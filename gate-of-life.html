@@ -116,6 +116,10 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
       <div class="hb-bar"><div class="hb-bar-fill" id="h-hp-f" style="width:100%;background:#39d353"></div></div>
       <div class="hb-bar-txt" id="h-hp-v">120/120</div>
     </div>
+    <div class="hb-bar-row">
+      <div class="hb-bar"><div class="hb-bar-fill" id="h-rage-f" style="width:0%;background:#ff4500"></div></div>
+      <div class="hb-bar-txt" id="h-rage-v" style="color:#ff6a00;font-size:11px">💢 0/100</div>
+    </div>
   </div>
   <div class="hb hb-bar-wrap">
     <div class="hb-label">Cửa Thiêng <span style="color:#3a2020">[G] Shop</span></div>
@@ -144,7 +148,7 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
     <div class="hb-val" id="h-gold" style="color:#ffd700;font-size:18px">🪙 0</div>
   </div>
   <div class="hb" style="min-width:110px;cursor:pointer;" title="Nhấn Tab để đổi vũ khí" onclick="cycleWeapon()">
-    <div class="hb-label">Vũ Khí <span style="color:#3a2020">[Tab]</span></div>
+    <div class="hb-label">Vũ Khí <span style="color:#3a2020">[Tab]</span> · Nộ <span style="color:#5a2010">[Space]</span></div>
     <div style="display:flex;align-items:center;gap:6px">
       <span id="h-wpn-icon" style="font-size:20px">⚔️</span>
       <div>
@@ -211,6 +215,7 @@ document.addEventListener('keydown', e => {
   if (e.code === 'KeyW' || e.code === 'KeyA' || e.code === 'KeyS' || e.code === 'KeyD') e.preventDefault();
   if (e.code === 'Tab')   { e.preventDefault(); cycleWeapon(); }
   if (e.code === 'KeyG')  { e.preventDefault(); toggleGateShop(); }
+  if (e.code === 'Space') { e.preventDefault(); activateRage(); }
   if (e.code === 'KeyP' || e.code === 'Escape') {
     e.preventDefault();
     if (gateShopOpen) toggleGateShop();
@@ -291,6 +296,7 @@ function initGame() {
     weaponLv:{sword:1, bow:0, cannon:0, laser:0, storm:0, homing:0},
     stormOrbs:[],
     projSpd:1.0, extraShots:0, itemStacks:{},
+    rage:0, rageMax:100, rageCooldown:0,
   };
   // Gate: súng mạnh hơn ở base để tạo giá trị rõ ngay từ đầu
   gate = {
@@ -365,12 +371,16 @@ function update(dt){
     hero.y=Math.max(hero.r+HUD_T, Math.min(H-hero.r, hero.y));
 
     if(hero.hitFlash>0) hero.hitFlash=Math.max(0,hero.hitFlash-dt);
+    if(hero.rageCooldown>0) hero.rageCooldown=Math.max(0,hero.rageCooldown-dt);
 
     // auto attack
     hero.atkT-=dt;
     if(hero.atkT<=0){
       const tgt=nearest(hero.x,hero.y,hero.range);
-      if(tgt){ shootHero(tgt); hero.atkT=hero.atkRate; hero.facing=Math.atan2(tgt.y-hero.y,tgt.x-hero.x); }
+      if(tgt){
+        shootHero(tgt); hero.atkT=hero.atkRate; hero.facing=Math.atan2(tgt.y-hero.y,tgt.x-hero.x);
+        hero.rage=Math.min(hero.rageMax, hero.rage+4);
+      }
       else hero.atkT=Math.min(hero.atkT+dt,0);
     }
   }
@@ -1013,6 +1023,30 @@ function spawnPs(x,y,col,n,spd){
     particles.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s-20,grav:80,life:.5+Math.random()*.4,maxLife:.9,col,sz:2+Math.random()*3});
   }
 }
+
+function activateRage(){
+  if(!gameRunning||gameOver||gameWon||!hero||hero.dead) return;
+  if(hero.rage < hero.rageMax || hero.rageCooldown > 0) return;
+  hero.rage = 0;
+  hero.rageCooldown = 18; // seconds before next rage
+  const burstCount = 24;
+  const rageDmg = hero.dmg * 4;
+  for(let i=0; i<burstCount; i++){
+    const ang = (i/burstCount)*Math.PI*2;
+    projectiles.push({
+      x:hero.x, y:hero.y,
+      vx:Math.cos(ang)*520, vy:Math.sin(ang)*520,
+      dmg:rageDmg, hero:true, hit:false,
+      life:1.4, pierced:new Set(), chains:0,
+      color:'#ff4500', wtype:'rage', sz:7,
+      splash:0, pierceCap:2,
+    });
+  }
+  spawnPs(hero.x, hero.y, '#ff4500', 40, 180);
+  spawnPs(hero.x, hero.y, '#ffd700', 24, 140);
+  screenShake = 10;
+}
+
 function nextWave(){ wave++; waveActive=true; spawnQ=buildWave(wave); spawnT=0; }
 
 // ═══════════════════ DRAW ═══════════════════
@@ -1196,6 +1230,25 @@ function drawHero(){
   if(hero.dead) return;
   const {x,y,r,facing,hitFlash}=hero;
   const fl=hitFlash>0;
+
+  // rage aura — glows red-orange when full
+  const rageRatio = hero.rage / hero.rageMax;
+  if(rageRatio > 0){
+    const rageAlpha = rageRatio * 0.55;
+    const rg = ctx.createRadialGradient(x,y,0,x,y,r*4.5);
+    rg.addColorStop(0,`rgba(255,69,0,${rageAlpha})`);
+    rg.addColorStop(0.5,`rgba(255,140,0,${rageAlpha*0.4})`);
+    rg.addColorStop(1,'transparent');
+    ctx.fillStyle=rg; ctx.beginPath(); ctx.arc(x,y,r*4.5,0,Math.PI*2); ctx.fill();
+    if(rageRatio >= 1){
+      // pulsing ring when ready
+      const pulse = 0.5+0.5*Math.sin(Date.now()/150);
+      ctx.beginPath(); ctx.arc(x,y,r*2.2,0,Math.PI*2);
+      ctx.strokeStyle=`rgba(255,69,0,${0.6+0.4*pulse})`; ctx.lineWidth=2.5; ctx.stroke();
+      ctx.beginPath(); ctx.arc(x,y,r*1.6,0,Math.PI*2);
+      ctx.strokeStyle=`rgba(255,215,0,${0.4+0.4*pulse})`; ctx.lineWidth=1.5; ctx.stroke();
+    }
+  }
 
   // aura
   const ag=ctx.createRadialGradient(x,y,0,x,y,r*3.2);
@@ -1499,8 +1552,12 @@ function drawProjectiles(){
       ctx.beginPath(); ctx.arc(0,0,p.sz*1.6, 0, Math.PI*1.2);
       ctx.strokeStyle='rgba(0,229,255,0.7)'; ctx.lineWidth=1.5; ctx.stroke();
       ctx.restore();
+    } else if(wt==='rage'){
+      // rage burst: big fiery orb
+      ctx.beginPath(); ctx.arc(p.x,p.y,p.sz,0,Math.PI*2); ctx.fillStyle='#ff4500'; ctx.fill();
+      ctx.beginPath(); ctx.arc(p.x,p.y,p.sz*0.5,0,Math.PI*2); ctx.fillStyle='#ffd700'; ctx.fill();
+      ctx.beginPath(); ctx.arc(p.x,p.y,p.sz*2.5,0,Math.PI*2); ctx.fillStyle='rgba(255,69,0,0.25)'; ctx.fill();
     } else {
-      // sword / default: gold circle + glow
       ctx.beginPath(); ctx.arc(p.x,p.y,p.sz||4,0,Math.PI*2); ctx.fillStyle=p.color||'#d4a017'; ctx.fill();
       ctx.beginPath(); ctx.arc(p.x,p.y,(p.sz||4)*2,0,Math.PI*2); ctx.fillStyle=(p.color||'#d4a017')+'33'; ctx.fill();
     }
@@ -1657,6 +1714,22 @@ function updateHUD(){
   const hf=document.getElementById('h-hp-f');
   hf.style.width=(hr*100)+'%'; hf.style.background=hr>.5?'#39d353':hr>.25?'#f39c12':'#e74c3c';
   document.getElementById('h-hp-v').textContent=`${Math.ceil(hero.hp)}/${hero.maxHp}`;
+  const rr=hero.rage/hero.rageMax;
+  const rf=document.getElementById('h-rage-f');
+  rf.style.width=(rr*100)+'%';
+  rf.style.background=rr>=1?'#ff4500':'#c0392b';
+  const rvEl=document.getElementById('h-rage-v');
+  if(rr>=1 && hero.rageCooldown<=0){
+    rvEl.textContent='💢 KÍCH NỘ [Space]';
+    rvEl.style.color='#ff4500';
+    rvEl.style.animation='none';
+  } else if(hero.rageCooldown>0){
+    rvEl.textContent=`⏳ ${Math.ceil(hero.rageCooldown)}s`;
+    rvEl.style.color='#8a5040';
+  } else {
+    rvEl.textContent=`💢 ${Math.round(hero.rage)}/${hero.rageMax}`;
+    rvEl.style.color='#ff6a00';
+  }
   const af=document.getElementById('h-gate-armor-f');
   af.style.width=(ar*100)+'%';
   document.getElementById('h-gate-armor-v').textContent=`🛡️${Math.ceil(gate.armor)}/${Math.ceil(gate.maxArmor)}`;
