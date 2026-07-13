@@ -1,0 +1,1566 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SINH TỬ MÔN</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Share+Tech+Mono&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --gold:#ffd700;--red:#c0392b;--jade:#1abc9c;--text:#e8d5b0;--dim:#2a1010;
+}
+html,body{width:100%;height:100%;overflow:hidden;background:#080408;font-family:'Share Tech Mono',monospace;user-select:none;}
+
+canvas{display:block;position:fixed;top:0;left:0;}
+
+/* ── HUD TOP ── */
+#hud-top{
+  position:fixed;top:0;left:0;right:0;height:52px;
+  background:rgba(5,1,1,0.93);border-bottom:1px solid #2a1010;
+  display:flex;align-items:center;gap:0;z-index:20;padding:0 10px;
+}
+.hb{display:flex;flex-direction:column;justify-content:center;padding:0 14px;border-right:1px solid #3a1818;height:100%;}
+.hb-label{font-size:11px;color:#8a6850;letter-spacing:.08em;text-transform:uppercase;margin-bottom:3px;font-weight:600;}
+.hb-val{font-size:22px;font-weight:700;color:var(--gold);letter-spacing:.05em;}
+.hb-val small{font-size:13px;color:#7a6050;}
+.hb-bar-wrap{display:flex;flex-direction:column;gap:3px;min-width:150px;}
+.hb-bar-row{display:flex;align-items:center;gap:8px;}
+.hb-bar{flex:1;height:12px;background:#200a0a;border:1px solid #3a1818;border-radius:2px;overflow:hidden;}
+.hb-bar-fill{height:100%;border-radius:1px;transition:width .1s,background .3s;}
+.hb-bar-txt{font-size:12px;color:#d8c0a0;white-space:nowrap;min-width:76px;text-align:right;font-weight:600;}
+.hb-right{margin-left:auto;border-right:none;border-left:1px solid #3a1818;text-align:right;}
+
+
+/* ── OVERLAY ── */
+#overlay{
+  position:fixed;inset:0;background:rgba(4,1,1,0.96);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  z-index:50;gap:12px;
+}
+.ov-title{font-family:'Cinzel',serif;font-weight:900;font-size:clamp(28px,5vw,54px);letter-spacing:.15em;color:var(--gold);text-shadow:0 0 40px rgba(255,215,0,.7);}
+.ov-sub{font-family:'Cinzel',serif;font-size:clamp(11px,1.6vw,17px);letter-spacing:.3em;color:#ff5555;text-shadow:0 0 20px rgba(255,60,60,.5);}
+.ov-stat{font-size:14px;color:var(--text);margin:4px 0;letter-spacing:.08em;}
+.ov-stat span{color:var(--gold);}
+.ov-btn{
+  margin-top:10px;background:transparent;border:1px solid var(--gold);border-radius:2px;
+  color:var(--gold);font-family:'Cinzel',serif;font-size:14px;letter-spacing:.2em;
+  padding:12px 40px;cursor:pointer;text-transform:uppercase;transition:background .2s,box-shadow .2s;
+}
+.ov-btn:hover{background:rgba(255,215,0,.1);box-shadow:0 0 24px rgba(255,215,0,.4);}
+.ov-btn.danger{border-color:#ff5555;color:#ff5555;}
+.ov-btn.danger:hover{background:rgba(255,60,60,.1);box-shadow:0 0 20px rgba(255,60,60,.4);}
+
+/* ── LEVEL UP ── */
+#gate-shop{
+  position:fixed;inset:0;background:rgba(2,4,12,0.97);
+  display:none;flex-direction:column;align-items:center;
+  z-index:50;padding:18px 24px;gap:14px;overflow-y:auto;
+}
+#gate-shop.on{display:flex;}
+.gs-header{display:flex;align-items:center;gap:20px;flex-wrap:wrap;justify-content:center;}
+.gs-title{font-family:'Cinzel',serif;font-size:20px;font-weight:700;letter-spacing:.18em;color:#38bdf8;}
+.gs-gold{font-size:18px;font-weight:700;color:#ffd700;}
+.gs-grid{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;max-width:880px;}
+.gs-item{
+  background:rgba(4,10,28,.98);border:1px solid #1e3a5a;border-radius:8px;
+  padding:14px 12px;width:160px;cursor:pointer;text-align:center;
+  transition:border-color .15s,transform .12s,box-shadow .15s;position:relative;
+}
+.gs-item:hover:not(.gs-maxed){border-color:#38bdf8;transform:translateY(-3px);box-shadow:0 8px 28px rgba(56,189,248,.25);}
+.gs-item.gs-maxed{border-color:#2a5a2a;opacity:.6;cursor:not-allowed;}
+.gs-ic{font-size:26px;margin-bottom:6px;}
+.gs-nm{font-size:11px;font-weight:700;color:#38bdf8;margin-bottom:4px;line-height:1.3;}
+.gs-ds{font-size:10px;color:#7a9ab0;line-height:1.5;margin-bottom:6px;min-height:28px;}
+.gs-cost{font-size:13px;font-weight:700;color:#ffd700;}
+.gs-lv{position:absolute;top:5px;right:6px;font-size:10px;color:#4a7090;font-weight:700;}
+
+body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.05) 2px,rgba(0,0,0,.05) 4px);pointer-events:none;z-index:100;}
+</style>
+</head>
+<body>
+
+<canvas id="c" tabindex="0"></canvas>
+
+<div id="hud-top">
+  <div class="hb" style="min-width:66px">
+    <div class="hb-label">Đợt</div>
+    <div class="hb-val" id="h-wave">0<small> / 30</small></div>
+  </div>
+  <div class="hb hb-bar-wrap">
+    <div class="hb-label">Anh Hùng</div>
+    <div class="hb-bar-row">
+      <div class="hb-bar"><div class="hb-bar-fill" id="h-hp-f" style="width:100%;background:#39d353"></div></div>
+      <div class="hb-bar-txt" id="h-hp-v">120/120</div>
+    </div>
+  </div>
+  <div class="hb hb-bar-wrap">
+    <div class="hb-label">Cửa Thiêng <span style="color:#3a2020">[G] Shop</span></div>
+    <div class="hb-bar-row">
+      <div class="hb-bar"><div class="hb-bar-fill" id="h-gate-armor-f" style="width:100%;background:#38bdf8"></div></div>
+      <div class="hb-bar-txt" id="h-gate-armor-v" style="color:#38bdf8">200/200</div>
+    </div>
+    <div class="hb-bar-row">
+      <div class="hb-bar"><div class="hb-bar-fill" id="h-gate-f" style="width:100%;background:#d4a017"></div></div>
+      <div class="hb-bar-txt" id="h-gate-v">500/500</div>
+    </div>
+  </div>
+  <div class="hb hb-bar-wrap">
+    <div class="hb-label">Cấp <span id="h-lv" style="color:#c084fc">1</span> · Kinh Nghiệm</div>
+    <div class="hb-bar-row">
+      <div class="hb-bar"><div class="hb-bar-fill" id="h-xp-f" style="width:0%;background:#a855f7"></div></div>
+      <div class="hb-bar-txt" id="h-xp-v" style="color:#c084fc">0/80</div>
+    </div>
+  </div>
+  <div class="hb hb-right" style="min-width:76px">
+    <div class="hb-label">Kẻ Địch</div>
+    <div class="hb-val" id="h-enemies" style="color:#e74c3c;font-size:22px">0</div>
+  </div>
+  <div class="hb" style="min-width:80px">
+    <div class="hb-label">Vàng</div>
+    <div class="hb-val" id="h-gold" style="color:#ffd700;font-size:18px">🪙 0</div>
+  </div>
+  <div class="hb" style="min-width:110px;cursor:pointer;" title="Nhấn Tab để đổi vũ khí" onclick="cycleWeapon()">
+    <div class="hb-label">Vũ Khí <span style="color:#3a2020">[Tab]</span></div>
+    <div style="display:flex;align-items:center;gap:6px">
+      <span id="h-wpn-icon" style="font-size:20px">⚔️</span>
+      <div>
+        <div id="h-wpn-name" style="font-size:11px;font-weight:700;color:#e8d5b0;line-height:1.2">Kiếm Đơn</div>
+        <div id="h-wpn-lv" style="font-size:10px;color:#d4a017">Lv.1</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="overlay">
+  <div class="ov-title">SINH TỬ MÔN</div>
+  <div class="ov-sub">CỬA SINH TỬ</div>
+  <div id="ov-stats"></div>
+  <button class="ov-btn" id="ov-btn" onclick="startGame()">VÀO TRẬN</button>
+</div>
+
+<div id="gate-shop">
+  <div class="gs-header">
+    <div class="gs-title">⚔️ NÂNG CẤP CỬA THIÊNG</div>
+    <div class="gs-gold" id="gs-gold">🪙 0</div>
+    <button class="ov-btn" style="margin-top:0;padding:8px 24px;font-size:12px" onclick="toggleGateShop()">ĐÓNG [G]</button>
+  </div>
+  <div class="gs-grid" id="gs-grid"></div>
+</div>
+
+<script>
+// ═══════════════════ CANVAS ═══════════════════
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+let W, H;
+function resize() {
+  W = canvas.width  = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+  if (gate) { gate.x = W/2; gate.y = H/2; }
+}
+window.addEventListener('resize', resize);
+
+// ═══════════════════ CONSTANTS ═══════════════════
+const TOTAL_WAVES = 30;
+const HUD_T = 52, HUD_B = 66;
+
+// ═══════════════════ INPUT ═══════════════════
+const keys = {};
+let mouseX = 0, mouseY = 0, mouseDest = null;
+
+document.addEventListener('keydown', e => {
+  keys[e.code] = true;
+  if (e.code === 'KeyW' || e.code === 'KeyA' || e.code === 'KeyS' || e.code === 'KeyD') e.preventDefault();
+  if (e.code === 'Tab')   { e.preventDefault(); cycleWeapon(); }
+  if (e.code === 'KeyG')  { e.preventDefault(); toggleGateShop(); }
+  if (e.code === 'KeyP' || e.code === 'Escape') { e.preventDefault(); togglePause(); }
+});
+document.addEventListener('keyup', e => keys[e.code] = false);
+
+canvas.addEventListener('mousemove', e => {
+  mouseX = e.clientX; mouseY = e.clientY;
+  mouseDest = { x: mouseX, y: mouseY };
+});
+canvas.addEventListener('mouseleave', () => { mouseDest = null; });
+
+// ═══════════════════ STATE ═══════════════════
+let hero, gate, enemies, projectiles, particles, souls, itemDrops;
+let wave, waveActive, spawnQ, spawnT, waveRestT, autoWaveT;
+let gameRunning = false, gameOver = false, gameWon = false, gamePaused = false;
+let screenShake = 0, lastT = 0;
+let pickupTexts = [];
+
+// ═══════════════════ WEAPON DEFS ═══════════════════
+const WEAPONS = [
+  { id:'sword',  name:'Kiếm Đơn',  icon:'⚔️',  color:'#d4a017', spd:480, multi:1, spread:0,    dmgMult:1.0, rateBonus:0,    pierceBonus:0,  sz:4,  life:1.2 },
+  { id:'bow',    name:'Cung Liên', icon:'🏹',  color:'#39d353', spd:560, multi:3, spread:0.22,  dmgMult:0.65,rateBonus:0.12, pierceBonus:0,  sz:3,  life:1.0 },
+  { id:'cannon', name:'Đại Bác',   icon:'💣',  color:'#e74c3c', spd:260, multi:1, spread:0,    dmgMult:2.4, rateBonus:-0.28,pierceBonus:0,  sz:8,  life:1.5, splash:85 },
+  { id:'laser',  name:'Tia Sáng',  icon:'🔴',  color:'#ff6b6b', spd:760, multi:1, spread:0,    dmgMult:0.7, rateBonus:0.22, pierceBonus:99, sz:3,  life:0.9 },
+  { id:'storm',  name:'Bão Kiếm',  icon:'🌀',  color:'#a855f7', spd:0,   multi:5, spread:0,    dmgMult:0.8, rateBonus:0,    pierceBonus:0,  sz:5,  life:0,   orbit:true },
+  { id:'homing', name:'Đạn Rượt',  icon:'🎯',  color:'#00e5ff', spd:200, multi:1, spread:0,    dmgMult:0.45,rateBonus:0.15, pierceBonus:0,  sz:5,  life:4.0, homing:true },
+];
+
+// ═══════════════════ DROP ITEMS ═══════════════════
+const DROP_ITEMS = [
+  { id:'dmg',      icon:'⚔️', name:'Lưỡi Kiếm Bén',  desc:'+12% sát thương',            color:'#ffd700', max:8,  fn: h => h.dmg = Math.round(h.dmg*1.12) },
+  { id:'range',    icon:'👁️', name:'Mắt Diều Hâu',   desc:'+30 tầm bắn',                color:'#39d353', max:6,  fn: h => h.range += 30 },
+  { id:'projspd',  icon:'💨', name:'Đạn Gió',         desc:'+15% tốc độ đạn',            color:'#38bdf8', max:6,  fn: h => h.projSpd = (h.projSpd||1)*1.15 },
+  { id:'multi',    icon:'🎯', name:'Thêm Đạn',         desc:'+1 đạn mỗi lần bắn',        color:'#facc15', max:3,  fn: h => h.extraShots = (h.extraShots||0)+1 },
+  { id:'atkspd',   icon:'⚡', name:'Tốc Công',         desc:'+15% tốc độ tấn công',      color:'#f39c12', max:6,  fn: h => h.atkRate = Math.max(0.12,h.atkRate*0.85) },
+  { id:'hp',       icon:'❤️', name:'Thể Lực',          desc:'+40 HP tối đa & hồi 40 HP', color:'#e74c3c', max:6,  fn: h => { h.maxHp+=40; h.hp=Math.min(h.hp+40,h.maxHp); } },
+  { id:'crit',     icon:'💥', name:'Tử Thương Ấn',     desc:'+12% tỷ lệ chí mạng',       color:'#ff6b6b', max:4,  fn: h => h.crit += 0.12 },
+  { id:'pierce',   icon:'🔥', name:'Long Hỏa Tiễn',    desc:'Đạn xuyên thêm 1 kẻ',       color:'#e67e22', max:3,  fn: h => h.pierce++ },
+  { id:'drain',    icon:'🩸', name:'Hút Hồn',           desc:'+8% hút máu từ sát thương', color:'#c0392b', max:4,  fn: h => h.lifesteal += 0.08 },
+  { id:'aoe',      icon:'💢', name:'Bùa Loan Sát',     desc:'Đạn nổ vùng +35px',          color:'#ff6b6b', max:4,  fn: h => h.aoeRadius = (h.aoeRadius||0)+35 },
+  { id:'rapidfire',icon:'🔫', name:'Liên Thanh',        desc:'+20% tốc độ tấn công',      color:'#facc15', max:4,  fn: h => h.atkRate = Math.max(0.08, h.atkRate*0.80) },
+];
+
+// Drop rate: basic ~10% → khoảng 1 item/wave đầu, boss luôn drop
+// Đủ để cảm giác được thưởng mà không spam
+const DROP_RATE = { basic:0.10, runner:0.08, tank:0.25, mage:0.20, demon:0.30, boss:1.0, miniboss:0.90 };
+
+
+
+// ═══════════════════ ENEMY DEFS ═══════════════════
+// Balance target: wave1-5 học mechanic, wave6-15 phải kite + upgrade,
+// wave16-25 cần build tốt, wave26-30 đòi hỏi chiến lược đầy đủ
+const EDEFS = {
+  basic:   {hp:100, spd:65,  sz:10, col:'#c0392b', rw:12, xp:8,  arm:0,    dg:10, lbl:'Binh Sĩ'},
+  runner:  {hp:55,  spd:155, sz:8,  col:'#e67e22', rw:9,  xp:6,  arm:0,    dg:7,  lbl:'Kỵ Binh'},
+  tank:    {hp:380, spd:38,  sz:15, col:'#8e44ad', rw:22, xp:20, arm:0.38, dg:22, lbl:'Chiến Binh'},
+  mage:    {hp:90,  spd:52,  sz:9,  col:'#2980b9', rw:16, xp:15, arm:0,    dg:0,  lbl:'Pháp Sư', ranged:true, rAtk:240, rRate:2.0},
+  demon:   {hp:260, spd:80,  sz:13, col:'#e74c3c', rw:28, xp:25, arm:0.22, dg:18, lbl:'Ác Quỷ'},
+  boss:    {hp:1600,spd:34,  sz:26, col:'#c0392b', rw:100,xp:100,arm:0.42, dg:50, lbl:'TRÙM', boss:true},
+  miniboss:{hp:700, spd:48,  sz:20, col:'#8e44ad', rw:50, xp:50, arm:0.32, dg:32, lbl:'TINH ANH', boss:true},
+};
+
+// ═══════════════════ INIT ═══════════════════
+function initGame() {
+// Hero base đủ mạnh wave đầu, upgrade tạo sự khác biệt rõ ở wave giữa
+  hero = {
+    x:W/2, y:H/2-80, r:14,
+    hp:150, maxHp:150, spd:170, dmg:26, range:210,
+    atkRate:0.50, atkT:0, chain:0, lifesteal:0, pierce:0, crit:0.08,
+    xp:0, xpNext:80, level:1, facing:0,
+    hitFlash:0, dead:false,
+    weapon:'sword',
+    weaponLv:{sword:1, bow:0, cannon:0, laser:0, storm:0, homing:0},
+    stormOrbs:[],
+    projSpd:1.0, extraShots:0, itemStacks:{},
+  };
+  // Gate: súng mạnh hơn ở base để tạo giá trị rõ ngay từ đầu
+  gate = {
+    x:W/2, y:H/2,
+    hp:600, maxHp:600,
+    armor:150, maxArmor:150,
+    armorRegen:2,
+    w:80, h:90,
+    hitFlash:0,
+    gun:{ dmg:28, range:300, atkRate:1.0, atkT:0, level:1 },
+    gold:0, upgrades:{},
+  };
+  enemies=[]; projectiles=[]; particles=[]; souls=[]; itemDrops=[];
+  wave=0; waveActive=false; spawnQ=[]; spawnT=0;
+  waveRestT=0; autoWaveT=0;
+  gameOver=false; gameWon=false; screenShake=0;
+}
+
+// ═══════════════════ WAVE BUILDING ═══════════════════
+// Wave size: wave1=7, wave10=21, wave20=37, wave30=53
+// Boss wave: 65% của wave thường để dồn sức cho boss
+function buildWave(n) {
+  const q=[], boss=n%5===0, mini=n%5===3&&n>3;
+  let cnt = boss ? Math.round((5+n*1.5)*0.65) : 5+n*1.5;
+  cnt = Math.round(cnt);
+  for(let i=0;i<cnt;i++) q.push({delay:i*0.72, type:pickType(n)});
+  if(mini) q.push({delay:cnt*0.72+2, type:'miniboss'});
+  if(boss) q.push({delay:cnt*0.72+2.5, type:'boss'});
+  return q;
+}
+function pickType(n){
+  const r=Math.random();
+  if(n<=3) return 'basic';
+  if(n<=6) return r<.5?'basic':'runner';
+  if(n<=10) return r<.35?'basic':r<.65?'runner':'tank';
+  if(n<=17){if(r<.25)return 'basic';if(r<.45)return 'runner';if(r<.65)return 'tank';if(r<.8)return 'mage';return 'demon';}
+  if(r<.15)return 'basic';if(r<.3)return 'runner';if(r<.5)return 'tank';if(r<.68)return 'mage';return 'demon';
+}
+
+function spawnEnemy(type){
+// Scale 4%/wave: wave10 = ×1.36, wave20 = ×1.76, wave30 = ×2.16
+// Vừa đủ tăng áp lực, không vô lý với build đã đầu tư
+  const d=EDEFS[type], sc=1+(wave-1)*0.04, mg=30;
+  const edge=Math.floor(Math.random()*4);
+  let x,y;
+  if(edge===0){x=Math.random()*W;y=-mg;}
+  else if(edge===1){x=W+mg;y=HUD_T+Math.random()*(H-HUD_T);}
+  else if(edge===2){x=-mg;y=HUD_T+Math.random()*(H-HUD_T);}
+  else{x=Math.random()*W;y=-mg-20;}
+  enemies.push({type,d,x,y,hp:d.hp*sc,maxHp:d.hp*sc,spd:d.spd,sz:d.sz,
+    dead:false,reached:false,hitFlash:0,atkT:d.ranged?d.rRate:0,slowT:0,frozen:false,dg:d.dg*sc});
+}
+
+// ═══════════════════ UPDATE ═══════════════════
+function update(dt){
+  if(gameOver||gameWon) return;
+  if(screenShake>0) screenShake=Math.max(0,screenShake-dt*30);
+
+  // hero move
+  if(!hero.dead){
+    let dx=0,dy=0;
+    if(keys['KeyW']) dy-=1;
+    if(keys['KeyS']) dy+=1;
+    if(keys['KeyA']) dx-=1;
+    if(keys['KeyD']) dx+=1;
+    if(mouseDest){
+      const mdx=mouseDest.x-hero.x, mdy=mouseDest.y-hero.y;
+      const md=Math.sqrt(mdx*mdx+mdy*mdy);
+      if(md>6){ dx+=mdx/md; dy+=mdy/md; }
+    }
+    if(dx||dy){ const l=Math.sqrt(dx*dx+dy*dy); hero.x+=dx/l*hero.spd*dt; hero.y+=dy/l*hero.spd*dt; hero.facing=Math.atan2(dy,dx); }
+    hero.x=Math.max(hero.r, Math.min(W-hero.r, hero.x));
+    hero.y=Math.max(hero.r+HUD_T, Math.min(H-hero.r, hero.y));
+
+    if(hero.hitFlash>0) hero.hitFlash=Math.max(0,hero.hitFlash-dt);
+
+    // auto attack
+    hero.atkT-=dt;
+    if(hero.atkT<=0){
+      const tgt=nearest(hero.x,hero.y,hero.range);
+      if(tgt){ shootHero(tgt); hero.atkT=hero.atkRate; hero.facing=Math.atan2(tgt.y-hero.y,tgt.x-hero.x); }
+      else hero.atkT=Math.min(hero.atkT+dt,0);
+    }
+  }
+
+  if(gate.hitFlash>0) gate.hitFlash=Math.max(0,gate.hitFlash-dt);
+
+  // wave spawning
+  if(waveActive && spawnQ.length>0){
+    spawnT+=dt;
+    while(spawnQ.length>0 && spawnT>=spawnQ[0].delay) spawnEnemy(spawnQ.shift().type);
+  }
+
+  // enemies
+  for(const e of enemies){
+    if(e.dead||e.reached) continue;
+    if(e.hitFlash>0) e.hitFlash=Math.max(0,e.hitFlash-dt);
+    if(e.slowT>0){ e.slowT-=dt; } else e.frozen=false;
+    const spd=e.slowT>0?e.spd*0.35:e.spd;
+    if(e.d.ranged){
+      const dx=gate.x-e.x, dy=gate.y-e.y, d=Math.sqrt(dx*dx+dy*dy);
+      if(d>e.d.rAtk){ e.x+=dx/d*spd*dt; e.y+=dy/d*spd*dt; }
+      else{ e.atkT-=dt; if(e.atkT<=0){ shootMage(e); e.atkT=e.d.rRate; } }
+    } else {
+      const dx=gate.x-e.x, dy=gate.y-e.y, d=Math.sqrt(dx*dx+dy*dy);
+      if(d < e.sz+gate.w*0.5){
+        e.reached=true;
+        // armor absorbs first
+        const dmg = e.dg;
+        if(gate.armor > 0){
+          const absorbed = Math.min(gate.armor, dmg);
+          gate.armor = Math.max(0, gate.armor - absorbed);
+          const overflow = dmg - absorbed;
+          if(overflow > 0) gate.hp = Math.max(0, gate.hp - overflow);
+        } else {
+          gate.hp = Math.max(0, gate.hp - dmg);
+        }
+        gate.hitFlash=0.4; screenShake=5;
+        spawnPs(gate.x,gate.y,'#ff4444',12,80);
+        if(gate.hp<=0) triggerLoss();
+      } else { e.x+=dx/d*spd*dt; e.y+=dy/d*spd*dt; }
+    }
+    // contact damage hero
+    if(!hero.dead){
+      const dx=hero.x-e.x, dy=hero.y-e.y;
+      if(Math.sqrt(dx*dx+dy*dy)<hero.r+e.sz-4){
+        hero.hp=Math.max(0,hero.hp-25*dt); hero.hitFlash=0.15;
+        if(hero.hp<=0){ hero.dead=true; spawnPs(hero.x,hero.y,'#ffd700',20,120); }
+      }
+    }
+  }
+
+  // projectiles
+  for(const p of projectiles){
+    if(p.hit) continue;
+    // homing steering — redirect velocity toward target each frame
+    if(p.homing && p.homingTarget && !p.homingTarget.dead && !p.homingTarget.reached){
+      const tx=p.homingTarget.x-p.x, ty=p.homingTarget.y-p.y;
+      const td=Math.sqrt(tx*tx+ty*ty)||1;
+      const spd=Math.sqrt(p.vx*p.vx+p.vy*p.vy)||200;
+      const turnRate = hero.weaponLv.homing >= 4 ? 8.0 : 4.5;
+      const desiredVx=tx/td*spd, desiredVy=ty/td*spd;
+      p.vx+=(desiredVx-p.vx)*turnRate*dt;
+      p.vy+=(desiredVy-p.vy)*turnRate*dt;
+      // renormalize speed
+      const curSpd=Math.sqrt(p.vx*p.vx+p.vy*p.vy)||1;
+      p.vx=p.vx/curSpd*spd; p.vy=p.vy/curSpd*spd;
+    } else if(p.homing && (!p.homingTarget||p.homingTarget.dead||p.homingTarget.reached)){
+      // retarget nearest enemy
+      p.homingTarget = nearest(p.x,p.y,600);
+    }
+    p.x+=p.vx*dt; p.y+=p.vy*dt; p.life-=dt;
+    if(p.life<=0){
+      // laser lv5: explode on expiry
+      if(p.wtype==='laser' && hero.weaponLv.laser>=5){
+        for(const e of enemies){ if(!e.dead&&!e.reached){ const dx=e.x-p.x,dy=e.y-p.y; if(Math.sqrt(dx*dx+dy*dy)<60) hitEnemy(e,p.dmg*0.8,false); } }
+        spawnPs(p.x,p.y,'#ff6b6b',14,100); screenShake=3;
+      }
+      p.hit=true; continue;
+    }
+    if(p.hero){
+      for(const e of enemies){
+        if(e.dead||e.reached||p.pierced.has(e)) continue;
+        const dx=e.x-p.x, dy=e.y-p.y;
+        if(Math.sqrt(dx*dx+dy*dy)<e.sz+4){
+          const crit=Math.random()<hero.crit;
+          hitEnemy(e, crit?p.dmg*2:p.dmg, crit);
+          spawnPs(e.x,e.y, crit?'#ffd700':'#ff4444', crit?8:4, 60);
+          p.pierced.add(e);
+          if(hero.chain>0 && p.chains>0){
+            const ct=nearest(e.x,e.y,120,e);
+            if(ct) shootChain(e.x,e.y,ct,p.dmg*0.7,p.chains-1);
+          }
+          // AOE from item drop
+          const aoeR = (hero.aoeRadius||0) + (p.splash||0);
+          if(aoeR>0){
+            for(const se of enemies){
+              if(!se.dead&&!se.reached&&se!==e){
+                const sdx=se.x-e.x, sdy=se.y-e.y;
+                if(Math.sqrt(sdx*sdx+sdy*sdy)<aoeR) hitEnemy(se,p.dmg*0.5,false);
+              }
+            }
+            spawnPs(e.x,e.y,'#ff6b6b',10,90);
+            if(p.splash>0){ screenShake=5; p.hit=true; break; }
+          }
+          // cannon splash (legacy, kept for weapon type)
+          if(p.splash>0 && (hero.aoeRadius||0)===0){
+            for(const se of enemies){
+              if(!se.dead&&!se.reached&&se!==e){
+                const sdx=se.x-e.x, sdy=se.y-e.y;
+                if(Math.sqrt(sdx*sdx+sdy*sdy)<p.splash) hitEnemy(se,p.dmg*0.6,false);
+              }
+            }
+            spawnPs(e.x,e.y,'#e74c3c',18,110); screenShake=5;
+            p.hit=true; break;
+          }
+          const cap = p.pierceCap!=null ? p.pierceCap : hero.pierce;
+          if(p.pierced.size>cap){p.hit=true;break;}
+        }
+      }
+    } else {
+      const dx=gate.x-p.x, dy=gate.y-p.y;
+      if(Math.sqrt(dx*dx+dy*dy)<gate.w*0.5){
+        p.hit=true;
+        if(gate.armor>0){
+          const abs=Math.min(gate.armor,p.dmg); gate.armor=Math.max(0,gate.armor-abs);
+          const ov=p.dmg-abs; if(ov>0) gate.hp=Math.max(0,gate.hp-ov);
+        } else { gate.hp=Math.max(0,gate.hp-p.dmg); }
+        gate.hitFlash=0.3; screenShake=3;
+        spawnPs(gate.x,gate.y,'#8888ff',8,60);
+        if(gate.hp<=0) triggerLoss();
+      }
+    }
+  }
+  projectiles=projectiles.filter(p=>!p.hit);
+
+  // particles
+  for(const p of particles){ p.x+=p.vx*dt; p.y+=p.vy*dt; p.vy+=p.grav*dt; p.life-=dt; }
+  particles=particles.filter(p=>p.life>0);
+
+  // souls
+  for(const s of souls){
+    if(s.done) continue;
+    const dx=hero.x-s.x, dy=hero.y-s.y, d=Math.sqrt(dx*dx+dy*dy);
+    if(d<hero.range){ const spd=160+(1-d/hero.range)*300; s.x+=dx/d*spd*dt; s.y+=dy/d*spd*dt; }
+    s.y-=16*dt; s.life-=dt;
+    if(s.life<=0){s.done=true;continue;}
+    if(!hero.dead && d<22){ s.done=true; gainXP(s.xp); }
+  }
+  souls=souls.filter(s=>!s.done);
+
+  // gate gun
+  if(gate.hitFlash>0) gate.hitFlash=Math.max(0,gate.hitFlash-dt);
+  if(gate.armorRegen>0) gate.armor=Math.min(gate.maxArmor, gate.armor+gate.armorRegen*dt);
+  gate.gun.atkT-=dt;
+  if(gate.gun.atkT<=0){
+    const tgt=nearest(gate.x,gate.y,gate.gun.range);
+    if(tgt){
+      shootGate(tgt);
+      gate.gun.atkT=gate.gun.atkRate;
+    } else gate.gun.atkT=0.1;
+  }
+
+  // check wave end
+  if(waveActive && spawnQ.length===0 && enemies.every(e=>e.dead||e.reached)){
+    waveActive=false;
+    if(wave>=TOTAL_WAVES) triggerWin();
+    else waveRestT=5;
+  }
+
+  // auto start first wave
+  if(wave===0 && !waveActive){ autoWaveT+=dt; if(autoWaveT>=3) nextWave(); }
+  if(!waveActive && waveRestT>0 && wave>0 && wave<TOTAL_WAVES){ waveRestT-=dt; if(waveRestT<=0){waveRestT=0;nextWave();} }
+
+  updateItemDrops(dt);
+  for(const pt of pickupTexts){ pt.y-=28*dt; pt.life-=dt; }
+  pickupTexts = pickupTexts.filter(pt=>pt.life>0);
+}
+
+// ═══════════════════ HELPERS ═══════════════════
+function nearest(x,y,range,exclude){
+  let best=null, bd=range;
+  for(const e of enemies){
+    if(e.dead||e.reached||e===exclude) continue;
+    const dx=e.x-x, dy=e.y-y, d=Math.sqrt(dx*dx+dy*dy);
+    if(d<bd){bd=d;best=e;}
+  }
+  return best;
+}
+function shootHero(t){
+  const w = WEAPONS.find(x=>x.id===hero.weapon);
+  if(w.orbit) return;
+  const baseDmg = hero.dmg * w.dmgMult;
+  const baseAngle = Math.atan2(t.y-hero.y, t.x-hero.x);
+  const lv = hero.weaponLv[w.id] || 1;
+
+  if(w.homing){
+    // lv1=1, lv3=2, lv5=3 missiles
+    const cnt = lv>=5 ? 3 : lv>=3 ? 2 : 1;
+    const sorted = enemies.filter(e=>!e.dead&&!e.reached)
+      .sort((a,b)=>(a.x-hero.x)**2+(a.y-hero.y)**2-(b.x-hero.x)**2-(b.y-hero.y)**2);
+    const targets = sorted.slice(0, cnt);
+    if(!targets.length) targets.push(t);
+    for(const tgt of targets) fireWeaponProjectile(Math.atan2(tgt.y-hero.y,tgt.x-hero.x), baseDmg, w, tgt);
+    return;
+  }
+
+  if(w.id==='sword'){
+    fireWeaponProjectile(baseAngle, baseDmg, w, null);
+    // lv4: extra parallel bullet
+    if(lv>=4){
+      fireWeaponProjectile(baseAngle+0.18, baseDmg*0.7, w, null);
+      fireWeaponProjectile(baseAngle-0.18, baseDmg*0.7, w, null);
+    }
+    return;
+  }
+
+  if(w.id==='bow'){
+    const cnt = lv>=5 ? 5 : lv>=3 ? 4 : 3;
+    for(let i=0;i<cnt;i++){
+      const ang = baseAngle + (i-(cnt-1)/2)*w.spread;
+      fireWeaponProjectile(ang, baseDmg, w, null);
+    }
+    return;
+  }
+
+  if(w.id==='cannon'){
+    // lv5: 2 shots
+    const cnt = lv>=5 ? 2 : 1;
+    const splashR = w.splash * (lv>=3 ? 1.3 : 1);
+    for(let i=0;i<cnt;i++){
+      const ang = baseAngle + (cnt>1?(i===0?-0.12:0.12):0);
+      fireWeaponProjectile(ang, baseDmg, {...w, splash:splashR}, null);
+    }
+    return;
+  }
+
+  if(w.id==='laser'){
+    // lv4: 2 beams
+    const cnt = lv>=4 ? 2 : 1;
+    for(let i=0;i<cnt;i++){
+      const ang = baseAngle + (cnt>1?(i===0?-0.1:0.1):0);
+      fireWeaponProjectile(ang, baseDmg, w, null);
+    }
+    return;
+  }
+
+  // fallback
+  const cnt = w.multi;
+  for(let i=0;i<cnt;i++){
+    const ang = baseAngle + (cnt>1?(i-(cnt-1)/2)*w.spread:0);
+    fireWeaponProjectile(ang, baseDmg, w, null);
+  }
+  // extra shots from shop upgrade
+  for(let ex=0; ex<(hero.extraShots||0); ex++){
+    const eAng = baseAngle + (ex%2===0?1:-1) * Math.ceil((ex+1)/2) * 0.2;
+    fireWeaponProjectile(eAng, baseDmg*0.7, w, null);
+  }
+}
+function fireWeaponProjectile(angle, dmg, w, homingTarget){
+  const pierceTotal = hero.pierce + w.pierceBonus;
+  const ps = hero.projSpd || 1;
+  projectiles.push({
+    x:hero.x, y:hero.y,
+    vx:Math.cos(angle)*w.spd*ps, vy:Math.sin(angle)*w.spd*ps,
+    dmg, hero:true, hit:false,
+    life:w.life, pierced:new Set(), chains:hero.chain,
+    color:w.color, wtype:w.id, sz:w.sz,
+    splash:w.splash||0, pierceCap:pierceTotal,
+    homing:w.homing||false, homingTarget: homingTarget||null,
+  });
+}
+function shootChain(x,y,t,dmg,chains){
+  const dx=t.x-x, dy=t.y-y, d=Math.sqrt(dx*dx+dy*dy)||1;
+  projectiles.push({x,y,vx:dx/d*420,vy:dy/d*420,dmg,hero:true,hit:false,life:0.8,pierced:new Set([t]),chains,color:'#d4a017cc'});
+}
+function shootMage(e){
+  const dx=gate.x-e.x, dy=gate.y-e.y, d=Math.sqrt(dx*dx+dy*dy)||1;
+  projectiles.push({x:e.x,y:e.y,vx:dx/d*160,vy:dy/d*160,dmg:14+wave*0.8,hero:false,hit:false,life:4,color:'#2980b9'});
+}
+function shootGate(t){
+  const g=gate.gun;
+  const dx=t.x-gate.x, dy=t.y-gate.y, d=Math.sqrt(dx*dx+dy*dy)||1;
+  const baseAng = Math.atan2(dy,dx);
+  g._lastAng = baseAng + Math.PI/2; // barrel points up by default, rotate to target
+  g._flash = 1.0;
+  const shots = g.level>=5 ? 3 : g.level>=3 ? 2 : 1;
+  const spread = 0.15;
+  for(let i=0;i<shots;i++){
+    const ang = baseAng + (shots>1?(i-(shots-1)/2)*spread:0);
+    projectiles.push({
+      x:gate.x, y:gate.y,
+      vx:Math.cos(ang)*520, vy:Math.sin(ang)*520,
+      dmg:g.dmg, hero:true, hit:false,
+      life:1.0, pierced:new Set(), chains:0,
+      color:'#38bdf8', wtype:'gate', sz:4,
+      splash:g.level>=4?60:0, pierceCap:g.level>=2?1:0,
+    });
+  }
+}
+function hitEnemy(e,dmg,crit){
+  const actual=dmg*(1-e.d.arm);
+  e.hp-=actual; e.hitFlash=0.12;
+  if(hero.lifesteal>0&&!hero.dead) hero.hp=Math.min(hero.maxHp,hero.hp+actual*hero.lifesteal);
+  if(e.hp<=0&&!e.dead){
+    e.dead=true;
+    spawnPs(e.x,e.y,e.d.col,e.d.boss?30:12,e.d.boss?140:90);
+    souls.push({x:e.x,y:e.y,xp:e.d.xp,life:6,done:false});
+    gate.gold += Math.round(e.d.rw * (1 + (wave-1)*0.08));
+    tryDropItem(e);
+    if(e.d.boss) screenShake=15;
+  }
+}
+function gainXP(xp){
+  hero.xp+=xp;
+  if(hero.xp>=hero.xpNext){ hero.xp-=hero.xpNext; hero.xpNext=Math.round(hero.xpNext*1.35); hero.level++; }
+}
+
+// ═══════════════════ GATE SHOP ═══════════════════
+const GATE_UPGRADES = [
+  // ── Cửa Thiêng ── giá đầu thấp, tăng dần để có thể mua sớm
+  { id:'g_armor',   icon:'🛡️', name:'Tăng Giáp',       desc:'+120 giáp tối đa',                  maxLv:8, cost: lv => 25+lv*20,  fn: () => { gate.maxArmor+=120; gate.armor=Math.min(gate.armor+120,gate.maxArmor); } },
+  { id:'g_regen',   icon:'♻️', name:'Hồi Giáp',        desc:'+4 giáp/giây',                       maxLv:6, cost: lv => 40+lv*28,  fn: () => { gate.armorRegen+=4; } },
+  { id:'g_hp',      icon:'❤️', name:'Tăng HP Cửa',     desc:'+180 HP tối đa & hồi 100 HP',         maxLv:6, cost: lv => 30+lv*25,  fn: () => { gate.maxHp+=180; gate.hp=Math.min(gate.hp+100,gate.maxHp); } },
+  { id:'g_gundmg',  icon:'💥', name:'Sát Thương Súng',  desc:'+30% sát thương súng cửa',            maxLv:8, cost: lv => 35+lv*25,  fn: () => { gate.gun.dmg=Math.round(gate.gun.dmg*1.30); } },
+  { id:'g_gunspd',  icon:'⚡', name:'Tốc Bắn Súng',    desc:'+25% tốc độ bắn (tối đa: liên thanh)',maxLv:8, cost: lv => 40+lv*28,  fn: () => { gate.gun.atkRate=Math.max(0.06,gate.gun.atkRate*0.75); } },
+  { id:'g_gunrng',  icon:'🔭', name:'Tầm Súng',         desc:'+60 tầm bắn súng',                   maxLv:6, cost: lv => 30+lv*22,  fn: () => { gate.gun.range+=60; } },
+  { id:'g_gunlv',   icon:'🔫', name:'Nâng Cấp Súng',   desc:'Lv súng: đa đạn & nổ vùng',          maxLv:4, cost: lv => 80+lv*50,  fn: () => { gate.gun.level=Math.min(5,gate.gun.level+1); } },
+  // ── Vũ Khí Hero ── giá cân với vàng kiếm được sau 3-5 wave
+  { id:'h_bow',    icon:'🏹', name:'Mở: Cung Liên',  desc:'3 mũi tên tỏa rộng',           maxLv:1, cost: () => 120, fn: () => { if(hero.weaponLv.bow<1)    unlockWeapon(hero,'bow'); },    isLocked: () => hero.weaponLv.bow>0 },
+  { id:'h_cannon', icon:'💣', name:'Mở: Đại Bác',    desc:'AoE nổ · dame cao',             maxLv:1, cost: () => 160, fn: () => { if(hero.weaponLv.cannon<1) unlockWeapon(hero,'cannon'); }, isLocked: () => hero.weaponLv.cannon>0 },
+  { id:'h_laser',  icon:'🔴', name:'Mở: Tia Sáng',   desc:'Xuyên tất cả · rất nhanh',      maxLv:1, cost: () => 190, fn: () => { if(hero.weaponLv.laser<1)  unlockWeapon(hero,'laser'); },  isLocked: () => hero.weaponLv.laser>0 },
+  { id:'h_storm',  icon:'🌀', name:'Mở: Bão Kiếm',   desc:'5 orb xoay tự tấn công',        maxLv:1, cost: () => 220, fn: () => { if(hero.weaponLv.storm<1)  unlockWeapon(hero,'storm'); },  isLocked: () => hero.weaponLv.storm>0 },
+  { id:'h_homing', icon:'🎯', name:'Mở: Đạn Rượt',   desc:'Tự dẫn đường · bám mục tiêu',   maxLv:1, cost: () => 170, fn: () => { if(hero.weaponLv.homing<1) unlockWeapon(hero,'homing'); }, isLocked: () => hero.weaponLv.homing>0 },
+  { id:'hu_sword',  icon:'⚔️+', name:'Nâng: Kiếm',    desc:'', maxLv:4, cost: lv => 80+lv*55,  fn: () => { if(hero.weaponLv.sword>=1&&hero.weaponLv.sword<5) upgradeWeapon(hero,'sword'); },   getDesc: () => weaponUpgradeDesc('sword',  hero.weaponLv.sword),  isLocked: () => hero.weaponLv.sword<1  || hero.weaponLv.sword>=5  },
+  { id:'hu_bow',    icon:'🏹+', name:'Nâng: Cung',     desc:'', maxLv:4, cost: lv => 90+lv*60,  fn: () => { if(hero.weaponLv.bow>=1&&hero.weaponLv.bow<5)     upgradeWeapon(hero,'bow'); },     getDesc: () => weaponUpgradeDesc('bow',    hero.weaponLv.bow),    isLocked: () => hero.weaponLv.bow<1    || hero.weaponLv.bow>=5    },
+  { id:'hu_cannon', icon:'💣+', name:'Nâng: Đại Bác',  desc:'', maxLv:4, cost: lv => 100+lv*65, fn: () => { if(hero.weaponLv.cannon>=1&&hero.weaponLv.cannon<5) upgradeWeapon(hero,'cannon'); }, getDesc: () => weaponUpgradeDesc('cannon', hero.weaponLv.cannon), isLocked: () => hero.weaponLv.cannon<1 || hero.weaponLv.cannon>=5 },
+  { id:'hu_laser',  icon:'🔴+', name:'Nâng: Tia Sáng', desc:'', maxLv:4, cost: lv => 110+lv*70, fn: () => { if(hero.weaponLv.laser>=1&&hero.weaponLv.laser<5)   upgradeWeapon(hero,'laser'); },  getDesc: () => weaponUpgradeDesc('laser',  hero.weaponLv.laser),  isLocked: () => hero.weaponLv.laser<1  || hero.weaponLv.laser>=5  },
+  { id:'hu_storm',  icon:'🌀+', name:'Nâng: Bão Kiếm', desc:'', maxLv:4, cost: lv => 115+lv*70, fn: () => { if(hero.weaponLv.storm>=1&&hero.weaponLv.storm<5)   upgradeWeapon(hero,'storm'); },  getDesc: () => weaponUpgradeDesc('storm',  hero.weaponLv.storm),  isLocked: () => hero.weaponLv.storm<1  || hero.weaponLv.storm>=5  },
+  { id:'hu_homing', icon:'🎯+', name:'Nâng: Đạn Rượt', desc:'', maxLv:4, cost: lv => 95+lv*60,  fn: () => { if(hero.weaponLv.homing>=1&&hero.weaponLv.homing<5) upgradeWeapon(hero,'homing'); }, getDesc: () => weaponUpgradeDesc('homing', hero.weaponLv.homing), isLocked: () => hero.weaponLv.homing<1 || hero.weaponLv.homing>=5 },
+];
+let gateShopOpen = false;
+
+function toggleGateShop(){
+  if(!gameRunning && !gateShopOpen) return;
+  if(gameOver||gameWon) return;
+  gateShopOpen = !gateShopOpen;
+  const el = document.getElementById('gate-shop');
+  if(gateShopOpen){
+    gamePaused = true;
+    renderGateShop();
+    el.classList.add('on');
+  } else {
+    gamePaused = false;
+    lastT = 0;
+    el.classList.remove('on');
+  }
+}
+
+function renderGateShop(){
+  document.getElementById('gs-gold').textContent = '🪙 ' + gate.gold;
+  const grid = document.getElementById('gs-grid');
+  grid.innerHTML = '';
+  for(const up of GATE_UPGRADES){
+    const lv = (gate.upgrades && gate.upgrades[up.id]) || 0;
+    const locked = up.isLocked ? up.isLocked() : false;
+    const maxed = lv >= up.maxLv;
+    const cost = up.cost(lv);
+    const canAfford = gate.gold >= cost;
+    const desc = up.getDesc ? up.getDesc() : up.desc;
+    const el = document.createElement('div');
+    el.className = 'gs-item' + (locked||maxed ? ' gs-maxed' : '');
+    el.innerHTML =
+      (lv>0&&!locked ? `<div class="gs-lv">Lv.${lv}/${up.maxLv}</div>` : '') +
+      `<div class="gs-ic">${up.icon}</div>` +
+      `<div class="gs-nm">${up.name}</div>` +
+      `<div class="gs-ds">${desc}</div>` +
+      `<div class="gs-cost" style="color:${(locked||maxed)?'#3a7a3a':canAfford?'#ffd700':'#a05050'}">${locked?'✓ SỞ HỮU':maxed?'MAX':'🪙 '+cost}</div>`;
+    if(!locked && !maxed){
+      el.onclick = () => {
+        const curLv = (gate.upgrades && gate.upgrades[up.id]) || 0;
+        if(up.isLocked && up.isLocked()) return;
+        const curCost = up.cost(curLv);
+        if(gate.gold < curCost) return;
+        gate.gold -= curCost;
+        up.fn();
+        if(!gate.upgrades) gate.upgrades={};
+        gate.upgrades[up.id] = (gate.upgrades[up.id]||0)+1;
+        renderGateShop();
+      };
+    }
+    grid.appendChild(el);
+  }
+}
+
+function tryDropItem(e){
+  const rate = DROP_RATE[e.type] || 0.1;
+  if(Math.random() > rate) return;
+  // build eligible pool: not maxed out
+  const pool = DROP_ITEMS.filter(it => {
+    const stacks = hero.itemStacks[it.id] || 0;
+    if(stacks >= it.max) return false;
+    if(it.canDrop && !it.canDrop(hero)) return false;
+    // weapon unlocks: skip if already owned
+    if(it.id.startsWith('w_') && !it.id.startsWith('wu_')){
+      const wid = it.id.slice(2);
+      if(hero.weaponLv[wid] > 0) return false;
+    }
+    return true;
+  });
+  if(!pool.length) return;
+  const chosen = pool[Math.floor(Math.random()*pool.length)];
+  itemDrops.push({ itemId:chosen.id, x:e.x, y:e.y, life:9, maxLife:9, bobT:Math.random()*Math.PI*2 });
+}
+
+function updateItemDrops(dt){
+  if(!hero||hero.dead) return;
+  for(const d of itemDrops){
+    if(d.picked) continue;
+    d.life -= dt;
+    d.bobT += dt*2.5;
+    if(d.life <= 0){ d.picked=true; continue; }
+    // pickup check
+    const dx=hero.x-d.x, dy=hero.y-d.y;
+    if(Math.sqrt(dx*dx+dy*dy) < 26){
+      const it = DROP_ITEMS.find(i=>i.id===d.itemId);
+      if(it){
+        it.fn(hero);
+        hero.itemStacks[it.id] = (hero.itemStacks[it.id]||0)+1;
+        spawnPs(d.x,d.y,it.color,14,80);
+        showPickupText(it, d.x, d.y);
+      }
+      d.picked=true;
+    }
+  }
+  itemDrops = itemDrops.filter(d=>!d.picked);
+}
+
+function showPickupText(it, x, y){
+  pickupTexts.push({ text:it.name, x, y, life:1.8, maxLife:1.8, color:it.color });
+}
+
+// ── weapon helpers ────────────────────────────────────────────
+// ── weapon level descriptions ────────────────────────────────
+const WEAPON_LV_DESC = {
+  sword:  ['Lv1 · 1 đạn · dame cơ bản',         'Lv2 → +20% sát thương',        'Lv3 → bắn nhanh hơn 25%',       'Lv4 → thêm 1 đạn phụ song song', 'Lv5 → đạn xuyên 1 kẻ địch'],
+  bow:    ['Lv1 · 3 mũi tên tỏa rộng',           'Lv2 → +20% sát thương',        'Lv3 → 4 mũi tên',               'Lv4 → bắn nhanh hơn 20%',        'Lv5 → 5 mũi + 15% chí mạng'],
+  cannon: ['Lv1 · AoE nổ · dame cao',            'Lv2 → +30% sát thương',        'Lv3 → vùng nổ lớn hơn 30%',    'Lv4 → bắn nhanh hơn 20%',        'Lv5 → bắn 2 đạn cùng lúc'],
+  laser:  ['Lv1 · xuyên tất cả · rất nhanh',     'Lv2 → +25% sát thương',        'Lv3 → bắn nhanh hơn 25%',      'Lv4 → bắn 2 tia song song',      'Lv5 → tia nổ khi kết thúc'],
+  storm:  ['Lv1 · 5 orb xoay · tự tấn công',    'Lv2 → 6 orb · dame +20%',     'Lv3 → orb xoay nhanh hơn',     'Lv4 → 7 orb · dame +20%',       'Lv5 → 8 orb · orb lớn hơn'],
+  homing: ['Lv1 · 1 đạn tự dẫn · dame thấp',    'Lv2 → +20% sát thương',        'Lv3 → 2 đạn đồng thời',        'Lv4 → rẽ hướng nhanh hơn',      'Lv5 → 3 đạn đồng thời'],
+};
+function weaponUpgradeDesc(id, curLv){
+  const descs = WEAPON_LV_DESC[id];
+  if(curLv >= 5) return `Đã đạt cấp tối đa (Lv.5)`;
+  return descs[curLv] || ''; // show what next level gives
+}
+
+function unlockWeapon(h, id){
+  h.weaponLv[id] = 1;
+  h.weapon = id;
+  applyWeaponLevel(h, id, 1);
+  syncWeaponStats();
+}
+function upgradeWeapon(h, id){
+  if(h.weaponLv[id] < 1) { h.weaponLv[id]=1; h.weapon=id; }
+  else if(h.weaponLv[id] < 5) h.weaponLv[id]++;
+  applyWeaponLevel(h, id, h.weaponLv[id]);
+  if(h.weapon===id) syncWeaponStats();
+}
+function applyWeaponLevel(h, id, lv){
+  if(id==='sword'){
+    if(lv===2) h.dmg = Math.round(h.dmg * 1.2);
+    if(lv===3) h.atkRate = Math.max(0.15, h.atkRate * 0.75);
+    // lv4: extra bullet handled in shootHero
+    if(lv===5) h.pierce = Math.max(h.pierce, 1);
+  }
+  if(id==='bow'){
+    if(lv===2) h.dmg = Math.round(h.dmg * 1.2);
+    // lv3: 4 arrows — handled in shootHero via weaponLv
+    if(lv===4) h.atkRate = Math.max(0.15, h.atkRate * 0.80);
+    if(lv===5) h.crit += 0.15;
+    // lv5: 5 arrows — handled in shootHero
+  }
+  if(id==='cannon'){
+    if(lv===2) h.dmg = Math.round(h.dmg * 1.3);
+    // lv3: bigger splash — handled in fireWeaponProjectile via weaponLv
+    if(lv===4) h.atkRate = Math.max(0.15, h.atkRate * 0.80);
+    // lv5: 2 shots — handled in shootHero
+  }
+  if(id==='laser'){
+    if(lv===2) h.dmg = Math.round(h.dmg * 1.25);
+    if(lv===3) h.atkRate = Math.max(0.15, h.atkRate * 0.75);
+    // lv4: 2 beams — handled in shootHero
+    // lv5: explosion — handled in projectile collision
+  }
+  if(id==='storm'){
+    initStormOrbs();
+  }
+  if(id==='homing'){
+    if(lv===2) h.dmg = Math.round(h.dmg * 1.2);
+    // lv3,5: extra missiles — handled in shootHero via weaponLv
+    // lv4: faster turn — handled in update via weaponLv
+  }
+}
+function syncWeaponStats(){
+  const w = WEAPONS.find(x=>x.id===hero.weapon);
+  hero.atkRate = Math.max(0.15, 0.55 + w.rateBonus);
+}
+function cycleWeapon(){
+  if(!gameRunning||gameOver||gameWon||!hero) return;
+  const unlocked = WEAPONS.filter(w=>hero.weaponLv[w.id]>0).map(w=>w.id);
+  if(unlocked.length<2) return;
+  const cur = unlocked.indexOf(hero.weapon);
+  hero.weapon = unlocked[(cur+1)%unlocked.length];
+  syncWeaponStats();
+  if(hero.weapon==='storm') initStormOrbs();
+  spawnPs(hero.x,hero.y,WEAPONS.find(w=>w.id===hero.weapon).color,12,80);
+}
+function initStormOrbs(){
+  const lv = hero.weaponLv.storm||1;
+  const cnt = lv + 4; // lv1=5, lv2=6, ...
+  hero.stormOrbs = Array.from({length:cnt},(_,i)=>({a:i/cnt*Math.PI*2, r:60, spd:2.8, atkT:0}));
+}
+
+// ── storm orb update ─────────────────────────────────────────
+function updateStormOrbs(dt){
+  if(hero.weapon!=='storm'||hero.dead) return;
+  const w = WEAPONS.find(x=>x.id==='storm');
+  for(const orb of hero.stormOrbs){
+    orb.a += orb.spd*dt;
+    orb.x = hero.x+Math.cos(orb.a)*orb.r;
+    orb.y = hero.y+Math.sin(orb.a)*orb.r;
+    orb.atkT-=dt;
+    if(orb.atkT<=0){
+      for(const e of enemies){
+        if(e.dead||e.reached) continue;
+        const dx=e.x-orb.x, dy=e.y-orb.y;
+        if(Math.sqrt(dx*dx+dy*dy)<e.sz+8){
+          hitEnemy(e,hero.dmg*w.dmgMult,false);
+          spawnPs(orb.x,orb.y,'#a855f7',4,50);
+          orb.atkT=0.4; break;
+        }
+      }
+      if(orb.atkT<=0) orb.atkT=0.1;
+    }
+  }
+}
+function spawnPs(x,y,col,n,spd){
+  for(let i=0;i<n;i++){
+    const a=Math.random()*Math.PI*2, s=spd*0.5+Math.random()*spd;
+    particles.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s-20,grav:80,life:.5+Math.random()*.4,maxLife:.9,col,sz:2+Math.random()*3});
+  }
+}
+function nextWave(){ wave++; waveActive=true; spawnQ=buildWave(wave); spawnT=0; }
+
+// ═══════════════════ DRAW ═══════════════════
+function draw(){
+  const sx=screenShake?(Math.random()-.5)*screenShake*2:0;
+  const sy=screenShake?(Math.random()-.5)*screenShake*2:0;
+  ctx.save(); ctx.translate(sx,sy);
+
+  // background
+  ctx.fillStyle='#080408'; ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle='rgba(50,15,15,0.3)'; ctx.lineWidth=0.5;
+  for(let x=0;x<=W;x+=40){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+  for(let y=0;y<=H;y+=40){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+  const vg=ctx.createRadialGradient(W/2,H/2,H*.3,W/2,H/2,H*.75);
+  vg.addColorStop(0,'transparent'); vg.addColorStop(1,'rgba(0,0,0,.55)');
+  ctx.fillStyle=vg; ctx.fillRect(0,0,W,H);
+
+  drawGate();
+  drawSouls();
+  drawDestMarker();
+  drawRange();
+  drawEnemies();
+  drawProjectiles();
+  drawItemDrops();
+  drawHero();
+  drawParticles();
+  drawPickupTexts();
+  drawMidScreen();
+
+  ctx.restore();
+  updateHUD();
+}
+
+let gateT=0;
+function drawGate(){
+  gateT+=0.016;
+  const pulse = 0.6+0.4*Math.sin(gateT*2.2);
+  const {x,y,hp,maxHp,armor,maxArmor,gun}=gate;
+  const hr=hp/maxHp, ar=armor/maxArmor;
+  const hitF=gate.hitFlash>0;
+
+  // ── outer energy field ──
+  const fieldR = 72;
+  const eg=ctx.createRadialGradient(x,y,fieldR*0.4,x,y,fieldR*1.4);
+  eg.addColorStop(0,`rgba(56,189,248,${0.06*pulse})`);
+  eg.addColorStop(0.6,`rgba(56,189,248,${0.03*pulse})`);
+  eg.addColorStop(1,'transparent');
+  ctx.fillStyle=eg; ctx.beginPath(); ctx.arc(x,y,fieldR*1.4,0,Math.PI*2); ctx.fill();
+
+  // ── hit flash ring ──
+  if(hitF){
+    ctx.beginPath(); ctx.arc(x,y,fieldR,0,Math.PI*2);
+    ctx.strokeStyle=`rgba(255,80,80,${gate.hitFlash/.4*0.8})`; ctx.lineWidth=4; ctx.stroke();
+  }
+
+  // ── base platform ──
+  ctx.save(); ctx.translate(x,y);
+  // octagon base
+  ctx.beginPath();
+  for(let i=0;i<8;i++){
+    const a=i/8*Math.PI*2-Math.PI/8;
+    i===0?ctx.moveTo(Math.cos(a)*48,Math.sin(a)*48):ctx.lineTo(Math.cos(a)*48,Math.sin(a)*48);
+  }
+  ctx.closePath();
+  ctx.fillStyle=hitF?'#2a1010':'#0a1428'; ctx.fill();
+  ctx.strokeStyle=ar>0.5?'#38bdf8':ar>0.2?'#60a5fa':'#ff4444'; ctx.lineWidth=2; ctx.stroke();
+
+  // ── inner rune circle ──
+  ctx.save(); ctx.rotate(gateT*0.4);
+  ctx.beginPath(); ctx.arc(0,0,34,0,Math.PI*2);
+  ctx.strokeStyle=`rgba(56,189,248,${0.3+0.2*pulse})`; ctx.lineWidth=1; ctx.setLineDash([4,6]); ctx.stroke(); ctx.setLineDash([]);
+  ctx.restore();
+  // rune dots
+  for(let i=0;i<6;i++){
+    const a=i/6*Math.PI*2+gateT*0.3;
+    ctx.beginPath(); ctx.arc(Math.cos(a)*34,Math.sin(a)*34,2.5,0,Math.PI*2);
+    ctx.fillStyle=`rgba(147,197,253,${0.6+0.4*pulse})`; ctx.fill();
+  }
+
+  // ── armor shell segments ──
+  if(ar>0){
+    const segs=8;
+    for(let i=0;i<segs;i++){
+      const a0=i/segs*Math.PI*2-Math.PI/segs, a1=a0+Math.PI/segs*0.8;
+      if(i/segs < ar){
+        ctx.beginPath(); ctx.arc(0,0,44,a0,a1);
+        ctx.strokeStyle=ar>0.5?'#38bdf8':ar>0.25?'#60a5fa':'#93c5fd';
+        ctx.lineWidth=5; ctx.stroke();
+      }
+    }
+  }
+
+  // ── central core ──
+  const cg=ctx.createRadialGradient(0,0,0,0,0,22);
+  cg.addColorStop(0,hitF?'#ff4444':'#1e90ff'); cg.addColorStop(0.5,hitF?'#aa1111':'#0a3080'); cg.addColorStop(1,'#050a1a');
+  ctx.beginPath(); ctx.arc(0,0,22,0,Math.PI*2); ctx.fillStyle=cg; ctx.fill();
+  ctx.beginPath(); ctx.arc(0,0,22,0,Math.PI*2);
+  ctx.strokeStyle=`rgba(56,189,248,${0.5+0.5*pulse})`; ctx.lineWidth=1.5; ctx.stroke();
+
+  // ── 門 character ──
+  ctx.fillStyle=`rgba(212,230,255,${0.7+0.3*pulse})`;
+  ctx.font=`bold 20px serif`; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText('門',0,0);
+
+  // ── gun barrel (points toward last target) ──
+  const gunAng = gate.gun._lastAng||0;
+  ctx.save(); ctx.rotate(gunAng);
+  // barrel housing
+  ctx.fillStyle='#1a3050'; ctx.strokeStyle='#38bdf8'; ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.roundRect(-6,-28,12,20,3); ctx.fill(); ctx.stroke();
+  // barrel tip
+  ctx.fillStyle='#38bdf8';
+  ctx.beginPath(); ctx.roundRect(-4,-38,8,14,2); ctx.fill();
+  // muzzle flash
+  if(gate.gun._flash>0){
+    gate.gun._flash-=0.016;
+    ctx.beginPath(); ctx.arc(0,-40,5+gate.gun._flash*8,0,Math.PI*2);
+    ctx.fillStyle=`rgba(255,220,50,${gate.gun._flash})`; ctx.fill();
+  }
+  ctx.restore();
+
+  ctx.restore();
+
+  // ── bars below ──
+  const bw=110, bx=x-bw/2, bh=8;
+  // armor bar
+  ctx.fillStyle='#0a1428'; ctx.fillRect(bx,y+56,bw,bh);
+  ctx.fillStyle=ar>0.5?'#38bdf8':ar>0.25?'#60a5fa':'#93c5fd';
+  ctx.fillRect(bx,y+56,bw*Math.max(0,ar),bh);
+  ctx.strokeStyle='#1e3a5a'; ctx.lineWidth=1; ctx.strokeRect(bx,y+56,bw,bh);
+  // HP bar
+  ctx.fillStyle='#1a0808'; ctx.fillRect(bx,y+67,bw,bh);
+  ctx.fillStyle=hr>.5?'#d4a017':hr>.25?'#e67e22':'#c0392b';
+  ctx.fillRect(bx,y+67,bw*Math.max(0,hr),bh);
+  ctx.strokeStyle='#3a1818'; ctx.lineWidth=1; ctx.strokeRect(bx,y+67,bw,bh);
+  // labels
+  ctx.font='bold 9px "Share Tech Mono"'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillStyle='#93c5fd'; ctx.fillText(`🛡️${Math.ceil(armor)}`,x,y+56+bh/2);
+  ctx.fillStyle='#e8d5b0'; ctx.fillText(`${Math.ceil(hp)}/${Math.ceil(maxHp)}`,x,y+67+bh/2);
+}
+
+
+function drawDestMarker(){
+  if(!mouseDest||hero.dead) return;
+  const {x,y}=mouseDest;
+  const t=Date.now()/400;
+  const r=10+Math.sin(t)*2;
+  // pulsing cross
+  ctx.strokeStyle='rgba(212,160,23,0.7)';
+  ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.moveTo(x-r,y); ctx.lineTo(x+r,y); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(x,y-r); ctx.lineTo(x,y+r); ctx.stroke();
+  // rotating ring
+  ctx.save();
+  ctx.translate(x,y); ctx.rotate(t);
+  ctx.beginPath(); ctx.arc(0,0,r*.6,0,Math.PI*.7);
+  ctx.strokeStyle='rgba(255,215,0,0.6)'; ctx.lineWidth=1.5; ctx.stroke();
+  ctx.beginPath(); ctx.arc(0,0,r*.6,Math.PI,Math.PI*1.7);
+  ctx.stroke();
+  ctx.restore();
+}
+
+function drawRange(){
+  if(hero.dead) return;
+  const {x, y, range} = hero;
+  const wColor = WEAPONS.find(w=>w.id===hero.weapon)?.color || '#d4a017';
+  const [r,g,b] = hexToRgb(wColor).split(',').map(Number);
+  ctx.beginPath(); ctx.arc(x, y, range, 0, Math.PI*2);
+  ctx.strokeStyle = `rgba(${r},${g},${b},0.45)`;
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+}
+
+function hexToRgb(hex){
+  const r=parseInt(hex.slice(1,3),16), g=parseInt(hex.slice(3,5),16), b=parseInt(hex.slice(5,7),16);
+  return `${r},${g},${b}`;
+}
+
+function drawHero(){
+  if(hero.dead) return;
+  const {x,y,r,facing,hitFlash}=hero;
+  const fl=hitFlash>0;
+
+  // aura
+  const ag=ctx.createRadialGradient(x,y,0,x,y,r*3.2);
+  ag.addColorStop(0,fl?'rgba(255,255,200,.18)':'rgba(212,160,23,.13)');
+  ag.addColorStop(1,'transparent');
+  ctx.fillStyle=ag; ctx.beginPath(); ctx.arc(x,y,r*3.2,0,Math.PI*2); ctx.fill();
+
+  // shadow
+  ctx.beginPath(); ctx.ellipse(x,y+r*.85,r*.9,r*.28,0,0,Math.PI*2);
+  ctx.fillStyle='rgba(0,0,0,.5)'; ctx.fill();
+
+  ctx.save(); ctx.translate(x,y); ctx.rotate(facing);
+
+  // cape
+  ctx.beginPath();
+  ctx.moveTo(-r*.6,-r*.3);
+  ctx.bezierCurveTo(-r*1.5,r*.2,-r*1.6,r*1.1,-r*.5,r*1.4);
+  ctx.bezierCurveTo(r*.1,r*1.6,r*.5,r*1.5,r*.4,r*1.2);
+  ctx.bezierCurveTo(r*.2,r*.5,0,0,-r*.6,-r*.3);
+  ctx.fillStyle=fl?'#4a0000':'#3a0000'; ctx.fill();
+
+  // legs
+  ctx.fillStyle=fl?'#eee':'#1c0e0e';
+  ctx.beginPath(); ctx.roundRect(-r*.35,r*.5,r*.28,r*.75,3); ctx.fill();
+  ctx.beginPath(); ctx.roundRect(r*.07,r*.5,r*.28,r*.75,3); ctx.fill();
+  ctx.fillStyle=fl?'#fff':'#2a1510'; ctx.strokeStyle=fl?'#fff':'#d4a017'; ctx.lineWidth=.8;
+  [-r*.32,r*.10].forEach(lx=>{ctx.beginPath();ctx.roundRect(lx,r*.52,r*.26,r*.28,2);ctx.fill();ctx.stroke();});
+
+  // torso
+  ctx.beginPath(); ctx.roundRect(-r*.55,-r*.55,r*1.1,r*1.15,4);
+  ctx.fillStyle=fl?'#fff':'#1e1008'; ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(-r*.45,-r*.5); ctx.lineTo(r*.45,-r*.5); ctx.lineTo(r*.5,r*.25); ctx.lineTo(0,r*.45); ctx.lineTo(-r*.5,r*.25); ctx.closePath();
+  ctx.fillStyle=fl?'#eee':'#2e1a0e'; ctx.fill();
+  ctx.strokeStyle=fl?'#fff':'#d4a017'; ctx.lineWidth=1.2; ctx.stroke();
+  // jewel
+  const jg=ctx.createRadialGradient(0,-r*.08,0,0,-r*.08,r*.18);
+  jg.addColorStop(0,fl?'#fff':'#ff6030'); jg.addColorStop(.5,fl?'#faa':'#c0392b'); jg.addColorStop(1,fl?'#c88':'#6a1010');
+  ctx.beginPath(); ctx.arc(0,-r*.08,r*.18,0,Math.PI*2); ctx.fillStyle=jg; ctx.fill();
+  ctx.strokeStyle=fl?'#fff':'#ffd700'; ctx.lineWidth=1; ctx.stroke();
+
+  // shoulders
+  [[-r*.62,-r*.5],[r*.38,-r*.5]].forEach(([px,py],i)=>{
+    ctx.beginPath(); ctx.ellipse(px+r*.12,py,r*.28,r*.2,i===0?-.3:.3,0,Math.PI*2);
+    ctx.fillStyle=fl?'#eee':'#2e1a0e'; ctx.fill(); ctx.strokeStyle=fl?'#fff':'#d4a017'; ctx.lineWidth=1; ctx.stroke();
+  });
+
+  // neck
+  ctx.beginPath(); ctx.roundRect(-r*.18,-r*.62,r*.36,r*.2,3);
+  ctx.fillStyle=fl?'#eee':'#1e1008'; ctx.fill(); ctx.strokeStyle=fl?'#fff':'#d4a017'; ctx.lineWidth=.8; ctx.stroke();
+
+  // face
+  ctx.beginPath(); ctx.ellipse(0,-r*.95,r*.28,r*.3,0,0,Math.PI*2);
+  ctx.fillStyle=fl?'#fff':'#c8845a'; ctx.fill();
+  // helmet
+  ctx.beginPath(); ctx.ellipse(0,-r*1.08,r*.34,r*.28,0,Math.PI,Math.PI*2);
+  ctx.fillStyle=fl?'#eee':'#2e1a0e'; ctx.fill(); ctx.strokeStyle=fl?'#fff':'#d4a017'; ctx.lineWidth=1; ctx.stroke();
+  // crest
+  ctx.beginPath(); ctx.moveTo(-r*.12,-r*1.28); ctx.lineTo(0,-r*1.72); ctx.lineTo(r*.12,-r*1.28); ctx.closePath();
+  ctx.fillStyle=fl?'#fff':'#c0392b'; ctx.fill(); ctx.strokeStyle=fl?'#fff':'#d4a017'; ctx.lineWidth=.8; ctx.stroke();
+  const crg=ctx.createLinearGradient(0,-r*1.7,0,-r*1.3);
+  crg.addColorStop(0,fl?'rgba(255,255,255,.8)':'rgba(255,80,40,.8)'); crg.addColorStop(1,'transparent');
+  ctx.fillStyle=crg; ctx.beginPath(); ctx.moveTo(-r*.08,-r*1.3); ctx.lineTo(0,-r*1.68); ctx.lineTo(r*.08,-r*1.3); ctx.closePath(); ctx.fill();
+  // visor
+  ctx.beginPath(); ctx.roundRect(-r*.22,-r*1.1,r*.44,r*.1,2);
+  ctx.fillStyle=fl?'rgba(255,255,255,.5)':'rgba(255,200,80,.5)'; ctx.fill();
+
+  // arm + sword
+  ctx.beginPath(); ctx.roundRect(r*.42,-r*.38,r*.22,r*.55,4);
+  ctx.fillStyle=fl?'#eee':'#2e1a0e'; ctx.fill(); ctx.strokeStyle=fl?'#fff':'#d4a017'; ctx.lineWidth=.8; ctx.stroke();
+  ctx.beginPath(); ctx.roundRect(r*.44,r*.18,r*.18,r*.5,3);
+  ctx.fillStyle=fl?'#ddd':'#1e1008'; ctx.fill(); ctx.strokeStyle=fl?'#fff':'#d4a017'; ctx.lineWidth=.7; ctx.stroke();
+
+  const so=r*.55;
+  const swg=ctx.createLinearGradient(so,0,so+r*3.2,0);
+  swg.addColorStop(0,'rgba(255,200,80,0)'); swg.addColorStop(.3,'rgba(255,200,80,.12)'); swg.addColorStop(1,'transparent');
+  ctx.fillStyle=swg; ctx.fillRect(so,-r*.18,r*3.2,r*.36);
+  ctx.beginPath(); ctx.moveTo(so,-r*.06); ctx.lineTo(so+r*2.8,0); ctx.lineTo(so,r*.06); ctx.closePath();
+  const blg=ctx.createLinearGradient(so,0,so+r*2.8,0);
+  blg.addColorStop(0,fl?'#fff':'#e8e0c8'); blg.addColorStop(.4,fl?'#eee':'#b8b090'); blg.addColorStop(1,fl?'#ccc':'#606050');
+  ctx.fillStyle=blg; ctx.fill();
+  ctx.beginPath(); ctx.moveTo(so,-r*.05); ctx.lineTo(so+r*2.75,0);
+  ctx.strokeStyle=fl?'rgba(255,255,255,.9)':'rgba(255,240,180,.8)'; ctx.lineWidth=1; ctx.stroke();
+  ctx.beginPath(); ctx.ellipse(so+r*.08,0,r*.1,r*.28,0,0,Math.PI*2);
+  ctx.fillStyle=fl?'#fff':'#d4a017'; ctx.fill(); ctx.strokeStyle=fl?'#fff':'#8b6010'; ctx.lineWidth=.8; ctx.stroke();
+  ctx.beginPath(); ctx.roundRect(so-r*.38,-r*.1,r*.38,r*.2,2);
+  ctx.fillStyle=fl?'#ccc':'#3a1a08'; ctx.fill();
+
+  ctx.restore();
+
+  // HP bar
+  const bw=r*4; const bx=x-bw/2, by=y-r*2.0;
+  ctx.fillStyle='#1a0808'; ctx.fillRect(bx,by,bw,5);
+  const hr2=hero.hp/hero.maxHp;
+  ctx.fillStyle=hr2>.5?'#39d353':hr2>.25?'#f39c12':'#c0392b';
+  ctx.fillRect(bx,by,bw*hr2,5);
+  ctx.strokeStyle='#2a1818'; ctx.lineWidth=.5; ctx.strokeRect(bx,by,bw,5);
+}
+
+function drawEnemies(){
+  for(const e of enemies){
+    if(e.dead||e.reached) continue;
+    const {x,y,sz,d,hp,maxHp,hitFlash,slowT,frozen}=e;
+    const fl=hitFlash>0;
+    const col=fl?'#ffffff':frozen?'#88ccff':slowT>0?'#1abc9c':d.col;
+    const ang = Math.atan2(gate.y-y, gate.x-x);
+
+    ctx.save(); ctx.translate(x,y); ctx.rotate(ang+Math.PI/2);
+
+    if(e.type==='basic'){
+      // skull soldier: triangular body + horns
+      const bg=ctx.createRadialGradient(0,0,0,0,0,sz*2.2);
+      bg.addColorStop(0,d.col+'44'); bg.addColorStop(1,'transparent');
+      ctx.fillStyle=bg; ctx.beginPath(); ctx.arc(0,0,sz*2.2,0,Math.PI*2); ctx.fill();
+      // body (triangle)
+      ctx.beginPath(); ctx.moveTo(0,-sz); ctx.lineTo(sz*.7,sz*.6); ctx.lineTo(-sz*.7,sz*.6); ctx.closePath();
+      ctx.fillStyle=fl?'#fff':d.col; ctx.fill();
+      ctx.strokeStyle=fl?'#fff':'#ff8888'; ctx.lineWidth=1; ctx.stroke();
+      // eye
+      ctx.beginPath(); ctx.arc(0,-sz*.15,sz*.28,0,Math.PI*2);
+      ctx.fillStyle=fl?'#ffd700':'#200000'; ctx.fill();
+      ctx.beginPath(); ctx.arc(0,-sz*.15,sz*.14,0,Math.PI*2);
+      ctx.fillStyle=fl?'#fff':'#ff2222'; ctx.fill();
+
+    } else if(e.type==='runner'){
+      // thin fast diamond
+      const bg=ctx.createRadialGradient(0,0,0,0,0,sz*2);
+      bg.addColorStop(0,d.col+'33'); bg.addColorStop(1,'transparent');
+      ctx.fillStyle=bg; ctx.beginPath(); ctx.arc(0,0,sz*2,0,Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(0,-sz*1.2); ctx.lineTo(sz*.55,0); ctx.lineTo(0,sz*1.2); ctx.lineTo(-sz*.55,0); ctx.closePath();
+      ctx.fillStyle=fl?'#fff':d.col; ctx.fill();
+      ctx.strokeStyle='#ffaa55'; ctx.lineWidth=1.5; ctx.stroke();
+      // speed lines
+      ctx.strokeStyle=`rgba(255,140,50,0.5)`; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.moveTo(-sz*.3,sz*.8); ctx.lineTo(-sz*.3,sz*1.6); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(sz*.3,sz*.8); ctx.lineTo(sz*.3,sz*1.6); ctx.stroke();
+
+    } else if(e.type==='tank'){
+      // heavy hexagon warrior
+      ctx.beginPath();
+      for(let i=0;i<6;i++){ const a=i/6*Math.PI*2; i===0?ctx.moveTo(Math.cos(a)*sz,Math.sin(a)*sz):ctx.lineTo(Math.cos(a)*sz,Math.sin(a)*sz); }
+      ctx.closePath();
+      ctx.fillStyle=fl?'#ddd':d.col; ctx.fill();
+      ctx.strokeStyle=fl?'#fff':'#cc88ff'; ctx.lineWidth=2.5; ctx.stroke();
+      // inner hex
+      ctx.beginPath();
+      for(let i=0;i<6;i++){ const a=i/6*Math.PI*2; i===0?ctx.moveTo(Math.cos(a)*sz*.55,Math.sin(a)*sz*.55):ctx.lineTo(Math.cos(a)*sz*.55,Math.sin(a)*sz*.55); }
+      ctx.closePath(); ctx.strokeStyle='rgba(200,150,255,0.6)'; ctx.lineWidth=1; ctx.stroke();
+      ctx.beginPath(); ctx.arc(0,0,sz*.25,0,Math.PI*2);
+      ctx.fillStyle=fl?'#fff':'#6a1e8a'; ctx.fill();
+
+    } else if(e.type==='mage'){
+      // floating orb with ring
+      const rot=Date.now()/800;
+      const bg=ctx.createRadialGradient(0,0,0,0,0,sz*2.5);
+      bg.addColorStop(0,d.col+'44'); bg.addColorStop(1,'transparent');
+      ctx.fillStyle=bg; ctx.beginPath(); ctx.arc(0,0,sz*2.5,0,Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(0,0,sz,0,Math.PI*2);
+      ctx.fillStyle=fl?'#fff':d.col; ctx.fill();
+      // rotating ring
+      ctx.save(); ctx.rotate(rot);
+      ctx.beginPath(); ctx.ellipse(0,0,sz*1.6,sz*.4,0,0,Math.PI*2);
+      ctx.strokeStyle=fl?'#fff':'#55aaff'; ctx.lineWidth=1.5; ctx.stroke();
+      ctx.restore();
+      ctx.beginPath(); ctx.arc(0,0,sz*.35,0,Math.PI*2);
+      ctx.fillStyle=fl?'#ffd700':'#ffffff88'; ctx.fill();
+
+    } else if(e.type==='demon'){
+      // jagged demon shape
+      const bg=ctx.createRadialGradient(0,0,0,0,0,sz*2.5);
+      bg.addColorStop(0,d.col+'55'); bg.addColorStop(1,'transparent');
+      ctx.fillStyle=bg; ctx.beginPath(); ctx.arc(0,0,sz*2.5,0,Math.PI*2); ctx.fill();
+      ctx.beginPath();
+      for(let i=0;i<10;i++){
+        const a=i/10*Math.PI*2, r=i%2===0?sz:sz*.55;
+        i===0?ctx.moveTo(Math.cos(a)*r,Math.sin(a)*r):ctx.lineTo(Math.cos(a)*r,Math.sin(a)*r);
+      }
+      ctx.closePath();
+      ctx.fillStyle=fl?'#fff':d.col; ctx.fill();
+      ctx.strokeStyle='#ff2222'; ctx.lineWidth=1.5; ctx.stroke();
+      // eyes
+      ctx.fillStyle=fl?'#000':'#ff8800';
+      ctx.beginPath(); ctx.arc(-sz*.3,-sz*.2,sz*.18,0,Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(sz*.3,-sz*.2,sz*.18,0,Math.PI*2); ctx.fill();
+
+    } else if(d.boss){
+      // boss: massive aura + crown
+      const bg=ctx.createRadialGradient(0,0,0,0,0,sz*3.5);
+      bg.addColorStop(0,d.col+'66'); bg.addColorStop(0.6,d.col+'22'); bg.addColorStop(1,'transparent');
+      ctx.fillStyle=bg; ctx.beginPath(); ctx.arc(0,0,sz*3.5,0,Math.PI*2); ctx.fill();
+      // pulsing outer ring
+      const p=0.6+0.4*Math.sin(Date.now()/300);
+      ctx.beginPath(); ctx.arc(0,0,sz*1.15,0,Math.PI*2);
+      ctx.strokeStyle=`rgba(255,80,80,${p})`; ctx.lineWidth=3; ctx.stroke();
+      // body
+      ctx.beginPath(); ctx.arc(0,0,sz,0,Math.PI*2);
+      ctx.fillStyle=fl?'#fff':d.col; ctx.fill();
+      ctx.strokeStyle=fl?'#fff':'#ff4444'; ctx.lineWidth=2.5; ctx.stroke();
+      // crown spikes
+      for(let i=0;i<5;i++){
+        const a=(i/5-0.25)*Math.PI*2;
+        ctx.beginPath(); ctx.moveTo(Math.cos(a)*sz,Math.sin(a)*sz);
+        ctx.lineTo(Math.cos(a)*(sz+10),Math.sin(a)*(sz+10));
+        ctx.strokeStyle='#ffd700'; ctx.lineWidth=3; ctx.stroke();
+      }
+      ctx.beginPath(); ctx.arc(0,0,sz*.4,0,Math.PI*2);
+      ctx.fillStyle=fl?'#ffd700':'#500000'; ctx.fill();
+      ctx.font=`bold ${sz*.5}px serif`; ctx.fillStyle=fl?'#000':'#ff8888';
+      ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('☠',0,sz*.05);
+    } else {
+      // miniboss
+      const bg=ctx.createRadialGradient(0,0,0,0,0,sz*2.8);
+      bg.addColorStop(0,d.col+'55'); bg.addColorStop(1,'transparent');
+      ctx.fillStyle=bg; ctx.beginPath(); ctx.arc(0,0,sz*2.8,0,Math.PI*2); ctx.fill();
+      ctx.beginPath();
+      for(let i=0;i<8;i++){ const a=i/8*Math.PI*2,r=i%2===0?sz:sz*.7; i===0?ctx.moveTo(Math.cos(a)*r,Math.sin(a)*r):ctx.lineTo(Math.cos(a)*r,Math.sin(a)*r); }
+      ctx.closePath(); ctx.fillStyle=fl?'#fff':d.col; ctx.fill();
+      ctx.strokeStyle='#cc44ff'; ctx.lineWidth=2; ctx.stroke();
+      ctx.beginPath(); ctx.arc(0,0,sz*.35,0,Math.PI*2); ctx.fillStyle=fl?'#ffd700':'#3a006a'; ctx.fill();
+    }
+
+    if(frozen){
+      ctx.beginPath(); ctx.arc(0,0,sz+2,0,Math.PI*2);
+      ctx.strokeStyle='rgba(136,204,255,0.7)'; ctx.lineWidth=2; ctx.stroke();
+    }
+
+    ctx.restore();
+
+    // hp bar
+    const bw=sz*2.8, bx=x-bw/2, by=y-sz-10;
+    ctx.fillStyle='#0a0808'; ctx.fillRect(bx,by,bw,3);
+    ctx.fillStyle=hp/maxHp>.5?'#39d353':hp/maxHp>.25?'#f39c12':'#c0392b';
+    ctx.fillRect(bx,by,bw*(hp/maxHp),3);
+    if(d.boss){
+      ctx.fillStyle='rgba(255,255,255,0.75)'; ctx.font='bold 9px "Share Tech Mono"';
+      ctx.textAlign='center'; ctx.textBaseline='bottom';
+      ctx.fillText(d.lbl,x,by-1);
+    }
+  }
+}
+
+function drawProjectiles(){
+  for(const p of projectiles){
+    if(p.hit) continue;
+    const wt = p.wtype;
+    if(wt==='bow'){
+      // arrow: small triangle pointing in velocity direction
+      const ang = Math.atan2(p.vy,p.vx);
+      ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(ang);
+      ctx.beginPath(); ctx.moveTo(8,0); ctx.lineTo(-4,-3); ctx.lineTo(-4,3); ctx.closePath();
+      ctx.fillStyle=p.color; ctx.fill();
+      ctx.restore();
+    } else if(wt==='cannon'){
+      // big red ball with dark core
+      ctx.beginPath(); ctx.arc(p.x,p.y,p.sz,0,Math.PI*2); ctx.fillStyle=p.color; ctx.fill();
+      ctx.beginPath(); ctx.arc(p.x,p.y,p.sz*.45,0,Math.PI*2); ctx.fillStyle='#4a0000'; ctx.fill();
+      ctx.beginPath(); ctx.arc(p.x,p.y,p.sz*1.8,0,Math.PI*2); ctx.fillStyle=p.color+'22'; ctx.fill();
+    } else if(wt==='laser'){
+      // long thin streak
+      const ang = Math.atan2(p.vy,p.vx);
+      ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(ang);
+      ctx.beginPath(); ctx.rect(-18,-1.5,36,3); ctx.fillStyle=p.color; ctx.fill();
+      ctx.beginPath(); ctx.rect(-18,-3,36,6); ctx.fillStyle=p.color+'44'; ctx.fill();
+      ctx.restore();
+    } else if(wt==='homing'){
+      // glowing cyan orb with rotating ring
+      const t2 = Date.now()/300;
+      ctx.beginPath(); ctx.arc(p.x,p.y,p.sz,0,Math.PI*2); ctx.fillStyle='#00e5ff'; ctx.fill();
+      ctx.beginPath(); ctx.arc(p.x,p.y,p.sz*2.2,0,Math.PI*2); ctx.fillStyle='rgba(0,229,255,0.2)'; ctx.fill();
+      ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(t2);
+      ctx.beginPath(); ctx.arc(0,0,p.sz*1.6, 0, Math.PI*1.2);
+      ctx.strokeStyle='rgba(0,229,255,0.7)'; ctx.lineWidth=1.5; ctx.stroke();
+      ctx.restore();
+    } else {
+      // sword / default: gold circle + glow
+      ctx.beginPath(); ctx.arc(p.x,p.y,p.sz||4,0,Math.PI*2); ctx.fillStyle=p.color||'#d4a017'; ctx.fill();
+      ctx.beginPath(); ctx.arc(p.x,p.y,(p.sz||4)*2,0,Math.PI*2); ctx.fillStyle=(p.color||'#d4a017')+'33'; ctx.fill();
+    }
+    // enemy projectile
+    if(!p.hero){
+      ctx.beginPath(); ctx.arc(p.x,p.y,5,0,Math.PI*2); ctx.fillStyle='#2980b9'; ctx.fill();
+      ctx.beginPath(); ctx.arc(p.x,p.y,9,0,Math.PI*2); ctx.fillStyle='#2980b933'; ctx.fill();
+    }
+  }
+}
+
+function drawStormOrbs(){
+  if(!hero||hero.weapon!=='storm'||hero.dead) return;
+  for(const orb of hero.stormOrbs){
+    // diamond shape
+    ctx.save(); ctx.translate(orb.x,orb.y); ctx.rotate(orb.a*2);
+    ctx.beginPath(); ctx.moveTo(0,-7); ctx.lineTo(7,0); ctx.lineTo(0,7); ctx.lineTo(-7,0); ctx.closePath();
+    ctx.fillStyle='#a855f7'; ctx.fill();
+    ctx.strokeStyle='#d8b4fe'; ctx.lineWidth=1; ctx.stroke();
+    ctx.restore();
+    // orbit trail glow
+    const og=ctx.createRadialGradient(orb.x,orb.y,0,orb.x,orb.y,14);
+    og.addColorStop(0,'rgba(168,85,247,.25)'); og.addColorStop(1,'transparent');
+    ctx.fillStyle=og; ctx.beginPath(); ctx.arc(orb.x,orb.y,14,0,Math.PI*2); ctx.fill();
+  }
+}
+
+function drawSouls(){
+  for(const s of souls){
+    if(s.done) continue;
+    const a=Math.min(1,s.life/1.5);
+    ctx.beginPath(); ctx.arc(s.x,s.y,5,0,Math.PI*2); ctx.fillStyle=`rgba(212,160,23,${a*.9})`; ctx.fill();
+    ctx.beginPath(); ctx.arc(s.x,s.y,9,0,Math.PI*2); ctx.fillStyle=`rgba(212,160,23,${a*.25})`; ctx.fill();
+  }
+}
+
+function drawParticles(){
+  for(const p of particles){
+    const a=Math.max(0,p.life/p.maxLife);
+    ctx.globalAlpha=a; ctx.beginPath(); ctx.arc(p.x,p.y,p.sz*a,0,Math.PI*2); ctx.fillStyle=p.col; ctx.fill();
+  }
+  ctx.globalAlpha=1;
+}
+
+function drawItemDrops(){
+  for(const d of itemDrops){
+    if(d.picked) continue;
+    const it = DROP_ITEMS.find(i=>i.id===d.itemId);
+    if(!it) continue;
+    const fadeRatio = d.life < 2 ? d.life/2 : 1;
+    const bob = Math.sin(d.bobT)*4;
+    const py = d.y + bob;
+    // glow
+    const gg = ctx.createRadialGradient(d.x,py,0,d.x,py,22);
+    gg.addColorStop(0,it.color+'55'); gg.addColorStop(1,'transparent');
+    ctx.fillStyle=gg; ctx.globalAlpha=fadeRatio;
+    ctx.beginPath(); ctx.arc(d.x,py,22,0,Math.PI*2); ctx.fill();
+    // circle border
+    ctx.beginPath(); ctx.arc(d.x,py,13,0,Math.PI*2);
+    ctx.strokeStyle=it.color; ctx.lineWidth=1.5; ctx.stroke();
+    ctx.fillStyle='rgba(4,1,1,0.85)';
+    ctx.beginPath(); ctx.arc(d.x,py,12,0,Math.PI*2); ctx.fill();
+    // icon
+    ctx.font='13px serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.globalAlpha=fadeRatio;
+    ctx.fillText(it.icon, d.x, py);
+    // name label
+    ctx.font='bold 9px "Share Tech Mono"';
+    ctx.fillStyle=it.color;
+    ctx.fillText(it.name, d.x, py+20);
+    ctx.globalAlpha=1;
+  }
+  ctx.globalAlpha=1;
+}
+
+function drawPickupTexts(){
+  for(const pt of pickupTexts){
+    const a = Math.min(1, pt.life/pt.maxLife);
+    ctx.globalAlpha = a;
+    ctx.font='bold 13px "Share Tech Mono"';
+    ctx.fillStyle=pt.color;
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(pt.text, pt.x, pt.y);
+  }
+  ctx.globalAlpha=1;
+}
+
+function drawMidScreen(){
+  if(!waveActive && waveRestT>0){
+    ctx.fillStyle='rgba(4,1,1,.85)'; ctx.fillRect(W/2-120,H/2-42,240,84);
+    ctx.strokeStyle='#d4a017'; ctx.lineWidth=1.5; ctx.strokeRect(W/2-120,H/2-42,240,84);
+    ctx.fillStyle='#8a7060'; ctx.font='13px "Share Tech Mono"'; ctx.textAlign='center';
+    ctx.fillText('ĐỢT TIẾP THEO SAU',W/2,H/2-12);
+    ctx.fillStyle='#ffd700'; ctx.font='bold 44px "Share Tech Mono"';
+    ctx.fillText(Math.ceil(waveRestT),W/2,H/2+32);
+  }
+  if(hero.dead&&!gameOver){
+    ctx.fillStyle='rgba(192,57,43,.18)'; ctx.fillRect(W/2-220,H/2-22,440,44);
+    ctx.fillStyle='#ff8080'; ctx.font='bold 14px "Share Tech Mono"'; ctx.textAlign='center';
+    ctx.fillText('ANH HÙNG NGÃ XUỐNG — CỬA PHẢI ĐỨNG VỮNG',W/2,H/2+6);
+  }
+}
+
+// ═══════════════════ HUD ═══════════════════
+function updateHUD(){
+  if(!hero) return;
+  const hr=Math.max(0,hero.hp/hero.maxHp), gr=Math.max(0,gate.hp/gate.maxHp);
+  const ar=Math.max(0,gate.armor/gate.maxArmor), xr=Math.max(0,hero.xp/hero.xpNext);
+  document.getElementById('h-wave').innerHTML=`${wave}<small> / ${TOTAL_WAVES}</small>`;
+  document.getElementById('h-lv').textContent=hero.level;
+  const hf=document.getElementById('h-hp-f');
+  hf.style.width=(hr*100)+'%'; hf.style.background=hr>.5?'#39d353':hr>.25?'#f39c12':'#e74c3c';
+  document.getElementById('h-hp-v').textContent=`${Math.ceil(hero.hp)}/${hero.maxHp}`;
+  const af=document.getElementById('h-gate-armor-f');
+  af.style.width=(ar*100)+'%';
+  document.getElementById('h-gate-armor-v').textContent=`🛡️${Math.ceil(gate.armor)}/${Math.ceil(gate.maxArmor)}`;
+  const gf=document.getElementById('h-gate-f');
+  gf.style.width=(gr*100)+'%'; gf.style.background=gr>.5?'#d4a017':gr>.25?'#e67e22':'#c0392b';
+  document.getElementById('h-gate-v').textContent=`${Math.ceil(gate.hp)}/${Math.ceil(gate.maxHp)}`;
+  document.getElementById('h-xp-f').style.width=(xr*100)+'%';
+  document.getElementById('h-xp-v').textContent=`${hero.xp}/${hero.xpNext}`;
+  document.getElementById('h-gold').textContent='🪙 '+gate.gold;
+  const alive=enemies.filter(e=>!e.dead&&!e.reached).length;
+  const he=document.getElementById('h-enemies');
+  he.textContent=alive; he.style.color=alive>0?'#e74c3c':'#4a3030';
+
+  // weapon HUD
+  const cw = WEAPONS.find(w=>w.id===hero.weapon);
+  if(cw){
+    document.getElementById('h-wpn-icon').textContent = cw.icon;
+    document.getElementById('h-wpn-name').textContent = cw.name;
+    document.getElementById('h-wpn-lv').textContent   = `Lv.${hero.weaponLv[cw.id]}`;
+  }
+}
+
+// ═══════════════════ END STATES ═══════════════════
+function triggerLoss(){
+  if(gameOver) return; gameOver=true; gameRunning=false;
+  setTimeout(()=>{
+    const ov=document.getElementById('overlay'), st=document.getElementById('ov-stats'), btn=document.getElementById('ov-btn');
+    ov.querySelector('.ov-title').textContent='THẤT BẠI';
+    ov.querySelector('.ov-title').style.cssText='color:#ff5555;text-shadow:0 0 40px rgba(255,60,60,.8)';
+    ov.querySelector('.ov-sub').textContent='CỬA ĐÃ THẤT THỦ';
+    st.innerHTML=`<p class="ov-stat">Đợt hoàn thành: <span>${Math.max(0,wave-1)}</span></p><p class="ov-stat">Cấp anh hùng: <span>${hero.level}</span></p><p class="ov-stat">HP cửa còn lại: <span>${Math.ceil(gate.hp)}</span></p>`;
+    btn.textContent='THỬ LẠI'; btn.className='ov-btn danger';
+    ov.style.display='flex';
+  },800);
+}
+function triggerWin(){
+  if(gameWon) return; gameWon=true; gameRunning=false;
+  setTimeout(()=>{
+    const ov=document.getElementById('overlay'), st=document.getElementById('ov-stats'), btn=document.getElementById('ov-btn');
+    ov.querySelector('.ov-title').textContent='CHIẾN THẮNG';
+    ov.querySelector('.ov-title').style.cssText='color:#ffd700;text-shadow:0 0 40px rgba(255,215,0,.8)';
+    ov.querySelector('.ov-sub').textContent='CỬA THIÊNG VẪN ĐỨNG VỮNG';
+    st.innerHTML=`<p class="ov-stat">Đợt sống sót: <span>${wave}</span></p><p class="ov-stat">Cấp anh hùng: <span>${hero.level}</span></p><p class="ov-stat">HP cửa còn lại: <span>${Math.ceil(gate.hp)}</span></p>`;
+    btn.textContent='CHƠI LẠI'; btn.className='ov-btn';
+    ov.style.display='flex';
+  },1000);
+}
+
+// ═══════════════════ GAME LOOP ═══════════════════
+function loop(ts){
+  if(!lastT) lastT=ts;
+  const dt=Math.min((ts-lastT)/1000,.05);
+  lastT=ts;
+  if(gameRunning && !gamePaused) update(dt);
+  draw();
+  if(gamePaused) drawPause();
+  requestAnimationFrame(loop);
+}
+
+function togglePause(){
+  if(!gameRunning || gameOver || gameWon) return;
+  gamePaused = !gamePaused;
+  if(gamePaused) lastT = 0; // reset timer so no dt spike on resume
+}
+
+function drawPause(){
+  // dim overlay
+  ctx.fillStyle = 'rgba(4,1,1,0.72)';
+  ctx.fillRect(0, 0, W, H);
+  // panel
+  const pw = 280, ph = 140, px = W/2 - pw/2, py = H/2 - ph/2;
+  ctx.fillStyle = 'rgba(10,3,3,0.96)';
+  ctx.fillRect(px, py, pw, ph);
+  ctx.strokeStyle = '#d4a017';
+  ctx.lineWidth = 1.5;
+  ctx.strokeRect(px, py, pw, ph);
+  // title
+  ctx.fillStyle = '#ffd700';
+  ctx.font = 'bold 26px "Share Tech Mono"';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('TẠM DỪNG', W/2, py + 44);
+  // hint
+  ctx.fillStyle = '#8a6850';
+  ctx.font = '13px "Share Tech Mono"';
+  ctx.fillText('Nhấn  P  hoặc  ESC  để tiếp tục', W/2, py + 85);
+  // wave info
+  ctx.fillStyle = '#5a4030';
+  ctx.font = '11px "Share Tech Mono"';
+  ctx.fillText(`Đợt ${wave} / ${TOTAL_WAVES}  ·  Cấp ${hero.level}`, W/2, py + 115);
+}
+
+function startGame(){
+  document.getElementById('overlay').style.display='none';
+  const ov=document.getElementById('overlay');
+  ov.querySelector('.ov-title').textContent='SINH TỬ MÔN';
+  ov.querySelector('.ov-title').style.cssText='';
+  ov.querySelector('.ov-sub').textContent='CỬA SINH TỬ';
+  document.getElementById('ov-stats').innerHTML='';
+  document.getElementById('ov-btn').textContent='VÀO TRẬN';
+  document.getElementById('ov-btn').className='ov-btn';
+  initGame(); lastT=0; gameRunning=true; gamePaused=false; mouseDest=null;
+  pickupTexts=[];
+  syncWeaponStats();
+}
+
+// ═══════════════════ BOOT ═══════════════════
+resize();
+initGame();
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
