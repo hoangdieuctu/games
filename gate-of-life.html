@@ -272,15 +272,15 @@ const DROP_RATE = { basic:0.10, runner:0.08, tank:0.25, mage:0.20, demon:0.30, s
 // Balance target: wave1-5 học mechanic, wave6-15 phải kite + upgrade,
 // wave16-25 cần build tốt, wave26-30 đòi hỏi chiến lược đầy đủ
 const EDEFS = {
-  basic:   {hp:100, spd:65,  sz:10, col:'#c0392b', rw:12, xp:8,  arm:0,    dg:10, lbl:'Binh Sĩ'},
-  runner:  {hp:55,  spd:155, sz:8,  col:'#e67e22', rw:9,  xp:6,  arm:0,    dg:7,  lbl:'Kỵ Binh'},
-  tank:    {hp:380, spd:38,  sz:15, col:'#8e44ad', rw:22, xp:20, arm:0.38, dg:22, lbl:'Chiến Binh'},
-  mage:    {hp:90,  spd:52,  sz:9,  col:'#2980b9', rw:16, xp:15, arm:0,    dg:0,  lbl:'Pháp Sư',   ranged:true,  rAtk:240, rRate:2.0, targetGate:true},
-  demon:   {hp:260, spd:80,  sz:13, col:'#e74c3c', rw:28, xp:25, arm:0.22, dg:18, lbl:'Ác Quỷ'},
-  sniper:  {hp:75,  spd:44,  sz:9,  col:'#27ae60', rw:18, xp:18, arm:0,    dg:0,  lbl:'Cung Thủ',  ranged:true,  rAtk:280, rRate:2.8, targetHero:true},
-  bomber:  {hp:160, spd:36,  sz:11, col:'#d35400', rw:24, xp:22, arm:0.10, dg:0,  lbl:'Ném Lửa',   ranged:true,  rAtk:220, rRate:3.5, targetBoth:true, splash:55},
-  boss:    {hp:1600,spd:34,  sz:26, col:'#c0392b', rw:100,xp:100,arm:0.42, dg:50, lbl:'TRÙM', boss:true},
-  miniboss:{hp:700, spd:48,  sz:20, col:'#8e44ad', rw:50, xp:50, arm:0.32, dg:32, lbl:'TINH ANH', boss:true},
+  basic:   {hp:100, spd:65,  sz:10, col:'#c0392b', rw:12, xp:8,  arm:0,    dg:10, lbl:'Binh Sĩ',  rage:3},
+  runner:  {hp:55,  spd:155, sz:8,  col:'#e67e22', rw:9,  xp:6,  arm:0,    dg:7,  lbl:'Kỵ Binh',  rage:1},
+  tank:    {hp:380, spd:38,  sz:15, col:'#8e44ad', rw:22, xp:20, arm:0.38, dg:22, lbl:'Chiến Binh',rage:7},
+  mage:    {hp:90,  spd:52,  sz:9,  col:'#2980b9', rw:16, xp:15, arm:0,    dg:0,  lbl:'Pháp Sư',   ranged:true,  rAtk:240, rRate:2.0, targetGate:true, rage:2},
+  demon:   {hp:260, spd:80,  sz:13, col:'#e74c3c', rw:28, xp:25, arm:0.22, dg:18, lbl:'Ác Quỷ',   rage:5},
+  sniper:  {hp:75,  spd:44,  sz:9,  col:'#27ae60', rw:18, xp:18, arm:0,    dg:0,  lbl:'Cung Thủ',  ranged:true,  rAtk:280, rRate:2.8, targetHero:true, rage:2},
+  bomber:  {hp:160, spd:36,  sz:11, col:'#d35400', rw:24, xp:22, arm:0.10, dg:0,  lbl:'Ném Lửa',   ranged:true,  rAtk:220, rRate:3.5, targetBoth:true, splash:55, rage:4},
+  boss:    {hp:1600,spd:34,  sz:26, col:'#c0392b', rw:100,xp:100,arm:0.42, dg:50, lbl:'TRÙM', boss:true, rage:30},
+  miniboss:{hp:700, spd:48,  sz:20, col:'#8e44ad', rw:50, xp:50, arm:0.32, dg:32, lbl:'TINH ANH', boss:true, rage:15},
 };
 
 // ═══════════════════ INIT ═══════════════════
@@ -379,7 +379,6 @@ function update(dt){
       const tgt=nearest(hero.x,hero.y,hero.range);
       if(tgt){
         shootHero(tgt); hero.atkT=hero.atkRate; hero.facing=Math.atan2(tgt.y-hero.y,tgt.x-hero.x);
-        hero.rage=Math.min(hero.rageMax, hero.rage+4);
       }
       else hero.atkT=Math.min(hero.atkT+dt,0);
     }
@@ -750,6 +749,7 @@ function hitEnemy(e,dmg,crit){
   if(e.hp<=0&&!e.dead){
     e.dead=true;
     spawnPs(e.x,e.y,e.d.col,e.d.boss?30:12,e.d.boss?140:90);
+    if(!hero.dead) hero.rage = Math.min(hero.rageMax, hero.rage + (e.d.rage||1));
     souls.push({x:e.x,y:e.y,xp:e.d.xp,life:6,done:false});
     const goldAmt = Math.round(e.d.rw * (1 + (wave-1)*0.08));
     goldDrops.push({ x:e.x, y:e.y, amount:goldAmt, life:10, maxLife:10, bobT:Math.random()*Math.PI*2, picked:false });
