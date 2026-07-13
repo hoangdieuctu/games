@@ -51,26 +51,45 @@ canvas{display:block;position:fixed;top:0;left:0;}
 .ov-btn.danger{border-color:#ff5555;color:#ff5555;}
 .ov-btn.danger:hover{background:rgba(255,60,60,.1);box-shadow:0 0 20px rgba(255,60,60,.4);}
 
-/* ── LEVEL UP ── */
+/* ── SHOP ── */
 #gate-shop{
   position:fixed;inset:0;background:rgba(2,4,12,0.97);
-  display:none;flex-direction:column;align-items:center;
-  z-index:50;padding:18px 24px;gap:14px;overflow-y:auto;
+  display:none;flex-direction:column;align-items:stretch;
+  z-index:50;overflow:hidden;
 }
 #gate-shop.on{display:flex;}
-.gs-header{display:flex;align-items:center;gap:20px;flex-wrap:wrap;justify-content:center;}
-.gs-title{font-family:'Cinzel',serif;font-size:20px;font-weight:700;letter-spacing:.18em;color:#38bdf8;}
-.gs-gold{font-size:18px;font-weight:700;color:#ffd700;}
-.gs-grid{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;max-width:880px;}
+.gs-topbar{
+  display:flex;align-items:center;gap:16px;padding:12px 24px;
+  background:rgba(4,8,20,0.98);border-bottom:1px solid #1e3a5a;flex-shrink:0;
+}
+.gs-topbar-title{font-family:'Cinzel',serif;font-size:18px;font-weight:700;letter-spacing:.18em;color:#e8d5b0;}
+.gs-gold{font-size:16px;font-weight:700;color:#ffd700;margin-left:auto;}
+.gs-columns{display:flex;flex:1;overflow:hidden;}
+.gs-col{
+  flex:1;display:flex;flex-direction:column;overflow:hidden;
+  border-right:1px solid #1a2a3a;
+}
+.gs-col:last-child{border-right:none;}
+.gs-col-header{
+  padding:10px 18px;background:rgba(4,10,28,0.95);border-bottom:1px solid #1e3a5a;
+  flex-shrink:0;display:flex;align-items:center;gap:10px;
+}
+.gs-col-title{font-family:'Cinzel',serif;font-size:15px;font-weight:700;letter-spacing:.14em;}
+.gs-col-title.gate{color:#38bdf8;}
+.gs-col-title.hero{color:#c084fc;}
+.gs-col-body{flex:1;overflow-y:auto;padding:14px 12px;display:flex;flex-wrap:wrap;gap:10px;align-content:flex-start;}
 .gs-item{
   background:rgba(4,10,28,.98);border:1px solid #1e3a5a;border-radius:8px;
-  padding:14px 12px;width:160px;cursor:pointer;text-align:center;
-  transition:border-color .15s,transform .12s,box-shadow .15s;position:relative;
+  padding:12px 10px;width:148px;cursor:pointer;text-align:center;
+  transition:border-color .15s,transform .12s,box-shadow .15s;position:relative;flex-shrink:0;
 }
+.gs-col.hero .gs-item{border-color:#2a1a4a;}
+.gs-col.hero .gs-item:hover:not(.gs-maxed){border-color:#c084fc;transform:translateY(-3px);box-shadow:0 8px 28px rgba(192,132,252,.25);}
 .gs-item:hover:not(.gs-maxed){border-color:#38bdf8;transform:translateY(-3px);box-shadow:0 8px 28px rgba(56,189,248,.25);}
 .gs-item.gs-maxed{border-color:#2a5a2a;opacity:.6;cursor:not-allowed;}
-.gs-ic{font-size:26px;margin-bottom:6px;}
+.gs-ic{font-size:24px;margin-bottom:5px;}
 .gs-nm{font-size:11px;font-weight:700;color:#38bdf8;margin-bottom:4px;line-height:1.3;}
+.gs-col.hero .gs-nm{color:#c084fc;}
 .gs-ds{font-size:10px;color:#7a9ab0;line-height:1.5;margin-bottom:6px;min-height:28px;}
 .gs-cost{font-size:13px;font-weight:700;color:#ffd700;}
 .gs-lv{position:absolute;top:5px;right:6px;font-size:10px;color:#4a7090;font-weight:700;}
@@ -140,12 +159,27 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 </div>
 
 <div id="gate-shop">
-  <div class="gs-header">
-    <div class="gs-title">⚔️ NÂNG CẤP CỬA THIÊNG</div>
+  <div class="gs-topbar">
+    <div class="gs-topbar-title">⚔️ NÂNG CẤP</div>
     <div class="gs-gold" id="gs-gold">🪙 0</div>
-    <button class="ov-btn" style="margin-top:0;padding:8px 24px;font-size:12px" onclick="toggleGateShop()">ĐÓNG [G]</button>
+    <button class="ov-btn" style="margin-top:0;padding:7px 20px;font-size:12px" onclick="toggleGateShop()">ĐÓNG [G]</button>
   </div>
-  <div class="gs-grid" id="gs-grid"></div>
+  <div class="gs-columns">
+    <div class="gs-col gate">
+      <div class="gs-col-header">
+        <span style="font-size:20px">🏛️</span>
+        <div class="gs-col-title gate">CỬA THIÊNG</div>
+      </div>
+      <div class="gs-col-body" id="gs-grid-gate"></div>
+    </div>
+    <div class="gs-col hero">
+      <div class="gs-col-header">
+        <span style="font-size:20px">🦸</span>
+        <div class="gs-col-title hero">ANH HÙNG</div>
+      </div>
+      <div class="gs-col-body" id="gs-grid-hero"></div>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -649,7 +683,7 @@ function gainXP(xp){
 
 // ═══════════════════ GATE SHOP ═══════════════════
 const GATE_UPGRADES = [
-  // ── Cửa Thiêng ── giá đầu thấp, tăng dần để có thể mua sớm
+  // ── Cửa Thiêng ──
   { id:'g_armor',   icon:'🛡️', name:'Tăng Giáp',       desc:'+120 giáp tối đa',                  maxLv:8, cost: lv => 25+lv*20,  fn: () => { gate.maxArmor+=120; gate.armor=Math.min(gate.armor+120,gate.maxArmor); } },
   { id:'g_regen',   icon:'♻️', name:'Hồi Giáp',        desc:'+4 giáp/giây',                       maxLv:6, cost: lv => 40+lv*28,  fn: () => { gate.armorRegen+=4; } },
   { id:'g_hp',      icon:'❤️', name:'Tăng HP Cửa',     desc:'+180 HP tối đa & hồi 100 HP',         maxLv:6, cost: lv => 30+lv*25,  fn: () => { gate.maxHp+=180; gate.hp=Math.min(gate.hp+100,gate.maxHp); } },
@@ -657,7 +691,9 @@ const GATE_UPGRADES = [
   { id:'g_gunspd',  icon:'⚡', name:'Tốc Bắn Súng',    desc:'+25% tốc độ bắn (tối đa: liên thanh)',maxLv:8, cost: lv => 40+lv*28,  fn: () => { gate.gun.atkRate=Math.max(0.06,gate.gun.atkRate*0.75); } },
   { id:'g_gunrng',  icon:'🔭', name:'Tầm Súng',         desc:'+60 tầm bắn súng',                   maxLv:6, cost: lv => 30+lv*22,  fn: () => { gate.gun.range+=60; } },
   { id:'g_gunlv',   icon:'🔫', name:'Nâng Cấp Súng',   desc:'Lv súng: đa đạn & nổ vùng',          maxLv:4, cost: lv => 80+lv*50,  fn: () => { gate.gun.level=Math.min(5,gate.gun.level+1); } },
-  // ── Vũ Khí Hero ── giá cân với vàng kiếm được sau 3-5 wave
+];
+const HERO_UPGRADES = [
+  // ── Vũ Khí Hero ──
   { id:'h_bow',    icon:'🏹', name:'Mở: Cung Liên',  desc:'3 mũi tên tỏa rộng',           maxLv:1, cost: () => 120, fn: () => { if(hero.weaponLv.bow<1)    unlockWeapon(hero,'bow'); },    isLocked: () => hero.weaponLv.bow>0 },
   { id:'h_cannon', icon:'💣', name:'Mở: Đại Bác',    desc:'AoE nổ · dame cao',             maxLv:1, cost: () => 160, fn: () => { if(hero.weaponLv.cannon<1) unlockWeapon(hero,'cannon'); }, isLocked: () => hero.weaponLv.cannon>0 },
   { id:'h_laser',  icon:'🔴', name:'Mở: Tia Sáng',   desc:'Xuyên tất cả · rất nhanh',      maxLv:1, cost: () => 190, fn: () => { if(hero.weaponLv.laser<1)  unlockWeapon(hero,'laser'); },  isLocked: () => hero.weaponLv.laser>0 },
@@ -690,9 +726,14 @@ function toggleGateShop(){
 
 function renderGateShop(){
   document.getElementById('gs-gold').textContent = '🪙 ' + gate.gold;
-  const grid = document.getElementById('gs-grid');
+  renderShopGrid('gs-grid-gate', GATE_UPGRADES);
+  renderShopGrid('gs-grid-hero', HERO_UPGRADES);
+}
+
+function renderShopGrid(gridId, upgrades){
+  const grid = document.getElementById(gridId);
   grid.innerHTML = '';
-  for(const up of GATE_UPGRADES){
+  for(const up of upgrades){
     const lv = (gate.upgrades && gate.upgrades[up.id]) || 0;
     const locked = up.isLocked ? up.isLocked() : false;
     const maxed = lv >= up.maxLv;
