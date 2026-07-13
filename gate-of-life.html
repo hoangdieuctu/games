@@ -87,6 +87,9 @@ canvas{display:block;position:fixed;top:0;left:0;}
 .gs-col.hero .gs-item:hover:not(.gs-maxed){border-color:#c084fc;transform:translateY(-3px);box-shadow:0 8px 28px rgba(192,132,252,.25);}
 .gs-item:hover:not(.gs-maxed){border-color:#38bdf8;transform:translateY(-3px);box-shadow:0 8px 28px rgba(56,189,248,.25);}
 .gs-item.gs-maxed{border-color:#2a5a2a;opacity:.6;cursor:not-allowed;}
+.gs-item.gs-cant-afford{opacity:.35;cursor:not-allowed;}
+.gs-item.gs-cant-afford:hover{transform:none;box-shadow:none;border-color:#1e3a5a;}
+.gs-col.hero .gs-item.gs-cant-afford:hover{border-color:#2a1a4a;}
 .gs-ic{font-size:24px;margin-bottom:5px;}
 .gs-nm{font-size:11px;font-weight:700;color:#38bdf8;margin-bottom:4px;line-height:1.3;}
 .gs-col.hero .gs-nm{color:#c084fc;}
@@ -207,7 +210,11 @@ document.addEventListener('keydown', e => {
   if (e.code === 'KeyW' || e.code === 'KeyA' || e.code === 'KeyS' || e.code === 'KeyD') e.preventDefault();
   if (e.code === 'Tab')   { e.preventDefault(); cycleWeapon(); }
   if (e.code === 'KeyG')  { e.preventDefault(); toggleGateShop(); }
-  if (e.code === 'KeyP' || e.code === 'Escape') { e.preventDefault(); togglePause(); }
+  if (e.code === 'KeyP' || e.code === 'Escape') {
+    e.preventDefault();
+    if (gateShopOpen) toggleGateShop();
+    else togglePause();
+  }
 });
 document.addEventListener('keyup', e => keys[e.code] = false);
 
@@ -741,7 +748,7 @@ function renderShopGrid(gridId, upgrades){
     const canAfford = gate.gold >= cost;
     const desc = up.getDesc ? up.getDesc() : up.desc;
     const el = document.createElement('div');
-    el.className = 'gs-item' + (locked||maxed ? ' gs-maxed' : '');
+    el.className = 'gs-item' + (locked||maxed ? ' gs-maxed' : !canAfford ? ' gs-cant-afford' : '');
     el.innerHTML =
       (lv>0&&!locked ? `<div class="gs-lv">Lv.${lv}/${up.maxLv}</div>` : '') +
       `<div class="gs-ic">${up.icon}</div>` +
