@@ -258,7 +258,7 @@ const DROP_ITEMS = [
 
 // Drop rate: basic ~10% → khoảng 1 item/wave đầu, boss luôn drop
 // Đủ để cảm giác được thưởng mà không spam
-const DROP_RATE = { basic:0.10, runner:0.08, tank:0.25, mage:0.20, demon:0.30, boss:1.0, miniboss:0.90 };
+const DROP_RATE = { basic:0.10, runner:0.08, tank:0.25, mage:0.20, demon:0.30, sniper:0.18, bomber:0.22, boss:1.0, miniboss:0.90 };
 
 
 
@@ -269,8 +269,10 @@ const EDEFS = {
   basic:   {hp:100, spd:65,  sz:10, col:'#c0392b', rw:12, xp:8,  arm:0,    dg:10, lbl:'Binh Sĩ'},
   runner:  {hp:55,  spd:155, sz:8,  col:'#e67e22', rw:9,  xp:6,  arm:0,    dg:7,  lbl:'Kỵ Binh'},
   tank:    {hp:380, spd:38,  sz:15, col:'#8e44ad', rw:22, xp:20, arm:0.38, dg:22, lbl:'Chiến Binh'},
-  mage:    {hp:90,  spd:52,  sz:9,  col:'#2980b9', rw:16, xp:15, arm:0,    dg:0,  lbl:'Pháp Sư', ranged:true, rAtk:240, rRate:2.0},
+  mage:    {hp:90,  spd:52,  sz:9,  col:'#2980b9', rw:16, xp:15, arm:0,    dg:0,  lbl:'Pháp Sư',   ranged:true,  rAtk:240, rRate:2.0, targetGate:true},
   demon:   {hp:260, spd:80,  sz:13, col:'#e74c3c', rw:28, xp:25, arm:0.22, dg:18, lbl:'Ác Quỷ'},
+  sniper:  {hp:75,  spd:44,  sz:9,  col:'#27ae60', rw:18, xp:18, arm:0,    dg:0,  lbl:'Cung Thủ',  ranged:true,  rAtk:280, rRate:2.8, targetHero:true},
+  bomber:  {hp:160, spd:36,  sz:11, col:'#d35400', rw:24, xp:22, arm:0.10, dg:0,  lbl:'Ném Lửa',   ranged:true,  rAtk:220, rRate:3.5, targetBoth:true, splash:55},
   boss:    {hp:1600,spd:34,  sz:26, col:'#c0392b', rw:100,xp:100,arm:0.42, dg:50, lbl:'TRÙM', boss:true},
   miniboss:{hp:700, spd:48,  sz:20, col:'#8e44ad', rw:50, xp:50, arm:0.32, dg:32, lbl:'TINH ANH', boss:true},
 };
@@ -323,8 +325,9 @@ function pickType(n){
   if(n<=3) return 'basic';
   if(n<=6) return r<.5?'basic':'runner';
   if(n<=10) return r<.35?'basic':r<.65?'runner':'tank';
-  if(n<=17){if(r<.25)return 'basic';if(r<.45)return 'runner';if(r<.65)return 'tank';if(r<.8)return 'mage';return 'demon';}
-  if(r<.15)return 'basic';if(r<.3)return 'runner';if(r<.5)return 'tank';if(r<.68)return 'mage';return 'demon';
+  if(n<=14){if(r<.25)return 'basic';if(r<.45)return 'runner';if(r<.60)return 'tank';if(r<.75)return 'mage';if(r<.88)return 'sniper';return 'demon';}
+  if(n<=20){if(r<.15)return 'basic';if(r<.30)return 'runner';if(r<.45)return 'tank';if(r<.58)return 'mage';if(r<.70)return 'sniper';if(r<.82)return 'bomber';return 'demon';}
+  if(r<.10)return 'basic';if(r<.22)return 'runner';if(r<.36)return 'tank';if(r<.48)return 'mage';if(r<.60)return 'sniper';if(r<.74)return 'bomber';return 'demon';
 }
 
 function spawnEnemy(type){
@@ -386,9 +389,29 @@ function update(dt){
     if(e.slowT>0){ e.slowT-=dt; } else e.frozen=false;
     const spd=e.slowT>0?e.spd*0.35:e.spd;
     if(e.d.ranged){
-      const dx=gate.x-e.x, dy=gate.y-e.y, d=Math.sqrt(dx*dx+dy*dy);
+      // determine primary target position
+      let tx, ty;
+      if(e.d.targetHero && !hero.dead){
+        tx=hero.x; ty=hero.y;
+      } else if(e.d.targetBoth){
+        // alternate: attack hero if close enough, else gate
+        const hd=hero.dead?Infinity:Math.sqrt((hero.x-e.x)**2+(hero.y-e.y)**2);
+        if(!hero.dead && hd < e.d.rAtk*1.2){ tx=hero.x; ty=hero.y; e._tgt='hero'; }
+        else { tx=gate.x; ty=gate.y; e._tgt='gate'; }
+      } else {
+        tx=gate.x; ty=gate.y;
+      }
+      const dx=tx-e.x, dy=ty-e.y, d=Math.sqrt(dx*dx+dy*dy);
       if(d>e.d.rAtk){ e.x+=dx/d*spd*dt; e.y+=dy/d*spd*dt; }
-      else{ e.atkT-=dt; if(e.atkT<=0){ shootMage(e); e.atkT=e.d.rRate; } }
+      else{
+        e.atkT-=dt;
+        if(e.atkT<=0){
+          if(e.d.targetHero && !hero.dead) shootAtHero(e);
+          else if(e.d.targetBoth) shootBomber(e, e._tgt==='hero' && !hero.dead);
+          else shootMage(e);
+          e.atkT=e.d.rRate;
+        }
+      }
     } else {
       const dx=gate.x-e.x, dy=gate.y-e.y, d=Math.sqrt(dx*dx+dy*dy);
       if(d < e.sz+gate.w*0.5){
@@ -487,16 +510,44 @@ function update(dt){
         }
       }
     } else {
-      const dx=gate.x-p.x, dy=gate.y-p.y;
-      if(Math.sqrt(dx*dx+dy*dy)<gate.w*0.5){
-        p.hit=true;
-        if(gate.armor>0){
-          const abs=Math.min(gate.armor,p.dmg); gate.armor=Math.max(0,gate.armor-abs);
-          const ov=p.dmg-abs; if(ov>0) gate.hp=Math.max(0,gate.hp-ov);
-        } else { gate.hp=Math.max(0,gate.hp-p.dmg); }
-        gate.hitFlash=0.3; screenShake=3;
-        spawnPs(gate.x,gate.y,'#8888ff',8,60);
-        if(gate.hp<=0) triggerLoss();
+      // enemy projectiles — can target hero or gate
+      if(p.targetHero || p.isBomb){
+        // check hero hit
+        if(!hero.dead){
+          const dx=hero.x-p.x, dy=hero.y-p.y;
+          if(Math.sqrt(dx*dx+dy*dy) < hero.r+( p.sz||5)){
+            p.hit=true;
+            if(p.isBomb && p.splash){ spawnPs(hero.x,hero.y,'#e67e22',16,100); screenShake=4; }
+            else spawnPs(hero.x,hero.y,'#27ae60',6,50);
+            hero.hp=Math.max(0, hero.hp-p.dmg);
+            hero.hitFlash=0.2;
+            if(hero.hp<=0){ hero.dead=true; spawnPs(hero.x,hero.y,'#ffd700',20,120); }
+          }
+        }
+        // bomb also damages gate on contact
+        if(!p.hit && p.isBomb){
+          const dx=gate.x-p.x, dy=gate.y-p.y;
+          if(Math.sqrt(dx*dx+dy*dy)<gate.w*0.5){
+            p.hit=true;
+            if(gate.armor>0){ const abs=Math.min(gate.armor,p.dmg); gate.armor=Math.max(0,gate.armor-abs); const ov=p.dmg-abs; if(ov>0) gate.hp=Math.max(0,gate.hp-ov); }
+            else gate.hp=Math.max(0,gate.hp-p.dmg);
+            gate.hitFlash=0.3; screenShake=4;
+            spawnPs(gate.x,gate.y,'#e67e22',14,80);
+            if(gate.hp<=0) triggerLoss();
+          }
+        }
+      } else {
+        const dx=gate.x-p.x, dy=gate.y-p.y;
+        if(Math.sqrt(dx*dx+dy*dy)<gate.w*0.5){
+          p.hit=true;
+          if(gate.armor>0){
+            const abs=Math.min(gate.armor,p.dmg); gate.armor=Math.max(0,gate.armor-abs);
+            const ov=p.dmg-abs; if(ov>0) gate.hp=Math.max(0,gate.hp-ov);
+          } else { gate.hp=Math.max(0,gate.hp-p.dmg); }
+          gate.hitFlash=0.3; screenShake=3;
+          spawnPs(gate.x,gate.y,'#8888ff',8,60);
+          if(gate.hp<=0) triggerLoss();
+        }
       }
     }
   }
@@ -645,7 +696,21 @@ function shootChain(x,y,t,dmg,chains){
 }
 function shootMage(e){
   const dx=gate.x-e.x, dy=gate.y-e.y, d=Math.sqrt(dx*dx+dy*dy)||1;
-  projectiles.push({x:e.x,y:e.y,vx:dx/d*160,vy:dy/d*160,dmg:14+wave*0.8,hero:false,hit:false,life:4,color:'#2980b9'});
+  projectiles.push({x:e.x,y:e.y,vx:dx/d*160,vy:dy/d*160,dmg:14+wave*0.8,hero:false,hit:false,life:4,color:'#2980b9',sz:5});
+}
+function shootAtHero(e){
+  if(hero.dead) return;
+  const dx=hero.x-e.x, dy=hero.y-e.y, d=Math.sqrt(dx*dx+dy*dy)||1;
+  // lead the target slightly
+  const lead=0.4;
+  const ldx=dx/d + (hero.vx||0)*lead, ldy=dy/d + (hero.vy||0)*lead;
+  const ld=Math.sqrt(ldx*ldx+ldy*ldy)||1;
+  projectiles.push({x:e.x,y:e.y,vx:ldx/ld*200,vy:ldy/ld*200,dmg:12+wave*0.6,hero:false,hit:false,life:5,color:'#27ae60',sz:4,targetHero:true});
+}
+function shootBomber(e, aimHero){
+  const tx=aimHero?hero.x:gate.x, ty=aimHero?hero.y:gate.y;
+  const dx=tx-e.x, dy=ty-e.y, d=Math.sqrt(dx*dx+dy*dy)||1;
+  projectiles.push({x:e.x,y:e.y,vx:dx/d*130,vy:dy/d*130,dmg:18+wave*0.9,hero:false,hit:false,life:5,color:'#e67e22',sz:7,splash:e.d.splash,isBomb:true});
 }
 function shootGate(t){
   const g=gate.gun;
@@ -1297,6 +1362,36 @@ function drawEnemies(){
       ctx.beginPath(); ctx.arc(0,0,sz*.35,0,Math.PI*2);
       ctx.fillStyle=fl?'#ffd700':'#ffffff88'; ctx.fill();
 
+    } else if(e.type==='sniper'){
+      // sniper: cloaked triangle + scope lens
+      const bg=ctx.createRadialGradient(0,0,0,0,0,sz*2.2);
+      bg.addColorStop(0,d.col+'44'); bg.addColorStop(1,'transparent');
+      ctx.fillStyle=bg; ctx.beginPath(); ctx.arc(0,0,sz*2.2,0,Math.PI*2); ctx.fill();
+      // body (inverted triangle — wide top)
+      ctx.beginPath(); ctx.moveTo(-sz,sz*.5); ctx.lineTo(sz,sz*.5); ctx.lineTo(0,-sz); ctx.closePath();
+      ctx.fillStyle=fl?'#fff':d.col; ctx.fill();
+      ctx.strokeStyle=fl?'#fff':'#2ecc71'; ctx.lineWidth=1.5; ctx.stroke();
+      // scope — small circle on top
+      ctx.beginPath(); ctx.arc(0,-sz*.55,sz*.32,0,Math.PI*2);
+      ctx.fillStyle=fl?'#ffd700':'#001a00'; ctx.fill();
+      ctx.strokeStyle=fl?'#fff':'#2ecc71'; ctx.lineWidth=1; ctx.stroke();
+      // crosshair
+      ctx.strokeStyle=fl?'#000':'#2ecc71'; ctx.lineWidth=0.8;
+      ctx.beginPath(); ctx.moveTo(-sz*.25,-sz*.55); ctx.lineTo(sz*.25,-sz*.55); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0,-sz*.8); ctx.lineTo(0,-sz*.3); ctx.stroke();
+
+    } else if(e.type==='bomber'){
+      // bomber: round with flame glow
+      const bg=ctx.createRadialGradient(0,0,0,0,0,sz*2.8);
+      bg.addColorStop(0,d.col+'55'); bg.addColorStop(1,'transparent');
+      ctx.fillStyle=bg; ctx.beginPath(); ctx.arc(0,0,sz*2.8,0,Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(0,0,sz,0,Math.PI*2);
+      ctx.fillStyle=fl?'#fff':d.col; ctx.fill();
+      ctx.strokeStyle=fl?'#fff':'#e74c3c'; ctx.lineWidth=2; ctx.stroke();
+      // flame icon center
+      ctx.font=`bold ${sz*.9}px serif`; ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillStyle=fl?'#000':'#ffd700'; ctx.fillText('🔥',0,sz*.08);
+
     } else if(e.type==='demon'){
       // jagged demon shape
       const bg=ctx.createRadialGradient(0,0,0,0,0,sz*2.5);
@@ -1408,10 +1503,26 @@ function drawProjectiles(){
       ctx.beginPath(); ctx.arc(p.x,p.y,p.sz||4,0,Math.PI*2); ctx.fillStyle=p.color||'#d4a017'; ctx.fill();
       ctx.beginPath(); ctx.arc(p.x,p.y,(p.sz||4)*2,0,Math.PI*2); ctx.fillStyle=(p.color||'#d4a017')+'33'; ctx.fill();
     }
-    // enemy projectile
+    // enemy projectile — draw by type
     if(!p.hero){
-      ctx.beginPath(); ctx.arc(p.x,p.y,5,0,Math.PI*2); ctx.fillStyle='#2980b9'; ctx.fill();
-      ctx.beginPath(); ctx.arc(p.x,p.y,9,0,Math.PI*2); ctx.fillStyle='#2980b933'; ctx.fill();
+      if(p.targetHero){
+        // sniper arrow: green sharp needle
+        const ang=Math.atan2(p.vy,p.vx);
+        ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(ang);
+        ctx.beginPath(); ctx.moveTo(10,0); ctx.lineTo(-5,-2.5); ctx.lineTo(-5,2.5); ctx.closePath();
+        ctx.fillStyle='#27ae60'; ctx.fill();
+        ctx.restore();
+        ctx.beginPath(); ctx.arc(p.x,p.y,7,0,Math.PI*2); ctx.fillStyle='rgba(39,174,96,0.2)'; ctx.fill();
+      } else if(p.isBomb){
+        // bomber fireball: orange + inner core
+        ctx.beginPath(); ctx.arc(p.x,p.y,p.sz,0,Math.PI*2); ctx.fillStyle='#e67e22'; ctx.fill();
+        ctx.beginPath(); ctx.arc(p.x,p.y,p.sz*.5,0,Math.PI*2); ctx.fillStyle='#ffd700'; ctx.fill();
+        ctx.beginPath(); ctx.arc(p.x,p.y,p.sz*2.2,0,Math.PI*2); ctx.fillStyle='rgba(230,126,34,0.2)'; ctx.fill();
+      } else {
+        // mage: blue orb
+        ctx.beginPath(); ctx.arc(p.x,p.y,5,0,Math.PI*2); ctx.fillStyle='#2980b9'; ctx.fill();
+        ctx.beginPath(); ctx.arc(p.x,p.y,9,0,Math.PI*2); ctx.fillStyle='#2980b933'; ctx.fill();
+      }
     }
   }
 }
