@@ -184,7 +184,7 @@ canvas.addEventListener('mousemove', e => {
 canvas.addEventListener('mouseleave', () => { mouseDest = null; });
 
 // ═══════════════════ STATE ═══════════════════
-let hero, gate, enemies, projectiles, particles, souls, itemDrops;
+let hero, gate, enemies, projectiles, particles, souls, itemDrops, goldDrops;
 let wave, waveActive, spawnQ, spawnT, waveRestT, autoWaveT;
 let gameRunning = false, gameOver = false, gameWon = false, gamePaused = false;
 let screenShake = 0, lastT = 0;
@@ -259,7 +259,7 @@ function initGame() {
     gun:{ dmg:28, range:300, atkRate:1.0, atkT:0, level:1 },
     gold:0, upgrades:{},
   };
-  enemies=[]; projectiles=[]; particles=[]; souls=[]; itemDrops=[];
+  enemies=[]; projectiles=[]; particles=[]; souls=[]; itemDrops=[]; goldDrops=[];
   wave=0; waveActive=false; spawnQ=[]; spawnT=0;
   waveRestT=0; autoWaveT=0;
   gameOver=false; gameWon=false; screenShake=0;
@@ -502,6 +502,7 @@ function update(dt){
   if(!waveActive && waveRestT>0 && wave>0 && wave<TOTAL_WAVES){ waveRestT-=dt; if(waveRestT<=0){waveRestT=0;nextWave();} }
 
   updateItemDrops(dt);
+  updateGoldDrops(dt);
   for(const pt of pickupTexts){ pt.y-=28*dt; pt.life-=dt; }
   pickupTexts = pickupTexts.filter(pt=>pt.life>0);
 }
@@ -635,7 +636,8 @@ function hitEnemy(e,dmg,crit){
     e.dead=true;
     spawnPs(e.x,e.y,e.d.col,e.d.boss?30:12,e.d.boss?140:90);
     souls.push({x:e.x,y:e.y,xp:e.d.xp,life:6,done:false});
-    gate.gold += Math.round(e.d.rw * (1 + (wave-1)*0.08));
+    const goldAmt = Math.round(e.d.rw * (1 + (wave-1)*0.08));
+    goldDrops.push({ x:e.x, y:e.y, amount:goldAmt, life:10, maxLife:10, bobT:Math.random()*Math.PI*2, picked:false });
     tryDropItem(e);
     if(e.d.boss) screenShake=15;
   }
@@ -767,6 +769,24 @@ function updateItemDrops(dt){
 
 function showPickupText(it, x, y){
   pickupTexts.push({ text:it.name, x, y, life:1.8, maxLife:1.8, color:it.color });
+}
+
+function updateGoldDrops(dt){
+  if(!hero||hero.dead) return;
+  for(const d of goldDrops){
+    if(d.picked) continue;
+    d.life -= dt;
+    d.bobT += dt*2.2;
+    if(d.life <= 0){ d.picked=true; continue; }
+    const dx=hero.x-d.x, dy=hero.y-d.y;
+    if(Math.sqrt(dx*dx+dy*dy) < 28){
+      gate.gold += d.amount;
+      spawnPs(d.x, d.y, '#ffd700', 10, 70);
+      pickupTexts.push({ text:'🪙 +'+d.amount, x:d.x, y:d.y, life:1.5, maxLife:1.5, color:'#ffd700' });
+      d.picked=true;
+    }
+  }
+  goldDrops = goldDrops.filter(d=>!d.picked);
 }
 
 // ── weapon helpers ────────────────────────────────────────────
@@ -904,6 +924,7 @@ function draw(){
   drawRange();
   drawEnemies();
   drawProjectiles();
+  drawGoldDrops();
   drawItemDrops();
   drawHero();
   drawParticles();
@@ -1382,6 +1403,33 @@ function drawParticles(){
   ctx.globalAlpha=1;
 }
 
+function drawGoldDrops(){
+  for(const d of goldDrops){
+    if(d.picked) continue;
+    const fadeRatio = d.life < 2 ? d.life/2 : 1;
+    const bob = Math.sin(d.bobT)*4;
+    const py = d.y + bob;
+    // glow
+    const gg = ctx.createRadialGradient(d.x,py,0,d.x,py,20);
+    gg.addColorStop(0,'rgba(255,215,0,0.5)'); gg.addColorStop(1,'transparent');
+    ctx.globalAlpha = fadeRatio;
+    ctx.fillStyle=gg; ctx.beginPath(); ctx.arc(d.x,py,20,0,Math.PI*2); ctx.fill();
+    // coin circle
+    ctx.beginPath(); ctx.arc(d.x,py,11,0,Math.PI*2);
+    ctx.fillStyle='rgba(4,1,1,0.85)'; ctx.fill();
+    ctx.strokeStyle='#ffd700'; ctx.lineWidth=1.5; ctx.stroke();
+    // coin icon
+    ctx.font='12px serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText('🪙', d.x, py);
+    // amount label
+    ctx.font='bold 9px "Share Tech Mono"';
+    ctx.fillStyle='#ffd700';
+    ctx.fillText('+'+d.amount, d.x, py+18);
+    ctx.globalAlpha=1;
+  }
+  ctx.globalAlpha=1;
+}
+
 function drawItemDrops(){
   for(const d of itemDrops){
     if(d.picked) continue;
@@ -1554,6 +1602,7 @@ function startGame(){
   document.getElementById('ov-btn').className='ov-btn';
   initGame(); lastT=0; gameRunning=true; gamePaused=false; mouseDest=null;
   pickupTexts=[];
+  goldDrops=[];
   syncWeaponStats();
 }
 
