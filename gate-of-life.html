@@ -328,17 +328,15 @@ function pickType(n){
 }
 
 function spawnEnemy(type){
-// Scale 4%/wave: wave10 = ×1.36, wave20 = ×1.76, wave30 = ×2.16
-// Vừa đủ tăng áp lực, không vô lý với build đã đầu tư
-  const d=EDEFS[type], sc=1+(wave-1)*0.04, mg=30;
+  const d=EDEFS[type], hpSc=Math.pow(1.10,wave-1), dgSc=1+(wave-1)*0.04, mg=30;
   const edge=Math.floor(Math.random()*4);
   let x,y;
   if(edge===0){x=Math.random()*W;y=-mg;}
   else if(edge===1){x=W+mg;y=HUD_T+Math.random()*(H-HUD_T);}
   else if(edge===2){x=-mg;y=HUD_T+Math.random()*(H-HUD_T);}
   else{x=Math.random()*W;y=-mg-20;}
-  enemies.push({type,d,x,y,hp:d.hp*sc,maxHp:d.hp*sc,spd:d.spd,sz:d.sz,
-    dead:false,reached:false,hitFlash:0,atkT:d.ranged?d.rRate:0,slowT:0,frozen:false,dg:d.dg*sc});
+  enemies.push({type,d,x,y,hp:d.hp*hpSc,maxHp:d.hp*hpSc,spd:d.spd,sz:d.sz,
+    dead:false,reached:false,hitFlash:0,atkT:d.ranged?d.rRate:0,slowT:0,frozen:false,dg:d.dg*dgSc});
 }
 
 // ═══════════════════ UPDATE ═══════════════════
