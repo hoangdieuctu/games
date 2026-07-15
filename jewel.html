@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Jewel Pop</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23a55eea'/%3E%3Ctext x='16' y='23' text-anchor='middle' font-size='20'%3E💎%3C/text%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Cinzel:wght@700;900&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  width: 100%; height: 100%;
+  font-family: 'Nunito', sans-serif;
+  overflow: hidden;
+  touch-action: manipulation;
+  user-select: none;
+  position: fixed;
+}
+
+.screen { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.screen.hidden { display: none; }
+
+/* ── NATURE BACKGROUND ── */
+.nature-bg {
+  position: fixed; inset: 0; z-index: 0;
+  background:
+    /* sky */
+    linear-gradient(180deg,
+      #87ceeb 0%, #b0e0f8 35%,
+      #c8f0a0 60%, #6daa30 75%,
+      #3a7a10 85%, #2a5a08 100%);
+}
+.nature-bg::before {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 60% 20% at 20% 70%, rgba(80,140,30,.7) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 25% at 80% 72%, rgba(60,110,20,.8) 0%, transparent 60%),
+    radial-gradient(ellipse 30% 15% at 50% 80%, rgba(100,160,40,.5) 0%, transparent 70%);
+}
+/* clouds */
+.nature-bg::after {
+  content: '';
+  position: absolute; top: 4%; left: 0; right: 0; height: 25%;
+  background:
+    radial-gradient(ellipse 140px 40px at 20% 40%, rgba(255,255,255,.85) 0%, transparent 70%),
+    radial-gradient(ellipse 100px 30px at 22% 30%, rgba(255,255,255,.7) 0%, transparent 70%),
+    radial-gradient(ellipse 160px 45px at 70% 50%, rgba(255,255,255,.8) 0%, transparent 70%),
+    radial-gradient(ellipse 120px 35px at 72% 35%, rgba(255,255,255,.65) 0%, transparent 70%);
+}
+
+/* ── TITLE SCREEN ── */
+#screen-title { gap: 20px; }
+.title-gem { font-size: clamp(80px,18vmin,130px); animation: float 2.5s ease-in-out infinite; position: relative; z-index:1; }
+@keyframes float { 0%,100%{transform:translateY(0) rotate(-4deg);} 50%{transform:translateY(-14px) rotate(4deg);} }
+.title-name {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(38px,9vmin,72px); font-weight: 900;
+  color: #fff;
+  text-shadow: 0 2px 0 #8b4a00, 0 0 20px rgba(255,200,0,.8), 0 0 40px rgba(255,150,0,.4);
+  letter-spacing: .05em;
+  position: relative; z-index:1;
+}
+.title-sub { font-size: clamp(13px,2.5vmin,18px); color: rgba(255,255,255,.85); text-shadow:0 1px 3px rgba(0,0,0,.5); position:relative;z-index:1; }
+.btn-play {
+  font-family:'Cinzel',serif; font-size:clamp(17px,3.5vmin,26px); font-weight:900;
+  background: linear-gradient(180deg, #ffe066 0%, #ff9900 50%, #cc5500 100%);
+  color: #fff; border: none; border-radius: 8px;
+  padding: clamp(14px,2.5vmin,20px) clamp(40px,8vmin,70px);
+  cursor: pointer;
+  box-shadow: 0 5px 0 #7a2e00, 0 8px 20px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.3);
+  transition: transform .12s, box-shadow .12s;
+  text-shadow: 0 1px 3px rgba(0,0,0,.4);
+  position: relative; z-index:1; margin-top:8px;
+  letter-spacing: .06em;
+}
+.btn-play:hover { transform:translateY(-3px); box-shadow: 0 8px 0 #7a2e00, 0 12px 24px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.3); }
+.btn-play:active { transform:translateY(2px); box-shadow: 0 2px 0 #7a2e00, 0 4px 10px rgba(0,0,0,.3), inset 0 1px 0 rgba(255,255,255,.3); }
+
+/* ── GAME SCREEN ── */
+#screen-game {
+  justify-content: flex-start;
+  padding: 0;
+  gap: 0;
+}
+
+/* Top bar — stage + powerups */
+.top-bar {
+  width: 100%; display: flex; align-items: center; justify-content: space-between;
+  padding: clamp(6px,1.5vmin,10px) clamp(8px,2vmin,14px);
+  background: linear-gradient(180deg, rgba(0,0,0,.55) 0%, rgba(0,0,0,.3) 100%);
+  flex-shrink: 0; gap: 10px;
+  border-bottom: 1px solid rgba(255,255,255,.15);
+}
+.top-left { display:flex; align-items:center; gap:8px; }
+.btn-pause {
+  width: clamp(34px,6vmin,44px); height: clamp(34px,6vmin,44px);
+  background: linear-gradient(180deg,#6de06d,#229922);
+  border: 2px solid #1a7a1a; border-radius: 50%;
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer; box-shadow:0 3px 0 #115511;
+  font-size: clamp(14px,2.5vmin,20px);
+  transition: transform .1s;
+  flex-shrink:0;
+}
+.btn-pause:active { transform:scale(.92); }
+.stage-name {
+  font-family:'Cinzel',serif; font-size:clamp(16px,3.5vmin,26px); font-weight:900;
+  color:#ffd700; text-shadow:0 1px 0 #7a4000, 0 0 12px rgba(255,215,0,.6);
+  letter-spacing:.08em;
+}
+.powerup-btns { display:flex; gap:6px; align-items:center; }
+.btn-power {
+  display:flex; flex-direction:column; align-items:center;
+  background: linear-gradient(180deg,#2a1a4a,#1a0a30);
+  border: 2px solid #6040a0; border-radius: 8px;
+  padding: 4px 10px; cursor:pointer;
+  transition: border-color .12s, transform .1s;
+  gap: 1px;
+}
+.btn-power:active { transform: scale(.93); }
+.btn-power.active { border-color: #ffd700; background: linear-gradient(180deg,#4a3000,#2a1800); }
+.pw-icon { font-size: clamp(18px,4vmin,28px); line-height:1; }
+.pw-count { font-size:clamp(9px,1.8vmin,13px); color:#c0a0ff; font-weight:800; white-space:nowrap; }
+.btn-power.active .pw-count { color:#ffd700; }
+
+/* Stats bar — TARGET / SCORE / BEST */
+.stats-bar {
+  width:100%; display:grid; grid-template-columns:1fr 1fr 1fr;
+  background: linear-gradient(180deg, #3a1a00 0%, #5a2e00 50%, #3a1a00 100%);
+  border-top: 2px solid #cc7722; border-bottom: 2px solid #cc7722;
+  flex-shrink:0;
+}
+.stat-col {
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  padding: clamp(4px,1vmin,8px) 4px;
+  border-right: 1px solid rgba(200,120,30,.4);
+}
+.stat-col:last-child { border-right:none; }
+.stat-label {
+  font-size:clamp(9px,1.8vmin,13px); font-weight:900; color:#cc9944;
+  letter-spacing:.1em; text-transform:uppercase;
+}
+.stat-value {
+  font-size:clamp(18px,4vmin,28px); font-weight:900; color:#ffd700;
+  text-shadow: 0 0 10px rgba(255,215,0,.5);
+  line-height:1.1;
+}
+
+/* Grid area */
+.grid-area {
+  flex:1; display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  padding: 4px; gap: 0; width:100%; position:relative;
+  overflow:hidden;
+}
+
+/* Grid background — slightly darker translucent panel */
+.grid-bg {
+  background: rgba(0,0,0,.25);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 4px;
+  padding: 3px;
+  position: relative;
+}
+
+.jewel-grid { display:grid; }
+
+/* Bottom info bar */
+.bottom-bar {
+  width:100%; text-align:center;
+  padding: clamp(4px,1vmin,8px) 8px;
+  background: rgba(0,0,0,.5);
+  border-top: 1px solid rgba(255,255,255,.15);
+  flex-shrink:0;
+  min-height: clamp(28px,5vmin,42px);
+  display:flex; align-items:center; justify-content:center;
+}
+.bottom-hint {
+  font-size: clamp(14px,3vmin,22px); font-weight:900;
+  color:#fff; text-shadow:0 1px 6px rgba(0,0,0,.8);
+}
+
+/* ── JEWEL CELL ── */
+.jewel {
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer; position:relative;
+  transition: transform .1s, filter .1s;
+  border-radius: 4px;
+  overflow: visible;
+}
+.jewel:hover:not(.selected):not(.empty) { transform:scale(1.1); z-index:2; }
+.jewel.selected { z-index:3; filter: drop-shadow(0 0 5px #ffd700) drop-shadow(0 0 10px #ffaa00); }
+.jewel.pop { animation: pop-out .25s ease forwards; pointer-events:none; }
+@keyframes pop-out {
+  0%  { transform:scale(1.15); opacity:1; }
+  50% { transform:scale(1.35); opacity:.7; }
+  100%{ transform:scale(0); opacity:0; }
+}
+.jewel.empty { pointer-events:none; opacity:0; }
+
+/* ── SVG JEWEL SHAPES ── */
+.jewel svg { width:100%; height:100%; overflow:visible; }
+
+/* Score popup */
+.score-pop {
+  position:absolute; pointer-events:none; z-index:30;
+  font-size:clamp(16px,3.5vmin,26px); font-weight:900;
+  color:#ffd700; text-shadow:0 0 10px rgba(255,215,0,.9), 0 2px 4px rgba(0,0,0,.6);
+  animation: score-rise .8s ease forwards;
+  white-space:nowrap;
+}
+@keyframes score-rise {
+  0%   { opacity:1; transform:translateY(0) scale(1); }
+  100% { opacity:0; transform:translateY(-55px) scale(1.25); }
+}
+
+/* ── RESULT SCREEN ── */
+#screen-result { gap:16px; }
+.result-panel {
+  background: linear-gradient(180deg,rgba(40,10,80,.96),rgba(20,5,50,.98));
+  border: 2px solid #8040c0; border-radius:16px;
+  padding: clamp(20px,4vmin,36px) clamp(24px,5vmin,48px);
+  display:flex; flex-direction:column; align-items:center; gap:14px;
+  box-shadow:0 8px 40px rgba(0,0,0,.6);
+  position:relative; z-index:1;
+}
+.result-emoji { font-size:clamp(60px,14vmin,100px); animation:bounce-in .5s cubic-bezier(.34,1.56,.64,1); }
+@keyframes bounce-in { from{transform:scale(0) rotate(-15deg);}to{transform:scale(1);} }
+.result-title { font-family:'Cinzel',serif; font-size:clamp(26px,6vmin,48px); font-weight:900; text-align:center; }
+.result-title.win  { color:#ffd700; text-shadow:0 0 20px rgba(255,215,0,.6); }
+.result-title.lose { color:#ff6b6b; }
+.result-stats { display:flex; flex-direction:column; align-items:center; gap:6px; }
+.result-stat  { font-size:clamp(13px,2.5vmin,18px); color:#c0a0e0; }
+.result-stat strong { color:#ffd700; }
+.result-btns { display:flex; gap:12px; flex-wrap:wrap; justify-content:center; margin-top:4px; }
+.btn-result {
+  font-family:'Cinzel',serif; font-size:clamp(14px,2.8vmin,20px); font-weight:900;
+  border-radius:8px; padding:clamp(10px,1.8vmin,16px) clamp(20px,4vmin,36px);
+  cursor:pointer; transition:transform .12s, box-shadow .12s; border:none;
+  letter-spacing:.04em;
+}
+.btn-result.primary {
+  background:linear-gradient(180deg,#ffe066,#ff9900,#cc5500);
+  color:#fff; box-shadow:0 4px 0 #7a2e00;
+  text-shadow:0 1px 3px rgba(0,0,0,.4);
+}
+.btn-result.secondary {
+  background:linear-gradient(180deg,rgba(80,40,120,.8),rgba(40,15,70,.9));
+  color:#c0a0ff; box-shadow:0 4px 0 rgba(0,0,0,.4);
+  border:1px solid #7040b0;
+}
+.btn-result:hover  { transform:translateY(-3px); }
+.btn-result:active { transform:translateY(1px); }
+
+/* confetti */
+.confetti-wrap { position:fixed; inset:0; pointer-events:none; overflow:hidden; z-index:0; }
+.confetto { position:absolute; width:10px; height:14px; border-radius:2px; top:-20px; animation:fall-conf linear forwards; }
+@keyframes fall-conf { to { transform:translateY(110vh) rotate(720deg); opacity:0; } }
+</style>
+</head>
+<body>
+
+<div class="nature-bg"></div>
+
+<!-- TITLE -->
+<div class="screen" id="screen-title">
+  <div class="title-gem">💎</div>
+  <div class="title-name">JEWEL POP</div>
+  <div class="title-sub">Chọn nhóm đá quý cùng màu để nổ!</div>
+  <button class="btn-play" onclick="startGame()">CHƠI NGAY</button>
+</div>
+
+<!-- GAME -->
+<div class="screen hidden" id="screen-game">
+
+  <!-- Top bar -->
+  <div class="top-bar">
+    <div class="top-left">
+      <button class="btn-pause" onclick="goHome()">⏸</button>
+      <span class="stage-name" id="stage-name">STAGE 1</span>
+    </div>
+    <div class="powerup-btns">
+      <button class="btn-power" id="btn-lightning" onclick="togglePower('lightning')">
+        <span class="pw-icon">⚡</span>
+        <span class="pw-count" id="count-lightning">x3</span>
+      </button>
+      <button class="btn-power" id="btn-bomb" onclick="togglePower('bomb')">
+        <span class="pw-icon">💣</span>
+        <span class="pw-count" id="count-bomb">x8</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Stats bar -->
+  <div class="stats-bar">
+    <div class="stat-col">
+      <span class="stat-label">TARGET</span>
+      <span class="stat-value" id="stat-target">400</span>
+    </div>
+    <div class="stat-col">
+      <span class="stat-label">SCORE</span>
+      <span class="stat-value" id="stat-score">0</span>
+    </div>
+    <div class="stat-col">
+      <span class="stat-label">BEST</span>
+      <span class="stat-value" id="stat-best">0</span>
+    </div>
+  </div>
+
+  <!-- Grid -->
+  <div class="grid-area" id="grid-area">
+    <div class="grid-bg">
+      <div class="jewel-grid" id="jewel-grid"></div>
+    </div>
+  </div>
+
+  <!-- Bottom hint -->
+  <div class="bottom-bar">
+    <div class="bottom-hint" id="bottom-hint">Chọn nhóm đá quý!</div>
+  </div>
+
+</div>
+
+<!-- RESULT -->
+<div class="screen hidden" id="screen-result">
+  <div class="confetti-wrap" id="confetti"></div>
+  <div class="result-panel">
+    <div class="result-emoji" id="result-emoji">🏆</div>
+    <div class="result-title" id="result-title">STAGE CLEAR!</div>
+    <div class="result-stats">
+      <div class="result-stat">Score: <strong id="res-score">0</strong></div>
+      <div class="result-stat">Stage: <strong id="res-level">1</strong></div>
+      <div class="result-stat" id="res-bonus-row" style="display:none">Bonus: <strong id="res-bonus">+0</strong></div>
+    </div>
+    <div class="result-btns">
+      <button class="btn-result primary"   id="btn-next-level" onclick="nextLevelFromResult()">NEXT ▶</button>
+      <button class="btn-result secondary" onclick="startGame()">RETRY</button>
+      <button class="btn-result secondary" onclick="goHome()">HOME</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Jewel SVG definitions ──────────────────────────────────────────────────
+// Each jewel is drawn as an SVG diamond/gem shape with gradient shading
+const JEWEL_DEFS = [
+  { // Blue diamond
+    main:'#4488ff', light:'#aaccff', dark:'#1133aa', shadow:'#001166',
+    shape:'diamond'
+  },
+  { // Pink/Rose — circle to distinguish from red diamond
+    main:'#ff55aa', light:'#ffaadd', dark:'#aa1166', shadow:'#660033',
+    shape:'circle'
+  },
+  { // Green
+    main:'#44cc44', light:'#aaffaa', dark:'#117711', shadow:'#005500',
+    shape:'octagon'
+  },
+  { // Purple
+    main:'#aa44ff', light:'#dd99ff', dark:'#6611bb', shadow:'#330077',
+    shape:'diamond'
+  },
+  { // Red
+    main:'#ff3333', light:'#ff9999', dark:'#aa0000', shadow:'#550000',
+    shape:'diamond'
+  },
+  { // Teal/Cyan
+    main:'#22cccc', light:'#88eeff', dark:'#007777', shadow:'#003333',
+    shape:'octagon'
+  },
+];
+
+function makeJewelSVG(type, size, selected) {
+  const d = JEWEL_DEFS[type];
+  const s = size;
+  const id = `j${type}`;
+
+  if (d.shape === 'diamond') {
+    // Classic diamond gem: kite shape with facets
+    const mx = s/2, top=2, bot=s-2, mid=s*0.38, left=2, right=s-2;
+    return `<svg viewBox="0 0 ${s} ${s}" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="g${id}${selected?'s':''}" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="${d.light}"/>
+          <stop offset="45%" stop-color="${d.main}"/>
+          <stop offset="100%" stop-color="${d.dark}"/>
+        </linearGradient>
+      </defs>
+      <!-- main body -->
+      <polygon points="${mx},${top} ${right},${mid} ${mx},${bot} ${left},${mid}"
+        fill="url(#g${id}${selected?'s':''})"
+        stroke="${selected?'#ffd700':d.dark}" stroke-width="${selected?2.5:1.2}"/>
+      <!-- top-left facet -->
+      <polygon points="${mx},${top} ${right},${mid} ${mx},${mid}"
+        fill="${d.light}" opacity=".35"/>
+      <!-- bottom shadow facet -->
+      <polygon points="${mx},${mid} ${right},${mid} ${mx},${bot}"
+        fill="${d.shadow}" opacity=".25"/>
+      <!-- highlight line -->
+      <line x1="${mx-s*.12}" y1="${mid*.55}" x2="${mx+s*.06}" y2="${mid*.3}"
+        stroke="white" stroke-width="1.2" opacity=".6" stroke-linecap="round"/>
+      ${selected ? `<polygon points="${mx},${top} ${right},${mid} ${mx},${bot} ${left},${mid}"
+        fill="none" stroke="#ffd700" stroke-width="2" opacity=".8"/>` : ''}
+    </svg>`;
+  } else if (d.shape === 'circle') {
+    const cx=s/2, cy=s/2, r=s*.43;
+    return `<svg viewBox="0 0 ${s} ${s}" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="cg${id}${selected?'s':''}" cx="35%" cy="30%" r="70%">
+          <stop offset="0%" stop-color="${d.light}"/>
+          <stop offset="45%" stop-color="${d.main}"/>
+          <stop offset="100%" stop-color="${d.dark}"/>
+        </radialGradient>
+      </defs>
+      <circle cx="${cx}" cy="${cy}" r="${r}"
+        fill="url(#cg${id}${selected?'s':''})"
+        stroke="${selected?'#ffd700':d.dark}" stroke-width="${selected?2.5:1.2}"/>
+      <!-- shine spot -->
+      <circle cx="${cx-r*.28}" cy="${cy-r*.3}" r="${r*.18}" fill="white" opacity=".5"/>
+      <circle cx="${cx-r*.18}" cy="${cy-r*.18}" r="${r*.08}" fill="white" opacity=".7"/>
+      ${selected ? `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#ffd700" stroke-width="2" opacity=".85"/>` : ''}
+    </svg>`;
+  } else {
+    // Octagon gem
+    const cx=s/2, cy=s/2, r=s*.44, r2=s*.28;
+    function oct(rad, rf) {
+      const pts=[];
+      for(let i=0;i<8;i++){const a=Math.PI/4*i-Math.PI/8; pts.push(`${cx+Math.cos(a)*rf},${cy+Math.sin(a)*rf}`);}
+      return pts.join(' ');
+    }
+    const outer = oct(s*.44, s*.44);
+    const inner = oct(s*.28, s*.28);
+    return `<svg viewBox="0 0 ${s} ${s}" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="rg${id}${selected?'s':''}" cx="35%" cy="30%" r="65%">
+          <stop offset="0%" stop-color="${d.light}"/>
+          <stop offset="50%" stop-color="${d.main}"/>
+          <stop offset="100%" stop-color="${d.dark}"/>
+        </radialGradient>
+      </defs>
+      <polygon points="${outer}"
+        fill="url(#rg${id}${selected?'s':''})"
+        stroke="${selected?'#ffd700':d.dark}" stroke-width="${selected?2.5:1.2}"/>
+      <polygon points="${inner}" fill="${d.light}" opacity=".2"/>
+      <circle cx="${cx-s*.1}" cy="${cy-s*.12}" r="${s*.06}" fill="white" opacity=".55"/>
+      ${selected ? `<polygon points="${outer}" fill="none" stroke="#ffd700" stroke-width="2" opacity=".8"/>` : ''}
+    </svg>`;
+  }
+}
+
+// ── Game config ────────────────────────────────────────────────────────────
+const COLS = 10, ROWS = 10;
+
+function levelConfig(lv) {
+  return {
+    target: 400 + (lv - 1) * 400,
+    colors: 6,
+  };
+}
+
+// ── State ──────────────────────────────────────────────────────────────────
+let board = [];
+let score = 0, bestScore = 0;
+let level = 1;
+let selectedGroup = [];
+let activePower = null;
+let bombs = 8, lightnings = 3;
+let locked = false;
+let cellSize = 40;
+
+// ── Audio ──────────────────────────────────────────────────────────────────
+let audioCtx;
+function ac() { if(!audioCtx) audioCtx=new(window.AudioContext||window.webkitAudioContext)(); return audioCtx; }
+function tone(freq,dur,type='sine',vol=0.18){
+  try{const ctx=ac(),o=ctx.createOscillator(),g=ctx.createGain();
+    o.connect(g);g.connect(ctx.destination);o.type=type;o.frequency.value=freq;
+    g.gain.setValueAtTime(vol,ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(.0001,ctx.currentTime+dur);
+    o.start();o.stop(ctx.currentTime+dur);}catch(e){}
+}
+function playSelect()   { tone(700,.06,'sine',.12); }
+function playPop(n)     { [523,659,784].forEach((f,i)=>setTimeout(()=>tone(f,.12,'sine',.18),i*45)); }
+function playBomb()     { tone(100,.3,'sawtooth',.2); setTimeout(()=>tone(250,.2,'sine',.12),120); }
+function playLightning(){ [880,660,440].forEach((f,i)=>setTimeout(()=>tone(f,.1,'square',.13),i*45)); }
+function playWin()      { [523,659,784,1047,1319].forEach((f,i)=>setTimeout(()=>tone(f,.18,'sine',.18),i*70)); }
+function playLose()     { [330,270,200].forEach((f,i)=>setTimeout(()=>tone(f,.22,'sawtooth',.13),i*110)); }
+
+// ── Helpers ────────────────────────────────────────────────────────────────
+function show(id){ document.getElementById(id).classList.remove('hidden'); }
+function hide(id){ document.getElementById(id).classList.add('hidden'); }
+
+function getGroup(r, c) {
+  const target = board[r][c];
+  if (target < 0) return [];
+  const vis = Array.from({length:ROWS},()=>new Array(COLS).fill(false));
+  const grp = [];
+  function dfs(r,c){
+    if(r<0||r>=ROWS||c<0||c>=COLS||vis[r][c]||board[r][c]!==target) return;
+    vis[r][c]=true; grp.push([r,c]);
+    dfs(r-1,c);dfs(r+1,c);dfs(r,c-1);dfs(r,c+1);
+  }
+  dfs(r,c); return grp;
+}
+
+function hasAnyGroup() {
+  for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++)
+    if(board[r][c]>=0 && getGroup(r,c).length>=2) return true;
+  return false;
+}
+
+function countRemaining() {
+  let n=0; for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++) if(board[r][c]>=0) n++;
+  return n;
+}
+
+// ── Build board ────────────────────────────────────────────────────────────
+function buildBoard(colors) {
+  board=[];
+  for(let r=0;r<ROWS;r++){board.push([]);for(let c=0;c<COLS;c++) board[r].push(Math.floor(Math.random()*colors));}
+  for(let attempt=0;attempt<30&&!hasAnyGroup();attempt++){
+    const r=Math.floor(Math.random()*ROWS), c=Math.floor(Math.random()*(COLS-1));
+    board[r][c+1]=board[r][c];
+  }
+}
+
+// ── Render ─────────────────────────────────────────────────────────────────
+function calcCellSize() {
+  const area = document.getElementById('grid-area');
+  const aw = area.clientWidth  - 14;
+  const ah = area.clientHeight - 14;
+  const gap = 3;
+  const maxW = Math.floor((aw - (COLS-1)*gap) / COLS);
+  const maxH = Math.floor((ah - (ROWS-1)*gap) / ROWS);
+  return Math.max(22, Math.min(maxW, maxH, 56));
+}
+
+function renderGrid(selSet) {
+  const gridEl = document.getElementById('jewel-grid');
+  gridEl.innerHTML = '';
+  cellSize = calcCellSize();
+  const gap = 3;
+
+  gridEl.style.gridTemplateColumns = `repeat(${COLS}, ${cellSize}px)`;
+  gridEl.style.gap = `${gap}px`;
+
+  for(let r=0;r<ROWS;r++) {
+    for(let c=0;c<COLS;c++) {
+      const el = document.createElement('div');
+      el.className = 'jewel';
+      el.style.width = cellSize+'px'; el.style.height = cellSize+'px';
+      el.dataset.r=r; el.dataset.c=c;
+      const j = board[r][c];
+      if(j>=0) {
+        const isSel = selSet && selSet.has(r*100+c);
+        el.innerHTML = makeJewelSVG(j, cellSize, isSel);
+        if(isSel) el.classList.add('selected');
+        el.addEventListener('click', ()=>onCellClick(r,c));
+      } else {
+        el.classList.add('empty');
+      }
+      gridEl.appendChild(el);
+    }
+  }
+}
+
+function cellEl(r,c){ return document.getElementById('jewel-grid').children[r*COLS+c]; }
+
+function updateStats() {
+  const cfg = levelConfig(level);
+  document.getElementById('stage-name').textContent  = `STAGE ${level}`;
+  document.getElementById('stat-target').textContent = cfg.target.toLocaleString();
+  document.getElementById('stat-score').textContent  = score.toLocaleString();
+  document.getElementById('stat-best').textContent   = bestScore.toLocaleString();
+  document.getElementById('count-bomb').textContent  = `x${bombs}`;
+  document.getElementById('count-lightning').textContent = `x${lightnings}`;
+}
+
+// ── Click handler ──────────────────────────────────────────────────────────
+function onCellClick(r, c) {
+  if(locked) return;
+
+  if(activePower==='bomb')      { useBomb(r,c); return; }
+  if(activePower==='lightning') { useLightning(r,c); return; }
+  if(board[r][c]<0) return;
+
+  const group = getGroup(r,c);
+  if(group.length < 2) {
+    clearSel();
+    setHint('Cần chọn nhóm 2+ viên cùng màu!');
+    return;
+  }
+
+  const selKey = r*100+c;
+  const alreadySel = selectedGroup.length>0 &&
+    selectedGroup.some(([sr,sc])=>sr===r&&sc===c) &&
+    selectedGroup.length===group.length;
+
+  if(alreadySel) { popGroup(group); return; }
+
+  clearSel();
+  selectedGroup = group;
+  const selSet = new Set(group.map(([gr,gc])=>gr*100+gc));
+  renderGrid(selSet);
+  playSelect();
+  setHint(`${group.length} Jewels: +${group.length * group.length * 2}`);
+}
+
+function clearSel() {
+  selectedGroup=[];
+  renderGrid(null);
+  setHint('Chọn nhóm đá quý!');
+  updateStats();
+}
+
+function setHint(txt) {
+  document.getElementById('bottom-hint').textContent = txt;
+}
+
+// ── Pop group ──────────────────────────────────────────────────────────────
+function popGroup(group) {
+  locked=true;
+  const pts = group.length * group.length * 2;
+  score += pts;
+  if(score > bestScore) bestScore = score;
+
+  group.forEach(([r,c])=>{ cellEl(r,c).classList.add('pop'); board[r][c]=-1; });
+  playPop(group.length);
+  selectedGroup=[];
+  showScorePop(group, group.length, group.length * group.length * 2);
+
+  setTimeout(()=>{
+    applyGravity();
+    setTimeout(()=>{ updateStats(); locked=false; checkEnd(); },220);
+  }, 270);
+}
+
+function showScorePop(group, n, pts) {
+  const area = document.getElementById('grid-area');
+  const gridEl = document.getElementById('jewel-grid');
+  const aRect = area.getBoundingClientRect();
+  const gRect = gridEl.getBoundingClientRect();
+  const avgR = group.reduce((s,[r])=>s+r,0)/group.length;
+  const avgC = group.reduce((s,[,c])=>s+c,0)/group.length;
+  const gap=3;
+  const x = gRect.left - aRect.left + avgC*(cellSize+gap) + cellSize/2;
+  const y = gRect.top  - aRect.top  + avgR*(cellSize+gap);
+  const el = document.createElement('div');
+  el.className='score-pop';
+  el.textContent = `${n} Jewels: +${pts}`;
+  el.style.left = x+'px'; el.style.top = y+'px';
+  el.style.transform = 'translateX(-50%)';
+  area.appendChild(el);
+  setTimeout(()=>el.remove(), 900);
+}
+
+// ── Gravity ────────────────────────────────────────────────────────────────
+function applyGravity() {
+  for(let c=0;c<COLS;c++){
+    const col=[];
+    for(let r=0;r<ROWS;r++) if(board[r][c]>=0) col.push(board[r][c]);
+    for(let r=ROWS-1;r>=0;r--) board[r][c] = col.length>0 ? col.pop() : -1;
+  }
+  const nonEmpty=[];
+  for(let c=0;c<COLS;c++) if(board[ROWS-1][c]>=0) nonEmpty.push(c);
+  const nb=Array.from({length:ROWS},()=>new Array(COLS).fill(-1));
+  nonEmpty.forEach((oc,nc)=>{ for(let r=0;r<ROWS;r++) nb[r][nc]=board[r][oc]; });
+  board=nb;
+  renderGrid(null);
+  setHint('Chọn nhóm đá quý!');
+}
+
+// ── Power-ups ──────────────────────────────────────────────────────────────
+function togglePower(type) {
+  activePower = activePower===type ? null : type;
+  clearSel();
+  document.getElementById('btn-bomb').classList.toggle('active', activePower==='bomb');
+  document.getElementById('btn-lightning').classList.toggle('active', activePower==='lightning');
+  if(activePower==='bomb') setHint('💣 Chọn 1 viên để phá hủy!');
+  else if(activePower==='lightning') setHint('⚡ Chọn 1 viên để xóa cả cột!');
+  else setHint('Chọn nhóm đá quý!');
+}
+
+function useBomb(r,c) {
+  if(bombs<=0){ activePower=null; togglePower(null); return; }
+  if(board[r][c]<0) return;
+  bombs--; activePower=null;
+  document.getElementById('btn-bomb').classList.remove('active');
+  locked=true;
+  // Destroy exactly 1 jewel
+  const pts = 5;
+  score+=pts; if(score>bestScore) bestScore=score;
+  cellEl(r,c).classList.add('pop'); board[r][c]=-1;
+  playBomb();
+  showScorePop([[r,c]], 1, pts);
+  setTimeout(()=>{ applyGravity(); setTimeout(()=>{ updateStats();locked=false;checkEnd();},220);},320);
+}
+
+function useLightning(r,c) {
+  if(lightnings<=0||board[r][c]<0){ activePower=null; return; }
+  lightnings--; activePower=null;
+  document.getElementById('btn-lightning').classList.remove('active');
+  locked=true;
+  // Destroy entire vertical column
+  const cells=[];
+  for(let br=0;br<ROWS;br++) if(board[br][c]>=0) cells.push([br,c]);
+  const pts=cells.length*4; score+=pts;
+  if(score>bestScore) bestScore=score;
+  cells.forEach(([br,bc])=>{ cellEl(br,bc).classList.add('pop'); board[br][bc]=-1; });
+  playLightning();
+  if(cells.length) showScorePop(cells,cells.length,pts);
+  setTimeout(()=>{ applyGravity(); setTimeout(()=>{ updateStats();locked=false;checkEnd();},220);},360);
+}
+
+// ── End conditions ─────────────────────────────────────────────────────────
+function checkEnd() {
+  const cfg = levelConfig(level);
+  const remaining = countRemaining();
+
+  // No more moves (stuck) or board fully cleared
+  if(remaining===0 || !hasAnyGroup()) {
+    locked = true;
+
+    const bonus = Math.max(0, 800 - remaining * 8 * 10);
+    score += bonus;
+    if(score > bestScore) bestScore = score;
+    updateStats();
+
+    if(score >= cfg.target) {
+      // Won — flash message then auto next level
+      setHint(`🎉 +${bonus} bonus! Cấp ${level} hoàn thành!`);
+      setTimeout(()=>{ playWin(); launchConfetti(); }, 100);
+      setTimeout(()=>{ autoNextLevel(); }, 2200);
+    } else {
+      // Not enough score — game over
+      setHint(`💔 +${bonus} bonus. Chưa đủ điểm!`);
+      setTimeout(()=>showResult(false, bonus), 1200);
+    }
+    return;
+  }
+}
+
+function autoNextLevel() {
+  level++;
+  activePower=null; selectedGroup=[]; locked=false;
+  document.getElementById('btn-bomb').classList.remove('active');
+  document.getElementById('btn-lightning').classList.remove('active');
+  const cfg=levelConfig(level); buildBoard(cfg.colors);
+  renderGrid(null); updateStats(); setHint('Chọn nhóm đá quý!');
+}
+
+// ── Screens ────────────────────────────────────────────────────────────────
+function startGame() {
+  score=0; level=1; bombs=8; lightnings=3;
+  activePower=null; selectedGroup=[]; locked=false;
+  document.getElementById('btn-bomb').classList.remove('active');
+  document.getElementById('btn-lightning').classList.remove('active');
+  hide('screen-title'); hide('screen-result'); show('screen-game');
+  const cfg=levelConfig(level); buildBoard(cfg.colors);
+  renderGrid(null); updateStats(); setHint('Chọn nhóm đá quý!');
+}
+
+function goHome() { hide('screen-game'); hide('screen-result'); show('screen-title'); }
+
+function nextLevelFromResult() {
+  hide('screen-result');
+  level++; activePower=null; selectedGroup=[]; locked=false;
+  document.getElementById('btn-bomb').classList.remove('active');
+  document.getElementById('btn-lightning').classList.remove('active');
+  const cfg=levelConfig(level); buildBoard(cfg.colors);
+  renderGrid(null); updateStats(); setHint('Chọn nhóm đá quý!');
+  show('screen-game');
+}
+
+function showResult(win, bonus) {
+  hide('screen-game');
+  document.getElementById('result-emoji').textContent = win ? '🏆' : '💔';
+  document.getElementById('result-title').textContent = win ? 'STAGE CLEAR!' : 'GAME OVER';
+  document.getElementById('result-title').className = 'result-title '+(win?'win':'lose');
+  document.getElementById('res-score').textContent = score.toLocaleString();
+  document.getElementById('res-level').textContent = level;
+  const br=document.getElementById('res-bonus-row');
+  if(bonus>0){ br.style.display=''; document.getElementById('res-bonus').textContent='+'+bonus; }
+  else br.style.display='none';
+  document.getElementById('btn-next-level').style.display = 'none'; // win = auto, lose = retry only
+  if(win){ playWin(); launchConfetti(); } else playLose();
+  show('screen-result');
+}
+
+function launchConfetti() {
+  const wrap=document.getElementById('confetti'); wrap.innerHTML='';
+  const cols=['#ff6b6b','#ffd32a','#26de81','#45aaf2','#a55eea','#ff9f43'];
+  for(let i=0;i<60;i++){
+    const c=document.createElement('div'); c.className='confetto';
+    c.style.left=Math.random()*100+'vw';
+    c.style.background=cols[Math.floor(Math.random()*cols.length)];
+    c.style.animationDuration=(.7+Math.random()*1.4)+'s';
+    c.style.animationDelay=(Math.random()*.5)+'s';
+    wrap.appendChild(c);
+  }
+  setTimeout(()=>wrap.innerHTML='',2800);
+}
+
+let resizeTimer;
+window.addEventListener('resize',()=>{
+  clearTimeout(resizeTimer);
+  resizeTimer=setTimeout(()=>{
+    if(!document.getElementById('screen-game').classList.contains('hidden'))
+      renderGrid(selectedGroup.length ? new Set(selectedGroup.map(([r,c])=>r*100+c)) : null);
+  },150);
+});
+</script>
+</body>
+</html>
