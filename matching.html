@@ -28,21 +28,22 @@ html, body {
 /* ══ THEME SCREEN ══ */
 #screen-theme {
   background: linear-gradient(160deg, #e8f0ff 0%, #f5e8ff 100%);
-  gap: 24px; padding: 24px;
+  gap: 16px; padding: 20px 16px;
+  overflow-y: auto; justify-content: flex-start; padding-top: clamp(24px,4vmin,48px);
 }
-.theme-title { font-size: clamp(26px, 5vmin, 48px); font-weight: 900; color: #333; text-align: center; }
-.theme-grid  { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: min(500px, 88vw); }
+.theme-title { font-size: clamp(22px, 4vmin, 36px); font-weight: 900; color: #333; text-align: center; }
+.theme-grid  { display: grid; grid-template-columns: repeat(4, 1fr); gap: clamp(10px,2vmin,18px); width: min(720px,92vw); }
 .theme-btn {
-  background: #fff; border: 4px solid transparent; border-radius: 24px;
-  padding: clamp(20px,4vmin,36px) 12px; cursor: pointer; text-align: center;
-  box-shadow: 0 6px 20px rgba(0,0,0,.08);
+  background: #fff; border: 3px solid transparent; border-radius: 18px;
+  padding: clamp(14px,2.5vmin,24px) 8px; cursor: pointer; text-align: center;
+  box-shadow: 0 4px 16px rgba(0,0,0,.08);
   transition: transform .14s, box-shadow .14s, border-color .14s;
-  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
 }
-.theme-btn:hover { transform: translateY(-4px) scale(1.04); box-shadow: 0 12px 32px rgba(0,0,0,.14); border-color: var(--c); }
+.theme-btn:hover { transform: translateY(-4px) scale(1.04); box-shadow: 0 10px 28px rgba(0,0,0,.14); border-color: var(--c); }
 .theme-btn:active { transform: scale(.97); }
-.theme-icon { font-size: clamp(48px, 10vmin, 80px); line-height: 1; }
-.theme-name { font-size: clamp(16px, 3vmin, 24px); font-weight: 800; color: #444; }
+.theme-icon { font-size: clamp(32px, 7vmin, 52px); line-height: 1; }
+.theme-name { font-size: clamp(11px, 2.2vmin, 15px); font-weight: 800; color: #444; }
 
 /* ══ GAME SCREEN ══ */
 #screen-game {
@@ -176,6 +177,38 @@ html, body {
       <span class="theme-icon">🔴</span>
       <span class="theme-name">Màu & Hình</span>
     </button>
+    <button class="theme-btn" style="--c:#45aaf2" onclick="startGame('vehicles')">
+      <span class="theme-icon">🚗</span>
+      <span class="theme-name">Phương Tiện</span>
+    </button>
+    <button class="theme-btn" style="--c:#fc5c65" onclick="startGame('food')">
+      <span class="theme-icon">🍕</span>
+      <span class="theme-name">Đồ Ăn</span>
+    </button>
+    <button class="theme-btn" style="--c:#26de81" onclick="startGame('sports')">
+      <span class="theme-icon">⚽</span>
+      <span class="theme-name">Thể Thao</span>
+    </button>
+    <button class="theme-btn" style="--c:#ffd32a" onclick="startGame('faces')">
+      <span class="theme-icon">😀</span>
+      <span class="theme-name">Mặt Cười</span>
+    </button>
+    <button class="theme-btn" style="--c:#fc5c65" onclick="startGame('flags')">
+      <span class="theme-icon">🏳️</span>
+      <span class="theme-name">Lá Cờ</span>
+    </button>
+    <button class="theme-btn" style="--c:#26de81" onclick="startGame('nature')">
+      <span class="theme-icon">🌿</span>
+      <span class="theme-name">Thiên Nhiên</span>
+    </button>
+    <button class="theme-btn" style="--c:#a55eea" onclick="startGame('music')">
+      <span class="theme-icon">🎵</span>
+      <span class="theme-name">Âm Nhạc</span>
+    </button>
+    <button class="theme-btn" style="--c:#45aaf2" onclick="startGame('home')">
+      <span class="theme-icon">🏠</span>
+      <span class="theme-name">Đồ Vật Nhà</span>
+    </button>
     <button class="theme-btn" style="--c:#a55eea" onclick="startGame('mix')">
       <span class="theme-icon">🎲</span>
       <span class="theme-name">Hỗn Hợp</span>
@@ -208,10 +241,18 @@ html, body {
 
 <script>
 const THEMES = {
-  animals: { name:'🐾 Động Vật', items:['🐶','🐱','🐸','🦊','🐼','🐰','🦁','🐯','🐮','🐷'] },
-  fruits:  { name:'🍎 Trái Cây', items:['🍎','🍌','🍓','🍇','🍑','🍊','🍋','🍒','🍉','🥝'] },
-  shapes:  { name:'🔴 Màu & Hình', items:['🔴','🔵','🟡','🟢','🟣','🟠','🔶','🔷','🟥','🟦'] },
-  mix:     { name:'🎲 Hỗn Hợp', items:['🐶','🍎','🔴','🦊','🍌','🔵','🐸','🍓','🟡','🐱'] },
+  animals:   { name:'🐾 Động Vật',     items:['🐶','🐱','🐸','🦊','🐼','🐰','🦁','🐯','🐮','🐷'] },
+  fruits:    { name:'🍎 Trái Cây',     items:['🍎','🍌','🍓','🍇','🍑','🍊','🍋','🍒','🍉','🥝'] },
+  shapes:    { name:'🔴 Màu & Hình',   items:['🔴','🔵','🟡','🟢','🟣','🟠','🔶','🔷','🟥','🟦'] },
+  vehicles:  { name:'🚗 Phương Tiện',  items:['🚗','🚕','✈️','🚀','🚁','🚂','🚢','🏎️','🚒','🚑'] },
+  food:      { name:'🍕 Đồ Ăn',       items:['🍕','🍔','🌮','🍜','🍣','🍩','🍦','🎂','🍪','🧁'] },
+  sports:    { name:'⚽ Thể Thao',     items:['⚽','🏀','🏈','⚾','🎾','🏐','🏉','🎱','🏓','🥊'] },
+  faces:     { name:'😀 Mặt Cười',     items:['😀','😂','🥰','😎','🤩','😴','🤔','😱','🥳','😍'] },
+  flags:     { name:'🏳️ Lá Cờ',       items:['🇻🇳','🇯🇵','🇰🇷','🇨🇳','🇺🇸','🇫🇷','🇬🇧','🇧🇷','🇦🇺','🇩🇪'] },
+  nature:    { name:'🌿 Thiên Nhiên',  items:['🌸','🌻','🌈','⛄','🌊','🌋','🌿','🍁','🌙','☀️'] },
+  music:     { name:'🎵 Âm Nhạc',      items:['🎸','🥁','🎹','🎺','🎻','🪗','🎷','🪘','🎙️','🎵'] },
+  home:      { name:'🏠 Đồ Vật Nhà',  items:['🛋️','🛁','🪑','🧸','🖥️','🎮','📺','🪴','🕯️','🛏️'] },
+  mix:       { name:'🎲 Hỗn Hợp',     items:[] },  // built dynamically
 };
 
 const PAIRS = 6;
@@ -268,7 +309,15 @@ function buildGame(themeKey) {
   const theme = THEMES[themeKey];
   document.getElementById('game-title').textContent = theme.name;
 
-  const picked = shuffle(theme.items).slice(0, PAIRS);
+  // Hỗn Hợp: pick 1 random emoji from each of the other themes
+  let items = theme.items;
+  if (themeKey === 'mix') {
+    const others = Object.keys(THEMES).filter(k => k !== 'mix');
+    const pool = shuffle(others).map(k => shuffle([...THEMES[k].items])[0]);
+    items = shuffle(pool).slice(0, PAIRS * 2); // enough to pick PAIRS from
+  }
+
+  const picked = shuffle(items).slice(0, PAIRS);
   const doubled = shuffle([...picked, ...picked]);
 
   cards = [];
