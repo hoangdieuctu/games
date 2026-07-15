@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kho Trò Chơi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --void:    #05030a;
+  --deep:    #0d0818;
+  --card:    #0a0614;
+  --gold:    #ffd700;
+  --cyan:    #38bdf8;
+  --parch:   #e8d5b0;
+  --muted:   #6a5a80;
+  --border:  #1e0e3a;
+  --glow-g:  rgba(255,215,0,.15);
+  --glow-c:  rgba(56,189,248,.12);
+}
+
+html, body {
+  width: 100%; min-height: 100%;
+  background: var(--void);
+  color: var(--parch);
+  font-family: 'Share Tech Mono', monospace;
+  overflow-x: hidden;
+}
+
+/* ── ambient canvas ── */
+#bg-canvas {
+  position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  opacity: .5;
+}
+
+/* ── hero ── */
+.hero {
+  position: relative; z-index: 1;
+  display: flex; flex-direction: column; align-items: center;
+  padding: 72px 24px 48px;
+  text-align: center;
+}
+
+.hero-gate {
+  font-family: serif;
+  font-size: clamp(96px, 18vw, 200px);
+  line-height: 1;
+  color: transparent;
+  background: radial-gradient(ellipse at 40% 35%, #38bdf8 0%, #0a3080 55%, #050a1a 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  filter: drop-shadow(0 0 40px rgba(56,189,248,.4)) drop-shadow(0 0 80px rgba(56,189,248,.2));
+  animation: gate-pulse 4s ease-in-out infinite;
+  user-select: none;
+  will-change: filter;
+}
+
+@keyframes gate-pulse {
+  0%, 100% { filter: drop-shadow(0 0 30px rgba(56,189,248,.35)) drop-shadow(0 0 70px rgba(56,189,248,.15)); }
+  50%       { filter: drop-shadow(0 0 55px rgba(56,189,248,.65)) drop-shadow(0 0 110px rgba(56,189,248,.3)); }
+}
+
+.hero-eyebrow {
+  font-size: 11px; letter-spacing: .28em; color: var(--muted);
+  text-transform: uppercase; margin-bottom: 18px;
+}
+
+.hero-title {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(22px, 4vw, 38px);
+  font-weight: 900;
+  letter-spacing: .12em;
+  color: var(--gold);
+  text-shadow: 0 0 40px rgba(255,215,0,.5);
+  margin-top: 20px;
+}
+
+.hero-sub {
+  font-size: 12px; letter-spacing: .14em; color: var(--muted);
+  margin-top: 10px;
+}
+
+/* ── divider ── */
+.divider {
+  position: relative; z-index: 1;
+  display: flex; align-items: center; gap: 18px;
+  max-width: 680px; margin: 0 auto 52px; padding: 0 24px;
+}
+.divider::before, .divider::after {
+  content: ''; flex: 1; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border) 60%, transparent);
+}
+.divider-mark {
+  font-size: 10px; letter-spacing: .22em; color: var(--muted); white-space: nowrap;
+  text-transform: uppercase;
+}
+
+/* ── grid ── */
+.grid {
+  position: relative; z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+  max-width: 1080px; margin: 0 auto;
+  padding: 0 24px 96px;
+}
+
+/* ── game card ── */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+  position: relative;
+  transition: transform .18s, border-color .18s, box-shadow .18s;
+  text-decoration: none;
+  display: flex; flex-direction: column;
+}
+.card::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 50% 0%, var(--glow-c), transparent 65%);
+  opacity: 0;
+  transition: opacity .25s;
+  pointer-events: none;
+}
+.card:hover { transform: translateY(-5px); border-color: var(--cyan); box-shadow: 0 12px 40px rgba(56,189,248,.18), 0 2px 8px rgba(0,0,0,.6); }
+.card:hover::before { opacity: 1; }
+.card:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+
+/* card thumbnail area */
+.card-thumb {
+  aspect-ratio: 16/9;
+  background: #07040f;
+  display: flex; align-items: center; justify-content: center;
+  position: relative; overflow: hidden;
+  border-bottom: 1px solid var(--border);
+}
+.card-thumb-bg {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 50% 50%, #0a1428 0%, #07040f 70%);
+}
+.card-thumb-icon {
+  position: relative; z-index: 1;
+  font-family: serif;
+  font-size: 64px; line-height: 1;
+  color: transparent;
+  background: radial-gradient(ellipse at 40% 35%, #38bdf8 0%, #0a3080 55%, #050a1a 100%);
+  -webkit-background-clip: text; background-clip: text;
+  filter: drop-shadow(0 0 18px rgba(56,189,248,.5));
+  transition: filter .2s, transform .2s;
+}
+.card:hover .card-thumb-icon {
+  filter: drop-shadow(0 0 28px rgba(56,189,248,.8));
+  transform: scale(1.08);
+}
+/* hexagon ring behind icon */
+.card-thumb-ring {
+  position: absolute; z-index: 0;
+  width: 110px; height: 110px;
+}
+.card-thumb-ring polygon {
+  fill: none; stroke: rgba(56,189,248,.14); stroke-width: 1.5;
+  animation: ring-spin 18s linear infinite;
+  transform-origin: 55px 55px;
+}
+@keyframes ring-spin { to { transform: rotate(360deg); } }
+
+.card-body {
+  padding: 18px 20px 20px;
+  display: flex; flex-direction: column; flex: 1;
+}
+.card-tag {
+  font-size: 9px; letter-spacing: .22em; color: var(--muted);
+  text-transform: uppercase; margin-bottom: 6px;
+}
+.card-title {
+  font-family: 'Cinzel', serif;
+  font-size: 16px; font-weight: 700;
+  color: var(--parch); letter-spacing: .08em;
+  line-height: 1.3; margin-bottom: 6px;
+}
+.card-desc {
+  font-size: 11px; color: var(--muted); line-height: 1.7;
+  flex: 1; margin-bottom: 18px;
+}
+.card-footer {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 10px;
+}
+.card-meta {
+  font-size: 9px; letter-spacing: .12em; color: #3a2a5a;
+}
+.card-play {
+  display: inline-flex; align-items: center; gap: 7px;
+  background: transparent;
+  border: 1px solid var(--gold);
+  border-radius: 2px;
+  color: var(--gold);
+  font-family: 'Cinzel', serif;
+  font-size: 10px; letter-spacing: .2em;
+  padding: 7px 16px;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: background .15s, box-shadow .15s;
+  white-space: nowrap;
+}
+.card-play:hover {
+  background: rgba(255,215,0,.1);
+  box-shadow: 0 0 20px rgba(255,215,0,.3);
+}
+.card-play::before { content: '▶'; font-size: 8px; }
+
+/* ── coming soon card ── */
+.card.card--soon {
+  opacity: .38; pointer-events: none;
+  border-style: dashed;
+}
+.card.card--soon .card-thumb-icon { filter: grayscale(1) opacity(.3); }
+.card--soon .card-title { color: var(--muted); }
+.soon-badge {
+  position: absolute; top: 10px; right: 10px;
+  font-size: 9px; letter-spacing: .15em;
+  color: var(--muted); border: 1px solid var(--border);
+  padding: 3px 8px; border-radius: 2px;
+  text-transform: uppercase;
+}
+
+/* ── footer ── */
+footer {
+  position: relative; z-index: 1;
+  text-align: center;
+  padding: 0 24px 48px;
+  font-size: 10px; letter-spacing: .12em; color: #2a1a40;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-gate, .card-thumb-ring polygon { animation: none; }
+  .card { transition: none; }
+}
+
+@media (max-width: 420px) {
+  .hero { padding: 48px 16px 36px; }
+  .grid { padding: 0 16px 72px; gap: 16px; }
+}
+</style>
+</head>
+<body>
+
+<canvas id="bg-canvas"></canvas>
+
+<header class="hero">
+  <div class="hero-eyebrow">Kho Trò Chơi · Thư Viện</div>
+  <div class="hero-gate" aria-hidden="true">門</div>
+  <h1 class="hero-title">Tuyển Tập Trò Chơi</h1>
+  <p class="hero-sub">Chọn trò chơi để bắt đầu</p>
+</header>
+
+<div class="divider" aria-hidden="true">
+  <span class="divider-mark">Trò Chơi</span>
+</div>
+
+<main class="grid" id="game-grid">
+
+  <!-- ── Sinh Tử Môn ── -->
+  <a class="card" href="gate-of-life.html">
+    <div class="card-thumb">
+      <div class="card-thumb-bg"></div>
+      <svg class="card-thumb-ring" viewBox="0 0 110 110" aria-hidden="true">
+        <polygon points="55,4 102,29.5 102,80.5 55,106 8,80.5 8,29.5"/>
+      </svg>
+      <div class="card-thumb-icon" aria-hidden="true">門</div>
+    </div>
+    <div class="card-body">
+      <div class="card-tag">Tower Defense · Hành Động</div>
+      <h2 class="card-title">Sinh Tử Môn</h2>
+      <p class="card-desc">Bảo vệ Cửa Thiêng trước 30 đợt tấn công. Nâng cấp vũ khí, mở khóa Dấu Ấn Huyền Thoại, và trụ vững đến đợt cuối.</p>
+      <div class="card-footer">
+        <span class="card-meta">30 đợt · 6 vũ khí · 5 loại quái</span>
+        <span class="card-play">Chơi Ngay</span>
+      </div>
+    </div>
+  </a>
+
+  <!-- ── placeholder: coming soon ── -->
+  <div class="card card--soon" aria-hidden="true">
+    <div class="card-thumb">
+      <div class="card-thumb-bg"></div>
+      <svg class="card-thumb-ring" viewBox="0 0 110 110">
+        <polygon points="55,4 102,29.5 102,80.5 55,106 8,80.5 8,29.5"/>
+      </svg>
+      <div class="card-thumb-icon">?</div>
+      <div class="soon-badge">Sắp Ra Mắt</div>
+    </div>
+    <div class="card-body">
+      <div class="card-tag">Thể Loại Mới</div>
+      <h2 class="card-title">Trò Chơi Tiếp Theo</h2>
+      <p class="card-desc">Đang trong quá trình phát triển.</p>
+      <div class="card-footer">
+        <span class="card-meta">—</span>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <span>門 · Kho Trò Chơi</span>
+</footer>
+
+<script>
+// ── ambient particle background ──
+const canvas = document.getElementById('bg-canvas');
+const ctx = canvas.getContext('2d');
+let W, H, particles;
+
+function resize() {
+  W = canvas.width  = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+}
+window.addEventListener('resize', resize);
+resize();
+
+function makeParticle() {
+  return {
+    x: Math.random() * W,
+    y: Math.random() * H,
+    vx: (Math.random() - .5) * .3,
+    vy: -Math.random() * .5 - .1,
+    life: Math.random(),
+    maxLife: .6 + Math.random() * .8,
+    sz: .8 + Math.random() * 1.4,
+    col: Math.random() < .5 ? '56,189,248' : '255,215,0',
+  };
+}
+
+particles = Array.from({ length: 90 }, makeParticle);
+
+function tick() {
+  ctx.clearRect(0, 0, W, H);
+  for (const p of particles) {
+    p.x += p.vx; p.y += p.vy; p.life += .004;
+    if (p.life >= p.maxLife) { Object.assign(p, makeParticle(), { x: Math.random()*W, y: H+4 }); p.life=0; }
+    const a = Math.sin(p.life / p.maxLife * Math.PI) * .45;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.sz, 0, Math.PI*2);
+    ctx.fillStyle = `rgba(${p.col},${a})`;
+    ctx.fill();
+  }
+  requestAnimationFrame(tick);
+}
+
+if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) tick();
+</script>
+</body>
+</html>
