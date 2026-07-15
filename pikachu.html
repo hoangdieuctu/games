@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Nối Hình Pikachu</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23ffd32a'/%3E%3Ctext x='16' y='23' text-anchor='middle' font-size='20'%3E⚡%3C/text%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root { --radius: 12px; }
+html, body {
+  width: 100%; height: 100%;
+  font-family: 'Nunito', sans-serif;
+  background: #fffbe6;
+  overflow: hidden;
+  touch-action: manipulation;
+  user-select: none;
+  position: fixed;
+}
+.screen { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.screen.hidden { display: none; }
+
+/* ══ GAME SCREEN ══ */
+#screen-game {
+  background: linear-gradient(160deg, #fffbe6 0%, #fff3e8 100%);
+  padding: 0 10px 10px;
+  gap: 8px;
+  justify-content: flex-start;
+}
+.game-header {
+  display: flex; align-items: center; justify-content: space-between;
+  width: 100%; padding: 12px 0 4px;
+  flex-shrink: 0;
+}
+.header-left { display: flex; align-items: center; gap: 10px; }
+.game-logo { font-size: clamp(18px, 3.5vmin, 26px); font-weight: 900; color: #e6a800; }
+.game-round { font-size: clamp(13px, 2.4vmin, 20px); font-weight: 800; color: #ff9f43;
+  background: #fff3cc; border-radius: 100px; padding: 3px 12px; }
+.game-score { font-size: clamp(13px, 2.4vmin, 20px); font-weight: 800; color: #888; }
+.btn-back {
+  background: none; border: 2px solid #ddd; border-radius: 100px;
+  padding: 5px 14px; font-family: inherit;
+  font-size: clamp(12px, 1.8vmin, 16px); font-weight: 800;
+  color: #aaa; cursor: pointer; transition: border-color .12s, color .12s;
+  flex-shrink: 0;
+}
+.btn-back:hover { border-color: #ffd32a; color: #e6a800; }
+
+/* grid wrapper */
+.grid-wrap {
+  position: relative;
+  flex: 1;
+  display: flex; align-items: center; justify-content: center;
+  width: 100%;
+}
+#path-svg {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* tile grid */
+.tile-grid {
+  display: grid;
+}
+.tile {
+  aspect-ratio: 1;
+  cursor: pointer;
+  border-radius: var(--radius);
+  background: #fff;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 3px 0 rgba(0,0,0,.10);
+  border: 3px solid transparent;
+  transition: transform .1s, border-color .12s, box-shadow .12s;
+  position: relative;
+}
+.tile:hover:not(.cleared):not(.selected) {
+  transform: scale(1.07);
+  box-shadow: 0 5px 0 rgba(0,0,0,.13);
+}
+.tile.selected {
+  border-color: #ffd32a;
+  box-shadow: 0 0 0 3px rgba(255,211,42,.4), 0 3px 0 rgba(0,0,0,.10);
+  transform: scale(1.1);
+  z-index: 2;
+}
+.tile.wrong { animation: wrong-shake .38s ease; }
+@keyframes wrong-shake {
+  0%,100% { transform: translateX(0) scale(1.1); }
+  20%  { transform: translateX(-7px) scale(1.1); }
+  40%  { transform: translateX(7px)  scale(1.1); }
+  60%  { transform: translateX(-4px) scale(1.1); }
+  80%  { transform: translateX(4px)  scale(1.1); }
+}
+.tile.hint {
+  border-color: #26de81;
+  box-shadow: 0 0 0 3px rgba(38,222,129,.45), 0 3px 0 rgba(0,0,0,.10);
+  animation: hint-pulse 0.7s ease-in-out infinite alternate;
+}
+@keyframes hint-pulse {
+  from { transform: scale(1.05); }
+  to   { transform: scale(1.12); }
+}
+.tile.cleared {
+  pointer-events: none;
+  animation: clear-pop .3s cubic-bezier(.34,1.56,.64,1) forwards;
+}
+@keyframes clear-pop {
+  0%   { transform: scale(1.12); opacity: 1; }
+  40%  { transform: scale(1.25); opacity: .7; }
+  100% { transform: scale(0);    opacity: 0; }
+}
+
+/* ══ WIN SCREEN ══ */
+#screen-win {
+  background: linear-gradient(160deg, #fffbe6 0%, #fff3cc 100%);
+  gap: 14px;
+}
+.win-emoji { font-size: clamp(80px, 18vmin, 140px); animation: bounce-in .5s cubic-bezier(.34,1.56,.64,1); }
+@keyframes bounce-in { from { transform: scale(0) rotate(-15deg); } to { transform: scale(1); } }
+.win-title { font-size: clamp(32px, 8vmin, 64px); font-weight: 900; color: #e6a800; text-align: center; }
+.win-sub   { font-size: clamp(14px, 3vmin, 22px); color: #888; text-align: center; }
+.win-btns  { display: flex; gap: 16px; margin-top: 8px; flex-wrap: wrap; justify-content: center; }
+.btn-win {
+  font-family: inherit; font-size: clamp(15px, 3vmin, 22px); font-weight: 800;
+  border-radius: 100px; padding: clamp(12px,2vmin,20px) clamp(28px,4.5vmin,48px);
+  cursor: pointer; transition: transform .12s, box-shadow .12s; border: none;
+}
+.btn-win.primary   { background: #ffd32a; color: #333; box-shadow: 0 4px 0 #c9a800; }
+.btn-win.secondary { background: #fff; color: #e6a800; box-shadow: 0 4px 0 #ddd; border: 2px solid #ffd32a; }
+.btn-win:hover  { transform: translateY(-3px); }
+.btn-win:active { transform: translateY(1px); }
+
+.confetti-wrap { position: fixed; inset: 0; pointer-events: none; overflow: hidden; }
+.confetto { position: absolute; width: 10px; height: 14px; border-radius: 2px; top: -20px; animation: fall linear forwards; }
+@keyframes fall { to { transform: translateY(110vh) rotate(720deg); opacity: 0; } }
+
+/* round-complete overlay */
+.round-overlay {
+  position: fixed; inset: 0;
+  background: rgba(255,251,230,.9);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 14px; z-index: 100;
+  animation: overlay-in .25s ease;
+}
+.round-overlay.hidden { display: none; }
+@keyframes overlay-in { from { opacity: 0; transform: scale(.95); } to { opacity: 1; transform: scale(1); } }
+.round-badge { font-size: clamp(56px, 14vmin, 110px); }
+.round-title { font-size: clamp(26px, 6vmin, 52px); font-weight: 900; color: #e6a800; text-align: center; }
+.round-sub   { font-size: clamp(13px, 2.8vmin, 20px); color: #888; text-align: center; }
+.btn-next {
+  font-family: inherit; font-size: clamp(16px, 3.5vmin, 26px); font-weight: 800;
+  border-radius: 100px; padding: clamp(14px,2.5vmin,22px) clamp(36px,6vmin,56px);
+  cursor: pointer; background: #ffd32a; color: #333;
+  box-shadow: 0 4px 0 #c9a800; border: none;
+  transition: transform .12s;
+}
+.btn-next:hover { transform: translateY(-3px); }
+</style>
+</head>
+<body>
+
+<!-- SCREEN 1: game -->
+<div class="screen" id="screen-game">
+  <div class="game-header">
+    <div class="header-left">
+      <span class="game-logo">⚡ Pikachu</span>
+      <span class="game-round" id="game-round">Vòng 1</span>
+    </div>
+    <div class="game-score" id="game-score">0 / 6 cặp</div>
+    <button class="btn-back" onclick="goHome()">🏠 Về nhà</button>
+  </div>
+  <div class="grid-wrap" id="grid-wrap">
+    <svg id="path-svg" xmlns="http://www.w3.org/2000/svg"></svg>
+    <div class="tile-grid" id="tile-grid"></div>
+  </div>
+</div>
+
+<!-- SCREEN 2: win -->
+<div class="screen hidden" id="screen-win">
+  <div class="confetti-wrap" id="confetti"></div>
+  <div class="win-emoji">⚡</div>
+  <div class="win-title">Xuất Sắc!</div>
+  <div class="win-sub" id="win-sub"></div>
+  <div class="win-btns">
+    <button class="btn-win primary"   onclick="startGame()">Chơi lại 🔄</button>
+    <button class="btn-win secondary" onclick="goHome()">🏠 Về nhà</button>
+  </div>
+</div>
+
+<!-- round-complete overlay -->
+<div class="round-overlay hidden" id="round-overlay">
+  <div class="round-badge">🎉</div>
+  <div class="round-title" id="round-title"></div>
+  <div class="round-sub"   id="round-sub"></div>
+  <button class="btn-next" onclick="nextRound()">Vòng tiếp ▶</button>
+</div>
+
+<script>
+// ── emoji pool (all items from every matching game theme) ──────────────────
+const ALL_EMOJI = [
+  '🐶','🐱','🐸','🦊','🐼','🐰','🦁','🐯','🐮','🐷','🦋','🐧','🦄','🐻','🐨','🦒','🦓','🦘','🦜','🐙',
+  '🍎','🍌','🍓','🍇','🍑','🍊','🍋','🍒','🍉','🥝','🍐','🥭','🍍','🍈','🥥','🍅','🫐','🥑',
+  '🔴','🔵','🟡','🟢','🟣','🟠','🔶','🔷','🟥','🟦','🟧','🟨','🟩','🟪','🔸','🔹',
+  '🚗','🚕','✈️','🚀','🚁','🚂','🚢','🏎️','🚒','🚑','🚌','🛻','🚓','🚜','🏍️','🛵','🚲','🛸',
+  '🍕','🍔','🌮','🍜','🍣','🍩','🍦','🎂','🍪','🧁','🥗','🍱','🍛','🌯','🥪','🍲','🍝','🍗',
+  '⚽','🏀','🏈','⚾','🎾','🏐','🏉','🎱','🏓','🥊','⛳','🎿','🛷','🚴','🧗',
+  '😀','😂','🥰','😎','🤩','😴','🤔','😱','🥳','😍','🤣','😇','🥺','😤','🤯','🥶','🤠','🤑','👻',
+  '🇻🇳','🇯🇵','🇰🇷','🇨🇳','🇺🇸','🇫🇷','🇬🇧','🇧🇷','🇦🇺','🇩🇪','🇮🇹','🇪🇸','🇨🇦','🇲🇽','🇷🇺','🇮🇳','🇹🇭',
+  '🌸','🌻','🌈','⛄','🌊','🌋','🌿','🍁','🌙','☀️','⭐','🌺','🍄','🌴','🌵','🌾',
+  '🎸','🥁','🎹','🎺','🎻','🪗','🎷','🪘','🎙️','🎵','🎤','🎼','🎧','📯','🪈','🎶',
+  '🛋️','🛁','🪑','🧸','🖥️','🎮','📺','🪴','🕯️','🛏️','🪞','🚿','🧴','🔦','🧹','📦',
+];
+
+// ── level config ──────────────────────────────────────────────────────────
+// pairs, cols, rows for each round (inner playable area; border adds +2 each side for pathing)
+const ROUNDS = [
+  { pairs:  6, cols: 4, rows: 3 },   // round 1:  12 tiles  easy
+  { pairs:  8, cols: 4, rows: 4 },   // round 2:  16 tiles
+  { pairs: 10, cols: 5, rows: 4 },   // round 3:  20 tiles
+  { pairs: 12, cols: 6, rows: 4 },   // round 4:  24 tiles
+  { pairs: 15, cols: 6, rows: 5 },   // round 5:  30 tiles
+  { pairs: 18, cols: 6, rows: 6 },   // round 6:  36 tiles  hard
+];
+
+// ── state ─────────────────────────────────────────────────────────────────
+let roundIndex  = 0;
+let totalPairs  = 0;
+let totalMatched = 0;
+let emojiPool   = [];  // shuffled pool used across all rounds
+
+let grid = [];  // [ROWS+2][COLS+2]
+let COLS = 0, ROWS = 0;
+
+let selectedTile = null;
+let locked = false;
+let hintTimer = null;
+let hintTiles = [];
+let _gridGeom = null;
+
+// ── audio ─────────────────────────────────────────────────────────────────
+let audioCtx;
+function ac() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+function tone(freq, dur, type = 'sine', vol = 0.22) {
+  try {
+    const ctx = ac(), o = ctx.createOscillator(), g = ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    o.type = type; o.frequency.value = freq;
+    g.gain.setValueAtTime(vol, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(.0001, ctx.currentTime + dur);
+    o.start(); o.stop(ctx.currentTime + dur);
+  } catch(e) {}
+}
+function playSelect() { tone(520, .07, 'sine', .18); }
+function playMatch()  { [523,659,784].forEach((f,i) => setTimeout(() => tone(f,.15), i*65)); }
+function playWrong()  { tone(200, .2, 'sawtooth', .12); }
+function playWin()    { [523,659,784,1047,1319].forEach((f,i) => setTimeout(() => tone(f,.2), i*80)); }
+function playRound()  { [523,784,1047].forEach((f,i) => setTimeout(() => tone(f,.25), i*90)); }
+
+// ── helpers ───────────────────────────────────────────────────────────────
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function show(id) { document.getElementById(id).classList.remove('hidden'); }
+function hide(id) { document.getElementById(id).classList.add('hidden'); }
+
+function goHome() {
+  hide('screen-win'); hide('round-overlay');
+  window.location.href = 'index.html';
+}
+
+// ── start / next round ────────────────────────────────────────────────────
+function startGame() {
+  hide('screen-win'); hide('round-overlay');
+  roundIndex   = 0;
+  totalPairs   = 0;
+  totalMatched = 0;
+  emojiPool    = shuffle([...ALL_EMOJI]);
+  show('screen-game');
+  buildRound();
+}
+
+function nextRound() {
+  hide('round-overlay');
+  roundIndex++;
+  buildRound();
+}
+
+function buildRound() {
+  const cfg  = ROUNDS[Math.min(roundIndex, ROUNDS.length - 1)];
+  COLS = cfg.cols;
+  ROWS = cfg.rows;
+  const PAIRS = cfg.pairs;
+  totalPairs += PAIRS;
+
+  // pick PAIRS emoji from the pool; wrap around if needed
+  const start = (roundIndex * 20) % emojiPool.length;
+  const picked = [];
+  for (let i = 0; i < PAIRS; i++) {
+    picked.push(emojiPool[(start + i) % emojiPool.length]);
+  }
+  const doubled = shuffle([...picked, ...picked]);
+
+  // build (ROWS+2) × (COLS+2) grid — row/col 0 and last are empty border for pathing
+  grid = [];
+  for (let r = 0; r < ROWS + 2; r++) grid.push(new Array(COLS + 2).fill(null));
+
+  const positions = shuffle(
+    Array.from({ length: ROWS * COLS }, (_, i) => [Math.floor(i / COLS) + 1, (i % COLS) + 1])
+  );
+  doubled.forEach((emoji, i) => {
+    if (i < positions.length) {
+      const [r, c] = positions[i];
+      grid[r][c] = { emoji, row: r, col: c, el: null };
+    }
+  });
+
+  selectedTile = null;
+  locked = false;
+  updateHeader();
+  renderGrid();
+  resetHintTimer();
+}
+
+function updateHeader() {
+  document.getElementById('game-round').textContent = `Vòng ${roundIndex + 1}`;
+  document.getElementById('game-score').textContent = `${totalMatched} / ${totalPairs} cặp`;
+}
+
+// ── render grid ───────────────────────────────────────────────────────────
+function renderGrid() {
+  const gridEl = document.getElementById('tile-grid');
+  gridEl.innerHTML = '';
+  document.getElementById('path-svg').innerHTML = '';
+
+  const headerH = document.querySelector('.game-header').offsetHeight || 56;
+  const pad = 20;
+  const gap = 8;
+  const availW = window.innerWidth  - pad * 2;
+  const availH = window.innerHeight - headerH - pad * 2;
+  const maxTileW = Math.floor((availW - (COLS - 1) * gap) / COLS);
+  const maxTileH = Math.floor((availH - (ROWS - 1) * gap) / ROWS);
+  const tileSize = Math.max(36, Math.min(maxTileW, maxTileH, 140));
+  const fontSize = Math.max(18, Math.floor(tileSize * 0.58));
+
+  gridEl.style.gridTemplateColumns = `repeat(${COLS}, ${tileSize}px)`;
+  gridEl.style.gap = `${gap}px`;
+
+  for (let r = 1; r <= ROWS; r++) {
+    for (let c = 1; c <= COLS; c++) {
+      const cell = grid[r][c];
+      const el = document.createElement('div');
+      el.className = 'tile';
+      el.style.width = tileSize + 'px';
+      el.style.fontSize = fontSize + 'px';
+      if (cell) {
+        el.textContent = cell.emoji;
+        el.dataset.row = r;
+        el.dataset.col = c;
+        cell.el = el;
+        el.addEventListener('click', () => onTileClick(r, c));
+      } else {
+        el.style.visibility = 'hidden';
+        el.style.pointerEvents = 'none';
+      }
+      gridEl.appendChild(el);
+    }
+  }
+  // Read geometry after layout settles
+  requestAnimationFrame(() => {
+    const wrapRect = document.getElementById('grid-wrap').getBoundingClientRect();
+    const firstTile = gridEl.querySelector('.tile[data-row]');
+    if (!firstTile) { _gridGeom = null; return; }
+    const r0 = parseInt(firstTile.dataset.row);
+    const c0 = parseInt(firstTile.dataset.col);
+    const t0 = firstTile.getBoundingClientRect();
+    const tileW = t0.width, tileH = t0.height;
+    // ox/oy = center of tile [1][1] relative to grid-wrap
+    const ox = t0.left - wrapRect.left + tileW / 2 - (c0 - 1) * (tileW + gap);
+    const oy = t0.top  - wrapRect.top  + tileH / 2 - (r0 - 1) * (tileH + gap);
+    _gridGeom = { ox, oy, stepX: tileW + gap, stepY: tileH + gap, tileW, tileH };
+  });
+}
+
+// ── path finding ──────────────────────────────────────────────────────────
+function isClear(r, c, exR1, exC1, exR2, exC2) {
+  if (r === exR1 && c === exC1) return true;
+  if (r === exR2 && c === exC2) return true;
+  if (r < 0 || r > ROWS + 1 || c < 0 || c > COLS + 1) return false;
+  return grid[r][c] === null;
+}
+
+function straightClear(r1, c1, r2, c2, exR1, exC1, exR2, exC2) {
+  if (r1 === r2) {
+    const [lo, hi] = c1 < c2 ? [c1, c2] : [c2, c1];
+    for (let c = lo; c <= hi; c++) if (!isClear(r1, c, exR1, exC1, exR2, exC2)) return false;
+    return true;
+  }
+  if (c1 === c2) {
+    const [lo, hi] = r1 < r2 ? [r1, r2] : [r2, r1];
+    for (let r = lo; r <= hi; r++) if (!isClear(r, c1, exR1, exC1, exR2, exC2)) return false;
+    return true;
+  }
+  return false;
+}
+
+function buildStraightPath(r1, c1, r2, c2) {
+  const path = [];
+  if (r1 === r2) {
+    const step = c2 > c1 ? 1 : -1;
+    for (let c = c1; c !== c2 + step; c += step) path.push([r1, c]);
+  } else {
+    const step = r2 > r1 ? 1 : -1;
+    for (let r = r1; r !== r2 + step; r += step) path.push([r, c1]);
+  }
+  return path;
+}
+
+function findPath(r1, c1, r2, c2) {
+  const ex = [r1, c1, r2, c2];
+  // 0 turns
+  if ((r1 === r2 || c1 === c2) && straightClear(r1, c1, r2, c2, ...ex)) {
+    return buildStraightPath(r1, c1, r2, c2);
+  }
+  // 1 turn: corner (r1,c2) or (r2,c1)
+  for (const [cr, cc] of [[r1, c2], [r2, c1]]) {
+    if (!isClear(cr, cc, ...ex)) continue;
+    if (straightClear(r1, c1, cr, cc, ...ex) && straightClear(cr, cc, r2, c2, ...ex)) {
+      return [...buildStraightPath(r1, c1, cr, cc), ...buildStraightPath(cr, cc, r2, c2).slice(1)];
+    }
+  }
+  // 2 turns: horizontal bridge row r
+  for (let r = 0; r <= ROWS + 1; r++) {
+    if (!isClear(r, c1, ...ex) || !isClear(r, c2, ...ex)) continue;
+    if (straightClear(r1, c1, r, c1, ...ex) &&
+        straightClear(r, c1, r, c2, ...ex) &&
+        straightClear(r, c2, r2, c2, ...ex)) {
+      return [
+        ...buildStraightPath(r1, c1, r, c1),
+        ...buildStraightPath(r, c1, r, c2).slice(1),
+        ...buildStraightPath(r, c2, r2, c2).slice(1),
+      ];
+    }
+  }
+  // 2 turns: vertical bridge col c
+  for (let c = 0; c <= COLS + 1; c++) {
+    if (!isClear(r1, c, ...ex) || !isClear(r2, c, ...ex)) continue;
+    if (straightClear(r1, c1, r1, c, ...ex) &&
+        straightClear(r1, c, r2, c, ...ex) &&
+        straightClear(r2, c, r2, c2, ...ex)) {
+      return [
+        ...buildStraightPath(r1, c1, r1, c),
+        ...buildStraightPath(r1, c, r2, c).slice(1),
+        ...buildStraightPath(r2, c, r2, c2).slice(1),
+      ];
+    }
+  }
+  return null;
+}
+
+// ── hint & stuck detection ────────────────────────────────────────────────
+function findAnyMove() {
+  const byEmoji = {};
+  for (let r = 1; r <= ROWS; r++)
+    for (let c = 1; c <= COLS; c++)
+      if (grid[r][c]) (byEmoji[grid[r][c].emoji] = byEmoji[grid[r][c].emoji] || []).push({r, c});
+  for (const tiles of Object.values(byEmoji)) {
+    if (tiles.length === 2) {
+      const path = findPath(tiles[0].r, tiles[0].c, tiles[1].r, tiles[1].c);
+      if (path) return tiles;
+    }
+  }
+  return null;
+}
+
+function clearHint() {
+  hintTiles.forEach(t => { if (t.el) t.el.classList.remove('hint'); });
+  hintTiles = [];
+}
+
+function showHint() {
+  clearHint();
+  const move = findAnyMove();
+  if (!move) { shuffleStuck(); return; }
+  hintTiles = move;
+  move.forEach(t => { if (t.el) t.el.classList.add('hint'); });
+  tone(440, .15, 'sine', .12);
+}
+
+function resetHintTimer() {
+  clearHint();
+  clearTimeout(hintTimer);
+  hintTimer = setTimeout(showHint, 10000);
+}
+
+function shuffleStuck() {
+  // Collect all remaining tile emojis, reshuffle them into the same positions
+  const positions = [], emojis = [];
+  for (let r = 1; r <= ROWS; r++)
+    for (let c = 1; c <= COLS; c++)
+      if (grid[r][c]) { positions.push([r, c]); emojis.push(grid[r][c].emoji); }
+
+  // Shuffle emojis into positions until at least one valid move exists
+  let shuffled = shuffle(emojis);
+  for (let attempt = 0; attempt < 200; attempt++) {
+    shuffled = shuffle(emojis);
+    // temporarily assign
+    positions.forEach(([r, c], i) => { grid[r][c] = { emoji: shuffled[i], row: r, col: c, el: null }; });
+    if (findAnyMove()) break;
+  }
+  // Re-render to update tile els
+  renderGrid();
+  tone(880, .1, 'sine', .12);
+  setTimeout(() => tone(1046, .15, 'sine', .12), 120);
+  resetHintTimer();
+}
+
+// ── tile click ────────────────────────────────────────────────────────────
+function onTileClick(r, c) {
+  if (locked) return;
+  const cell = grid[r][c];
+  if (!cell) return;
+  resetHintTimer();
+
+  if (selectedTile && selectedTile.row === r && selectedTile.col === c) {
+    cell.el.classList.remove('selected');
+    selectedTile = null;
+    return;
+  }
+
+  if (!selectedTile) {
+    selectedTile = cell;
+    cell.el.classList.add('selected');
+    playSelect();
+    return;
+  }
+
+  const first = selectedTile;
+  selectedTile = null;
+  cell.el.classList.add('selected');
+  locked = true;
+
+  if (first.emoji !== cell.emoji) {
+    first.el.classList.add('wrong');
+    cell.el.classList.add('wrong');
+    playWrong();
+    setTimeout(() => {
+      first.el.classList.remove('selected', 'wrong');
+      cell.el.classList.remove('selected', 'wrong');
+      locked = false;
+    }, 500);
+    return;
+  }
+
+  const path = findPath(first.row, first.col, r, c);
+  if (!path) {
+    first.el.classList.add('wrong');
+    cell.el.classList.add('wrong');
+    playWrong();
+    setTimeout(() => {
+      first.el.classList.remove('selected', 'wrong');
+      cell.el.classList.remove('selected', 'wrong');
+      locked = false;
+    }, 500);
+    return;
+  }
+
+  drawPath(path, () => {
+    first.el.classList.remove('selected');
+    cell.el.classList.remove('selected');
+    first.el.classList.add('cleared');
+    cell.el.classList.add('cleared');
+    grid[first.row][first.col] = null;
+    grid[r][c] = null;
+    playMatch();
+    totalMatched++;
+    updateHeader();
+    locked = false;
+
+    let remaining = 0;
+    for (let rr = 1; rr <= ROWS; rr++)
+      for (let cc = 1; cc <= COLS; cc++)
+        if (grid[rr][cc]) remaining++;
+
+    if (remaining === 0) {
+      setTimeout(showRoundComplete, 400);
+    } else if (!findAnyMove()) {
+      setTimeout(shuffleStuck, 300);
+    }
+  });
+}
+
+// ── draw connection path ──────────────────────────────────────────────────
+// _gridGeom is set by renderGrid with exact computed values
+
+function cellCenter(r, c) {
+  if (!_gridGeom) return null;
+  const { ox, oy, stepX, stepY } = _gridGeom;
+  // Only called for inner grid cells (1..ROWS, 1..COLS)
+  return { x: ox + (c - 1) * stepX, y: oy + (r - 1) * stepY };
+}
+
+// Tile edge point: the point on the border of a tile facing direction dr,dc
+function tileEdge(r, c, dr, dc) {
+  if (!_gridGeom) return null;
+  const { ox, oy, stepX, stepY, tileW, tileH } = _gridGeom;
+  const cx = ox + (c - 1) * stepX;
+  const cy = oy + (r - 1) * stepY;
+  // Offset to tile edge in the direction dr,dc
+  return {
+    x: cx + dc * tileW / 2,
+    y: cy + dr * tileH / 2,
+  };
+}
+
+// Convert a logical path into clean visual polyline points.
+// Start/end: tile edge (facing the corridor direction), not center.
+// Middle inner cells: tile center (always empty per path algorithm).
+// Border cells: halfway into the gap outside the grid edge.
+function pathToVisualPoints(path) {
+  if (!_gridGeom || path.length < 2) return [];
+  const { ox, oy, stepX, stepY, tileW, tileH } = _gridGeom;
+  const halfGapX = (stepX - tileW) / 2;
+  const halfGapY = (stepY - tileH) / 2;
+
+  // Center of inner tile
+  function ctr(r, c) {
+    return { x: ox + (c - 1) * stepX, y: oy + (r - 1) * stepY };
+  }
+
+  // Border cell: place in the middle of the gap outside the grid
+  function borderPt(r, c) {
+    let x = ox + (Math.max(1, Math.min(c, COLS)) - 1) * stepX;
+    let y = oy + (Math.max(1, Math.min(r, ROWS)) - 1) * stepY;
+    if (r === 0)        y -= tileH / 2 + halfGapY;
+    if (r === ROWS + 1) y += tileH / 2 + halfGapY;
+    if (c === 0)        x -= tileW / 2 + halfGapX;
+    if (c === COLS + 1) x += tileW / 2 + halfGapX;
+    return { x, y };
+  }
+
+  const corners = pathCorners(path);
+  const n = corners.length;
+  const pts = [];
+
+  for (let i = 0; i < n; i++) {
+    const [r, c] = corners[i];
+    const isBorder = r === 0 || r === ROWS + 1 || c === 0 || c === COLS + 1;
+
+    if (isBorder) {
+      pts.push(borderPt(r, c));
+      continue;
+    }
+
+    if (i === 0 || i === n - 1) {
+      // For start/end: use tile edge if adjacent point is a border cell
+      const adj = corners[i === 0 ? 1 : n - 2];
+      const adjBorder = adj[0] === 0 || adj[0] === ROWS + 1 || adj[1] === 0 || adj[1] === COLS + 1;
+      if (adjBorder) {
+        const dr = Math.sign(adj[0] - r), dc = Math.sign(adj[1] - c);
+        pts.push({ x: ctr(r,c).x + dc * tileW / 2, y: ctr(r,c).y + dr * tileH / 2 });
+      } else {
+        pts.push(ctr(r, c));
+      }
+      continue;
+    }
+
+    // Middle inner cell: tile center
+    pts.push(ctr(r, c));
+  }
+
+  return pts.filter(Boolean);
+}
+
+// Extract only the turning points from a path (start, corners, end)
+function pathCorners(path) {
+  if (path.length < 2) return path;
+  const corners = [path[0]];
+  for (let i = 1; i < path.length - 1; i++) {
+    const [pr, pc] = path[i - 1];
+    const [cr, cc] = path[i];
+    const [nr, nc] = path[i + 1];
+    if ((cr - pr) !== (nr - cr) || (cc - pc) !== (nc - cc)) corners.push(path[i]);
+  }
+  corners.push(path[path.length - 1]);
+  return corners;
+}
+
+function drawPath(path, onDone) {
+  const svg = document.getElementById('path-svg');
+  svg.innerHTML = '';
+  const points = pathToVisualPoints(path);
+  if (points.length < 2) { onDone(); return; }
+  const d = points.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
+  const el = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  el.setAttribute('d', d);
+  el.setAttribute('fill', 'none');
+  el.setAttribute('stroke', '#ffd32a');
+  el.setAttribute('stroke-width', '5');
+  el.setAttribute('stroke-linecap', 'round');
+  el.setAttribute('stroke-linejoin', 'round');
+  el.setAttribute('opacity', '0.9');
+  const len = el.getTotalLength ? el.getTotalLength() : 300;
+  el.style.strokeDasharray = len;
+  el.style.strokeDashoffset = len;
+  el.style.transition = 'stroke-dashoffset 0.22s ease';
+  svg.appendChild(el);
+  requestAnimationFrame(() => {
+    el.style.strokeDashoffset = '0';
+    setTimeout(() => { svg.innerHTML = ''; onDone(); }, 300);
+  });
+}
+
+// ── round complete ────────────────────────────────────────────────────────
+function showRoundComplete() {
+  clearHint();
+  clearTimeout(hintTimer);
+  playRound();
+  const isLast = roundIndex >= ROUNDS.length - 1;
+  if (isLast) { showWin(); return; }
+  document.getElementById('round-title').textContent = `Vòng ${roundIndex + 1} xong!`;
+  document.getElementById('round-sub').textContent = `Con đã nối hết ${ROUNDS[roundIndex].pairs} cặp rồi!`;
+  show('round-overlay');
+}
+
+// ── win ───────────────────────────────────────────────────────────────────
+function showWin() {
+  clearHint();
+  clearTimeout(hintTimer);
+  hide('screen-game');
+  document.getElementById('win-sub').textContent =
+    `Con đã hoàn thành ${ROUNDS.length} vòng và nối ${totalMatched} cặp! Tuyệt vời!`;
+  playWin();
+  launchConfetti();
+  show('screen-win');
+}
+
+function launchConfetti() {
+  const wrap = document.getElementById('confetti');
+  wrap.innerHTML = '';
+  const cols = ['#ff6b6b','#ffd32a','#26de81','#45aaf2','#a55eea','#ff9f43'];
+  for (let i = 0; i < 60; i++) {
+    const c = document.createElement('div');
+    c.className = 'confetto';
+    c.style.left = Math.random() * 100 + 'vw';
+    c.style.background = cols[Math.floor(Math.random() * cols.length)];
+    c.style.animationDuration = (.7 + Math.random() * 1.4) + 's';
+    c.style.animationDelay   = (Math.random() * .5) + 's';
+    wrap.appendChild(c);
+  }
+  setTimeout(() => wrap.innerHTML = '', 2600);
+}
+
+// ── resize ────────────────────────────────────────────────────────────────
+let resizeTimer;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => {
+    if (!document.getElementById('screen-game').classList.contains('hidden')) renderGrid();
+  }, 150);
+});
+
+// ── auto-start ────────────────────────────────────────────────────────────
+startGame();
+</script>
+</body>
+</html>
