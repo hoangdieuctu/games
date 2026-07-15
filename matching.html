@@ -18,6 +18,8 @@ html, body {
   overflow: hidden;
   touch-action: manipulation;
   user-select: none;
+  /* prevent bounce/overscroll on iOS Safari/Chrome */
+  position: fixed;
 }
 
 .screen { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
@@ -28,45 +30,51 @@ html, body {
   background: linear-gradient(160deg, #e8f0ff 0%, #f5e8ff 100%);
   gap: 24px; padding: 24px;
 }
-.theme-title { font-size: clamp(22px,5vw,32px); font-weight: 900; color: #333; text-align: center; }
-.theme-grid  { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; width: min(380px,92vw); }
+.theme-title { font-size: clamp(26px, 5vmin, 48px); font-weight: 900; color: #333; text-align: center; }
+.theme-grid  { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: min(500px, 88vw); }
 .theme-btn {
-  background: #fff; border: 3px solid transparent; border-radius: 18px;
-  padding: 18px 10px; cursor: pointer; text-align: center;
-  box-shadow: 0 4px 16px rgba(0,0,0,.08);
+  background: #fff; border: 4px solid transparent; border-radius: 24px;
+  padding: clamp(20px,4vmin,36px) 12px; cursor: pointer; text-align: center;
+  box-shadow: 0 6px 20px rgba(0,0,0,.08);
   transition: transform .14s, box-shadow .14s, border-color .14s;
-  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
 }
-.theme-btn:hover { transform: translateY(-4px) scale(1.04); box-shadow: 0 10px 28px rgba(0,0,0,.14); border-color: var(--c); }
+.theme-btn:hover { transform: translateY(-4px) scale(1.04); box-shadow: 0 12px 32px rgba(0,0,0,.14); border-color: var(--c); }
 .theme-btn:active { transform: scale(.97); }
-.theme-icon { font-size: 40px; line-height: 1; }
-.theme-name { font-size: 14px; font-weight: 800; color: #444; }
+.theme-icon { font-size: clamp(48px, 10vmin, 80px); line-height: 1; }
+.theme-name { font-size: clamp(16px, 3vmin, 24px); font-weight: 800; color: #444; }
 
 /* ══ GAME SCREEN ══ */
 #screen-game {
   background: linear-gradient(160deg, #e8f0ff 0%, #f5e8ff 100%);
-  padding: 0 12px;
-  gap: 10px;
+  padding: 0 16px 16px;
+  gap: 12px;
+  justify-content: flex-start;
 }
 .game-header {
   display: flex; align-items: center; justify-content: space-between;
-  width: min(480px, 96vw); padding: 10px 0 4px;
+  width: 100%; padding: 16px 0 0;
+  flex-shrink: 0;
 }
-.game-title { font-size: 17px; font-weight: 900; color: #555; }
-.game-score { font-size: 13px; font-weight: 800; color: #888; }
+.game-title { font-size: clamp(18px, 3.5vmin, 28px); font-weight: 900; color: #555; }
+.game-score { font-size: clamp(14px, 2.5vmin, 22px); font-weight: 800; color: #888; }
 .btn-back {
   background: none; border: 2px solid #ccc; border-radius: 100px;
-  padding: 3px 12px; font-family: inherit; font-size: 12px; font-weight: 800;
+  padding: 6px 16px; font-family: inherit;
+  font-size: clamp(13px, 2vmin, 18px); font-weight: 800;
   color: #888; cursor: pointer; transition: border-color .12s, color .12s;
+  flex-shrink: 0;
 }
 .btn-back:hover { border-color: #4b7bec; color: #4b7bec; }
 
-/* card grid */
+/* card grid — fill available space */
 .card-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: clamp(7px, 2vw, 12px);
-  width: min(480px, 96vw);
+  gap: clamp(10px, 2.5vmin, 20px);
+  width: min(96vw, 96vh - 120px);
+  flex: 1;
+  align-content: center;
 }
 
 /* card — always visible */
@@ -76,9 +84,9 @@ html, body {
   border-radius: var(--radius);
   background: #fff;
   display: flex; align-items: center; justify-content: center;
-  font-size: clamp(28px, 8vw, 48px);
-  box-shadow: 0 3px 0 rgba(0,0,80,.12);
-  border: 3px solid transparent;
+  font-size: clamp(36px, 11vmin, 90px);
+  box-shadow: 0 4px 0 rgba(0,0,80,.12);
+  border: 4px solid transparent;
   transition: transform .12s, border-color .15s, box-shadow .12s, opacity .2s;
   position: relative;
 }
@@ -117,27 +125,28 @@ html, body {
 }
 
 /* progress dots */
-.progress-row { display: flex; gap: 8px; }
+.progress-row { display: flex; gap: 10px; flex-shrink: 0; }
 .prog-dot {
-  width: 11px; height: 11px; border-radius: 50%;
+  width: clamp(12px, 2vmin, 18px); height: clamp(12px, 2vmin, 18px);
+  border-radius: 50%;
   background: #ddd; transition: background .3s, transform .2s;
 }
-.prog-dot.done { background: #26de81; transform: scale(1.25); }
+.prog-dot.done { background: #26de81; transform: scale(1.3); }
 
 /* ══ WIN SCREEN ══ */
 #screen-win {
   background: linear-gradient(160deg, #e8fff0 0%, #f5fff0 100%);
   gap: 12px;
 }
-.win-emoji  { font-size: clamp(72px,18vw,130px); animation: bounce-in .5s cubic-bezier(.34,1.56,.64,1); }
+.win-emoji  { font-size: clamp(80px, 20vmin, 160px); animation: bounce-in .5s cubic-bezier(.34,1.56,.64,1); }
 @keyframes bounce-in { from { transform: scale(0) rotate(-15deg); } to { transform: scale(1); } }
-.win-title  { font-size: clamp(28px,8vw,52px); font-weight: 900; color: #26de81; text-align: center; }
-.win-sub    { font-size: clamp(14px,3.5vw,20px); color: #888; text-align: center; }
-.win-btns   { display: flex; gap: 14px; margin-top: 8px; flex-wrap: wrap; justify-content: center; }
+.win-title  { font-size: clamp(36px, 9vmin, 72px); font-weight: 900; color: #26de81; text-align: center; }
+.win-sub    { font-size: clamp(16px, 3.5vmin, 26px); color: #888; text-align: center; }
+.win-btns   { display: flex; gap: 16px; margin-top: 12px; flex-wrap: wrap; justify-content: center; }
 .btn-win {
-  font-family: inherit; font-size: clamp(14px,3.5vw,20px); font-weight: 800;
-  border-radius: 100px; padding: 13px 32px; cursor: pointer;
-  transition: transform .12s, box-shadow .12s; border: none;
+  font-family: inherit; font-size: clamp(16px, 3.5vmin, 26px); font-weight: 800;
+  border-radius: 100px; padding: clamp(14px,2.5vmin,22px) clamp(32px,5vmin,52px);
+  cursor: pointer; transition: transform .12s, box-shadow .12s; border: none;
 }
 .btn-win.primary   { background: #4b7bec; color: #fff; box-shadow: 0 4px 0 #2d5cd4; }
 .btn-win.secondary { background: #fff; color: #4b7bec; box-shadow: 0 4px 0 #ccc; border: 2px solid #4b7bec; }
