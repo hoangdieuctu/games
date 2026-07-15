@@ -543,17 +543,19 @@ function update(dt){
             }
           }
           // chain seal: bounce (only if active)
-          if(hero.activeSeal==='chain' && hero.seals.chain){
+          if(hero.activeSeal==='chain' && hero.seals.chain && p.wtype!=='chain_bounce'){
             const cs=hero.seals.chain;
             const bounces=[0,2,3,4,5,6][cs]||2;
             const decay=[0,0.75,0.80,0.85,0.90,0.95][cs]||0.75;
             let src=e, srcDmg=p.dmg*decay;
+            const visited=new Set([e]);
             for(let b=0;b<bounces;b++){
-              const ct=nearest(src.x,src.y,200,src);
+              const ct=nearest(src.x,src.y,200,src,visited);
               if(!ct) break;
               const cdx=ct.x-src.x,cdy=ct.y-src.y,cd=Math.sqrt(cdx*cdx+cdy*cdy)||1;
               projectiles.push({x:src.x,y:src.y,vx:cdx/cd*600,vy:cdy/cd*600,dmg:srcDmg,hero:true,hit:false,life:0.5,pierced:new Set([src]),chains:0,color:'#00ffcc',wtype:'chain_bounce',sz:3,splash:0,pierceCap:0});
               spawnPs(src.x,src.y,'#00ffcc',4,60);
+              visited.add(ct);
               src=ct; srcDmg*=decay;
             }
           }
@@ -677,10 +679,11 @@ function update(dt){
 }
 
 // ═══════════════════ HELPERS ═══════════════════
-function nearest(x,y,range,exclude){
+function nearest(x,y,range,exclude,excludeSet){
   let best=null, bd=range;
   for(const e of enemies){
     if(e.dead||e.reached||e===exclude) continue;
+    if(excludeSet && excludeSet.has(e)) continue;
     const dx=e.x-x, dy=e.y-y, d=Math.sqrt(dx*dx+dy*dy);
     if(d<bd){bd=d;best=e;}
   }
