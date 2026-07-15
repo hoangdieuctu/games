@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Học Đếm Số</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='bg' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%23ff6b6b'/%3E%3Cstop offset='50%25' stop-color='%23ffd32a'/%3E%3Cstop offset='100%25' stop-color='%2326de81'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='url(%23bg)'/%3E%3Ctext x='16' y='23' text-anchor='middle' font-family='Arial Rounded MT Bold%2C Arial%2C sans-serif' font-size='20' font-weight='bold' fill='white'%3E123%3C/text%3E%3C/svg%3E">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #fff9f0;
+  --colors: #ff6b6b, #ff9f43, #ffd32a, #26de81, #2bcbba, #45aaf2, #a55eea, #fd9644, #fc5c65, #4b7bec;
+}
+
+html, body {
+  width: 100%; height: 100%;
+  background: var(--bg);
+  font-family: 'Baloo 2', 'Segoe UI', sans-serif;
+  overflow: hidden;
+  touch-action: manipulation;
+}
+
+/* ── screens ── */
+.screen { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0; }
+.screen.hidden { display: none; }
+
+/* ══════════════════════════════════
+   SCREEN 1 — show target number
+══════════════════════════════════ */
+#screen-show {
+  background: linear-gradient(160deg, #fff9f0 0%, #ffe8cc 100%);
+  gap: 16px;
+}
+
+.prompt-label {
+  font-size: clamp(18px, 4vw, 26px);
+  font-weight: 700;
+  color: #888;
+  letter-spacing: .04em;
+}
+
+.big-number {
+  font-size: clamp(140px, 38vw, 280px);
+  font-weight: 800;
+  line-height: 1;
+  border-radius: 24px;
+  padding: 0 24px;
+  transition: transform .12s;
+  user-select: none;
+  cursor: default;
+  animation: pop-in .4s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes pop-in {
+  from { transform: scale(.4); opacity: 0; }
+  to   { transform: scale(1);  opacity: 1; }
+}
+
+.dots-row {
+  display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;
+  max-width: min(480px, 90vw);
+}
+.dot {
+  width: 22px; height: 22px; border-radius: 50%;
+  animation: dot-in .3s both;
+}
+@keyframes dot-in { from { transform: scale(0); } to { transform: scale(1); } }
+
+.btn-ready {
+  margin-top: 12px;
+  font-family: inherit; font-size: clamp(18px, 4vw, 24px); font-weight: 800;
+  background: #fff; border: 3px solid currentColor;
+  border-radius: 100px; padding: 14px 44px;
+  cursor: pointer; transition: transform .12s, box-shadow .12s;
+  color: #ff6b6b;
+}
+.btn-ready:hover, .btn-ready:focus-visible { transform: scale(1.06); box-shadow: 0 6px 24px rgba(0,0,0,.12); }
+.btn-ready:active { transform: scale(.97); }
+
+/* ══════════════════════════════════
+   SCREEN 2 — pick the number
+══════════════════════════════════ */
+#screen-pick {
+  background: linear-gradient(160deg, #f0f8ff 0%, #e8f4ff 100%);
+  padding: 24px 16px;
+  gap: 20px;
+}
+
+.pick-label {
+  font-size: clamp(20px, 4.5vw, 30px);
+  font-weight: 700; color: #555;
+  text-align: center; line-height: 1.3;
+}
+.pick-label strong { color: #ff6b6b; font-size: 1.25em; }
+
+.number-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: clamp(8px, 2vw, 14px);
+  width: min(520px, 92vw);
+}
+
+.num-btn {
+  aspect-ratio: 1;
+  border-radius: 16px;
+  border: none;
+  font-family: inherit;
+  font-size: clamp(28px, 6vw, 48px);
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform .12s, box-shadow .12s, opacity .15s;
+  position: relative;
+  overflow: hidden;
+  color: #fff;
+  text-shadow: 0 2px 4px rgba(0,0,0,.2);
+  box-shadow: 0 4px 0 rgba(0,0,0,.18);
+}
+.num-btn:hover  { transform: translateY(-3px) scale(1.06); box-shadow: 0 8px 0 rgba(0,0,0,.18); }
+.num-btn:active { transform: translateY(1px) scale(.97);  box-shadow: 0 2px 0 rgba(0,0,0,.18); }
+.num-btn:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+
+.num-btn.correct {
+  animation: shake-yes .45s ease;
+}
+.num-btn.wrong {
+  animation: shake-no .4s ease;
+  opacity: .35; pointer-events: none;
+}
+@keyframes shake-yes {
+  0%   { transform: scale(1); }
+  25%  { transform: scale(1.25) rotate(-6deg); }
+  50%  { transform: scale(1.3) rotate(6deg); }
+  75%  { transform: scale(1.2) rotate(-3deg); }
+  100% { transform: scale(1); }
+}
+@keyframes shake-no {
+  0%, 100% { transform: translateX(0); }
+  20%  { transform: translateX(-8px) rotate(-4deg); }
+  40%  { transform: translateX(8px)  rotate(4deg); }
+  60%  { transform: translateX(-6px) rotate(-2deg); }
+  80%  { transform: translateX(6px)  rotate(2deg); }
+}
+
+/* ══════════════════════════════════
+   SCREEN 3 — win!
+══════════════════════════════════ */
+#screen-win {
+  gap: 10px;
+}
+
+.win-emoji {
+  font-size: clamp(72px, 18vw, 140px);
+  animation: bounce-in .5s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes bounce-in {
+  from { transform: scale(0) rotate(-20deg); }
+  to   { transform: scale(1) rotate(0deg); }
+}
+
+.win-title {
+  font-size: clamp(32px, 8vw, 64px);
+  font-weight: 800; color: #ff6b6b;
+  text-align: center; line-height: 1.1;
+}
+.win-sub {
+  font-size: clamp(16px, 3.5vw, 22px);
+  color: #aaa; text-align: center;
+}
+
+.confetti-wrap {
+  position: fixed; inset: 0; pointer-events: none; overflow: hidden;
+}
+.confetto {
+  position: absolute; width: 10px; height: 14px;
+  border-radius: 2px;
+  animation: fall linear forwards;
+  top: -20px;
+}
+@keyframes fall {
+  to { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+}
+
+.btn-again {
+  margin-top: 8px;
+  font-family: inherit; font-size: clamp(18px, 4vw, 24px); font-weight: 800;
+  background: #ff6b6b; color: #fff; border: none;
+  border-radius: 100px; padding: 16px 52px;
+  cursor: pointer; box-shadow: 0 4px 0 #c0392b;
+  transition: transform .12s, box-shadow .12s;
+}
+.btn-again:hover  { transform: translateY(-3px); box-shadow: 0 8px 0 #c0392b; }
+.btn-again:active { transform: translateY(1px); box-shadow: 0 2px 0 #c0392b; }
+</style>
+</head>
+<body>
+
+<!-- SCREEN 1: show the target number -->
+<div class="screen" id="screen-show">
+  <div class="prompt-label">Hãy tìm số này nhé!</div>
+  <div class="big-number" id="target-display"></div>
+  <div class="dots-row" id="dots-row"></div>
+  <button class="btn-ready" id="btn-ready" onclick="goToPick()">Tôi sẵn sàng! ▶</button>
+</div>
+
+<!-- SCREEN 2: pick the number -->
+<div class="screen hidden" id="screen-pick">
+  <div class="pick-label" id="pick-label"></div>
+  <div class="number-grid" id="number-grid"></div>
+</div>
+
+<!-- SCREEN 3: win -->
+<div class="screen hidden" id="screen-win">
+  <div class="confetti-wrap" id="confetti"></div>
+  <div class="win-emoji" id="win-emoji">🎉</div>
+  <div class="win-title">Giỏi lắm!</div>
+  <div class="win-sub" id="win-sub"></div>
+  <button class="btn-again" onclick="startGame()">Chơi tiếp! 🔄</button>
+</div>
+
+<script>
+// ── palette (one per number, 1-indexed) ──
+const COLORS = [
+  null,           // 0 unused
+  '#ff6b6b',      // 1 red
+  '#ff9f43',      // 2 orange
+  '#ffd32a',      // 3 yellow
+  '#26de81',      // 4 green
+  '#2bcbba',      // 5 teal
+  '#45aaf2',      // 6 blue
+  '#a55eea',      // 7 purple
+  '#fd9644',      // 8 amber
+  '#fc5c65',      // 9 rose
+  '#4b7bec',      // 10 indigo
+];
+
+const EMOJIS = ['🌟','🦊','🐰','🦁','🐸','🦋','🐳','🦄','🐣','🌈','⭐'];
+
+let targetNumber = 1;
+
+// ── Web Audio for simple tones ──
+let audioCtx;
+function getAudio() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+function playTone(freq, dur, type='sine', vol=0.25) {
+  try {
+    const ac = getAudio();
+    const osc = ac.createOscillator();
+    const gain = ac.createGain();
+    osc.connect(gain); gain.connect(ac.destination);
+    osc.type = type; osc.frequency.value = freq;
+    gain.gain.setValueAtTime(vol, ac.currentTime);
+    gain.gain.exponentialRampToValueAtTime(.0001, ac.currentTime + dur);
+    osc.start(); osc.stop(ac.currentTime + dur);
+  } catch(e) {}
+}
+function playCorrect() {
+  [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => playTone(f, .18), i * 80));
+}
+function playWrong() {
+  playTone(200, .25, 'sawtooth', .15);
+  setTimeout(() => playTone(160, .25, 'sawtooth', .12), 120);
+}
+
+// ── helpers ──
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function show(id)  { document.getElementById(id).classList.remove('hidden'); }
+function hide(id)  { document.getElementById(id).classList.add('hidden'); }
+
+// ── game flow ──
+function startGame() {
+  targetNumber = Math.floor(Math.random() * 10) + 1;
+
+  // render target screen
+  const disp = document.getElementById('target-display');
+  disp.textContent = targetNumber;
+  disp.style.color = COLORS[targetNumber];
+
+  // dots (visual count)
+  const dotsRow = document.getElementById('dots-row');
+  dotsRow.innerHTML = '';
+  for (let i = 0; i < targetNumber; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot';
+    d.style.background = COLORS[targetNumber];
+    d.style.animationDelay = (i * 50) + 'ms';
+    dotsRow.appendChild(d);
+  }
+
+  hide('screen-win');
+  hide('screen-pick');
+  show('screen-show');
+}
+
+function goToPick() {
+  hide('screen-show');
+
+  // build shuffled grid
+  const grid = document.getElementById('number-grid');
+  grid.innerHTML = '';
+  const nums = shuffle([1,2,3,4,5,6,7,8,9,10]);
+  nums.forEach(n => {
+    const btn = document.createElement('button');
+    btn.className = 'num-btn';
+    btn.textContent = n;
+    btn.style.background = COLORS[n];
+    btn.setAttribute('aria-label', 'Số ' + n);
+    btn.onclick = () => pickNumber(n, btn);
+    grid.appendChild(btn);
+  });
+
+  const label = document.getElementById('pick-label');
+  label.innerHTML = `Bấm vào số <strong>${targetNumber}</strong> nào!`;
+
+  show('screen-pick');
+}
+
+function pickNumber(n, btn) {
+  if (n === targetNumber) {
+    btn.classList.add('correct');
+    playCorrect();
+    setTimeout(showWin, 600);
+  } else {
+    btn.classList.add('wrong');
+    playWrong();
+  }
+}
+
+function showWin() {
+  hide('screen-pick');
+
+  const emojis = ['🎉','🌟','🥳','🦄','🎊','🌈','⭐','🐸','🎈'];
+  document.getElementById('win-emoji').textContent =
+    emojis[Math.floor(Math.random() * emojis.length)];
+
+  document.getElementById('win-sub').textContent =
+    `Con đã tìm được số ${targetNumber}! Cố lên nhé!`;
+
+  launchConfetti();
+  show('screen-win');
+}
+
+function launchConfetti() {
+  const wrap = document.getElementById('confetti');
+  wrap.innerHTML = '';
+  const confettiColors = ['#ff6b6b','#ffd32a','#26de81','#45aaf2','#a55eea','#ff9f43'];
+  for (let i = 0; i < 60; i++) {
+    const c = document.createElement('div');
+    c.className = 'confetto';
+    c.style.left = Math.random() * 100 + 'vw';
+    c.style.background = confettiColors[Math.floor(Math.random() * confettiColors.length)];
+    c.style.animationDuration = (.8 + Math.random() * 1.4) + 's';
+    c.style.animationDelay = (Math.random() * .6) + 's';
+    c.style.transform = `rotate(${Math.random()*360}deg)`;
+    wrap.appendChild(c);
+  }
+  // clean up after animation
+  setTimeout(() => { wrap.innerHTML = ''; }, 2500);
+}
+
+// ── start ──
+startGame();
+</script>
+</body>
+</html>
