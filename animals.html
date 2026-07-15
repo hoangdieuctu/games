@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>100 Động Vật</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2326de81'/%3E%3Ctext x='16' y='23' text-anchor='middle' font-size='20'%3E🐾%3C/text%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  width: 100%; height: 100%;
+  font-family: 'Nunito', sans-serif;
+  background: #f0faf4;
+  overflow: hidden;
+  touch-action: manipulation;
+  user-select: none;
+  position: fixed;
+}
+.screen { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; }
+.screen.hidden { display: none; }
+
+/* ── Header ── */
+.browse-header {
+  width: 100%; padding: 12px 16px 8px;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-shrink: 0;
+  background: rgba(255,255,255,.85);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(0,0,0,.06);
+}
+.browse-title { font-size: clamp(18px,3.5vmin,26px); font-weight: 900; color: #222; }
+.browse-count { font-size: clamp(12px,2.5vmin,18px); font-weight: 800; color: #26de81; }
+
+/* ── Category tabs ── */
+.cat-tabs {
+  display: flex; gap: 8px; overflow-x: auto; padding: 10px 12px;
+  flex-shrink: 0; width: 100%; scrollbar-width: none;
+}
+.cat-tabs::-webkit-scrollbar { display: none; }
+.cat-tab {
+  flex-shrink: 0;
+  background: #fff; border: 2px solid #ddd; border-radius: 100px;
+  padding: clamp(6px,1.5vmin,10px) clamp(12px,3vmin,20px);
+  font-family: inherit; font-size: clamp(12px,2.5vmin,17px); font-weight: 800;
+  cursor: pointer; color: #666; white-space: nowrap;
+  transition: all .15s;
+}
+.cat-tab.active { background: #26de81; border-color: #26de81; color: #fff; box-shadow: 0 3px 10px rgba(38,222,129,.35); }
+
+/* ── Grid ── */
+.animal-grid {
+  flex: 1; overflow-y: auto; width: 100%;
+  padding: 10px 10px 20px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-auto-rows: 1fr;
+  gap: clamp(8px,2vmin,14px);
+  align-content: start;
+  -webkit-overflow-scrolling: touch;
+}
+.animal-grid::before {
+  content: '';
+  width: 0;
+  padding-bottom: 100%;
+  grid-row: 1 / 1;
+  grid-column: 1 / 1;
+}
+.animal-grid > *:first-child {
+  grid-row: 1 / 1;
+  grid-column: 1 / 1;
+}
+.animal-grid::-webkit-scrollbar { width: 3px; }
+.animal-grid::-webkit-scrollbar-thumb { background: #ccc; border-radius: 2px; }
+
+/* ── Card ── */
+.animal-card {
+  background: #fff; border-radius: 14px;
+  box-shadow: 0 3px 10px rgba(0,0,0,.09);
+  overflow: hidden; cursor: pointer;
+  border: 3px solid transparent;
+  transition: transform .13s, box-shadow .13s, border-color .13s;
+  position: relative;
+  /* force square via padding trick */
+  width: 100%;
+  padding-bottom: 100%;
+  height: 0;
+}
+.animal-card:active { transform: scale(1.06); border-color: #26de81; box-shadow: 0 8px 22px rgba(0,0,0,.14); }
+
+.img-wrap {
+  position: absolute; inset: 0;
+  background: #f0f0f0;
+  display: flex; align-items: center; justify-content: center;
+}
+.img-wrap img {
+  width: 100%; height: 100%; object-fit: cover;
+  opacity: 0; transition: opacity .4s;
+  position: absolute; inset: 0;
+}
+.img-wrap img.loaded { opacity: 1; }
+.img-fallback {
+  font-size: clamp(32px,10vmin,60px);
+  z-index: 0;
+}
+
+.animal-name {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  padding: 20px 4px 6px;
+  font-size: clamp(10px,2vmin,14px); font-weight: 800;
+  text-align: center; color: #fff; line-height: 1.2;
+  background: linear-gradient(transparent, rgba(0,0,0,.6));
+  z-index: 2;
+}
+
+/* ── Modal ── */
+#modal {
+  position: fixed; inset: 0; z-index: 100;
+  background: rgba(0,0,0,.65);
+  backdrop-filter: blur(8px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 16px;
+  animation: fade-in .18s ease;
+}
+#modal.hidden { display: none; }
+@keyframes fade-in { from { opacity:0; } to { opacity:1; } }
+
+.modal-card {
+  background: #fff; border-radius: 22px;
+  width: 96vw;
+  height: 88vh;
+  max-height: 88vh;
+  overflow: hidden;
+  box-shadow: 0 24px 64px rgba(0,0,0,.35);
+  animation: pop-up .22s cubic-bezier(.34,1.56,.64,1);
+  display: flex; flex-direction: row;
+}
+@keyframes pop-up {
+  from { transform: scale(.82) translateY(24px); opacity:0; }
+  to   { transform: scale(1); opacity:1; }
+}
+
+/* left: image */
+.modal-img-area {
+  flex: 0 0 62%;
+  background: #111;
+  position: relative;
+  overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 22px 0 0 22px;
+}
+.modal-img-area .fallback {
+  font-size: clamp(60px,10vmin,100px); line-height: 1;
+}
+.modal-img-area img {
+  width: 100%; height: 100%;
+  object-fit: contain; display: block;
+  opacity: 0; transition: opacity .35s;
+  position: absolute; inset: 0;
+}
+.modal-img-area img.loaded { opacity: 1; }
+
+/* right: info */
+.modal-body {
+  flex: 1; padding: 24px 22px 20px;
+  display: flex; flex-direction: column;
+  overflow-y: auto;
+}
+.modal-vi   { font-size: clamp(22px,4vmin,38px); font-weight: 900; color: #111; line-height: 1; }
+.modal-en   { font-size: clamp(13px,2.5vmin,20px); font-weight: 700; color: #26de81; margin-top: 4px; }
+.modal-desc { font-size: clamp(12px,2vmin,15px); color: #555; margin-top: 10px; line-height: 1.6; }
+.modal-info {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 8px; margin-top: 14px; flex: 1; align-content: start;
+}
+.info-item {
+  background: #f8f8f8; border-radius: 12px;
+  padding: 10px 12px;
+  display: flex; flex-direction: column; gap: 3px;
+}
+.info-label {
+  font-size: clamp(9px,1.5vmin,11px); font-weight: 800;
+  color: #aaa; text-transform: uppercase; letter-spacing: .08em;
+}
+.info-value {
+  font-size: clamp(11px,1.8vmin,14px); font-weight: 700; color: #333; line-height: 1.35;
+}
+.modal-tag  {
+  display: inline-block; margin-top: 10px;
+  background: #f0faf4; border-radius: 100px;
+  padding: 4px 14px; font-size: clamp(11px,2vmin,15px); font-weight: 800; color: #26de81;
+}
+
+.modal-nav { display: flex; gap: 10px; margin-top: 14px; }
+.btn-nav {
+  flex: 1; background: #f5f5f5; color: #444; border: none;
+  border-radius: 100px; padding: clamp(10px,2vmin,15px);
+  font-family: inherit; font-size: clamp(14px,2.5vmin,18px); font-weight: 800;
+  cursor: pointer; transition: background .12s;
+}
+.btn-nav:active { background: #e8e8e8; }
+.btn-close {
+  margin-top: 10px; width: 100%;
+  background: #26de81; color: #fff; border: none;
+  border-radius: 100px; padding: clamp(12px,2vmin,16px);
+  font-family: inherit; font-size: clamp(15px,3vmin,20px); font-weight: 800;
+  cursor: pointer; box-shadow: 0 4px 0 #1ab36a;
+}
+.btn-close:active { transform: scale(.97); }
+</style>
+</head>
+<body>
+
+<div class="screen" id="screen-browse">
+  <div class="browse-header">
+    <div class="browse-title">🐾 100 Động Vật</div>
+    <div class="browse-count" id="browse-count">100 con</div>
+  </div>
+  <div class="cat-tabs" id="cat-tabs"></div>
+  <div class="animal-grid" id="animal-grid"></div>
+</div>
+
+<div id="modal" class="hidden" onclick="handleModalBg(event)">
+  <div class="modal-card" onclick="event.stopPropagation()">
+    <div class="modal-img-area" id="modal-img-area"></div>
+    <div class="modal-body">
+      <div class="modal-vi"  id="modal-vi"></div>
+      <div class="modal-en"  id="modal-en"></div>
+      <div class="modal-desc" id="modal-desc"></div>
+      <div class="modal-info">
+        <div class="info-item"><div class="info-label">🏠 Nơi sống</div><div class="info-value" id="modal-habitat"></div></div>
+        <div class="info-item"><div class="info-label">🍽️ Thức ăn</div><div class="info-value" id="modal-food"></div></div>
+        <div class="info-item"><div class="info-label">📏 Kích thước</div><div class="info-value" id="modal-size"></div></div>
+        <div class="info-item"><div class="info-label">⭐ Đặc điểm</div><div class="info-value" id="modal-fact"></div></div>
+      </div>
+      <div class="modal-tag"  id="modal-tag"></div>
+      <div class="modal-nav">
+        <button class="btn-nav" onclick="nav(-1)">◀ Trước</button>
+        <button class="btn-nav" onclick="nav(1)">Tiếp ▶</button>
+      </div>
+      <button class="btn-close" onclick="closeModal()">Đóng ✕</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const ANIMALS = [
+  // ── Thú ──
+  {vi:'Chó',          en:'Dog',               emoji:'🐕',  cat:'Thú',       desc:'Bạn thân nhất của con người, trung thành và thông minh.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7a/Huskiesatrest.jpg/500px-Huskiesatrest.jpg',
+   habitat:'Sống cùng con người toàn thế giới', food:'Ăn tạp', size:'Cao 20–70cm, nặng 2–90kg', fact:'Khứu giác nhạy hơn con người tới 100.000 lần.'},
+  {vi:'Mèo',          en:'Cat',               emoji:'🐈',  cat:'Thú',       desc:'Mèo thích leo trèo, nằm ngủ và săn chuột.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Cat_August_2010-4.jpg/500px-Cat_August_2010-4.jpg',
+   habitat:'Sống cùng con người toàn thế giới', food:'Ăn thịt', size:'Dài 45–50cm, nặng 3–5kg', fact:'Mèo có thể ngủ tới 16 tiếng mỗi ngày.'},
+  {vi:'Sư Tử',        en:'Lion',              emoji:'🦁',  cat:'Thú',       desc:'Vua của muôn loài, sống ở thảo nguyên châu Phi.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a6/020_The_lion_king_Snyggve_in_the_Serengeti_National_Park_Photo_by_Giles_Laurent.jpg/500px-020_The_lion_king_Snyggve_in_the_Serengeti_National_Park_Photo_by_Giles_Laurent.jpg',
+   habitat:'Đồng cỏ và thảo nguyên châu Phi', food:'Ăn thịt', size:'Dài 1,7–2,5m, nặng 120–250kg', fact:'Sư tử đực có bờm oai vệ để thu hút con cái.'},
+  {vi:'Hổ',           en:'Tiger',             emoji:'🐯',  cat:'Thú',       desc:'Loài mèo lớn nhất thế giới với sọc đen đặc trưng.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b0/Bengal_tiger_%28Panthera_tigris_tigris%29_female_3_crop.jpg/500px-Bengal_tiger_%28Panthera_tigris_tigris%29_female_3_crop.jpg',
+   habitat:'Rừng nhiệt đới và ôn đới châu Á', food:'Ăn thịt', size:'Dài 2–3,3m, nặng 100–300kg', fact:'Không có hai con hổ nào có vằn giống nhau hoàn toàn.'},
+  {vi:'Voi',          en:'Elephant',          emoji:'🐘',  cat:'Thú',       desc:'Loài động vật có vú lớn nhất trên cạn.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/3/37/African_Bush_Elephant.jpg/500px-African_Bush_Elephant.jpg',
+   habitat:'Đồng cỏ và rừng châu Phi, châu Á', food:'Ăn thực vật', size:'Cao 2,5–4m, nặng 3.000–6.000kg', fact:'Voi có thể nhận ra mình trong gương — rất ít loài làm được vậy.'},
+  {vi:'Hươu Cao Cổ',  en:'Giraffe',           emoji:'🦒',  cat:'Thú',       desc:'Động vật cao nhất thế giới với chiếc cổ dài.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Giraffe_Mikumi_National_Park.jpg/500px-Giraffe_Mikumi_National_Park.jpg',
+   habitat:'Đồng cỏ và rừng thưa châu Phi', food:'Ăn thực vật', size:'Cao 4,5–6m, nặng 750–1.200kg', fact:'Hươu cao cổ là động vật trên cạn cao nhất thế giới.'},
+  {vi:'Ngựa Vằn',     en:'Zebra',             emoji:'🦓',  cat:'Thú',       desc:'Họ hàng của ngựa với bộ lông sọc đen trắng.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/9/96/Plains_Zebra_Equus_quagga_cropped.jpg/500px-Plains_Zebra_Equus_quagga_cropped.jpg',
+   habitat:'Đồng cỏ và thảo nguyên châu Phi', food:'Ăn cỏ', size:'Cao 1,2–1,4m, nặng 200–450kg', fact:'Sọc của mỗi con ngựa vằn là duy nhất như dấu vân tay.'},
+  {vi:'Gấu Bắc Cực',  en:'Polar Bear',        emoji:'🐻‍❄️',cat:'Vùng Lạnh', desc:'Gấu trắng khổng lồ sống ở vùng Bắc Cực băng giá.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Polar_Bear_-_Alaska_%28cropped%29.jpg/500px-Polar_Bear_-_Alaska_%28cropped%29.jpg',
+   habitat:'Băng biển Bắc Cực', food:'Ăn thịt', size:'Dài 2–3m, nặng 350–700kg', fact:'Gấu Bắc Cực bơi rất giỏi, có thể bơi liên tục hàng trăm km.'},
+  {vi:'Gấu Trúc',     en:'Giant Panda',       emoji:'🐼',  cat:'Thú',       desc:'Gấu trúc đen trắng chỉ ăn tre và sống ở Trung Quốc.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/Grosser_Panda.JPG/500px-Grosser_Panda.JPG',
+   habitat:'Rừng tre núi cao Trung Quốc', food:'Ăn thực vật', size:'Dài 1,5–1,8m, nặng 70–125kg', fact:'Gấu trúc ăn tre tới 12–15 tiếng mỗi ngày.'},
+  {vi:'Khỉ',          en:'Monkey',            emoji:'🐒',  cat:'Thú',       desc:'Khỉ rất thông minh, thích leo cây và ăn chuối.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Ubud_Monkey_Family.jpg/500px-Ubud_Monkey_Family.jpg',
+   habitat:'Rừng nhiệt đới châu Á, châu Phi, châu Mỹ', food:'Ăn tạp', size:'Cao 15cm–1m, nặng 0,1–50kg', fact:'Khỉ dùng đá như công cụ để bẻ vỏ hạt cứng.'},
+  {vi:'Tê Giác',      en:'Rhinoceros',        emoji:'🦏',  cat:'Thú',       desc:'Tê giác có chiếc sừng lớn trên mũi và da dày.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b7/Rhino_collage.png/500px-Rhino_collage.png',
+   habitat:'Đồng cỏ và rừng thưa châu Phi, châu Á', food:'Ăn thực vật', size:'Dài 3–4m, nặng 1.000–3.600kg', fact:'Sừng tê giác làm từ keratin — cùng chất với móng tay người.'},
+  {vi:'Hà Mã',        en:'Hippopotamus',      emoji:'🦛',  cat:'Thú',       desc:'Hà mã dành cả ngày ngâm mình dưới nước.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Portrait_Hippopotamus_in_the_water.jpg/500px-Portrait_Hippopotamus_in_the_water.jpg',
+   habitat:'Sông và hồ vùng hạ Sahara châu Phi', food:'Ăn thực vật', size:'Dài 3,5–5m, nặng 1.500–3.200kg', fact:'Hà mã tiết mồ hôi đỏ giúp bảo vệ da khỏi nắng và vi khuẩn.'},
+  {vi:'Lạc Đà',       en:'Camel',             emoji:'🐪',  cat:'Thú',       desc:'Lạc đà có bướu chứa mỡ để sống ở sa mạc khô hạn.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/4/43/07._Camel_Profile%2C_near_Silverton%2C_NSW%2C_07.07.2007.jpg/500px-07._Camel_Profile%2C_near_Silverton%2C_NSW%2C_07.07.2007.jpg',
+   habitat:'Sa mạc châu Phi và châu Á', food:'Ăn thực vật', size:'Cao 1,8–2m, nặng 400–700kg', fact:'Bướu lạc đà chứa mỡ dự trữ, không phải nước.'},
+  {vi:'Ngựa',         en:'Horse',             emoji:'🐴',  cat:'Thú',       desc:'Ngựa là loài vật gắn bó lâu đời với con người.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/d/de/Nokota_Horses_cropped.jpg/500px-Nokota_Horses_cropped.jpg',
+   habitat:'Đồng cỏ, sống cùng con người toàn cầu', food:'Ăn cỏ', size:'Cao 1,4–1,8m, nặng 380–1.000kg', fact:'Ngựa có thể ngủ đứng nhờ cơ chế khóa chân đặc biệt.'},
+  {vi:'Bò',           en:'Cow',               emoji:'🐄',  cat:'Thú',       desc:'Bò cho chúng ta sữa và thịt mỗi ngày.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Cow_%28Fleckvieh_breed%29_Oeschinensee_Slaunger_2009-07-07.jpg/500px-Cow_%28Fleckvieh_breed%29_Oeschinensee_Slaunger_2009-07-07.jpg',
+   habitat:'Đồng cỏ, nuôi ở khắp nơi trên thế giới', food:'Ăn cỏ', size:'Cao 1,3–1,5m, nặng 400–900kg', fact:'Bò có bốn ngăn dạ dày để tiêu hóa cỏ hiệu quả.'},
+  {vi:'Cừu',          en:'Sheep',             emoji:'🐑',  cat:'Thú',       desc:'Cừu cho len làm quần áo ấm áp.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Flock_of_sheep.jpg/500px-Flock_of_sheep.jpg',
+   habitat:'Đồng cỏ và núi, nuôi toàn cầu', food:'Ăn cỏ', size:'Cao 60–120cm, nặng 45–160kg', fact:'Cừu có thể nhận ra và nhớ khuôn mặt bạn bè trong nhiều năm.'},
+  {vi:'Dê',           en:'Goat',              emoji:'🐐',  cat:'Thú',       desc:'Dê leo trèo rất giỏi trên những vách đá dốc.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b2/Hausziege_04.jpg/500px-Hausziege_04.jpg',
+   habitat:'Núi và đồng cỏ, nuôi toàn cầu', food:'Ăn thực vật', size:'Cao 45–100cm, nặng 20–140kg', fact:'Dê là loài đầu tiên được con người thuần hóa làm gia súc.'},
+  {vi:'Thỏ',          en:'Rabbit',            emoji:'🐰',  cat:'Thú',       desc:'Thỏ có đôi tai dài và nhảy rất xa.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/Oryctolagus_cuniculus_Rcdo.jpg/500px-Oryctolagus_cuniculus_Rcdo.jpg',
+   habitat:'Đồng cỏ, rừng thưa, bán sa mạc', food:'Ăn thực vật', size:'Dài 30–50cm, nặng 1–3kg', fact:'Thỏ có thể quay mắt 360 độ mà không cần xoay đầu.'},
+  {vi:'Sói',          en:'Wolf',              emoji:'🐺',  cat:'Thú',       desc:'Sói sống thành bầy và rú vào ban đêm.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/6/68/Eurasian_wolf_2.jpg/500px-Eurasian_wolf_2.jpg',
+   habitat:'Rừng, đồng cỏ, tundra Bắc bán cầu', food:'Ăn thịt', size:'Dài 1–1,6m, nặng 20–80kg', fact:'Tiếng hú của sói có thể được nghe từ xa tới 10km.'},
+  {vi:'Cáo',          en:'Fox',               emoji:'🦊',  cat:'Thú',       desc:'Cáo tinh khôn và nhanh nhẹn.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/Vulpes_vulpes_ssp_fulvus.jpg/500px-Vulpes_vulpes_ssp_fulvus.jpg',
+   habitat:'Rừng, đồng cỏ và vùng ngoại ô toàn cầu', food:'Ăn tạp', size:'Dài 45–90cm, nặng 3–11kg', fact:'Cáo dùng từ trường Trái Đất để định vị khi săn mồi.'},
+  {vi:'Gấu',          en:'Bear',              emoji:'🐻',  cat:'Thú',       desc:'Gấu ngủ đông suốt mùa đông lạnh.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Ours_brun_parcanimalierpyrenees_1.jpg/500px-Ours_brun_parcanimalierpyrenees_1.jpg',
+   habitat:'Rừng và núi Bắc Mỹ, châu Á, châu Âu', food:'Ăn tạp', size:'Dài 1,5–2,5m, nặng 100–700kg', fact:'Gấu nâu có thể ngửi mùi từ khoảng cách hơn 30km.'},
+  {vi:'Sóc',          en:'Red squirrel',      emoji:'🐿️', cat:'Thú',       desc:'Sóc trữ hạt dẻ cho mùa đông và leo cây rất nhanh.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/Squirrel_posing.jpg/500px-Squirrel_posing.jpg',
+   habitat:'Rừng lá kim châu Âu và châu Á', food:'Ăn thực vật', size:'Dài 18–24cm, nặng 250–340g', fact:'Sóc đỏ chôn hạt để dự trữ đông nhưng thường quên chỗ giấu.'},
+  {vi:'Nhím',         en:'Hedgehog',          emoji:'🦔',  cat:'Thú',       desc:'Nhím có gai nhọn để bảo vệ cơ thể.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/7/72/Igel.JPG/500px-Igel.JPG',
+   habitat:'Đồng cỏ, rừng thưa châu Âu và châu Á', food:'Ăn tạp', size:'Dài 15–25cm, nặng 400–1.200g', fact:'Nhím cuộn tròn thành bóng gai khi gặp nguy hiểm.'},
+  {vi:'Kangaroo',     en:'Kangaroo',          emoji:'🦘',  cat:'Thú',       desc:'Kangaroo mẹ mang con trong túi bụng, nhảy rất xa.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/d/df/Forester_kangaroo_%28Macropus_giganteus_tasmaniensis%29_juvenile_hopping_Esk_Valley.jpg/500px-Forester_kangaroo_%28Macropus_giganteus_tasmaniensis%29_juvenile_hopping_Esk_Valley.jpg',
+   habitat:'Đồng cỏ và bụi rậm Australia', food:'Ăn cỏ', size:'Cao 1–2m, nặng 18–90kg', fact:'Kangaroo không thể đi lùi — chỉ nhảy về phía trước.'},
+  {vi:'Koala',        en:'Koala',             emoji:'🐨',  cat:'Thú',       desc:'Koala ngủ nhiều và chỉ ăn lá bạch đàn.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/4/49/Koala_climbing_tree.jpg/500px-Koala_climbing_tree.jpg',
+   habitat:'Rừng bạch đàn Australia', food:'Ăn thực vật', size:'Dài 60–85cm, nặng 4–15kg', fact:'Koala ngủ tới 22 tiếng mỗi ngày để tiêu hóa lá bạch đàn độc.'},
+  {vi:'Alpaca',       en:'Alpaca',            emoji:'🦙',  cat:'Thú',       desc:'Alpaca cho lông mịn để dệt quần áo ấm.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/Alpaca_in_Higashiyama_Zoo_-_1.jpg/500px-Alpaca_in_Higashiyama_Zoo_-_1.jpg',
+   habitat:'Vùng núi cao Andes Nam Mỹ', food:'Ăn cỏ', size:'Cao 80–100cm, nặng 50–80kg', fact:'Lông alpaca ấm hơn lông cừu và không gây dị ứng.'},
+  {vi:'Bison',        en:'Bison',             emoji:'🦬',  cat:'Thú',       desc:'Bison là loài trâu rừng khổng lồ ở châu Mỹ.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/American_bison_k5680-1.jpg/500px-American_bison_k5680-1.jpg',
+   habitat:'Đồng cỏ Bắc Mỹ và châu Âu', food:'Ăn cỏ', size:'Dài 2,1–3,5m, nặng 400–1.000kg', fact:'Bò rừng bison là động vật trên cạn nặng nhất Bắc Mỹ.'},
+  {vi:'Báo',          en:'Leopard',           emoji:'🐆',  cat:'Thú',       desc:'Báo có đốm đen và leo cây rất giỏi.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/7/70/African_leopard_male_%28cropped%29.jpg/500px-African_leopard_male_%28cropped%29.jpg',
+   habitat:'Rừng và đồng cỏ châu Phi, châu Á', food:'Ăn thịt', size:'Dài 1–1,9m, nặng 30–90kg', fact:'Báo leo cây rất giỏi và thường kéo con mồi lên cây.'},
+  {vi:'Báo Tuyết',    en:'Snow leopard',      emoji:'🐆',  cat:'Thú',       desc:'Báo tuyết sống trên dãy núi cao lạnh giá ở châu Á.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Irbis4.JPG/500px-Irbis4.JPG',
+   habitat:'Núi cao Trung Á và Himalaya', food:'Ăn thịt', size:'Dài 1–1,3m, nặng 22–55kg', fact:'Báo tuyết dùng đuôi dày để quấn quanh người giữ ấm.'},
+  {vi:'Báo Cheetah',  en:'Cheetah',           emoji:'🐆',  cat:'Thú',       desc:'Cheetah là động vật chạy nhanh nhất thế giới.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/9/92/Male_cheetah_facing_left_in_South_Africa.jpg/500px-Male_cheetah_facing_left_in_South_Africa.jpg',
+   habitat:'Đồng cỏ và thảo nguyên châu Phi', food:'Ăn thịt', size:'Dài 1,1–1,5m, nặng 21–72kg', fact:'Cheetah là loài động vật trên cạn chạy nhanh nhất — đạt 120km/h.'},
+  {vi:'Khỉ Đột',      en:'Gorilla',           emoji:'🦍',  cat:'Thú',       desc:'Khỉ đột là loài vượn lớn mạnh nhất trên cạn.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/b/bb/Gorille_des_plaines_de_l%27ouest_%C3%A0_l%27Espace_Zoologique.jpg/500px-Gorille_des_plaines_de_l%27ouest_%C3%A0_l%27Espace_Zoologique.jpg',
+   habitat:'Rừng nhiệt đới trung và tây châu Phi', food:'Ăn thực vật', size:'Cao 1,3–1,8m, nặng 70–200kg', fact:'Gorilla có ADN tương đồng tới 98,3% với con người.'},
+  {vi:'Tinh Tinh',    en:'Chimpanzee',        emoji:'🦧',  cat:'Thú',       desc:'Tinh tinh rất thông minh và gần gũi với con người.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/015_Chimpanzee_at_Kibale_forest_National_Park_Photo_by_Giles_Laurent.jpg/500px-015_Chimpanzee_at_Kibale_forest_National_Park_Photo_by_Giles_Laurent.jpg',
+   habitat:'Rừng nhiệt đới và thảo nguyên rừng châu Phi', food:'Ăn tạp', size:'Cao 70–130cm, nặng 25–70kg', fact:'Tinh tinh biết chế tạo và sử dụng công cụ thô sơ.'},
+  {vi:'Nai Sừng Tấm', en:'Moose',             emoji:'🫎',  cat:'Thú',       desc:'Nai sừng tấm là loài hươu lớn nhất thế giới.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Alaska_moose.jpg/500px-Alaska_moose.jpg',
+   habitat:'Rừng phương Bắc Bắc Mỹ, châu Âu, châu Á', food:'Ăn thực vật', size:'Cao 1,5–2m, nặng 300–700kg', fact:'Nai sừng tấm là loài hươu nai lớn nhất thế giới.'},
+  {vi:'Hươu',         en:'Reindeer',          emoji:'🦌',  cat:'Vùng Lạnh', desc:'Tuần lộc kéo xe ông già Noel trong đêm Giáng Sinh.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/9/96/Reinbukken_p%C3%A5_frisk_gr%C3%B8nt_beite._-_panoramio.jpg/500px-Reinbukken_p%C3%A5_frisk_gr%C3%B8nt_beite._-_panoramio.jpg',
+   habitat:'Tundra và rừng phương Bắc Bắc Cực', food:'Ăn thực vật', size:'Cao 0,9–1,4m, nặng 60–300kg', fact:'Tuần lộc là loài hươu duy nhất mà cả đực và cái đều có sừng.'},
+  {vi:'Cáo Bắc Cực',  en:'Arctic fox',        emoji:'🦊',  cat:'Vùng Lạnh', desc:'Cáo bắc cực đổi lông trắng để ngụy trang trong tuyết.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/d/dc/Vulpes_lagopus_in_Iceland_%28cropped_3%29.jpg/500px-Vulpes_lagopus_in_Iceland_%28cropped_3%29.jpg',
+   habitat:'Tundra Bắc Cực', food:'Ăn tạp', size:'Dài 45–68cm, nặng 1,5–9kg', fact:'Cáo Bắc Cực đổi màu lông từ nâu mùa hè sang trắng mùa đông.'},
+  {vi:'Hải Mã',       en:'Walrus',            emoji:'🦭',  cat:'Vùng Lạnh', desc:'Hải mã có hai ngà dài và lớp mỡ dày để chịu lạnh.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Walrus_in_the_Russian_Arctic_National_Park%2C_Novaya_Zemlya_2015-2.jpg/500px-Walrus_in_the_Russian_Arctic_National_Park%2C_Novaya_Zemlya_2015-2.jpg',
+   habitat:'Băng biển và bờ biển Bắc Cực', food:'Ăn thịt', size:'Dài 2,2–3,6m, nặng 400–1.700kg', fact:'Hải mã dùng ngà để kéo cơ thể lên băng và đánh nhau.'},
+  {vi:'Gấu Trúc Đỏ',  en:'Red panda',         emoji:'🦊',  cat:'Thú',       desc:'Gấu trúc đỏ nhỏ xinh, sống trên cây ở Himalaya.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fd/Red_Panda%2C_Gentle_Tree-Dweller_of_the_Himalayas.jpg/500px-Red_Panda%2C_Gentle_Tree-Dweller_of_the_Himalayas.jpg',
+   habitat:'Rừng núi Himalaya và Tây Nam Trung Quốc', food:'Ăn tạp', size:'Dài 50–65cm, nặng 3–6kg', fact:'Gấu trúc đỏ có cổ tay đặc biệt như ngón tay cái để cầm tre.'},
+  {vi:'Vượn',         en:'Gibbon',            emoji:'🐒',  cat:'Rừng',      desc:'Vượn đu từ cành này sang cành khác rất nhanh.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/0/03/Hylobates_lar_-_Kaeng_Krachan_WB.jpg/500px-Hylobates_lar_-_Kaeng_Krachan_WB.jpg',
+   habitat:'Rừng nhiệt đới Đông Nam Á', food:'Ăn tạp', size:'Cao 45–90cm, nặng 4–13kg', fact:'Vượn đu chuyền cây với tốc độ lên tới 55km/h.'},
+  {vi:'Vượn Cáo',     en:'Ring-tailed lemur', emoji:'🐒',  cat:'Thú',       desc:'Vượn cáo có chiếc đuôi sọc đen trắng rất nổi bật.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/Ring-tailed_lemur_%28Lemur_catta%29.jpg/500px-Ring-tailed_lemur_%28Lemur_catta%29.jpg',
+   habitat:'Rừng và bụi rậm Madagascar', food:'Ăn tạp', size:'Dài 38–46cm, nặng 2–4kg', fact:'Vượn cáo dùng đuôi sọc nổi bật để liên lạc trong đàn.'},
+  {vi:'Chồn Meerkat', en:'Meerkat',           emoji:'🦦',  cat:'Thú',       desc:'Meerkat đứng thẳng canh gác và sống thành nhóm.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Meerkat_%28Suricata_suricatta%29_Tswalu.jpg/500px-Meerkat_%28Suricata_suricatta%29_Tswalu.jpg',
+   habitat:'Sa mạc Kalahari và Namib, châu Phi', food:'Ăn tạp', size:'Dài 24–35cm, nặng 620–970g', fact:'Meerkat miễn dịch với nọc bọ cạp và rắn độc.'},
+  {vi:'Capybara',     en:'Capybara',          emoji:'🐾',  cat:'Thú',       desc:'Capybara là loài gặm nhấm lớn nhất thế giới.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/7/71/Capybaracropped.jpg/500px-Capybaracropped.jpg',
+   habitat:'Đồng cỏ và rừng ven nước Nam Mỹ', food:'Ăn thực vật', size:'Dài 1–1,3m, nặng 35–66kg', fact:'Capybara là loài gặm nhấm lớn nhất thế giới.'},
+  {vi:'Thú Mỏ Vịt',   en:'Platypus',          emoji:'🦫',  cat:'Thú',       desc:'Thú mỏ vịt có mỏ như vịt nhưng là thú có vú.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Duck-billed_platypus_%28Ornithorhynchus_anatinus%29_Scottsdale.jpg/500px-Duck-billed_platypus_%28Ornithorhynchus_anatinus%29_Scottsdale.jpg',
+   habitat:'Sông suối miền đông Australia', food:'Ăn thịt', size:'Dài 40–60cm, nặng 0,7–2,4kg', fact:'Thú mỏ vịt là một trong số ít thú có vú đẻ trứng.'},
+  {vi:'Lừa',          en:'Donkey',            emoji:'🫏',  cat:'Thú',       desc:'Lừa là loài vật cần mẫn, mang đồ không mệt.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Donkey_in_Clovelly%2C_North_Devon%2C_England.jpg/500px-Donkey_in_Clovelly%2C_North_Devon%2C_England.jpg',
+   habitat:'Vùng khô hạn, nuôi toàn cầu', food:'Ăn thực vật', size:'Cao 0,9–1,3m, nặng 80–480kg', fact:'Lừa có thể nhớ đường đi và bản đồ địa hình rất tốt.'},
+  {vi:'Lợn Rừng',     en:'Wild boar',         emoji:'🐗',  cat:'Thú',       desc:'Lợn rừng hung hăng và có răng nanh dài.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d2/Wildschwein%2C_N%C3%A4he_Pulverstampftor_%28cropped%29.jpg/500px-Wildschwein%2C_N%C3%A4he_Pulverstampftor_%28cropped%29.jpg',
+   habitat:'Rừng và đồng cỏ châu Á, châu Âu, châu Phi', food:'Ăn tạp', size:'Dài 1,5–2m, nặng 50–350kg', fact:'Lợn rừng có răng nanh không ngừng mọc dài suốt đời.'},
+  {vi:'Tê Tê',        en:'Pangolin',          emoji:'🐾',  cat:'Thú',       desc:'Tê tê có lớp vảy cứng bảo vệ như áo giáp.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/2/28/Eupholidota.jpg/500px-Eupholidota.jpg',
+   habitat:'Rừng nhiệt đới châu Á và châu Phi', food:'Ăn thịt', size:'Dài 30cm–1m, nặng 2–33kg', fact:'Tê tê là loài thú bị buôn lậu nhiều nhất thế giới.'},
+  {vi:'Heo Vòi',      en:'Tapir',             emoji:'🐗',  cat:'Rừng',      desc:'Heo vòi có cái vòi ngắn dùng để hái lá và tắm.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6c/Tapiridae.png/500px-Tapiridae.png',
+   habitat:'Rừng nhiệt đới Nam Mỹ và Đông Nam Á', food:'Ăn thực vật', size:'Dài 1,8–2,5m, nặng 150–320kg', fact:'Heo vòi có mũi dài linh hoạt như vòi voi thu nhỏ.'},
+  {vi:'Wombat',       en:'Wombat',            emoji:'🐾',  cat:'Thú',       desc:'Wombat đào hang sống và có túi như kangaroo.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/Vombatus_ursinus_-Maria_Island_National_Park.jpg/500px-Vombatus_ursinus_-Maria_Island_National_Park.jpg',
+   habitat:'Đồng cỏ, rừng và núi Australia', food:'Ăn thực vật', size:'Dài 70–120cm, nặng 20–35kg', fact:'Wombat là loài duy nhất trên thế giới thải phân hình khối vuông.'},
+  {vi:'Quỷ Tasmania', en:'Tasmanian devil',   emoji:'🐾',  cat:'Thú',       desc:'Quỷ Tasmania có tiếng kêu rùng rợn và hàm rất mạnh.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/4/43/Sarcophilus_harrisii_taranna.jpg/500px-Sarcophilus_harrisii_taranna.jpg',
+   habitat:'Rừng và đồng cỏ Tasmania, Australia', food:'Ăn thịt', size:'Dài 50–80cm, nặng 6–14kg', fact:'Quỷ Tasmania có lực cắn mạnh nhất so với kích thước cơ thể trong loài có túi.'},
+
+  // ── Chim ──
+  {vi:'Đại Bàng',     en:'Bald eagle',        emoji:'🦅',  cat:'Chim',      desc:'Đại bàng bay cao và nhìn rất xa.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/d/db/Bald_eagle_about_to_fly_in_Alaska_%282016%29.jpg/500px-Bald_eagle_about_to_fly_in_Alaska_%282016%29.jpg',
+   habitat:'Ven hồ, sông và bờ biển Bắc Mỹ', food:'Ăn thịt', size:'Sải cánh 1,8–2,3m, nặng 3–6,3kg', fact:'Đại bàng đầu trắng có thể nhìn rõ con mồi từ xa hơn 1,5km.'},
+  {vi:'Vẹt',          en:'Parrot',            emoji:'🦜',  cat:'Chim',      desc:'Vẹt học nói được tiếng người và rất thông minh.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ad/Rainbow_lorikeet_%28Trichoglossus_moluccanus_moluccanus%29_Sydney.jpg/500px-Rainbow_lorikeet_%28Trichoglossus_moluccanus_moluccanus%29_Sydney.jpg',
+   habitat:'Rừng nhiệt đới châu Mỹ, châu Phi, châu Á', food:'Ăn thực vật', size:'Dài 8–100cm, nặng 10g–1,6kg', fact:'Vẹt có thể bắt chước giọng người và học hàng trăm từ.'},
+  {vi:'Chim Cánh Cụt',en:'Penguin',           emoji:'🐧',  cat:'Chim',      desc:'Chim cánh cụt không bay được nhưng bơi rất giỏi.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/Aptenodytes_forsteri_-Snow_Hill_Island%2C_Antarctica_-adults_and_juvenile-8.jpg/500px-Aptenodytes_forsteri_-Snow_Hill_Island%2C_Antarctica_-adults_and_juvenile-8.jpg',
+   habitat:'Bờ biển Nam Cực và Nam bán cầu', food:'Ăn thịt', size:'Cao 30–120cm, nặng 1–40kg', fact:'Chim cánh cụt bơi rất giỏi nhưng không thể bay.'},
+  {vi:'Flamingo',     en:'Flamingo',          emoji:'🦩',  cat:'Chim',      desc:'Flamingo có bộ lông hồng rực rỡ và đứng một chân.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/3/38/Flamingos_Laguna_Colorada.jpg/500px-Flamingos_Laguna_Colorada.jpg',
+   habitat:'Hồ muối và đầm lầy nhiệt đới', food:'Ăn tạp', size:'Cao 90–145cm, nặng 1,8–3,6kg', fact:'Màu hồng của flamingo đến từ sắc tố trong tôm và tảo chúng ăn.'},
+  {vi:'Thiên Nga',    en:'Swan',              emoji:'🦢',  cat:'Chim',      desc:'Thiên nga trắng muốt là biểu tượng của vẻ đẹp.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Mute_Swan_Emsworth2.JPG/500px-Mute_Swan_Emsworth2.JPG',
+   habitat:'Hồ, sông và đầm lầy Bắc bán cầu', food:'Ăn thực vật', size:'Dài 1,4–1,6m, nặng 8–15kg', fact:'Thiên nga kết đôi suốt đời và thường không tái hôn sau khi mất bạn.'},
+  {vi:'Công',         en:'Peacock',           emoji:'🦚',  cat:'Chim',      desc:'Công trống xòe đuôi rực rỡ để thu hút bạn đời.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Peacock_Plumage.jpg/500px-Peacock_Plumage.jpg',
+   habitat:'Rừng và đồng cỏ Nam Á', food:'Ăn tạp', size:'Dài 1,8–2,3m (gồm đuôi), nặng 4–6kg', fact:'Đuôi công đực có thể dài tới 1,5m và xòe ra để thu hút con cái.'},
+  {vi:'Cú',           en:'Owl',               emoji:'🦉',  cat:'Chim',      desc:'Cú hoạt động ban đêm và nhìn rất tốt trong bóng tối.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/5/56/Bubo_bubo_sibiricus_-_01.JPG/500px-Bubo_bubo_sibiricus_-_01.JPG',
+   habitat:'Rừng, đồng cỏ và sa mạc toàn cầu', food:'Ăn thịt', size:'Cao 13–70cm, nặng 30g–4kg', fact:'Cú có thể quay đầu 270 độ mà không cần xoay người.'},
+  {vi:'Cú Tuyết',     en:'Snowy owl',         emoji:'🦉',  cat:'Vùng Lạnh', desc:'Cú tuyết trắng tinh sống ở vùng Bắc Cực lạnh giá.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Bubo_scandiacus_%28Linnaeus%2C_1758%29_Male.jpg/500px-Bubo_scandiacus_%28Linnaeus%2C_1758%29_Male.jpg',
+   habitat:'Tundra Bắc Cực và đồng bằng tuyết phủ', food:'Ăn thịt', size:'Cao 52–71cm, nặng 1,6–3kg', fact:'Cú tuyết có thể phát hiện con mồi ẩn dưới lớp tuyết dày.'},
+  {vi:'Đà Điểu',      en:'Ostrich',           emoji:'🦤',  cat:'Chim',      desc:'Đà điểu là loài chim lớn nhất và chạy nhanh nhất.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/Struthio_Diversity.jpg/500px-Struthio_Diversity.jpg',
+   habitat:'Đồng cỏ và sa mạc châu Phi', food:'Ăn tạp', size:'Cao 2–2,8m, nặng 60–145kg', fact:'Đà điểu là loài chim lớn nhất và chạy nhanh nhất thế giới — đạt 70km/h.'},
+  {vi:'Gà',           en:'Chicken',           emoji:'🐔',  cat:'Chim',      desc:'Gà cho chúng ta trứng ăn mỗi buổi sáng.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/8/84/Male_and_female_chicken_sitting_together.jpg/500px-Male_and_female_chicken_sitting_together.jpg',
+   habitat:'Nuôi toàn cầu, nguồn gốc rừng Đông Nam Á', food:'Ăn tạp', size:'Cao 35–45cm, nặng 1,5–4kg', fact:'Gà là loài gia cầm đông nhất thế giới, hơn 30 tỷ con.'},
+  {vi:'Vịt',          en:'Duck',              emoji:'🦆',  cat:'Chim',      desc:'Vịt bơi giỏi, kêu quạc quạc.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/b/bf/Bucephala-albeola-010.jpg/500px-Bucephala-albeola-010.jpg',
+   habitat:'Hồ, sông và đầm lầy toàn cầu', food:'Ăn tạp', size:'Dài 35–65cm, nặng 0,5–3kg', fact:'Lông vịt có lớp dầu tự nhiên khiến nước không thể thấm vào.'},
+  {vi:'Toucan',       en:'Toucan',            emoji:'🦜',  cat:'Rừng',      desc:'Toucan có chiếc mỏ to màu sắc sặc sỡ.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Toucans_%28Ramphastidae%29.jpg/500px-Toucans_%28Ramphastidae%29.jpg',
+   habitat:'Rừng nhiệt đới Trung và Nam Mỹ', food:'Ăn tạp', size:'Dài 30–65cm, nặng 130–680g', fact:'Mỏ lớn của toucan giúp điều hòa thân nhiệt, không phải để chiến đấu.'},
+  {vi:'Chim Ruồi',    en:'Hummingbird',       emoji:'🐦',  cat:'Rừng',      desc:'Chim ruồi vỗ cánh cực nhanh và hút mật hoa.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7c/Trinidad_and_Tobago_hummingbirds_composite.jpg/500px-Trinidad_and_Tobago_hummingbirds_composite.jpg',
+   habitat:'Rừng và vườn châu Mỹ', food:'Ăn tạp', size:'Dài 6–13cm, nặng 2–20g', fact:'Chim ruồi vỗ cánh tới 80 lần mỗi giây và có thể bay lùi.'},
+  {vi:'Cò',           en:'Stork',             emoji:'🦢',  cat:'Chim',      desc:'Cò trắng bay về mỗi mùa xuân.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/0/06/Ringed_white_stork.jpg/500px-Ringed_white_stork.jpg',
+   habitat:'Đồng cỏ, đầm lầy và nông trại châu Âu, châu Á', food:'Ăn thịt', size:'Cao 95–115cm, nặng 2,3–4,4kg', fact:'Cò trắng di cư hàng nghìn km mỗi năm giữa châu Âu và châu Phi.'},
+  {vi:'Hạc',          en:'Common crane',      emoji:'🦩',  cat:'Chim',      desc:'Hạc là biểu tượng của sự trường thọ và may mắn.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fd/Common_crane_grus_grus.jpg/500px-Common_crane_grus_grus.jpg',
+   habitat:'Đầm lầy và đồng cỏ châu Âu và châu Á', food:'Ăn tạp', size:'Cao 100–130cm, nặng 4–6kg', fact:'Sếu thường kết đôi trọn đời và thực hiện vũ điệu ve vãn công phu.'},
+  {vi:'Ác Là',        en:'Magpie',            emoji:'🐦',  cat:'Chim',      desc:'Ác là đen trắng rất thông minh và nhớ lâu.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b6/Pica_pica_-_Compans_Caffarelli_-_2012-03-16.jpg/500px-Pica_pica_-_Compans_Caffarelli_-_2012-03-16.jpg',
+   habitat:'Rừng, đồng cỏ và đô thị châu Âu, châu Á', food:'Ăn tạp', size:'Dài 40–51cm, nặng 145–257g', fact:'Chim ác là có thể nhận ra mình trong gương — rất hiếm ở loài chim.'},
+  {vi:'Bồ Câu',       en:'Pigeon',            emoji:'🕊️', cat:'Chim',      desc:'Bồ câu là biểu tượng của hòa bình.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/f/ff/Treron_vernans_male_-_Kent_Ridge_Park.jpg/500px-Treron_vernans_male_-_Kent_Ridge_Park.jpg',
+   habitat:'Đô thị và đồng quê toàn cầu', food:'Ăn thực vật', size:'Dài 29–37cm, nặng 260–380g', fact:'Bồ câu có khả năng tìm đường về nhà từ hàng trăm km nhờ từ trường.'},
+
+  // ── Biển ──
+  {vi:'Cá Heo',       en:'Dolphin',           emoji:'🐬',  cat:'Biển',      desc:'Cá heo rất thông minh và thân thiện với người.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Tursiops_truncatus_01.jpg/500px-Tursiops_truncatus_01.jpg',
+   habitat:'Đại dương và biển ấm toàn cầu', food:'Ăn thịt', size:'Dài 1,7–4m, nặng 50–650kg', fact:'Cá heo dùng sóng siêu âm để định vị và giao tiếp với nhau.'},
+  {vi:'Cá Voi Xanh',  en:'Blue whale',        emoji:'🐋',  cat:'Biển',      desc:'Cá voi xanh là động vật lớn nhất từng tồn tại.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/Anim1754_-_Flickr_-_NOAA_Photo_Library.jpg/500px-Anim1754_-_Flickr_-_NOAA_Photo_Library.jpg',
+   habitat:'Đại dương toàn cầu', food:'Ăn thịt', size:'Dài tới 33m, nặng tới 200.000kg', fact:'Cá voi xanh là động vật lớn nhất từng tồn tại trên Trái Đất.'},
+  {vi:'Cá Mập',       en:'Great white shark', emoji:'🦈',  cat:'Biển',      desc:'Cá mập trắng là loài cá săn mồi lớn nhất đại dương.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/5/56/White_shark.jpg/500px-White_shark.jpg',
+   habitat:'Vùng biển ven bờ ôn đới và nhiệt đới', food:'Ăn thịt', size:'Dài 4–6m, nặng 680–2.250kg', fact:'Cá mập trắng có thể phát hiện một giọt máu trong 100 lít nước.'},
+  {vi:'Bạch Tuộc',    en:'Octopus',           emoji:'🐙',  cat:'Biển',      desc:'Bạch tuộc có 8 cánh tay và có thể đổi màu.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/5/57/Octopus2.jpg/500px-Octopus2.jpg',
+   habitat:'Đại dương và biển sâu toàn cầu', food:'Ăn thịt', size:'Sải xúc tu 0,3–9m, nặng 3g–15kg', fact:'Bạch tuộc có ba tim và máu màu xanh.'},
+  {vi:'Cua',          en:'Crab',              emoji:'🦀',  cat:'Biển',      desc:'Cua có càng to và đi ngang rất đặc trưng.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/7/71/Cancer_pagurus.jpg/500px-Cancer_pagurus.jpg',
+   habitat:'Biển, bờ biển và nước ngọt toàn cầu', food:'Ăn tạp', size:'Rộng mai 1cm–60cm, nặng vài gram đến 18kg', fact:'Cua di chuyển chủ yếu theo chiều ngang thay vì đi thẳng.'},
+  {vi:'Tôm Hùm',      en:'Lobster',           emoji:'🦞',  cat:'Biển',      desc:'Tôm hùm là hải sản quý với vỏ cứng và càng to.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/KreeftbijDenOsse.jpg/500px-KreeftbijDenOsse.jpg',
+   habitat:'Đáy biển và rạn san hô toàn cầu', food:'Ăn tạp', size:'Dài 20–60cm, nặng 0,5–20kg', fact:'Tôm hùm có thể tiếp tục lột xác và sinh trưởng gần như không giới hạn.'},
+  {vi:'Cá Ngựa',      en:'Seahorse',          emoji:'🐴',  cat:'Biển',      desc:'Cá ngựa bơi thẳng đứng, con đực mang con trong túi.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/2/25/Hippocampus_hippocampus_%28on_Ascophyllum_nodosum%29.jpg/500px-Hippocampus_hippocampus_%28on_Ascophyllum_nodosum%29.jpg',
+   habitat:'Cỏ biển và rạn san hô vùng nhiệt đới', food:'Ăn thịt', size:'Dài 1,5–35cm, nặng vài gram', fact:'Cá ngựa là loài duy nhất mà con đực mang thai và sinh con.'},
+  {vi:'Sứa',          en:'Jellyfish',         emoji:'🪼',  cat:'Biển',      desc:'Sứa trong suốt và có xúc tu dài để bắt mồi.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Jelly_cc11.jpg/500px-Jelly_cc11.jpg',
+   habitat:'Đại dương toàn cầu từ mặt nước đến đáy sâu', food:'Ăn thịt', size:'Đường kính 1cm–2m, xúc tu dài tới 36m', fact:'Sứa không có não, tim hay xương nhưng tồn tại hơn 500 triệu năm.'},
+  {vi:'Rùa Biển',     en:'Green sea turtle',  emoji:'🐢',  cat:'Biển',      desc:'Rùa biển sống hàng trăm năm và bơi hàng nghìn km.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/Green_sea_turtle_%28Chelonia_mydas%29_Moorea.jpg/500px-Green_sea_turtle_%28Chelonia_mydas%29_Moorea.jpg',
+   habitat:'Đại dương nhiệt đới và cận nhiệt đới', food:'Ăn thực vật', size:'Dài 0,9–1,2m, nặng 68–190kg', fact:'Rùa biển xanh luôn quay về bãi cát nơi chúng nở để đẻ trứng.'},
+  {vi:'Hải Cẩu',      en:'Sea lion',          emoji:'🦭',  cat:'Biển',      desc:'Hải cẩu sống ở biển lạnh và bơi rất giỏi.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/South_American_bull_sea_lion_%28Otaria_flavescens%29.jpg/500px-South_American_bull_sea_lion_%28Otaria_flavescens%29.jpg',
+   habitat:'Bờ biển và đại dương Thái Bình Dương', food:'Ăn thịt', size:'Dài 1,8–3,5m, nặng 50–1.000kg', fact:'Sư tử biển là loài chân kỳ duy nhất có thể đi bằng bốn chân trên cạn.'},
+  {vi:'Cá Đuối Manta', en:'Manta ray',        emoji:'🐠',  cat:'Biển',      desc:'Cá đuối manta có đôi cánh khổng lồ lướt dưới đại dương.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/Dharavandhoo_Thila_-_Manata_Black_Pearl.JPG/500px-Dharavandhoo_Thila_-_Manata_Black_Pearl.JPG',
+   habitat:'Đại dương nhiệt đới và cận nhiệt đới', food:'Ăn thịt', size:'Sải cánh 3–7m, nặng 300–2.000kg', fact:'Cá đuối manta có bộ não lớn nhất trong số các loài cá.'},
+  {vi:'Cá Kỳ Lân',    en:'Narwhal',           emoji:'🦄',  cat:'Biển',      desc:'Cá kỳ lân biển có chiếc ngà xoắn dài như sừng.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/b/bc/%D0%9D%D0%B0%D1%80%D0%B2%D0%B0%D0%BB_%D0%B2_%D1%80%D0%BE%D1%81%D1%81%D0%B8%D0%B9%D1%81%D0%BA%D0%BE%D0%B9_%D0%90%D1%80%D0%BA%D1%82%D0%B8%D0%BA%D0%B5.jpg/500px-%D0%9D%D0%B0%D1%80%D0%B2%D0%B0%D0%BB_%D0%B2_%D1%80%D0%BE%D1%81%D1%81%D0%B8%D0%B9%D1%81%D0%BA%D0%BE%D0%B9_%D0%90%D1%80%D0%BA%D1%82%D0%B8%D0%BA%D0%B5.jpg',
+   habitat:'Bắc Cực và Bắc Đại Tây Dương', food:'Ăn thịt', size:'Dài 4–5,5m (chưa kể ngà), nặng 800–1.600kg', fact:'Chiếc ngà dài của kỳ lân biển thực ra là một chiếc răng xoắn đặc biệt.'},
+  {vi:'Lợn Biển',     en:'Manatee',           emoji:'🐋',  cat:'Biển',      desc:'Lợn biển hiền lành ăn cỏ biển và bơi chậm rãi.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Underwater_photography_on_endangered_mammal_manatee.jpg/500px-Underwater_photography_on_endangered_mammal_manatee.jpg',
+   habitat:'Vùng nước ấm ven biển và sông nhiệt đới', food:'Ăn thực vật', size:'Dài 2,5–4m, nặng 200–600kg', fact:'Lợn biển cần ăn tới 10% trọng lượng cơ thể mỗi ngày.'},
+
+  // ── Cá ──
+  {vi:'Cá Vàng',      en:'Goldfish',          emoji:'🐟',  cat:'Cá',        desc:'Cá vàng nuôi trong bể cảnh rất đẹp mắt.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/Gold_fish1.jpg/500px-Gold_fish1.jpg',
+   habitat:'Hồ và sông nước ngọt châu Á (nuôi toàn cầu)', food:'Ăn tạp', size:'Dài 5–45cm, nặng 50g–4,5kg', fact:'Cá vàng có thể nhớ thông tin trong vài tháng, không chỉ 3 giây.'},
+  {vi:'Cá Nemo',      en:'Clownfish',         emoji:'🐠',  cat:'Cá',        desc:'Cá clown cam trắng sống cùng hải quỳ.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ad/Amphiprion_ocellaris_%28Clown_anemonefish%29_by_Nick_Hobgood.jpg/500px-Amphiprion_ocellaris_%28Clown_anemonefish%29_by_Nick_Hobgood.jpg',
+   habitat:'Rạn san hô Thái Bình Dương và Ấn Độ Dương', food:'Ăn tạp', size:'Dài 7–17cm, nặng khoảng 250g', fact:'Cá hề sống cộng sinh với hải quỳ — chúng bảo vệ nhau.'},
+  {vi:'Cá Kiếm',      en:'Swordfish',         emoji:'🐡',  cat:'Cá',        desc:'Cá kiếm có mõm dài nhọn như thanh kiếm.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Xiphias_gladius_Linnaeus%2C_1758_2599925021.jpg/500px-Xiphias_gladius_Linnaeus%2C_1758_2599925021.jpg',
+   habitat:'Đại dương nhiệt đới và ôn đới toàn cầu', food:'Ăn thịt', size:'Dài tới 4,5m, nặng tới 650kg', fact:'Cá kiếm có thể bơi với tốc độ lên tới 80km/h.'},
+  {vi:'Cá Nóc',       en:'Pufferfish',        emoji:'🐡',  cat:'Cá',        desc:'Cá nóc phình to như quả bóng khi gặp nguy hiểm.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Tetraodon-hispidus.jpg/500px-Tetraodon-hispidus.jpg',
+   habitat:'Vùng biển nhiệt đới và cận nhiệt đới', food:'Ăn tạp', size:'Dài 2,5cm–60cm, nặng vài gram đến 1kg', fact:'Cá nóc chứa độc tố mạnh gấp 1.200 lần cyanide.'},
+  {vi:'Cá Hồi',       en:'Salmon',            emoji:'🐟',  cat:'Cá',        desc:'Cá hồi bơi ngược dòng về nơi sinh ra để đẻ trứng.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/3/39/Salmo_salar.jpg/500px-Salmo_salar.jpg',
+   habitat:'Sông và biển Bắc Thái Bình Dương, Bắc Đại Tây Dương', food:'Ăn thịt', size:'Dài 50–150cm, nặng 2–50kg', fact:'Cá hồi nhớ mùi dòng sông nơi sinh ra để quay về đẻ trứng.'},
+  {vi:'Cá Bướm',      en:'Clown triggerfish',emoji:'🐠',   cat:'Cá',        desc:'Cá bướm biển có hoa văn đen trắng cam rực rỡ.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/Balistoides_conspicillum_2607.jpg/500px-Balistoides_conspicillum_2607.jpg',
+   habitat:'Rạn san hô Ấn Độ Dương và Thái Bình Dương', food:'Ăn thịt', size:'Dài 20–50cm, nặng tới 2kg', fact:'Cá bò hề có răng cứng đặc biệt để nghiền vỏ sò và san hô.'},
+
+  // ── Bò Sát ──
+  {vi:'Cá Sấu',       en:'Crocodile',         emoji:'🐊',  cat:'Bò Sát',    desc:'Cá sấu là loài bò sát nguy hiểm nhất thế giới.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/b/bd/Nile_crocodile_head.jpg/500px-Nile_crocodile_head.jpg',
+   habitat:'Sông, hồ và đầm lầy nhiệt đới châu Phi, châu Á', food:'Ăn thịt', size:'Dài 2–6m, nặng 70–1.000kg', fact:'Cá sấu gần như không thay đổi hình dạng trong 200 triệu năm qua.'},
+  {vi:'Rắn Hổ Mang',  en:'King cobra',        emoji:'🐍',  cat:'Bò Sát',    desc:'Rắn hổ mang vua có nọc độc nguy hiểm và biết phình cổ.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/12_-_The_Mystical_King_Cobra_and_Coffee_Forests.jpg/500px-12_-_The_Mystical_King_Cobra_and_Coffee_Forests.jpg',
+   habitat:'Rừng nhiệt đới Nam và Đông Nam Á', food:'Ăn thịt', size:'Dài 3–5,4m, nặng 6–9kg', fact:'Hổ mang chúa là loài rắn độc dài nhất thế giới.'},
+  {vi:'Tắc Kè Hoa',   en:'Chameleon',         emoji:'🦎',  cat:'Bò Sát',    desc:'Tắc kè hoa đổi màu da theo môi trường xung quanh.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Panther_Chameleon_738367_%28cropped%29.jpg/500px-Panther_Chameleon_738367_%28cropped%29.jpg',
+   habitat:'Rừng nhiệt đới và sa mạc châu Phi, Madagascar', food:'Ăn thịt', size:'Dài 2,5–69cm, nặng vài gram đến 600g', fact:'Tắc kè hoa đổi màu da để giao tiếp và điều hòa thân nhiệt.'},
+  {vi:'Rùa',          en:'Turtle',            emoji:'🐢',  cat:'Bò Sát',    desc:'Rùa mang ngôi nhà trên lưng và sống rất lâu.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/Turtle_diversity.jpg/500px-Turtle_diversity.jpg',
+   habitat:'Nước ngọt và vùng đất ẩm toàn cầu', food:'Ăn tạp', size:'Dài 10–120cm, nặng 0,1–35kg', fact:'Rùa có thể sống hơn 100 năm, là một trong những loài lâu đời nhất.'},
+  {vi:'Rồng Komodo',  en:'Komodo dragon',     emoji:'🦎',  cat:'Bò Sát',    desc:'Rồng Komodo là loài thằn lằn lớn nhất thế giới.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f5/202306_Varanus_komodoensis.jpg/500px-202306_Varanus_komodoensis.jpg',
+   habitat:'Đảo Komodo và các đảo lân cận Indonesia', food:'Ăn thịt', size:'Dài 2–3m, nặng 70–90kg', fact:'Rồng Komodo có nước bọt chứa vi khuẩn và độc tố đặc biệt.'},
+  {vi:'Ếch Mắt Đỏ',   en:'Frog',             emoji:'🐸',  cat:'Bò Sát',    desc:'Ếch mắt đỏ có màu sắc rực rỡ, sống ở rừng nhiệt đới.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f5/Red-eyed_Leaf_Frog_%2849661076226%29.jpg/500px-Red-eyed_Leaf_Frog_%2849661076226%29.jpg',
+   habitat:'Đầm lầy, ao hồ và rừng ẩm ướt toàn cầu', food:'Ăn thịt', size:'Dài 1cm–30cm, nặng vài gram đến 3kg', fact:'Ếch hấp thụ nước và ôxy qua da thay vì uống nước.'},
+  {vi:'Kỳ Nhông',     en:'Axolotl',           emoji:'🦎',  cat:'Bò Sát',    desc:'Kỳ nhông nước có thể tái sinh lại các bộ phận cơ thể.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/0/00/Axolotl_ganz.jpg/500px-Axolotl_ganz.jpg',
+   habitat:'Hồ Xochimilco, Mexico', food:'Ăn thịt', size:'Dài 15–45cm, nặng 60–227g', fact:'Kỳ nhông Mexico có thể tái tạo hoàn chỉnh chi, tim và não bị tổn thương.'},
+
+  // ── Côn Trùng ──
+  {vi:'Bướm',         en:'Butterfly',         emoji:'🦋',  cat:'Côn Trùng', desc:'Bướm có đôi cánh đầy màu sắc rực rỡ.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/Fesoj_-_Papilio_machaon_%28by%29.jpg/500px-Fesoj_-_Papilio_machaon_%28by%29.jpg',
+   habitat:'Đồng cỏ, rừng và vườn hoa toàn cầu', food:'Ăn thực vật', size:'Sải cánh 1–30cm', fact:'Bướm cảm nhận vị bằng cơ quan vị giác ở chân.'},
+  {vi:'Ong',          en:'Honey bee',         emoji:'🐝',  cat:'Côn Trùng', desc:'Ong làm mật và giúp cây ra hoa kết trái.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/The_Lone_Pollinator.jpg/500px-The_Lone_Pollinator.jpg',
+   habitat:'Đồng cỏ, vườn và rừng toàn cầu', food:'Ăn thực vật', size:'Dài 1,5–2cm, nặng 0,1g', fact:'Ong mật nhảy vũ điệu lắc lư để chỉ đường đến nguồn hoa cho đồng loại.'},
+  {vi:'Kiến',         en:'Ant',               emoji:'🐜',  cat:'Côn Trùng', desc:'Kiến sống thành đàn và làm việc rất chăm chỉ.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/d/db/Red_Ant_-_March_2025.jpg/500px-Red_Ant_-_March_2025.jpg',
+   habitat:'Khắp nơi trên thế giới trừ Nam Cực', food:'Ăn tạp', size:'Dài 1–52mm', fact:'Kiến có thể mang vật nặng gấp 50 lần trọng lượng cơ thể mình.'},
+  {vi:'Nhện',         en:'Spider',            emoji:'🕷️', cat:'Côn Trùng', desc:'Nhện giăng tơ tinh xảo để bẫy côn trùng.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Araneus_diadematus_%28Clerck%2C_1757%29.JPG/500px-Araneus_diadematus_%28Clerck%2C_1757%29.JPG',
+   habitat:'Khắp nơi toàn cầu trừ Nam Cực', food:'Ăn thịt', size:'Dài 0,4mm–30cm', fact:'Tơ nhện bền hơn thép cùng đường kính theo tỷ lệ trọng lượng.'},
+  {vi:'Chuồn Chuồn',  en:'Dragonfly',         emoji:'🪲',  cat:'Côn Trùng', desc:'Chuồn chuồn bay rất nhanh và linh hoạt.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/Red_grasshawk_%28Neurothemis_fluctuans%29_male_Phuket_2.jpg/500px-Red_grasshawk_%28Neurothemis_fluctuans%29_male_Phuket_2.jpg',
+   habitat:'Gần hồ, ao và sông toàn cầu', food:'Ăn thịt', size:'Sải cánh 2–16cm', fact:'Chuồn chuồn có tỷ lệ bắt mồi thành công trên 95% — cao nhất thế giới.'},
+  {vi:'Bọ Rùa',       en:'Ladybug',           emoji:'🐞',  cat:'Côn Trùng', desc:'Bọ rùa đỏ có chấm đen, ăn rệp để bảo vệ cây.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/Coccinella-septempunctata-15-fws.jpg/500px-Coccinella-septempunctata-15-fws.jpg',
+   habitat:'Đồng cỏ, vườn và rừng toàn cầu', food:'Ăn thịt', size:'Dài 1–10mm', fact:'Bọ rùa tiết chất lỏng vàng đắng từ chân để xua đuổi kẻ thù.'},
+  {vi:'Châu Chấu',    en:'Grasshopper',       emoji:'🦗',  cat:'Côn Trùng', desc:'Châu chấu nhảy rất xa và kêu rả rích.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b7/American_Bird_Grasshopper.jpg/500px-American_Bird_Grasshopper.jpg',
+   habitat:'Đồng cỏ và cánh đồng toàn cầu', food:'Ăn thực vật', size:'Dài 1–15cm', fact:'Châu chấu có thể nhảy xa gấp 20 lần chiều dài cơ thể mình.'},
+  {vi:'Sâu Bướm',     en:'Caterpillar',       emoji:'🐛',  cat:'Côn Trùng', desc:'Sâu bướm sau này sẽ hóa thành bướm xinh đẹp.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Chenille_de_Grand_porte_queue_%28macaon%29.jpg/500px-Chenille_de_Grand_porte_queue_%28macaon%29.jpg',
+   habitat:'Rừng, vườn và đồng cỏ toàn cầu', food:'Ăn thực vật', size:'Dài 1–15cm', fact:'Sâu bướm ăn liên tục để tích lũy năng lượng cho quá trình hóa bướm.'},
+  {vi:'Cá Đuối',      en:'Stingray',          emoji:'🐟',  cat:'Biển',      desc:'Cá đuối bơi uyển chuyển dưới đáy biển với đôi vây rộng như cánh.',
+   img:'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b9/Southern_stingray.jpg/500px-Southern_stingray.jpg',
+   habitat:'Đáy biển nhiệt đới và cận nhiệt đới', food:'Ăn thịt', size:'Rộng 30cm–2m, nặng 0,5–300kg', fact:'Cá đuối có gai độc ở đuôi dùng để tự vệ khi bị đe dọa.'},
+];
+
+const CATS = ['Tất Cả','Thú','Chim','Biển','Cá','Bò Sát','Côn Trùng','Rừng','Vùng Lạnh'];
+let filteredList = [];
+let currentIdx = 0;
+
+function init() {
+  const tabs = document.getElementById('cat-tabs');
+  CATS.forEach(cat => {
+    const b = document.createElement('button');
+    b.className = 'cat-tab' + (cat==='Tất Cả'?' active':'');
+    b.textContent = cat;
+    b.onclick = () => {
+      document.querySelectorAll('.cat-tab').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active');
+      renderGrid(cat);
+    };
+    tabs.appendChild(b);
+  });
+  renderGrid('Tất Cả');
+}
+
+function renderGrid(cat) {
+  filteredList = cat==='Tất Cả' ? ANIMALS : ANIMALS.filter(a=>a.cat===cat);
+  document.getElementById('browse-count').textContent = filteredList.length + ' con';
+  const grid = document.getElementById('animal-grid');
+  grid.innerHTML = '';
+  grid.scrollTop = 0;
+
+  filteredList.forEach((a, idx) => {
+    const card = document.createElement('div');
+    card.className = 'animal-card';
+    card.innerHTML = `
+      <div class="img-wrap">
+        <div class="img-fallback">${a.emoji}</div>
+        <img src="${a.img}" alt="${a.vi}"
+          onload="this.classList.add('loaded')"
+          onerror="this.style.display='none'">
+      </div>
+      <div class="animal-name">${a.vi}</div>`;
+    card.onclick = () => openModal(idx);
+    grid.appendChild(card);
+  });
+}
+
+function openModal(idx) {
+  currentIdx = idx;
+  renderModal();
+  document.getElementById('modal').classList.remove('hidden');
+}
+
+function renderModal() {
+  const a = filteredList[currentIdx];
+  const area = document.getElementById('modal-img-area');
+  area.innerHTML = `
+    <span class="fallback">${a.emoji}</span>
+    <img src="${a.img}" alt="${a.vi}"
+      onload="this.classList.add('loaded'); this.previousElementSibling.style.display='none'"
+      onerror="this.style.display='none'">`;
+  document.getElementById('modal-vi').textContent      = a.vi;
+  document.getElementById('modal-en').textContent      = a.en;
+  document.getElementById('modal-desc').textContent    = a.desc;
+  document.getElementById('modal-habitat').textContent = a.habitat || '—';
+  document.getElementById('modal-food').textContent    = a.food    || '—';
+  document.getElementById('modal-size').textContent    = a.size    || '—';
+  document.getElementById('modal-fact').textContent    = a.fact    || '—';
+}
+
+function nav(dir) {
+  currentIdx = (currentIdx + dir + filteredList.length) % filteredList.length;
+  renderModal();
+}
+
+function closeModal() { document.getElementById('modal').classList.add('hidden'); }
+function handleModalBg(e) { if(e.target===document.getElementById('modal')) closeModal(); }
+
+init();
+</script>
+</body>
+</html>
