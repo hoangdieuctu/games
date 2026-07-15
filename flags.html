@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Cờ Các Nước</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%234263eb'/%3E%3Ctext x='16' y='23' text-anchor='middle' font-size='20'%3E🌍%3C/text%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  width: 100%; height: 100%;
+  font-family: 'Nunito', sans-serif;
+  background: #f0f4ff;
+  overflow: hidden;
+  touch-action: manipulation;
+  user-select: none;
+  position: fixed;
+}
+.screen { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; }
+.screen.hidden { display: none; }
+
+/* ── Header ── */
+.browse-header {
+  width: 100%; padding: 12px 16px 8px;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-shrink: 0;
+  background: rgba(255,255,255,.85);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(0,0,0,.06);
+}
+.browse-title { font-size: clamp(18px,3.5vmin,26px); font-weight: 900; color: #222; }
+.browse-count { font-size: clamp(12px,2.5vmin,18px); font-weight: 800; color: #4263eb; }
+
+/* ── Category tabs ── */
+.cat-tabs {
+  display: flex; gap: 8px; overflow-x: auto; padding: 10px 12px;
+  flex-shrink: 0; width: 100%; scrollbar-width: none;
+}
+.cat-tabs::-webkit-scrollbar { display: none; }
+.cat-tab {
+  flex-shrink: 0;
+  background: #fff; border: 2px solid #ddd; border-radius: 100px;
+  padding: clamp(6px,1.5vmin,10px) clamp(12px,3vmin,20px);
+  font-family: inherit; font-size: clamp(12px,2.5vmin,17px); font-weight: 800;
+  cursor: pointer; color: #666; white-space: nowrap;
+  transition: all .15s;
+}
+.cat-tab.active { background: #4263eb; border-color: #4263eb; color: #fff; box-shadow: 0 3px 10px rgba(66,99,235,.35); }
+
+/* ── Grid ── */
+.flag-grid {
+  flex: 1; overflow-y: auto; width: 100%;
+  padding: 10px 10px 20px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-auto-rows: 1fr;
+  gap: clamp(8px,2vmin,14px);
+  align-content: start;
+  -webkit-overflow-scrolling: touch;
+}
+.flag-grid::before {
+  content: '';
+  width: 0;
+  padding-bottom: 100%;
+  grid-row: 1 / 1;
+  grid-column: 1 / 1;
+}
+.flag-grid > *:first-child {
+  grid-row: 1 / 1;
+  grid-column: 1 / 1;
+}
+.flag-grid::-webkit-scrollbar { width: 3px; }
+.flag-grid::-webkit-scrollbar-thumb { background: #ccc; border-radius: 2px; }
+
+/* ── Card ── */
+.flag-card {
+  background: #fff; border-radius: 14px;
+  box-shadow: 0 3px 10px rgba(0,0,0,.09);
+  overflow: hidden; cursor: pointer;
+  border: 3px solid transparent;
+  transition: transform .13s, box-shadow .13s, border-color .13s;
+  position: relative;
+  width: 100%;
+  padding-bottom: 100%;
+  height: 0;
+}
+.flag-card:active { transform: scale(1.06); border-color: #4263eb; box-shadow: 0 8px 22px rgba(0,0,0,.14); }
+
+.flag-inner {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  background: #f5f7ff;
+}
+
+.flag-emoji {
+  font-size: 64px;
+  line-height: 1;
+  transform: scale(3.2);
+  transform-origin: center center;
+  display: block;
+}
+
+.flag-name {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  padding: 20px 4px 6px;
+  font-size: clamp(10px,2vmin,14px); font-weight: 800;
+  text-align: center; color: #fff; line-height: 1.2;
+  background: linear-gradient(transparent, rgba(0,0,0,.55));
+  z-index: 2;
+}
+
+/* ── Modal ── */
+#modal {
+  position: fixed; inset: 0; z-index: 100;
+  background: rgba(0,0,0,.65);
+  backdrop-filter: blur(8px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 16px;
+  animation: fade-in .18s ease;
+}
+#modal.hidden { display: none; }
+@keyframes fade-in { from { opacity:0; } to { opacity:1; } }
+
+.modal-card {
+  background: #fff; border-radius: 22px;
+  width: 96vw;
+  height: 88vh;
+  max-height: 88vh;
+  overflow: hidden;
+  box-shadow: 0 24px 64px rgba(0,0,0,.35);
+  animation: pop-up .22s cubic-bezier(.34,1.56,.64,1);
+  display: flex; flex-direction: row;
+}
+@keyframes pop-up {
+  from { transform: scale(.82) translateY(24px); opacity:0; }
+  to   { transform: scale(1); opacity:1; }
+}
+
+/* left: flag display */
+.modal-flag-area {
+  flex: 0 0 55%;
+  background: #1a1a2e;
+  position: relative;
+  overflow: hidden;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  border-radius: 22px 0 0 22px;
+  gap: 16px;
+}
+.modal-flag-area .flag-bg-emoji {
+  font-size: 64px; line-height: 1;
+  transform: scale(4.5);
+  transform-origin: center center;
+  display: block;
+  filter: drop-shadow(0 8px 24px rgba(0,0,0,.4));
+}
+.modal-flag-area img {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: contain;
+  padding: 24px;
+  opacity: 0; transition: opacity .35s;
+}
+.modal-flag-area img.loaded { opacity: 1; }
+.modal-continent-badge {
+  position: absolute; top: 14px; left: 14px;
+  background: rgba(255,255,255,.18);
+  backdrop-filter: blur(6px);
+  border-radius: 100px;
+  padding: 4px 12px;
+  font-size: clamp(10px,1.8vmin,13px); font-weight: 800; color: #fff;
+}
+
+/* right: info */
+.modal-body {
+  flex: 1; padding: 22px 20px 18px;
+  display: flex; flex-direction: column;
+  overflow-y: auto;
+}
+.modal-vi   { font-size: clamp(20px,3.8vmin,36px); font-weight: 900; color: #111; line-height: 1; }
+.modal-en   { font-size: clamp(12px,2.2vmin,18px); font-weight: 700; color: #4263eb; margin-top: 4px; }
+.modal-capital { font-size: clamp(11px,1.9vmin,15px); font-weight: 800; color: #888; margin-top: 3px; }
+.modal-desc { font-size: clamp(11px,1.9vmin,14px); color: #555; margin-top: 9px; line-height: 1.6; }
+.modal-info {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 7px; margin-top: 12px; flex: 1; align-content: start;
+}
+.info-item {
+  background: #f8f8ff; border-radius: 12px;
+  padding: 9px 11px;
+  display: flex; flex-direction: column; gap: 3px;
+}
+.info-label {
+  font-size: clamp(9px,1.4vmin,11px); font-weight: 800;
+  color: #aaa; text-transform: uppercase; letter-spacing: .08em;
+}
+.info-value {
+  font-size: clamp(10px,1.7vmin,13px); font-weight: 700; color: #333; line-height: 1.35;
+}
+.modal-story {
+  margin-top: 10px; padding: 10px 13px;
+  background: linear-gradient(135deg, #f0f4ff, #e8eeff);
+  border-radius: 12px; border-left: 3px solid #4263eb;
+  font-size: clamp(10px,1.7vmin,13px); color: #444; line-height: 1.65;
+  font-style: italic;
+}
+.modal-tag {
+  display: inline-block; margin-top: 8px;
+  background: #f0f4ff; border-radius: 100px;
+  padding: 4px 14px; font-size: clamp(10px,1.8vmin,14px); font-weight: 800; color: #4263eb;
+}
+.modal-nav { display: flex; gap: 10px; margin-top: 12px; }
+.btn-nav {
+  flex: 1; background: #f5f5f5; color: #444; border: none;
+  border-radius: 100px; padding: clamp(9px,1.8vmin,14px);
+  font-family: inherit; font-size: clamp(13px,2.3vmin,17px); font-weight: 800;
+  cursor: pointer; transition: background .12s;
+}
+.btn-nav:active { background: #e8e8e8; }
+.btn-close {
+  margin-top: 8px; width: 100%;
+  background: #4263eb; color: #fff; border: none;
+  border-radius: 100px; padding: clamp(11px,1.9vmin,15px);
+  font-family: inherit; font-size: clamp(14px,2.8vmin,19px); font-weight: 800;
+  cursor: pointer; box-shadow: 0 4px 0 #2d4abf;
+}
+.btn-close:active { transform: scale(.97); }
+</style>
+</head>
+<body>
+
+<div class="screen" id="screen-browse">
+  <div class="browse-header">
+    <div class="browse-title">🌍 Cờ Các Nước</div>
+    <div class="browse-count" id="browse-count"></div>
+  </div>
+  <div class="cat-tabs" id="cat-tabs"></div>
+  <div class="flag-grid" id="flag-grid"></div>
+</div>
+
+<div id="modal" class="hidden" onclick="handleModalBg(event)">
+  <div class="modal-card" onclick="event.stopPropagation()">
+    <div class="modal-flag-area" id="modal-flag-area"></div>
+    <div class="modal-body">
+      <div class="modal-vi"      id="modal-vi"></div>
+      <div class="modal-en"      id="modal-en"></div>
+      <div class="modal-capital" id="modal-capital"></div>
+      <div class="modal-desc"    id="modal-desc"></div>
+      <div class="modal-info">
+        <div class="info-item"><div class="info-label">👥 Dân số</div><div class="info-value" id="modal-pop"></div></div>
+        <div class="info-item"><div class="info-label">📐 Diện tích</div><div class="info-value" id="modal-area"></div></div>
+        <div class="info-item"><div class="info-label">💰 Tiền tệ</div><div class="info-value" id="modal-currency"></div></div>
+        <div class="info-item"><div class="info-label">🗣️ Ngôn ngữ</div><div class="info-value" id="modal-lang"></div></div>
+      </div>
+      <div class="modal-story" id="modal-story"></div>
+      <div class="modal-tag"   id="modal-tag"></div>
+      <div class="modal-nav">
+        <button class="btn-nav" onclick="nav(-1)">◀ Trước</button>
+        <button class="btn-nav" onclick="nav(1)">Tiếp ▶</button>
+      </div>
+      <button class="btn-close" onclick="closeModal()">Đóng ✕</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const NATIONS = [
+  // ── Châu Á ──
+  { vi:'Việt Nam',       en:'Vietnam',          flag:'🇻🇳', cat:'Châu Á',
+    capital:'Hà Nội', pop:'97 triệu', area:'331.000 km²', currency:'Đồng (VND)', lang:'Tiếng Việt',
+    desc:'Đất nước hình chữ S bên bờ biển Đông, nổi tiếng với văn hóa lúa nước và ẩm thực phong phú.',
+    story:'Việt Nam có hơn bốn nghìn năm lịch sử oai hùng. Từ ruộng lúa xanh mướt đến biển xanh trong vắt, đất nước hình chữ S thật xinh đẹp!',
+    tag:'🌾 Lúa nước' },
+  { vi:'Nhật Bản',       en:'Japan',            flag:'🇯🇵', cat:'Châu Á',
+    capital:'Tokyo', pop:'125 triệu', area:'377.000 km²', currency:'Yên (JPY)', lang:'Tiếng Nhật',
+    desc:'Đất nước mặt trời mọc, nổi tiếng với hoa anh đào, samurai và công nghệ hiện đại.',
+    story:'Mỗi mùa xuân, hoa anh đào nở hồng phủ khắp nước Nhật. Từ núi Phú Sĩ hùng vĩ đến những đường phố hiện đại sầm uất Tokyo!',
+    tag:'🌸 Hoa anh đào' },
+  { vi:'Trung Quốc',     en:'China',            flag:'🇨🇳', cat:'Châu Á',
+    capital:'Bắc Kinh', pop:'1,4 tỷ', area:'9.597.000 km²', currency:'Nhân dân tệ (CNY)', lang:'Tiếng Quan thoại',
+    desc:'Đất nước đông dân nhất thế giới với Vạn Lý Trường Thành và nền văn minh lâu đời.',
+    story:'Vạn Lý Trường Thành dài hàng nghìn km uốn lượn qua núi non hùng vĩ. Trung Quốc là một trong những nền văn minh cổ đại vĩ đại nhất thế giới!',
+    tag:'🐉 Rồng vàng' },
+  { vi:'Hàn Quốc',       en:'South Korea',      flag:'🇰🇷', cat:'Châu Á',
+    capital:'Seoul', pop:'52 triệu', area:'100.000 km²', currency:'Won (KRW)', lang:'Tiếng Hàn',
+    desc:'Xứ sở kim chi nổi tiếng với K-pop, K-drama và công nghệ điện tử hàng đầu thế giới.',
+    story:'Từ những điệu nhảy K-pop rực rỡ đến bát kim chi cay nồng thơm ngon. Hàn Quốc là đất nước nhỏ bé nhưng ảnh hưởng văn hóa khổng lồ!',
+    tag:'🎵 K-pop' },
+  { vi:'Thái Lan',       en:'Thailand',         flag:'🇹🇭', cat:'Châu Á',
+    capital:'Bangkok', pop:'72 triệu', area:'513.000 km²', currency:'Baht (THB)', lang:'Tiếng Thái',
+    desc:'Xứ sở nụ cười với những ngôi chùa vàng óng, ẩm thực cay thơm và bãi biển đẹp.',
+    story:'Những ngôi chùa vàng lấp lánh dưới nắng và những bãi biển xanh trong của Thái Lan khiến du khách mê mẩn. Người Thái luôn chào đón bạn bằng nụ cười!',
+    tag:'🐘 Voi trắng' },
+  { vi:'Ấn Độ',          en:'India',            flag:'🇮🇳', cat:'Châu Á',
+    capital:'New Delhi', pop:'1,4 tỷ', area:'3.287.000 km²', currency:'Rupee (INR)', lang:'Hindi, Tiếng Anh',
+    desc:'Đất nước đa dạng văn hóa với đền Taj Mahal, yoga và ẩm thực đặc sắc.',
+    story:'Đền Taj Mahal trắng tinh dưới ánh trăng rằm là biểu tượng tình yêu bất tử. Ấn Độ là nơi sinh ra yoga, phật giáo và những món cà ri thơm nức!',
+    tag:'🕌 Taj Mahal' },
+  { vi:'Indonesia',      en:'Indonesia',        flag:'🇮🇩', cat:'Châu Á',
+    capital:'Jakarta', pop:'277 triệu', area:'1.905.000 km²', currency:'Rupiah (IDR)', lang:'Tiếng Indonesia',
+    desc:'Quốc gia vạn đảo lớn nhất thế giới với rừng nhiệt đới và văn hóa Bali nổi tiếng.',
+    story:'Indonesia có hơn mười bảy nghìn hòn đảo lớn nhỏ trải dài trên đại dương. Đảo Bali xinh đẹp là thiên đường du lịch của cả thế giới!',
+    tag:'🌺 Đảo ngàn hoa' },
+  { vi:'Philippines',    en:'Philippines',      flag:'🇵🇭', cat:'Châu Á',
+    capital:'Manila', pop:'114 triệu', area:'300.000 km²', currency:'Peso (PHP)', lang:'Filipino, Tiếng Anh',
+    desc:'Quần đảo hơn 7.600 đảo với những bãi biển tuyệt đẹp và văn hóa nhiệt tình.',
+    story:'Hơn bảy nghìn hòn đảo tạo nên Philippines xinh đẹp giữa Thái Bình Dương. Bãi biển cát trắng El Nido và Boracay là kỳ quan thiên nhiên!',
+    tag:'🏝️ Vạn đảo' },
+  { vi:'Malaysia',       en:'Malaysia',         flag:'🇲🇾', cat:'Châu Á',
+    capital:'Kuala Lumpur', pop:'33 triệu', area:'330.000 km²', currency:'Ringgit (MYR)', lang:'Tiếng Mã Lai',
+    desc:'Đất nước đa sắc tộc với tháp đôi Petronas và rừng nhiệt đới cổ đại.',
+    story:'Tháp đôi Petronas vươn cao giữa bầu trời Kuala Lumpur như hai ngọn nến khổng lồ. Malaysia có rừng nhiệt đới cổ nhất thế giới hơn 130 triệu năm tuổi!',
+    tag:'🗼 Petronas' },
+  { vi:'Singapore',      en:'Singapore',        flag:'🇸🇬', cat:'Châu Á',
+    capital:'Singapore', pop:'5,8 triệu', area:'730 km²', currency:'Đô Singapore (SGD)', lang:'Tiếng Anh, Mã Lai, Hoa',
+    desc:'Đảo quốc sư tử nhỏ bé nhưng hiện đại và giàu có bậc nhất châu Á.',
+    story:'Singapore nhỏ như một chấm xanh trên bản đồ nhưng lại là một trong những thành phố giàu nhất thế giới. Khu Gardens by the Bay lung linh ánh đèn về đêm thật huyền ảo!',
+    tag:'🦁 Sư tử biển' },
+  { vi:'Campuchia',      en:'Cambodia',         flag:'🇰🇭', cat:'Châu Á',
+    capital:'Phnom Penh', pop:'17 triệu', area:'181.000 km²', currency:'Riel (KHR)', lang:'Tiếng Khmer',
+    desc:'Xứ sở của Angkor Wat kỳ vĩ và nền văn minh Khmer huy hoàng.',
+    story:'Angkor Wat là quần thể đền đài lớn nhất thế giới ẩn trong rừng già bí ẩn. Đây là báu vật của nhân loại được xây từ hơn nghìn năm trước!',
+    tag:'🛕 Angkor Wat' },
+  { vi:'Lào',            en:'Laos',             flag:'🇱🇦', cat:'Châu Á',
+    capital:'Vientiane', pop:'7,4 triệu', area:'237.000 km²', currency:'Kip (LAK)', lang:'Tiếng Lào',
+    desc:'Xứ sở triệu voi bình yên bên dòng sông Mekong hiền hòa.',
+    story:'Lào bình yên như dòng sông Mekong chảy êm đềm qua những ngôi làng nhỏ. Luang Prabang cổ kính với những ngôi chùa vàng và thác nước Kuang Si tuyệt đẹp!',
+    tag:'🐘 Triệu voi' },
+  { vi:'Myanmar',        en:'Myanmar',          flag:'🇲🇲', cat:'Châu Á',
+    capital:'Naypyidaw', pop:'54 triệu', area:'677.000 km²', currency:'Kyat (MMK)', lang:'Tiếng Miến',
+    desc:'Đất nước của những ngôi chùa vàng và cánh đồng bằng đá Bagan huyền thoại.',
+    story:'Đồng bằng Bagan với hàng nghìn ngôi chùa cổ nổi lên trong sương sớm thật huyền bí. Chùa Vàng Shwedagon lấp lánh vàng suốt bao thế kỷ tại Yangon!',
+    tag:'⛩️ Ngàn chùa' },
+
+  // ── Châu Âu ──
+  { vi:'Pháp',           en:'France',           flag:'🇫🇷', cat:'Châu Âu',
+    capital:'Paris', pop:'68 triệu', area:'551.000 km²', currency:'Euro (EUR)', lang:'Tiếng Pháp',
+    desc:'Kinh đô thời trang và ẩm thực thế giới với tháp Eiffel biểu tượng của tình yêu.',
+    story:'Tháp Eiffel lung linh ánh đèn vào mỗi đêm ở Paris lãng mạn. Bánh mì baguette, phô mai và rượu vang — Pháp là thiên đường ẩm thực của thế giới!',
+    tag:'🗼 Tháp Eiffel' },
+  { vi:'Đức',            en:'Germany',          flag:'🇩🇪', cat:'Châu Âu',
+    capital:'Berlin', pop:'84 triệu', area:'357.000 km²', currency:'Euro (EUR)', lang:'Tiếng Đức',
+    desc:'Cường quốc kinh tế châu Âu nổi tiếng với xe hơi, bia và những lâu đài cổ kính.',
+    story:'Những lâu đài cổ tích như Neuschwanstein nằm trên đỉnh núi phủ mây trắng. Đức là quê hương của Mercedes, BMW và lễ hội bia Oktoberfest náo nhiệt!',
+    tag:'🏰 Lâu đài cổ' },
+  { vi:'Anh',            en:'United Kingdom',   flag:'🇬🇧', cat:'Châu Âu',
+    capital:'London', pop:'68 triệu', area:'244.000 km²', currency:'Bảng Anh (GBP)', lang:'Tiếng Anh',
+    desc:'Đảo quốc với Big Ben, Hoàng gia lừng danh và xứ sở của bóng đá hiện đại.',
+    story:'Đồng hồ Big Ben gõ từng tiếng trên sông Thames lịch sử của London. Anh là quê hương của bóng đá, Shakespeare và những tách trà chiều thơm ngát!',
+    tag:'👑 Hoàng gia' },
+  { vi:'Ý',              en:'Italy',            flag:'🇮🇹', cat:'Châu Âu',
+    capital:'Rome', pop:'60 triệu', area:'301.000 km²', currency:'Euro (EUR)', lang:'Tiếng Ý',
+    desc:'Đất nước hình chiếc ủng với đấu trường La Mã, pizza, pasta và thời trang cao cấp.',
+    story:'Đấu trường Colosseum vẫn đứng vững sau hàng nghìn năm giữa lòng Rome vĩnh cửu. Ý là đất nước của nghệ thuật, thời trang và những bữa tối pasta thơm ngon!',
+    tag:'🍕 Pizza Roma' },
+  { vi:'Tây Ban Nha',    en:'Spain',            flag:'🇪🇸', cat:'Châu Âu',
+    capital:'Madrid', pop:'47 triệu', area:'506.000 km²', currency:'Euro (EUR)', lang:'Tiếng Tây Ban Nha',
+    desc:'Xứ bò tót với điệu flamenco đam mê, kiến trúc Gaudí kỳ ảo và khí hậu nắng ấm.',
+    story:'Điệu flamenco đam mê cháy bỏng vang lên trong những đêm hè Tây Ban Nha nóng bỏng. Nhà thờ Sagrada Família của Gaudí là tuyệt tác kiến trúc chưa hoàn thành!',
+    tag:'💃 Flamenco' },
+  { vi:'Bồ Đào Nha',     en:'Portugal',         flag:'🇵🇹', cat:'Châu Âu',
+    capital:'Lisbon', pop:'10 triệu', area:'92.000 km²', currency:'Euro (EUR)', lang:'Tiếng Bồ Đào Nha',
+    desc:'Đất nước của những thủy thủ huyền thoại đã khám phá ra các châu lục mới.',
+    story:'Những thủy thủ dũng cảm người Bồ Đào Nha đã vượt đại dương khám phá ra châu Mỹ và châu Phi. Điệu nhạc Fado buồn bã vẫn vang lên khắp Lisbon cổ kính!',
+    tag:'⛵ Hàng hải' },
+  { vi:'Hà Lan',         en:'Netherlands',      flag:'🇳🇱', cat:'Châu Âu',
+    capital:'Amsterdam', pop:'17 triệu', area:'41.000 km²', currency:'Euro (EUR)', lang:'Tiếng Hà Lan',
+    desc:'Xứ sở cối xay gió, hoa tulip và những con kênh thơ mộng ở Amsterdam.',
+    story:'Những chiếc cối xay gió quay đều bên cánh đồng hoa tulip đủ màu sắc rực rỡ. Amsterdam có nhiều con kênh và xe đạp hơn cả ô tô — thật thú vị!',
+    tag:'🌷 Hoa tulip' },
+  { vi:'Thụy Điển',      en:'Sweden',           flag:'🇸🇪', cat:'Châu Âu',
+    capital:'Stockholm', pop:'10 triệu', area:'450.000 km²', currency:'Krona (SEK)', lang:'Tiếng Thụy Điển',
+    desc:'Xứ sở bắc cực với đèn cực quang tuyệt đẹp, ABBA và đồ gỗ IKEA.',
+    story:'Đèn cực quang uốn lượn xanh lá giữa bầu trời đêm Bắc Cực thật huyền diệu. Thụy Điển là quê hương của ABBA, IKEA và giải Nobel danh giá!',
+    tag:'🌌 Cực quang' },
+  { vi:'Na Uy',          en:'Norway',           flag:'🇳🇴', cat:'Châu Âu',
+    capital:'Oslo', pop:'5,4 triệu', area:'385.000 km²', currency:'Krone (NOK)', lang:'Tiếng Na Uy',
+    desc:'Đất nước của những vịnh hẹp hùng vĩ, đèn cực quang và những người Viking huyền thoại.',
+    story:'Những vịnh hẹp fjord sâu thẳm của Na Uy là một trong những cảnh quan đẹp nhất địa cầu. Người Viking dũng mãnh xưa kia xuất phát từ vùng đất băng giá này!',
+    tag:'🚢 Fjord hùng vĩ' },
+  { vi:'Thụy Sĩ',        en:'Switzerland',      flag:'🇨🇭', cat:'Châu Âu',
+    capital:'Bern', pop:'8,7 triệu', area:'41.000 km²', currency:'Franc (CHF)', lang:'Đức, Pháp, Ý',
+    desc:'Đất nước trung lập với đồng hồ chính xác, sô cô la ngon nhất và núi Alps hùng vĩ.',
+    story:'Núi Alps phủ tuyết trắng phản chiếu dưới ánh nắng rực rỡ thật đẹp mắt. Thụy Sĩ nổi tiếng với đồng hồ chính xác tuyệt đối và sô cô la tan chảy trong miệng!',
+    tag:'⛷️ Núi Alps' },
+  { vi:'Hy Lạp',         en:'Greece',           flag:'🇬🇷', cat:'Châu Âu',
+    capital:'Athens', pop:'10 triệu', area:'132.000 km²', currency:'Euro (EUR)', lang:'Tiếng Hy Lạp',
+    desc:'Nôi của nền văn minh phương Tây với đền Parthenon và huyền thoại thần thoại.',
+    story:'Đền Parthenon trên đỉnh Acropolis nhìn xuống Athens từ hàng nghìn năm trước. Hy Lạp là quê hương của triết học, toán học và Thế vận hội Olympic!',
+    tag:'🏛️ Văn minh cổ' },
+  { vi:'Nga',            en:'Russia',           flag:'🇷🇺', cat:'Châu Âu',
+    capital:'Moscow', pop:'144 triệu', area:'17.098.000 km²', currency:'Ruble (RUB)', lang:'Tiếng Nga',
+    desc:'Đất nước lớn nhất thế giới trải từ châu Âu sang tận châu Á với cung điện Kremlin.',
+    story:'Nga là đất nước rộng lớn nhất địa cầu, trải dài từ châu Âu đến tận Thái Bình Dương. Nhà thờ St. Basil với những mái vòm sặc sỡ là biểu tượng của Moscow!',
+    tag:'❄️ Đất nước tuyết' },
+  { vi:'Ba Lan',         en:'Poland',           flag:'🇵🇱', cat:'Châu Âu',
+    capital:'Warsaw', pop:'38 triệu', area:'313.000 km²', currency:'Zloty (PLN)', lang:'Tiếng Ba Lan',
+    desc:'Đất nước ở trung tâm châu Âu với lịch sử hào hùng và ẩm thực pierogi nổi tiếng.',
+    story:'Warsaw xinh đẹp đã được xây dựng lại hoàn toàn sau Thế Chiến II từ những đống đổ nát. Ba Lan là quê hương của Frédéric Chopin và nhà khoa học Marie Curie!',
+    tag:'🎹 Chopin' },
+
+  // ── Châu Mỹ ──
+  { vi:'Mỹ',             en:'United States',    flag:'🇺🇸', cat:'Châu Mỹ',
+    capital:'Washington D.C.', pop:'331 triệu', area:'9.834.000 km²', currency:'Đô la (USD)', lang:'Tiếng Anh',
+    desc:'Siêu cường số một thế giới với Tượng Nữ Thần Tự Do và Hollywood nổi tiếng.',
+    story:'Tượng Nữ Thần Tự Do đứng vững trên đảo nhỏ chào đón người nhập cư từ khắp nơi. Mỹ là đất nước của ước mơ, điện ảnh Hollywood và những tòa nhà chọc trời!',
+    tag:'🗽 Tự do' },
+  { vi:'Canada',         en:'Canada',           flag:'🇨🇦', cat:'Châu Mỹ',
+    capital:'Ottawa', pop:'38 triệu', area:'9.985.000 km²', currency:'Đô Canada (CAD)', lang:'Tiếng Anh, Pháp',
+    desc:'Đất nước lớn thứ hai thế giới với rừng phong đỏ rực và hồ băng tuyệt đẹp.',
+    story:'Lá phong đỏ rực rỡ mùa thu phủ khắp những cánh rừng bao la của Canada. Canada nổi tiếng với khúc côn cầu trên băng, gấu trắng và lòng mến khách!',
+    tag:'🍁 Lá phong đỏ' },
+  { vi:'Brazil',         en:'Brazil',           flag:'🇧🇷', cat:'Châu Mỹ',
+    capital:'Brasília', pop:'215 triệu', area:'8.516.000 km²', currency:'Real (BRL)', lang:'Tiếng Bồ Đào Nha',
+    desc:'Đất nước bóng đá và lễ hội Carnival sôi động với rừng Amazon xanh bát ngát.',
+    story:'Lễ hội Carnival Rio sôi động với vũ điệu samba rực rỡ cả thành phố suốt nhiều ngày đêm. Rừng Amazon — lá phổi xanh của trái đất — nằm trọn trong vòng tay Brazil!',
+    tag:'⚽ Vua bóng đá' },
+  { vi:'Mexico',         en:'Mexico',           flag:'🇲🇽', cat:'Châu Mỹ',
+    capital:'Mexico City', pop:'130 triệu', area:'1.964.000 km²', currency:'Peso (MXN)', lang:'Tiếng Tây Ban Nha',
+    desc:'Đất nước của nền văn minh Maya cổ đại, tequila và tacos thơm ngon.',
+    story:'Những kim tự tháp Maya kỳ vĩ đứng vững trong rừng già qua hàng nghìn năm. Mexico là quê hương của taco, guacamole và điệu nhảy Mariachi rộn ràng!',
+    tag:'🌮 Tacos' },
+  { vi:'Argentina',      en:'Argentina',        flag:'🇦🇷', cat:'Châu Mỹ',
+    capital:'Buenos Aires', pop:'46 triệu', area:'2.780.000 km²', currency:'Peso (ARS)', lang:'Tiếng Tây Ban Nha',
+    desc:'Xứ sở điệu tango đam mê, thịt bò ngon nhất và Patagonia hoang dã.',
+    story:'Điệu tango đầy đam mê ra đời từ những con phố Buenos Aires nhiều năm về trước. Argentina là quê hương của Messi và những cánh đồng bò mênh mông!',
+    tag:'💃 Tango' },
+  { vi:'Chile',          en:'Chile',            flag:'🇨🇱', cat:'Châu Mỹ',
+    capital:'Santiago', pop:'19 triệu', area:'756.000 km²', currency:'Peso (CLP)', lang:'Tiếng Tây Ban Nha',
+    desc:'Dải đất hẹp dài nhất thế giới từ sa mạc Atacama đến Nam Cực băng giá.',
+    story:'Chile trải dài như một sợi chỉ từ sa mạc khô nhất thế giới đến tận băng Nam Cực. Sa mạc Atacama không có mưa trong vòng hàng trăm năm!',
+    tag:'🏔️ Dải đất hẹp' },
+  { vi:'Colombia',       en:'Colombia',         flag:'🇨🇴', cat:'Châu Mỹ',
+    capital:'Bogotá', pop:'51 triệu', area:'1.142.000 km²', currency:'Peso (COP)', lang:'Tiếng Tây Ban Nha',
+    desc:'Đất nước hoa và cà phê nổi tiếng với thiên nhiên đa dạng và vũ điệu cumbia.',
+    story:'Colombia là vùng đất của những cánh rừng đầy màu sắc và những vườn hoa rực rỡ. Cà phê Colombia thơm ngon nổi tiếng khắp thế giới từ những triền núi cao!',
+    tag:'☕ Cà phê' },
+
+  // ── Châu Phi ──
+  { vi:'Ai Cập',         en:'Egypt',            flag:'🇪🇬', cat:'Châu Phi',
+    capital:'Cairo', pop:'105 triệu', area:'1.002.000 km²', currency:'Bảng Ai Cập (EGP)', lang:'Tiếng Ả Rập',
+    desc:'Đất nước kim tự tháp huyền bí bên dòng sông Nile và nền văn minh 5.000 năm.',
+    story:'Kim tự tháp Giza đứng vững giữa sa mạc cát bỏng rát hàng nghìn năm không đổi. Sông Nile dài nhất thế giới mang phù sa nuôi sống cả đất nước Ai Cập!',
+    tag:'🏺 Kim tự tháp' },
+  { vi:'Nam Phi',        en:'South Africa',     flag:'🇿🇦', cat:'Châu Phi',
+    capital:'Cape Town', pop:'60 triệu', area:'1.221.000 km²', currency:'Rand (ZAR)', lang:'11 ngôn ngữ chính thức',
+    desc:'Quốc gia cầu vồng với Cape Town xinh đẹp, kim cương và động vật hoang dã phong phú.',
+    story:'Nam Phi được gọi là "quốc gia cầu vồng" vì sự đa dạng của 11 ngôn ngữ chính thức. Vườn quốc gia Kruger là thiên đường của sư tử, voi và tê giác hoang dã!',
+    tag:'🌈 Quốc gia cầu vồng' },
+  { vi:'Nigeria',        en:'Nigeria',          flag:'🇳🇬', cat:'Châu Phi',
+    capital:'Abuja', pop:'220 triệu', area:'924.000 km²', currency:'Naira (NGN)', lang:'Tiếng Anh',
+    desc:'Đất nước đông dân nhất châu Phi với nền điện ảnh Nollywood sôi động.',
+    story:'Nigeria là quê hương của điện ảnh Nollywood — ngành phim lớn thứ hai thế giới sau Hollywood. Đây là đất nước đông dân nhất châu Phi với hơn 500 bộ tộc!',
+    tag:'🎬 Nollywood' },
+  { vi:'Ethiopia',       en:'Ethiopia',         flag:'🇪🇹', cat:'Châu Phi',
+    capital:'Addis Ababa', pop:'120 triệu', area:'1.104.000 km²', currency:'Birr (ETB)', lang:'Amharic',
+    desc:'Cái nôi của loài người với hóa thạch Lucy, cà phê xuất xứ và các vương quốc cổ.',
+    story:'Ethiopia là nơi tìm thấy hóa thạch người Lucy hơn ba triệu năm tuổi. Đây cũng là quê hương của hạt cà phê đầu tiên được con người phát hiện ra!',
+    tag:'☕ Quê hương cà phê' },
+  { vi:'Kenya',          en:'Kenya',            flag:'🇰🇪', cat:'Châu Phi',
+    capital:'Nairobi', pop:'55 triệu', area:'580.000 km²', currency:'Shilling (KES)', lang:'Swahili, Tiếng Anh',
+    desc:'Đất nước của đồng cỏ thảo nguyên Serengeti và cuộc đại di cư của hàng triệu linh dương.',
+    story:'Hàng triệu linh dương wildebeest chạy qua đồng cỏ Masai Mara tạo nên màn đại di cư ngoạn mục nhất thế giới. Kenya là quê hương của các nhà vô địch chạy đường dài!',
+    tag:'🦁 Safari hoang dã' },
+  { vi:'Morocco',        en:'Morocco',          flag:'🇲🇦', cat:'Châu Phi',
+    capital:'Rabat', pop:'37 triệu', area:'447.000 km²', currency:'Dirham (MAD)', lang:'Tiếng Ả Rập, Berber',
+    desc:'Cổng vào châu Phi với các thành phố mê cung, sa mạc Sahara và ẩm thực tagine.',
+    story:'Những con phố mê cung của Fès và Marrakech đầy màu sắc như trong câu chuyện nghìn lẻ một đêm. Sa mạc Sahara rộng mênh mông với những đồi cát vàng óng!',
+    tag:'🏜️ Sa mạc Sahara' },
+
+  // ── Trung Đông ──
+  { vi:'Ả Rập Saudi',    en:'Saudi Arabia',     flag:'🇸🇦', cat:'Trung Đông',
+    capital:'Riyadh', pop:'35 triệu', area:'2.150.000 km²', currency:'Riyal (SAR)', lang:'Tiếng Ả Rập',
+    desc:'Vùng đất cát vàng với dầu mỏ dồi dào, thánh địa Mecca và kiến trúc hiện đại.',
+    story:'Mecca — thành phố thiêng liêng nhất của đạo Hồi — nằm tại trung tâm Ả Rập Saudi. Đây là vùng đất xuất xứ của dầu mỏ nuôi sống kinh tế thế giới!',
+    tag:'🕌 Thánh địa' },
+  { vi:'UAE',            en:'United Arab Emirates', flag:'🇦🇪', cat:'Trung Đông',
+    capital:'Abu Dhabi', pop:'10 triệu', area:'84.000 km²', currency:'Dirham (AED)', lang:'Tiếng Ả Rập',
+    desc:'Đất nước sa mạc biến thành thành phố tương lai với tòa nhà Burj Khalifa cao nhất.',
+    story:'Burj Khalifa cao 830 mét vươn lên bầu trời Dubai như một mũi kim khổng lồ. UAE biến sa mạc thành đô thị xa hoa nhất thế giới chỉ trong vài thập kỷ!',
+    tag:'🏙️ Burj Khalifa' },
+  { vi:'Israel',         en:'Israel',           flag:'🇮🇱', cat:'Trung Đông',
+    capital:'Jerusalem', pop:'9,4 triệu', area:'20.000 km²', currency:'Shekel (ILS)', lang:'Hebrew, Tiếng Ả Rập',
+    desc:'Vùng đất thánh của ba tôn giáo lớn với Jerusalem cổ kính và Biển Chết kỳ lạ.',
+    story:'Jerusalem — thành phố linh thiêng của Do Thái giáo, Kitô giáo và Hồi giáo — đứng vững qua nghìn năm. Biển Chết mặn đến mức người bơi tự nổi không chìm!',
+    tag:'✡️ Đất thánh' },
+  { vi:'Thổ Nhĩ Kỳ',    en:'Turkey',           flag:'🇹🇷', cat:'Trung Đông',
+    capital:'Ankara', pop:'85 triệu', area:'785.000 km²', currency:'Lira (TRY)', lang:'Tiếng Thổ Nhĩ Kỳ',
+    desc:'Cầu nối giữa châu Âu và châu Á với Istanbul lịch sử và khí cầu Cappadocia.',
+    story:'Istanbul là thành phố duy nhất trên thế giới nằm trên hai châu lục cùng một lúc. Những khí cầu màu sắc bay trên Cappadocia vào buổi bình minh là cảnh tượng thần tiên!',
+    tag:'🎈 Khí cầu Cappadocia' },
+
+  // ── Châu Đại Dương ──
+  { vi:'Úc',             en:'Australia',        flag:'🇦🇺', cat:'Châu Đại Dương',
+    capital:'Canberra', pop:'26 triệu', area:'7.692.000 km²', currency:'Đô Úc (AUD)', lang:'Tiếng Anh',
+    desc:'Lục địa đảo với kangaroo, koala, Nhà hát Opera Sydney và rạn san hô Great Barrier.',
+    story:'Nhà hát Opera Sydney nhìn ra cảng biển xanh ngắt như một tuyệt tác nghệ thuật vĩ đại. Kangaroo và koala là những người dân nguyên thủy đáng yêu của lục địa xanh này!',
+    tag:'🦘 Kangaroo' },
+  { vi:'New Zealand',    en:'New Zealand',      flag:'🇳🇿', cat:'Châu Đại Dương',
+    capital:'Wellington', pop:'5 triệu', area:'268.000 km²', currency:'Đô NZ (NZD)', lang:'Tiếng Anh, Māori',
+    desc:'Xứ sở kiwi với cảnh quan núi lửa hùng vĩ, người Maori và bộ phim Chúa Nhẫn.',
+    story:'Bộ phim Chúa Nhẫn và Hobbit được quay tại những cánh đồng xanh bao la của New Zealand. Người Maori bản địa có điệu Haka uy hùng khiến đối thủ run sợ!',
+    tag:'🥝 Kiwi' },
+  { vi:'Fiji',           en:'Fiji',             flag:'🇫🇯', cat:'Châu Đại Dương',
+    capital:'Suva', pop:'930.000', area:'18.000 km²', currency:'Đô Fiji (FJD)', lang:'Tiếng Anh, Fijian',
+    desc:'Thiên đường đảo nhiệt đới với bãi biển trắng, nước biển trong xanh và văn hóa aloha.',
+    story:'Fiji là thiên đường nhiệt đới với 332 hòn đảo san hô bao quanh bởi nước biển xanh ngọc bích. Người dân Fiji nổi tiếng là những người hạnh phúc nhất hành tinh!',
+    tag:'🌺 Đảo thiên đường' },
+];
+
+const CATS = ['Tất Cả','Châu Á','Châu Âu','Châu Mỹ','Châu Phi','Trung Đông','Châu Đại Dương'];
+let filteredList = [];
+let currentIdx = 0;
+
+function init() {
+  const tabs = document.getElementById('cat-tabs');
+  CATS.forEach(cat => {
+    const b = document.createElement('button');
+    b.className = 'cat-tab' + (cat === 'Tất Cả' ? ' active' : '');
+    b.textContent = cat;
+    b.onclick = () => {
+      document.querySelectorAll('.cat-tab').forEach(x => x.classList.remove('active'));
+      b.classList.add('active');
+      renderGrid(cat);
+    };
+    tabs.appendChild(b);
+  });
+  renderGrid('Tất Cả');
+}
+
+function renderGrid(cat) {
+  filteredList = cat === 'Tất Cả' ? NATIONS : NATIONS.filter(n => n.cat === cat);
+  document.getElementById('browse-count').textContent = filteredList.length + ' nước';
+  const grid = document.getElementById('flag-grid');
+  grid.innerHTML = '';
+  grid.scrollTop = 0;
+
+  filteredList.forEach((n, idx) => {
+    const card = document.createElement('div');
+    card.className = 'flag-card';
+    card.innerHTML = `
+      <div class="flag-inner">
+        <div class="flag-emoji">${n.flag}</div>
+      </div>
+      <div class="flag-name">${n.vi}</div>`;
+    card.onclick = () => openModal(idx);
+    grid.appendChild(card);
+  });
+}
+
+function openModal(idx) {
+  currentIdx = idx;
+  renderModal();
+  document.getElementById('modal').classList.remove('hidden');
+}
+
+function renderModal() {
+  const n = filteredList[currentIdx];
+  const area = document.getElementById('modal-flag-area');
+  area.innerHTML = `
+    <div class="modal-continent-badge">${n.cat}</div>
+    <div class="flag-bg-emoji">${n.flag}</div>`;
+  document.getElementById('modal-vi').textContent      = n.vi;
+  document.getElementById('modal-en').textContent      = n.en;
+  document.getElementById('modal-capital').textContent = '🏙️ Thủ đô: ' + n.capital;
+  document.getElementById('modal-desc').textContent    = n.desc;
+  document.getElementById('modal-pop').textContent     = n.pop;
+  document.getElementById('modal-area').textContent    = n.area;
+  document.getElementById('modal-currency').textContent= n.currency;
+  document.getElementById('modal-lang').textContent    = n.lang;
+  document.getElementById('modal-story').textContent   = n.story;
+  document.getElementById('modal-tag').textContent     = n.tag;
+}
+
+function nav(dir) {
+  currentIdx = (currentIdx + dir + filteredList.length) % filteredList.length;
+  renderModal();
+}
+
+function closeModal() { document.getElementById('modal').classList.add('hidden'); }
+function handleModalBg(e) { if (e.target === document.getElementById('modal')) closeModal(); }
+
+init();
+</script>
+</body>
+</html>
