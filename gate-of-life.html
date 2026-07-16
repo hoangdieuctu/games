@@ -241,17 +241,116 @@ window.addEventListener('resize', resize);
 
 // ═══════════════════ GALAXY BACKGROUND ═══════════════════
 const STARS = [];
-const NEBULAE = [
-  { x:.25, y:.35, rx:420, ry:250, angle:-.4, r:60,  g:0,   b:160, a:.35 },
-  { x:.65, y:.55, rx:350, ry:200, angle:.6,  r:120, g:0,   b:200, a:.28 },
-  { x:.45, y:.75, rx:300, ry:160, angle:-.2, r:0,   g:60,  b:180, a:.25 },
-  { x:.15, y:.7,  rx:240, ry:140, angle:.9,  r:180, g:0,   b:100, a:.22 },
-  { x:.8,  y:.25, rx:280, ry:180, angle:-.7, r:40,  g:0,   b:220, a:.30 },
-  { x:.5,  y:.45, rx:200, ry:200, angle:0,   r:80,  g:20,  b:160, a:.20 },
-];
 let galaxyDrift = 0;
 const SHOOTERS = [];  // active shooting stars / comets
 let shooterTimer = 0;
+
+// ── Background Zones (one per round group) ──
+// Each zone has its own nebula palette, sky colors, special effects
+const BG_ZONES = [
+  // 0: Deep Violet Nebula (waves 1-3)
+  { name:'Tinh Vân Tím', bgFrom:'#110830', bgMid:'#080318', bgTo:'#020008',
+    coreCol:'rgba(140,80,220,.22)', coreMid:'rgba(80,30,160,.14)',
+    bandA:'rgba(60,20,120,0)', bandB:'rgba(100,40,200,.18)', bandC:'rgba(130,60,220,.25)', bandD:'rgba(80,20,160,.16)',
+    nebulae:[
+      {x:.25,y:.35,rx:420,ry:250,angle:-.4,r:60, g:0,  b:160,a:.35},
+      {x:.65,y:.55,rx:350,ry:200,angle:.6, r:120,g:0,  b:200,a:.28},
+      {x:.5, y:.45,rx:200,ry:200,angle:0,  r:80, g:20, b:160,a:.20},
+    ], extraFx: null },
+  // 1: Red Giant Region (waves 4-6)
+  { name:'Vùng Sao Đỏ', bgFrom:'#1a0408', bgMid:'#0d0204', bgTo:'#050000',
+    coreCol:'rgba(220,60,40,.22)', coreMid:'rgba(160,20,10,.14)',
+    bandA:'rgba(120,10,0,0)', bandB:'rgba(200,40,10,.18)', bandC:'rgba(180,60,20,.22)', bandD:'rgba(120,10,0,.14)',
+    nebulae:[
+      {x:.30,y:.30,rx:380,ry:220,angle:-.3,r:200,g:20, b:20, a:.32},
+      {x:.70,y:.60,rx:300,ry:180,angle:.5, r:180,g:50, b:10, a:.25},
+      {x:.15,y:.65,rx:260,ry:150,angle:.8, r:220,g:30, b:0,  a:.20},
+    ], extraFx: 'redGiant' },
+  // 2: Azure Star Cluster (waves 7-9)
+  { name:'Cụm Sao Xanh', bgFrom:'#020a18', bgMid:'#010510', bgTo:'#000208',
+    coreCol:'rgba(40,120,220,.25)', coreMid:'rgba(20,60,160,.15)',
+    bandA:'rgba(0,60,120,0)', bandB:'rgba(0,100,200,.20)', bandC:'rgba(20,140,220,.28)', bandD:'rgba(0,80,160,.18)',
+    nebulae:[
+      {x:.40,y:.40,rx:360,ry:200,angle:-.2,r:20, g:100,b:220,a:.35},
+      {x:.75,y:.50,rx:280,ry:160,angle:.4, r:0,  g:140,b:200,a:.28},
+      {x:.20,y:.55,rx:220,ry:130,angle:.7, r:10, g:80, b:180,a:.22},
+    ], extraFx: 'starCluster' },
+  // 3: Emerald Dust Cloud (waves 10-12)
+  { name:'Đám Mây Ngọc', bgFrom:'#020e08', bgMid:'#010804', bgTo:'#000403',
+    coreCol:'rgba(20,160,80,.22)', coreMid:'rgba(10,100,40,.14)',
+    bandA:'rgba(0,80,20,0)', bandB:'rgba(0,160,60,.18)', bandC:'rgba(20,140,80,.22)', bandD:'rgba(0,100,40,.14)',
+    nebulae:[
+      {x:.35,y:.45,rx:400,ry:230,angle:-.5,r:0,  g:180,b:60, a:.30},
+      {x:.70,y:.35,rx:300,ry:170,angle:.3, r:0,  g:140,b:40, a:.25},
+      {x:.15,y:.70,rx:240,ry:140,angle:.6, r:20, g:160,b:80, a:.22},
+    ], extraFx: 'dustCloud' },
+  // 4: Supernova Remnant (waves 13-15)
+  { name:'Tàn Dư Siêu Tân Tinh', bgFrom:'#150a00', bgMid:'#0a0500', bgTo:'#040100',
+    coreCol:'rgba(255,120,20,.28)', coreMid:'rgba(180,60,0,.18)',
+    bandA:'rgba(180,60,0,0)', bandB:'rgba(255,100,20,.22)', bandC:'rgba(220,80,10,.28)', bandD:'rgba(160,40,0,.18)',
+    nebulae:[
+      {x:.50,y:.50,rx:450,ry:300,angle:0,  r:255,g:100,b:0,  a:.30},
+      {x:.25,y:.30,rx:320,ry:200,angle:-.4,r:220,g:60, b:20, a:.25},
+      {x:.75,y:.65,rx:280,ry:160,angle:.6, r:240,g:80, b:10, a:.22},
+    ], extraFx: 'supernova' },
+  // 5: Cyan Pulsar Field (waves 16-18)
+  { name:'Trường Xung Tinh', bgFrom:'#001414', bgMid:'#000808', bgTo:'#000304',
+    coreCol:'rgba(0,220,200,.25)', coreMid:'rgba(0,150,130,.15)',
+    bandA:'rgba(0,120,100,0)', bandB:'rgba(0,200,180,.20)', bandC:'rgba(20,220,200,.28)', bandD:'rgba(0,160,140,.18)',
+    nebulae:[
+      {x:.40,y:.40,rx:380,ry:220,angle:-.3,r:0,  g:200,b:180,a:.32},
+      {x:.70,y:.60,rx:280,ry:160,angle:.5, r:0,  g:160,b:200,a:.26},
+      {x:.20,y:.65,rx:240,ry:140,angle:.7, r:0,  g:180,b:160,a:.20},
+    ], extraFx: 'pulsar' },
+  // 6: Golden Core (waves 19-21)
+  { name:'Lõi Vàng', bgFrom:'#100c00', bgMid:'#080600', bgTo:'#030200',
+    coreCol:'rgba(220,180,20,.28)', coreMid:'rgba(160,120,0,.18)',
+    bandA:'rgba(160,120,0,0)', bandB:'rgba(220,160,20,.20)', bandC:'rgba(200,150,0,.26)', bandD:'rgba(160,100,0,.16)',
+    nebulae:[
+      {x:.50,y:.45,rx:420,ry:260,angle:-.1,r:220,g:160,b:0,  a:.30},
+      {x:.25,y:.60,rx:300,ry:180,angle:.4, r:200,g:140,b:10, a:.24},
+      {x:.78,y:.35,rx:260,ry:150,angle:-.5,r:240,g:180,b:20, a:.22},
+    ], extraFx: 'goldCore' },
+  // 7: Crimson War Zone (waves 22-24)
+  { name:'Vùng Chiến Tranh', bgFrom:'#100000', bgMid:'#080000', bgTo:'#030000',
+    coreCol:'rgba(220,0,0,.30)', coreMid:'rgba(150,0,0,.20)',
+    bandA:'rgba(160,0,0,0)', bandB:'rgba(220,10,10,.24)', bandC:'rgba(200,0,0,.32)', bandD:'rgba(150,0,0,.20)',
+    nebulae:[
+      {x:.35,y:.35,rx:400,ry:240,angle:-.3,r:220,g:0,  b:0,  a:.35},
+      {x:.70,y:.55,rx:320,ry:190,angle:.5, r:180,g:10, b:10, a:.28},
+      {x:.15,y:.65,rx:260,ry:150,angle:.8, r:200,g:0,  b:20, a:.22},
+    ], extraFx: 'warZone' },
+  // 8: Frost Nebula (waves 25-27)
+  { name:'Tinh Vân Băng Giá', bgFrom:'#010810', bgMid:'#000508', bgTo:'#000203',
+    coreCol:'rgba(100,180,255,.25)', coreMid:'rgba(60,120,200,.15)',
+    bandA:'rgba(40,100,180,0)', bandB:'rgba(80,160,240,.20)', bandC:'rgba(100,180,255,.26)', bandD:'rgba(60,120,200,.18)',
+    nebulae:[
+      {x:.45,y:.40,rx:400,ry:240,angle:-.2,r:80, g:160,b:255,a:.30},
+      {x:.75,y:.60,rx:300,ry:180,angle:.4, r:60, g:140,b:220,a:.25},
+      {x:.15,y:.50,rx:240,ry:140,angle:.7, r:100,g:180,b:240,a:.22},
+    ], extraFx: 'frost' },
+  // 9: BLACK HOLE (waves 28-30) — the final boss zone
+  { name:'LỖ ĐEN', bgFrom:'#000000', bgMid:'#000000', bgTo:'#000000',
+    coreCol:'rgba(80,0,120,.20)', coreMid:'rgba(40,0,80,.12)',
+    bandA:'rgba(60,0,80,0)', bandB:'rgba(100,0,120,.15)', bandC:'rgba(80,0,100,.20)', bandD:'rgba(50,0,70,.14)',
+    nebulae:[
+      {x:.50,y:.50,rx:180,ry:180,angle:0,  r:120,g:0,  b:180,a:.18},
+      {x:.30,y:.30,rx:200,ry:120,angle:-.5,r:100,g:0,  b:160,a:.15},
+      {x:.70,y:.70,rx:180,ry:100,angle:.5, r:80, g:0,  b:140,a:.12},
+    ], extraFx: 'blackHole' },
+];
+
+let currentZoneIdx = 0;
+let nextZoneIdx = 0;
+let zoneTransitionT = 0;  // 0..1 blend factor
+const ZONE_TRANSITION_DUR = 2.5; // seconds to blend between zones
+
+// Black hole state
+const blackHole = { angle: 0, pulseT: 0, accretionT: 0 };
+// Supernova state
+let supernovaRings = [];
+// Pulsar beams
+let pulsarT = 0;
 
 function spawnShooter() {
   const isComet = Math.random() < 0.25;
@@ -367,28 +466,59 @@ function initGalaxy() {
   }
 }
 
+function getZoneForWave(w) {
+  // 10 zones for 30 waves: zone changes every 3 waves
+  return Math.min(9, Math.floor((w - 1) / 3));
+}
+
 function drawGalaxy(dt) {
   galaxyDrift += dt * 0.000012;
   updateShooters(dt);
 
-  // Deep space base
+  // zone transition blend
+  if (zoneTransitionT < 1) {
+    zoneTransitionT = Math.min(1, zoneTransitionT + dt / ZONE_TRANSITION_DUR);
+  }
+  const zA = BG_ZONES[currentZoneIdx];
+  const zB = BG_ZONES[nextZoneIdx];
+  const blend = zoneTransitionT;
+
+  function blendColor(a, b, t) {
+    // both are css color strings — just pick based on blend for gradients
+    return t > 0.5 ? b : a;
+  }
+
+  // ── Deep space base (interpolated) ──
   const bg = ctx.createRadialGradient(W*.45, H*.4, 0, W*.5, H*.5, Math.max(W,H)*.8);
-  bg.addColorStop(0, '#110830');
-  bg.addColorStop(0.3, '#080318');
-  bg.addColorStop(1, '#020008');
+  bg.addColorStop(0,   blend < 0.5 ? zA.bgFrom : zB.bgFrom);
+  bg.addColorStop(0.3, blend < 0.5 ? zA.bgMid  : zB.bgMid);
+  bg.addColorStop(1,   blend < 0.5 ? zA.bgTo   : zB.bgTo);
   ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
 
-  // Galaxy core glow
+  // Zone name flash on transition start
+  if (zoneTransitionT < 0.6 && zoneTransitionT > 0.01 && nextZoneIdx !== currentZoneIdx) {
+    const fade = zoneTransitionT < 0.3 ? zoneTransitionT/0.3 : 1 - (zoneTransitionT-0.3)/0.3;
+    ctx.globalAlpha = fade * 0.75;
+    ctx.font = 'bold 18px "Cinzel", serif';
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText('✦ ' + zB.name.toUpperCase() + ' ✦', W/2, H/2 - 30);
+    ctx.globalAlpha = 1;
+  }
+
+  // ── Galaxy core glow ──
+  const zone = blend < 0.5 ? zA : zB;
   const core = ctx.createRadialGradient(W*.5, H*.48, 0, W*.5, H*.48, Math.min(W,H)*.45);
-  core.addColorStop(0,   'rgba(140,80,220,.22)');
-  core.addColorStop(0.3, 'rgba(80,30,160,.14)');
-  core.addColorStop(0.7, 'rgba(40,10,100,.06)');
+  core.addColorStop(0,   zone.coreCol);
+  core.addColorStop(0.3, zone.coreMid);
+  core.addColorStop(0.7, 'rgba(20,5,50,.04)');
   core.addColorStop(1,   'transparent');
   ctx.fillStyle = core; ctx.fillRect(0, 0, W, H);
 
-  // Nebula clouds
+  // ── Nebula clouds ──
   ctx.save();
-  for (const n of NEBULAE) {
+  const nebs = blend < 0.5 ? zA.nebulae : zB.nebulae;
+  for (const n of nebs) {
     const nx = (n.x + galaxyDrift * .3) % 1.4 - .2;
     ctx.save();
     ctx.translate(nx * W, n.y * H);
@@ -404,17 +534,16 @@ function drawGalaxy(dt) {
   }
   ctx.restore();
 
-  // Milky-way band
+  // ── Milky-way band (zone-tinted) ──
   const band = ctx.createLinearGradient(0, H*.1, W, H*.95);
-  band.addColorStop(0,   'rgba(60,20,120,0)');
-  band.addColorStop(0.25,'rgba(100,40,200,.18)');
-  band.addColorStop(0.5, 'rgba(130,60,220,.25)');
-  band.addColorStop(0.75,'rgba(80,20,160,.16)');
-  band.addColorStop(1,   'rgba(40,10,80,0)');
+  band.addColorStop(0,    zone.bandA);
+  band.addColorStop(0.25, zone.bandB);
+  band.addColorStop(0.5,  zone.bandC);
+  band.addColorStop(0.75, zone.bandD);
+  band.addColorStop(1,    zone.bandA);
   ctx.fillStyle = band; ctx.fillRect(0, 0, W, H);
 
-  // Stars
-  const t = performance.now() * .001;
+  // ── Stars ──
   for (const s of STARS) {
     s.twinkle += s.twinkleSpeed;
     const twinkle = 0.6 + 0.4 * Math.sin(s.twinkle);
@@ -422,23 +551,235 @@ function drawGalaxy(dt) {
     const sy = s.y * H;
     ctx.globalAlpha = s.a * twinkle;
     ctx.fillStyle = s.color + (s.a * twinkle).toFixed(2) + ')';
-    // Bigger stars get a subtle cross glow
-    if (s.r > 1.5) {
-      ctx.shadowBlur = 6; ctx.shadowColor = '#aaaaff';
-    }
+    if (s.r > 1.5) { ctx.shadowBlur = 6; ctx.shadowColor = '#aaaaff'; }
     ctx.beginPath(); ctx.arc(sx, sy, s.r, 0, Math.PI*2); ctx.fill();
     ctx.shadowBlur = 0;
   }
   ctx.globalAlpha = 1;
 
-  // Shooting stars & comets
+  // ── Zone-specific special effects ──
+  drawZoneEffect(zone, dt);
+
+  // ── Shooting stars & comets ──
   drawShooters();
 
-  // Vignette
-  const vg = ctx.createRadialGradient(W/2,H/2,H*.25,W/2,H/2,H*.85);
+  // ── Vignette (heavier for black hole) ──
+  const vigAlpha = zone.extraFx === 'blackHole' ? 0.85 : 0.7;
+  const vg = ctx.createRadialGradient(W/2, H/2, H*.2, W/2, H/2, H*.85);
   vg.addColorStop(0, 'transparent');
-  vg.addColorStop(1, 'rgba(0,0,0,.7)');
+  vg.addColorStop(1, `rgba(0,0,0,${vigAlpha})`);
   ctx.fillStyle = vg; ctx.fillRect(0, 0, W, H);
+}
+
+function drawZoneEffect(zone, dt) {
+  if (!zone.extraFx) return;
+  const fx = zone.extraFx;
+
+  if (fx === 'blackHole') {
+    blackHole.angle += dt * 0.6;
+    blackHole.pulseT += dt;
+    blackHole.accretionT += dt;
+    const cx = W * 0.5, cy = H * 0.5;
+    const bhR = Math.min(W, H) * 0.09;
+
+    // Gravitational lensing rings
+    for (let i = 5; i >= 1; i--) {
+      const ringR = bhR * (1.5 + i * 0.55);
+      const pulse = 0.5 + 0.5 * Math.sin(blackHole.pulseT * 2 + i);
+      ctx.beginPath(); ctx.arc(cx, cy, ringR, 0, Math.PI * 2);
+      ctx.strokeStyle = `rgba(140,0,200,${0.04 * pulse * i})`;
+      ctx.lineWidth = 6 - i * 0.5; ctx.stroke();
+    }
+
+    // Accretion disk (bright swirling band around black hole)
+    ctx.save(); ctx.translate(cx, cy);
+    for (let ring = 0; ring < 3; ring++) {
+      const rInner = bhR * (1.15 + ring * 0.22);
+      const rOuter = rInner + bhR * 0.18;
+      ctx.save(); ctx.rotate(blackHole.angle * (1 - ring * 0.15));
+      // draw as arc segments with gradient alpha
+      const segs = 48;
+      for (let i = 0; i < segs; i++) {
+        const a0 = (i / segs) * Math.PI * 2;
+        const a1 = ((i + 1) / segs) * Math.PI * 2;
+        const brightness = 0.2 + 0.8 * Math.pow(Math.sin(i / segs * Math.PI * 2 + blackHole.accretionT * 1.5 + ring), 2);
+        const r = ring === 0 ? 255 : ring === 1 ? 200 : 140;
+        const g = ring === 0 ? 120 : ring === 1 ? 60 : 20;
+        const b = ring === 0 ? 10 : 5;
+        ctx.beginPath();
+        ctx.arc(0, 0, rInner, a0, a1);
+        ctx.arc(0, 0, rOuter, a1, a0, true);
+        ctx.closePath();
+        ctx.fillStyle = `rgba(${r},${g},${b},${brightness * 0.55})`;
+        ctx.fill();
+      }
+      ctx.restore();
+    }
+
+    // Black hole core (jet black circle)
+    const bhGrad = ctx.createRadialGradient(0, 0, 0, 0, 0, bhR);
+    bhGrad.addColorStop(0,   'rgba(0,0,0,1)');
+    bhGrad.addColorStop(0.7, 'rgba(0,0,0,1)');
+    bhGrad.addColorStop(0.85,'rgba(20,0,30,0.8)');
+    bhGrad.addColorStop(1,   'rgba(0,0,0,0)');
+    ctx.fillStyle = bhGrad;
+    ctx.beginPath(); ctx.arc(0, 0, bhR * 1.1, 0, Math.PI * 2); ctx.fill();
+
+    // Event horizon glow
+    const pulse = 0.5 + 0.5 * Math.sin(blackHole.pulseT * 3);
+    ctx.beginPath(); ctx.arc(0, 0, bhR, 0, Math.PI * 2);
+    ctx.strokeStyle = `rgba(180,0,255,${0.5 + 0.4 * pulse})`;
+    ctx.lineWidth = 3 + pulse * 2; ctx.stroke();
+
+    // Polar jets (vertical beams from the poles)
+    const jetAlpha = 0.25 + 0.15 * Math.sin(blackHole.pulseT * 4);
+    for (const jDir of [-1, 1]) {
+      const jetLen = H * 0.45;
+      const jGrad = ctx.createLinearGradient(0, 0, 0, jDir * jetLen);
+      jGrad.addColorStop(0,   `rgba(180,50,255,${jetAlpha})`);
+      jGrad.addColorStop(0.3, `rgba(100,10,200,${jetAlpha * 0.5})`);
+      jGrad.addColorStop(1,   'rgba(50,0,100,0)');
+      ctx.fillStyle = jGrad;
+      ctx.fillRect(-8, jDir > 0 ? bhR : -bhR - jetLen, 16, jetLen);
+    }
+
+    ctx.restore();
+
+  } else if (fx === 'redGiant') {
+    // Pulsing red giant star in background
+    const p = 0.6 + 0.4 * Math.sin(performance.now() * 0.0008);
+    const rg = ctx.createRadialGradient(W * 0.78, H * 0.22, 0, W * 0.78, H * 0.22, W * 0.22 * p);
+    rg.addColorStop(0,   `rgba(255,180,60,${0.18 * p})`);
+    rg.addColorStop(0.3, `rgba(255,80,10,${0.14 * p})`);
+    rg.addColorStop(0.6, `rgba(200,20,0,${0.08 * p})`);
+    rg.addColorStop(1,   'transparent');
+    ctx.fillStyle = rg; ctx.beginPath(); ctx.arc(W * 0.78, H * 0.22, W * 0.22 * p, 0, Math.PI * 2); ctx.fill();
+
+  } else if (fx === 'starCluster') {
+    // Dense bright star sparkles
+    const t = performance.now() * 0.001;
+    const clusterX = W * 0.6, clusterY = H * 0.35;
+    for (let i = 0; i < 8; i++) {
+      const a = i / 8 * Math.PI * 2 + t * 0.3;
+      const dist = 80 + Math.sin(t * 0.7 + i) * 40;
+      const sx = clusterX + Math.cos(a) * dist;
+      const sy = clusterY + Math.sin(a) * dist;
+      const sg = ctx.createRadialGradient(sx, sy, 0, sx, sy, 18);
+      sg.addColorStop(0,   `rgba(120,200,255,${0.45 + 0.3 * Math.sin(t * 2 + i)})`);
+      sg.addColorStop(1,   'transparent');
+      ctx.fillStyle = sg; ctx.beginPath(); ctx.arc(sx, sy, 18, 0, Math.PI * 2); ctx.fill();
+    }
+
+  } else if (fx === 'supernova') {
+    // Expanding shock-wave rings
+    pulsarT += dt;
+    if (supernovaRings.length < 6 && Math.random() < dt * 1.2) {
+      supernovaRings.push({ r: 30, maxR: 180 + Math.random() * 200, alpha: 0.5, cx: W * 0.5 + (Math.random() - 0.5) * W * 0.3, cy: H * 0.5 + (Math.random() - 0.5) * H * 0.3 });
+    }
+    for (let i = supernovaRings.length - 1; i >= 0; i--) {
+      const ring = supernovaRings[i];
+      ring.r += dt * 80;
+      ring.alpha = (1 - ring.r / ring.maxR) * 0.4;
+      if (ring.r >= ring.maxR) { supernovaRings.splice(i, 1); continue; }
+      ctx.beginPath(); ctx.arc(ring.cx, ring.cy, ring.r, 0, Math.PI * 2);
+      ctx.strokeStyle = `rgba(255,120,20,${ring.alpha})`;
+      ctx.lineWidth = 3; ctx.stroke();
+    }
+    // Central flash
+    const flash = 0.5 + 0.5 * Math.sin(pulsarT * 5);
+    const sfg = ctx.createRadialGradient(W * 0.5, H * 0.5, 0, W * 0.5, H * 0.5, 60);
+    sfg.addColorStop(0,   `rgba(255,220,100,${flash * 0.3})`);
+    sfg.addColorStop(1,   'transparent');
+    ctx.fillStyle = sfg; ctx.beginPath(); ctx.arc(W * 0.5, H * 0.5, 60, 0, Math.PI * 2); ctx.fill();
+
+  } else if (fx === 'pulsar') {
+    // Rotating lighthouse beams
+    pulsarT += dt;
+    const t = pulsarT;
+    const pcx = W * 0.35, pcy = H * 0.3;
+    for (let beam = 0; beam < 2; beam++) {
+      const ang = t * 2.5 + beam * Math.PI;
+      const beamLen = Math.max(W, H) * 1.2;
+      ctx.save();
+      ctx.translate(pcx, pcy);
+      ctx.rotate(ang);
+      const bg2 = ctx.createLinearGradient(0, 0, beamLen, 0);
+      bg2.addColorStop(0,   'rgba(0,240,220,0.35)');
+      bg2.addColorStop(0.3, 'rgba(0,200,180,0.08)');
+      bg2.addColorStop(1,   'transparent');
+      ctx.fillStyle = bg2;
+      ctx.beginPath();
+      ctx.moveTo(0, -6); ctx.lineTo(beamLen, -18); ctx.lineTo(beamLen, 18); ctx.lineTo(0, 6);
+      ctx.closePath(); ctx.fill();
+      ctx.restore();
+    }
+
+  } else if (fx === 'dustCloud') {
+    // Floating green dust wisps
+    const t = performance.now() * 0.0005;
+    for (let i = 0; i < 5; i++) {
+      const wx = ((Math.sin(t * 0.4 + i * 1.3) * 0.3 + 0.5)) * W;
+      const wy = ((Math.cos(t * 0.3 + i * 0.9) * 0.2 + 0.5)) * H;
+      const wg = ctx.createRadialGradient(wx, wy, 0, wx, wy, 100 + i * 30);
+      wg.addColorStop(0,   `rgba(20,200,80,${0.12 + 0.06 * Math.sin(t + i)})`);
+      wg.addColorStop(1,   'transparent');
+      ctx.fillStyle = wg; ctx.beginPath(); ctx.arc(wx, wy, 100 + i * 30, 0, Math.PI * 2); ctx.fill();
+    }
+
+  } else if (fx === 'goldCore') {
+    // Glittering gold rays from center
+    const t = performance.now() * 0.001;
+    for (let i = 0; i < 8; i++) {
+      const a = i / 8 * Math.PI * 2 + t * 0.18;
+      const rayLen = W * 0.45;
+      const rayGrad = ctx.createLinearGradient(W * 0.5, H * 0.5,
+        W * 0.5 + Math.cos(a) * rayLen, H * 0.5 + Math.sin(a) * rayLen);
+      rayGrad.addColorStop(0,   `rgba(255,200,30,${0.14 + 0.06 * Math.sin(t * 2 + i)})`);
+      rayGrad.addColorStop(0.5, `rgba(200,140,10,0.04)`);
+      rayGrad.addColorStop(1,   'transparent');
+      ctx.fillStyle = rayGrad;
+      ctx.beginPath();
+      ctx.moveTo(W * 0.5 - 2, H * 0.5);
+      ctx.lineTo(W * 0.5 + Math.cos(a) * rayLen - 10, H * 0.5 + Math.sin(a) * rayLen);
+      ctx.lineTo(W * 0.5 + Math.cos(a) * rayLen + 10, H * 0.5 + Math.sin(a) * rayLen);
+      ctx.closePath(); ctx.fill();
+    }
+
+  } else if (fx === 'warZone') {
+    // Random flare explosions in background
+    const t = performance.now() * 0.001;
+    for (let i = 0; i < 4; i++) {
+      const fx2 = W * (0.1 + (i * 0.23 + Math.sin(t * 0.4 + i) * 0.1));
+      const fy = H * (0.15 + (i * 0.18 + Math.cos(t * 0.3 + i) * 0.08));
+      const fp = 0.4 + 0.6 * Math.abs(Math.sin(t * (1.2 + i * 0.3) + i));
+      const fg = ctx.createRadialGradient(fx2, fy, 0, fx2, fy, 50 * fp);
+      fg.addColorStop(0,   `rgba(255,60,0,${fp * 0.3})`);
+      fg.addColorStop(0.4, `rgba(200,20,0,${fp * 0.15})`);
+      fg.addColorStop(1,   'transparent');
+      ctx.fillStyle = fg; ctx.beginPath(); ctx.arc(fx2, fy, 50 * fp, 0, Math.PI * 2); ctx.fill();
+    }
+
+  } else if (fx === 'frost') {
+    // Ice crystal sparkles
+    const t = performance.now() * 0.001;
+    for (let i = 0; i < 6; i++) {
+      const icx = W * (0.15 + i * 0.14 + Math.sin(t * 0.5 + i) * 0.06);
+      const icy = H * (0.25 + Math.cos(t * 0.4 + i * 0.7) * 0.15 + i * 0.08);
+      const ig = ctx.createRadialGradient(icx, icy, 0, icx, icy, 25);
+      const alpha = 0.2 + 0.15 * Math.sin(t * 2 + i);
+      ig.addColorStop(0,   `rgba(140,210,255,${alpha})`);
+      ig.addColorStop(1,   'transparent');
+      ctx.fillStyle = ig; ctx.beginPath(); ctx.arc(icx, icy, 25, 0, Math.PI * 2); ctx.fill();
+      // Star shape
+      ctx.save(); ctx.translate(icx, icy); ctx.rotate(t * 0.5 + i);
+      ctx.strokeStyle = `rgba(180,230,255,${alpha * 0.8})`; ctx.lineWidth = 1.2;
+      for (let s = 0; s < 6; s++) {
+        const sa = s / 6 * Math.PI * 2;
+        ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(Math.cos(sa) * 14, Math.sin(sa) * 14); ctx.stroke();
+      }
+      ctx.restore();
+    }
+  }
 }
 
 initGalaxy();
@@ -1515,7 +1856,19 @@ function activateRage(){
   screenShake = 10;
 }
 
-function nextWave(){ wave++; waveActive=true; spawnQ=buildWave(wave); spawnT=0; }
+function nextWave(){
+  wave++;
+  waveActive=true; spawnQ=buildWave(wave); spawnT=0;
+  // Trigger background zone transition
+  const newZone = getZoneForWave(wave);
+  if (newZone !== nextZoneIdx) {
+    currentZoneIdx = nextZoneIdx;
+    nextZoneIdx = newZone;
+    zoneTransitionT = 0;
+    supernovaRings = [];
+    pulsarT = 0;
+  }
+}
 
 // ═══════════════════ DRAW ═══════════════════
 function draw(){
