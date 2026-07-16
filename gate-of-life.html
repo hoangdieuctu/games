@@ -35,7 +35,7 @@ canvas{display:block;position:fixed;top:0;left:0;}
 
 /* ── OVERLAY ── */
 #overlay{
-  position:fixed;inset:0;background:rgba(4,1,1,0.96);
+  position:fixed;inset:0;background:rgba(4,1,12,0.7);
   display:flex;flex-direction:column;align-items:center;justify-content:center;
   z-index:50;gap:12px;
 }
@@ -235,10 +235,213 @@ function resize() {
   W = canvas.width  = window.innerWidth;
   H = canvas.height = window.innerHeight;
   if (gate) { gate.x = W/2; gate.y = H/2; }
+  initGalaxy();
 }
 window.addEventListener('resize', resize);
 
-// ═══════════════════ CONSTANTS ═══════════════════
+// ═══════════════════ GALAXY BACKGROUND ═══════════════════
+const STARS = [];
+const NEBULAE = [
+  { x:.25, y:.35, rx:420, ry:250, angle:-.4, r:60,  g:0,   b:160, a:.35 },
+  { x:.65, y:.55, rx:350, ry:200, angle:.6,  r:120, g:0,   b:200, a:.28 },
+  { x:.45, y:.75, rx:300, ry:160, angle:-.2, r:0,   g:60,  b:180, a:.25 },
+  { x:.15, y:.7,  rx:240, ry:140, angle:.9,  r:180, g:0,   b:100, a:.22 },
+  { x:.8,  y:.25, rx:280, ry:180, angle:-.7, r:40,  g:0,   b:220, a:.30 },
+  { x:.5,  y:.45, rx:200, ry:200, angle:0,   r:80,  g:20,  b:160, a:.20 },
+];
+let galaxyDrift = 0;
+const SHOOTERS = [];  // active shooting stars / comets
+let shooterTimer = 0;
+
+function spawnShooter() {
+  const isComet = Math.random() < 0.25;
+  // Start from a random edge
+  const edge = Math.floor(Math.random() * 4);
+  let x, y, vx, vy;
+  const speed = isComet ? 180 + Math.random()*120 : 400 + Math.random()*300;
+  const angle = (Math.random() * 60 - 30) * Math.PI/180 + (edge < 2 ? Math.PI*.25 : Math.PI*1.25);
+  vx = Math.cos(angle) * speed;
+  vy = Math.sin(angle) * speed;
+  if(edge === 0) { x = Math.random()*W; y = -20; vy = Math.abs(vy); }
+  else if(edge === 1) { x = W+20; y = Math.random()*H; vx = -Math.abs(vx); }
+  else if(edge === 2) { x = Math.random()*W; y = H+20; vy = -Math.abs(vy); }
+  else { x = -20; y = Math.random()*H; vx = Math.abs(vx); }
+
+  SHOOTERS.push({
+    x, y, vx, vy,
+    isComet,
+    len: isComet ? 80 + Math.random()*120 : 40 + Math.random()*60,
+    width: isComet ? 3 + Math.random()*2 : 1.5 + Math.random(),
+    r: isComet ? 4 + Math.random()*3 : 1.5 + Math.random(),
+    hue: isComet ? Math.random() < .5 ? 200 : 40 : 220,
+    life: 0, maxLife: isComet ? 3.5 : 1.2,
+    // comet wobble
+    wobble: 0, wobbleSpeed: isComet ? .8 + Math.random()*.4 : 0,
+  });
+}
+
+function updateShooters(dt) {
+  shooterTimer -= dt/1000;
+  if(shooterTimer <= 0) {
+    spawnShooter();
+    // next spawn in 3–12 seconds
+    shooterTimer = 3 + Math.random() * 9;
+  }
+  for(let i = SHOOTERS.length-1; i>=0; i--) {
+    const s = SHOOTERS[i];
+    s.life += dt/1000;
+    s.x += s.vx * dt/1000;
+    s.y += s.vy * dt/1000;
+    s.wobble += s.wobbleSpeed * dt/1000;
+    if(s.life > s.maxLife || s.x < -200 || s.x > W+200 || s.y < -200 || s.y > H+200)
+      SHOOTERS.splice(i, 1);
+  }
+}
+
+function drawShooters() {
+  for(const s of SHOOTERS) {
+    const alpha = s.life < .15 ? s.life/.15 :
+                  s.life > s.maxLife-.3 ? (s.maxLife-s.life)/.3 : 1;
+    const nx = -s.vy / Math.hypot(s.vx, s.vy);
+    const ny =  s.vx / Math.hypot(s.vx, s.vy);
+    const wobbleOff = s.isComet ? Math.sin(s.wobble) * 8 : 0;
+    const cx = s.x + nx * wobbleOff;
+    const cy = s.y + ny * wobbleOff;
+    const dx = -s.vx / Math.hypot(s.vx, s.vy) * s.len;
+    const dy = -s.vy / Math.hypot(s.vx, s.vy) * s.len;
+
+    // Tail gradient
+    const grad = ctx.createLinearGradient(cx, cy, cx+dx, cy+dy);
+    if(s.isComet) {
+      grad.addColorStop(0, `hsla(${s.hue},100%,90%,${alpha})`);
+      grad.addColorStop(0.15,`hsla(${s.hue},90%,70%,${alpha*.8})`);
+      grad.addColorStop(0.5, `hsla(${s.hue},80%,55%,${alpha*.4})`);
+      grad.addColorStop(1,   `hsla(${s.hue},70%,40%,0)`);
+    } else {
+      grad.addColorStop(0, `rgba(255,255,255,${alpha})`);
+      grad.addColorStop(0.3,`rgba(200,220,255,${alpha*.6})`);
+      grad.addColorStop(1,  `rgba(180,200,255,0)`);
+    }
+
+    ctx.save();
+    ctx.lineWidth = s.width;
+    ctx.strokeStyle = grad;
+    ctx.shadowBlur = s.isComet ? 12 : 4;
+    ctx.shadowColor = `hsla(${s.hue},100%,80%,${alpha*.8})`;
+    ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx+dx, cy+dy);
+    ctx.stroke();
+
+    // Head glow
+    ctx.globalAlpha = alpha;
+    const headGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, s.r*3);
+    headGrad.addColorStop(0, `hsla(${s.hue},100%,100%,.9)`);
+    headGrad.addColorStop(0.4,`hsla(${s.hue},90%,80%,.6)`);
+    headGrad.addColorStop(1,  `hsla(${s.hue},80%,60%,0)`);
+    ctx.fillStyle = headGrad;
+    ctx.beginPath(); ctx.arc(cx, cy, s.r*3, 0, Math.PI*2); ctx.fill();
+    // Bright core
+    ctx.fillStyle = `hsla(${s.hue},60%,100%,${alpha})`;
+    ctx.beginPath(); ctx.arc(cx, cy, s.r*.6, 0, Math.PI*2); ctx.fill();
+    ctx.globalAlpha = 1; ctx.shadowBlur = 0;
+    ctx.restore();
+  }
+}
+
+function initGalaxy() {
+  STARS.length = 0;
+  const N = 500;
+  for (let i = 0; i < N; i++) {
+    STARS.push({
+      x: Math.random(),
+      y: Math.random(),
+      r: Math.random() < .05 ? 2.5 + Math.random() * 2 :
+         Math.random() < .2  ? 1.2 + Math.random() * .8 :
+                                0.4 + Math.random() * 0.8,
+      a: 0.6 + Math.random() * 0.4,
+      twinkle: Math.random() * Math.PI * 2,
+      twinkleSpeed: 0.015 + Math.random() * 0.035,
+      color: Math.random() < .15 ? `rgba(180,210,255,` :
+             Math.random() < .1  ? `rgba(255,220,160,` :
+             Math.random() < .05 ? `rgba(255,160,160,` : `rgba(230,235,255,`,
+    });
+  }
+}
+
+function drawGalaxy(dt) {
+  galaxyDrift += dt * 0.000012;
+  updateShooters(dt);
+
+  // Deep space base
+  const bg = ctx.createRadialGradient(W*.45, H*.4, 0, W*.5, H*.5, Math.max(W,H)*.8);
+  bg.addColorStop(0, '#110830');
+  bg.addColorStop(0.3, '#080318');
+  bg.addColorStop(1, '#020008');
+  ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
+
+  // Galaxy core glow
+  const core = ctx.createRadialGradient(W*.5, H*.48, 0, W*.5, H*.48, Math.min(W,H)*.45);
+  core.addColorStop(0,   'rgba(140,80,220,.22)');
+  core.addColorStop(0.3, 'rgba(80,30,160,.14)');
+  core.addColorStop(0.7, 'rgba(40,10,100,.06)');
+  core.addColorStop(1,   'transparent');
+  ctx.fillStyle = core; ctx.fillRect(0, 0, W, H);
+
+  // Nebula clouds
+  ctx.save();
+  for (const n of NEBULAE) {
+    const nx = (n.x + galaxyDrift * .3) % 1.4 - .2;
+    ctx.save();
+    ctx.translate(nx * W, n.y * H);
+    ctx.rotate(n.angle + galaxyDrift * .05);
+    const ng = ctx.createRadialGradient(0, 0, 0, 0, 0, n.rx);
+    ng.addColorStop(0,   `rgba(${n.r},${n.g},${n.b},${n.a})`);
+    ng.addColorStop(0.5, `rgba(${n.r},${n.g},${n.b},${n.a*.5})`);
+    ng.addColorStop(1,   `rgba(${n.r},${n.g},${n.b},0)`);
+    ctx.scale(1, n.ry / n.rx);
+    ctx.fillStyle = ng;
+    ctx.beginPath(); ctx.arc(0, 0, n.rx, 0, Math.PI*2); ctx.fill();
+    ctx.restore();
+  }
+  ctx.restore();
+
+  // Milky-way band
+  const band = ctx.createLinearGradient(0, H*.1, W, H*.95);
+  band.addColorStop(0,   'rgba(60,20,120,0)');
+  band.addColorStop(0.25,'rgba(100,40,200,.18)');
+  band.addColorStop(0.5, 'rgba(130,60,220,.25)');
+  band.addColorStop(0.75,'rgba(80,20,160,.16)');
+  band.addColorStop(1,   'rgba(40,10,80,0)');
+  ctx.fillStyle = band; ctx.fillRect(0, 0, W, H);
+
+  // Stars
+  const t = performance.now() * .001;
+  for (const s of STARS) {
+    s.twinkle += s.twinkleSpeed;
+    const twinkle = 0.6 + 0.4 * Math.sin(s.twinkle);
+    const sx = ((s.x + galaxyDrift * (0.2 + s.r * .05)) % 1) * W;
+    const sy = s.y * H;
+    ctx.globalAlpha = s.a * twinkle;
+    ctx.fillStyle = s.color + (s.a * twinkle).toFixed(2) + ')';
+    // Bigger stars get a subtle cross glow
+    if (s.r > 1.5) {
+      ctx.shadowBlur = 6; ctx.shadowColor = '#aaaaff';
+    }
+    ctx.beginPath(); ctx.arc(sx, sy, s.r, 0, Math.PI*2); ctx.fill();
+    ctx.shadowBlur = 0;
+  }
+  ctx.globalAlpha = 1;
+
+  // Shooting stars & comets
+  drawShooters();
+
+  // Vignette
+  const vg = ctx.createRadialGradient(W/2,H/2,H*.25,W/2,H/2,H*.85);
+  vg.addColorStop(0, 'transparent');
+  vg.addColorStop(1, 'rgba(0,0,0,.7)');
+  ctx.fillStyle = vg; ctx.fillRect(0, 0, W, H);
+}
+
+initGalaxy();
 const TOTAL_WAVES = 30;
 const HUD_T = 52, HUD_B = 66;
 
@@ -1320,14 +1523,8 @@ function draw(){
   const sy=screenShake?(Math.random()-.5)*screenShake*2:0;
   ctx.save(); ctx.translate(sx,sy);
 
-  // background
-  ctx.fillStyle='#080408'; ctx.fillRect(0,0,W,H);
-  ctx.strokeStyle='rgba(50,15,15,0.3)'; ctx.lineWidth=0.5;
-  for(let x=0;x<=W;x+=40){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
-  for(let y=0;y<=H;y+=40){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
-  const vg=ctx.createRadialGradient(W/2,H/2,H*.3,W/2,H/2,H*.75);
-  vg.addColorStop(0,'transparent'); vg.addColorStop(1,'rgba(0,0,0,.55)');
-  ctx.fillStyle=vg; ctx.fillRect(0,0,W,H);
+  // background — galaxy
+  drawGalaxy(16);
 
   drawGate();
   drawSouls();
