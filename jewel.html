@@ -199,6 +199,29 @@ html, body {
 }
 .jewel.empty { pointer-events:none; opacity:0; }
 
+/* ── CELEBRATION BANNER ── */
+.celebrate-banner {
+  position: fixed; top: 50%; left: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  z-index: 100; pointer-events: none;
+  background: linear-gradient(135deg, #ffd700, #ff9900);
+  color: #fff; font-family: 'Cinzel', serif;
+  font-size: clamp(22px, 5vmin, 38px); font-weight: 900;
+  padding: clamp(14px,3vmin,22px) clamp(30px,6vmin,56px);
+  border-radius: 12px;
+  box-shadow: 0 8px 40px rgba(0,0,0,.5), 0 0 0 4px rgba(255,255,255,.3);
+  text-shadow: 0 2px 4px rgba(0,0,0,.4);
+  white-space: nowrap;
+  animation: celebrate-pop 2s cubic-bezier(.34,1.56,.64,1) forwards;
+}
+@keyframes celebrate-pop {
+  0%   { transform: translate(-50%,-50%) scale(0); opacity:0; }
+  15%  { transform: translate(-50%,-50%) scale(1.1); opacity:1; }
+  25%  { transform: translate(-50%,-50%) scale(1); opacity:1; }
+  70%  { transform: translate(-50%,-50%) scale(1); opacity:1; }
+  100% { transform: translate(-50%,-50%) scale(.8); opacity:0; }
+}
+
 /* ── SVG JEWEL SHAPES ── */
 .jewel svg { width:100%; height:100%; overflow:visible; }
 
@@ -468,6 +491,7 @@ let activePower = null;
 let bombs = 8, lightnings = 3;
 let locked = false;
 let cellSize = 40;
+let targetReached = false;  // tracks if we already celebrated this level
 
 // ── Audio ──────────────────────────────────────────────────────────────────
 let audioCtx;
@@ -617,6 +641,26 @@ function setHint(txt) {
   document.getElementById('bottom-hint').textContent = txt;
 }
 
+function showCelebration() {
+  const el = document.createElement('div');
+  el.className = 'celebrate-banner';
+  el.textContent = '🎉 TARGET REACHED!';
+  document.body.appendChild(el);
+  [523,659,784,1047].forEach((f,i) => setTimeout(()=>tone(f,.18,'sine',.2), i*70));
+  setTimeout(() => el.remove(), 2200);
+}
+
+function showPowerupGain(msg) {
+  const el = document.createElement('div');
+  el.className = 'celebrate-banner';
+  el.style.fontSize = 'clamp(16px,3.5vmin,26px)';
+  el.style.background = 'linear-gradient(135deg,#6611bb,#aa44ff)';
+  el.textContent = msg;
+  document.body.appendChild(el);
+  tone(880,.1,'sine',.15); setTimeout(()=>tone(1100,.12,'sine',.15),120);
+  setTimeout(() => { el.remove(); updateStats(); }, 1800);
+}
+
 // ── Pop group ──────────────────────────────────────────────────────────────
 function popGroup(group) {
   locked=true;
@@ -628,6 +672,21 @@ function popGroup(group) {
   playPop(group.length);
   selectedGroup=[];
   showScorePop(group, group.length, group.length * group.length * 2);
+
+  // Big group rewards: >15 jewels → +1 bomb, >20 jewels → +1 lightning
+  if(group.length > 20) {
+    lightnings++;
+    setTimeout(()=>showPowerupGain('⚡ +1 Lightning!'), 350);
+  } else if(group.length > 15) {
+    bombs++;
+    setTimeout(()=>showPowerupGain('💣 +1 Bomb!'), 350);
+  }
+
+  // Celebrate first time target is reached
+  if(!targetReached && score >= levelConfig(level).target) {
+    targetReached = true;
+    setTimeout(showCelebration, 100);
+  }
 
   setTimeout(()=>{
     applyGravity();
@@ -709,6 +768,7 @@ function useLightning(r,c) {
   cells.forEach(([br,bc])=>{ cellEl(br,bc).classList.add('pop'); board[br][bc]=-1; });
   playLightning();
   if(cells.length) showScorePop(cells,cells.length,pts);
+  if(!targetReached && score >= levelConfig(level).target) { targetReached=true; setTimeout(showCelebration,100); }
   setTimeout(()=>{ applyGravity(); setTimeout(()=>{ updateStats();locked=false;checkEnd();},220);},360);
 }
 
@@ -742,6 +802,15 @@ function checkEnd() {
 
 function autoNextLevel() {
   level++;
+  targetReached = false;
+  // Every 5 rounds → +1 bomb, every 10 rounds → +1 lightning
+  if(level % 10 === 1) {        // completed round 10, 20, 30...
+    lightnings++;
+    setTimeout(()=>showPowerupGain('⚡ +1 Lightning! (10 rounds)'), 400);
+  } else if(level % 5 === 1) {  // completed round 5, 15, 25...
+    bombs++;
+    setTimeout(()=>showPowerupGain('💣 +1 Bomb! (5 rounds)'), 400);
+  }
   activePower=null; selectedGroup=[]; locked=false;
   document.getElementById('btn-bomb').classList.remove('active');
   document.getElementById('btn-lightning').classList.remove('active');
@@ -751,7 +820,7 @@ function autoNextLevel() {
 
 // ── Screens ────────────────────────────────────────────────────────────────
 function startGame() {
-  score=0; level=1; bombs=8; lightnings=3;
+  score=0; level=1; bombs=8; lightnings=3; targetReached=false;
   activePower=null; selectedGroup=[]; locked=false;
   document.getElementById('btn-bomb').classList.remove('active');
   document.getElementById('btn-lightning').classList.remove('active');
