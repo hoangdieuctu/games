@@ -304,6 +304,10 @@ html, body {
       <span class="stage-name" id="stage-name">STAGE 1</span>
     </div>
     <div class="powerup-btns">
+      <button class="btn-power" id="btn-shuffle" onclick="useShuffle()">
+        <span class="pw-icon">🔀</span>
+        <span class="pw-count" id="count-shuffle">x3</span>
+      </button>
       <button class="btn-power" id="btn-lightning" onclick="togglePower('lightning')">
         <span class="pw-icon">⚡</span>
         <span class="pw-count" id="count-lightning">x3</span>
@@ -488,7 +492,7 @@ let score = 0, bestScore = 0;
 let level = 1;
 let selectedGroup = [];
 let activePower = null;
-let bombs = 8, lightnings = 3;
+let bombs = 8, lightnings = 3, shuffles = 3;
 let locked = false;
 let cellSize = 40;
 let targetReached = false;  // tracks if we already celebrated this level
@@ -598,6 +602,7 @@ function updateStats() {
   document.getElementById('stat-best').textContent   = bestScore.toLocaleString();
   document.getElementById('count-bomb').textContent  = `x${bombs}`;
   document.getElementById('count-lightning').textContent = `x${lightnings}`;
+  document.getElementById('count-shuffle').textContent = `x${shuffles}`;
 }
 
 // ── Click handler ──────────────────────────────────────────────────────────
@@ -680,6 +685,14 @@ function popGroup(group) {
   } else if(group.length > 15) {
     bombs++;
     setTimeout(()=>showPowerupGain('💣 +1 Bomb!'), 350);
+  }
+
+  // Every 2000 pts milestone → +1 shuffle
+  const milestone = Math.floor(score / 2000);
+  const prevMilestone = Math.floor((score - pts) / 2000);
+  if(milestone > prevMilestone) {
+    shuffles++;
+    setTimeout(()=>showPowerupGain('🔀 +1 Shuffle! (2000 pts)'), 350);
   }
 
   // Celebrate first time target is reached
@@ -772,6 +785,21 @@ function useLightning(r,c) {
   setTimeout(()=>{ applyGravity(); setTimeout(()=>{ updateStats();locked=false;checkEnd();},220);},360);
 }
 
+function useShuffle() {
+  if(shuffles <= 0 || locked) return;
+  if(countRemaining() < COLS * ROWS) { setHint('🔀 Chỉ dùng được lúc bắt đầu vòng!'); return; }
+  shuffles--;
+  targetReached = false;
+  selectedGroup = [];
+  const cfg = levelConfig(level);
+  buildBoard(cfg.colors);
+  renderGrid(null);
+  updateStats();
+  setHint('🔀 Board shuffled!');
+  tone(440,.08,'sine',.15); setTimeout(()=>tone(660,.1,'sine',.15),100); setTimeout(()=>tone(880,.12,'sine',.15),200);
+  if(score >= cfg.target) { targetReached = true; setTimeout(showCelebration, 300); }
+}
+
 // ── End conditions ─────────────────────────────────────────────────────────
 function checkEnd() {
   const cfg = levelConfig(level);
@@ -816,11 +844,12 @@ function autoNextLevel() {
   document.getElementById('btn-lightning').classList.remove('active');
   const cfg=levelConfig(level); buildBoard(cfg.colors);
   renderGrid(null); updateStats(); setHint('Chọn nhóm đá quý!');
+  if(score >= cfg.target) { targetReached = true; setTimeout(showCelebration, 300); }
 }
 
 // ── Screens ────────────────────────────────────────────────────────────────
 function startGame() {
-  score=0; level=1; bombs=8; lightnings=3; targetReached=false;
+  score=0; level=1; bombs=8; lightnings=3; shuffles=3; targetReached=false;
   activePower=null; selectedGroup=[]; locked=false;
   document.getElementById('btn-bomb').classList.remove('active');
   document.getElementById('btn-lightning').classList.remove('active');
