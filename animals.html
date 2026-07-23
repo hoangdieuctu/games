@@ -251,6 +251,13 @@ html, body {
 </div>
 
 <script>
+// Cache animal images in the browser (via service worker) for instant repeat visits.
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  });
+}
+
 const ANIMALS = [
   // ── Thú ──
   {vi:'Chó',          en:'Dog',               emoji:'🐕',  cat:'Thú',       desc:'Bạn thân nhất của con người, trung thành và thông minh.',
@@ -598,7 +605,7 @@ function renderGrid(cat) {
     card.innerHTML = `
       <div class="img-wrap">
         <div class="img-fallback">${a.emoji}</div>
-        <img src="${a.img}" alt="${a.vi}"
+        <img src="${a.img}" alt="${a.vi}" loading="lazy"
           onload="this.classList.add('loaded')"
           onerror="this.style.display='none'">
       </div>
