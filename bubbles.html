@@ -77,6 +77,49 @@ html, body {
 .score.bump { transform: scale(1.18); }
 .score .ico { font-size: 26px; }
 
+/* ── chế độ khóa ── */
+.hud.hidden { opacity: 0; pointer-events: none; transition: opacity .3s; }
+
+.lockbadge {
+  position: fixed; z-index: 6;
+  top: calc(env(safe-area-inset-top, 0px) + 10px);
+  left: calc(env(safe-area-inset-left, 0px) + 12px);
+  width: 46px; height: 46px;
+  display: none; align-items: center; justify-content: center;
+  border: none; border-radius: 50%;
+  background: rgba(90,130,175,.22);
+  color: #fff; font-size: 18px; line-height: 1;
+  opacity: .5;
+  touch-action: none; cursor: pointer;
+  -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px);
+}
+.lockbadge.on { display: flex; }
+.lockbadge.holding { opacity: 1; background: rgba(90,130,175,.5); }
+.lockbadge::before {
+  content: ''; position: absolute; inset: -5px;
+  border-radius: 50%;
+  background: conic-gradient(from -90deg, rgba(255,255,255,.95) calc(var(--p, 0) * 1turn), rgba(255,255,255,0) 0);
+  -webkit-mask: radial-gradient(circle, transparent 58%, #000 61%);
+          mask: radial-gradient(circle, transparent 58%, #000 61%);
+  opacity: var(--o, 0);
+}
+
+/* ── thông báo ngắn ── */
+.toast {
+  position: fixed; z-index: 7;
+  left: 50%; bottom: calc(env(safe-area-inset-bottom, 0px) + 28px);
+  transform: translate(-50%, 14px);
+  padding: 12px 22px; border-radius: 26px;
+  background: rgba(255,255,255,.78);
+  box-shadow: 0 6px 20px rgba(60,90,140,.2);
+  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+  color: #2f6ea8; font-size: 19px; font-weight: 700;
+  white-space: nowrap;
+  opacity: 0; pointer-events: none;
+  transition: opacity .3s, transform .3s;
+}
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+
 /* ── gợi ý ban đầu ── */
 .hint {
   position: fixed; z-index: 4;
@@ -103,12 +146,17 @@ html, body {
 
 <canvas id="cv"></canvas>
 
-<div class="hud">
+<div class="hud" id="hud">
   <a class="btn" href="index.html" aria-label="Quay lại">←</a>
   <div class="spacer"></div>
   <div class="score" id="score"><span class="ico">🫧</span><span id="num">0</span></div>
+  <button class="btn" id="full" aria-label="Toàn màn hình">⛶</button>
+  <button class="btn" id="lock" aria-label="Khóa cho bé chơi">🔒</button>
   <button class="btn" id="sound" aria-label="Bật tắt âm thanh">🔊</button>
 </div>
+
+<button class="lockbadge" id="lockbadge" aria-label="Giữ 2 giây để mở khóa">🔒</button>
+<div class="toast" id="toast"></div>
 
 <div class="hint" id="hint">Chạm vào bong bóng!<small>👆 chạm hoặc vuốt để nổ</small></div>
 
@@ -194,6 +242,119 @@ document.getElementById('sound').addEventListener('click', (e) => {
   e.currentTarget.textContent = soundOn ? '🔊' : '🔇';
   if (soundOn) { ac(); playPop(700); }
 });
+
+/* ══════════ toàn màn hình & chế độ khóa ══════════ */
+const hudEl    = document.getElementById('hud');
+const fullBtn  = document.getElementById('full');
+const lockBtn  = document.getElementById('lock');
+const badgeEl  = document.getElementById('lockbadge');
+const toastEl  = document.getElementById('toast');
+
+const docEl = document.documentElement;
+const rawRequestFS = docEl.requestFullscreen || docEl.webkitRequestFullscreen;
+const rawExitFS    = document.exitFullscreen || document.webkitExitFullscreen;
+const FS_SUPPORTED = !!rawRequestFS;
+
+/* iPhone Safari không cho phần tử vào toàn màn hình → ẩn nút */
+if (!FS_SUPPORTED) fullBtn.style.display = 'none';
+
+function isFS() {
+  return !!(document.fullscreenElement || document.webkitFullscreenElement);
+}
+function enterFS() {
+  if (!FS_SUPPORTED || isFS()) return;
+  try { const r = rawRequestFS.call(docEl); if (r && r.catch) r.catch(() => {}); } catch (e) {}
+}
+function exitFS() {
+  if (!isFS() || !rawExitFS) return;
+  try { const r = rawExitFS.call(document); if (r && r.catch) r.catch(() => {}); } catch (e) {}
+}
+function syncFSIcon() {
+  fullBtn.setAttribute('aria-label', isFS() ? 'Thoát toàn màn hình' : 'Toàn màn hình');
+  fullBtn.style.color = isFS() ? '#e0679a' : '';
+}
+document.addEventListener('fullscreenchange', syncFSIcon);
+document.addEventListener('webkitfullscreenchange', syncFSIcon);
+
+fullBtn.addEventListener('click', () => { isFS() ? exitFS() : enterFS(); });
+
+/* giữ màn hình luôn sáng khi bé đang chơi */
+let wakeLock = null;
+async function keepAwake(on) {
+  try {
+    if (on && 'wakeLock' in navigator) {
+      wakeLock = await navigator.wakeLock.request('screen');
+    } else if (wakeLock) {
+      await wakeLock.release(); wakeLock = null;
+    }
+  } catch (e) { /* trình duyệt không hỗ trợ - bỏ qua */ }
+}
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && locked) keepAwake(true);
+});
+
+let toastTimer = null;
+function toast(msg, ms) {
+  toastEl.textContent = msg;
+  toastEl.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toastEl.classList.remove('show'), ms || 2600);
+}
+
+let locked = false;
+
+function setLocked(on) {
+  locked = on;
+  hudEl.classList.toggle('hidden', on);
+  badgeEl.classList.toggle('on', on);
+  badgeEl.style.setProperty('--p', 0);
+  badgeEl.style.setProperty('--o', 0);
+  keepAwake(on);
+  if (on) {
+    enterFS();
+    toast('Đã khóa · giữ 🔒 2 giây để mở', 3200);
+  } else {
+    exitFS();
+    toast('Đã mở khóa', 1800);
+  }
+}
+
+lockBtn.addEventListener('click', () => { ac(); setLocked(true); });
+
+/* mở khóa: giữ nút 🔒 trong 2 giây (bé bấm lung tung sẽ không mở được) */
+const HOLD_MS = 2000;
+let holdRAF = 0, holdTimer = 0, holdFrom = 0, holdId = null;
+
+/* setTimeout quyết định mốc 2 giây (luôn chạy); rAF chỉ vẽ vòng tiến trình */
+function holdStep(now) {
+  badgeEl.style.setProperty('--p', Math.min(1, (now - holdFrom) / HOLD_MS));
+  holdRAF = requestAnimationFrame(holdStep);
+}
+function holdCancel() {
+  cancelAnimationFrame(holdRAF);
+  clearTimeout(holdTimer);
+  holdRAF = 0; holdTimer = 0; holdId = null;
+  badgeEl.classList.remove('holding');
+  badgeEl.style.setProperty('--p', 0);
+  badgeEl.style.setProperty('--o', 0);
+}
+
+badgeEl.addEventListener('pointerdown', (e) => {
+  e.preventDefault(); e.stopPropagation();
+  holdId = e.pointerId;
+  try { badgeEl.setPointerCapture(e.pointerId); } catch (err) {}
+  badgeEl.classList.add('holding');
+  badgeEl.style.setProperty('--o', 1);
+  holdFrom = performance.now();
+  holdRAF = requestAnimationFrame(holdStep);
+  holdTimer = setTimeout(() => { holdCancel(); setLocked(false); }, HOLD_MS);
+});
+['pointerup', 'pointercancel', 'pointerleave'].forEach((ev) => {
+  badgeEl.addEventListener(ev, (e) => { if (e.pointerId === holdId) holdCancel(); });
+});
+
+/* chặn menu ngữ cảnh khi bé nhấn giữ */
+document.addEventListener('contextmenu', (e) => e.preventDefault());
 
 /* ══════════ tiện ích ══════════ */
 const rnd  = (a, b) => a + Math.random() * (b - a);
