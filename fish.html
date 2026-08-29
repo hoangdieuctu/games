@@ -471,6 +471,68 @@ const clamp = (v, a, b) => v < a ? a : (v > b ? b : v);
 const FISH_HUES = [28, 45, 12, 190, 330, 275, 150, 210, 0, 60];
 const PRAISE = ['Có bạn mới!', 'Thêm một bạn!', 'Cá mới tới!'];
 
+/* ══════════ các cảnh trong ngày ══════════ */
+/* Cứ 60 giây bể lại đổi cảnh, màu chuyển mượt trong 4 giây. */
+const THEMES = [
+  { label: '☀️ Trời sáng rồi!', hue: 200,
+    water: [[127,220,247],[41,174,226],[15,107,165],[8,69,110]],
+    sand: [232,209,153], ray: 0.95, rayCol: [255,255,255], tint: [0,0,0,0], glow: 0 },
+
+  { label: '🌇 Hoàng hôn rồi!', hue: 25,
+    water: [[255,206,150],[248,150,110],[196,92,124],[86,54,110]],
+    sand: [226,180,136], ray: 0.8, rayCol: [255,214,160], tint: [255,150,80,0.10], glow: 0 },
+
+  { label: '🌙 Đêm xuống rồi!', hue: 235,
+    water: [[46,80,140],[28,56,104],[16,34,74],[7,16,44]],
+    sand: [143,159,192], ray: 0.22, rayCol: [190,215,255], tint: [10,20,60,0.24], glow: 1 },
+
+  { label: '🌅 Bình minh rồi!', hue: 330,
+    water: [[255,209,232],[168,201,240],[64,133,186],[13,74,120]],
+    sand: [240,217,181], ray: 0.7, rayCol: [255,225,235], tint: [255,180,200,0.08], glow: 0.25 }
+];
+
+const THEME_MS = 60000;    /* mỗi cảnh kéo dài 1 phút */
+const FADE_MS  = 4000;     /* thời gian chuyển màu */
+
+let themeIdx = 0, nextIdx = 0, fade = 1, themeT = 0;
+let theme = null;          /* cảnh đã pha trộn, cập nhật mỗi khung hình */
+
+const lerpN = (a, b, t) => a + (b - a) * t;
+const mixArr = (a, b, t) => a.map((v, i) => lerpN(v, b[i], t));
+const rgb  = (c) => 'rgb(' + Math.round(c[0]) + ',' + Math.round(c[1]) + ',' + Math.round(c[2]) + ')';
+const rgba = (c, a) => 'rgba(' + Math.round(c[0]) + ',' + Math.round(c[1]) + ',' + Math.round(c[2]) + ',' + a + ')';
+
+function mixTheme() {
+  const a = THEMES[themeIdx], b = THEMES[nextIdx], t = fade;
+  if (a === b) return a;
+  return {
+    label: b.label, hue: lerpN(a.hue, b.hue, t),
+    water: a.water.map((c, i) => mixArr(c, b.water[i], t)),
+    sand: mixArr(a.sand, b.sand, t),
+    ray: lerpN(a.ray, b.ray, t),
+    rayCol: mixArr(a.rayCol, b.rayCol, t),
+    tint: [lerpN(a.tint[0], b.tint[0], t), lerpN(a.tint[1], b.tint[1], t),
+           lerpN(a.tint[2], b.tint[2], t), lerpN(a.tint[3], b.tint[3], t)],
+    glow: lerpN(a.glow, b.glow, t)
+  };
+}
+
+function stepTheme(dt) {
+  themeT += dt * 1000;
+  if (fade >= 1 && themeT >= THEME_MS) {
+    nextIdx = (themeIdx + 1) % THEMES.length;
+    fade = 0;
+    texts.push({ x: W / 2, y: H * 0.32, txt: THEMES[nextIdx].label,
+                 life: 1, decay: 0.38, size: 48, hue: THEMES[nextIdx].hue });
+    playSparkle();
+  }
+  if (fade < 1) {
+    fade = Math.min(1, fade + (dt * 1000) / FADE_MS);
+    if (fade >= 1) { themeIdx = nextIdx; themeT = 0; }
+  }
+  theme = mixTheme();
+}
+
 /* ══════════ trạng thái ══════════ */
 const fishes  = [];
 const foods   = [];
@@ -479,6 +541,7 @@ const parts   = [];
 const texts   = [];
 const weeds   = [];
 const rocks   = [];
+const plankton = [];
 let fed = 0, started = false, bubbleTimer = 0;
 
 const MAX_FISH = 22;
@@ -516,6 +579,17 @@ function layout() {
       phase: rnd(0, 6.28),
       speed: rnd(0.5, 1.1),
       blades: Math.round(rnd(2, 4))
+    });
+  }
+
+  /* sinh vật phù du phát sáng (chỉ hiện về đêm) */
+  plankton.length = 0;
+  const np = Math.round(W * H / 16000);
+  for (let i = 0; i < np; i++) {
+    plankton.push({
+      x: rnd(0, W), y: rnd(0, sandY), r: rnd(1.2, 3.4),
+      phase: rnd(0, 6.28), blink: rnd(0.5, 1.8),
+      vx: rnd(-6, 6), vy: rnd(-9, -2)
     });
   }
 
@@ -690,10 +764,10 @@ document.addEventListener('gesturestart', (e) => e.preventDefault());
 /* ══════════ vẽ nền bể ══════════ */
 function drawWater(t) {
   const g = ctx.createLinearGradient(0, 0, 0, H);
-  g.addColorStop(0,   '#6fd6f5');
-  g.addColorStop(0.35,'#25a7dd');
-  g.addColorStop(0.75,'#0f6ba5');
-  g.addColorStop(1,   '#08456e');
+  g.addColorStop(0,    rgb(theme.water[0]));
+  g.addColorStop(0.35, rgb(theme.water[1]));
+  g.addColorStop(0.75, rgb(theme.water[2]));
+  g.addColorStop(1,    rgb(theme.water[3]));
   ctx.fillStyle = g;
   ctx.fillRect(0, 0, W, H);
 
@@ -703,10 +777,10 @@ function drawWater(t) {
   for (let i = 0; i < 5; i++) {
     const bx = ((i / 5) * W + Math.sin(t * 0.13 + i) * W * 0.05 + W * 0.08) % (W * 1.1);
     const w1 = W * 0.055, w2 = W * 0.16;
-    const a = 0.05 + 0.035 * Math.sin(t * 0.5 + i * 1.7);
+    const a = (0.05 + 0.035 * Math.sin(t * 0.5 + i * 1.7)) * theme.ray;
     const lg = ctx.createLinearGradient(0, 0, 0, sandY);
-    lg.addColorStop(0, 'rgba(255,255,255,' + a + ')');
-    lg.addColorStop(1, 'rgba(255,255,255,0)');
+    lg.addColorStop(0, rgba(theme.rayCol, a));
+    lg.addColorStop(1, rgba(theme.rayCol, 0));
     ctx.fillStyle = lg;
     ctx.beginPath();
     ctx.moveTo(bx - w1 / 2, -10);
@@ -720,7 +794,7 @@ function drawWater(t) {
 }
 
 function drawSand(t) {
-  ctx.fillStyle = '#e8d199';
+  ctx.fillStyle = rgb(theme.sand);
   ctx.beginPath();
   ctx.moveTo(0, H);
   ctx.lineTo(0, sandY + 12);
@@ -890,8 +964,37 @@ function drawFish(f, t) {
   ctx.restore();
 }
 
+/* phủ sắc ánh sáng của cảnh lên toàn bể (cả cá, rong, cát) */
+function drawTint() {
+  if (theme.tint[3] <= 0.001) return;
+  ctx.fillStyle = rgba(theme.tint, theme.tint[3]);
+  ctx.fillRect(0, 0, W, H);
+}
+
+/* đốm sáng lập lòe trong nước, chỉ thấy khi trời tối */
+function drawPlankton(t, dt) {
+  if (theme.glow <= 0.02) return;
+  ctx.save();
+  ctx.globalCompositeOperation = 'lighter';
+  for (const p of plankton) {
+    p.x += p.vx * dt;
+    p.y += p.vy * dt;
+    if (p.y < -5) { p.y = sandY + 5; p.x = rnd(0, W); }
+    if (p.x < -5) p.x = W + 5;
+    if (p.x > W + 5) p.x = -5;
+    const a = theme.glow * (0.35 + 0.65 * (0.5 + 0.5 * Math.sin(t * p.blink + p.phase)));
+    const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * 4);
+    g.addColorStop(0, 'rgba(190,255,235,' + (a * 0.9) + ')');
+    g.addColorStop(1, 'rgba(120,220,255,0)');
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(p.x, p.y, p.r * 4, 0, 6.2832); ctx.fill();
+  }
+  ctx.restore();
+}
+
 /* ══════════ vòng lặp ══════════ */
 let last = performance.now(), time = 0;
+theme = mixTheme();
 
 function frame(now) {
   let dt = (now - last) / 1000;
@@ -899,6 +1002,8 @@ function frame(now) {
   if (dt > 0.05) dt = 0.05;
   if (dt < 0) dt = 0;          /* timestamp lùi thì bỏ qua, tránh hệ số nội suy đổi dấu */
   time += dt;
+
+  stepTheme(dt);
 
   /* bong bóng nền */
   bubbleTimer -= dt;
@@ -1004,6 +1109,9 @@ function frame(now) {
     ctx.fillStyle = 'rgba(255,255,255,.9)';
     ctx.beginPath(); ctx.arc(b.x - b.r * 0.32, b.y - b.r * 0.32, b.r * 0.22, 0, 6.2832); ctx.fill();
   }
+
+  drawTint();
+  drawPlankton(time, dt);
 
   /* hạt hiệu ứng */
   for (let i = parts.length - 1; i >= 0; i--) {
