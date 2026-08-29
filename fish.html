@@ -545,6 +545,7 @@ const plankton = [];
 let fed = 0, started = false, bubbleTimer = 0;
 
 const MAX_FISH = 22;
+const MAX_CRIT = 14;
 const MAX_FOOD = 16;
 
 const numEl   = document.getElementById('num');
@@ -635,7 +636,10 @@ function makeFish(opts) {
     retarget: rnd(1.5, 4),
     munch: 0,
     startle: 0,
-    entering: false
+    entering: false,
+    maxSize: size * 1.7,
+    pop: 0,
+    full: false
   };
 }
 
@@ -669,6 +673,13 @@ function keepInTank(f) {
 
 for (let i = 0; i < 6; i++) fishes.push(makeFish());
 updateCount();
+
+/* mỗi 5 viên được ăn thì có thêm một chú cá, mỗi 20 viên thêm một loài biển */
+function onFed() {
+  fed++;
+  if (fed % 20 === 0) addCritter();
+  else if (fed % 5 === 0) addFish();
+}
 
 function addFish() {
   if (fishes.length >= MAX_FISH) return;
@@ -711,8 +722,8 @@ function onDown(e) {
   }
   pointers.set(e.pointerId, { x: e.clientX, y: e.clientY, moved: 0 });
 
-  /* chạm vào cá thì cá giật mình bơi vụt đi */
-  let startled = false;
+  /* chạm vào sinh vật biển: mỗi loài phản ứng một kiểu */
+  let startled = touchCritter(e.clientX, e.clientY);
   for (const f of fishes) {
     if (Math.hypot(e.clientX - f.x, e.clientY - f.y) < f.size * 0.75) {
       const bd = bounds(f);
@@ -760,6 +771,581 @@ cv.addEventListener('pointerup', onUp);
 cv.addEventListener('pointercancel', onUp);
 document.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });
 document.addEventListener('gesturestart', (e) => e.preventDefault());
+
+/* ══════════ sinh vật biển khác ══════════ */
+const critters = [];
+
+const CRITTER_VN = {
+  jelly:    'Sứa biển',
+  turtle:   'Rùa biển',
+  seahorse: 'Cá ngựa',
+  crab:     'Cua biển',
+  star:     'Sao biển',
+  ray:      'Cá đuối',
+  octopus:  'Bạch tuộc'
+};
+const CRITTER_KINDS = ['jelly', 'turtle', 'seahorse', 'crab', 'star', 'ray', 'octopus'];
+const ON_FLOOR = { crab: 1, star: 1, octopus: 1 };
+
+function critterSize(kind) {
+  const base = Math.min(W, H);
+  const k = { star: 0.075, crab: 0.058, jelly: 0.072, seahorse: 0.078,
+              octopus: 0.085, turtle: 0.105, ray: 0.115 }[kind] || 0.08;
+  return base * k;
+}
+
+function floorY(c) { return sandY - c.size * (c.kind === 'star' ? 0.06 : 0.16); }
+
+function makeCritter(kind, opts) {
+  const o = opts || {};
+  const size = critterSize(kind) * rnd(0.85, 1.15);
+  const c = {
+    kind, size,
+    x: o.x != null ? o.x : rnd(W * 0.1, W * 0.9),
+    y: 0,
+    vx: 0, vy: 0,
+    tx: rnd(W * 0.1, W * 0.9), ty: rnd(H * 0.15, sandY - size),
+    retarget: rnd(2, 6),
+    phase: rnd(0, 6.28),
+    spin: rnd(-0.25, 0.25),
+    rot: rnd(0, 6.28),
+    startle: 0,
+    pop: 0,                /* phồng lên một nhịp khi vừa ăn */
+    full: false,
+    dir: Math.random() < 0.5 ? -1 : 1,
+    hue: { jelly: rnd(280, 330), turtle: rnd(95, 135), seahorse: rnd(30, 55),
+           crab: rnd(5, 20), star: rnd(15, 45), ray: rnd(200, 225),
+           octopus: rnd(285, 315) }[kind],
+    speed: { jelly: rnd(9, 16), turtle: rnd(26, 40), seahorse: rnd(8, 14),
+             crab: rnd(22, 38), star: rnd(1.5, 4), ray: rnd(34, 52),
+             octopus: rnd(16, 28) }[kind],
+    hop: 0            /* bạch tuộc phụt lên */
+  };
+  c.maxSize = size * 1.6;
+  c.y = ON_FLOOR[kind] ? floorY(c) : (o.y != null ? o.y : rnd(H * 0.15, sandY - size));
+  if (kind === 'seahorse') c.y = rnd(sandY - H * 0.3, sandY - size * 0.7);
+  return c;
+}
+
+function stockCritters() {
+  critters.length = 0;
+  const k = clamp(Math.round((W * H) / 450000), 1, 2);
+  const plan = { jelly: k + 1, star: k + 1, crab: k, seahorse: k, turtle: 1, ray: 1, octopus: 1 };
+  for (const kind in plan) {
+    for (let i = 0; i < plan[kind]; i++) critters.push(makeCritter(kind));
+  }
+}
+
+/* thưởng thêm một loài mới khi bé cho ăn nhiều */
+function addCritter() {
+  if (critters.length >= MAX_CRIT) { addFish(); return; }
+  const kind = pick(CRITTER_KINDS);
+  const fromLeft = Math.random() < 0.5;
+  const c = makeCritter(kind, { x: fromLeft ? -70 : W + 70 });
+  c.tx = fromLeft ? rnd(W * 0.3, W * 0.8) : rnd(W * 0.2, W * 0.7);
+  critters.push(c);
+  playSparkle();
+  texts.push({ x: W / 2, y: H * 0.3, txt: CRITTER_VN[kind] + ' tới rồi!',
+               life: 1, decay: 0.5, size: 44, hue: 190 });
+}
+
+function newCritterTarget(c) {
+  const m = c.size * 0.8;
+  c.tx = rnd(m, W - m);
+  c.ty = c.kind === 'seahorse'
+    ? rnd(sandY - H * 0.32, sandY - c.size * 0.7)
+    : rnd(H * 0.12 + c.size * 0.4, sandY - c.size * 0.6);
+  c.retarget = rnd(2.5, 7);
+}
+
+/* loài nào biết ăn mồi (sứa thì không) */
+const EATER = { turtle: 1, ray: 1, seahorse: 1, octopus: 1, crab: 1, star: 1 };
+
+/* tìm viên thức ăn gần nhất trong tầm */
+function nearestFood(x, y, reach) {
+  let best = null, bestD = reach;
+  for (const fd of foods) {
+    const d = Math.hypot(fd.x - x, fd.y - y);
+    if (d < bestD) { bestD = d; best = fd; }
+  }
+  return best ? { fd: best, d: bestD } : null;
+}
+
+function updateCritter(c, dt) {
+  c.phase += dt * (c.kind === 'jelly' ? 1.7 : 2.4);
+  if (c.startle > 0) c.startle = Math.max(0, c.startle - dt * 0.8);
+  if (c.hop > 0) c.hop = Math.max(0, c.hop - dt * 1.1);
+  if (c.pop > 0) c.pop = Math.max(0, c.pop - dt * 3.2);
+
+  const m = c.size * 0.8;
+  const boost = 1 + c.startle * 2.2;
+
+  /* ăn mồi và lớn lên */
+  const near = EATER[c.kind] && c.startle <= 0
+    ? nearestFood(c.x, c.y, c.kind === 'star' ? c.size * 0.9 : Math.min(W, H) * 0.4)
+    : null;
+  if (near && near.d < c.size * 0.6) { eatFood(c, near.fd); }
+
+  if (ON_FLOOR[c.kind]) {
+    /* bò ngang trên cát */
+    if (near && c.kind !== 'star') {
+      c.dir = near.fd.x > c.x ? 1 : -1;
+      c.retarget = rnd(3, 8);
+    } else {
+      c.retarget -= dt;
+      if (c.retarget <= 0) { c.dir = Math.random() < 0.5 ? -1 : 1; c.retarget = rnd(3, 8); }
+    }
+    if (c.kind !== 'star' || near) c.x += c.dir * c.speed * boost * (near ? 1.7 : 1) * dt;
+    else c.x += c.dir * c.speed * boost * dt;
+    if (c.x < m)     { c.x = m;     c.dir = 1; }
+    if (c.x > W - m) { c.x = W - m; c.dir = -1; }
+    /* bạch tuộc thỉnh thoảng phụt lên rồi chìm xuống */
+    if (c.kind === 'octopus') {
+      if (c.hop <= 0 && Math.random() < dt * 0.12) c.hop = 1;
+      c.y = floorY(c) - Math.sin(c.hop * Math.PI) * c.size * 2.2;
+    } else {
+      c.y = floorY(c) + Math.sin(c.phase * 0.6) * c.size * 0.05;
+    }
+    if (c.kind === 'star') c.rot += c.spin * dt * 0.4;
+    return;
+  }
+
+  /* các loài bơi trong nước */
+  c.retarget -= dt;
+  if (c.retarget <= 0 || Math.hypot(c.tx - c.x, c.ty - c.y) < c.size * 0.7) newCritterTarget(c);
+
+  let gx = c.tx, gy = c.ty, chase = 1;
+  if (near) { gx = near.fd.x; gy = near.fd.y; chase = 1.8; }
+
+  const dx = gx - c.x, dy = gy - c.y;
+  const d = Math.max(0.001, Math.hypot(dx, dy));
+  const sp = c.speed * boost * chase;
+  const turn = c.kind === 'ray' ? 1.2 : 0.9;
+  c.vx += ((dx / d) * sp - c.vx) * Math.min(1, dt * turn);
+  c.vy += ((dy / d) * sp - c.vy) * Math.min(1, dt * turn);
+
+  /* sứa nhấp nhô theo nhịp đập chuông */
+  if (c.kind === 'jelly') c.vy -= Math.max(0, Math.sin(c.phase)) * 16 * dt * 6;
+
+  c.x += c.vx * dt;
+  c.y += c.vy * dt;
+  if (c.x < m)     { c.x = m;     c.vx =  Math.abs(c.vx) + 6; c.tx = rnd(W * 0.4, W - m); }
+  if (c.x > W - m) { c.x = W - m; c.vx = -Math.abs(c.vx) - 6; c.tx = rnd(m, W * 0.6); }
+  const top = H * 0.08 + c.size * 0.35, bot = sandY - c.size * 0.5;
+  if (c.y < top) { c.y = top; c.vy =  Math.abs(c.vy) + 5; c.ty = rnd((top + bot) / 2, bot); }
+  if (c.y > bot) { c.y = bot; c.vy = -Math.abs(c.vy) - 5; c.ty = rnd(top, (top + bot) / 2); }
+  if (c.kind !== 'seahorse') c.dir = c.vx < 0 ? -1 : 1;
+}
+
+/* ăn một viên mồi: lớn thêm một chút, phồng lên một nhịp */
+function eatFood(a, fd) {
+  const i = foods.indexOf(fd);
+  if (i < 0) return;
+  foods.splice(i, 1);
+
+  a.size = Math.min(a.maxSize, a.size * 1.045);
+  a.pop = 1;
+  if (a.munch !== undefined) a.munch = 1;
+  playNom();
+
+  for (let k = 0; k < 6; k++) {
+    parts.push({ kind: 'crumb', x: fd.x, y: fd.y, vx: rnd(-50, 50), vy: rnd(-50, 10),
+                 r: rnd(1.5, 3), life: 1, decay: 2 });
+  }
+  addBubble(a.x + a.size * 0.3, a.y - a.size * 0.2, rnd(2, 5));
+
+  /* vừa đạt cỡ trưởng thành */
+  if (!a.full && a.size >= a.maxSize - 0.05) {
+    a.full = true;
+    playSparkle();
+    texts.push({ x: a.x, y: a.y - a.size, txt: '🎉 Lớn rồi!', life: 1, decay: 0.75, size: 34, hue: 45 });
+    for (let k = 0; k < 14; k++) {
+      const ang = rnd(0, 6.28);
+      parts.push({ kind: 'spark', x: a.x, y: a.y, vx: Math.cos(ang) * rnd(60, 240),
+                   vy: Math.sin(ang) * rnd(60, 240), r: rnd(3, 6), life: 1, decay: 1.5 });
+    }
+  }
+  onFed();
+}
+
+/* ── vẽ từng loài ── */
+function drawJelly(c, t) {
+  const s = c.size * (1 + 0.25 * c.pop);
+  const pulse = Math.sin(c.phase);
+  const rx = s * (0.5 + 0.06 * pulse), ry = s * (0.42 - 0.06 * pulse);
+  const glow = theme.glow;
+
+  ctx.save();
+  ctx.translate(c.x, c.y);
+
+  if (glow > 0.02) {                       /* phát sáng khi trời tối */
+    const gg = ctx.createRadialGradient(0, 0, 0, 0, 0, s * 1.5);
+    gg.addColorStop(0, 'hsla(' + c.hue + ',95%,75%,' + (0.35 * glow) + ')');
+    gg.addColorStop(1, 'hsla(' + c.hue + ',95%,70%,0)');
+    ctx.fillStyle = gg;
+    ctx.beginPath(); ctx.arc(0, 0, s * 1.5, 0, 6.2832); ctx.fill();
+  }
+
+  /* tua rua */
+  ctx.lineCap = 'round';
+  for (let i = 0; i < 7; i++) {
+    const ox = (i / 6 - 0.5) * rx * 1.5;
+    const len = s * (0.9 + 0.5 * Math.sin(i * 1.7));
+    const sw = Math.sin(c.phase * 1.2 + i * 0.8) * s * 0.22;
+    ctx.strokeStyle = 'hsla(' + c.hue + ',85%,' + (72 + glow * 15) + '%,.55)';
+    ctx.lineWidth = Math.max(1.5, s * 0.055);
+    ctx.beginPath();
+    ctx.moveTo(ox, ry * 0.75);
+    ctx.quadraticCurveTo(ox + sw, ry * 0.75 + len * 0.55, ox + sw * 1.7, ry * 0.75 + len);
+    ctx.stroke();
+  }
+
+  /* chuông */
+  const bg = ctx.createRadialGradient(-rx * 0.25, -ry * 0.4, rx * 0.1, 0, 0, rx * 1.25);
+  bg.addColorStop(0, 'hsla(' + c.hue + ',95%,92%,.85)');
+  bg.addColorStop(0.6, 'hsla(' + c.hue + ',90%,74%,.6)');
+  bg.addColorStop(1, 'hsla(' + c.hue + ',88%,62%,.35)');
+  ctx.fillStyle = bg;
+  ctx.beginPath();
+  ctx.ellipse(0, 0, rx, ry, 0, Math.PI, 0);
+  ctx.quadraticCurveTo(rx * 0.55, ry * 0.85, 0, ry * 0.62);
+  ctx.quadraticCurveTo(-rx * 0.55, ry * 0.85, -rx, 0);
+  ctx.fill();
+
+  ctx.strokeStyle = 'hsla(' + c.hue + ',95%,88%,.75)';
+  ctx.lineWidth = Math.max(1.5, s * 0.04);
+  ctx.beginPath(); ctx.ellipse(0, 0, rx, ry, 0, Math.PI, 0); ctx.stroke();
+
+  /* đốm sáng trong chuông */
+  ctx.fillStyle = 'hsla(' + c.hue + ',100%,95%,.55)';
+  for (let i = -1; i <= 1; i++) {
+    ctx.beginPath();
+    ctx.ellipse(i * rx * 0.4, -ry * 0.25, rx * 0.11, ry * 0.2, 0, 0, 6.2832);
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
+function drawTurtle(c, t) {
+  const s = c.size * (1 + 0.25 * c.pop);
+  ctx.save();
+  ctx.translate(c.x, c.y);
+  ctx.rotate(Math.atan2(c.vy * 0.5, Math.abs(c.vx) + 45) * c.dir);
+  ctx.scale(c.dir, 1);
+
+  const flap = Math.sin(c.phase * 0.9);
+
+  /* chân chèo sau */
+  ctx.fillStyle = 'hsl(' + c.hue + ',42%,42%)';
+  ctx.beginPath(); ctx.ellipse(-s * 0.44, s * 0.2, s * 0.16, s * 0.09, -0.5 + flap * 0.2, 0, 6.2832); ctx.fill();
+  /* chân chèo trước */
+  ctx.beginPath(); ctx.ellipse(s * 0.28, s * 0.24 + flap * s * 0.07, s * 0.26, s * 0.1, 0.5 + flap * 0.5, 0, 6.2832); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(s * 0.2, -s * 0.26 - flap * s * 0.07, s * 0.24, s * 0.09, -0.45 - flap * 0.45, 0, 6.2832); ctx.fill();
+
+  /* đầu */
+  ctx.fillStyle = 'hsl(' + c.hue + ',40%,50%)';
+  ctx.beginPath(); ctx.ellipse(s * 0.5, -s * 0.02, s * 0.17, s * 0.13, 0, 0, 6.2832); ctx.fill();
+  ctx.fillStyle = '#20303a';
+  ctx.beginPath(); ctx.arc(s * 0.58, -s * 0.06, s * 0.032, 0, 6.2832); ctx.fill();
+
+  /* mai */
+  const sg = ctx.createLinearGradient(0, -s * 0.4, 0, s * 0.4);
+  sg.addColorStop(0, 'hsl(' + c.hue + ',45%,52%)');
+  sg.addColorStop(1, 'hsl(' + (c.hue - 12) + ',48%,30%)');
+  ctx.fillStyle = sg;
+  ctx.beginPath(); ctx.ellipse(0, 0, s * 0.5, s * 0.36, 0, 0, 6.2832); ctx.fill();
+
+  /* hoa văn mai */
+  ctx.fillStyle = 'hsla(' + (c.hue + 20) + ',55%,68%,.55)';
+  const spots = [[0, 0, 0.17, 0.13], [-0.26, -0.06, 0.12, 0.1], [0.26, -0.05, 0.12, 0.1],
+                 [-0.13, 0.19, 0.1, 0.08], [0.14, 0.19, 0.1, 0.08], [0, -0.22, 0.11, 0.08]];
+  for (const sp of spots) {
+    ctx.beginPath();
+    ctx.ellipse(sp[0] * s, sp[1] * s, sp[2] * s, sp[3] * s, 0, 0, 6.2832);
+    ctx.fill();
+  }
+  ctx.strokeStyle = 'hsla(' + (c.hue - 20) + ',45%,25%,.5)';
+  ctx.lineWidth = Math.max(1, s * 0.02);
+  ctx.beginPath(); ctx.ellipse(0, 0, s * 0.5, s * 0.36, 0, 0, 6.2832); ctx.stroke();
+
+  ctx.restore();
+}
+
+function drawSeahorse(c, t) {
+  const s = c.size * (1 + 0.25 * c.pop);
+  const sway = Math.sin(c.phase * 0.7) * 0.12;
+  ctx.save();
+  ctx.translate(c.x, c.y + Math.sin(c.phase * 0.5) * s * 0.06);
+  ctx.rotate(sway);
+  ctx.scale(c.dir, 1);
+
+  /* vây lưng rung */
+  ctx.fillStyle = 'hsla(' + (c.hue + 15) + ',85%,70%,.85)';
+  ctx.beginPath();
+  ctx.moveTo(-s * 0.12, -s * 0.15);
+  ctx.quadraticCurveTo(-s * 0.34 + Math.sin(c.phase * 6) * s * 0.03, 0, -s * 0.12, s * 0.22);
+  ctx.closePath(); ctx.fill();
+
+  /* thân cong chữ S + đuôi cuộn */
+  ctx.strokeStyle = 'hsl(' + c.hue + ',88%,55%)';
+  ctx.lineWidth = s * 0.26;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(0, -s * 0.3);
+  ctx.quadraticCurveTo(s * 0.16, -s * 0.02, -s * 0.02, s * 0.22);
+  ctx.quadraticCurveTo(-s * 0.16, s * 0.42, s * 0.04, s * 0.46);
+  ctx.stroke();
+
+  /* bụng sáng */
+  ctx.strokeStyle = 'hsla(' + (c.hue + 10) + ',92%,76%,.6)';
+  ctx.lineWidth = s * 0.1;
+  ctx.beginPath();
+  ctx.moveTo(s * 0.06, -s * 0.22);
+  ctx.quadraticCurveTo(s * 0.2, -s * 0.02, s * 0.02, s * 0.18);
+  ctx.stroke();
+
+  /* đầu và mõm */
+  ctx.fillStyle = 'hsl(' + c.hue + ',88%,58%)';
+  ctx.beginPath(); ctx.ellipse(s * 0.02, -s * 0.36, s * 0.15, s * 0.13, -0.3, 0, 6.2832); ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(s * 0.1, -s * 0.42);
+  ctx.quadraticCurveTo(s * 0.32, -s * 0.36, s * 0.3, -s * 0.28);
+  ctx.quadraticCurveTo(s * 0.18, -s * 0.28, s * 0.1, -s * 0.32);
+  ctx.fill();
+
+  ctx.fillStyle = '#fff';
+  ctx.beginPath(); ctx.arc(s * 0.08, -s * 0.4, s * 0.055, 0, 6.2832); ctx.fill();
+  ctx.fillStyle = '#20303a';
+  ctx.beginPath(); ctx.arc(s * 0.095, -s * 0.4, s * 0.028, 0, 6.2832); ctx.fill();
+
+  ctx.restore();
+}
+
+function drawCrab(c, t) {
+  const s = c.size * (1 + 0.25 * c.pop);
+  const step = Math.sin(c.phase * 2.2);
+  ctx.save();
+  ctx.translate(c.x, c.y);
+  ctx.scale(c.dir, 1);
+
+  ctx.strokeStyle = 'hsl(' + c.hue + ',75%,38%)';
+  ctx.lineWidth = Math.max(2, s * 0.07);
+  ctx.lineCap = 'round';
+  for (let i = 0; i < 3; i++) {
+    const bx = (-0.3 + i * 0.3) * s;
+    const lift = Math.sin(c.phase * 2.2 + i) * s * 0.06;
+    for (const sgn of [-1, 1]) {
+      ctx.beginPath();
+      ctx.moveTo(bx, sgn * s * 0.12);
+      ctx.quadraticCurveTo(bx + sgn * 0 - s * 0.04, sgn * s * 0.34, bx - s * 0.1, sgn * (s * 0.44) + lift);
+      ctx.stroke();
+    }
+  }
+
+  /* càng */
+  ctx.fillStyle = 'hsl(' + c.hue + ',80%,48%)';
+  for (const sgn of [-1, 1]) {
+    const a = sgn * (0.5 + step * 0.12);
+    ctx.save();
+    ctx.translate(s * 0.42, sgn * s * 0.24);
+    ctx.rotate(a * 0.4);
+    ctx.beginPath(); ctx.ellipse(0, 0, s * 0.2, s * 0.13, 0, 0, 6.2832); ctx.fill();
+    ctx.fillStyle = 'hsl(' + c.hue + ',80%,58%)';
+    ctx.beginPath(); ctx.ellipse(s * 0.13, -s * 0.05, s * 0.1, s * 0.05, -0.4 + step * 0.25, 0, 6.2832); ctx.fill();
+    ctx.fillStyle = 'hsl(' + c.hue + ',80%,48%)';
+    ctx.restore();
+  }
+
+  /* mai */
+  const bg = ctx.createLinearGradient(0, -s * 0.3, 0, s * 0.3);
+  bg.addColorStop(0, 'hsl(' + c.hue + ',85%,62%)');
+  bg.addColorStop(1, 'hsl(' + c.hue + ',80%,44%)');
+  ctx.fillStyle = bg;
+  ctx.beginPath(); ctx.ellipse(0, 0, s * 0.42, s * 0.3, 0, 0, 6.2832); ctx.fill();
+
+  /* mắt trên cuống */
+  ctx.strokeStyle = 'hsl(' + c.hue + ',75%,42%)';
+  ctx.lineWidth = Math.max(2, s * 0.05);
+  for (const sgn of [-1, 1]) {
+    ctx.beginPath();
+    ctx.moveTo(sgn * s * 0.13, -s * 0.16);
+    ctx.lineTo(sgn * s * 0.16, -s * 0.36);
+    ctx.stroke();
+    ctx.fillStyle = '#fff';
+    ctx.beginPath(); ctx.arc(sgn * s * 0.16, -s * 0.4, s * 0.075, 0, 6.2832); ctx.fill();
+    ctx.fillStyle = '#20303a';
+    ctx.beginPath(); ctx.arc(sgn * s * 0.17, -s * 0.4, s * 0.036, 0, 6.2832); ctx.fill();
+  }
+  /* miệng cười */
+  ctx.strokeStyle = 'hsla(0,0%,100%,.7)';
+  ctx.lineWidth = Math.max(1.5, s * 0.035);
+  ctx.beginPath(); ctx.arc(0, s * 0.02, s * 0.13, 0.35, Math.PI - 0.35); ctx.stroke();
+
+  ctx.restore();
+}
+
+function drawStar(c, t) {
+  const s = c.size * (1 + 0.25 * c.pop);
+  ctx.save();
+  ctx.translate(c.x, c.y);
+  ctx.rotate(c.rot);
+  ctx.scale(1, 0.62);                       /* nằm bẹp trên cát */
+
+  ctx.beginPath();
+  for (let i = 0; i < 5; i++) {
+    const a1 = (i / 5) * 6.2832 - Math.PI / 2;
+    const a2 = a1 + 6.2832 / 10;
+    const bend = 1 + 0.05 * Math.sin(c.phase * 0.6 + i);
+    const px1 = Math.cos(a1) * s * 0.55 * bend, py1 = Math.sin(a1) * s * 0.55 * bend;
+    const px2 = Math.cos(a2) * s * 0.22, py2 = Math.sin(a2) * s * 0.22;
+    if (i === 0) ctx.moveTo(px1, py1); else ctx.quadraticCurveTo(px2 * 1.5, py2 * 1.5, px1, py1);
+    ctx.quadraticCurveTo(px2 * 1.5, py2 * 1.5, Math.cos(a2 + 6.2832 / 10) * s * 0.55 * bend,
+                                               Math.sin(a2 + 6.2832 / 10) * s * 0.55 * bend);
+  }
+  ctx.closePath();
+  const g = ctx.createRadialGradient(0, 0, s * 0.06, 0, 0, s * 0.55);
+  g.addColorStop(0, 'hsl(' + (c.hue + 12) + ',92%,72%)');
+  g.addColorStop(1, 'hsl(' + c.hue + ',88%,52%)');
+  ctx.fillStyle = g;
+  ctx.fill();
+
+  ctx.fillStyle = 'hsla(' + (c.hue + 20) + ',95%,85%,.75)';
+  for (let i = 0; i < 9; i++) {
+    const a = (i / 9) * 6.2832 + c.phase * 0.1;
+    const rr = s * (0.12 + 0.22 * ((i % 3) / 2));
+    ctx.beginPath();
+    ctx.arc(Math.cos(a) * rr, Math.sin(a) * rr, s * 0.045, 0, 6.2832);
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
+function drawRay(c, t) {
+  const s = c.size * (1 + 0.25 * c.pop);
+  const flap = Math.sin(c.phase * 1.1);
+  ctx.save();
+  ctx.translate(c.x, c.y);
+  ctx.rotate(Math.atan2(c.vy * 0.4, Math.abs(c.vx) + 60) * c.dir);
+  ctx.scale(c.dir, 1);
+
+  /* đuôi */
+  ctx.strokeStyle = 'hsl(' + c.hue + ',35%,38%)';
+  ctx.lineWidth = Math.max(1.5, s * 0.045);
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(-s * 0.38, 0);
+  ctx.quadraticCurveTo(-s * 0.7, flap * s * 0.12, -s * 0.95, flap * s * 0.2);
+  ctx.stroke();
+
+  /* thân + cánh vẫy */
+  const g = ctx.createLinearGradient(0, -s * 0.4, 0, s * 0.4);
+  g.addColorStop(0, 'hsl(' + c.hue + ',48%,64%)');
+  g.addColorStop(1, 'hsl(' + (c.hue + 8) + ',46%,44%)');
+  ctx.fillStyle = g;
+  ctx.beginPath();
+  ctx.moveTo(s * 0.42, 0);
+  ctx.quadraticCurveTo(s * 0.1, -s * 0.16, -s * 0.1, -s * (0.34 + flap * 0.12));
+  ctx.quadraticCurveTo(-s * 0.34, -s * (0.24 + flap * 0.08), -s * 0.36, 0);
+  ctx.quadraticCurveTo(-s * 0.34, s * (0.24 + flap * 0.08), -s * 0.1, s * (0.34 + flap * 0.12));
+  ctx.quadraticCurveTo(s * 0.1, s * 0.16, s * 0.42, 0);
+  ctx.fill();
+
+  /* đốm trên lưng */
+  ctx.fillStyle = 'hsla(' + (c.hue + 15) + ',55%,78%,.4)';
+  for (const sp of [[-0.02, -0.14], [-0.12, 0.06], [0.1, 0.08], [-0.2, -0.04]]) {
+    ctx.beginPath(); ctx.ellipse(sp[0] * s, sp[1] * s, s * 0.05, s * 0.035, 0, 0, 6.2832); ctx.fill();
+  }
+
+  /* mắt */
+  ctx.fillStyle = '#182838';
+  for (const sgn of [-1, 1]) {
+    ctx.beginPath(); ctx.arc(s * 0.26, sgn * s * 0.09, s * 0.033, 0, 6.2832); ctx.fill();
+  }
+  ctx.restore();
+}
+
+function drawOctopus(c, t) {
+  const s = c.size * (1 + 0.25 * c.pop);
+  ctx.save();
+  ctx.translate(c.x, c.y);
+  ctx.scale(c.dir, 1);
+
+  /* 8 tua */
+  ctx.strokeStyle = 'hsl(' + c.hue + ',62%,52%)';
+  ctx.lineCap = 'round';
+  for (let i = 0; i < 8; i++) {
+    const ox = ((i / 7) - 0.5) * s * 0.62;
+    const w = Math.sin(c.phase * 1.4 + i * 0.9);
+    const len = s * (0.5 + 0.22 * Math.sin(i * 1.3));
+    ctx.lineWidth = Math.max(2, s * 0.085 * (1 - Math.abs(i - 3.5) / 9));
+    ctx.beginPath();
+    ctx.moveTo(ox, s * 0.16);
+    ctx.quadraticCurveTo(ox + w * s * 0.18, s * 0.16 + len * 0.6, ox + w * s * 0.3, s * 0.16 + len);
+    ctx.stroke();
+  }
+
+  /* đầu */
+  const g = ctx.createRadialGradient(-s * 0.12, -s * 0.18, s * 0.05, 0, 0, s * 0.46);
+  g.addColorStop(0, 'hsl(' + c.hue + ',70%,72%)');
+  g.addColorStop(1, 'hsl(' + c.hue + ',64%,48%)');
+  ctx.fillStyle = g;
+  ctx.beginPath(); ctx.ellipse(0, -s * 0.04, s * 0.4, s * 0.42, 0, 0, 6.2832); ctx.fill();
+
+  /* mắt to */
+  for (const sgn of [-1, 1]) {
+    ctx.fillStyle = '#fff';
+    ctx.beginPath(); ctx.ellipse(sgn * s * 0.16, -s * 0.08, s * 0.12, s * 0.13, 0, 0, 6.2832); ctx.fill();
+    ctx.fillStyle = '#182838';
+    ctx.beginPath(); ctx.arc(sgn * s * 0.17, -s * 0.06, s * 0.058, 0, 6.2832); ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,.9)';
+    ctx.beginPath(); ctx.arc(sgn * s * 0.19, -s * 0.1, s * 0.022, 0, 6.2832); ctx.fill();
+  }
+  ctx.restore();
+}
+
+function drawCritter(c, t) {
+  switch (c.kind) {
+    case 'jelly':    drawJelly(c, t); break;
+    case 'turtle':   drawTurtle(c, t); break;
+    case 'seahorse': drawSeahorse(c, t); break;
+    case 'crab':     drawCrab(c, t); break;
+    case 'star':     drawStar(c, t); break;
+    case 'ray':      drawRay(c, t); break;
+    case 'octopus':  drawOctopus(c, t); break;
+  }
+}
+
+/* chạm vào sinh vật biển: mỗi loài phản ứng một kiểu */
+function touchCritter(px, py) {
+  for (let i = critters.length - 1; i >= 0; i--) {
+    const c = critters[i];
+    if (Math.hypot(px - c.x, py - c.y) > c.size * 0.75) continue;
+
+    c.startle = 1;
+    if (c.kind === 'octopus') {
+      /* phun mực rồi chuồn */
+      for (let k = 0; k < 3; k++) {
+        parts.push({ kind: 'ink', x: c.x + rnd(-8, 8), y: c.y + rnd(-8, 8),
+                     r: c.size * 0.3, gr: c.size * rnd(1.6, 2.6), life: 1, decay: 0.45 });
+      }
+      c.dir = -c.dir;
+      c.hop = 1;
+    } else if (c.kind === 'crab') {
+      c.dir = px > c.x ? -1 : 1;
+    } else if (c.kind === 'jelly') {
+      c.phase = 0;                       /* đập chuông mạnh một nhịp */
+      for (let k = 0; k < 5; k++) addBubble(c.x + rnd(-10, 10), c.y, rnd(2, 5));
+    } else {
+      const bd = { l: c.size, r: W - c.size, t: H * 0.1, b: sandY - c.size * 0.5 };
+      c.tx = clamp(px + (c.x - px) * 6, bd.l, bd.r);
+      c.ty = clamp(py + (c.y - py) * 6, bd.t, bd.b);
+      c.retarget = 2.5;
+      for (let k = 0; k < 3; k++) addBubble(c.x + rnd(-8, 8), c.y - c.size * 0.2, rnd(2, 5));
+    }
+    return true;
+  }
+  return false;
+}
 
 /* ══════════ vẽ nền bể ══════════ */
 function drawWater(t) {
@@ -865,7 +1451,7 @@ function drawWeeds(t) {
 
 /* ══════════ vẽ cá ══════════ */
 function drawFish(f, t) {
-  const s = f.size * f.grow;
+  const s = f.size * f.grow * (1 + 0.25 * f.pop);
   const dir = f.vx < 0 ? -1 : 1;
   const tilt = Math.atan2(f.vy * 0.55, Math.abs(f.vx) + 40);
 
@@ -995,6 +1581,7 @@ function drawPlankton(t, dt) {
 /* ══════════ vòng lặp ══════════ */
 let last = performance.now(), time = 0;
 theme = mixTheme();
+stockCritters();      /* gọi ở đây vì mảng critters khai báo phía trên module sinh vật biển */
 
 function frame(now) {
   let dt = (now - last) / 1000;
@@ -1032,6 +1619,7 @@ function frame(now) {
   for (const f of fishes) {
     if (f.grow < 1) f.grow = Math.min(1, f.grow + dt * 0.9);
     if (f.munch > 0) f.munch = Math.max(0, f.munch - dt * 3);
+    if (f.pop > 0) f.pop = Math.max(0, f.pop - dt * 3.2);
     if (f.startle > 0) f.startle = Math.max(0, f.startle - dt * 1.2);
 
     /* tìm mồi gần nhất */
@@ -1046,19 +1634,7 @@ function frame(now) {
     let tx, ty, speed = f.speed;
     if (target) {
       tx = target.x; ty = target.y; speed = f.speed * 1.9;
-      if (bestD < f.size * 0.55) {           /* đớp trúng */
-        const idx = foods.indexOf(target);
-        if (idx >= 0) foods.splice(idx, 1);
-        f.munch = 1;
-        fed++;
-        playNom();
-        for (let k = 0; k < 6; k++) {
-          parts.push({ kind: 'crumb', x: target.x, y: target.y, vx: rnd(-50, 50), vy: rnd(-50, 10),
-                       r: rnd(1.5, 3), life: 1, decay: 2 });
-        }
-        addBubble(f.x + f.size * 0.4, f.y - f.size * 0.2, rnd(2, 5));
-        if (fed % 5 === 0) addFish();
-      }
+      if (bestD < f.size * 0.55) eatFood(f, target);   /* đớp trúng → lớn thêm chút */
     } else {
       f.retarget -= dt;
       if (f.retarget <= 0 || Math.hypot(f.tx - f.x, f.ty - f.y) < f.size) newTarget(f);
@@ -1076,6 +1652,8 @@ function frame(now) {
     keepInTank(f);
   }
 
+  for (const c of critters) updateCritter(c, dt);
+
   /* bong bóng nổi lên */
   for (let i = bubbles.length - 1; i >= 0; i--) {
     const b = bubbles[i];
@@ -1090,6 +1668,7 @@ function frame(now) {
   drawSand(time);
   drawRocks(time);
   drawWeeds(time);
+  for (const c of critters) if (ON_FLOOR[c.kind]) drawCritter(c, time);
 
   for (const fd of foods) {
     ctx.fillStyle = '#c9762c';
@@ -1099,6 +1678,7 @@ function frame(now) {
   }
 
   for (const f of fishes) drawFish(f, time);
+  for (const c of critters) if (!ON_FLOOR[c.kind]) drawCritter(c, time);
 
   for (const b of bubbles) {
     ctx.strokeStyle = 'rgba(255,255,255,.7)';
@@ -1118,6 +1698,17 @@ function frame(now) {
     const p = parts[i];
     p.life -= p.decay * dt;
     if (p.life <= 0) { parts.splice(i, 1); continue; }
+
+    if (p.kind === 'ink') {
+      const k = 1 - p.life;
+      const rr = p.r + (p.gr - p.r) * (1 - Math.pow(1 - k, 2));
+      const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, rr);
+      g.addColorStop(0, 'rgba(18,16,34,' + (p.life * 0.6) + ')');
+      g.addColorStop(1, 'rgba(18,16,34,0)');
+      ctx.fillStyle = g;
+      ctx.beginPath(); ctx.arc(p.x, p.y, rr, 0, 6.2832); ctx.fill();
+      continue;
+    }
 
     if (p.kind === 'ring') {
       const t2 = 1 - p.life;
