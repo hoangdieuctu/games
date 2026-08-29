@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Bể Cá">
+<link rel="apple-touch-icon" href="icon-fish-180.png">
+<title>Bể Cá</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='w' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0%25' stop-color='%2359cdf5'/%3E%3Cstop offset='100%25' stop-color='%230b5b93'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='url(%23w)'/%3E%3Cpath d='M20 16 L27 11 L27 21 Z' fill='%23ff9f43'/%3E%3Cellipse cx='15' cy='16' rx='8' ry='5.5' fill='%23ffb142'/%3E%3Ccircle cx='11' cy='14.5' r='1.5' fill='%23233'/%3E%3Ccircle cx='23' cy='8' r='1.6' fill='%23ffffff' opacity='.7'/%3E%3Ccircle cx='26' cy='5' r='1' fill='%23ffffff' opacity='.5'/%3E%3C/svg%3E">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  width: 100%; height: 100%;
+  overflow: hidden;
+  position: fixed;
+  background: #0b5b93;
+  font-family: 'Baloo 2', 'Arial Rounded MT Bold', Arial, sans-serif;
+  -webkit-user-select: none; user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior: none;
+}
+
+#cv {
+  position: fixed; inset: 0;
+  width: 100%; height: 100%;
+  display: block;
+  touch-action: none;
+}
+
+/* ── thanh trên ── */
+.hud {
+  position: fixed; z-index: 5;
+  top: calc(env(safe-area-inset-top, 0px) + 10px);
+  left: calc(env(safe-area-inset-left, 0px) + 12px);
+  right: calc(env(safe-area-inset-right, 0px) + 12px);
+  display: flex; align-items: center; gap: 10px;
+  pointer-events: none;
+}
+.hud.hidden { opacity: 0; pointer-events: none; transition: opacity .3s; }
+
+.btn {
+  pointer-events: auto;
+  width: 54px; height: 54px;
+  flex: 0 0 auto;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 26px; line-height: 1;
+  border: none; border-radius: 50%;
+  background: rgba(255,255,255,.72);
+  box-shadow: 0 4px 14px rgba(0,50,90,.28), inset 0 1px 0 rgba(255,255,255,.9);
+  color: #0d6ba8;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform .12s;
+  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+}
+.btn:active { transform: scale(.9); }
+
+.spacer { flex: 1; }
+
+.score {
+  pointer-events: none;
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 20px 8px 14px;
+  border-radius: 32px;
+  background: rgba(255,255,255,.72);
+  box-shadow: 0 4px 14px rgba(0,50,90,.28), inset 0 1px 0 rgba(255,255,255,.9);
+  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+  font-size: 30px; font-weight: 800;
+  color: #0d6ba8;
+  transition: transform .15s cubic-bezier(.3,1.6,.5,1);
+}
+.score.bump { transform: scale(1.18); }
+.score .ico { font-size: 26px; }
+
+/* ── chế độ khóa ── */
+.lockbadge {
+  position: fixed; z-index: 6;
+  top: calc(env(safe-area-inset-top, 0px) + 10px);
+  left: calc(env(safe-area-inset-left, 0px) + 12px);
+  width: 46px; height: 46px;
+  display: none; align-items: center; justify-content: center;
+  border: none; border-radius: 50%;
+  background: rgba(255,255,255,.22);
+  color: #fff; font-size: 18px; line-height: 1;
+  opacity: .5;
+  touch-action: none; cursor: pointer;
+  -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px);
+}
+.lockbadge.on { display: flex; }
+.lockbadge.holding { opacity: 1; background: rgba(255,255,255,.45); }
+.lockbadge::before {
+  content: ''; position: absolute; inset: -5px;
+  border-radius: 50%;
+  background: conic-gradient(from -90deg, rgba(255,255,255,.95) calc(var(--p, 0) * 1turn), rgba(255,255,255,0) 0);
+  -webkit-mask: radial-gradient(circle, transparent 58%, #000 61%);
+          mask: radial-gradient(circle, transparent 58%, #000 61%);
+  opacity: var(--o, 0);
+}
+
+/* ── bảng hướng dẫn ── */
+.sheet {
+  position: fixed; inset: 0; z-index: 9;
+  display: none; align-items: center; justify-content: center;
+  padding: 20px;
+  background: rgba(5,45,80,.5);
+  -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px);
+}
+.sheet.on { display: flex; }
+
+.sheet-card {
+  width: min(560px, 100%);
+  max-height: 90vh; overflow-y: auto;
+  padding: 26px 26px 22px;
+  border-radius: 26px;
+  background: #fff;
+  box-shadow: 0 18px 50px rgba(5,45,80,.35);
+  color: #33506f;
+  -webkit-overflow-scrolling: touch;
+}
+.sheet-card h2 { font-size: 25px; color: #0d6ba8; margin-bottom: 4px; }
+.sheet-card .lead { font-size: 16px; color: #7b93ad; margin-bottom: 18px; }
+
+.step { display: flex; gap: 13px; margin-bottom: 16px; }
+.step-n {
+  flex: 0 0 auto; width: 30px; height: 30px; border-radius: 50%;
+  background: #d9edff; color: #0d6ba8;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; font-weight: 800;
+}
+.step-b { font-size: 17px; line-height: 1.45; }
+.step-b b { color: #0d6ba8; }
+.step-b em { font-style: normal; background: #fff2cc; border-radius: 6px; padding: 0 5px; }
+
+.sheet-btn {
+  width: 100%; margin-top: 6px; padding: 15px;
+  border: none; border-radius: 18px;
+  background: linear-gradient(135deg,#38bdf8,#0d6ba8);
+  color: #fff; font-family: inherit; font-size: 20px; font-weight: 800;
+  cursor: pointer;
+}
+.sheet-btn:active { transform: scale(.97); }
+.sheet-link {
+  display: block; width: 100%; margin-top: 10px; padding: 8px;
+  border: none; background: none; color: #8ba3bb;
+  font-family: inherit; font-size: 16px; font-weight: 700; cursor: pointer;
+}
+
+/* ── thông báo ngắn ── */
+.toast {
+  position: fixed; z-index: 7;
+  left: 50%; bottom: calc(env(safe-area-inset-bottom, 0px) + 28px);
+  transform: translate(-50%, 14px);
+  padding: 12px 22px; border-radius: 26px;
+  background: rgba(255,255,255,.85);
+  box-shadow: 0 6px 20px rgba(0,50,90,.28);
+  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+  color: #0d6ba8; font-size: 19px; font-weight: 700;
+  white-space: nowrap;
+  opacity: 0; pointer-events: none;
+  transition: opacity .3s, transform .3s;
+}
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+/* ── gợi ý ban đầu ── */
+.hint {
+  position: fixed; z-index: 4;
+  left: 50%; top: 14%;
+  transform: translate(-50%,0);
+  text-align: center;
+  color: #fff;
+  font-size: clamp(26px, 5.4vw, 46px);
+  font-weight: 800;
+  text-shadow: 0 3px 0 rgba(0,70,120,.5), 0 8px 26px rgba(0,50,90,.4);
+  pointer-events: none;
+  animation: hint-pulse 1.6s ease-in-out infinite;
+}
+.hint small { display: block; font-size: .52em; opacity: .92; margin-top: 6px; }
+.hint.gone { opacity: 0; transition: opacity .6s; }
+
+@keyframes hint-pulse {
+  0%, 100% { transform: translate(-50%,0) scale(1); }
+  50%      { transform: translate(-50%,0) scale(1.06); }
+}
+</style>
+</head>
+<body>
+
+<canvas id="cv"></canvas>
+
+<div class="hud" id="hud">
+  <a class="btn" href="index.html" aria-label="Quay lại">←</a>
+  <div class="spacer"></div>
+  <div class="score" id="score"><span class="ico">🐟</span><span id="num">0</span></div>
+  <button class="btn" id="full" aria-label="Toàn màn hình">⛶</button>
+  <button class="btn" id="lock" aria-label="Khóa cho bé chơi">🔒</button>
+  <button class="btn" id="sound" aria-label="Bật tắt âm thanh">🔊</button>
+</div>
+
+<button class="lockbadge" id="lockbadge" aria-label="Giữ 2 giây để mở khóa">🔒</button>
+
+<div class="sheet" id="guide">
+  <div class="sheet-card">
+    <h2>Toàn màn hình cho bé</h2>
+    <p class="lead">Trong Safari luôn có nút ✕ để thoát. Làm 2 bước này là mất hẳn nút đó.</p>
+
+    <div class="step">
+      <div class="step-n">1</div>
+      <div class="step-b">
+        <b>Cài game ra Màn hình chính</b><br>
+        Bấm nút Chia sẻ <em>⬆️</em> trên thanh Safari → chọn <em>Thêm vào MH chính</em>.
+        Sau đó mở game bằng biểu tượng ngoài màn hình chính — không còn thanh Safari, không còn nút ✕.
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-n">2</div>
+      <div class="step-b">
+        <b>Khóa iPad trong game</b><br>
+        <em>Cài đặt → Trợ năng → Truy cập được hướng dẫn</em> → Bật, rồi đặt mật mã.
+        Khi bé chơi, bấm <em>nút nguồn 3 lần</em> → Bắt đầu. Bé sẽ không thoát ra app khác được.
+      </div>
+    </div>
+
+    <button class="sheet-btn" id="guideLock">Khóa cho bé chơi ngay</button>
+    <button class="sheet-link" id="guideClose">Để sau</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="hint" id="hint">Chạm để cho cá ăn!<small>👆 chạm rắc thức ăn · vuốt tạo bong bóng</small></div>
+
+<script>
+'use strict';
+
+/* ══════════ canvas ══════════ */
+const cv = document.getElementById('cv');
+const ctx = cv.getContext('2d');
+let W = 0, H = 0, DPR = 1, sandY = 0;
+
+/* ══════════ âm thanh ══════════ */
+let audioCtx = null, master = null, noiseBuf = null, soundOn = true;
+
+function ac() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    master = audioCtx.createGain();
+    master.gain.value = 0.45;
+    master.connect(audioCtx.destination);
+    const n = audioCtx.sampleRate * 0.25;
+    noiseBuf = audioCtx.createBuffer(1, n, audioCtx.sampleRate);
+    const d = noiseBuf.getChannelData(0);
+    for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / n);
+  }
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+
+/* tiếng "tõm" khi thả thức ăn */
+function playDrop() {
+  if (!soundOn) return;
+  const c = ac(), t = c.currentTime;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = 'sine';
+  o.frequency.setValueAtTime(240, t);
+  o.frequency.exponentialRampToValueAtTime(760, t + 0.09);
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(0.2, t + 0.012);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + 0.16);
+  o.connect(g); g.connect(master);
+  o.start(t); o.stop(t + 0.18);
+}
+
+/* tiếng "chóp" khi cá đớp */
+function playNom() {
+  if (!soundOn) return;
+  const c = ac(), t = c.currentTime;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = 'triangle';
+  o.frequency.setValueAtTime(900, t);
+  o.frequency.exponentialRampToValueAtTime(320, t + 0.07);
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(0.22, t + 0.006);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + 0.1);
+  o.connect(g); g.connect(master);
+  o.start(t); o.stop(t + 0.12);
+}
+
+/* tiếng bong bóng nước */
+function playBlub() {
+  if (!soundOn) return;
+  const c = ac(), t = c.currentTime;
+  const s = c.createBufferSource(); s.buffer = noiseBuf;
+  const bp = c.createBiquadFilter(); bp.type = 'bandpass';
+  bp.frequency.setValueAtTime(500, t);
+  bp.frequency.exponentialRampToValueAtTime(1600, t + 0.09);
+  bp.Q.value = 6;
+  const g = c.createGain();
+  g.gain.setValueAtTime(0.16, t);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + 0.12);
+  s.connect(bp); bp.connect(g); g.connect(master);
+  s.start(t); s.stop(t + 0.14);
+}
+
+/* tiếng chuông khi có cá mới */
+function playSparkle() {
+  if (!soundOn) return;
+  const c = ac(), t = c.currentTime;
+  [0, 1, 2, 3].forEach((i) => {
+    const o = c.createOscillator(), g = c.createGain();
+    o.type = 'triangle';
+    o.frequency.value = 784 * Math.pow(2, i / 4);
+    const st = t + i * 0.06;
+    g.gain.setValueAtTime(0.0001, st);
+    g.gain.exponentialRampToValueAtTime(0.18, st + 0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001, st + 0.22);
+    o.connect(g); g.connect(master);
+    o.start(st); o.stop(st + 0.24);
+  });
+}
+
+document.getElementById('sound').addEventListener('click', (e) => {
+  soundOn = !soundOn;
+  e.currentTarget.textContent = soundOn ? '🔊' : '🔇';
+  if (soundOn) { ac(); playBlub(); }
+});
+
+/* ══════════ toàn màn hình & chế độ khóa ══════════ */
+const hudEl   = document.getElementById('hud');
+const fullBtn = document.getElementById('full');
+const lockBtn = document.getElementById('lock');
+const badgeEl = document.getElementById('lockbadge');
+const toastEl = document.getElementById('toast');
+const guideEl = document.getElementById('guide');
+
+const docEl = document.documentElement;
+const rawRequestFS = docEl.requestFullscreen || docEl.webkitRequestFullscreen;
+const rawExitFS    = document.exitFullscreen || document.webkitExitFullscreen;
+
+/* iPad/iPhone: Safari luôn phủ nút ✕ lên trang khi dùng Fullscreen API và
+   trang không gỡ được nút đó → trên iOS không gọi Fullscreen API. */
+const IS_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+               (navigator.maxTouchPoints > 1 && /Macintosh/.test(navigator.userAgent));
+const IS_APP = navigator.standalone === true ||
+               (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) ||
+               (window.matchMedia && window.matchMedia('(display-mode: fullscreen)').matches);
+const USE_FS = !!rawRequestFS && !IS_IOS;
+
+if (IS_APP || (!USE_FS && !IS_IOS)) fullBtn.style.display = 'none';
+else if (IS_IOS) { fullBtn.textContent = 'ℹ️'; fullBtn.setAttribute('aria-label', 'Hướng dẫn toàn màn hình'); }
+
+function isFS() { return !!(document.fullscreenElement || document.webkitFullscreenElement); }
+function enterFS() {
+  if (!USE_FS || isFS()) return;
+  try { const r = rawRequestFS.call(docEl); if (r && r.catch) r.catch(() => {}); } catch (e) {}
+}
+function exitFS() {
+  if (!isFS() || !rawExitFS) return;
+  try { const r = rawExitFS.call(document); if (r && r.catch) r.catch(() => {}); } catch (e) {}
+}
+function syncFSIcon() {
+  fullBtn.setAttribute('aria-label', isFS() ? 'Thoát toàn màn hình' : 'Toàn màn hình');
+  fullBtn.style.color = isFS() ? '#e0679a' : '';
+}
+document.addEventListener('fullscreenchange', syncFSIcon);
+document.addEventListener('webkitfullscreenchange', syncFSIcon);
+
+fullBtn.addEventListener('click', () => {
+  if (IS_IOS) showGuide();
+  else isFS() ? exitFS() : enterFS();
+});
+
+function showGuide() { guideEl.classList.add('on'); }
+function hideGuide() { guideEl.classList.remove('on'); }
+document.getElementById('guideClose').addEventListener('click', hideGuide);
+document.getElementById('guideLock').addEventListener('click', () => { hideGuide(); setLocked(true); });
+guideEl.addEventListener('click', (e) => { if (e.target === guideEl) hideGuide(); });
+
+let wakeLock = null;
+async function keepAwake(on) {
+  try {
+    if (on && 'wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen');
+    else if (wakeLock) { await wakeLock.release(); wakeLock = null; }
+  } catch (e) {}
+}
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && locked) keepAwake(true);
+});
+
+let toastTimer = null;
+function toast(msg, ms) {
+  toastEl.textContent = msg;
+  toastEl.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toastEl.classList.remove('show'), ms || 2600);
+}
+
+let locked = false;
+function setLocked(on) {
+  locked = on;
+  hudEl.classList.toggle('hidden', on);
+  badgeEl.classList.toggle('on', on);
+  badgeEl.style.setProperty('--p', 0);
+  badgeEl.style.setProperty('--o', 0);
+  keepAwake(on);
+  if (on) {
+    enterFS();
+    toast(IS_IOS && !IS_APP
+      ? 'Đã khóa · giữ 🔒 2 giây để mở · bấm ℹ️ để bỏ viền Safari'
+      : 'Đã khóa · giữ 🔒 2 giây để mở', 3600);
+  } else {
+    exitFS();
+    toast('Đã mở khóa', 1800);
+  }
+}
+
+lockBtn.addEventListener('click', () => {
+  ac();
+  let seen = false;
+  try { seen = localStorage.getItem('fish-guide') === '1'; } catch (e) {}
+  if (IS_IOS && !IS_APP && !seen) {
+    try { localStorage.setItem('fish-guide', '1'); } catch (e) {}
+    showGuide();
+    return;
+  }
+  setLocked(true);
+});
+
+const HOLD_MS = 2000;
+let holdRAF = 0, holdTimer = 0, holdFrom = 0, holdId = null;
+
+function holdStep(now) {
+  badgeEl.style.setProperty('--p', Math.min(1, (now - holdFrom) / HOLD_MS));
+  holdRAF = requestAnimationFrame(holdStep);
+}
+function holdCancel() {
+  cancelAnimationFrame(holdRAF);
+  clearTimeout(holdTimer);
+  holdRAF = 0; holdTimer = 0; holdId = null;
+  badgeEl.classList.remove('holding');
+  badgeEl.style.setProperty('--p', 0);
+  badgeEl.style.setProperty('--o', 0);
+}
+badgeEl.addEventListener('pointerdown', (e) => {
+  e.preventDefault(); e.stopPropagation();
+  holdId = e.pointerId;
+  try { badgeEl.setPointerCapture(e.pointerId); } catch (err) {}
+  badgeEl.classList.add('holding');
+  badgeEl.style.setProperty('--o', 1);
+  holdFrom = performance.now();
+  holdRAF = requestAnimationFrame(holdStep);
+  holdTimer = setTimeout(() => { holdCancel(); setLocked(false); }, HOLD_MS);
+});
+['pointerup', 'pointercancel', 'pointerleave'].forEach((ev) => {
+  badgeEl.addEventListener(ev, (e) => { if (e.pointerId === holdId) holdCancel(); });
+});
+
+document.addEventListener('contextmenu', (e) => e.preventDefault());
+
+/* ══════════ tiện ích ══════════ */
+const rnd  = (a, b) => a + Math.random() * (b - a);
+const pick = (a) => a[Math.floor(Math.random() * a.length)];
+const clamp = (v, a, b) => v < a ? a : (v > b ? b : v);
+
+const FISH_HUES = [28, 45, 12, 190, 330, 275, 150, 210, 0, 60];
+const PRAISE = ['Có bạn mới!', 'Thêm một bạn!', 'Cá mới tới!'];
+
+/* ══════════ trạng thái ══════════ */
+const fishes  = [];
+const foods   = [];
+const bubbles = [];
+const parts   = [];
+const texts   = [];
+const weeds   = [];
+const rocks   = [];
+let fed = 0, started = false, bubbleTimer = 0;
+
+const MAX_FISH = 22;
+const MAX_FOOD = 16;
+
+const numEl   = document.getElementById('num');
+const scoreEl = document.getElementById('score');
+const hintEl  = document.getElementById('hint');
+
+function updateCount() {
+  numEl.textContent = fishes.length;
+  scoreEl.classList.add('bump');
+  setTimeout(() => scoreEl.classList.remove('bump'), 160);
+}
+
+/* ══════════ bố cục bể ══════════ */
+function layout() {
+  DPR = Math.min(window.devicePixelRatio || 1, 2);
+  W = window.innerWidth;
+  H = window.innerHeight;
+  cv.width  = Math.round(W * DPR);
+  cv.height = Math.round(H * DPR);
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  sandY = H - Math.max(60, H * 0.13);
+
+  /* rong biển */
+  weeds.length = 0;
+  const nw = Math.max(5, Math.round(W / 130));
+  for (let i = 0; i < nw; i++) {
+    weeds.push({
+      x: rnd(0, W),
+      h: rnd(H * 0.12, H * 0.32),
+      w: rnd(7, 16),
+      hue: rnd(95, 150),
+      phase: rnd(0, 6.28),
+      speed: rnd(0.5, 1.1),
+      blades: Math.round(rnd(2, 4))
+    });
+  }
+
+  /* đá & san hô */
+  rocks.length = 0;
+  const nr = Math.max(3, Math.round(W / 260));
+  for (let i = 0; i < nr; i++) {
+    const coral = Math.random() < 0.45;
+    rocks.push({
+      x: rnd(W * 0.05, W * 0.95),
+      r: rnd(26, 62),
+      coral,
+      hue: coral ? pick([340, 20, 300, 175]) : rnd(200, 220),
+      lumps: Math.round(rnd(3, 5)),
+      phase: rnd(0, 6.28)
+    });
+  }
+  rocks.sort((a, b) => b.r - a.r);
+}
+layout();
+window.addEventListener('resize', layout);
+window.addEventListener('orientationchange', () => setTimeout(layout, 120));
+
+/* ══════════ cá ══════════ */
+function makeFish(opts) {
+  const o = opts || {};
+  const base = Math.min(W, H);
+  const size = o.size != null ? o.size : rnd(base * 0.055, base * 0.1);
+  return {
+    x: o.x != null ? o.x : rnd(size, W - size),
+    y: o.y != null ? o.y : rnd(H * 0.12, sandY - size),
+    vx: (Math.random() < 0.5 ? -1 : 1) * rnd(30, 70),
+    vy: rnd(-12, 12),
+    size,
+    grow: o.grow ? 0.2 : 1,
+    hue: o.hue != null ? o.hue : pick(FISH_HUES),
+    pattern: pick(['plain', 'stripes', 'dots', 'stripes']),
+    speed: rnd(46, 86),
+    turn: rnd(1.6, 2.8),
+    phase: rnd(0, 6.28),
+    wagSpeed: rnd(9, 15),
+    tx: rnd(0, W), ty: rnd(H * 0.12, sandY - size),
+    retarget: rnd(1.5, 4),
+    munch: 0,
+    startle: 0,
+    entering: false
+  };
+}
+
+/* lề an toàn của bể cho một con cá */
+function bounds(f) {
+  const m = f.size * 0.7;
+  return { l: m, r: W - m, t: H * 0.06 + f.size * 0.4, b: sandY - f.size * 0.5 };
+}
+
+function newTarget(f) {
+  const bd = bounds(f);
+  f.tx = rnd(bd.l, bd.r);
+  f.ty = rnd(bd.t, bd.b);
+  f.retarget = rnd(1.8, 4.5);
+}
+
+/* giữ cá trong bể: chạm mép thì bật lại và chọn đích hướng vào trong */
+function keepInTank(f) {
+  const bd = bounds(f);
+  if (f.entering) {
+    if (f.x > bd.l && f.x < bd.r) f.entering = false;
+    return;
+  }
+  if (f.x < bd.l) { f.x = bd.l; f.vx =  Math.abs(f.vx) * 0.6 + 25; f.tx = rnd(W * 0.35, bd.r); }
+  if (f.x > bd.r) { f.x = bd.r; f.vx = -Math.abs(f.vx) * 0.6 - 25; f.tx = rnd(bd.l, W * 0.65); }
+  if (f.y < bd.t) { f.y = bd.t; f.vy =  Math.abs(f.vy) * 0.6 + 15; f.ty = rnd((bd.t + bd.b) / 2, bd.b); }
+  if (f.y > bd.b) { f.y = bd.b; f.vy = -Math.abs(f.vy) * 0.6 - 15; f.ty = rnd(bd.t, (bd.t + bd.b) / 2); }
+  f.tx = clamp(f.tx, bd.l, bd.r);
+  f.ty = clamp(f.ty, bd.t, bd.b);
+}
+
+for (let i = 0; i < 6; i++) fishes.push(makeFish());
+updateCount();
+
+function addFish() {
+  if (fishes.length >= MAX_FISH) return;
+  const fromLeft = Math.random() < 0.5;
+  const f = makeFish({ x: fromLeft ? -60 : W + 60, y: rnd(H * 0.2, sandY - 60), grow: true });
+  f.vx = fromLeft ? 70 : -70;
+  f.entering = true;
+  fishes.push(f);
+  updateCount();
+  playSparkle();
+  texts.push({ x: W / 2, y: H * 0.26, txt: pick(PRAISE), life: 1, decay: 0.55, size: 46, hue: 190 });
+  for (let i = 0; i < 16; i++) {
+    const a = rnd(0, 6.28);
+    parts.push({ kind: 'spark', x: W / 2, y: H * 0.26, vx: Math.cos(a) * rnd(60, 260),
+                 vy: Math.sin(a) * rnd(60, 260), r: rnd(3, 7), life: 1, decay: 1.4 });
+  }
+}
+
+/* ══════════ thức ăn & bong bóng ══════════ */
+function dropFood(x, y) {
+  if (foods.length >= MAX_FOOD) return;
+  foods.push({ x, y, vy: rnd(26, 44), phase: rnd(0, 6.28), r: rnd(4, 6.5), life: 14 });
+  playDrop();
+  parts.push({ kind: 'ring', x, y, r: 6, gr: 46, life: 1, decay: 2.4 });
+}
+
+function addBubble(x, y, r) {
+  bubbles.push({ x, y, r: r || rnd(3, 9), speed: rnd(40, 90), phase: rnd(0, 6.28), amp: rnd(4, 14) });
+}
+
+/* ══════════ chạm ══════════ */
+const pointers = new Map();
+
+function onDown(e) {
+  ac();
+  if (!started) {
+    started = true;
+    hintEl.classList.add('gone');
+    setTimeout(() => hintEl.remove(), 700);
+  }
+  pointers.set(e.pointerId, { x: e.clientX, y: e.clientY, moved: 0 });
+
+  /* chạm vào cá thì cá giật mình bơi vụt đi */
+  let startled = false;
+  for (const f of fishes) {
+    if (Math.hypot(e.clientX - f.x, e.clientY - f.y) < f.size * 0.75) {
+      const bd = bounds(f);
+      f.startle = 1;
+      f.tx = clamp(e.clientX + (f.x - e.clientX) * 8, bd.l, bd.r);
+      f.ty = clamp(e.clientY + (f.y - e.clientY) * 8, bd.t, bd.b);
+      f.retarget = 1.6;
+      for (let i = 0; i < 4; i++) addBubble(f.x + rnd(-8, 8), f.y - f.size * 0.2, rnd(2, 6));
+      startled = true;
+    }
+  }
+  if (startled) playBlub();
+  else if (e.clientY < sandY) dropFood(e.clientX, e.clientY);
+
+  e.preventDefault();
+}
+
+function onMove(e) {
+  const p = pointers.get(e.pointerId);
+  if (!p) return;
+  const d = Math.hypot(e.clientX - p.x, e.clientY - p.y);
+  p.moved += d;
+  /* vuốt tạo dòng bong bóng và đẩy cá dạt ra */
+  if (p.moved > 26) {
+    p.moved = 0;
+    addBubble(e.clientX + rnd(-6, 6), e.clientY, rnd(3, 9));
+    for (const f of fishes) {
+      const dx = f.x - e.clientX, dy = f.y - e.clientY;
+      const dist = Math.hypot(dx, dy);
+      if (dist < f.size * 2.4 && dist > 0.01) {
+        f.vx += (dx / dist) * 40;
+        f.vy += (dy / dist) * 30;
+      }
+    }
+  }
+  p.x = e.clientX; p.y = e.clientY;
+  e.preventDefault();
+}
+
+function onUp(e) { pointers.delete(e.pointerId); }
+
+cv.addEventListener('pointerdown', onDown, { passive: false });
+cv.addEventListener('pointermove', onMove, { passive: false });
+cv.addEventListener('pointerup', onUp);
+cv.addEventListener('pointercancel', onUp);
+document.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });
+document.addEventListener('gesturestart', (e) => e.preventDefault());
+
+/* ══════════ vẽ nền bể ══════════ */
+function drawWater(t) {
+  const g = ctx.createLinearGradient(0, 0, 0, H);
+  g.addColorStop(0,   '#6fd6f5');
+  g.addColorStop(0.35,'#25a7dd');
+  g.addColorStop(0.75,'#0f6ba5');
+  g.addColorStop(1,   '#08456e');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, W, H);
+
+  /* tia nắng xuyên nước */
+  ctx.save();
+  ctx.globalCompositeOperation = 'lighter';
+  for (let i = 0; i < 5; i++) {
+    const bx = ((i / 5) * W + Math.sin(t * 0.13 + i) * W * 0.05 + W * 0.08) % (W * 1.1);
+    const w1 = W * 0.055, w2 = W * 0.16;
+    const a = 0.05 + 0.035 * Math.sin(t * 0.5 + i * 1.7);
+    const lg = ctx.createLinearGradient(0, 0, 0, sandY);
+    lg.addColorStop(0, 'rgba(255,255,255,' + a + ')');
+    lg.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = lg;
+    ctx.beginPath();
+    ctx.moveTo(bx - w1 / 2, -10);
+    ctx.lineTo(bx + w1 / 2, -10);
+    ctx.lineTo(bx + w2 / 2 + W * 0.05, sandY);
+    ctx.lineTo(bx - w2 / 2 + W * 0.05, sandY);
+    ctx.closePath();
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
+function drawSand(t) {
+  ctx.fillStyle = '#e8d199';
+  ctx.beginPath();
+  ctx.moveTo(0, H);
+  ctx.lineTo(0, sandY + 12);
+  const step = Math.max(60, W / 8);
+  for (let x = 0; x <= W + step; x += step) {
+    ctx.quadraticCurveTo(x + step * 0.5, sandY + (Math.sin(x * 0.011) * 12) - 6, x + step, sandY + 8);
+  }
+  ctx.lineTo(W, H);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.fillStyle = 'rgba(255,255,255,.28)';
+  ctx.beginPath();
+  ctx.ellipse(W * 0.5, sandY + 10, W * 0.6, 10, 0, 0, 6.2832);
+  ctx.fill();
+}
+
+function drawRocks(t) {
+  for (const r of rocks) {
+    if (r.coral) {
+      /* san hô: mấy nhánh tròn xếp chồng */
+      for (let i = 0; i < r.lumps; i++) {
+        const a = -Math.PI / 2 + (i - (r.lumps - 1) / 2) * 0.5;
+        const sway = Math.sin(t * 0.8 + r.phase + i) * 3;
+        const bx = r.x + Math.cos(a) * r.r * 0.5 + sway;
+        const by = sandY - Math.abs(Math.sin(a)) * r.r * 0.9;
+        ctx.fillStyle = 'hsl(' + r.hue + ',72%,' + (58 + i * 3) + '%)';
+        ctx.beginPath();
+        ctx.ellipse(bx, by, r.r * 0.26, r.r * 0.5, a * 0.35, 0, 6.2832);
+        ctx.fill();
+        ctx.fillStyle = 'hsla(' + r.hue + ',80%,80%,.5)';
+        ctx.beginPath();
+        ctx.arc(bx, by - r.r * 0.3, r.r * 0.12, 0, 6.2832);
+        ctx.fill();
+      }
+    } else {
+      ctx.fillStyle = 'hsl(' + r.hue + ',22%,38%)';
+      ctx.beginPath();
+      ctx.ellipse(r.x, sandY + 4, r.r, r.r * 0.62, 0, Math.PI, 0);
+      ctx.fill();
+      ctx.fillStyle = 'hsla(' + r.hue + ',25%,60%,.5)';
+      ctx.beginPath();
+      ctx.ellipse(r.x - r.r * 0.3, sandY - r.r * 0.3, r.r * 0.3, r.r * 0.16, -0.5, 0, 6.2832);
+      ctx.fill();
+    }
+  }
+}
+
+function drawWeeds(t) {
+  for (const wd of weeds) {
+    for (let b = 0; b < wd.blades; b++) {
+      const off = (b - (wd.blades - 1) / 2) * wd.w * 0.9;
+      const h = wd.h * (1 - Math.abs(b - (wd.blades - 1) / 2) * 0.16);
+      const sway = Math.sin(t * wd.speed + wd.phase + b) * (wd.w * 1.6);
+      const grd = ctx.createLinearGradient(0, sandY, 0, sandY - h);
+      grd.addColorStop(0, 'hsl(' + wd.hue + ',60%,26%)');
+      grd.addColorStop(1, 'hsl(' + wd.hue + ',65%,48%)');
+      ctx.fillStyle = grd;
+      ctx.beginPath();
+      ctx.moveTo(wd.x + off - wd.w * 0.42, sandY + 6);
+      ctx.quadraticCurveTo(wd.x + off + sway * 0.4, sandY - h * 0.55, wd.x + off + sway, sandY - h);
+      ctx.quadraticCurveTo(wd.x + off + sway * 0.4 + wd.w * 0.5, sandY - h * 0.55, wd.x + off + wd.w * 0.42, sandY + 6);
+      ctx.closePath();
+      ctx.fill();
+    }
+  }
+}
+
+/* ══════════ vẽ cá ══════════ */
+function drawFish(f, t) {
+  const s = f.size * f.grow;
+  const dir = f.vx < 0 ? -1 : 1;
+  const tilt = Math.atan2(f.vy * 0.55, Math.abs(f.vx) + 40);
+
+  ctx.save();
+  ctx.translate(f.x, f.y);
+  ctx.rotate(tilt * dir);
+  ctx.scale(dir, 1);
+
+  const wag = Math.sin(t * f.wagSpeed + f.phase);
+  const hue = f.hue;
+
+  /* đuôi */
+  ctx.fillStyle = 'hsl(' + hue + ',85%,52%)';
+  ctx.beginPath();
+  ctx.moveTo(-s * 0.5, 0);
+  ctx.quadraticCurveTo(-s * 0.85, -s * 0.1 + wag * s * 0.12, -s * 1.05, -s * 0.36 + wag * s * 0.3);
+  ctx.quadraticCurveTo(-s * 0.78, 0, -s * 1.05, s * 0.36 + wag * s * 0.3);
+  ctx.quadraticCurveTo(-s * 0.85, s * 0.1 + wag * s * 0.12, -s * 0.5, 0);
+  ctx.fill();
+
+  /* vây lưng */
+  ctx.fillStyle = 'hsl(' + hue + ',88%,58%)';
+  ctx.beginPath();
+  ctx.moveTo(-s * 0.28, -s * 0.3);
+  ctx.quadraticCurveTo(-s * 0.05, -s * 0.72 + wag * s * 0.05, s * 0.22, -s * 0.26);
+  ctx.closePath();
+  ctx.fill();
+
+  /* vây bụng */
+  ctx.beginPath();
+  ctx.moveTo(-s * 0.2, s * 0.28);
+  ctx.quadraticCurveTo(-s * 0.02, s * 0.56 + wag * s * 0.05, s * 0.16, s * 0.24);
+  ctx.closePath();
+  ctx.fill();
+
+  /* thân */
+  const bg = ctx.createLinearGradient(0, -s * 0.45, 0, s * 0.45);
+  bg.addColorStop(0, 'hsl(' + hue + ',92%,72%)');
+  bg.addColorStop(0.55, 'hsl(' + hue + ',88%,58%)');
+  bg.addColorStop(1, 'hsl(' + hue + ',80%,42%)');
+  ctx.fillStyle = bg;
+  ctx.beginPath();
+  ctx.ellipse(0, 0, s * 0.62, s * 0.42, 0, 0, 6.2832);
+  ctx.fill();
+
+  /* hoa văn */
+  ctx.save();
+  ctx.beginPath();
+  ctx.ellipse(0, 0, s * 0.62, s * 0.42, 0, 0, 6.2832);
+  ctx.clip();
+  if (f.pattern === 'stripes') {
+    ctx.fillStyle = 'hsla(' + hue + ',95%,88%,.55)';
+    for (let i = -1; i <= 2; i++) {
+      ctx.save();
+      ctx.translate(i * s * 0.26 - s * 0.05, 0);
+      ctx.rotate(0.22);
+      ctx.fillRect(-s * 0.055, -s * 0.5, s * 0.11, s);
+      ctx.restore();
+    }
+  } else if (f.pattern === 'dots') {
+    ctx.fillStyle = 'hsla(' + hue + ',95%,90%,.6)';
+    for (let i = 0; i < 5; i++) {
+      ctx.beginPath();
+      ctx.arc(-s * 0.35 + i * s * 0.2, (i % 2 ? -1 : 1) * s * 0.14, s * 0.075, 0, 6.2832);
+      ctx.fill();
+    }
+  }
+  /* bụng sáng */
+  ctx.fillStyle = 'rgba(255,255,255,.3)';
+  ctx.beginPath();
+  ctx.ellipse(s * 0.05, s * 0.3, s * 0.45, s * 0.16, 0, 0, 6.2832);
+  ctx.fill();
+  ctx.restore();
+
+  /* vây ngực */
+  ctx.fillStyle = 'hsla(' + hue + ',90%,78%,.85)';
+  ctx.beginPath();
+  ctx.ellipse(s * 0.06, s * 0.12, s * 0.2, s * 0.11, 0.5 + wag * 0.2, 0, 6.2832);
+  ctx.fill();
+
+  /* mắt */
+  ctx.fillStyle = '#fff';
+  ctx.beginPath(); ctx.arc(s * 0.34, -s * 0.1, s * 0.125, 0, 6.2832); ctx.fill();
+  ctx.fillStyle = '#182838';
+  ctx.beginPath(); ctx.arc(s * 0.37, -s * 0.1, s * 0.065, 0, 6.2832); ctx.fill();
+  ctx.fillStyle = 'rgba(255,255,255,.95)';
+  ctx.beginPath(); ctx.arc(s * 0.40, -s * 0.135, s * 0.026, 0, 6.2832); ctx.fill();
+
+  /* miệng: mở khi vừa đớp mồi */
+  ctx.fillStyle = 'hsl(' + hue + ',60%,30%)';
+  ctx.beginPath();
+  if (f.munch > 0) ctx.ellipse(s * 0.6, s * 0.04, s * 0.075, s * 0.075 * (0.4 + f.munch), 0, 0, 6.2832);
+  else ctx.ellipse(s * 0.6, s * 0.05, s * 0.055, s * 0.028, 0, 0, 6.2832);
+  ctx.fill();
+
+  ctx.restore();
+}
+
+/* ══════════ vòng lặp ══════════ */
+let last = performance.now(), time = 0;
+
+function frame(now) {
+  let dt = (now - last) / 1000;
+  last = now;
+  if (dt > 0.05) dt = 0.05;
+  if (dt < 0) dt = 0;          /* timestamp lùi thì bỏ qua, tránh hệ số nội suy đổi dấu */
+  time += dt;
+
+  /* bong bóng nền */
+  bubbleTimer -= dt;
+  if (bubbleTimer <= 0) {
+    addBubble(rnd(0, W), sandY + rnd(-6, 10), rnd(2, 7));
+    bubbleTimer = rnd(0.25, 0.9);
+  }
+
+  /* thức ăn chìm dần */
+  for (let i = foods.length - 1; i >= 0; i--) {
+    const fd = foods[i];
+    fd.life -= dt;
+    fd.phase += dt * 2.4;
+    fd.y += fd.vy * dt;
+    fd.x += Math.sin(fd.phase) * 12 * dt;
+    if (fd.y > sandY - 2 || fd.life <= 0) {
+      for (let k = 0; k < 4; k++) {
+        parts.push({ kind: 'crumb', x: fd.x, y: Math.min(fd.y, sandY), vx: rnd(-30, 30), vy: rnd(-40, -5),
+                     r: rnd(1.5, 3), life: 1, decay: 1.6 });
+      }
+      foods.splice(i, 1);
+    }
+  }
+
+  /* cá */
+  for (const f of fishes) {
+    if (f.grow < 1) f.grow = Math.min(1, f.grow + dt * 0.9);
+    if (f.munch > 0) f.munch = Math.max(0, f.munch - dt * 3);
+    if (f.startle > 0) f.startle = Math.max(0, f.startle - dt * 1.2);
+
+    /* tìm mồi gần nhất */
+    let target = null, bestD = Infinity;
+    if (f.startle <= 0) {
+      for (const fd of foods) {
+        const d = Math.hypot(fd.x - f.x, fd.y - f.y);
+        if (d < Math.min(W, H) * 0.55 && d < bestD) { bestD = d; target = fd; }
+      }
+    }
+
+    let tx, ty, speed = f.speed;
+    if (target) {
+      tx = target.x; ty = target.y; speed = f.speed * 1.9;
+      if (bestD < f.size * 0.55) {           /* đớp trúng */
+        const idx = foods.indexOf(target);
+        if (idx >= 0) foods.splice(idx, 1);
+        f.munch = 1;
+        fed++;
+        playNom();
+        for (let k = 0; k < 6; k++) {
+          parts.push({ kind: 'crumb', x: target.x, y: target.y, vx: rnd(-50, 50), vy: rnd(-50, 10),
+                       r: rnd(1.5, 3), life: 1, decay: 2 });
+        }
+        addBubble(f.x + f.size * 0.4, f.y - f.size * 0.2, rnd(2, 5));
+        if (fed % 5 === 0) addFish();
+      }
+    } else {
+      f.retarget -= dt;
+      if (f.retarget <= 0 || Math.hypot(f.tx - f.x, f.ty - f.y) < f.size) newTarget(f);
+      tx = f.tx; ty = f.ty;
+      if (f.startle > 0) speed = f.speed * 2.4;
+    }
+
+    const dx = tx - f.x, dy = ty - f.y;
+    const d = Math.max(0.001, Math.hypot(dx, dy));
+    f.vx += ((dx / d) * speed - f.vx) * Math.min(1, dt * f.turn);
+    f.vy += ((dy / d) * speed - f.vy) * Math.min(1, dt * f.turn);
+
+    f.x += f.vx * dt;
+    f.y += f.vy * dt;
+    keepInTank(f);
+  }
+
+  /* bong bóng nổi lên */
+  for (let i = bubbles.length - 1; i >= 0; i--) {
+    const b = bubbles[i];
+    b.phase += dt * 2.2;
+    b.y -= b.speed * dt;
+    b.x += Math.sin(b.phase) * b.amp * dt;
+    if (b.y + b.r < 0) bubbles.splice(i, 1);
+  }
+
+  /* ── vẽ ── */
+  drawWater(time);
+  drawSand(time);
+  drawRocks(time);
+  drawWeeds(time);
+
+  for (const fd of foods) {
+    ctx.fillStyle = '#c9762c';
+    ctx.beginPath(); ctx.arc(fd.x, fd.y, fd.r, 0, 6.2832); ctx.fill();
+    ctx.fillStyle = 'rgba(255,220,160,.75)';
+    ctx.beginPath(); ctx.arc(fd.x - fd.r * 0.3, fd.y - fd.r * 0.3, fd.r * 0.35, 0, 6.2832); ctx.fill();
+  }
+
+  for (const f of fishes) drawFish(f, time);
+
+  for (const b of bubbles) {
+    ctx.strokeStyle = 'rgba(255,255,255,.7)';
+    ctx.lineWidth = Math.max(1, b.r * 0.22);
+    ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, 6.2832); ctx.stroke();
+    ctx.fillStyle = 'rgba(255,255,255,.18)';
+    ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, 6.2832); ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,.9)';
+    ctx.beginPath(); ctx.arc(b.x - b.r * 0.32, b.y - b.r * 0.32, b.r * 0.22, 0, 6.2832); ctx.fill();
+  }
+
+  /* hạt hiệu ứng */
+  for (let i = parts.length - 1; i >= 0; i--) {
+    const p = parts[i];
+    p.life -= p.decay * dt;
+    if (p.life <= 0) { parts.splice(i, 1); continue; }
+
+    if (p.kind === 'ring') {
+      const t2 = 1 - p.life;
+      const rr = p.r + (p.gr - p.r) * (1 - Math.pow(1 - t2, 2));
+      ctx.lineWidth = 3 * p.life;
+      ctx.strokeStyle = 'rgba(255,255,255,' + (p.life * 0.6) + ')';
+      ctx.beginPath(); ctx.arc(p.x, p.y, rr, 0, 6.2832); ctx.stroke();
+      continue;
+    }
+
+    p.vy += (p.kind === 'crumb' ? 60 : 260) * dt;
+    p.x += p.vx * dt;
+    p.y += p.vy * dt;
+
+    if (p.kind === 'crumb') {
+      ctx.fillStyle = 'rgba(201,118,44,' + p.life + ')';
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, 6.2832); ctx.fill();
+    } else {
+      ctx.fillStyle = 'rgba(255,255,255,' + (p.life * 0.95) + ')';
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.r * p.life, 0, 6.2832); ctx.fill();
+    }
+  }
+
+  /* chữ */
+  for (let i = texts.length - 1; i >= 0; i--) {
+    const tx = texts[i];
+    tx.life -= tx.decay * dt;
+    if (tx.life <= 0) { texts.splice(i, 1); continue; }
+    ctx.save();
+    ctx.globalAlpha = Math.min(1, tx.life * 1.6);
+    ctx.translate(tx.x, tx.y - (1 - tx.life) * 55);
+    const sc = 1 + (1 - tx.life) * 0.3;
+    ctx.scale(sc, sc);
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.font = '800 ' + tx.size + "px 'Baloo 2', Arial, sans-serif";
+    ctx.lineWidth = tx.size * 0.16;
+    ctx.lineJoin = 'round';
+    ctx.strokeStyle = 'rgba(255,255,255,.95)';
+    ctx.strokeText(tx.txt, 0, 0);
+    ctx.fillStyle = 'hsl(' + tx.hue + ',80%,45%)';
+    ctx.fillText(tx.txt, 0, 0);
+    ctx.restore();
+  }
+
+  requestAnimationFrame(frame);
+}
+
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

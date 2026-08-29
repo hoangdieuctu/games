@@ -768,6 +768,7 @@ function frame(now) {
   let dt = (now - last) / 1000;
   last = now;
   if (dt > 0.05) dt = 0.05;
+  if (dt < 0) dt = 0;          /* timestamp lùi thì bỏ qua, tránh hệ số nội suy đổi dấu */
   time += dt;
 
   /* cho con vật thò lên */
