@@ -1,10 +1,13 @@
 // ── Cấu hình tĩnh của game: dịch vụ, loại khách, màu sắc, độ khó từng ngày ──
 
+// mode 'staff': cô nhân viên phải đến làm trong dur giây (chạm để nhanh hơn)
+// mode 'mask' : nhân viên đắp mặt nạ → chờ ngấm → chạm để nhân viên đến gỡ
+// mode 'room' : phòng xông hơi chứa nhiều khách, tự chạy theo thời gian
 export const SERVICES = {
-  massage: { name: 'Mát-xa',   icon: '💆‍♀️', price: 30, mode: 'tap',  taps: 6 },
-  facial:  { name: 'Mặt nạ',   icon: '🧖‍♀️', price: 26, mode: 'auto', dur: 7 },
-  sauna:   { name: 'Xông hơi', icon: '♨️',  price: 22, mode: 'auto', dur: 9 },
-  nail:    { name: 'Làm móng', icon: '💅',  price: 28, mode: 'tap',  taps: 6 },
+  massage: { name: 'Mát-xa',   icon: '💆‍♀️', price: 30, mode: 'staff', dur: 5 },
+  facial:  { name: 'Mặt nạ',   icon: '🧖‍♀️', price: 26, mode: 'mask',  applyT: 1.0, maskT: 6, removeT: 1.0 },
+  sauna:   { name: 'Xông hơi', icon: '♨️',  price: 22, mode: 'room',  dur: 8, cap: 3 },
+  nail:    { name: 'Làm móng', icon: '💅',  price: 28, mode: 'staff', dur: 5 },
 };
 
 export const PAY_ICON = '💰';
@@ -24,9 +27,10 @@ export const TYPES = {
 // tốc độ giảm kiên nhẫn (tim / giây) theo trạng thái chờ
 export const DECAY = {
   sit: 1 / 6,
+  awaitStaff: 1 / 9, // chờ cô nhân viên đến
+  maskDone: 1 / 8,   // mặt nạ ngấm xong, chờ được gỡ
   done: 1 / 8,
   queue: 1 / 8,
-  neglected: 1 / 7, // dịch vụ chạm bị bỏ mặc giữa chừng
 };
 
 export function dayConfig(d) {
@@ -48,7 +52,7 @@ export function dayConfig(d) {
     types,
     minW, maxW,
     nCustomers: n,
-    spawnGap: Math.max(3.4, 9 - d * 0.8),
+    spawnGap: Math.max(4, 9.5 - d * 0.75),
     goal,
   };
 }

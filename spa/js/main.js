@@ -7,7 +7,7 @@ import { bindInput } from './input.js';
 import { update, prepareDay, bindDayFlow } from './game.js';
 import { draw } from './render.js';
 import { bindUi } from './ui.js';
-import { initSoundToggle, ac } from './audio.js';
+import { initSoundToggle, initMusicToggle, startMusic, ac } from './audio.js';
 
 G.canvas = document.getElementById('cv');
 G.ctx = G.canvas.getContext('2d');
@@ -17,10 +17,11 @@ loadShop();
 layout();
 bindInput();
 initSoundToggle(document.getElementById('snd-btn'));
+initMusicToggle(document.getElementById('music-btn'));
 
 const flow = bindDayFlow();
 bindUi({
-  onStart: () => { ac(); flow.onStart(); },
+  onStart: () => { ac(); startMusic(); flow.onStart(); },
   onRetry: flow.onRetry,
   onNext: flow.onNext,
 });

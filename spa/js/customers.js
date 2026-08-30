@@ -6,7 +6,7 @@ import { anchorPos } from './layout.js';
 import { sAssign, sDone, sBell, sAngry, sCash } from './audio.js';
 import { spark, coin, puff, heartPop, textPop } from './particles.js';
 import { setHint, advanceTutorial, updateCustPill, bump } from './ui.js';
-import { tapsFor, tipMult, addToBank } from './upgrades.js';
+import { tipMult, addToBank } from './upgrades.js';
 
 export function makeCustomer() {
   const typeKey = pick(G.cfg.types);
@@ -33,9 +33,8 @@ export function makeCustomer() {
     tx: G.door.x, ty: G.door.y,
     anchor: null,
     bobT: Math.random() * 6,
-    workProgress: 0, workIdle: 0,
+    workProgress: 0,
     serviceTimer: 0,
-    payTimer: 0,
     arrive: null,
   };
 }
@@ -53,7 +52,13 @@ export function walkTo(c, x, y, then) {
 export function freeAnchor(c) {
   if (!c.anchor) return;
   if (c.anchor.kind === 'seat') { const s = G.seats[c.anchor.idx]; if (s && s.taken === c) s.taken = null; }
-  if (c.anchor.kind === 'station') { const s = G.stations[c.anchor.idx]; if (s && s.occupant === c) s.occupant = null; }
+  if (c.anchor.kind === 'station') {
+    const s = G.stations[c.anchor.idx];
+    if (s) {
+      if (s.slots) { const i = s.slots.indexOf(c); if (i !== -1) s.slots[i] = null; }
+      if (s.occupant === c) s.occupant = null;
+    }
+  }
   if (c.anchor.kind === 'queue') { const q = G.queueSpots[c.anchor.idx]; if (q && q.taken === c) q.taken = null; }
   c.anchor = null;
 }
@@ -83,20 +88,34 @@ export function spawnCustomer(seatIdx) {
   updateCustPill();
 }
 
+// ô còn nhận được khách không (phòng xông tính theo suất trống)
+export function stationFree(st) {
+  if (st.slots) return st.slots.some(s => !s);
+  return !st.occupant;
+}
+
 export function assignToStation(c, st) {
   freeAnchor(c);
-  st.occupant = c;
-  c.anchor = { kind: 'station', idx: G.stations.indexOf(st) };
+  const idx = G.stations.indexOf(st);
+  if (st.slots) {
+    const slot = st.slots.findIndex(s => !s);
+    st.slots[slot] = c;
+    c.anchor = { kind: 'station', idx, slot };
+  } else {
+    st.occupant = c;
+    c.anchor = { kind: 'station', idx };
+  }
   const a = anchorPos(c);
   G.selected = null;
   sAssign();
   advanceTutorial(2);
+  const mode = SERVICES[st.key].mode;
   walkTo(c, a.x, a.y, () => {
-    c.state = 'service';
     c.workProgress = 0;
-    c.workIdle = 0;
     c.serviceTimer = 0;
-    if (SERVICES[st.key].mode === 'tap') setHint();
+    // phòng xông tự chạy; các dịch vụ khác chờ cô nhân viên đến
+    c.state = mode === 'room' ? 'service' : 'awaitStaff';
+    setHint();
   });
 }
 
@@ -114,28 +133,16 @@ export function finishService(c) {
   c.earned += SERVICES[st.key].price;
   c.wishIndex++;
   c.state = 'done';
-  c.workIdle = 0;
   sDone();
   for (let i = 0; i < 7; i++) spark(c.x + (Math.random() - 0.5) * 60 * G.K, c.y - Math.random() * 90 * G.K);
   advanceTutorial(3);
   setHint();
 }
 
-// một lần chạm khi đang làm dịch vụ kiểu chạm; trả về true nếu vừa xong
-export function workTap(c, st) {
-  c.workProgress += 1 / tapsFor(st.key);
-  c.workIdle = 0;
+// chạm cổ vũ khi cô nhân viên đang mát-xa / làm móng → nhanh xong hơn
+export function cheerTap(c) {
+  c.workProgress = Math.min(1, c.workProgress + 0.06);
   spark(c.x + (Math.random() - 0.5) * 24, c.y - 40 * G.K - Math.random() * 20);
-  if (c.workProgress >= 0.999) { finishService(c); return true; }
-  return false;
-}
-
-export function checkout() {
-  const c = G.queueSpots[0].taken;
-  if (!c || c.state !== 'queue') return false;
-  c.state = 'pay';
-  c.payTimer = 0.85;
-  return true;
 }
 
 export function completePay(c) {

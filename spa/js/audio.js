@@ -43,3 +43,125 @@ export function initSoundToggle(btn) {
     if (soundOn) sSelect();
   });
 }
+
+/* ════════════════ NHẠC NỀN THƯ GIÃN ════════════════
+   Tự sinh bằng WebAudio: pad hợp âm êm, giai điệu ngũ cung
+   thánh thót có tiếng vọng, thỉnh thoảng chuông gió. */
+
+let musicOn = localStorage.getItem('spa_music') !== '0';
+let musicTimer = null;
+let musicGain = null;
+let nextChordAt = 0, nextNoteAt = 0, chordIdx = 0;
+
+// Cmaj7 → Am7 → Fmaj7 → G6, vòng lặp dịu dàng
+const CHORDS = [
+  [261.63, 329.63, 392.00, 493.88],
+  [220.00, 261.63, 329.63, 392.00],
+  [174.61, 220.00, 261.63, 329.63],
+  [196.00, 246.94, 293.66, 329.63],
+];
+// ngũ cung Đô cao cho giai điệu
+const SCALE = [523.25, 587.33, 659.25, 783.99, 880.00, 1046.5];
+
+function padNote(t, freq, dur) {
+  const a = ac();
+  const g = a.createGain();
+  g.gain.setValueAtTime(0, t);
+  g.gain.linearRampToValueAtTime(0.035, t + dur * 0.35);
+  g.gain.linearRampToValueAtTime(0.0001, t + dur);
+  g.connect(musicGain);
+  for (const det of [-3, 3]) {
+    const o = a.createOscillator();
+    o.type = 'triangle';
+    o.frequency.setValueAtTime(freq, t);
+    o.detune.setValueAtTime(det, t);
+    o.connect(g);
+    o.start(t); o.stop(t + dur + 0.1);
+  }
+}
+
+function pluck(t, freq, vol) {
+  const a = ac();
+  const o = a.createOscillator(), g = a.createGain();
+  o.type = 'sine';
+  o.frequency.setValueAtTime(freq, t);
+  g.gain.setValueAtTime(0, t);
+  g.gain.linearRampToValueAtTime(vol, t + 0.025);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + 1.9);
+  o.connect(g); g.connect(musicGain);
+  o.start(t); o.stop(t + 2);
+}
+
+function melodyNote(t, freq) {
+  pluck(t, freq, 0.055);
+  pluck(t + 0.38, freq, 0.022); // tiếng vọng nhẹ
+}
+
+function windChime(t) {
+  const notes = [1046.5, 1318.5, 1568.0, 2093.0];
+  let d = 0;
+  for (let i = 0; i < 3 + Math.floor(Math.random() * 3); i++) {
+    pluck(t + d, notes[Math.floor(Math.random() * notes.length)], 0.02);
+    d += 0.1 + Math.random() * 0.14;
+  }
+}
+
+function musicTick() {
+  const a = ac();
+  if (!musicOn || !musicGain || a.state !== 'running') return;
+  const now = a.currentTime;
+  if (nextChordAt < now) { nextChordAt = now + 0.1; nextNoteAt = now + 1; }
+  while (nextChordAt < now + 1.5) {
+    const chord = CHORDS[chordIdx % CHORDS.length];
+    for (const f of chord) padNote(nextChordAt, f, 8.5);
+    chordIdx++;
+    nextChordAt += 7.5;
+  }
+  while (nextNoteAt < now + 1.5) {
+    const r = Math.random();
+    if (r < 0.62) melodyNote(nextNoteAt, SCALE[Math.floor(Math.random() * SCALE.length)]);
+    else if (r < 0.72) windChime(nextNoteAt);
+    // phần còn lại: khoảng lặng
+    nextNoteAt += 1.4 + Math.random() * 2.2;
+  }
+}
+
+export function startMusic() {
+  if (!musicOn || musicTimer) return;
+  const a = ac();
+  musicGain = a.createGain();
+  musicGain.gain.value = 1;
+  const lp = a.createBiquadFilter();
+  lp.type = 'lowpass';
+  lp.frequency.value = 2400;
+  musicGain.connect(lp); lp.connect(a.destination);
+  nextChordAt = 0; nextNoteAt = 0; chordIdx = 0;
+  musicTick();
+  musicTimer = setInterval(musicTick, 400);
+}
+
+export function stopMusic() {
+  if (musicTimer) { clearInterval(musicTimer); musicTimer = null; }
+  if (musicGain) {
+    const a = ac();
+    musicGain.gain.setValueAtTime(musicGain.gain.value, a.currentTime);
+    musicGain.gain.linearRampToValueAtTime(0.0001, a.currentTime + 0.6);
+    const g = musicGain;
+    setTimeout(() => g.disconnect(), 800);
+    musicGain = null;
+  }
+}
+
+export function initMusicToggle(btn) {
+  const paint = () => {
+    btn.textContent = '🎵';
+    btn.classList.toggle('off', !musicOn);
+  };
+  paint();
+  btn.addEventListener('click', () => {
+    musicOn = !musicOn;
+    localStorage.setItem('spa_music', musicOn ? '1' : '0');
+    paint();
+    if (musicOn) startMusic(); else stopMusic();
+  });
+}

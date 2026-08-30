@@ -36,15 +36,19 @@ export function advanceTutorial(step) {
 export function setHint() {
   let msg = '';
   const ts = G.tutorialStep;
-  if (ts === 0 && G.customers.some(c => c.state === 'sit')) msg = '👆 Chạm vào khách đang ngồi chờ!';
+  const has = (state) => G.customers.some(c => c.state === state);
+  if ((ts >= 0 || G.day <= 2) && has('maskDone')) msg = '👆 Mặt nạ ngấm xong rồi — chạm vào ô mặt nạ để gỡ!';
+  else if (ts === 0 && has('sit')) msg = '👆 Chạm vào khách đang ngồi chờ!';
   else if (ts === 1) msg = '👆 Chạm vào ô dịch vụ mà khách muốn (xem bong bóng 💭)';
   else if (ts === 2) {
-    const busy = G.customers.some(c => c.state === 'service' && c.anchor &&
-      SERVICES[G.stations[c.anchor.idx].key].mode === 'tap');
-    msg = busy ? '👆 Chạm liên tục vào khách để làm dịch vụ!' : '⏳ Chờ dịch vụ xong nhé...';
+    if (G.customers.some(c => c.state === 'service' && c.anchor &&
+      SERVICES[G.stations[c.anchor.idx].key].mode === 'staff'))
+      msg = '👆 Chạm liên tục để cô nhân viên làm nhanh hơn!';
+    else if (has('awaitStaff')) msg = '💁‍♀️ Cô nhân viên đang đến phục vụ...';
+    else msg = '⏳ Chờ dịch vụ xong nhé...';
   }
   else if (ts === 3) msg = '💰 Chọn khách rồi chạm vào quầy thu ngân!';
-  else if (ts >= 0 && G.customers.some(c => c.state === 'queue')) msg = '👆 Chạm vào quầy để thu tiền!';
+  else if (ts >= 0 && has('queue')) msg = '👆 Chạm vào quầy để cô nhân viên ra tính tiền!';
   const el = $('hint');
   el.textContent = msg;
   el.classList.toggle('show', !!msg);

@@ -1,8 +1,9 @@
-// ── Xử lý chạm: chọn khách, giao dịch vụ, chạm làm việc, thu tiền ──
+// ── Xử lý chạm: chọn khách, giao dịch vụ, cổ vũ nhân viên, gỡ mặt nạ, thu tiền ──
 
 import { G } from './state.js';
 import { SERVICES } from './config.js';
-import { currentWish, assignToStation, assignToQueue, workTap, checkout } from './customers.js';
+import { currentWish, assignToStation, assignToQueue, stationFree, cheerTap } from './customers.js';
+import { enqueueTask, taskExists, teaTarget } from './staff.js';
 import { ac, sSelect, sNope, sTapWork } from './audio.js';
 import { setHint, advanceTutorial } from './ui.js';
 
@@ -21,13 +22,16 @@ function onTap(e) {
   let hit = null;
   for (let i = G.customers.length - 1; i >= 0; i--) {
     const c = G.customers[i];
-    if (c.state === 'exitHappy' || c.state === 'exitAngry' || c.state === 'pay') continue;
+    if (c.state === 'exitHappy' || c.state === 'exitAngry') continue;
     if (Math.hypot(x - c.x, y - (c.y - 45 * K)) < 55 * K) { hit = c; break; }
   }
   if (hit) {
-    if (hit.state === 'service' && hit.anchor) {
-      const st = G.stations[hit.anchor.idx];
-      if (SERVICES[st.key].mode === 'tap') { sTapWork(); workTap(hit, st); }
+    if (hit.state === 'service' && hit.anchor && SERVICES[G.stations[hit.anchor.idx].key].mode === 'staff') {
+      sTapWork(); cheerTap(hit); // cổ vũ cho nhanh xong
+      return;
+    }
+    if (hit.state === 'maskDone' && hit.anchor) {
+      if (enqueueTask('remove', hit.anchor.idx)) setHint();
       return;
     }
     if (hit.state === 'sit' || hit.state === 'done') {
@@ -41,9 +45,17 @@ function onTap(e) {
   // 2) chạm ô dịch vụ?
   for (const st of G.stations) {
     if (Math.abs(x - st.x) < st.w / 2 + 10 && Math.abs(y - st.y) < st.h / 2 + 26 * K) {
+      const idx = G.stations.indexOf(st);
       const occ = st.occupant;
-      if (occ && occ.state === 'service' && SERVICES[st.key].mode === 'tap') {
-        sTapWork(); workTap(occ, st);
+      // cổ vũ khi nhân viên đang làm
+      if (occ && occ.state === 'service' && SERVICES[st.key].mode === 'staff') {
+        sTapWork(); cheerTap(occ);
+        return;
+      }
+      // gỡ mặt nạ đã ngấm xong
+      if (occ && occ.state === 'maskDone') {
+        if (enqueueTask('remove', idx)) setHint();
+        else sNope();
         return;
       }
       if (occ && occ.state === 'done') {
@@ -52,9 +64,14 @@ function onTap(e) {
         setHint();
         return;
       }
-      if (!occ && G.selected) {
-        if (currentWish(G.selected) === st.key) assignToStation(G.selected, st);
-        else { sNope(); st.shakeT = 0.3; }
+      // giao khách vào ô trống
+      if (G.selected && stationFree(st)) {
+        if (currentWish(G.selected) === st.key) {
+          assignToStation(G.selected, st);
+          const mode = SERVICES[st.key].mode;
+          if (mode === 'staff') enqueueTask('work', idx);
+          if (mode === 'mask') enqueueTask('apply', idx);
+        } else { sNope(); st.shakeT = 0.3; }
       }
       return;
     }
@@ -70,11 +87,21 @@ function onTap(e) {
       else sNope();
       return;
     }
-    if (!checkout()) sNope();
+    const front = G.queueSpots[0].taken;
+    if (front && front.state === 'queue' && !taskExists('checkout', null)) {
+      enqueueTask('checkout', null);
+    } else sNope();
     return;
   }
 
-  // 4) chạm chỗ trống → bỏ chọn
+  // 4) chạm xe trà → mời trà khách đang chờ ít tim nhất
+  const t = G.teaCart;
+  if (Math.hypot(x - t.x, y - t.y) < 60 * K) {
+    if (!teaTarget() || !enqueueTask('tea', null)) sNope();
+    return;
+  }
+
+  // 5) chạm chỗ trống → bỏ chọn
   G.selected = null;
   setHint();
 }

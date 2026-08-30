@@ -11,13 +11,18 @@ export const UPGRADES = {
   },
   oil: {
     name: 'Dầu Thơm Hảo Hạng', icon: '🫧',
-    desc: 'Mát-xa & làm móng cần ít lần chạm hơn',
+    desc: 'Mát-xa & làm móng nhanh xong hơn',
     costs: [100, 220],
   },
   steam: {
     name: 'Máy Xông Xịn', icon: '♨️',
     desc: 'Mặt nạ & xông hơi nhanh hơn',
     costs: [100, 220],
+  },
+  staff: {
+    name: 'Thêm Nhân Viên', icon: '💁‍♀️',
+    desc: 'Thuê thêm 1 cô nhân viên phục vụ',
+    costs: [320],
   },
   decor: {
     name: 'Trang Trí Lộng Lẫy', icon: '🌺',
@@ -67,12 +72,19 @@ export function buy(key) {
 export function sitDecayMult()  { return [1, 0.65, 0.45][levelOf('tea')]; }
 export function tipMult()       { return [1, 1.5, 2][levelOf('decor')]; }
 export function extraSeats()    { return levelOf('seat'); }
+export function staffCount()    { return 1 + levelOf('staff'); }
 
-export function tapsFor(key) {
-  const base = SERVICES[key].taps;
-  return Math.max(3, base - levelOf('oil'));
+// thời gian nhân viên làm mát-xa / làm móng
+export function staffDur(key) {
+  return SERVICES[key].dur * [1, 0.8, 0.65][levelOf('oil')];
 }
 
-export function durFor(key) {
-  return SERVICES[key].dur * [1, 0.8, 0.65][levelOf('steam')];
+// thời gian mặt nạ ngấm
+export function maskTime() {
+  return SERVICES.facial.maskT * [1, 0.8, 0.65][levelOf('steam')];
+}
+
+// thời gian xông hơi
+export function saunaTime() {
+  return SERVICES.sauna.dur * [1, 0.8, 0.65][levelOf('steam')];
 }

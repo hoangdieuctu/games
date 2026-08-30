@@ -25,10 +25,13 @@ export const G = {
 
   // thực thể
   customers: [],
+  staff: [],   // các cô nhân viên
+  tasks: [],   // hàng đợi việc cho nhân viên (FIFO)
   stations: [],
   seats: [],
   queueSpots: [],
   register: { x: 0, y: 0, w: 0, h: 0 },
+  teaCart: { x: 0, y: 0 },
   door: { x: 0, y: 0 },
   selected: null,
   particles: [],

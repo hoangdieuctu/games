@@ -2,9 +2,10 @@
 
 import { G } from './state.js';
 import { SERVICES, PAY_ICON } from './config.js';
-import { currentWish } from './customers.js';
+import { currentWish, stationFree } from './customers.js';
+import { teaTarget } from './staff.js';
 import { drawParticles, drawHeart } from './particles.js';
-import { tapsFor, durFor } from './upgrades.js';
+import { maskTime, saunaTime } from './upgrades.js';
 
 function rr(x, y, w, h, r) {
   const { ctx } = G;
@@ -82,6 +83,16 @@ function drawSeats() {
 
 const TILE_COLORS = { massage: '#cdeafc', facial: '#e5d8fc', sauna: '#fcdfc2', nail: '#fcd8e8' };
 
+function drawProgressBar(x, by, bw, prog, col) {
+  const { ctx } = G;
+  const bh = 12 * G.K;
+  const bx = x - bw / 2;
+  ctx.fillStyle = 'rgba(255,255,255,.85)';
+  rr(bx - 2, by - 2, bw + 4, bh + 4, bh); ctx.fill();
+  ctx.fillStyle = col;
+  if (prog > 0.02) { rr(bx, by, bw * Math.min(1, prog), bh, bh / 2); ctx.fill(); }
+}
+
 function drawStationTile(st, dt) {
   const { ctx, K } = G;
   const svc = SERVICES[st.key];
@@ -92,9 +103,10 @@ function drawStationTile(st, dt) {
   ctx.translate(sx, 0);
 
   const occ = st.occupant;
-  const busy = occ && occ.state === 'service';
-  const done = occ && occ.state === 'done';
-  const validTarget = G.selected && !occ && currentWish(G.selected) === st.key;
+  const occupants = st.slots ? st.slots.filter(Boolean) : (occ ? [occ] : []);
+  const anyDone = occupants.some(c => c.state === 'done');
+  const maskDone = occ && occ.state === 'maskDone';
+  const validTarget = G.selected && stationFree(st) && currentWish(G.selected) === st.key;
 
   ctx.fillStyle = 'rgba(140,80,50,.18)';
   ctx.beginPath(); ctx.ellipse(x, y + h * 0.42, w * 0.58, h * 0.2, 0, 0, 7); ctx.fill();
@@ -106,7 +118,7 @@ function drawStationTile(st, dt) {
     const p = 0.5 + 0.5 * Math.sin(G.time * 7);
     ctx.strokeStyle = `rgba(60,200,110,${0.5 + p * 0.5})`;
     ctx.lineWidth = (4 + p * 3) * K;
-  } else if (done) {
+  } else if (anyDone || maskDone) {
     const p = 0.5 + 0.5 * Math.sin(G.time * 6);
     ctx.strokeStyle = `rgba(255,180,0,${0.4 + p * 0.5})`;
     ctx.lineWidth = 4 * K;
@@ -126,27 +138,96 @@ function drawStationTile(st, dt) {
   ctx.fillStyle = 'rgba(90,60,80,.75)';
   ctx.fillText(svc.name, x, y + h / 2 + 15 * K);
 
-  if (occ && (occ.state === 'service' || occ.state === 'done')) {
-    drawCustomerAtStation(occ, st, busy);
+  for (const c of occupants) {
+    if (c.state === 'walk') continue; // đang đi tới, vẽ như khách thường
+    drawCustomerAtStation(c, st);
   }
 
-  if (busy) {
-    const prog = svc.mode === 'tap' ? occ.workProgress : occ.serviceTimer / durFor(st.key);
-    const bw = w * 0.72, bh = 12 * K;
-    const bx = x - bw / 2, by = y - h / 2 - 20 * K;
-    ctx.fillStyle = 'rgba(255,255,255,.85)';
-    rr(bx - 2, by - 2, bw + 4, bh + 4, bh); ctx.fill();
-    ctx.fillStyle = svc.mode === 'tap' ? '#ff7ba3' : '#7cc576';
-    if (prog > 0.02) { rr(bx, by, bw * Math.min(1, prog), bh, bh / 2); ctx.fill(); }
-    if (svc.mode === 'tap') {
-      const p = 0.5 + 0.5 * Math.sin(G.time * 9);
-      ctx.font = `800 ${(15 + p * 3) * K}px 'Baloo 2', sans-serif`;
-      ctx.fillStyle = '#e0447a';
-      ctx.fillText('CHẠM! 👆', x, by - 16 * K);
+  // thanh tiến độ + lời nhắc
+  const by = y - h / 2 - 20 * K;
+  if (occ && occ.state === 'service' && svc.mode === 'staff') {
+    drawProgressBar(x, by, w * 0.72, occ.workProgress, '#ff7ba3');
+    const p = 0.5 + 0.5 * Math.sin(G.time * 9);
+    ctx.font = `800 ${(15 + p * 3) * K}px 'Baloo 2', sans-serif`;
+    ctx.fillStyle = '#e0447a';
+    ctx.fillText('CHẠM! 👆', x, by - 16 * K);
+  } else if (occ && occ.state === 'masked') {
+    drawProgressBar(x, by, w * 0.72, occ.serviceTimer / maskTime(), '#a58ae0');
+  } else if (maskDone) {
+    const p = 0.5 + 0.5 * Math.sin(G.time * 8);
+    ctx.font = `800 ${(15 + p * 3) * K}px 'Baloo 2', sans-serif`;
+    ctx.fillStyle = '#8a5ad0';
+    ctx.fillText('GỠ MẶT NẠ! 👆', x, by - 4 * K);
+  } else if (st.slots) {
+    // vòng tiến độ nhỏ cho từng khách trong phòng xông
+    for (const c of st.slots.filter(c => c && c.state === 'service')) {
+      const prog = c.serviceTimer / saunaTime();
+      ctx.strokeStyle = 'rgba(255,255,255,.75)';
+      ctx.lineWidth = 4 * K;
+      ctx.beginPath(); ctx.arc(c.x, y - h * 0.52, 12 * K, 0, 7); ctx.stroke();
+      ctx.strokeStyle = '#f0964c';
+      ctx.beginPath(); ctx.arc(c.x, y - h * 0.52, 12 * K, -Math.PI / 2, -Math.PI / 2 + prog * Math.PI * 2); ctx.stroke();
     }
   }
 
   ctx.restore();
+}
+
+// xe trà cạnh khu chờ
+function drawTeaCart() {
+  const { ctx, K } = G;
+  const t = G.teaCart;
+  ctx.fillStyle = 'rgba(140,80,50,.22)';
+  ctx.beginPath(); ctx.ellipse(t.x, t.y + 24 * K, 40 * K, 12 * K, 0, 0, 7); ctx.fill();
+  // xe gỗ hai tầng có bánh
+  ctx.fillStyle = '#b57a44';
+  rr(t.x - 34 * K, t.y - 14 * K, 68 * K, 30 * K, 8 * K); ctx.fill();
+  ctx.fillStyle = '#d99a5e';
+  rr(t.x - 38 * K, t.y - 22 * K, 76 * K, 12 * K, 6 * K); ctx.fill();
+  ctx.fillStyle = '#7a5230';
+  ctx.beginPath(); ctx.arc(t.x - 22 * K, t.y + 18 * K, 7 * K, 0, 7); ctx.fill();
+  ctx.beginPath(); ctx.arc(t.x + 22 * K, t.y + 18 * K, 7 * K, 0, 7); ctx.fill();
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.font = `${26 * K}px sans-serif`;
+  ctx.fillText('🍵', t.x, t.y - 30 * K);
+  ctx.font = `800 ${13 * K}px 'Baloo 2', sans-serif`;
+  ctx.fillStyle = 'rgba(90,60,80,.75)';
+  ctx.fillText('Mời trà', t.x, t.y + 36 * K);
+  // nhấp nháy khi có khách đang khát trà
+  if (G.running && teaTarget()) {
+    const p = 0.5 + 0.5 * Math.sin(G.time * 6);
+    ctx.strokeStyle = `rgba(60,200,110,${0.3 + p * 0.5})`;
+    ctx.lineWidth = (3 + p * 2) * K;
+    rr(t.x - 44 * K, t.y - 44 * K, 88 * K, 76 * K, 14 * K);
+    ctx.stroke();
+  }
+}
+
+// số thứ tự việc đang chờ cô nhân viên (giống Sally's Spa)
+function drawTaskBadges() {
+  const { ctx, K } = G;
+  G.tasks.forEach((t, i) => {
+    let bx, by;
+    if (t.type === 'checkout') {
+      bx = G.register.x + G.register.w * 0.42;
+      by = G.register.y - G.register.h * 0.85;
+    } else if (t.type === 'tea') {
+      bx = G.teaCart.x + 34 * K;
+      by = G.teaCart.y - 34 * K;
+    } else {
+      const st = G.stations[t.stIdx];
+      bx = st.x + st.w / 2 - 14 * K;
+      by = st.y - st.h / 2 - 2 * K;
+    }
+    ctx.fillStyle = '#f06292';
+    ctx.beginPath(); ctx.arc(bx, by, 13 * K, 0, 7); ctx.fill();
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = 2.5 * K;
+    ctx.beginPath(); ctx.arc(bx, by, 13 * K, 0, 7); ctx.stroke();
+    ctx.fillStyle = '#fff';
+    ctx.font = `800 ${14 * K}px 'Baloo 2', sans-serif`;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(i + 1, bx, by + 0.5);
+  });
 }
 
 function drawFurniture(st) {
@@ -170,17 +251,21 @@ function drawFurniture(st) {
     ctx.font = `${20 * K}px sans-serif`;
     ctx.fillText('🧴', fx + w * 0.3, fy + h * 0.02);
   } else if (st.key === 'sauna') {
+    // phòng xông gỗ rộng với cửa sổ tròn cho từng khách
     ctx.fillStyle = '#c98a52';
-    rr(fx - w * 0.26, fy - h * 0.34, w * 0.5, h * 0.62, 10 * K); ctx.fill();
+    rr(x - w * 0.44, y - h * 0.42, w * 0.88, h * 0.66, 12 * K); ctx.fill();
     ctx.strokeStyle = 'rgba(120,70,30,.4)'; ctx.lineWidth = 2;
     for (let i = 1; i < 4; i++) {
       ctx.beginPath();
-      ctx.moveTo(fx - w * 0.26, fy - h * 0.34 + i * h * 0.155);
-      ctx.lineTo(fx + w * 0.24, fy - h * 0.34 + i * h * 0.155);
+      ctx.moveTo(x - w * 0.44, y - h * 0.42 + i * h * 0.165);
+      ctx.lineTo(x + w * 0.44, y - h * 0.42 + i * h * 0.165);
       ctx.stroke();
     }
-    ctx.fillStyle = '#5a3a1e';
-    ctx.beginPath(); ctx.arc(fx - w * 0.01, fy - h * 0.1, 15 * K, 0, 7); ctx.fill();
+    const cap = (st.slots || [null, null, null]).length;
+    for (let s = 0; s < cap; s++) {
+      ctx.fillStyle = '#5a3a1e';
+      ctx.beginPath(); ctx.arc(x + (s - 1) * w * 0.26, y - h * 0.10, 15 * K, 0, 7); ctx.fill();
+    }
   } else if (st.key === 'nail') {
     ctx.fillStyle = '#fff';
     rr(fx - w * 0.26, fy - h * 0.02, w * 0.48, h * 0.16, 8 * K); ctx.fill();
@@ -194,15 +279,17 @@ function drawFurniture(st) {
 
 /* ── khách tại ô dịch vụ (tư thế riêng theo loại) ── */
 
-function drawCustomerAtStation(c, st, busy) {
+function drawCustomerAtStation(c, st) {
   const { ctx } = G;
-  if (!busy) { drawCustomer(c); return; }
   const K = G.K;
-  if (st.key === 'sauna') {
-    drawHead(c, st.x - st.w * 0.19, st.y - st.h * 0.08, 13 * K, { sweat: true });
+  // trong phòng xông: chỉ thấy đầu qua cửa sổ
+  if (st.key === 'sauna' && c.state === 'service') {
+    const slot = c.anchor.slot || 0;
+    drawHead(c, st.x + (slot - 1) * st.w * 0.26, st.y - st.h * 0.08, 13 * K, { sweat: true });
     return;
   }
-  if (st.key === 'massage') {
+  // nằm trên giường khi được mát-xa
+  if (st.key === 'massage' && c.state === 'service') {
     ctx.save();
     ctx.translate(st.x - st.w * 0.18, st.y - st.h * 0.13);
     ctx.fillStyle = '#fff';
@@ -213,7 +300,8 @@ function drawCustomerAtStation(c, st, busy) {
     ctx.restore();
     return;
   }
-  if (st.key === 'facial') {
+  // nằm ghế đắp mặt nạ (đang đắp hoặc chờ gỡ)
+  if (st.key === 'facial' && (c.state === 'masked' || c.state === 'maskDone')) {
     ctx.save();
     ctx.translate(st.x - st.w * 0.05, st.y - st.h * 0.05);
     ctx.fillStyle = '#fff';
@@ -222,7 +310,71 @@ function drawCustomerAtStation(c, st, busy) {
     ctx.restore();
     return;
   }
-  drawCustomer(c, { small: true });
+  if (st.key === 'nail' && c.state === 'service') {
+    drawCustomer(c, { small: true });
+    return;
+  }
+  // các trạng thái còn lại: đứng cạnh ô (chờ nhân viên / xong)
+  drawCustomer(c);
+}
+
+/* ── cô nhân viên spa ── */
+
+function drawStaff(s) {
+  const { ctx, K } = G;
+  const moving = Math.hypot(s.tx - s.x, s.ty - s.y) > 3 && (s.state === 'walk' || s.state === 'idle');
+  const working = s.state === 'working' || s.state === 'action';
+  const bob = moving ? Math.abs(Math.sin(s.bobT)) * 5 * K
+            : working ? Math.abs(Math.sin(G.time * 10)) * 2.5 * K
+            : Math.sin(s.bobT) * 1.5 * K;
+  const x = s.x, y = s.y - bob;
+
+  ctx.fillStyle = 'rgba(120,70,40,.2)';
+  ctx.beginPath(); ctx.ellipse(s.x, s.y + 22 * K, 26 * K, 8 * K, 0, 0, 7); ctx.fill();
+
+  // giày
+  ctx.fillStyle = '#c2557a';
+  ctx.beginPath(); ctx.ellipse(x - 10 * K, s.y + 18 * K, 8 * K, 5 * K, 0, 0, 7); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(x + 10 * K, s.y + 18 * K, 8 * K, 5 * K, 0, 0, 7); ctx.fill();
+
+  // đồng phục hồng đậm + tạp dề trắng
+  ctx.fillStyle = '#f06292';
+  rr(x - 24 * K, y - 40 * K, 48 * K, 60 * K, 18 * K); ctx.fill();
+  ctx.fillStyle = 'rgba(255,255,255,.92)';
+  rr(x - 15 * K, y - 18 * K, 30 * K, 34 * K, 10 * K); ctx.fill();
+  ctx.fillStyle = 'rgba(255,255,255,.85)';
+  ctx.beginPath();
+  ctx.moveTo(x - 12 * K, y - 40 * K);
+  ctx.lineTo(x, y - 24 * K);
+  ctx.lineTo(x + 12 * K, y - 40 * K);
+  ctx.closePath(); ctx.fill();
+
+  // đầu, tóc nâu búi cao cài hoa
+  const hr = 20 * K, hy = y - 58 * K;
+  ctx.fillStyle = '#ffdfc4';
+  ctx.beginPath(); ctx.arc(x, hy, hr, 0, 7); ctx.fill();
+  ctx.fillStyle = '#6a4020';
+  ctx.beginPath(); ctx.arc(x, hy - hr * 0.25, hr * 1.02, Math.PI * 1.02, -Math.PI * 0.02); ctx.fill();
+  ctx.beginPath(); ctx.arc(x, hy - hr * 1.22, hr * 0.42, 0, 7); ctx.fill();
+  ctx.font = `${15 * K}px sans-serif`;
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('🌸', x + hr * 0.72, hy - hr * 1.05);
+
+  // mặt tươi tắn
+  ctx.strokeStyle = '#503020'; ctx.lineWidth = 2 * K; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.arc(x - hr * 0.4, hy + hr * 0.02, hr * 0.2, Math.PI * 1.15, Math.PI * 1.85); ctx.stroke();
+  ctx.beginPath(); ctx.arc(x + hr * 0.4, hy + hr * 0.02, hr * 0.2, Math.PI * 1.15, Math.PI * 1.85); ctx.stroke();
+  ctx.fillStyle = 'rgba(255,120,150,.35)';
+  ctx.beginPath(); ctx.ellipse(x - hr * 0.62, hy + hr * 0.38, hr * 0.2, hr * 0.13, 0, 0, 7); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(x + hr * 0.62, hy + hr * 0.38, hr * 0.2, hr * 0.13, 0, 0, 7); ctx.fill();
+  ctx.strokeStyle = '#c06060';
+  ctx.beginPath(); ctx.arc(x, hy + hr * 0.38, hr * 0.26, Math.PI * 0.15, Math.PI * 0.85); ctx.stroke();
+
+  // đang làm việc: đôi tay lấp lánh
+  if (working) {
+    ctx.font = `${16 * K}px sans-serif`;
+    ctx.fillText('✨', x + 26 * K, y - 10 * K + Math.sin(G.time * 12) * 4 * K);
+  }
 }
 
 function drawHead(c, x, y, r, opt) {
@@ -339,7 +491,7 @@ export function drawCustomer(c, opt) {
 
   // tim kiên nhẫn
   const showHearts = c.state === 'sit' || c.state === 'done' || c.state === 'queue' ||
-    (c.state === 'service' && c.workIdle > 3);
+    c.state === 'awaitStaff' || c.state === 'maskDone';
   if (showHearts) {
     const n = Math.ceil(c.maxPatience);
     const filled = Math.ceil(Math.max(0, c.patience));
@@ -434,13 +586,18 @@ export function draw(dt) {
   ctx.clearRect(0, 0, W, H);
   drawBackground();
   drawSeats();
+  drawTeaCart();
   drawRegister();
   for (const st of G.stations) drawStationTile(st, dt);
-  const sorted = G.customers.slice().sort((a, b) => a.y - b.y);
-  for (const c of sorted) {
-    const inService = c.anchor && c.anchor.kind === 'station' && (c.state === 'service' || c.state === 'done');
-    if (inService) continue; // ô dịch vụ tự vẽ khách của nó
-    drawCustomer(c);
+  // khách ngoài ô dịch vụ + nhân viên, vẽ theo thứ tự từ trên xuống
+  const actors = [];
+  for (const c of G.customers) {
+    const atStation = c.anchor && c.anchor.kind === 'station' && c.state !== 'walk';
+    if (!atStation) actors.push({ y: c.y, draw: () => drawCustomer(c) });
   }
+  for (const s of G.staff) actors.push({ y: s.y, draw: () => drawStaff(s) });
+  actors.sort((a, b) => a.y - b.y);
+  for (const a of actors) a.draw();
+  drawTaskBadges();
   drawParticles();
 }

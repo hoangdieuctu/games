@@ -47,6 +47,7 @@ html, body {
   -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
 }
 .btn:active { transform: scale(.9); }
+.btn.off { opacity: .4; filter: grayscale(1); }
 
 .spacer { flex: 1; }
 

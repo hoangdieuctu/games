@@ -28,6 +28,9 @@ export function layout() {
     });
   }
 
+  // xe trà cạnh khu chờ — mời trà giúp khách hồi tim
+  G.teaCart = { x: W * 0.165, y: topPad + (H - topPad) * 0.90 };
+
   // quầy thu ngân trên phải
   const rw = 168 * K, rh = 92 * K;
   G.register = { x: W * 0.885, y: topPad + (H - topPad) * 0.20, w: rw, h: rh };
@@ -42,22 +45,26 @@ export function layout() {
   }
 
   // các ô dịch vụ ở giữa (giữ nguyên đối tượng station, chỉ cập nhật toạ độ)
+  // phòng xông hơi rộng gấp rưỡi vì chứa nhiều khách
   if (G.stations.length) {
-    const zL = W * 0.21, zR = W * 0.84;
+    const zL = W * 0.24, zR = W * 0.84;
     const n = G.stations.length;
     const row1 = Math.ceil(n / 2), row2 = n - row1;
-    const tw = Math.min(196 * K, (zR - zL) / Math.max(row1, 2) - 12);
+    const wf = (st) => st.key === 'sauna' ? 1.55 : 1;
+    const tw = Math.min(196 * K, (zR - zL) / Math.max(row1 + 0.6, 2.6) - 12);
     const th = 128 * K;
     const y1 = topPad + (H - topPad) * 0.30;
     const y2 = topPad + (H - topPad) * 0.72;
     const place = (count, y, startIdx) => {
-      const total = count * tw + (count - 1) * 26 * K;
-      const x0 = (zL + zR) / 2 - total / 2;
-      for (let i = 0; i < count; i++) {
-        const st = G.stations[startIdx + i];
-        st.x = x0 + i * (tw + 26 * K) + tw / 2;
+      const items = G.stations.slice(startIdx, startIdx + count);
+      const total = items.reduce((a, st) => a + tw * wf(st), 0) + (count - 1) * 26 * K;
+      let x = (zL + zR) / 2 - total / 2;
+      for (const st of items) {
+        const w = tw * wf(st);
+        st.x = x + w / 2;
         st.y = y;
-        st.w = tw; st.h = th;
+        st.w = w; st.h = th;
+        x += w + 26 * K;
       }
     };
     place(row1, y1, 0);
@@ -71,13 +78,27 @@ export function layout() {
     if (c.state === 'walk' || c.state === 'enter') { c.tx = a.x; c.ty = a.y; }
     else if (c.state !== 'exitHappy' && c.state !== 'exitAngry') { c.x = a.x; c.y = a.y; }
   }
+
+  // nhân viên đứng yên thì về lại chỗ chờ mới
+  for (const s of G.staff) {
+    if (s.state === 'idle') { s.tx = s.x; s.ty = s.y; }
+  }
 }
 
 export function anchorPos(c) {
   if (c.anchor == null) return null;
   const K = G.K;
-  if (c.anchor.kind === 'seat')    { const s = G.seats[c.anchor.idx]; return s ? { x: s.x, y: s.y - 14 * K } : null; }
-  if (c.anchor.kind === 'station') { const s = G.stations[c.anchor.idx]; return s ? { x: s.x + s.w * 0.26, y: s.y + s.h * 0.30 } : null; }
-  if (c.anchor.kind === 'queue')   { const q = G.queueSpots[c.anchor.idx]; return q ? { x: q.x, y: q.y } : null; }
+  if (c.anchor.kind === 'seat') { const s = G.seats[c.anchor.idx]; return s ? { x: s.x, y: s.y - 14 * K } : null; }
+  if (c.anchor.kind === 'station') {
+    const s = G.stations[c.anchor.idx];
+    if (!s) return null;
+    if (s.key === 'sauna') {
+      // mỗi khách một suất trong phòng xông
+      const slot = c.anchor.slot || 0;
+      return { x: s.x + (slot - 1) * s.w * 0.26, y: s.y + s.h * 0.30 };
+    }
+    return { x: s.x + s.w * 0.26, y: s.y + s.h * 0.30 };
+  }
+  if (c.anchor.kind === 'queue') { const q = G.queueSpots[c.anchor.idx]; return q ? { x: q.x, y: q.y } : null; }
   return null;
 }

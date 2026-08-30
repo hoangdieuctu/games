@@ -5,8 +5,9 @@ import { SERVICES, DECAY, dayConfig } from './config.js';
 import { layout } from './layout.js';
 import { steam, spark, updateParticles } from './particles.js';
 import { updateHud, updateCustPill, setHint, showStart, hideStart, showEnd, hideEnd } from './ui.js';
-import { spawnCustomer, finishService, completePay, customerAngry } from './customers.js';
-import { sitDecayMult, durFor } from './upgrades.js';
+import { spawnCustomer, finishService, customerAngry } from './customers.js';
+import { initStaff, updateStaff } from './staff.js';
+import { sitDecayMult, staffDur, maskTime, saunaTime } from './upgrades.js';
 import { sBell, sDone, sCash } from './audio.js';
 
 export function prepareDay() {
@@ -16,7 +17,12 @@ export function prepareDay() {
 
 export function startDay() {
   G.cfg = dayConfig(G.day);
-  G.stations = G.cfg.stations.map(k => ({ key: k, x: 0, y: 0, w: 0, h: 0, occupant: null, shakeT: 0 }));
+  G.stations = G.cfg.stations.map(k => ({
+    key: k, x: 0, y: 0, w: 0, h: 0,
+    occupant: null,
+    slots: SERVICES[k].mode === 'room' ? new Array(SERVICES[k].cap).fill(null) : null,
+    shakeT: 0,
+  }));
   G.customers = [];
   G.particles = [];
   G.selected = null;
@@ -27,6 +33,7 @@ export function startDay() {
   G.tutorialStep = G.day === 1 ? 0 : -1;
   for (const s of G.seats) s.taken = null;
   for (const q of G.queueSpots) q.taken = null;
+  initStaff();
   layout();
   G.running = true;
   updateHud();
@@ -82,34 +89,45 @@ export function update(dt) {
       // kiên nhẫn giảm khi phải chờ
       let decay = 0;
       if (c.state === 'sit') decay = DECAY.sit * sitDecayMult();
+      else if (c.state === 'awaitStaff') decay = DECAY.awaitStaff;
+      else if (c.state === 'maskDone') decay = DECAY.maskDone;
       else if (c.state === 'done') decay = DECAY.done;
       else if (c.state === 'queue') decay = DECAY.queue;
-      else if (c.state === 'service' && c.anchor && SERVICES[G.stations[c.anchor.idx].key].mode === 'tap') {
-        c.workIdle += dt;
-        if (c.workIdle > 3) decay = DECAY.neglected; // bị bỏ mặc giữa chừng
-      }
       if (decay) {
         c.patience -= decay * dt;
         if (c.patience <= 0) { customerAngry(c); continue; }
       }
 
-      // dịch vụ tự động chạy theo thời gian
-      if (c.state === 'service' && c.anchor) {
-        const st = G.stations[c.anchor.idx];
-        if (SERVICES[st.key].mode === 'auto') {
-          c.serviceTimer += dt;
-          if (st.key === 'sauna' && Math.random() < dt * 4) steam(st.x + (Math.random() - 0.5) * st.w * 0.5, st.y - st.h * 0.45);
-          if (st.key === 'facial' && Math.random() < dt * 1.2) spark(st.x + (Math.random() - 0.5) * st.w * 0.6, st.y - Math.random() * 40 * G.K);
-          if (c.serviceTimer >= durFor(st.key)) finishService(c);
-        }
+      if (!c.anchor || c.anchor.kind !== 'station') continue;
+      const st = G.stations[c.anchor.idx];
+      const mode = SERVICES[st.key].mode;
+
+      // cô nhân viên đang mát-xa / làm móng: tiến độ chạy theo thời gian
+      if (c.state === 'service' && mode === 'staff') {
+        c.workProgress += dt / staffDur(st.key);
+        if (c.workProgress >= 1) finishService(c);
       }
 
-      // đang thanh toán
-      if (c.state === 'pay') {
-        c.payTimer -= dt;
-        if (c.payTimer <= 0) completePay(c);
+      // phòng xông hơi: tự chạy, bốc hơi nước
+      if (c.state === 'service' && mode === 'room') {
+        c.serviceTimer += dt;
+        if (Math.random() < dt * 2) steam(c.x + (Math.random() - 0.5) * 30 * G.K, st.y - st.h * 0.4);
+        if (c.serviceTimer >= saunaTime()) finishService(c);
+      }
+
+      // mặt nạ đang ngấm (khách thư giãn, không mất tim)
+      if (c.state === 'masked') {
+        c.serviceTimer += dt;
+        if (Math.random() < dt * 1.2) spark(c.x + (Math.random() - 0.5) * 40 * G.K, st.y - Math.random() * 30 * G.K);
+        if (c.serviceTimer >= maskTime()) {
+          c.state = 'maskDone';
+          sBell(); // báo hiệu tới giờ gỡ mặt nạ
+          setHint();
+        }
       }
     }
+
+    updateStaff(dt);
 
     // hết ngày khi mọi khách đã rời tiệm
     if (G.spawned >= G.cfg.nCustomers && G.customers.length === 0) endDay();
