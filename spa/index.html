@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Tiệm Spa">
+<link rel="apple-touch-icon" href="../icon-spa-180.png">
+<title>Tiệm Spa Vui Vẻ</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23ffb3c8'/%3E%3Ccircle cx='16' cy='18' r='8' fill='%23ffdfc4'/%3E%3Cpath d='M8 16 a8 8 0 0 1 16 0 l-2 0 a6 6 0 0 0 -12 0 Z' fill='%23fff'/%3E%3Ccircle cx='16' cy='8.5' r='2.6' fill='%23fff'/%3E%3Ccircle cx='13' cy='17.5' r='1.2' fill='%23503020'/%3E%3Ccircle cx='19' cy='17.5' r='1.2' fill='%23503020'/%3E%3Cpath d='M13.5 21 q2.5 2 5 0' stroke='%23e06080' stroke-width='1.2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="css/spa.css">
+</head>
+<body>
+
+<canvas id="cv"></canvas>
+
+<div class="hud">
+  <a class="btn" href="../index.html" aria-label="Quay lại">←</a>
+  <div class="pill" id="day-pill"><span class="ico">🌸</span><span id="day-val">Ngày 1</span></div>
+  <div class="spacer"></div>
+  <div class="pill" id="cust-pill"><span class="ico">👩</span><span id="cust-val">0</span></div>
+  <div class="pill" id="money-pill"><span class="ico">💰</span><span id="money-val">0</span><small id="goal-val">/100</small></div>
+  <button class="btn" id="snd-btn" aria-label="Âm thanh">🔊</button>
+</div>
+
+<div id="hint"></div>
+
+<!-- ── bắt đầu ngày ── -->
+<div class="overlay" id="ov-start">
+  <div class="card">
+    <h1>🌸 Tiệm Spa Vui Vẻ 🌸</h1>
+    <div class="day-big" id="start-day">Ngày 1</div>
+    <div class="goal-line">Mục tiêu: <span id="start-goal">100</span> 💰</div>
+    <div class="bank-line">Ngân quỹ: <b id="start-bank">0</b> 💰</div>
+    <div class="svc-row" id="start-svcs"></div>
+    <div class="howto">
+      <div><span class="n">1</span><span>Chạm vào <b>khách</b> đang ngồi chờ để chọn</span></div>
+      <div><span class="n">2</span><span>Chạm vào <b>ô dịch vụ</b> mà khách muốn (xem bong bóng)</span></div>
+      <div><span class="n">3</span><span>Mát-xa 💆‍♀️ &amp; làm móng 💅: <b>chạm liên tục</b> vào khách!</span></div>
+      <div><span class="n">4</span><span>Xong hết thì đưa khách đến <b>quầy thu ngân</b> 💰</span></div>
+      <div><span class="n">♥</span><span>Đừng để khách chờ lâu — hết tim là khách giận bỏ về!</span></div>
+    </div>
+    <div class="btn-row">
+      <button class="big-btn alt" id="btn-shop">🛍️ Nâng Cấp</button>
+      <button class="big-btn" id="btn-start">Mở Cửa Tiệm! ✨</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── kết thúc ngày ── -->
+<div class="overlay" id="ov-end">
+  <div class="card">
+    <h1 id="end-title">Hết Ngày!</h1>
+    <div class="stars"><span id="st1">★</span><span id="st2">★</span><span id="st3">★</span></div>
+    <div class="result-line" id="end-money">💰 0 / 100</div>
+    <div class="result-sub" id="end-sub"></div>
+    <div class="btn-row">
+      <button class="big-btn alt" id="btn-retry">Chơi Lại 🔄</button>
+      <button class="big-btn" id="btn-next" style="display:none;">Ngày Tiếp Theo ➜</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── cửa hàng nâng cấp ── -->
+<div class="overlay" id="ov-shop">
+  <div class="card">
+    <h1>🛍️ Cửa Hàng Nâng Cấp</h1>
+    <div class="shop-bank-line">Ngân quỹ: <span id="shop-bank">0</span> 💰</div>
+    <div id="shop-list"></div>
+    <button class="big-btn small" id="btn-shop-close">Xong ✓</button>
+  </div>
+</div>
+
+<div id="rotate">
+  <div class="ico">📱</div>
+  <div>Xoay ngang iPad để chơi nhé!</div>
+</div>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
