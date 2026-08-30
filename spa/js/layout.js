@@ -15,21 +15,22 @@ export function layout() {
   G.door = { x: -60 * K, y: H * 0.52 };
 
   // ghế chờ bên trái — giữ lại khách đang ngồi khi đổi kích thước
+  // ghế đầu hạ thấp xuống để bong bóng ước muốn của khách không bị HUD che
   const oldSeats = G.seats;
   const nSeats = 5 + extraSeats();
-  const seatGap = Math.min(0.17, 0.68 / (nSeats - 1));
+  const seatGap = Math.min(0.15, 0.62 / (nSeats - 1));
   G.seats = [];
   for (let i = 0; i < nSeats; i++) {
     G.seats.push({
-      x: W * 0.095,
-      y: topPad + (H - topPad) * (0.14 + seatGap * i),
+      x: W * (0.06 + (i % 2) * 0.065), // so le 2 cột cho đỡ chồng hình
+      y: topPad + (H - topPad) * (0.24 + seatGap * i),
       taken: oldSeats[i] ? oldSeats[i].taken : null,
     });
   }
 
   // quầy thu ngân trên phải
   const rw = 168 * K, rh = 92 * K;
-  G.register = { x: W * 0.885, y: topPad + (H - topPad) * 0.16, w: rw, h: rh };
+  G.register = { x: W * 0.885, y: topPad + (H - topPad) * 0.20, w: rw, h: rh };
   const oldQ = G.queueSpots;
   G.queueSpots = [];
   for (let i = 0; i < 3; i++) {

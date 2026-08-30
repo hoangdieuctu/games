@@ -39,10 +39,11 @@ function drawBackground() {
   for (let y = wallH + 42 * K; y < H; y += 46 * K) {
     ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
   }
-  // thảm khu chờ
+  // thảm khu chờ (phủ cả 2 cột ghế so le)
   const s0 = G.seats[0], sN = G.seats[G.seats.length - 1];
+  const sxMin = Math.min(...G.seats.map(s => s.x)), sxMax = Math.max(...G.seats.map(s => s.x));
   ctx.fillStyle = 'rgba(255,150,180,.22)';
-  rr(s0.x - 62 * K, s0.y - 60 * K, 124 * K, sN.y - s0.y + 120 * K, 30 * K);
+  rr(sxMin - 62 * K, s0.y - 60 * K, sxMax - sxMin + 124 * K, sN.y - s0.y + 120 * K, 30 * K);
   ctx.fill();
   // cửa ra vào
   ctx.fillStyle = '#e8a8be';
@@ -60,7 +61,7 @@ function drawBackground() {
   ctx.fillText('🪴', W * 0.955, H - 46 * K);
   ctx.font = `800 ${19 * K}px 'Baloo 2', sans-serif`;
   ctx.fillStyle = 'rgba(190,90,130,.5)';
-  ctx.fillText('✿ KHU CHỜ ✿', s0.x, s0.y - 74 * K);
+  ctx.fillText('✿ KHU CHỜ ✿', (sxMin + sxMax) / 2, s0.y - 74 * K);
 }
 
 function drawSeats() {
