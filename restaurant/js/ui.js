@@ -4,6 +4,7 @@ import { G } from './state.js';
 import { DISHES } from './config.js';
 import { UPGRADES, levelOf, nextCost, buy, staffCount } from './upgrades.js';
 import { CATS, getLook, isOwned, isLocked, chooseItem, equippedOf } from './wardrobe.js';
+import { DECOR, isOwnedDecor, pickedDecor, chooseDecor } from './decor.js';
 import { getGold, getExp, getLevel, expNeed } from './player.js';
 import { drawPerson } from './avatar.js';
 import { sSelect, sCash, sNope, sLevel } from './audio.js';
@@ -213,6 +214,46 @@ export function renderWardrobe() {
   drawWardPreview();
 }
 
+/* ── trang trí nhà hàng ── */
+
+let decorCat = 'wall';
+
+export function renderDecor() {
+  $('decor-gold').textContent = getGold();
+  const tabs = $('decor-tabs');
+  tabs.innerHTML = '';
+  for (const key of Object.keys(DECOR)) {
+    const c = DECOR[key];
+    const b = document.createElement('button');
+    b.className = 'decor-tab' + (key === decorCat ? ' on' : '');
+    b.innerHTML = '<span>' + c.icon + '</span>' + c.name;
+    b.addEventListener('click', () => { decorCat = key; sSelect(); renderDecor(); });
+    tabs.appendChild(b);
+  }
+  const grid = $('decor-items');
+  grid.innerHTML = '';
+  for (const item of DECOR[decorCat].items) {
+    const owned = isOwnedDecor(decorCat, item);
+    const on = pickedDecor(decorCat) === item.id;
+    const b = document.createElement('button');
+    b.className = 'decor-item' + (on ? ' on' : '');
+    const ico = item.swatch
+      ? '<span class="decor-sw" style="background:' + item.swatch + '"></span>'
+      : '<span class="decor-emo">' + (item.emoji || '✨') + '</span>';
+    const tag = on ? 'Đang dùng ✓' : owned ? 'Đã có' : item.price + ' 💰';
+    b.innerHTML = ico + '<span class="decor-name">' + item.name + '</span>' +
+      '<span class="decor-tag' + (on ? ' on' : owned ? '' : ' buy') + '">' + tag + '</span>';
+    b.addEventListener('click', () => {
+      const r = chooseDecor(decorCat, item);
+      if (r === 'bought') sCash();
+      else if (r === 'used') sSelect();
+      else sNope();
+      renderDecor();
+    });
+    grid.appendChild(b);
+  }
+}
+
 /* ── nối nút bấm ── */
 
 export function bindUi({ onStart, onRetry, onNext }) {
@@ -223,4 +264,17 @@ export function bindUi({ onStart, onRetry, onNext }) {
   $('btn-shop-close').addEventListener('click', () => { sSelect(); $('ov-shop').classList.remove('show'); });
   $('btn-ward').addEventListener('click', () => { sSelect(); renderWardrobe(); $('ov-ward').classList.add('show'); });
   $('btn-ward-close').addEventListener('click', () => { sSelect(); $('ov-ward').classList.remove('show'); });
+  // trang trí: tạm ẩn thẻ bắt đầu để thấy quán đổi ngay phía sau
+  $('btn-decor').addEventListener('click', () => {
+    sSelect();
+    renderDecor();
+    $('ov-start').classList.remove('show');
+    $('ov-decor').classList.add('show');
+  });
+  $('btn-decor-close').addEventListener('click', () => {
+    sSelect();
+    $('ov-decor').classList.remove('show');
+    $('start-gold').textContent = getGold();
+    $('ov-start').classList.add('show');
+  });
 }

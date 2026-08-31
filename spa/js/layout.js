@@ -14,16 +14,18 @@ export function layout() {
   const topPad = 74;
   G.door = { x: -60 * K, y: H * 0.52 };
 
-  // ghế chờ bên trái — giữ lại khách đang ngồi khi đổi kích thước
-  // ghế đầu hạ thấp xuống để bong bóng ước muốn của khách không bị HUD che
+  // ghế chờ bên trái — mở tiệm chỉ có 2 ghế, mua nâng cấp mới có thêm.
+  // Nhóm ghế được canh giữa khu chờ; ghế so le 2 cột cho đỡ chồng hình.
   const oldSeats = G.seats;
-  const nSeats = 5 + extraSeats();
-  const seatGap = Math.min(0.15, 0.62 / (nSeats - 1));
+  const nSeats = 2 + extraSeats();
+  const band = 0.58;
+  const seatGap = nSeats > 1 ? Math.min(0.14, band / (nSeats - 1)) : 0;
+  const seatTop = 0.29 + (band - seatGap * (nSeats - 1)) / 2;
   G.seats = [];
   for (let i = 0; i < nSeats; i++) {
     G.seats.push({
-      x: W * (0.06 + (i % 2) * 0.065), // so le 2 cột cho đỡ chồng hình
-      y: topPad + (H - topPad) * (0.24 + seatGap * i),
+      x: W * (0.06 + (i % 2) * 0.065),
+      y: topPad + (H - topPad) * (seatTop + seatGap * i),
       taken: oldSeats[i] ? oldSeats[i].taken : null,
     });
   }

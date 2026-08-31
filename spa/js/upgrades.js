@@ -31,8 +31,8 @@ export const UPGRADES = {
   },
   seat: {
     name: 'Thêm Ghế Chờ', icon: '🛋️',
-    desc: 'Thêm 1 ghế ở khu chờ',
-    costs: [150],
+    desc: 'Kê thêm ghế cho khách chờ (tối đa 7 ghế)',
+    costs: [110, 190, 300, 430, 580],
   },
 };
 
@@ -45,6 +45,14 @@ export function loadShop() {
 }
 
 export function getBank() { return bank; }
+
+// trừ ngân quỹ (dùng cho cả nâng cấp và trang trí)
+export function spendBank(amount) {
+  if (bank < amount) return false;
+  bank -= amount;
+  localStorage.setItem('spa_bank', String(bank));
+  return true;
+}
 export function addToBank(amount) {
   bank += amount;
   localStorage.setItem('spa_bank', String(bank));

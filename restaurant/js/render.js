@@ -7,6 +7,10 @@ import { drawParticles, drawHeart } from './particles.js';
 import { drawPerson } from './avatar.js';
 import { staffLook, waterTarget } from './staff.js';
 import { cookSlots } from './upgrades.js';
+import { getTheme } from './decor.js';
+
+// bảng màu trang trí đang dùng, cập nhật mỗi khung hình
+let T = getTheme();
 
 const CHEF_LOOK = {
   skin: '#f2c9a0', hair: 'bob', hairColor: '#3a2a20',
@@ -37,23 +41,47 @@ function drawWall() {
   const { ctx, W, H, K } = G;
   const wallH = H * 0.24;
 
+  const wl = T.wall;
   const wg = ctx.createLinearGradient(0, 0, 0, wallH);
-  wg.addColorStop(0, '#fff2df');
-  wg.addColorStop(1, '#ffddb8');
+  wg.addColorStop(0, wl.top);
+  wg.addColorStop(1, wl.bot);
   ctx.fillStyle = wg;
   ctx.fillRect(0, 0, W, wallH);
 
-  // giấy dán tường kẻ dọc nhạt
-  ctx.strokeStyle = 'rgba(215,150,95,.16)';
-  ctx.lineWidth = 6 * K;
-  for (let x = 20 * K; x < W; x += 46 * K) {
-    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, wallH - 26 * K); ctx.stroke();
+  // hoạ tiết giấy dán tường
+  if (wl.pattern === 'stripe') {
+    ctx.strokeStyle = wl.ink;
+    ctx.lineWidth = 6 * K;
+    for (let x = 20 * K; x < W; x += 46 * K) {
+      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, wallH - 26 * K); ctx.stroke();
+    }
+  } else if (wl.pattern === 'dots') {
+    ctx.fillStyle = wl.ink;
+    for (let x = 22 * K; x < W; x += 50 * K) {
+      for (let y = 20 * K; y < wallH - 30 * K; y += 42 * K) {
+        ctx.beginPath();
+        ctx.arc(x + (Math.floor(y / (42 * K)) % 2 ? 25 * K : 0), y, 5 * K, 0, 7);
+        ctx.fill();
+      }
+    }
+  } else if (wl.pattern === 'brick') {
+    ctx.strokeStyle = wl.ink;
+    ctx.lineWidth = 2 * K;
+    const bh = 26 * K, bw = 64 * K;
+    for (let y = 0, r2 = 0; y < wallH - 26 * K; y += bh, r2++) {
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+      for (let x = (r2 % 2 ? 0 : bw / 2); x < W; x += bw) {
+        ctx.beginPath();
+        ctx.moveTo(x, y); ctx.lineTo(x, Math.min(y + bh, wallH - 26 * K));
+        ctx.stroke();
+      }
+    }
   }
 
   // ván ốp chân tường
-  ctx.fillStyle = '#c98a52';
+  ctx.fillStyle = wl.base;
   ctx.fillRect(0, wallH - 26 * K, W, 26 * K);
-  ctx.fillStyle = '#a9713c';
+  ctx.fillStyle = wl.baseDark;
   ctx.fillRect(0, wallH - 8 * K, W, 8 * K);
   ctx.fillStyle = 'rgba(255,255,255,.25)';
   ctx.fillRect(0, wallH - 26 * K, W, 4 * K);
@@ -85,26 +113,90 @@ function drawWall() {
     ctx.closePath(); ctx.fill();
   }
 
-  // tranh treo tường
+  // trang trí tường theo bộ người chơi chọn
   const frame = (fx, fy, emo) => {
-    ctx.fillStyle = '#a9713c';
+    ctx.fillStyle = T.furn.dark;
     rr(fx - 30 * K, fy - 26 * K, 60 * K, 52 * K, 7 * K); ctx.fill();
     ctx.fillStyle = '#fff6ea';
     rr(fx - 24 * K, fy - 20 * K, 48 * K, 40 * K, 4 * K); ctx.fill();
     ctx.font = `${26 * K}px sans-serif`;
     ctx.fillText(emo, fx, fy + 1);
   };
-  frame(W * 0.10, wallH * 0.42, '🍕');
-  frame(W * 0.20, wallH * 0.42, '🥗');
-  frame(W * 0.70, wallH * 0.42, '☕');
+  if (T.art === 'menu') {
+    // bảng menu đen viết phấn (đặt giữa tường, tránh thanh HUD)
+    const bx = W * 0.375, bw = W * 0.105;
+    ctx.fillStyle = T.furn.dark;
+    rr(bx, wallH * 0.3, bw, wallH * 0.54, 8 * K); ctx.fill();
+    ctx.fillStyle = '#3a4038';
+    rr(bx + 5 * K, wallH * 0.34, bw - 10 * K, wallH * 0.46, 5 * K); ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,.85)';
+    ctx.font = `800 ${13 * K}px 'Baloo 2', sans-serif`;
+    ctx.fillText('MENU', bx + bw / 2, wallH * 0.43);
+    ctx.strokeStyle = 'rgba(255,255,255,.45)';
+    ctx.lineWidth = 1.6 * K;
+    for (let i = 0; i < 3; i++) {
+      const ly = wallH * (0.55 + i * 0.08);
+      ctx.beginPath();
+      ctx.moveTo(bx + 9 * K, ly); ctx.lineTo(bx + bw - (i % 2 ? 26 : 12) * K, ly);
+      ctx.stroke();
+    }
+    frame(W * 0.70, wallH * 0.42, '🍜');
+    frame(W * 0.10, wallH * 0.5, '🥗');
+  } else if (T.art === 'plants') {
+    // giàn cây leo và chậu treo
+    ctx.strokeStyle = '#6f9a58';
+    ctx.lineWidth = 3 * K;
+    ctx.beginPath();
+    ctx.moveTo(0, wallH * 0.16);
+    ctx.quadraticCurveTo(W * 0.5, wallH * 0.34, W, wallH * 0.16);
+    ctx.stroke();
+    ctx.font = `${22 * K}px sans-serif`;
+    for (let i = 0; i <= 10; i++) {
+      const t2 = i / 10;
+      const lx = t2 * W;
+      const ly = wallH * 0.16 + Math.sin(Math.PI * t2) * wallH * 0.1;
+      ctx.fillText(i % 2 ? '🌿' : '🍃', lx, ly + 12 * K);
+    }
+    ctx.font = `${34 * K}px sans-serif`;
+    ctx.fillText('🪴', W * 0.11, wallH * 0.56);
+    ctx.fillText('🌵', W * 0.7, wallH * 0.56);
+  } else if (T.art === 'lantern') {
+    // đèn lồng giấy
+    const lantern = (lx, ly, col) => {
+      ctx.strokeStyle = 'rgba(150,110,80,.6)';
+      ctx.lineWidth = 1.6 * K;
+      ctx.beginPath(); ctx.moveTo(lx, 0); ctx.lineTo(lx, ly - 15 * K); ctx.stroke();
+      ctx.fillStyle = '#b5714f';
+      rr(lx - 9 * K, ly - 16 * K, 18 * K, 4 * K, 2 * K); ctx.fill();
+      rr(lx - 9 * K, ly + 12 * K, 18 * K, 4 * K, 2 * K); ctx.fill();
+      ctx.fillStyle = col;
+      ctx.beginPath(); ctx.ellipse(lx, ly, 14 * K, 16 * K, 0, 0, 7); ctx.fill();
+      ctx.strokeStyle = 'rgba(180,90,60,.45)';
+      for (const dx of [-6, 0, 6]) {
+        ctx.beginPath();
+        ctx.moveTo(lx + dx * K, ly - 14 * K);
+        ctx.quadraticCurveTo(lx + dx * K * 1.2, ly, lx + dx * K, ly + 14 * K);
+        ctx.stroke();
+      }
+      ctx.fillStyle = 'rgba(255,210,140,.32)';
+      ctx.beginPath(); ctx.arc(lx, ly, 24 * K, 0, 7); ctx.fill();
+    };
+    lantern(W * 0.10, wallH * 0.5, '#f4707f');
+    lantern(W * 0.2, wallH * 0.42, '#ffa15c');
+    lantern(W * 0.70, wallH * 0.48, '#f4707f');
+  } else {
+    frame(W * 0.10, wallH * 0.42, '🍕');
+    frame(W * 0.20, wallH * 0.42, '🥗');
+    frame(W * 0.70, wallH * 0.42, '☕');
+  }
 
   // đồng hồ tường
   const cx = W * 0.79, cy = wallH * 0.42, cr = 24 * K;
-  ctx.fillStyle = '#a9713c';
+  ctx.fillStyle = T.furn.dark;
   ctx.beginPath(); ctx.arc(cx, cy, cr, 0, 7); ctx.fill();
   ctx.fillStyle = '#fff6ea';
   ctx.beginPath(); ctx.arc(cx, cy, cr * 0.78, 0, 7); ctx.fill();
-  ctx.strokeStyle = '#96603a'; ctx.lineWidth = 2.4 * K; ctx.lineCap = 'round';
+  ctx.strokeStyle = T.furn.dark; ctx.lineWidth = 2.4 * K; ctx.lineCap = 'round';
   const ang = G.time * 0.25;
   ctx.beginPath(); ctx.moveTo(cx, cy);
   ctx.lineTo(cx + Math.sin(ang) * cr * 0.5, cy - Math.cos(ang) * cr * 0.5); ctx.stroke();
@@ -116,19 +208,43 @@ function drawWall() {
 
 function drawFloor(wallH) {
   const { ctx, W, H, K } = G;
-  ctx.fillStyle = '#e9b586';
+  const f = T.floor;
+  ctx.fillStyle = f.base;
   ctx.fillRect(0, wallH, W, H - wallH);
-  // gạch lát so le hai màu
   const tile = 62 * K;
-  let row = 0;
-  for (let y = wallH; y < H; y += tile, row++) {
-    for (let x = -tile + (row % 2 ? tile / 2 : 0), col = 0; x < W; x += tile, col++) {
-      if ((col + row) % 2) continue;
-      ctx.fillStyle = '#dfa471';
-      ctx.fillRect(x, y, tile, Math.min(tile, H - y));
+  if (f.style === 'plank') {
+    ctx.fillStyle = f.alt;
+    let row = 0;
+    for (let y = wallH; y < H; y += tile * 0.5, row++) {
+      for (let x = -tile + (row % 2 ? tile : 0); x < W; x += tile * 2) {
+        ctx.fillRect(x, y, tile, Math.min(tile * 0.5 - 2, H - y));
+      }
+    }
+  } else if (f.style === 'diamond') {
+    ctx.save();
+    ctx.beginPath(); ctx.rect(0, wallH, W, H - wallH); ctx.clip();
+    ctx.translate(0, wallH);
+    ctx.rotate(Math.PI / 4);
+    const d = tile * 0.72;
+    ctx.fillStyle = f.alt;
+    for (let i = -20; i < 40; i++) {
+      for (let j = -20; j < 40; j++) {
+        if ((i + j) % 2) continue;
+        ctx.fillRect(i * d, j * d, d - 1.5, d - 1.5);
+      }
+    }
+    ctx.restore();
+  } else {
+    let row = 0;
+    for (let y = wallH; y < H; y += tile, row++) {
+      for (let x = -tile + (row % 2 ? tile / 2 : 0), col = 0; x < W; x += tile, col++) {
+        if ((col + row) % 2) continue;
+        ctx.fillStyle = f.alt;
+        ctx.fillRect(x, y, tile, Math.min(tile, H - y));
+      }
     }
   }
-  ctx.strokeStyle = 'rgba(150,95,50,.13)';
+  ctx.strokeStyle = f.line;
   ctx.lineWidth = 1.5;
   for (let y = wallH; y < H; y += tile) {
     ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
@@ -144,7 +260,7 @@ function drawFloor(wallH) {
 function drawDoorAndWaitArea() {
   const { ctx, W, H, K } = G;
   // cửa ra vào
-  ctx.fillStyle = '#a9713c';
+  ctx.fillStyle = T.furn.dark;
   rr(-10, G.door.y - 106 * K, 26 * K, 212 * K, 8 * K); ctx.fill();
   ctx.fillStyle = '#9fd8ef';
   rr(2 * K, G.door.y - 88 * K, 12 * K, 96 * K, 6 * K); ctx.fill();
@@ -161,9 +277,9 @@ function drawDoorAndWaitArea() {
   const xMin = Math.min(...ws.map(s => s.x)), xMax = Math.max(...ws.map(s => s.x));
   const rx = xMin - 50 * K, ry = ws[0].y - 66 * K;
   const rw = xMax - xMin + 100 * K, rh = ws[ws.length - 1].y - ws[0].y + 122 * K;
-  ctx.fillStyle = '#e08a5a';
+  ctx.fillStyle = T.furn.main;
   rr(rx, ry, rw, rh, 26 * K); ctx.fill();
-  ctx.fillStyle = '#eaa270';
+  ctx.fillStyle = T.furn.light;
   rr(rx + 8 * K, ry + 8 * K, rw - 16 * K, rh - 16 * K, 20 * K); ctx.fill();
   ctx.save();
   rr(rx + 8 * K, ry + 8 * K, rw - 16 * K, rh - 16 * K, 20 * K); ctx.clip();
@@ -198,9 +314,9 @@ function drawWater() {
   ctx.fillStyle = 'rgba(120,80,40,.2)';
   ctx.beginPath(); ctx.ellipse(w.x, w.y + 30 * K, 40 * K, 12 * K, 0, 0, 7); ctx.fill();
   // tủ gỗ nhỏ
-  ctx.fillStyle = '#a9713c';
+  ctx.fillStyle = T.furn.dark;
   rr(w.x - 32 * K, w.y - 8 * K, 64 * K, 38 * K, 8 * K); ctx.fill();
-  ctx.fillStyle = '#c98a52';
+  ctx.fillStyle = T.furn.main;
   rr(w.x - 36 * K, w.y - 18 * K, 72 * K, 13 * K, 6 * K); ctx.fill();
   ctx.fillStyle = 'rgba(0,0,0,.12)';
   rr(w.x - 22 * K, w.y + 4 * K, 44 * K, 20 * K, 5 * K); ctx.fill();
@@ -216,7 +332,7 @@ function drawWater() {
   ctx.font = `800 ${13 * K}px 'Baloo 2', sans-serif`;
   ctx.fillStyle = '#fff';
   const lw = 74 * K;
-  ctx.fillStyle = 'rgba(160,95,50,.85)';
+  ctx.fillStyle = T.furn.dark;
   rr(w.x - lw / 2, w.y + 32 * K, lw, 20 * K, 10 * K); ctx.fill();
   ctx.fillStyle = '#fff';
   ctx.fillText('Mời nước', w.x, w.y + 42 * K);
@@ -245,7 +361,7 @@ function drawPass() {
     }
   }
   // vách ngăn
-  ctx.fillStyle = '#c98a52';
+  ctx.fillStyle = T.furn.main;
   ctx.fillRect(zx - 7 * K, 0, 7 * K, H);
   ctx.fillStyle = 'rgba(255,255,255,.3)';
   ctx.fillRect(zx - 7 * K, 0, 2 * K, H);
@@ -253,7 +369,7 @@ function drawPass() {
   // bếp lò sau lưng đầu bếp (cao theo số chảo)
   const sx = G.chef.x, sy = G.chef.y;
   const nSlots = cookSlots();
-  ctx.fillStyle = '#7b828c';
+  ctx.fillStyle = T.furn.metal;
   rr(sx - 42 * K, sy + 34 * K, 84 * K, (56 + nSlots * 48) * K, 12 * K); ctx.fill();
   ctx.fillStyle = '#9aa2ac';
   rr(sx - 42 * K, sy + 34 * K, 84 * K, 12 * K, 6 * K); ctx.fill();
@@ -301,9 +417,9 @@ function drawPass() {
   const cTop = p.y - p.h * 0.44, cH = p.h * 0.88;
   ctx.fillStyle = 'rgba(120,80,40,.16)';
   rr(px - 40 * K, cTop + 6 * K, 80 * K, cH, 18 * K); ctx.fill();
-  ctx.fillStyle = '#b57a44';
+  ctx.fillStyle = T.furn.dark;
   rr(px - 38 * K, cTop, 76 * K, cH, 16 * K); ctx.fill();
-  ctx.fillStyle = '#d99a5e';
+  ctx.fillStyle = T.furn.main;
   rr(px - 38 * K, cTop, 76 * K, cH - 12 * K, 16 * K); ctx.fill();
   ctx.fillStyle = 'rgba(255,255,255,.3)';
   rr(px - 32 * K, cTop + 6 * K, 64 * K, 8 * K, 4 * K); ctx.fill();
@@ -365,15 +481,16 @@ function drawPass() {
 
 function drawChair(x, y, w, h) {
   const { ctx, K } = G;
+  const fu = T.furn;
   // lưng ghế
-  ctx.fillStyle = '#96603a';
+  ctx.fillStyle = fu.dark;
   rr(x - w * 0.24, y, w * 0.48, h * 0.5, 10 * K); ctx.fill();
-  ctx.fillStyle = '#b07a46';
+  ctx.fillStyle = fu.light;
   rr(x - w * 0.19, y + 5 * K, w * 0.38, h * 0.34, 7 * K); ctx.fill();
   ctx.fillStyle = 'rgba(255,255,255,.18)';
   rr(x - w * 0.19, y + 5 * K, w * 0.38, h * 0.1, 5 * K); ctx.fill();
   // mặt ghế thò ra hai bên khách
-  ctx.fillStyle = '#a9713c';
+  ctx.fillStyle = fu.main;
   rr(x - w * 0.28, y + h * 0.5, w * 0.56, h * 0.16, 7 * K); ctx.fill();
 }
 
@@ -406,9 +523,9 @@ function drawTable(t, dt) {
   const trx = t.w * 0.47, tryy = t.h * 0.24;
   ctx.fillStyle = 'rgba(110,70,35,.24)';
   ctx.beginPath(); ctx.ellipse(t.x, t.y + t.h * 0.52, trx * 0.9, tryy * 0.5, 0, 0, 7); ctx.fill();
-  ctx.fillStyle = '#96603a';
+  ctx.fillStyle = T.furn.dark;
   ctx.fillRect(t.x - 6 * K, ty, 12 * K, t.h * 0.36);
-  ctx.fillStyle = '#a9713c';
+  ctx.fillStyle = T.furn.main;
   ctx.beginPath(); ctx.ellipse(t.x, t.y + t.h * 0.5, 22 * K, 7 * K, 0, 0, 7); ctx.fill();
 
   // khăn trải bàn kẻ ô
@@ -419,24 +536,42 @@ function drawTable(t, dt) {
   ctx.quadraticCurveTo(t.x, ty + t.h * 0.40, t.x + trx, ty + t.h * 0.24);
   ctx.lineTo(t.x + trx, ty);
   ctx.closePath();
-  ctx.fillStyle = '#f5ece2';
+  const cl = T.cloth;
+  ctx.fillStyle = cl.base;
   ctx.fill();
   ctx.clip();
-  ctx.fillStyle = 'rgba(230,110,110,.22)';
-  for (let i = -3; i <= 3; i++) ctx.fillRect(t.x + i * t.w * 0.16 - t.w * 0.04, ty, t.w * 0.08, t.h * 0.44);
+  if (cl.pattern !== 'none') {
+    ctx.fillStyle = cl.stripe;
+    for (let i = -3; i <= 3; i++) ctx.fillRect(t.x + i * t.w * 0.16 - t.w * 0.04, ty, t.w * 0.08, t.h * 0.44);
+  }
   ctx.fillStyle = 'rgba(120,70,40,.12)';
   ctx.fillRect(t.x - trx, ty + t.h * 0.02, trx * 2, t.h * 0.42);
   ctx.restore();
 
-  ctx.fillStyle = '#fff8f0';
+  ctx.fillStyle = cl.base;
   ctx.beginPath(); ctx.ellipse(t.x, ty, trx, tryy, 0, 0, 7); ctx.fill();
   ctx.save();
   ctx.beginPath(); ctx.ellipse(t.x, ty, trx, tryy, 0, 0, 7); ctx.clip();
-  ctx.fillStyle = 'rgba(230,110,110,.2)';
-  for (let i = -3; i <= 3; i++) ctx.fillRect(t.x + i * t.w * 0.16 - t.w * 0.04, ty - tryy, t.w * 0.08, tryy * 2);
-  for (let j = -2; j <= 2; j++) ctx.fillRect(t.x - trx, ty + j * tryy * 0.5 - tryy * 0.09, trx * 2, tryy * 0.18);
+  if (cl.pattern === 'check') {
+    ctx.fillStyle = cl.stripe;
+    for (let i = -3; i <= 3; i++) ctx.fillRect(t.x + i * t.w * 0.16 - t.w * 0.04, ty - tryy, t.w * 0.08, tryy * 2);
+    for (let j = -2; j <= 2; j++) ctx.fillRect(t.x - trx, ty + j * tryy * 0.5 - tryy * 0.09, trx * 2, tryy * 0.18);
+  } else if (cl.pattern === 'floral') {
+    ctx.fillStyle = cl.stripe;
+    for (let i = -2; i <= 2; i++) {
+      for (let j = -1; j <= 1; j++) {
+        const fx2 = t.x + i * t.w * 0.16, fy2 = ty + j * tryy * 0.7;
+        for (let k2 = 0; k2 < 5; k2++) {
+          const a2 = (k2 / 5) * Math.PI * 2;
+          ctx.beginPath();
+          ctx.ellipse(fx2 + Math.cos(a2) * 4 * K, fy2 + Math.sin(a2) * 3 * K, 2.6 * K, 1.8 * K, a2, 0, 7);
+          ctx.fill();
+        }
+      }
+    }
+  }
   ctx.restore();
-  ctx.strokeStyle = 'rgba(190,120,80,.35)'; ctx.lineWidth = 2 * K;
+  ctx.strokeStyle = cl.edge; ctx.lineWidth = 2 * K;
   ctx.beginPath(); ctx.ellipse(t.x, ty, trx, tryy, 0, 0, 7); ctx.stroke();
 
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
@@ -605,6 +740,7 @@ function drawTaskBadges() {
 
 export function draw(dt) {
   const { ctx, W, H, K } = G;
+  T = getTheme();
   ctx.clearRect(0, 0, W, H);
   drawBackground();
   drawWater();

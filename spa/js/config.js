@@ -12,7 +12,8 @@ export const SERVICES = {
 
 export const PAY_ICON = '💰';
 
-export const ROBES = ['#ff9eb8', '#a5d8ff', '#b9e8a8', '#ffd98a', '#d5b8ff', '#ffc2a0'];
+export const ROBES = ['#ff9eb8', '#a5d8ff', '#b9e8a8', '#ffd98a', '#d5b8ff', '#ffc2a0', '#9ee0d0'];
+export const HAIR_STYLES = ['bun', 'pony', 'long', 'twin', 'bob'];
 export const SKINS = ['#ffdfc4', '#f5cfa8', '#e8b88a'];
 export const HAIRS = ['#6a4020', '#2e2018', '#a05c28', '#4a3550', '#c8763a'];
 

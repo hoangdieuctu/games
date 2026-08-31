@@ -3,6 +3,7 @@
 import { G } from './state.js';
 import { SERVICES } from './config.js';
 import { UPGRADES, getBank, levelOf, nextCost, buy } from './upgrades.js';
+import { DECOR, isOwnedDecor, pickedDecor, chooseDecor } from './decor.js';
 import { sSelect, sCash, sNope } from './audio.js';
 
 const $ = (id) => document.getElementById(id);
@@ -124,10 +125,63 @@ export function renderShop() {
   });
 }
 
+/* ── trang trí tiệm ── */
+
+let decorCat = 'wall';
+
+export function renderDecor() {
+  $('decor-bank').textContent = getBank();
+  const tabs = $('decor-tabs');
+  tabs.innerHTML = '';
+  for (const key of Object.keys(DECOR)) {
+    const c = DECOR[key];
+    const b = document.createElement('button');
+    b.className = 'decor-tab' + (key === decorCat ? ' on' : '');
+    b.innerHTML = '<span>' + c.icon + '</span>' + c.name;
+    b.addEventListener('click', () => { decorCat = key; sSelect(); renderDecor(); });
+    tabs.appendChild(b);
+  }
+  const grid = $('decor-items');
+  grid.innerHTML = '';
+  for (const item of DECOR[decorCat].items) {
+    const owned = isOwnedDecor(decorCat, item);
+    const on = pickedDecor(decorCat) === item.id;
+    const b = document.createElement('button');
+    b.className = 'decor-item' + (on ? ' on' : '');
+    const ico = item.swatch
+      ? '<span class="decor-sw" style="background:' + item.swatch + '"></span>'
+      : '<span class="decor-emo">' + (item.emoji || '✨') + '</span>';
+    const tag = on ? 'Đang dùng ✓' : owned ? 'Đã có' : item.price + ' 💰';
+    b.innerHTML = ico + '<span class="decor-name">' + item.name + '</span>' +
+      '<span class="decor-tag' + (on ? ' on' : owned ? '' : ' buy') + '">' + tag + '</span>';
+    b.addEventListener('click', () => {
+      const r = chooseDecor(decorCat, item);
+      if (r === 'bought') sCash();
+      else if (r === 'used') sSelect();
+      else sNope();
+      renderDecor();
+    });
+    grid.appendChild(b);
+  }
+}
+
 export function bindUi({ onStart, onRetry, onNext }) {
   $('btn-start').addEventListener('click', onStart);
   $('btn-retry').addEventListener('click', onRetry);
   $('btn-next').addEventListener('click', onNext);
   $('btn-shop').addEventListener('click', () => { sSelect(); renderShop(); $('ov-shop').classList.add('show'); });
   $('btn-shop-close').addEventListener('click', () => { sSelect(); $('ov-shop').classList.remove('show'); });
+  // trang trí: tạm ẩn thẻ bắt đầu để thấy tiệm đổi ngay phía sau
+  $('btn-decor').addEventListener('click', () => {
+    sSelect();
+    renderDecor();
+    $('ov-start').classList.remove('show');
+    $('ov-decor').classList.add('show');
+  });
+  $('btn-decor-close').addEventListener('click', () => {
+    sSelect();
+    $('ov-decor').classList.remove('show');
+    $('start-bank').textContent = getBank();
+    $('ov-start').classList.add('show');
+  });
 }

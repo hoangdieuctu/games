@@ -10,19 +10,26 @@ import { initStaff, updateStaff } from './staff.js';
 import { sitDecayMult, staffDur, maskTime, saunaTime } from './upgrades.js';
 import { sBell, sDone, sCash } from './audio.js';
 
-export function prepareDay() {
-  G.cfg = dayConfig(G.day);
-  showStart();
-}
-
-export function startDay() {
-  G.cfg = dayConfig(G.day);
+// dựng các ô dịch vụ của ngày (dùng cho cả lúc xem trước ở màn bắt đầu)
+function buildStations() {
   G.stations = G.cfg.stations.map(k => ({
     key: k, x: 0, y: 0, w: 0, h: 0,
     occupant: null,
     slots: SERVICES[k].mode === 'room' ? new Array(SERVICES[k].cap).fill(null) : null,
     shakeT: 0,
   }));
+}
+
+export function prepareDay() {
+  G.cfg = dayConfig(G.day);
+  buildStations();
+  layout();
+  showStart();
+}
+
+export function startDay() {
+  G.cfg = dayConfig(G.day);
+  buildStations();
   G.customers = [];
   G.particles = [];
   G.selected = null;

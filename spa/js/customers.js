@@ -1,7 +1,7 @@
 // ── Khách hàng: sinh ra, di chuyển, xếp việc, phục vụ, thanh toán, giận dỗi ──
 
 import { G } from './state.js';
-import { SERVICES, TYPES, ROBES, SKINS, HAIRS, pick } from './config.js';
+import { SERVICES, TYPES, ROBES, SKINS, HAIRS, HAIR_STYLES, pick } from './config.js';
 import { anchorPos } from './layout.js';
 import { sAssign, sDone, sBell, sAngry, sCash } from './audio.js';
 import { spark, coin, puff, heartPop, textPop } from './particles.js';
@@ -18,12 +18,23 @@ export function makeCustomer() {
     const j = Math.floor(Math.random() * pool.length);
     wishes.push(pool.splice(j, 1)[0]);
   }
+  const look = {
+    skin: pick(SKINS),
+    hair: typeKey === 'granny' ? 'bun' : pick(HAIR_STYLES),
+    hairColor: typeKey === 'granny' ? '#cdd2da' : pick(HAIRS),
+    dress: 'robe',
+    dressColor: pick(ROBES),
+    apron: 'none',
+    acc: typeKey === 'granny' ? 'glasses' : typeKey === 'star' ? 'crown' : 'none',
+  };
   return {
     id: ++G.custId,
     type: typeKey,
-    robe: pick(ROBES),
-    skin: pick(SKINS),
-    hair: typeKey === 'granny' ? '#cdd2da' : pick(HAIRS),
+    look,
+    lookTowel: { ...look, towel: true }, // lúc thư giãn thì quấn khăn bông
+    robe: look.dressColor,
+    skin: look.skin,
+    hair: look.hairColor,
     wishes, wishIndex: 0,
     earned: 0,
     patience: t.patience, maxPatience: t.patience,

@@ -2,6 +2,7 @@
 
 import { G, loadDay } from './state.js';
 import { loadShop } from './upgrades.js';
+import { loadDecor } from './decor.js';
 import { layout } from './layout.js';
 import { bindInput } from './input.js';
 import { update, prepareDay, bindDayFlow } from './game.js';
@@ -14,6 +15,7 @@ G.ctx = G.canvas.getContext('2d');
 
 loadDay();
 loadShop();
+loadDecor();
 layout();
 bindInput();
 initSoundToggle(document.getElementById('snd-btn'));
@@ -44,3 +46,4 @@ requestAnimationFrame(tick);
 // hook gỡ lỗi trong console
 window.__spa = G;
 window.__spaStep = (dt) => { update(dt); };
+window.__step = (dt, n) => { for (let i = 0; i < (n || 1); i++) { update(dt || 0.05); draw(dt || 0.05); } };

@@ -54,6 +54,7 @@
     <div class="btn-row">
       <button class="big-btn alt" id="btn-shop">🛍️ Nâng Cấp</button>
       <button class="big-btn alt2" id="btn-ward">👗 Tủ Đồ</button>
+      <button class="big-btn alt3" id="btn-decor">🎨 Trang Trí</button>
       <button class="big-btn" id="btn-start">Mở Cửa Quán! ✨</button>
     </div>
   </div>
@@ -107,6 +108,19 @@
 <!-- ── mini-game ── -->
 <div class="overlay" id="ov-mini">
   <div class="card mini" id="mini-body"></div>
+</div>
+
+<!-- ── trang trí quán (bảng dưới, thấy quán đổi ngay phía sau) ── -->
+<div class="sheet" id="ov-decor">
+  <div class="sheet-card">
+    <div class="sheet-head">
+      <span class="sheet-title">🎨 Trang Trí Quán</span>
+      <span class="sheet-bank">Ví: <b id="decor-gold">0</b> 💰</span>
+      <button class="sheet-close" id="btn-decor-close">Xong ✓</button>
+    </div>
+    <div class="decor-tabs" id="decor-tabs"></div>
+    <div class="decor-items" id="decor-items"></div>
+  </div>
 </div>
 
 <div id="rotate">
