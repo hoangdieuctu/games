@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Nhà Hàng">
+<title>Nhà Hàng Vui Vẻ</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23ffb56b'/%3E%3Ccircle cx='16' cy='17' r='9' fill='%23fff6ea'/%3E%3Ccircle cx='16' cy='17' r='5.5' fill='%23ff9f43'/%3E%3Crect x='4' y='8' width='2' height='16' rx='1' fill='%23fff'/%3E%3Crect x='26' y='8' width='2' height='16' rx='1' fill='%23fff'/%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="../icon-rest-180.png">
+<link rel="stylesheet" href="css/rest.css">
+</head>
+<body>
+
+<canvas id="cv"></canvas>
+
+<div class="hud">
+  <a class="btn" href="../index.html" aria-label="Quay lại">←</a>
+  <div class="pill" id="day-pill"><span class="ico">🍽️</span><span id="day-val">Ngày 1</span></div>
+  <div class="spacer"></div>
+  <div class="pill" id="exp-pill">
+    <span class="ico">⭐</span><span id="lv-val">1</span>
+    <span class="exp-bar"><i id="exp-fill"></i></span>
+  </div>
+  <div class="pill" id="cust-pill"><span class="ico">👥</span><span id="cust-val">0</span></div>
+  <div class="pill" id="money-pill"><span class="ico">💰</span><span id="money-val">0</span><small id="goal-val">/100</small></div>
+  <button class="btn" id="music-btn" aria-label="Nhạc nền">🎵</button>
+  <button class="btn" id="snd-btn" aria-label="Âm thanh">🔊</button>
+</div>
+
+<div id="hint"></div>
+
+<!-- ── bắt đầu ngày ── -->
+<div class="overlay" id="ov-start">
+  <div class="card">
+    <h1>🍽️ Nhà Hàng Vui Vẻ 🍽️</h1>
+    <div class="day-big" id="start-day">Ngày 1</div>
+    <div class="goal-line">Mục tiêu: <span id="start-goal">100</span> 💰</div>
+    <div class="lv-line">
+      <div class="lv-txt"><span id="start-lv">Cấp 1</span> · Ví: <b id="start-gold">0</b> 💰</div>
+      <div class="lv-bar"><i id="start-exp-fill"></i></div>
+    </div>
+    <div class="start-tip" id="start-tip"></div>
+    <div class="dish-row" id="start-menu"></div>
+    <div class="howto" id="start-howto">
+      <div><span class="n">1</span><span>Chạm <b>khách đang chờ</b> → chạm <b>bàn trống</b> để mời vào bàn</span></div>
+      <div><span class="n">2</span><span>Khách giơ 📝 — chạm khách để <b>ghi món</b></span></div>
+      <div><span class="n">3</span><span>Món ra ở <b>quầy bếp</b> — chạm đĩa để bưng tới bàn</span></div>
+      <div><span class="n">4</span><span>Khách giơ 💰 — chạm để <b>thu tiền</b>; bàn bẩn thì chạm để <b>dọn</b></span></div>
+      <div><span class="n">🔔</span><span>Chuông vàng reo — chơi <b>thử thách nhỏ</b> lấy thêm 💰 và ⭐</span></div>
+      <div><span class="n">♥</span><span>Hết tim là khách bỏ về — mời 🍹 <b>nước</b> cho khách đỡ sốt ruột</span></div>
+    </div>
+    <div class="btn-row">
+      <button class="big-btn alt" id="btn-shop">🛍️ Nâng Cấp</button>
+      <button class="big-btn alt2" id="btn-ward">👗 Tủ Đồ</button>
+      <button class="big-btn" id="btn-start">Mở Cửa Quán! ✨</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── kết thúc ngày ── -->
+<div class="overlay" id="ov-end">
+  <div class="card">
+    <h1 id="end-title">Hết Ngày!</h1>
+    <div class="stars"><span id="st1">★</span><span id="st2">★</span><span id="st3">★</span></div>
+    <div class="result-line" id="end-money">💰 0 / 100</div>
+    <div class="result-sub" id="end-sub"></div>
+    <div class="lv-line">
+      <div class="lv-txt" id="end-lv">Cấp 1</div>
+      <div class="lv-bar"><i id="end-exp-fill"></i></div>
+    </div>
+    <div class="levelup" id="end-levelup"></div>
+    <div class="btn-row">
+      <button class="big-btn alt" id="btn-retry">Chơi Lại 🔄</button>
+      <button class="big-btn" id="btn-next" style="display:none;">Ngày Tiếp Theo ➜</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── cửa hàng nâng cấp ── -->
+<div class="overlay" id="ov-shop">
+  <div class="card">
+    <h1>🛍️ Nâng Cấp Quán</h1>
+    <div class="gold-line">Ví: <span id="shop-gold">0</span> 💰</div>
+    <div id="shop-list"></div>
+    <button class="big-btn small" id="btn-shop-close">Xong ✓</button>
+  </div>
+</div>
+
+<!-- ── tủ đồ ── -->
+<div class="overlay" id="ov-ward">
+  <div class="card wide">
+    <h1>👗 Tủ Đồ Của Cô Chủ</h1>
+    <div class="gold-line">Ví: <span id="ward-gold">0</span> 💰 · Cấp <span id="ward-lv">1</span></div>
+    <div class="ward-wrap">
+      <div class="ward-preview"><canvas id="ward-cv"></canvas></div>
+      <div class="ward-right">
+        <div class="ward-tabs" id="ward-tabs"></div>
+        <div class="ward-items" id="ward-items"></div>
+      </div>
+    </div>
+    <button class="big-btn small" id="btn-ward-close">Xinh Rồi ✓</button>
+  </div>
+</div>
+
+<!-- ── mini-game ── -->
+<div class="overlay" id="ov-mini">
+  <div class="card mini" id="mini-body"></div>
+</div>
+
+<div id="rotate">
+  <div class="ico">📱</div>
+  <div>Xoay ngang iPad để chơi nhé!</div>
+</div>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
