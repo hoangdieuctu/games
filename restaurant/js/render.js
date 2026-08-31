@@ -482,7 +482,10 @@ function drawStaffPerson(s) {
   const bob = moving ? Math.abs(Math.sin(s.bobT)) * 5 * K
     : acting ? Math.abs(Math.sin(G.time * 10)) * 2.5 * K
     : Math.sin(s.bobT) * 1.5 * K;
-  drawPerson(ctx, s.x, s.y, K, staffLook(s), { bob, mood: 1, happy: true });
+  drawPerson(ctx, s.x, s.y, K, staffLook(s), {
+    bob, mood: 1, happy: true,
+    swing: moving ? Math.sin(s.bobT) * 0.9 : 0,
+  });
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
   if (s.carry) {
     // khay bưng món trên tay
@@ -505,7 +508,7 @@ function drawCustomerUi(c) {
   const { ctx, K } = G;
   if (c.state.startsWith('exit') || c.state === 'walk') return;
   const x = c.x;
-  const headY = c.y - 58 * K;
+  const headY = c.y - 64 * K;
   const hr = 20 * K;
 
   // tim
@@ -514,7 +517,7 @@ function drawCustomerUi(c) {
     const filled = Math.ceil(Math.max(0, c.patience));
     const hs = 9 * K, gap = 11.5 * K;
     const hx0 = x - ((n - 1) * gap) / 2;
-    const hy = headY - hr - 16 * K;
+    const hy = headY - hr - 23 * K;
     const low = filled <= 2;
     const blink = low && Math.sin(G.time * 9) > 0;
     for (let i = 0; i < n; i++) {
@@ -545,7 +548,7 @@ function drawCustomerUi(c) {
   if (!icons) return;
 
   const bw = 22 * K + (icons.length - 1) * 20 * K;
-  const by = headY - hr - 52 * K + Math.sin(G.time * 3 + c.id) * 2.5 * K;
+  const by = headY - hr - 60 * K + Math.sin(G.time * 3 + c.id) * 2.5 * K;
   ctx.fillStyle = 'rgba(255,255,255,.95)';
   rr(x - bw, by - 22 * K, bw * 2, 44 * K, 22 * K); ctx.fill();
   ctx.beginPath();
@@ -613,12 +616,13 @@ export function draw(dt) {
   for (const c of G.customers) {
     const seated = c.anchor && c.anchor.kind === 'table' && c.state !== 'walk';
     if (!seated) {
+      const moving = c.state === 'walk' || c.state.startsWith('exit');
       actors.push({
         y: c.y, draw: () => drawPerson(ctx, c.x, c.y, K, c.look, {
-          bob: (c.state === 'walk' || c.state.startsWith('exit'))
-            ? Math.abs(Math.sin(c.bobT)) * 5 * K : Math.sin(c.bobT) * 1.5 * K,
+          bob: moving ? Math.abs(Math.sin(c.bobT)) * 5 * K : Math.sin(c.bobT) * 1.5 * K,
           mood: c.state === 'exitAngry' ? 0 : c.patience / c.maxPatience,
           happy: c.state === 'exitHappy',
+          swing: moving ? Math.sin(c.bobT) * 0.9 : 0,
         }),
       });
     }

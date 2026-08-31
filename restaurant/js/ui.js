@@ -166,7 +166,7 @@ function drawWardPreview() {
   ctx.fillRect(0, 0, w, h);
   ctx.fillStyle = 'rgba(200,150,120,.18)';
   ctx.beginPath(); ctx.ellipse(w / 2, h - 30, 62, 16, 0, 0, 7); ctx.fill();
-  drawPerson(ctx, w / 2, h - 42, 1.32, getLook(), { mood: 1, happy: true });
+  drawPerson(ctx, w / 2, h - 34, 1.42, getLook(), { mood: 1, happy: true });
 }
 
 export function renderWardrobe() {
