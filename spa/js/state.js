@@ -11,6 +11,7 @@ export const G = {
   day: 1,
   cfg: null,
   running: false,
+  paused: false,
   time: 0,
 
   // trong ngày
@@ -35,11 +36,22 @@ export const G = {
   door: { x: 0, y: 0 },
   selected: null,
   particles: [],
+
+  // giữ ngón tay để cô nhân viên làm nhanh hơn: { stIdx, x, y }
+  holding: null,
+  // xe trà hồi tim cho cả tiệm — mỗi ngày vài lượt, giữa hai lượt phải chờ nguội
+  teaCool: 0,
+  teaLeft: 0,
 };
 
 export function loadDay() {
   const d = parseInt(localStorage.getItem('spa_day') || '1', 10);
   G.day = d >= 1 ? d : 1;
+}
+
+export function resetDay() {
+  G.day = 1;
+  localStorage.removeItem('spa_day');
 }
 
 export function saveDayUnlocked(day) {

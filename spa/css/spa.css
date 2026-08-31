@@ -139,6 +139,57 @@ html, body {
   white-space: nowrap;
   font-size: 15px; font-weight: 700; color: #b08898;
 }
+
+/* ── chương & cấp độ ── */
+.chapter-line {
+  margin-top: 4px;
+  font-size: 16px; font-weight: 800; color: #b07a9a;
+  letter-spacing: .2px;
+}
+.lv-dots { display: flex; justify-content: center; gap: 6px; margin-top: 7px; }
+.lv-dots i {
+  width: 9px; height: 9px; border-radius: 50%;
+  background: #f0dae4;
+}
+.lv-dots i.done { background: #f5a2c0; }
+.lv-dots i.now  { background: #e8558a; transform: scale(1.35); }
+.expert-line {
+  margin-top: 7px;
+  font-size: 14.5px; font-weight: 800; color: #b8892c;
+}
+.unlock-row {
+  display: flex; justify-content: center; gap: 8px; flex-wrap: wrap;
+  margin-top: 10px;
+}
+.unlock-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 13px; border-radius: 18px;
+  background: linear-gradient(180deg, #fff3c9, #ffe49a);
+  border: 2px solid #f0c85e;
+  font-size: 13.5px; font-weight: 800; color: #9a6a10;
+  animation: unlock-pop .5s cubic-bezier(.3,1.7,.5,1) both;
+}
+.unlock-chip .e { font-size: 17px; }
+@keyframes unlock-pop {
+  from { transform: scale(.5); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+
+/* ── tạm dừng ── */
+.card.narrow { max-width: 400px; }
+.pause-sub {
+  margin-top: 8px;
+  font-size: 15px; font-weight: 700; color: #b08898;
+  line-height: 1.4;
+}
+.pause-stat {
+  display: inline-block;
+  margin-top: 12px;
+  padding: 7px 18px; border-radius: 20px;
+  background: #fff5d6; border: 2px solid #f2ce6e;
+  font-size: 16px; font-weight: 800; color: #a07018;
+  white-space: nowrap;
+}
 .howto {
   margin: 14px auto 0;
   text-align: left;
@@ -378,3 +429,40 @@ html, body {
 .decor-tag { font-size: 11.5px; font-weight: 800; color: #b08898; white-space: nowrap; }
 .decor-tag.buy { color: #d1913a; }
 .decor-tag.on { color: #3ba85a; }
+
+/* ── nút bắt đầu lại từ Ngày 1 (xoá tiến trình cũ) ── */
+.reset-row { margin-top: 14px; }
+.reset-btn {
+  border: none; border-radius: 20px;
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 7px 16px;
+  background: rgba(190,130,150,.14);
+  color: #a5758a; font-family: inherit;
+  font-size: 14px; font-weight: 800;
+  cursor: pointer;
+  transition: transform .1s, background .15s;
+}
+.reset-btn:active { transform: scale(.95); }
+.reset-row.asking .reset-btn { display: none; }
+
+.reset-ask {
+  display: none;
+  align-items: center; justify-content: center;
+  flex-wrap: wrap; gap: 8px;
+  padding: 10px 14px;
+  border-radius: 20px;
+  background: #fff0f4; border: 2px solid #f0c0d0;
+}
+.reset-row.asking .reset-ask { display: flex; }
+.reset-q { font-size: 14.5px; font-weight: 800; color: #b0607a; }
+.reset-yes, .reset-no {
+  border: none; border-radius: 18px;
+  padding: 7px 15px;
+  font-family: inherit; font-size: 14px; font-weight: 800;
+  cursor: pointer;
+  transition: transform .1s;
+}
+.reset-yes { background: linear-gradient(180deg,#ff9a86,#ee6b52); box-shadow: 0 3px 0 #c9503a; color: #fff; }
+.reset-yes:active { transform: translateY(2px); box-shadow: 0 1px 0 #c9503a; }
+.reset-no { background: #fff; box-shadow: 0 2px 6px rgba(180,90,120,.18); color: #a5758a; }
+.reset-no:active { transform: scale(.95); }

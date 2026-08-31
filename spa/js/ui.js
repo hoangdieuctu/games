@@ -4,7 +4,7 @@ import { G } from './state.js';
 import { SERVICES } from './config.js';
 import { UPGRADES, getBank, levelOf, nextCost, buy } from './upgrades.js';
 import { DECOR, isOwnedDecor, pickedDecor, chooseDecor } from './decor.js';
-import { sSelect, sCash, sNope } from './audio.js';
+import { sSelect, sCash, sNope, startMusic, stopMusic } from './audio.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -44,12 +44,12 @@ export function setHint() {
   else if (ts === 2) {
     if (G.customers.some(c => c.state === 'service' && c.anchor &&
       SERVICES[G.stations[c.anchor.idx].key].mode === 'staff'))
-      msg = '👆 Chạm liên tục để cô nhân viên làm nhanh hơn!';
+      msg = '👆 Giữ ngón tay trên ô để cô nhân viên làm nhanh hơn!';
     else if (has('awaitStaff')) msg = '💁‍♀️ Cô nhân viên đang đến phục vụ...';
     else msg = '⏳ Chờ dịch vụ xong nhé...';
   }
   else if (ts === 3) msg = '💰 Chọn khách rồi chạm vào quầy thu ngân!';
-  else if (ts >= 0 && has('queue')) msg = '👆 Chạm vào quầy để cô nhân viên ra tính tiền!';
+  else if (ts >= 0 && has('queue')) msg = '💁‍♀️ Cô nhân viên đang ra quầy tính tiền cho cả hàng...';
   const el = $('hint');
   el.textContent = msg;
   el.classList.toggle('show', !!msg);
@@ -58,8 +58,35 @@ export function setHint() {
 /* ── màn hình bắt đầu ── */
 
 export function showStart() {
-  $('start-day').textContent = 'Ngày ' + G.day;
+  const ch = G.cfg.chapter;
+  $('start-chapter').textContent = ch.icon + ' ' + ch.name;
+  $('start-day').textContent = ch.endless
+    ? 'Ngày ' + G.day + ' · Thử thách ' + ch.day
+    : 'Ngày ' + G.day + ' · Màn ' + ch.day + '/' + ch.days;
   $('start-goal').textContent = G.cfg.goal;
+  $('start-expert').textContent = G.cfg.expert;
+
+  // chấm tiến trình trong chương
+  const dots = $('start-dots');
+  dots.innerHTML = '';
+  dots.style.display = ch.endless ? 'none' : '';
+  for (let i = 1; i <= ch.days; i++) {
+    const d = document.createElement('i');
+    d.className = i < ch.day ? 'done' : i === ch.day ? 'now' : '';
+    dots.appendChild(d);
+  }
+
+  // hôm nay mở thêm gì
+  const un = $('start-unlocks');
+  un.innerHTML = '';
+  for (const u of G.cfg.unlocks) {
+    const chip = document.createElement('div');
+    chip.className = 'unlock-chip';
+    chip.innerHTML = '<span class="e">' + u.icon + '</span>Mới: ' + u.name;
+    un.appendChild(chip);
+  }
+  un.style.display = G.cfg.unlocks.length ? '' : 'none';
+
   const row = $('start-svcs');
   row.innerHTML = '';
   for (const k of [...new Set(G.cfg.stations)]) {
@@ -70,6 +97,9 @@ export function showStart() {
     row.appendChild(chip);
   }
   $('start-bank').textContent = getBank();
+  document.querySelector('.reset-row').classList.remove('asking');
+  $('ov-pause').classList.remove('show');
+  $('pause-btn').textContent = '⏸️';
   $('ov-start').classList.add('show');
 }
 
@@ -80,6 +110,9 @@ export function hideStart() { $('ov-start').classList.remove('show'); }
 export function showEnd({ passed, stars }) {
   $('end-title').textContent = passed ? 'Tuyệt Vời! 🎉' : 'Ôi, Chưa Đủ...';
   $('end-money').textContent = '💰 ' + G.money + ' / ' + G.cfg.goal;
+  $('end-goals').textContent = G.money >= G.cfg.expert
+    ? '🏆 Đạt mục tiêu vàng ' + G.cfg.expert + ' 💰 — 3 sao!'
+    : 'Mục tiêu vàng (3 sao): ' + G.cfg.expert + ' 💰';
   $('end-sub').textContent =
     '😊 ' + G.paidCount + ' khách vui vẻ' +
     (G.angryCount ? ' · 💢 ' + G.angryCount + ' khách bỏ về' : '') +
@@ -94,6 +127,27 @@ export function showEnd({ passed, stars }) {
 }
 
 export function hideEnd() { $('ov-end').classList.remove('show'); }
+
+/* ── tạm dừng ── */
+
+export function setPaused(on) {
+  if (!G.running) return;          // chỉ tạm dừng khi đang chơi
+  if (G.paused === on) return;
+  G.paused = on;
+  G.holding = null;
+  if (on) {
+    stopMusic();
+    $('pause-stat').textContent =
+      '💰 ' + G.money + ' / ' + G.cfg.goal + '  ·  👩 còn ' + $('cust-val').textContent + ' khách';
+    $('ov-pause').classList.add('show');
+  } else {
+    $('ov-pause').classList.remove('show');
+    startMusic();
+  }
+  $('pause-btn').textContent = on ? '▶️' : '⏸️';
+}
+
+export function togglePause() { setPaused(!G.paused); }
 
 /* ── cửa hàng nâng cấp ── */
 
@@ -165,7 +219,12 @@ export function renderDecor() {
   }
 }
 
-export function bindUi({ onStart, onRetry, onNext }) {
+export function bindUi({ onStart, onRetry, onNext, onReset }) {
+  $('pause-btn').addEventListener('click', () => { sSelect(); togglePause(); });
+  $('btn-resume').addEventListener('click', () => { sSelect(); setPaused(false); });
+  // rời khỏi tab / khoá máy → tự tạm dừng cho khách khỏi giận oan
+  document.addEventListener('visibilitychange', () => { if (document.hidden) setPaused(true); });
+
   $('btn-start').addEventListener('click', onStart);
   $('btn-retry').addEventListener('click', onRetry);
   $('btn-next').addEventListener('click', onNext);
@@ -183,5 +242,15 @@ export function bindUi({ onStart, onRetry, onNext }) {
     $('ov-decor').classList.remove('show');
     $('start-bank').textContent = getBank();
     $('ov-start').classList.add('show');
+  });
+
+  // bắt đầu lại từ Ngày 1: hỏi lại một lần cho chắc rồi mới xoá
+  const resetRow = document.querySelector('.reset-row');
+  $('btn-reset').addEventListener('click', () => { sSelect(); resetRow.classList.add('asking'); });
+  $('btn-reset-no').addEventListener('click', () => { sSelect(); resetRow.classList.remove('asking'); });
+  $('btn-reset-yes').addEventListener('click', () => {
+    sNope();
+    resetRow.classList.remove('asking');
+    onReset();
   });
 }

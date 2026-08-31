@@ -53,7 +53,15 @@ export function layout() {
     const n = G.stations.length;
     const row1 = Math.ceil(n / 2), row2 = n - row1;
     const wf = (st) => st.key === 'sauna' ? 1.55 : 1;
-    const tw = Math.min(196 * K, (zR - zL) / Math.max(row1 + 0.6, 2.6) - 12);
+    // bề rộng một ô: lấy theo hàng "nặng" nhất để hàng nhiều ô nhất vẫn vừa khung
+    const rows = [G.stations.slice(0, row1), G.stations.slice(row1)];
+    let tw = 196 * K;
+    for (const items of rows) {
+      if (!items.length) continue;
+      const wSum = items.reduce((a, st) => a + wf(st), 0);
+      const gaps = (items.length - 1) * 26 * K;
+      tw = Math.min(tw, (zR - zL - gaps) / wSum);
+    }
     const th = 128 * K;
     const y1 = topPad + (H - topPad) * 0.30;
     const y2 = topPad + (H - topPad) * 0.72;

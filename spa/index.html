@@ -21,6 +21,7 @@
   <div class="spacer"></div>
   <div class="pill" id="cust-pill"><span class="ico">👩</span><span id="cust-val">0</span></div>
   <div class="pill" id="money-pill"><span class="ico">💰</span><span id="money-val">0</span><small id="goal-val">/100</small></div>
+  <button class="btn" id="pause-btn" aria-label="Tạm dừng">⏸️</button>
   <button class="btn" id="music-btn" aria-label="Nhạc nền">🎵</button>
   <button class="btn" id="snd-btn" aria-label="Âm thanh">🔊</button>
 </div>
@@ -31,22 +32,35 @@
 <div class="overlay" id="ov-start">
   <div class="card">
     <h1>🌸 Tiệm Spa Vui Vẻ 🌸</h1>
+    <div class="chapter-line" id="start-chapter">🏠 Tiệm Nhỏ Đầu Phố</div>
     <div class="day-big" id="start-day">Ngày 1</div>
+    <div class="lv-dots" id="start-dots"></div>
     <div class="goal-line">Mục tiêu: <span id="start-goal">100</span> 💰</div>
+    <div class="expert-line">⭐⭐⭐ Mục tiêu vàng: <b id="start-expert">0</b> 💰</div>
     <div class="bank-line">Ngân quỹ: <b id="start-bank">0</b> 💰</div>
+    <div class="unlock-row" id="start-unlocks"></div>
     <div class="svc-row" id="start-svcs"></div>
     <div class="howto">
       <div><span class="n">1</span><span>Chạm vào <b>khách</b> đang chờ, rồi chạm <b>ô dịch vụ</b> khách muốn</span></div>
-      <div><span class="n">2</span><span><b>Cô nhân viên</b> 💁‍♀️ sẽ đến làm — chạm liên tục để nhanh hơn!</span></div>
+      <div><span class="n">2</span><span><b>Cô nhân viên</b> 💁‍♀️ sẽ đến làm — <b>giữ ngón tay</b> trên ô cho nhanh hơn!</span></div>
       <div><span class="n">3</span><span>Mặt nạ 🧖‍♀️ ngấm xong nhớ chạm để cô ấy đến <b>gỡ mặt nạ</b></span></div>
-      <div><span class="n">4</span><span>Xong hết thì đưa khách ra <b>quầy</b> 💰 và chạm quầy để tính tiền</span></div>
-      <div><span class="n">🍵</span><span>Chạm <b>xe trà</b> để mời trà khách đang chờ — hồi lại 2 tim!</span></div>
+      <div><span class="n">4</span><span>Xong hết thì đưa khách ra <b>quầy</b> 💰 — nhân viên tự ra <b>tính tiền cả hàng một lượt</b></span></div>
+      <div><span class="n">🍵</span><span>Chạm <b>xe trà</b> để mời trà <b>cả tiệm</b> — ai cũng hồi tim, rồi xe nghỉ một lúc</span></div>
+      <div><span class="n">🔄</span><span>Chọn một khách rồi chạm khách khác để <b>đổi chỗ</b>, hoặc chạm <b>ghế trống</b> để mời về ghế đợi</span></div>
       <div><span class="n">♥</span><span>Đừng để khách chờ lâu — hết tim là khách giận bỏ về!</span></div>
     </div>
     <div class="btn-row">
       <button class="big-btn alt" id="btn-shop">🛍️ Nâng Cấp</button>
       <button class="big-btn alt2" id="btn-decor">🎨 Trang Trí</button>
       <button class="big-btn" id="btn-start">Mở Cửa Tiệm! ✨</button>
+    </div>
+    <div class="reset-row">
+      <button class="reset-btn" id="btn-reset"><span>🔄</span>Bắt đầu lại từ Ngày 1</button>
+      <div class="reset-ask" id="reset-ask">
+        <span class="reset-q">Xoá hết ngày, ngân quỹ, đồ đã mua?</span>
+        <button class="reset-yes" id="btn-reset-yes">Xoá hết, chơi lại ✓</button>
+        <button class="reset-no" id="btn-reset-no">Thôi</button>
+      </div>
     </div>
   </div>
 </div>
@@ -57,11 +71,22 @@
     <h1 id="end-title">Hết Ngày!</h1>
     <div class="stars"><span id="st1">★</span><span id="st2">★</span><span id="st3">★</span></div>
     <div class="result-line" id="end-money">💰 0 / 100</div>
+    <div class="result-sub" id="end-goals"></div>
     <div class="result-sub" id="end-sub"></div>
     <div class="btn-row">
       <button class="big-btn alt" id="btn-retry">Chơi Lại 🔄</button>
       <button class="big-btn" id="btn-next" style="display:none;">Ngày Tiếp Theo ➜</button>
     </div>
+  </div>
+</div>
+
+<!-- ── tạm dừng ── -->
+<div class="overlay" id="ov-pause">
+  <div class="card narrow">
+    <h1>⏸️ Tạm Dừng</h1>
+    <div class="pause-sub">Tiệm đang nghỉ tay một chút — khách vẫn chờ đấy nhé!</div>
+    <div class="pause-stat" id="pause-stat"></div>
+    <button class="big-btn" id="btn-resume">Chơi Tiếp ▶</button>
   </div>
 </div>
 

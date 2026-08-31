@@ -90,6 +90,13 @@ export function loadDecor() {
   } catch (e) { pick = { ...DEFAULT }; }
 }
 
+export function resetDecor() {
+  owned = {};
+  pick = { ...DEFAULT };
+  localStorage.removeItem('spa_decor');
+  localStorage.removeItem('spa_theme');
+}
+
 function save() {
   localStorage.setItem('spa_decor', JSON.stringify(owned));
   localStorage.setItem('spa_theme', JSON.stringify(pick));

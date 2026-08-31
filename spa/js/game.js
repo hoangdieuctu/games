@@ -5,9 +5,9 @@ import { SERVICES, DECAY, dayConfig } from './config.js';
 import { layout } from './layout.js';
 import { steam, spark, updateParticles } from './particles.js';
 import { updateHud, updateCustPill, setHint, showStart, hideStart, showEnd, hideEnd } from './ui.js';
-import { spawnCustomer, finishService, customerAngry } from './customers.js';
-import { initStaff, updateStaff } from './staff.js';
-import { sitDecayMult, staffDur, maskTime, saunaTime } from './upgrades.js';
+import { spawnCustomer, finishService, customerAngry, holdBoost } from './customers.js';
+import { initStaff, updateStaff, enqueueTask, taskExists, queueGuests } from './staff.js';
+import { sitDecayMult, staffDur, maskTime, saunaTime, teaUses } from './upgrades.js';
 import { sBell, sDone, sCash } from './audio.js';
 
 // dựng các ô dịch vụ của ngày (dùng cho cả lúc xem trước ở màn bắt đầu)
@@ -38,11 +38,15 @@ export function startDay() {
   G.paidCount = 0; G.angryCount = 0;
   G.time = 0;
   G.tutorialStep = G.day === 1 ? 0 : -1;
+  G.holding = null;
+  G.teaCool = 0;
+  G.teaLeft = teaUses();
   for (const s of G.seats) s.taken = null;
   for (const q of G.queueSpots) q.taken = null;
   initStaff();
   layout();
   G.running = true;
+  G.paused = false;
   updateHud();
   updateCustPill();
   setHint();
@@ -51,8 +55,11 @@ export function startDay() {
 
 function endDay() {
   G.running = false;
+  G.paused = false;
+  G.holding = null;
   const passed = G.money >= G.cfg.goal;
-  const stars = G.money >= G.cfg.goal * 1.5 ? 3 : G.money >= G.cfg.goal * 1.25 ? 2 : passed ? 1 : 0;
+  const mid = Math.round((G.cfg.goal + G.cfg.expert) / 2);
+  const stars = G.money >= G.cfg.expert ? 3 : G.money >= mid ? 2 : passed ? 1 : 0;
   if (passed) saveDayUnlocked(G.day + 1);
   setTimeout(() => {
     showEnd({ passed, stars });
@@ -61,9 +68,26 @@ function endDay() {
 }
 
 export function update(dt) {
+  if (G.paused) return;
   G.time += dt;
 
   if (G.running) {
+    // xe trà đang nguội dần
+    if (G.teaCool > 0) G.teaCool = Math.max(0, G.teaCool - dt);
+
+    // giữ ngón tay trên ô đang làm → cô nhân viên làm nhanh hẳn lên
+    if (G.holding) {
+      const st = G.stations[G.holding.stIdx];
+      const c = st && st.occupant;
+      if (c && c.state === 'service' && SERVICES[st.key].mode === 'staff') holdBoost(c, dt);
+      else G.holding = null;
+    }
+
+    // có khách đứng ở quầy là nhân viên tự ra tính tiền, không cần chạm quầy
+    if (queueGuests().length && !taskExists('checkout', null)) {
+      enqueueTask('checkout', null, true);
+    }
+
     // sinh khách mới khi còn ghế trống
     if (G.spawned < G.cfg.nCustomers) {
       G.spawnTimer -= dt;

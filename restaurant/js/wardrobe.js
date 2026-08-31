@@ -89,6 +89,14 @@ export function loadWardrobe() {
   if (!ownedSet['acc:flower']) { ownedSet['acc:flower'] = 1; saveOwned(); }
 }
 
+export function resetWardrobe() {
+  ownedSet = {};
+  look = { ...DEFAULT_LOOK };
+  localStorage.removeItem('rest_owned');
+  localStorage.removeItem('rest_look');
+  loadWardrobe(); // trả lại hoa cài tặng sẵn
+}
+
 function saveOwned() { localStorage.setItem('rest_owned', JSON.stringify(ownedSet)); }
 function saveLook() { localStorage.setItem('rest_look', JSON.stringify(look)); }
 

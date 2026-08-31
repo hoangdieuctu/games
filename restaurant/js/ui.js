@@ -85,6 +85,7 @@ export function showStart() {
     row.appendChild(chip);
   }
   $('start-howto').style.display = G.day <= 2 ? '' : 'none';
+  document.querySelector('.reset-row').classList.remove('asking');
   $('ov-start').classList.add('show');
 }
 
@@ -256,7 +257,7 @@ export function renderDecor() {
 
 /* ── nối nút bấm ── */
 
-export function bindUi({ onStart, onRetry, onNext }) {
+export function bindUi({ onStart, onRetry, onNext, onReset }) {
   $('btn-start').addEventListener('click', onStart);
   $('btn-retry').addEventListener('click', onRetry);
   $('btn-next').addEventListener('click', onNext);
@@ -276,5 +277,15 @@ export function bindUi({ onStart, onRetry, onNext }) {
     $('ov-decor').classList.remove('show');
     $('start-gold').textContent = getGold();
     $('ov-start').classList.add('show');
+  });
+
+  // bắt đầu lại từ Ngày 1: hỏi lại một lần cho chắc rồi mới xoá
+  const resetRow = document.querySelector('.reset-row');
+  $('btn-reset').addEventListener('click', () => { sSelect(); resetRow.classList.add('asking'); });
+  $('btn-reset-no').addEventListener('click', () => { sSelect(); resetRow.classList.remove('asking'); });
+  $('btn-reset-yes').addEventListener('click', () => {
+    sNope();
+    resetRow.classList.remove('asking');
+    onReset();
   });
 }

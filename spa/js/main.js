@@ -1,8 +1,8 @@
 // ── Khởi động: nối các module, vòng lặp khung hình ──
 
-import { G, loadDay } from './state.js';
-import { loadShop } from './upgrades.js';
-import { loadDecor } from './decor.js';
+import { G, loadDay, resetDay } from './state.js';
+import { loadShop, resetShop } from './upgrades.js';
+import { loadDecor, resetDecor } from './decor.js';
 import { layout } from './layout.js';
 import { bindInput } from './input.js';
 import { update, prepareDay, bindDayFlow } from './game.js';
@@ -26,6 +26,14 @@ bindUi({
   onStart: () => { ac(); startMusic(); flow.onStart(); },
   onRetry: flow.onRetry,
   onNext: flow.onNext,
+  // xoá hết dữ liệu cũ rồi dựng lại Ngày 1 (giữ cài đặt âm thanh)
+  onReset: () => {
+    resetDay();
+    resetShop();
+    resetDecor();
+    G.running = false;
+    prepareDay();
+  },
 });
 
 window.addEventListener('resize', layout);

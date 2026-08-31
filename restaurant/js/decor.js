@@ -89,6 +89,13 @@ export function loadDecor() {
   } catch (e) { pick = { ...DEFAULT }; }
 }
 
+export function resetDecor() {
+  owned = {};
+  pick = { ...DEFAULT };
+  localStorage.removeItem('rest_decor');
+  localStorage.removeItem('rest_theme');
+}
+
 function save() {
   localStorage.setItem('rest_decor', JSON.stringify(owned));
   localStorage.setItem('rest_theme', JSON.stringify(pick));

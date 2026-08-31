@@ -1,10 +1,10 @@
 // ── Khởi động: nối các module lại và chạy vòng lặp khung hình ──
 
 import { G } from './state.js';
-import { loadPlayer, loadDay } from './player.js';
-import { loadShop } from './upgrades.js';
-import { loadWardrobe } from './wardrobe.js';
-import { loadDecor } from './decor.js';
+import { loadPlayer, loadDay, resetPlayer } from './player.js';
+import { loadShop, resetShop } from './upgrades.js';
+import { loadWardrobe, resetWardrobe } from './wardrobe.js';
+import { loadDecor, resetDecor } from './decor.js';
 import { layout } from './layout.js';
 import { bindInput } from './input.js';
 import { update, prepareDay, bindDayFlow } from './game.js';
@@ -30,6 +30,18 @@ bindUi({
   onStart: () => { ac(); startMusic(); flow.onStart(); updateHud(); },
   onRetry: () => { flow.onRetry(); updateHud(); },
   onNext: flow.onNext,
+  // xoá hết dữ liệu cũ rồi dựng lại Ngày 1 (giữ cài đặt âm thanh)
+  onReset: () => {
+    resetPlayer();
+    resetShop();
+    resetWardrobe();
+    resetDecor();
+    G.running = false;
+    G.paused = false;
+    G.day = 1;
+    prepareDay();
+    updateHud();
+  },
 });
 
 window.addEventListener('resize', layout);

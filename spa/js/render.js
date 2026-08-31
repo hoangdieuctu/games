@@ -2,8 +2,9 @@
 
 import { G } from './state.js';
 import { SERVICES, PAY_ICON } from './config.js';
-import { currentWish, stationFree } from './customers.js';
-import { teaTarget } from './staff.js';
+import { currentWish, stationFree, canSwap } from './customers.js';
+import { teaTarget, teaReady } from './staff.js';
+import { teaCooldown } from './upgrades.js';
 import { drawParticles, drawHeart } from './particles.js';
 import { drawPerson, drawHeadOnly } from './avatar.js';
 import { maskTime, saunaTime } from './upgrades.js';
@@ -420,16 +421,40 @@ function drawTeaCart() {
   ctx.fillText('🌸', t.x + 22 * K, t.y + 1 * K);
   ctx.font = `${15 * K}px sans-serif`;
   ctx.fillText('🍵', t.x - 16 * K, t.y + 1 * K);
-  // nhãn
-  const lw = 72 * K;
-  ctx.fillStyle = T.furn.dark;
+  // nhãn: còn lượt thì "Mời trà ×n", đang nguội thì đếm giây, hết thì "Hết trà"
+  const cooling = G.teaCool > 0;
+  const empty = G.teaLeft <= 0;
+  const label = empty ? 'Hết trà' : cooling ? Math.ceil(G.teaCool) + 's' : 'Mời trà ×' + G.teaLeft;
+  const lw = (cooling ? 52 : 82) * K;
+  ctx.fillStyle = (cooling || empty) ? 'rgba(120,110,115,.85)' : T.furn.dark;
   rr(t.x - lw / 2, t.y + 32 * K, lw, 20 * K, 10 * K); ctx.fill();
   ctx.fillStyle = '#fff';
   ctx.font = `800 ${13 * K}px 'Baloo 2', sans-serif`;
-  ctx.fillText('Mời trà', t.x, t.y + 42 * K);
+  ctx.fillText(label, t.x, t.y + 42 * K);
 
-  if (G.running && teaTarget()) {
+  // vòng tròn nguội dần quanh xe trà
+  if (cooling) {
+    const total = teaCooldown();
+    const left = G.teaCool / total;
+    ctx.strokeStyle = 'rgba(255,255,255,.75)';
+    ctx.lineWidth = 4.5 * K;
+    ctx.beginPath(); ctx.arc(t.x, t.y - 8 * K, 46 * K, 0, 7); ctx.stroke();
+    ctx.strokeStyle = 'rgba(120,180,230,.95)';
+    ctx.beginPath();
+    ctx.arc(t.x, t.y - 8 * K, 46 * K, -Math.PI / 2, -Math.PI / 2 + (1 - left) * Math.PI * 2);
+    ctx.stroke();
+  }
+
+  if (G.running && teaReady()) {
     glowRing(t.x - 46 * K, t.y - 52 * K, 92 * K, 106 * K, 16 * K, 'rgba(60,200,110,%A%)', 6);
+    // nhắc là mời một lượt được cả tiệm
+    const n = G.customers.filter(c => c.patience < c.maxPatience - 0.05 &&
+      ['sit', 'queue', 'done', 'awaitStaff', 'maskDone'].includes(c.state)).length;
+    if (n > 1) {
+      ctx.fillStyle = '#3aa860';
+      ctx.font = `800 ${12.5 * K}px 'Baloo 2', sans-serif`;
+      ctx.fillText('cả tiệm · ' + n + ' khách', t.x, t.y + 62 * K);
+    }
   }
 }
 
@@ -695,6 +720,8 @@ function drawStationTile(st, dt) {
   const anyDone = occupants.some(c => c.state === 'done');
   const maskDone = occ && occ.state === 'maskDone';
   const validTarget = G.selected && stationFree(st) && currentWish(G.selected) === st.key;
+  // ô đang có người nhưng đổi chỗ được với khách đang chọn
+  const swapTarget = !validTarget && G.selected && occ && canSwap(G.selected, occ);
 
   // nền ô
   ctx.fillStyle = 'rgba(150,90,110,.14)';
@@ -706,6 +733,7 @@ function drawStationTile(st, dt) {
   rr(x - w / 2, y - h / 2, w, h * 0.3, 20 * K);
   ctx.fill();
   if (validTarget) glowRing(x - w / 2, y - h / 2, w, h, 20 * K, 'rgba(60,200,110,%A%)', 7);
+  else if (swapTarget) glowRing(x - w / 2, y - h / 2, w, h, 20 * K, 'rgba(80,150,240,%A%)', 7);
   else if (anyDone || maskDone) glowRing(x - w / 2, y - h / 2, w, h, 20 * K, 'rgba(255,180,0,%A%)', 6);
   else {
     ctx.strokeStyle = 'rgba(255,255,255,.85)';
@@ -732,11 +760,12 @@ function drawStationTile(st, dt) {
   // thanh tiến độ và lời nhắc
   const by = y - h / 2 - 20 * K;
   if (occ && occ.state === 'service' && svc.mode === 'staff') {
-    drawProgressBar(x, by, w * 0.72, occ.workProgress, '#ff7ba3');
+    const holding = G.holding && G.holding.stIdx === G.stations.indexOf(st);
+    drawProgressBar(x, by, w * 0.72, occ.workProgress, holding ? '#ff4f86' : '#ff7ba3');
     const p = 0.5 + 0.5 * Math.sin(G.time * 9);
     ctx.font = `800 ${(15 + p * 3) * K}px 'Baloo 2', sans-serif`;
-    ctx.fillStyle = '#e0447a';
-    ctx.fillText('CHẠM! 👆', x, by - 16 * K);
+    ctx.fillStyle = holding ? '#c62a5e' : '#e0447a';
+    ctx.fillText(holding ? 'ĐANG GIỮ… ✨' : 'GIỮ NGÓN TAY! 👆', x, by - 16 * K);
   } else if (occ && occ.state === 'masked') {
     drawProgressBar(x, by, w * 0.72, occ.serviceTimer / maskTime(), '#a58ae0');
   } else if (maskDone) {
@@ -910,6 +939,14 @@ function drawCustomerUi(c) {
     }
   }
 
+  // đổi chỗ được với khách đang chọn → hiện dấu 🔄
+  if (G.selected && G.selected !== c && canSwap(G.selected, c)) {
+    const p = 0.5 + 0.5 * Math.sin(G.time * 6);
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.font = `${(21 + p * 4) * K}px sans-serif`;
+    ctx.fillText('🔄', c.x, c.y - 118 * K);
+  }
+
   if (!showBubble) return;
   const wish = currentWish(c);
   const icon = wish === 'pay' ? PAY_ICON : SERVICES[wish].icon;
@@ -988,6 +1025,14 @@ export function draw(dt) {
       });
     }
     seatFront(s);
+  }
+
+  // ghế trống sáng lên khi đang chọn một khách → nhắc là đưa về ghế được
+  if (G.running && G.selected && ['sit', 'done', 'awaitStaff', 'queue'].includes(G.selected.state)) {
+    for (const st of G.seats) {
+      if (st.taken) continue;
+      glowRing(st.x - 34 * K, st.y - 54 * K, 68 * K, 84 * K, 16 * K, 'rgba(80,150,240,%A%)', 5);
+    }
   }
 
   drawTeaCart();

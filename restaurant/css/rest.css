@@ -150,9 +150,15 @@ html, body {
 .lv-bar i { display: block; height: 100%; width: 0; border-radius: 7px; background: linear-gradient(90deg,#ffd76a,#ff9f43); transition: width .5s; }
 .levelup {
   margin-top: 10px; font-size: 17px; font-weight: 800; color: #7a5ad0;
+  line-height: 1.35;
   opacity: 0; transition: opacity .4s;
 }
-.levelup.show { opacity: 1; animation: hint-bounce 1.4s ease-in-out infinite; }
+/* nhún lên xuống tại chỗ (không dùng hint-bounce vì nó có translateX(-50%)) */
+.levelup.show { opacity: 1; animation: bounce-y 1.4s ease-in-out infinite; }
+@keyframes bounce-y {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-5px); }
+}
 
 .start-tip {
   margin: 10px auto 0; max-width: 420px;
@@ -471,3 +477,40 @@ html, body {
 .decor-tag { font-size: 11.5px; font-weight: 800; color: #b89070; white-space: nowrap; }
 .decor-tag.buy { color: #d1913a; }
 .decor-tag.on { color: #3ba85a; }
+
+/* ── nút bắt đầu lại từ Ngày 1 (xoá tiến trình cũ) ── */
+.reset-row { margin-top: 14px; }
+.reset-btn {
+  border: none; border-radius: 20px;
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 7px 16px;
+  background: rgba(190,140,100,.14);
+  color: #a5825f; font-family: inherit;
+  font-size: 14px; font-weight: 800;
+  cursor: pointer;
+  transition: transform .1s, background .15s;
+}
+.reset-btn:active { transform: scale(.95); }
+.reset-row.asking .reset-btn { display: none; }
+
+.reset-ask {
+  display: none;
+  align-items: center; justify-content: center;
+  flex-wrap: wrap; gap: 8px;
+  padding: 10px 14px;
+  border-radius: 20px;
+  background: #fff2e8; border: 2px solid #f0c0a0;
+}
+.reset-row.asking .reset-ask { display: flex; }
+.reset-q { font-size: 14.5px; font-weight: 800; color: #b06a4a; }
+.reset-yes, .reset-no {
+  border: none; border-radius: 18px;
+  padding: 7px 15px;
+  font-family: inherit; font-size: 14px; font-weight: 800;
+  cursor: pointer;
+  transition: transform .1s;
+}
+.reset-yes { background: linear-gradient(180deg,#ff9a86,#ee6b52); box-shadow: 0 3px 0 #c9503a; color: #fff; }
+.reset-yes:active { transform: translateY(2px); box-shadow: 0 1px 0 #c9503a; }
+.reset-no { background: #fff; box-shadow: 0 2px 6px rgba(160,90,40,.18); color: #a5825f; }
+.reset-no:active { transform: scale(.95); }

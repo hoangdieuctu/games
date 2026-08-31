@@ -45,6 +45,13 @@ export function addExp(n) {
   return ups;
 }
 
+// xoá sạch tiến trình: về Ngày 1, hết vàng, cấp 1
+export function resetPlayer() {
+  gold = 0; exp = 0; level = 1;
+  for (const k of ['rest_gold', 'rest_exp', 'rest_level', 'rest_day'])
+    localStorage.removeItem(k);
+}
+
 export function loadDay() {
   const d = parseInt(localStorage.getItem('rest_day') || '1', 10);
   return d >= 1 ? d : 1;

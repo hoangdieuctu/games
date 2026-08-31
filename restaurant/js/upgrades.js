@@ -46,6 +46,11 @@ export function loadShop() {
   try { levels = JSON.parse(localStorage.getItem('rest_upg') || '{}') || {}; } catch (e) { levels = {}; }
 }
 
+export function resetShop() {
+  levels = {};
+  localStorage.removeItem('rest_upg');
+}
+
 export function levelOf(key) { return levels[key] || 0; }
 
 export function nextCost(key) {

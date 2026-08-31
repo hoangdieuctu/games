@@ -6,12 +6,12 @@ import { SERVICES } from './config.js';
 export const UPGRADES = {
   tea: {
     name: 'Trà & Tạp Chí', icon: '🍵',
-    desc: 'Khách ngồi chờ bớt sốt ruột',
+    desc: 'Khách chờ bớt sốt ruột · xe trà thêm lượt, hồi nhiều tim hơn',
     costs: [80, 180],
   },
   oil: {
     name: 'Dầu Thơm Hảo Hạng', icon: '🫧',
-    desc: 'Mát-xa & làm móng nhanh xong hơn',
+    desc: 'Mát-xa & làm móng nhanh xong hơn · giữ ngón tay càng ăn tiền',
     costs: [100, 220],
   },
   steam: {
@@ -58,6 +58,13 @@ export function addToBank(amount) {
   localStorage.setItem('spa_bank', String(bank));
 }
 
+export function resetShop() {
+  levels = {};
+  bank = 0;
+  localStorage.removeItem('spa_upg');
+  localStorage.removeItem('spa_bank');
+}
+
 export function levelOf(key) { return levels[key] || 0; }
 
 export function nextCost(key) {
@@ -78,6 +85,14 @@ export function buy(key) {
 // ── hiệu ứng của nâng cấp lên gameplay ──
 
 export function sitDecayMult()  { return [1, 0.65, 0.45][levelOf('tea')]; }
+
+// ── xe trà: mỗi ngày mời được mấy lượt, mỗi lượt hồi mấy tim, nguội bao lâu ──
+export function teaUses()     { return [3, 4, 5][levelOf('tea')]; }
+export function teaHeal()     { return [3, 3.5, 4][levelOf('tea')]; }
+export function teaCooldown() { return [18, 15, 12][levelOf('tea')]; }
+
+// giữ ngón tay: tiến độ cộng thêm bao nhiêu mỗi giây
+export function holdBoostRate() { return [0.26, 0.33, 0.42][levelOf('oil')]; }
 export function tipMult()       { return [1, 1.5, 2][levelOf('decor')]; }
 export function extraSeats()    { return levelOf('seat'); }
 export function staffCount()    { return 1 + levelOf('staff'); }
