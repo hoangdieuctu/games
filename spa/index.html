@@ -7,8 +7,8 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Tiệm Spa">
 <link rel="apple-touch-icon" href="../icon-spa-180.png">
-<title>Tiệm Spa Vui Vẻ</title>
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23ffb3c8'/%3E%3Ccircle cx='16' cy='18' r='8' fill='%23ffdfc4'/%3E%3Cpath d='M8 16 a8 8 0 0 1 16 0 l-2 0 a6 6 0 0 0 -12 0 Z' fill='%23fff'/%3E%3Ccircle cx='16' cy='8.5' r='2.6' fill='%23fff'/%3E%3Ccircle cx='13' cy='17.5' r='1.2' fill='%23503020'/%3E%3Ccircle cx='19' cy='17.5' r='1.2' fill='%23503020'/%3E%3Cpath d='M13.5 21 q2.5 2 5 0' stroke='%23e06080' stroke-width='1.2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
+<title>Spa Bờ Biển Xanh</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%237fd4de'/%3E%3Ccircle cx='16' cy='18' r='8' fill='%23ffdfc4'/%3E%3Cpath d='M8 16 a8 8 0 0 1 16 0 l-2 0 a6 6 0 0 0 -12 0 Z' fill='%23fff'/%3E%3Ccircle cx='16' cy='8.5' r='2.6' fill='%23fff'/%3E%3Ccircle cx='13' cy='17.5' r='1.2' fill='%23503020'/%3E%3Ccircle cx='19' cy='17.5' r='1.2' fill='%23503020'/%3E%3Cpath d='M13.5 21 q2.5 2 5 0' stroke='%23e06080' stroke-width='1.2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="css/spa.css">
 </head>
 <body>
@@ -16,46 +16,62 @@
 <canvas id="cv"></canvas>
 
 <div class="hud">
-  <a class="btn" href="../index.html" aria-label="Quay lại">←</a>
+  <a class="btn wood" href="../index.html" aria-label="Quay lại">🏝️</a>
+  <button class="btn wood" id="pause-btn" aria-label="Tạm dừng">⏸️</button>
   <div class="pill" id="day-pill"><span class="ico">🌸</span><span id="day-val">Ngày 1</span></div>
   <div class="spacer"></div>
+  <div class="topbar">
+    <div class="tb-cell">TỔNG&nbsp;<b><span id="money-val">0</span> 💰</b><small id="goal-val" hidden></small></div>
+    <div class="tb-sep"></div>
+    <div class="tb-cell">MỤC TIÊU&nbsp;<b><span id="goal-big">100</span> 💰</b></div>
+  </div>
+  <div class="spacer"></div>
+  <div class="hud-stars"><span id="hst1">★</span><span id="hst2">★</span><span id="hst3">★</span></div>
   <div class="pill" id="cust-pill"><span class="ico">👩</span><span id="cust-val">0</span></div>
-  <div class="pill" id="money-pill"><span class="ico">💰</span><span id="money-val">0</span><small id="goal-val">/100</small></div>
-  <button class="btn" id="pause-btn" aria-label="Tạm dừng">⏸️</button>
-  <button class="btn" id="music-btn" aria-label="Nhạc nền">🎵</button>
-  <button class="btn" id="snd-btn" aria-label="Âm thanh">🔊</button>
+  <div class="pill" id="money-pill" hidden></div>
+  <button class="btn wood" id="music-btn" aria-label="Nhạc nền">🎵</button>
+  <button class="btn wood" id="snd-btn" aria-label="Âm thanh">🔊</button>
 </div>
 
 <div id="hint"></div>
 
+<!-- ── cốt truyện tranh mở đầu ── -->
+<div class="overlay" id="ov-story">
+  <div class="card wide comic-card">
+    <h1>🌊 Kỳ Nghỉ Ở Bãi Biển Ngọc 🌊</h1>
+    <div class="comic" id="story-grid"></div>
+    <div class="btn-row">
+      <button class="big-btn play" id="btn-story-close">Bắt đầu thôi! ▸</button>
+    </div>
+  </div>
+</div>
+
 <!-- ── bắt đầu ngày ── -->
 <div class="overlay" id="ov-start">
-  <div class="card">
-    <h1>🌸 Tiệm Spa Vui Vẻ 🌸</h1>
-    <div class="chapter-line" id="start-chapter">🏠 Tiệm Nhỏ Đầu Phố</div>
-    <div class="day-big" id="start-day">Ngày 1</div>
-    <div class="lv-dots" id="start-dots"></div>
-    <div class="goal-line">Mục tiêu: <span id="start-goal">100</span> 💰</div>
-    <div class="expert-line">⭐⭐⭐ Mục tiêu vàng: <b id="start-expert">0</b> 💰</div>
-    <div class="bank-line">Ngân quỹ: <b id="start-bank">0</b> 💰</div>
+  <div class="card map-card">
+    <div class="map-head">
+      <span class="map-ribbon" id="start-chapter">🏖️ Spa Bờ Biển Xanh</span>
+    </div>
+    <div class="start-flex">
+      <canvas id="start-hero" class="hero-cv"></canvas>
+      <div class="start-mid">
+        <div class="day-big" id="start-day">Ngày 1</div>
+        <div class="lv-dots" id="start-dots"></div>
+        <div class="goal-line">Mục tiêu: <span id="start-goal">100</span> 💰</div>
+        <div class="expert-line">⭐⭐⭐ Mục tiêu vàng: <b id="start-expert">0</b> 💰</div>
+        <div class="bank-line">Ngân quỹ: <b id="start-bank">0</b> 💰</div>
+      </div>
+    </div>
     <div class="unlock-row" id="start-unlocks"></div>
     <div class="svc-row" id="start-svcs"></div>
-    <div class="howto">
-      <div><span class="n">1</span><span>Chạm vào <b>khách</b> đang chờ, rồi chạm <b>ô dịch vụ</b> khách muốn</span></div>
-      <div><span class="n">2</span><span><b>Cô nhân viên</b> 💁‍♀️ sẽ đến làm — <b>giữ ngón tay</b> trên ô cho nhanh hơn!</span></div>
-      <div><span class="n">3</span><span>Mặt nạ 🧖‍♀️ ngấm xong nhớ chạm để cô ấy đến <b>gỡ mặt nạ</b></span></div>
-      <div><span class="n">4</span><span>Xong hết thì đưa khách ra <b>quầy</b> 💰 — nhân viên tự ra <b>tính tiền cả hàng một lượt</b></span></div>
-      <div><span class="n">🍵</span><span>Chạm <b>xe trà</b> để mời trà <b>cả tiệm</b> — ai cũng hồi tim, rồi xe nghỉ một lúc</span></div>
-      <div><span class="n">🔄</span><span>Chọn một khách rồi chạm khách khác để <b>đổi chỗ</b>, hoặc chạm <b>ghế trống</b> để mời về ghế đợi</span></div>
-      <div><span class="n">♥</span><span>Đừng để khách chờ lâu — hết tim là khách giận bỏ về!</span></div>
-    </div>
     <div class="btn-row">
       <button class="big-btn alt" id="btn-shop">🛍️ Nâng Cấp</button>
       <button class="big-btn alt2" id="btn-decor">🎨 Trang Trí</button>
-      <button class="big-btn" id="btn-start">Mở Cửa Tiệm! ✨</button>
+      <button class="big-btn play" id="btn-start">CHƠI!</button>
     </div>
     <div class="reset-row">
-      <button class="reset-btn" id="btn-reset"><span>🔄</span>Bắt đầu lại từ Ngày 1</button>
+      <button class="reset-btn" id="btn-story"><span>📖</span>Xem lại cốt truyện</button>
+      <button class="reset-btn" id="btn-reset"><span>🔄</span>Chơi lại từ Ngày 1</button>
       <div class="reset-ask" id="reset-ask">
         <span class="reset-q">Xoá hết ngày, ngân quỹ, đồ đã mua?</span>
         <button class="reset-yes" id="btn-reset-yes">Xoá hết, chơi lại ✓</button>
@@ -65,17 +81,62 @@
   </div>
 </div>
 
+<!-- ── "Những Điều Cơ Bản" trước ngày đầu ── -->
+<div class="overlay" id="ov-basics">
+  <div class="card teal-card">
+    <h1>Những Điều Cơ Bản</h1>
+    <div class="start-flex">
+      <div class="basics-text">
+        <p>Chào bạn! Mình là <b>Sen</b> 🌸 Trước khi mở cửa tiệm spa đầu tiên, cùng xem nhanh cách phục vụ nhé!</p>
+        <div class="howto">
+          <div><span class="n">1</span><span>Chạm vào <b>khách</b> đang chờ, rồi chạm <b>chỗ dịch vụ</b> khách muốn (nhìn bong bóng 💭)</span></div>
+          <div><span class="n">2</span><span>Mình sẽ chạy tới làm — <b>giữ ngón tay</b> trên ô để làm nhanh hơn!</span></div>
+          <div><span class="n">3</span><span>Đắp mặt nạ thì <b>chọn kiểu khách thích</b> — thấy khách cười là đúng!</span></div>
+          <div><span class="n">4</span><span>Xong hết thì đưa khách ra <b>quầy lễ tân</b> 💰 · đừng để khách hết tim ♥ nhé!</span></div>
+        </div>
+      </div>
+      <canvas id="basics-hero" class="hero-cv"></canvas>
+    </div>
+    <button class="big-btn play" id="btn-basics-go">BẮT ĐẦU NÀO!</button>
+  </div>
+</div>
+
+<!-- ── chọn mặt nạ ── -->
+<div class="overlay" id="ov-mask">
+  <div class="card teal-card narrow mask-card">
+    <h1>Chọn Mặt Nạ!</h1>
+    <div class="mask-row">
+      <button class="arrow-btn" id="mask-left">◀</button>
+      <canvas id="mask-face"></canvas>
+      <button class="arrow-btn" id="mask-right">▶</button>
+    </div>
+    <div class="mask-name" id="mask-name">Mặt nạ dưa leo</div>
+    <div class="mask-tip">Bấm mũi tên tới khi khách <b>nở nụ cười</b> — đó là chiếc mặt nạ khách thích nhất!</div>
+    <button class="big-btn play" id="btn-mask-ok">Đắp mặt nạ ✓</button>
+  </div>
+</div>
+
 <!-- ── kết thúc ngày ── -->
 <div class="overlay" id="ov-end">
-  <div class="card">
-    <h1 id="end-title">Hết Ngày!</h1>
+  <div class="card teal-card">
+    <div class="closed-banner" id="end-banner">ĐÓNG CỬA</div>
+    <h1 id="end-title">Chúc Mừng!</h1>
+    <div class="start-flex">
+      <div class="end-stats">
+        <div class="stat-row"><span>Tiền dịch vụ:</span><b id="r-serv">0 💰</b></div>
+        <div class="stat-row"><span>Tiền boa:</span><b id="r-tip">0 💰</b></div>
+        <div class="stat-row total"><span>Tổng cộng:</span><b id="r-total">0 💰</b></div>
+        <div class="stat-row"><span>😊 Khách đã phục vụ:</span><b id="r-served">0</b></div>
+        <div class="stat-row"><span>😾 Khách bỏ về:</span><b id="r-lost">0</b></div>
+      </div>
+      <canvas id="end-hero" class="hero-cv"></canvas>
+    </div>
     <div class="stars"><span id="st1">★</span><span id="st2">★</span><span id="st3">★</span></div>
-    <div class="result-line" id="end-money">💰 0 / 100</div>
     <div class="result-sub" id="end-goals"></div>
-    <div class="result-sub" id="end-sub"></div>
+    <div class="result-sub" id="end-bank"></div>
     <div class="btn-row">
       <button class="big-btn alt" id="btn-retry">Chơi Lại 🔄</button>
-      <button class="big-btn" id="btn-next" style="display:none;">Ngày Tiếp Theo ➜</button>
+      <button class="big-btn play" id="btn-next" style="display:none;">Ngày Tiếp Theo ➜</button>
     </div>
   </div>
 </div>

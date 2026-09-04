@@ -5,7 +5,7 @@ import { SERVICES, TYPES, ROBES, SKINS, HAIRS, HAIR_STYLES, pick } from './confi
 import { anchorPos } from './layout.js';
 import { sAssign, sDone, sBell, sAngry, sCash } from './audio.js';
 import { spark, coin, puff, heartPop, textPop } from './particles.js';
-import { setHint, advanceTutorial, updateCustPill, bump } from './ui.js';
+import { setHint, advanceTutorial, updateCustPill, bump, closeMaskPickFor } from './ui.js';
 import { tipMult, addToBank, holdBoostRate } from './upgrades.js';
 
 export function makeCustomer() {
@@ -252,6 +252,7 @@ function payOne(c) {
   const tip = Math.round(Math.ceil(Math.max(0, c.patience)) * 2 * tipMult());
   const total = Math.round(c.earned * c.payMult) + tip;
   G.money += total;
+  G.tips += tip;
   addToBank(total);
   G.paidCount++;
   for (let i = 0; i < 6; i++) coin(c.x, c.y - 40 * G.K);
@@ -280,6 +281,7 @@ export function payQueue() {
 
 export function customerAngry(c) {
   if (c.state === 'exitAngry' || c.state === 'pay') return;
+  closeMaskPickFor(c); // đang mở bảng chọn mặt nạ cho khách này thì đóng lại
   freeAnchor(c);
   if (G.selected === c) G.selected = null;
   G.angryCount++;

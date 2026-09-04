@@ -15,6 +15,7 @@ import { G } from './state.js';
 import { SERVICES } from './config.js';
 import { staffCount, teaHeal, teaCooldown } from './upgrades.js';
 import { finishService, payQueue } from './customers.js';
+import { openMaskPick } from './ui.js';
 import { sAssign, sDone } from './audio.js';
 import { spark, heartPop } from './particles.js';
 
@@ -35,7 +36,8 @@ export function initStaff() {
 }
 
 export function staffHome(i) {
-  return { x: G.W * (0.175 + i * 0.045), y: G.H * 0.56 };
+  // cô chủ đứng chờ gần quầy lễ tân như trong video
+  return { x: G.W * (0.66 - i * 0.05), y: G.H * 0.70 };
 }
 
 export function placeStaffHome() {
@@ -210,8 +212,8 @@ export function updateStaff(dt) {
         const st = G.stations[t.stIdx];
         const c = st.occupant;
         if (c && t.type === 'apply' && c.state === 'awaitStaff') {
-          c.state = 'masked';
-          c.serviceTimer = 0;
+          // mở bảng "Chọn mặt nạ!" — chọn đúng mặt cười khách được thêm tim
+          openMaskPick(c);
         } else if (c && t.type === 'remove' && c.state === 'maskDone') {
           finishService(c);
         }

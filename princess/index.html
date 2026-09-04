@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Công Chúa">
+<link rel="apple-touch-icon" href="../icon-princess-180.png">
+<title>Công Chúa Lấp Lánh</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23ff9ccf'/%3E%3Cpath d='M7 22 L9 11 L13 16 L16 8 L19 16 L23 11 L25 22 Z' fill='%23ffd84a' stroke='%23d8a800' stroke-width='1'/%3E%3Ccircle cx='16' cy='10' r='1.8' fill='%23e0344d'/%3E%3Ccircle cx='9.5' cy='13' r='1.2' fill='%237fb8ff'/%3E%3Ccircle cx='22.5' cy='13' r='1.2' fill='%237fb8ff'/%3E%3Crect x='6' y='22' width='20' height='3.5' rx='1.5' fill='%23e3b93a'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div id="bg-fx" aria-hidden="true"></div>
+
+<!-- ── MÀN HÌNH TIÊU ĐỀ ── -->
+<section class="screen show" id="scr-title">
+  <div class="title-wrap">
+    <svg id="title-hero" class="hero-svg" aria-hidden="true"></svg>
+    <div class="title-card">
+      <div class="title-crown">👑</div>
+      <h1>Công Chúa<br>Lấp Lánh</h1>
+      <p>Trang điểm và thay váy cho công chúa<br>thật giống với công chúa mẫu nhé! ✨</p>
+      <button class="big-btn" id="btn-play">Chơi ngay ▸</button>
+      <a class="link-back" href="../index.html">‹ Về kho trò chơi</a>
+    </div>
+  </div>
+</section>
+
+<!-- ── BẢN ĐỒ VÒNG CHƠI ── -->
+<section class="screen" id="scr-map">
+  <header class="hud">
+    <button class="btn" id="map-back" aria-label="Về trang đầu">🏠</button>
+    <h2 class="hud-title">Chọn vòng chơi</h2>
+    <div class="spacer"></div>
+    <div class="pill">💎 <b id="map-gems">0</b></div>
+    <div class="pill">🪞 <b id="map-hints">0</b></div>
+    <div class="pill">⭐ <b id="map-stars">0</b><small>/60</small></div>
+    <button class="btn wide" id="map-mini">🎮 Kiếm 💎</button>
+    <button class="btn music-btn" aria-label="Nhạc nền">🎵</button>
+    <button class="btn snd-btn" aria-label="Âm thanh">🔊</button>
+  </header>
+  <div class="map-scroll"><div class="map-grid" id="map-grid"></div></div>
+</section>
+
+<!-- ── MÀN CHƠI ── -->
+<section class="screen" id="scr-game">
+  <header class="hud">
+    <button class="btn" id="g-back" aria-label="Về bản đồ">🗺️</button>
+    <div class="pill lv">Vòng <b id="g-level">1</b></div>
+    <div class="meter" id="meter"><div class="meter-fill" id="meter-fill"></div><span id="meter-txt">Giống 0%</span></div>
+    <div class="pill">💎 <b id="g-gems">0</b></div>
+    <button class="btn hint" id="g-hint" aria-label="Dùng gương thần">🪞 <b id="g-hints">1</b></button>
+    <button class="btn" id="g-mini" aria-label="Chơi mini game kiếm kim cương">🎮</button>
+    <button class="btn music-btn" aria-label="Nhạc nền">🎵</button>
+    <button class="btn snd-btn" aria-label="Âm thanh">🔊</button>
+    <button class="btn done" id="g-done" disabled>Hoàn thành ✔</button>
+  </header>
+  <div class="stage">
+    <div class="panel model">
+      <div class="panel-tag">👑 Công chúa mẫu</div>
+      <svg id="svg-model" aria-label="Công chúa mẫu"></svg>
+    </div>
+    <div class="panel mine">
+      <div class="panel-tag">💖 Công chúa của bạn</div>
+      <svg id="svg-mine" aria-label="Công chúa của bạn"></svg>
+      <div class="fx" id="fx-mine"></div>
+    </div>
+  </div>
+  <div class="bottom">
+    <div class="tabs" id="tabs"></div>
+    <div class="options" id="options"></div>
+  </div>
+</section>
+
+<!-- ── MUA VẬT PHẨM ── -->
+<div class="overlay" id="ov-buy">
+  <div class="card">
+    <h2 id="buy-title">Mua vật phẩm</h2>
+    <div class="buy-preview" id="buy-preview"></div>
+    <div class="buy-name" id="buy-name"></div>
+    <div class="buy-price">Giá: <b id="buy-price">0</b> 💎 &nbsp;·&nbsp; Bạn có: <b id="buy-have">0</b> 💎</div>
+    <p class="buy-msg" id="buy-msg"></p>
+    <div class="btn-row">
+      <button class="big-btn ghost" id="buy-close">Đóng</button>
+      <button class="big-btn" id="buy-ok">Mua 💎</button>
+      <button class="big-btn alt" id="buy-mini">🎮 Kiếm kim cương</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── KHÔNG CÒN GƯƠNG THẦN ── -->
+<div class="overlay" id="ov-nohint">
+  <div class="card">
+    <h2>🪞 Hết gương thần rồi!</h2>
+    <p class="sub">Gương thần sẽ chỉ ra chỗ còn thiếu. Bạn được tặng gương sau một số vòng, hoặc mua bằng kim cương.</p>
+    <div class="btn-row">
+      <button class="big-btn ghost" id="nohint-close">Để sau</button>
+      <button class="big-btn" id="nohint-buy">Mua 1 gương · <span id="nohint-price">45</span> 💎</button>
+      <button class="big-btn alt" id="nohint-mini">🎮 Kiếm kim cương</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── HOÀN THÀNH VÒNG ── -->
+<div class="overlay" id="ov-complete">
+  <div class="card celebrate">
+    <div class="confetti" id="confetti"></div>
+    <h1 id="cp-title">Tuyệt vời! 🎉</h1>
+    <div class="stars-big" id="cp-stars"><span>★</span><span>★</span><span>★</span></div>
+    <p class="sub" id="cp-sub">Giống 100%</p>
+    <div class="reward" id="cp-reward">+0 💎</div>
+    <p class="gift" id="cp-gift" hidden>🪞 Bạn nhận được 1 Gương thần!</p>
+    <div class="btn-row">
+      <button class="big-btn ghost" id="cp-map">🗺️ Bản đồ</button>
+      <button class="big-btn ghost" id="cp-retry">↻ Chơi lại</button>
+      <button class="big-btn" id="cp-next">Vòng tiếp ▸</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── CHIẾN THẮNG TOÀN BỘ ── -->
+<div class="overlay" id="ov-final">
+  <div class="card celebrate wide">
+    <div class="confetti" id="confetti2"></div>
+    <h1>👑 Nữ hoàng thời trang! 👑</h1>
+    <p class="sub">Bạn đã hoàn thành cả 20 vòng. Tổng sao: <b id="final-stars">0</b>/60</p>
+    <svg id="final-hero" class="hero-svg small" aria-hidden="true"></svg>
+    <div class="btn-row">
+      <button class="big-btn" id="final-map">🗺️ Chơi lại các vòng lấy đủ sao</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── MINI GAME ── -->
+<div class="overlay" id="ov-mini">
+  <div class="card mini-card">
+    <button class="btn close-x" id="mini-x" aria-label="Đóng">✕</button>
+    <div id="mini-body"></div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>

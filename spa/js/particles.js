@@ -7,7 +7,8 @@ export function spark(x, y) {
   G.particles.push({ t: 'spark', x, y, vx: (Math.random() - 0.5) * 60, vy: -40 - Math.random() * 60, life: 0.7, max: 0.7, sz: (4 + Math.random() * 5) * G.K, hue: 45 + Math.random() * 20 });
 }
 export function coin(x, y) {
-  G.particles.push({ t: 'coin', x, y, sx: x, sy: y, life: 0.75, max: 0.75, dx: G.W - 150, dy: 34 });
+  // bay về thanh TỔNG ở giữa phía trên
+  G.particles.push({ t: 'coin', x, y, sx: x, sy: y, life: 0.75, max: 0.75, dx: G.W * 0.44, dy: 34 });
 }
 export function steam(x, y) {
   G.particles.push({ t: 'steam', x, y, vx: (Math.random() - 0.5) * 14, vy: -34 - Math.random() * 24, life: 1.6, max: 1.6, sz: (9 + Math.random() * 9) * G.K });

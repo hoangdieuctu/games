@@ -1,7 +1,18 @@
-// ── Bố cục: kích thước canvas và toạ độ neo của mọi vị trí trong tiệm ──
+// ── Bố cục sân trong biệt thự spa bên bờ biển (theo kiểu Sally's Spa):
+//    ghế mặt nạ vàng trên-trái · buồng tắm vòi sen giữa-trên · ghế làm móng
+//    trên-phải · giường mát-xa ở giữa · đài phun nước · ghế băng chờ phía dưới
+//    · quầy lễ tân + thu ngân dưới-phải · xe trà dưới-trái ──
 
 import { G } from './state.js';
 import { extraSeats } from './upgrades.js';
+
+// vị trí đặt sẵn cho từng loại ô dịch vụ (tỉ lệ theo màn hình)
+const ZONES = {
+  facial:  [[0.135, 0.20], [0.295, 0.20], [0.135, 0.52]],
+  sauna:   [[0.50, 0.10]],
+  nail:    [[0.685, 0.20], [0.845, 0.20], [0.895, 0.52]],
+  massage: [[0.545, 0.50], [0.72, 0.50], [0.37, 0.50], [0.545, 0.80]],
+};
 
 export function layout() {
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -11,74 +22,73 @@ export function layout() {
   G.K = Math.max(0.62, Math.min(1.15, G.H / 820));
   const { W, H, K } = G;
 
-  const topPad = 74;
-  G.door = { x: -60 * K, y: H * 0.52 };
+  const topPad = 78;
+  const zoneH = H - topPad;
+  const zy = (f) => topPad + zoneH * f;
 
-  // ghế chờ bên trái — mở tiệm chỉ có 2 ghế, mua nâng cấp mới có thêm.
-  // Nhóm ghế được canh giữa khu chờ; ghế so le 2 cột cho đỡ chồng hình.
+  // khách bước vào từ lối đi bên trái (con đường từ bãi biển)
+  G.door = { x: -60 * K, y: H * 0.66 };
+
+  // ghế băng gỗ chờ phía dưới, ngồi thành hàng ngang
   const oldSeats = G.seats;
   const nSeats = 2 + extraSeats();
-  const band = 0.58;
-  const seatGap = nSeats > 1 ? Math.min(0.14, band / (nSeats - 1)) : 0;
-  const seatTop = 0.29 + (band - seatGap * (nSeats - 1)) / 2;
+  const benchY = zy(0.835);
+  const seatGap = Math.min(72 * K, (W * 0.34) / Math.max(1, nSeats - 1));
+  const benchX0 = W * 0.31 - (seatGap * (nSeats - 1)) / 2; // hàng ghế canh giữa quanh 0.31W
   G.seats = [];
   for (let i = 0; i < nSeats; i++) {
     G.seats.push({
-      x: W * (0.06 + (i % 2) * 0.065),
-      y: topPad + (H - topPad) * (seatTop + seatGap * i),
+      x: benchX0 + i * seatGap,
+      y: benchY,
       taken: oldSeats[i] ? oldSeats[i].taken : null,
     });
   }
 
-  // xe trà cạnh khu chờ — mời trà giúp khách hồi tim
-  G.teaCart = { x: W * 0.165, y: topPad + (H - topPad) * 0.90 };
+  // xe trà góc dưới-trái, cạnh xe chở mỹ phẩm
+  G.teaCart = { x: W * 0.085, y: zy(0.80) };
 
-  // quầy thu ngân trên phải
-  const rw = 168 * K, rh = 92 * K;
-  G.register = { x: W * 0.885, y: topPad + (H - topPad) * 0.20, w: rw, h: rh };
+  // quầy lễ tân + thu ngân dưới-phải (có máy tính như trong video)
+  const rw = 200 * K, rh = 96 * K;
+  G.register = { x: W * 0.845, y: zy(0.80), w: rw, h: rh };
   const oldQ = G.queueSpots;
   G.queueSpots = [];
   for (let i = 0; i < 3; i++) {
     G.queueSpots.push({
-      x: G.register.x - rw * 0.55 - 8 * K - i * 66 * K,
-      y: G.register.y + rh * 0.22,
+      x: G.register.x - rw * 0.62 - 10 * K - i * 64 * K,
+      y: G.register.y + rh * 0.14,
       taken: oldQ[i] ? oldQ[i].taken : null,
     });
   }
 
-  // các ô dịch vụ ở giữa (giữ nguyên đối tượng station, chỉ cập nhật toạ độ)
-  // phòng xông hơi rộng gấp rưỡi vì chứa nhiều khách
+  // đài phun nước trang trí ở khoảng sân giữa (chỉ để ngắm)
+  G.fountain = { x: W * 0.40, y: zy(0.42), r: 70 * K };
+
+  // các ô dịch vụ đặt theo khu như trong video
   if (G.stations.length) {
-    const zL = W * 0.24, zR = W * 0.84;
-    const n = G.stations.length;
-    const row1 = Math.ceil(n / 2), row2 = n - row1;
-    const wf = (st) => st.key === 'sauna' ? 1.55 : 1;
-    // bề rộng một ô: lấy theo hàng "nặng" nhất để hàng nhiều ô nhất vẫn vừa khung
-    const rows = [G.stations.slice(0, row1), G.stations.slice(row1)];
-    let tw = 196 * K;
-    for (const items of rows) {
-      if (!items.length) continue;
-      const wSum = items.reduce((a, st) => a + wf(st), 0);
-      const gaps = (items.length - 1) * 26 * K;
-      tw = Math.min(tw, (zR - zL - gaps) / wSum);
-    }
-    const th = 128 * K;
-    const y1 = topPad + (H - topPad) * 0.30;
-    const y2 = topPad + (H - topPad) * 0.72;
-    const place = (count, y, startIdx) => {
-      const items = G.stations.slice(startIdx, startIdx + count);
-      const total = items.reduce((a, st) => a + tw * wf(st), 0) + (count - 1) * 26 * K;
-      let x = (zL + zR) / 2 - total / 2;
-      for (const st of items) {
-        const w = tw * wf(st);
-        st.x = x + w / 2;
-        st.y = y;
-        st.w = w; st.h = th;
-        x += w + 26 * K;
+    const tw = Math.min(185 * K, W * 0.145);
+    const th = 122 * K;
+    const used = { facial: 0, sauna: 0, nail: 0, massage: 0 };
+    const overflow = [];
+    for (const st of G.stations) {
+      const zone = ZONES[st.key] || ZONES.massage;
+      const slot = zone[used[st.key]];
+      if (slot) {
+        used[st.key]++;
+        st.x = W * slot[0];
+        st.y = zy(slot[1]) + th / 2;
+        st.w = st.key === 'sauna' ? tw * 1.55 : tw;
+        st.h = th;
+      } else {
+        overflow.push(st);
       }
-    };
-    place(row1, y1, 0);
-    if (row2 > 0) place(row2, y2, row1);
+    }
+    // ô vượt quá chỗ đặt sẵn: xếp thành hàng giữa sân
+    overflow.forEach((st, i) => {
+      st.x = W * (0.30 + i * 0.16);
+      st.y = zy(0.66) + th / 2;
+      st.w = st.key === 'sauna' ? tw * 1.55 : tw;
+      st.h = th;
+    });
   }
 
   // khách đang đứng yên thì dịch về đúng chỗ neo mới
@@ -103,9 +113,9 @@ export function anchorPos(c) {
     const s = G.stations[c.anchor.idx];
     if (!s) return null;
     if (s.key === 'sauna') {
-      // mỗi khách một suất trong phòng xông
+      // mỗi khách một buồng tắm
       const slot = c.anchor.slot || 0;
-      return { x: s.x + (slot - 1) * s.w * 0.26, y: s.y + s.h * 0.30 };
+      return { x: s.x + (slot - 1) * s.w * 0.28, y: s.y + s.h * 0.30 };
     }
     return { x: s.x + s.w * 0.26, y: s.y + s.h * 0.30 };
   }

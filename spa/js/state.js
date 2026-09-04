@@ -17,12 +17,14 @@ export const G = {
   // trong ngày
   money: 0,
   moneyShown: 0,
+  tips: 0,        // tiền boa (hiện ở màn tổng kết như trong video)
   spawned: 0,
   spawnTimer: 0,
   paidCount: 0,
   angryCount: 0,
   custId: 0,
   tutorialStep: -1,
+  maskPick: null, // khách đang được chọn kiểu mặt nạ (minigame "Chọn mặt nạ!")
 
   // thực thể
   customers: [],
@@ -33,6 +35,7 @@ export const G = {
   queueSpots: [],
   register: { x: 0, y: 0, w: 0, h: 0 },
   teaCart: { x: 0, y: 0 },
+  fountain: { x: 0, y: 0, r: 0 },
   door: { x: 0, y: 0 },
   selected: null,
   particles: [],

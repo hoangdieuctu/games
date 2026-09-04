@@ -4,7 +4,7 @@ import { G, saveDayUnlocked } from './state.js';
 import { SERVICES, DECAY, dayConfig } from './config.js';
 import { layout } from './layout.js';
 import { steam, spark, updateParticles } from './particles.js';
-import { updateHud, updateCustPill, setHint, showStart, hideStart, showEnd, hideEnd } from './ui.js';
+import { updateHud, updateHudStars, updateCustPill, setHint, showStart, hideStart, showEnd, hideEnd, showBasics } from './ui.js';
 import { spawnCustomer, finishService, customerAngry, holdBoost } from './customers.js';
 import { initStaff, updateStaff, enqueueTask, taskExists, queueGuests } from './staff.js';
 import { sitDecayMult, staffDur, maskTime, saunaTime, teaUses } from './upgrades.js';
@@ -34,11 +34,13 @@ export function startDay() {
   G.particles = [];
   G.selected = null;
   G.money = 0; G.moneyShown = 0;
+  G.tips = 0;
   G.spawned = 0; G.spawnTimer = 1.2;
   G.paidCount = 0; G.angryCount = 0;
   G.time = 0;
   G.tutorialStep = G.day === 1 ? 0 : -1;
   G.holding = null;
+  G.maskPick = null;
   G.teaCool = 0;
   G.teaLeft = teaUses();
   for (const s of G.seats) s.taken = null;
@@ -48,9 +50,12 @@ export function startDay() {
   G.running = true;
   G.paused = false;
   updateHud();
+  updateHudStars();
   updateCustPill();
   setHint();
   sBell();
+  // ngày đầu tiên: cô chủ tiệm dặn dò "Những điều cơ bản" trước khi mở cửa
+  if (G.day === 1) showBasics();
 }
 
 function endDay() {
@@ -121,6 +126,7 @@ export function update(dt) {
       let decay = 0;
       if (c.state === 'sit') decay = DECAY.sit * sitDecayMult();
       else if (c.state === 'awaitStaff') decay = DECAY.awaitStaff;
+      else if (c.state === 'maskPick') decay = DECAY.awaitStaff; // đang chọn mặt nạ
       else if (c.state === 'maskDone') decay = DECAY.maskDone;
       else if (c.state === 'done') decay = DECAY.done;
       else if (c.state === 'queue') decay = DECAY.queue;
@@ -168,6 +174,7 @@ export function update(dt) {
   G.moneyShown += (G.money - G.moneyShown) * Math.min(1, dt * 8);
   if (Math.abs(G.money - G.moneyShown) < 0.6) G.moneyShown = G.money;
   document.getElementById('money-val').textContent = Math.round(G.moneyShown);
+  updateHudStars();
 
   updateParticles(dt);
 }
