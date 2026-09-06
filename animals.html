@@ -126,6 +126,7 @@ html, body {
 @keyframes fade-in { from { opacity:0; } to { opacity:1; } }
 
 .modal-card {
+  position: relative;
   background: #fff; border-radius: 22px;
   width: 96vw;
   height: 88vh;
@@ -186,19 +187,19 @@ html, body {
   font-size: clamp(11px,1.8vmin,14px); font-weight: 700; color: #333; line-height: 1.35;
 }
 .modal-tag  {
-  display: inline-block; margin-top: 10px;
+  display: inline-block; margin-top: 10px; flex-shrink: 0; align-self: flex-start;
   background: #f0faf4; border-radius: 100px;
   padding: 4px 14px; font-size: clamp(11px,2vmin,15px); font-weight: 800; color: #26de81;
 }
 
 .modal-story {
-  margin-top: 12px; padding: 12px 14px;
+  margin-top: 12px; padding: 12px 14px; flex-shrink: 0;
   background: linear-gradient(135deg, #f0faf4, #e8f8ff);
   border-radius: 12px; border-left: 3px solid #26de81;
   font-size: clamp(11px,1.8vmin,14px); color: #444; line-height: 1.65;
   font-style: italic;
 }
-.modal-nav { display: flex; gap: 10px; margin-top: 14px; }.btn-nav {
+.modal-nav { display: flex; gap: 10px; margin-top: 14px; flex-shrink: 0; }.btn-nav {
   flex: 1; background: #f5f5f5; color: #444; border: none;
   border-radius: 100px; padding: clamp(10px,2vmin,15px);
   font-family: inherit; font-size: clamp(14px,2.5vmin,18px); font-weight: 800;
@@ -213,6 +214,63 @@ html, body {
   cursor: pointer; box-shadow: 0 4px 0 #1ab36a;
 }
 .btn-close:active { transform: scale(.97); }
+
+/* ── Âm thanh ── */
+.sound-toggle {
+  background: #fff; border: 2px solid #26de81; border-radius: 100px;
+  padding: 5px 12px; font-family: inherit;
+  font-size: clamp(13px,2.4vmin,18px); font-weight: 800; color: #26de81;
+  cursor: pointer; line-height: 1.3; white-space: nowrap;
+}
+.sound-toggle.off { border-color: #ccc; color: #aaa; }
+
+.card-speak {
+  position: absolute; top: 5px; right: 5px; z-index: 3;
+  width: clamp(22px,5vmin,32px); height: clamp(22px,5vmin,32px);
+  border: none; border-radius: 50%;
+  background: rgba(255,255,255,.82);
+  box-shadow: 0 2px 6px rgba(0,0,0,.2);
+  font-size: clamp(11px,2.4vmin,16px); line-height: 1;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; padding: 0;
+}
+.card-speak:active { transform: scale(.88); background: #26de81; }
+
+.name-row { display: flex; align-items: center; gap: 10px; }
+.name-row .modal-vi, .name-row .modal-en { flex: 1; min-width: 0; }
+.btn-speak {
+  flex-shrink: 0; border: none; border-radius: 100px;
+  background: #26de81; color: #fff;
+  font-family: inherit; font-weight: 800; cursor: pointer;
+  padding: clamp(5px,1.2vmin,9px) clamp(10px,2vmin,16px);
+  font-size: clamp(11px,1.9vmin,15px);
+  box-shadow: 0 3px 0 #1ab36a; white-space: nowrap;
+}
+.btn-speak:active { transform: translateY(2px); box-shadow: none; }
+.btn-speak.speaking { animation: speak-pulse .7s ease-in-out infinite; }
+@keyframes speak-pulse {
+  0%,100% { transform: scale(1); }
+  50%     { transform: scale(1.08); }
+}
+/* thanh đếm ngược tự động chuyển con */
+.auto-bar {
+  position: absolute; top: 0; left: 0; right: 0; height: 5px;
+  background: rgba(0,0,0,.08); z-index: 5;
+  border-radius: 22px 22px 0 0; overflow: hidden;
+}
+.auto-bar.hidden { display: none; }
+.auto-bar > i {
+  display: block; height: 100%; width: 0;
+  background: linear-gradient(90deg, #26de81, #4a9eff);
+}
+.auto-bar.run > i { animation: auto-fill 5s linear forwards; }
+@keyframes auto-fill { from { width: 0; } to { width: 100%; } }
+
+.speak-warn {
+  margin-top: 8px; font-size: clamp(10px,1.6vmin,13px);
+  color: #e8804a; font-weight: 700;
+}
+.speak-warn.hidden { display: none; }
 </style>
 </head>
 <body>
@@ -220,7 +278,11 @@ html, body {
 <div class="screen" id="screen-browse">
   <div class="browse-header">
     <div class="browse-title">🐾 100 Động Vật</div>
-    <div class="browse-count" id="browse-count">100 con</div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <button class="sound-toggle" id="sound-toggle" onclick="toggleSound()">🔊 Đọc tên</button>
+      <button class="sound-toggle" id="auto-toggle" onclick="toggleAutoPlay()">⏭ Tự động</button>
+      <div class="browse-count" id="browse-count">100 con</div>
+    </div>
   </div>
   <div class="cat-tabs" id="cat-tabs"></div>
   <div class="animal-grid" id="animal-grid"></div>
@@ -228,10 +290,15 @@ html, body {
 
 <div id="modal" class="hidden" onclick="handleModalBg(event)">
   <div class="modal-card" onclick="event.stopPropagation()">
+    <div class="auto-bar hidden" id="auto-bar"><i></i></div>
     <div class="modal-img-area" id="modal-img-area"></div>
     <div class="modal-body">
-      <div class="modal-vi"  id="modal-vi"></div>
-      <div class="modal-en"  id="modal-en"></div>
+      <div class="name-row">
+        <div class="modal-vi" id="modal-vi"></div>
+        <button class="btn-speak" id="btn-speak-en" onclick="speakCurrent()">🔊 English</button>
+      </div>
+      <div class="modal-en" id="modal-en"></div>
+      <div class="speak-warn hidden" id="speak-warn"></div>
       <div class="modal-desc" id="modal-desc"></div>
       <div class="modal-info">
         <div class="info-item"><div class="info-label">🏠 Nơi sống</div><div class="info-value" id="modal-habitat"></div></div>
@@ -572,6 +639,130 @@ const ANIMALS = [
    habitat:'Đáy biển nhiệt đới và cận nhiệt đới', food:'Ăn thịt', size:'Rộng 30cm–2m, nặng 0,5–300kg', fact:'Cá đuối có gai độc ở đuôi dùng để tự vệ khi bị đe dọa.', story:'Cá đuối lượn sát đáy biển phẳng như chiếc bánh dẹt khổng lồ. Chú vùi mình dưới cát để ẩn náu và nghỉ ngơi yên tĩnh. Cá đuối vỗ vây nhẹ nhàng bơi đi trông như đang bay dưới biển!'},
 ];
 
+/* ══════════ Phát âm tên con vật (tiếng Anh) ══════════ */
+const Speech = {
+  enVoice: null, loaded: false, supported: 'speechSynthesis' in window,
+
+  loadVoices() {
+    if (!this.supported) return;
+    const vs = speechSynthesis.getVoices();
+    if (!vs.length) return;
+    this.enVoice =
+        vs.find(v => /^en[-_]US/i.test(v.lang) && /google|samantha|zira|aria/i.test(v.name)) ||
+        vs.find(v => /^en[-_]US/i.test(v.lang)) ||
+        vs.find(v => /^en[-_]GB/i.test(v.lang)) ||
+        vs.find(v => /^en/i.test(v.lang)) || null;
+    this.loaded = true;
+    updateSpeakWarn();
+  },
+
+  cancel() { if (this.supported) { try { speechSynthesis.cancel(); } catch(e){} } },
+
+  say(text, onEnd) {
+    if (!this.supported || !text) { if (onEnd) onEnd(); return; }
+    if (!this.loaded) this.loadVoices();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = this.enVoice ? this.enVoice.lang : 'en-US';
+    if (this.enVoice) u.voice = this.enVoice;
+    u.rate = 0.8;
+    u.pitch = 1.1;
+    u.volume = 1;
+    u.onend = u.onerror = () => { if (onEnd) onEnd(); };
+    // Chrome đôi khi "kẹt" hàng đợi sau khi cancel — resume cho chắc.
+    try { speechSynthesis.resume(); } catch(e){}
+    speechSynthesis.speak(u);
+  }
+};
+
+if (Speech.supported) {
+  Speech.loadVoices();
+  speechSynthesis.onvoiceschanged = () => Speech.loadVoices();
+  // Một số trình duyệt nạp giọng chậm sau khi tải trang.
+  setTimeout(() => Speech.loadVoices(), 400);
+  setTimeout(() => Speech.loadVoices(), 1500);
+}
+
+let autoSpeak = localStorage.getItem('animals_autospeak') !== '0';
+let autoPlay  = localStorage.getItem('animals_autoplay')  === '1';
+let autoTimer = null;
+const AUTO_DELAY = 5000;
+
+function toggleSound() {
+  autoSpeak = !autoSpeak;
+  localStorage.setItem('animals_autospeak', autoSpeak ? '1' : '0');
+  if (!autoSpeak) { speakToken++; Speech.cancel(); markSpeaking(false); }
+  renderToggles();
+}
+
+function toggleAutoPlay() {
+  autoPlay = !autoPlay;
+  localStorage.setItem('animals_autoplay', autoPlay ? '1' : '0');
+  renderToggles();
+  // Nếu đang mở một con vật thì bật/tắt đếm ngược ngay.
+  if (!document.getElementById('modal').classList.contains('hidden')) armAutoPlay();
+  else stopAutoPlay();
+}
+
+function renderToggles() {
+  const b = document.getElementById('sound-toggle');
+  b.textContent = autoSpeak ? '🔊 Đọc tên' : '🔇 Tắt tiếng';
+  b.classList.toggle('off', !autoSpeak);
+  const a = document.getElementById('auto-toggle');
+  a.textContent = autoPlay ? '⏭ Tự động 5s' : '⏭ Tự động';
+  a.classList.toggle('off', !autoPlay);
+}
+
+function updateSpeakWarn() {
+  const el = document.getElementById('speak-warn');
+  if (!el) return;
+  const msg = Speech.supported ? '' : '⚠️ Trình duyệt này không hỗ trợ đọc tên.';
+  el.textContent = msg;
+  el.classList.toggle('hidden', !msg);
+}
+
+/* ── Đếm ngược tự động chuyển sang con tiếp theo ── */
+function stopAutoPlay() {
+  clearTimeout(autoTimer);
+  autoTimer = null;
+  const bar = document.getElementById('auto-bar');
+  bar.classList.add('hidden');
+  bar.classList.remove('run');
+}
+
+function armAutoPlay() {
+  stopAutoPlay();
+  if (!autoPlay) return;
+  const bar = document.getElementById('auto-bar');
+  bar.classList.remove('hidden');
+  void bar.offsetWidth;          // ép trình duyệt chạy lại animation
+  bar.classList.add('run');
+  autoTimer = setTimeout(() => nav(1), AUTO_DELAY);
+}
+
+/* ── Đọc tên ── */
+let speakToken = 0;
+
+function speakName(a) {
+  if (!a) return;
+  const my = ++speakToken;
+  Speech.cancel();
+  markSpeaking(true);
+  Speech.say(a.en, () => { if (my === speakToken) markSpeaking(false); });
+}
+
+function markSpeaking(on) {
+  const en = document.getElementById('btn-speak-en');
+  if (en) en.classList.toggle('speaking', !!on);
+}
+
+function speakCurrent() { speakName(filteredList[currentIdx]); }
+
+// Nút loa nhỏ trên từng thẻ ở lưới.
+function speakCard(e, idx) {
+  e.stopPropagation();
+  speakName(filteredList[idx]);
+}
+
 const CATS = ['Tất Cả','Thú','Chim','Biển','Cá','Bò Sát','Côn Trùng','Rừng','Vùng Lạnh'];
 let filteredList = [];
 let currentIdx = 0;
@@ -589,6 +780,8 @@ function init() {
     };
     tabs.appendChild(b);
   });
+  renderToggles();
+  updateSpeakWarn();
   renderGrid('Tất Cả');
 }
 
@@ -609,7 +802,8 @@ function renderGrid(cat) {
           onload="this.classList.add('loaded')"
           onerror="this.style.display='none'">
       </div>
-      <div class="animal-name">${a.vi}</div>`;
+      <div class="animal-name">${a.vi}</div>
+      <button class="card-speak" aria-label="Đọc tên ${a.vi}" onclick="speakCard(event, ${idx})">🔊</button>`;
     card.onclick = () => openModal(idx);
     grid.appendChild(card);
   });
@@ -637,6 +831,11 @@ function renderModal() {
   document.getElementById('modal-size').textContent    = a.size    || '—';
   document.getElementById('modal-fact').textContent    = a.fact    || '—';
   document.getElementById('modal-story').textContent   = a.story   || '';
+  document.getElementById('modal-tag').textContent     = a.cat     || '';
+  markSpeaking(false);
+  updateSpeakWarn();
+  if (autoSpeak) speakName(a);
+  armAutoPlay();
 }
 
 function nav(dir) {
@@ -644,7 +843,13 @@ function nav(dir) {
   renderModal();
 }
 
-function closeModal() { document.getElementById('modal').classList.add('hidden'); }
+function closeModal() {
+  speakToken++;
+  Speech.cancel();
+  markSpeaking(false);
+  stopAutoPlay();
+  document.getElementById('modal').classList.add('hidden');
+}
 function handleModalBg(e) { if(e.target===document.getElementById('modal')) closeModal(); }
 
 init();
