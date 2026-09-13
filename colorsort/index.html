@@ -119,6 +119,36 @@
 
 <div class="loading" id="loading" hidden><div class="spin"></div><span>Đang xếp bóng…</span></div>
 
+<!-- Báo lỗi rõ ràng nếu phần mã trò chơi không tải được (mở bằng file://, máy chủ
+     trả sai kiểu tệp, hoặc trình duyệt quá cũ) — đỡ phải đoán vì sao nút không ăn. -->
+<div class="boot-error" id="boot-error" hidden>
+  <h2>Chưa chạy được trò chơi 😢</h2>
+  <p id="boot-why"></p>
+  <p class="boot-fix">Trò chơi cần được mở qua một <b>máy chủ web</b> (http:// hoặc https://),
+  không mở trực tiếp tệp trên máy được. Ví dụ chạy trong thư mục <code>games</code>:</p>
+  <code class="boot-cmd">python3 -m http.server 8000</code>
+  <p class="boot-fix">rồi vào <code>http://&lt;địa-chỉ-máy&gt;:8000/colorsort/</code> trên iPad.</p>
+</div>
+
+<script>
+// Trình duyệt quá cũ, không hiểu <script type="module">.
+window.__csBootMsg = '';
+window.addEventListener('error', function (e) {
+  if (!window.__csBootMsg && e && e.message) window.__csBootMsg = e.message;
+}, true);
+</script>
+<script nomodule>
+  window.__csBootMsg = 'Trình duyệt này quá cũ, chưa hỗ trợ JavaScript module.';
+</script>
 <script type="module" src="js/main.js"></script>
+<script>
+setTimeout(function () {
+  if (window.__csReady) return;
+  var box = document.getElementById('boot-error');
+  document.getElementById('boot-why').textContent =
+    window.__csBootMsg || 'Trình duyệt đã chặn không cho tải các tệp trong thư mục js/.';
+  box.hidden = false;
+}, 2500);
+</script>
 </body>
 </html>
