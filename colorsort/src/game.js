@@ -9,7 +9,7 @@ import * as A from './audio.js';
 export const G = {
   level: 1, tubes: [], cap: 4, plan: null, par: 10,
   moves: 0, sel: -1, flyers: [], history: [],
-  doneSet: new Set(), hint: null, hintUntil: 0, wandMode: false,
+  doneSet: new Set(), doneAt: new Map(), nudgeAt: new Map(), hint: null, hintUntil: 0, wandMode: false,
   layout: null, initial: null, W: 0, H: 0, locked: true, finished: false,
 };
 
@@ -57,24 +57,30 @@ export function startLevel(n, keepBoard) {
   G.flyers.length = 0;
   G.history.length = 0;
   G.doneSet = new Set();
+  G.doneAt = new Map();
+  G.nudgeAt = new Map();
   G.hint = null;
   G.wandMode = false;
   G.finished = false;
   G.locked = false;
   FX.clearFx();
   relayout();
-  markDone(true);
+  markDone();
   hooks.onChange && hooks.onChange();
 }
 
 // Chơi lại đúng bàn cũ chứ không xáo ván mới, để bé thử lại cách khác.
 export function restartLevel() { startLevel(G.level, G.initial); }
 
-function markDone(silent) {
+// Ống đã đầy một màu thì coi như đóng nút chai: khoá lại, chạm vào cũng không mở.
+export function isSealed(i) {
+  return G.tubes[i].length === G.cap && isPure(G.tubes[i]);
+}
+
+function markDone() {
   G.tubes.forEach((t, i) => {
-    if (t.length === G.cap && isPure(t)) G.doneSet.add(i);
+    if (isSealed(i) && !G.doneSet.has(i)) { G.doneSet.add(i); G.doneAt.set(i, 0); }
   });
-  if (silent) return;
 }
 
 /* ═══ CHẠM ═══ */
@@ -102,9 +108,11 @@ function onPointer(e) {
 
 function tapTube(i) {
   G.hint = null;
+  // Ống đã đóng nút: chỉ cho nút nảy một cái rồi thôi, không chọn được.
+  if (isSealed(i)) { G.nudgeAt.set(i, performance.now()); A.sBack(); return; }
+
   if (G.sel < 0) {
     if (!G.tubes[i].length) { A.sBack(); return; }
-    if (G.tubes[i].length === G.cap && isPure(G.tubes[i])) { A.sBack(); return; }
     G.sel = i;
     A.sLift();
     return;
@@ -113,9 +121,8 @@ function tapTube(i) {
   const k = canPour(G.tubes, G.sel, i, G.cap);
   if (!k) {
     // Không rót được: thử chọn ống mới cho bé đỡ phải chạm hai lần.
-    if (G.tubes[i].length && !(G.tubes[i].length === G.cap && isPure(G.tubes[i]))) {
-      G.sel = i; A.sLift();
-    } else { A.sNope(); shake = 1; }
+    if (G.tubes[i].length) { G.sel = i; A.sLift(); }
+    else { A.sNope(); shake = 1; }
     return;
   }
   doMove(G.sel, i, k);
@@ -160,8 +167,9 @@ function landFlyer(f) {
   A.sDrop(G.tubes[f.to].length - 1);
   FX.splash(t.cx, y + L.r * 0.5, COLORS[f.color].light, 7);
 
-  if (G.tubes[f.to].length === G.cap && isPure(G.tubes[f.to]) && !G.doneSet.has(f.to)) {
+  if (isSealed(f.to) && !G.doneSet.has(f.to)) {
     G.doneSet.add(f.to);
+    G.doneAt.set(f.to, performance.now());
     const c = COLORS[f.color];
     A.sTubeDone(G.doneSet.size - 1);
     FX.sparkBurst(t.cx, t.y + t.h * 0.45, c.light, 20, 1.25);
@@ -209,6 +217,7 @@ export function undo() {
   G.tubes = h.tubes;
   G.moves = h.moves;
   G.doneSet = new Set(h.done);
+  for (const i of [...G.doneAt.keys()]) if (!G.doneSet.has(i)) G.doneAt.delete(i);
   G.sel = -1;
   G.hint = null;
   A.sUndo();
@@ -238,6 +247,8 @@ export function armWand() {
 export function disarmWand() { G.wandMode = false; canvas.classList.remove('wand'); }
 
 function useWandOn(i) {
+  // Ống đã đóng nút thì đũa thần cũng chịu — giữ đũa lại cho bé chọn ống khác.
+  if (isSealed(i)) { G.nudgeAt.set(i, performance.now()); A.sNope(); return; }
   if (!G.tubes[i].length) { A.sNope(); return; }
   snapshot();
   const L = G.layout, t = L.tubes[i];
@@ -249,7 +260,8 @@ function useWandOn(i) {
   FX.ring(t.cx, y, c.light, 6, L.r * 3, 560);
   disarmWand();
   G.doneSet.delete(i);
-  markDone(true);
+  G.doneAt.delete(i);
+  markDone();
   if (solved(G.tubes)) { finish(); return; }
   hooks.onChange && hooks.onChange();
   checkStuck();
@@ -351,6 +363,16 @@ function draw(now) {
     if (i === G.sel) glow = Math.max(glow, 0.55 + pulse * 0.45);
     if (G.hint && now < G.hintUntil && (i === G.hint[0] || i === G.hint[1])) glow = Math.max(glow, pulse);
     R.drawTubeGlass(ctx, L.tubes[i], L.d, { glow, done: done && i !== G.sel });
+  }
+
+  // Nút chai trên các ống đã xếp xong.
+  for (const i of G.doneSet) {
+    const t0 = G.doneAt.get(i);
+    const grow = t0 ? Math.min(1, (now - t0) / 360) : 1;
+    const n0 = G.nudgeAt.get(i);
+    const nudge = n0 ? (now - n0) / 420 : 0;
+    if (nudge >= 1) G.nudgeAt.delete(i);
+    R.drawTubeCap(ctx, L.tubes[i], L.d, grow, nudge > 0 && nudge < 1 ? nudge : 0, G.tubes[i][0]);
   }
 
   // Quả bóng được nhấc lên khỏi miệng ống, nhún nhẹ.

@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Sắc Màu">
+<meta name="theme-color" content="#2a1a5e">
+<link rel="apple-touch-icon" href="/*__ICON__*/">
+<title>Sắp Xếp Sắc Màu 3D</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%233a2378'/%3E%3Crect x='5' y='6' width='7' height='21' rx='3.5' fill='%23ffffff' opacity='.25'/%3E%3Crect x='12.5' y='6' width='7' height='21' rx='3.5' fill='%23ffffff' opacity='.25'/%3E%3Crect x='20' y='6' width='7' height='21' rx='3.5' fill='%23ffffff' opacity='.25'/%3E%3Ccircle cx='8.5' cy='23' r='3' fill='%23ff3355'/%3E%3Ccircle cx='8.5' cy='17' r='3' fill='%232f7dff'/%3E%3Ccircle cx='16' cy='23' r='3' fill='%23ffcc1a'/%3E%3Ccircle cx='16' cy='17' r='3' fill='%232ec25f'/%3E%3Ccircle cx='16' cy='11' r='3' fill='%23ff3355'/%3E%3Ccircle cx='23.5' cy='23' r='3' fill='%23a34cf0'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&display=swap" rel="stylesheet">
+<style>/*__CSS__*/</style>
+</head>
+<body>
+
+<!-- ══ MÀN HÌNH TIÊU ĐỀ ══ -->
+<section class="screen show" id="scr-title">
+  <div class="title-bubbles" id="title-bubbles" aria-hidden="true"></div>
+  <div class="title-card">
+    <div class="title-tubes" aria-hidden="true">
+      <svg viewBox="0 0 240 150" width="100%" height="100%">
+        <defs>
+          <linearGradient id="glass" x1="0" x2="1">
+            <stop offset="0" stop-color="#fff" stop-opacity=".55"/>
+            <stop offset=".2" stop-color="#fff" stop-opacity=".12"/>
+            <stop offset=".8" stop-color="#fff" stop-opacity=".12"/>
+            <stop offset="1" stop-color="#fff" stop-opacity=".45"/>
+          </linearGradient>
+          <radialGradient id="b1" cx=".35" cy=".3"><stop offset="0" stop-color="#ffb3c0"/><stop offset=".5" stop-color="#ff3355"/><stop offset="1" stop-color="#8e0c26"/></radialGradient>
+          <radialGradient id="b2" cx=".35" cy=".3"><stop offset="0" stop-color="#b6d4ff"/><stop offset=".5" stop-color="#2f7dff"/><stop offset="1" stop-color="#0d2f80"/></radialGradient>
+          <radialGradient id="b3" cx=".35" cy=".3"><stop offset="0" stop-color="#fff0b0"/><stop offset=".5" stop-color="#ffcc1a"/><stop offset="1" stop-color="#9a6b00"/></radialGradient>
+          <radialGradient id="b4" cx=".35" cy=".3"><stop offset="0" stop-color="#b6f0c8"/><stop offset=".5" stop-color="#2ec25f"/><stop offset="1" stop-color="#0b5c27"/></radialGradient>
+        </defs>
+        <g>
+          <rect x="20" y="18" width="46" height="120" rx="23" fill="url(#glass)" stroke="rgba(255,255,255,.6)" stroke-width="2.5"/>
+          <circle cx="43" cy="115" r="20" fill="url(#b1)"/><circle cx="43" cy="76" r="20" fill="url(#b2)"/>
+          <rect x="97" y="18" width="46" height="120" rx="23" fill="url(#glass)" stroke="rgba(255,255,255,.6)" stroke-width="2.5"/>
+          <circle cx="120" cy="115" r="20" fill="url(#b3)"/><circle cx="120" cy="76" r="20" fill="url(#b4)"/><circle cx="120" cy="37" r="20" fill="url(#b1)"/>
+          <rect x="174" y="18" width="46" height="120" rx="23" fill="url(#glass)" stroke="rgba(255,255,255,.6)" stroke-width="2.5"/>
+          <circle cx="197" cy="115" r="20" fill="url(#b2)"/>
+        </g>
+      </svg>
+    </div>
+    <h1>Sắp Xếp<br><span>Sắc Màu</span></h1>
+    <p class="title-sub">Gom các quả bóng cùng màu về chung một ống nhé!</p>
+    <button class="big-btn" id="btn-play">Chơi ngay ▸</button>
+    <div class="title-meta" id="title-meta"></div>
+    <a class="link-back" href="../index.html">‹ Về kho trò chơi</a>
+  </div>
+</section>
+
+<!-- ══ MÀN CHƠI ══ -->
+<section class="screen" id="scr-game">
+  <header class="hud">
+    <button class="btn" id="g-home" aria-label="Về trang đầu">🏠</button>
+    <div class="pill lv">Vòng <b id="g-level">1</b></div>
+    <div class="pill" id="g-movepill">Nước đi <b id="g-moves">0</b></div>
+    <div class="badge-chal" id="g-chal" hidden>⚡ Thử thách</div>
+    <div class="spacer"></div>
+    <div class="pill gem">💎 <b id="g-gems">0</b></div>
+    <button class="btn" id="g-shop" aria-label="Cửa hàng">🛒</button>
+    <button class="btn music-btn" aria-label="Nhạc nền">🎵</button>
+    <button class="btn snd-btn" aria-label="Âm thanh">🔊</button>
+  </header>
+
+  <div class="board-wrap"><canvas id="board"></canvas></div>
+
+  <footer class="dock">
+    <button class="tool" id="t-undo"><span class="ic">↩️</span><span class="lb">Quay lại</span></button>
+    <button class="tool" id="t-hint"><span class="ic">💡</span><span class="lb">Gợi ý</span><b class="cnt" id="c-hint">0</b></button>
+    <button class="tool" id="t-wand"><span class="ic">🪄</span><span class="lb">Đũa thần</span><b class="cnt" id="c-wand">0</b></button>
+    <button class="tool" id="t-tube"><span class="ic">🧪</span><span class="lb">Ống thêm</span><b class="cnt" id="c-tube">0</b></button>
+    <button class="tool" id="t-again"><span class="ic">🔄</span><span class="lb">Chơi lại</span></button>
+  </footer>
+
+  <div class="wand-tip" id="wand-tip" hidden>🪄 Chạm vào ống muốn búng quả trên cùng đi!</div>
+  <div class="wand-tip stuck-tip" id="stuck-tip" hidden>Hết chỗ rót rồi! Bấm ↩️ Quay lại hoặc 🧪 Ống thêm nhé.</div>
+</section>
+
+<!-- ══ LỚP PHỦ: VÒNG HOÀN THÀNH ══ -->
+<div class="overlay" id="ov-win" hidden>
+  <div class="card win-card">
+    <div class="win-ribbon">Tuyệt vời!</div>
+    <div class="stars" id="win-stars"><span>★</span><span>★</span><span>★</span></div>
+    <h2>Xong vòng <b id="win-level">1</b>!</h2>
+    <p class="win-line"><span id="win-moves">0</span> nước đi</p>
+    <div class="win-reward">
+      <div class="rw"><span class="rw-ic">💎</span><b id="win-gems">0</b></div>
+      <div class="rw" id="win-item" hidden><span class="rw-ic" id="win-item-ic">🎁</span><b id="win-item-tx">+1</b></div>
+    </div>
+    <button class="big-btn" id="btn-next">Vòng tiếp theo ▸</button>
+    <button class="ghost-btn" id="btn-replay">Chơi lại vòng này</button>
+  </div>
+</div>
+
+<!-- ══ LỚP PHỦ: CỬA HÀNG ══ -->
+<div class="overlay" id="ov-shop" hidden>
+  <div class="card shop-card">
+    <h2>🛒 Cửa hàng</h2>
+    <div class="shop-gems">Bé đang có <b id="shop-gems">0</b> 💎</div>
+    <div class="shop-list" id="shop-list"></div>
+    <button class="ghost-btn" id="btn-shop-close">Đóng</button>
+  </div>
+</div>
+
+<!-- ══ LỚP PHỦ: TẠM DỪNG ══ -->
+<div class="overlay" id="ov-menu" hidden>
+  <div class="card menu-card">
+    <h2>Tạm nghỉ</h2>
+    <button class="big-btn" id="btn-resume">Chơi tiếp ▸</button>
+    <button class="ghost-btn" id="btn-menu-restart">Chơi lại vòng này</button>
+    <a class="ghost-btn" href="../index.html">Về kho trò chơi</a>
+  </div>
+</div>
+
+<div class="loading" id="loading" hidden><div class="spin"></div><span>Đang xếp bóng…</span></div>
+
+<!-- Lưới an toàn: nếu mã trò chơi không chạy được thì nói rõ lý do,
+     thay vì để lại một nút bấm không phản ứng gì. -->
+<div class="boot-error" id="boot-error" hidden>
+  <h2>Chưa chạy được trò chơi 😢</h2>
+  <p id="boot-why"></p>
+  <p class="boot-fix">Bé thử tải lại trang xem sao. Nếu vẫn vậy thì có thể trình duyệt
+  đã quá cũ — hãy cập nhật iPadOS hoặc mở bằng Safari / Chrome mới nhất.</p>
+</div>
+
+<script>
+window.__csBootMsg = '';
+window.addEventListener('error', function (e) {
+  if (!window.__csBootMsg && e && e.message) window.__csBootMsg = e.message;
+}, true);
+</script>
+
+<script>
+/*__JS__*/
+</script>
+
+<script>
+setTimeout(function () {
+  if (window.__csReady) return;
+  document.getElementById('boot-why').textContent =
+    window.__csBootMsg || 'Trình duyệt không chạy được phần mã của trò chơi.';
+  document.getElementById('boot-error').hidden = false;
+}, 2500);
+</script>
+</body>
+</html>

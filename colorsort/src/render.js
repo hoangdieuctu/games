@@ -236,6 +236,112 @@ function roundRect(ctx, x, y, w, h, r) {
   ctx.closePath();
 }
 
+// ── Nút chai đậy lên ống đã xếp xong ──
+// Nắp khoén thật: mặt nắp ăn theo màu của ống, váy nắp bằng kim loại có răng cưa.
+// Ống đã đậy nút là khoá hẳn, bé chạm vào cũng không chọn được nữa.
+const CRIMPS = 11;        // số răng nhìn thấy ở nửa trước của váy nắp
+
+export function drawTubeCap(ctx, t, d, grow, nudge, ci) {
+  const lip = t.w * 0.11;
+  const col = COLORS[ci % COLORS.length];
+
+  // Nắp rơi từ trên xuống, hơi nảy một cái rồi đậy khít.
+  const e = grow >= 1 ? 1 : 1 - Math.pow(1 - grow, 3);
+  const drop = (1 - e) * d * 0.9;
+  const squash = grow >= 1 ? 1 : 1 + Math.sin(grow * Math.PI) * 0.14;
+  const bounce = nudge > 0 ? Math.sin(nudge * Math.PI * 3) * (1 - nudge) * d * 0.13 : 0;
+  if (e < 0.02) return;
+
+  const rx = (t.w / 2) * 1.07 * squash;
+  const ry = rx * 0.23;
+  const skirt = d * 0.24 * e;
+  const cx = t.cx;
+  const cy = t.y + lip - skirt * 0.45 - drop - bounce;
+
+  // Toạ độ một điểm trên vành trước của hình elip.
+  const front = (a, ox, oy) => [cx + rx * Math.cos(a), cy + oy + ry * Math.sin(a) + (ox || 0)];
+
+  ctx.save();
+
+  // Bóng nắp hắt xuống miệng ống.
+  ctx.fillStyle = 'rgba(16,6,44,.38)';
+  ctx.beginPath();
+  ctx.ellipse(cx, cy + skirt + ry * 0.5, rx * 0.94, ry * 0.85, 0, 0, 6.2832);
+  ctx.fill();
+
+  /* ── Váy nắp: dải kim loại có răng cưa ở mép dưới ── */
+  const STEPS = 64;
+  ctx.beginPath();
+  for (let i = 0; i <= STEPS; i++) {            // mép trên, trái → phải qua phía trước
+    const a = Math.PI - (i / STEPS) * Math.PI;
+    const [x, y] = front(a, 0, 0);
+    i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+  }
+  for (let i = STEPS; i >= 0; i--) {            // mép dưới có răng, phải → trái
+    const a = Math.PI - (i / STEPS) * Math.PI;
+    const tooth = Math.abs(Math.sin(a * CRIMPS)) * skirt * 0.26;
+    const [x, y] = front(a, 0, skirt - tooth);
+    ctx.lineTo(x, y);
+  }
+  ctx.closePath();
+
+  const mg = ctx.createLinearGradient(cx - rx, 0, cx + rx, 0);
+  mg.addColorStop(0.00, '#8a5a06');
+  mg.addColorStop(0.18, '#e8b545');
+  mg.addColorStop(0.38, '#fff1c2');
+  mg.addColorStop(0.62, '#f2cf72');
+  mg.addColorStop(0.84, '#c98c16');
+  mg.addColorStop(1.00, '#7d4f04');
+  ctx.fillStyle = mg;
+  ctx.fill();
+
+  // Rãnh dọc giữa các răng cho váy nắp có khối.
+  ctx.save();
+  ctx.clip();
+  ctx.lineWidth = Math.max(1, rx * 0.035);
+  for (let k = 0; k < CRIMPS; k++) {
+    const a = Math.PI - ((k + 0.5) / CRIMPS) * Math.PI;
+    const [x0, y0] = front(a, 0, 0);
+    const [x1, y1] = front(a, 0, skirt);
+    ctx.strokeStyle = 'rgba(80,44,0,.32)';
+    ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); ctx.stroke();
+    ctx.strokeStyle = 'rgba(255,255,255,.34)';
+    ctx.beginPath();
+    ctx.moveTo(x0 + rx * 0.03, y0); ctx.lineTo(x1 + rx * 0.03, y1);
+    ctx.stroke();
+  }
+  ctx.restore();
+
+  /* ── Mặt nắp: ăn theo màu của ống ── */
+  const tg = ctx.createRadialGradient(cx - rx * 0.34, cy - ry * 0.7, ry * 0.1, cx, cy, rx * 1.02);
+  tg.addColorStop(0, col.light);
+  tg.addColorStop(0.42, col.base);
+  tg.addColorStop(1, col.dark);
+  ctx.fillStyle = tg;
+  ctx.beginPath(); ctx.ellipse(cx, cy, rx, ry, 0, 0, 6.2832); ctx.fill();
+
+  // Vành vàng quanh mặt nắp.
+  ctx.strokeStyle = '#ffe9a8';
+  ctx.lineWidth = Math.max(1.6, rx * 0.075);
+  ctx.beginPath(); ctx.ellipse(cx, cy, rx * 0.97, ry * 0.94, 0, 0, 6.2832); ctx.stroke();
+
+  // Gân chìm đồng tâm như nắp chai thật.
+  ctx.strokeStyle = 'rgba(255,255,255,.22)';
+  ctx.lineWidth = Math.max(1, rx * 0.03);
+  ctx.beginPath(); ctx.ellipse(cx, cy, rx * 0.62, ry * 0.58, 0, 0, 6.2832); ctx.stroke();
+
+  // Vệt sáng lưỡi liềm phía trên trái, mờ dần cho đỡ chói.
+  const hl = ctx.createLinearGradient(cx - rx * 0.7, cy - ry, cx + rx * 0.2, cy + ry * 0.4);
+  hl.addColorStop(0, 'rgba(255,255,255,.55)');
+  hl.addColorStop(1, 'rgba(255,255,255,0)');
+  ctx.fillStyle = hl;
+  ctx.beginPath();
+  ctx.ellipse(cx - rx * 0.32, cy - ry * 0.34, rx * 0.42, ry * 0.32, -0.3, 0, 6.2832);
+  ctx.fill();
+
+  ctx.restore();
+}
+
 // Mũi tên gợi ý bay lượn giữa hai ống.
 export function drawHintArrow(ctx, x, y, t) {
   const bob = Math.sin(t * 0.006) * 6;
