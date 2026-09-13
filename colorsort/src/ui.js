@@ -1,6 +1,6 @@
 // ── Màn hình, thanh thông tin, cửa hàng và bảng chúc mừng ──
 import { ITEMS } from './config.js';
-import { save, persist, addGems, addItem, useItem } from './state.js';
+import { save, persist, addGems, addItem, useItem, saveBoard, clearBoard, validBoard } from './state.js';
 import * as A from './audio.js';
 import * as Game from './game.js';
 import { G } from './game.js';
@@ -65,7 +65,15 @@ function wire() {
   });
 
   $('btn-next').addEventListener('click', () => { A.sTap(); els['ov-win'].hidden = true; play(pendingNext); });
-  $('btn-replay').addEventListener('click', () => { A.sTap(); els['ov-win'].hidden = true; Game.restartLevel(); });
+  $('btn-replay').addEventListener('click', () => {
+    A.sTap();
+    els['ov-win'].hidden = true;
+    // Quay lại chơi vòng vừa xong thì tiến trình cũng phải lùi về vòng đó,
+    // không thì lần mở sau bé lại nhảy sang vòng kế tiếp.
+    save.level = G.level;
+    persist();
+    Game.restartLevel();
+  });
 
   A.initSoundToggle(document.querySelector('.snd-btn'));
   A.initMusicToggle(document.querySelector('.music-btn'));
@@ -84,7 +92,9 @@ export function play(level) {
   // Nhường một nhịp để vòng quay kịp hiện ra trước khi sinh vòng chơi.
   setTimeout(() => {
     Game.resize();
-    Game.startLevel(level);
+    // Còn ván dở đúng vòng này thì dựng lại đúng chỗ bé đang chơi.
+    if (validBoard(save.board, level)) Game.restoreLevel(save.board);
+    else Game.startLevel(level);
     els['loading'].hidden = true;
     A.startMusic();
   }, 60);
@@ -93,6 +103,12 @@ export function play(level) {
 function openMenu() { els['ov-menu'].hidden = false; }
 
 /* ══ THANH THÔNG TIN ══ */
+// Cất ván sau mỗi nước đi để đóng máy giữa chừng vẫn chơi tiếp được.
+export function persistBoard() {
+  const b = Game.boardSnapshot();
+  if (b) saveBoard(b);
+}
+
 let stuckTimer = 0;
 export function showStuck() {
   const el = $('stuck-tip');
@@ -118,9 +134,13 @@ export function syncHud() {
 }
 
 function syncTitle() {
-  els['title-meta'].textContent = save.best > 1
-    ? `Bé đang ở vòng ${save.level} · ⭐ ${save.stars} · 💎 ${save.gems}`
-    : 'Vòng đầu tiên đang đợi bé!';
+  if (save.best <= 1 && !validBoard(save.board, save.level)) {
+    els['title-meta'].textContent = 'Vòng đầu tiên đang đợi bé!';
+    return;
+  }
+  const dang = validBoard(save.board, save.level) && save.board.moves > 0 ? ' · đang chơi dở' : '';
+  els['title-meta'].textContent =
+    `Bé đang ở vòng ${save.level} · ⭐ ${save.stars} · 💎 ${save.gems}${dang}`;
 }
 
 /* ══ CỬA HÀNG ══ */
@@ -178,6 +198,7 @@ export function showWin({ level, moves, stars }) {
   save.stars += stars;
   save.level = level + 1;
   save.best = Math.max(save.best, save.level);
+  save.board = null;          // vòng này xong rồi, vòng sau xếp bàn mới
   persist();
   pendingNext = level + 1;
 

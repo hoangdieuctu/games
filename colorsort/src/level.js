@@ -14,7 +14,19 @@ export function runLen(t) {
 }
 
 export const isPure = (t) => t.length === 0 || t.every((c) => c === t[0]);
-export const solved = (tubes) => tubes.every(isPure);
+
+// Xong vòng khi MỌI ống chỉ còn một màu VÀ mỗi màu gom trọn vào đúng một ống.
+// Cùng một màu còn nằm ở hai ống là chưa xong, dù ống nào cũng thuần một màu.
+export function solved(tubes) {
+  const seen = new Set();
+  for (const t of tubes) {
+    if (!t.length) continue;
+    if (!isPure(t)) return false;
+    if (seen.has(t[0])) return false;
+    seen.add(t[0]);
+  }
+  return true;
+}
 
 // Nước đi hợp lệ: đổ dải trên cùng của `from` sang `to`.
 export function canPour(tubes, from, to, cap) {

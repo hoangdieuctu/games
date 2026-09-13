@@ -1,5 +1,5 @@
 // ── Khởi động trò chơi ──
-import { initUI, syncHud, showWin, showStuck } from './ui.js';
+import { initUI, syncHud, showWin, showStuck, persistBoard } from './ui.js';
 import { initGame } from './game.js';
 import { startMusic } from './audio.js';
 
@@ -7,7 +7,7 @@ window.__csReady = true;   // cho lớp báo lỗi biết mã trò chơi đã ch
 
 initUI();
 initGame(document.getElementById('board'), {
-  onChange: syncHud,
+  onChange: () => { syncHud(); persistBoard(); },
   onWin: showWin,
   onStuck: showStuck,
 });

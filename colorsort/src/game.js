@@ -72,6 +72,43 @@ export function startLevel(n, keepBoard) {
 // Chơi lại đúng bàn cũ chứ không xáo ván mới, để bé thử lại cách khác.
 export function restartLevel() { startLevel(G.level, G.initial); }
 
+// ── Cất / dựng lại ván đang chơi dở ──
+// Chỉ cất khi bàn đang đứng yên: lúc bóng còn bay, số bóng đã rời ống nguồn
+// nhưng chưa tới ống đích, cất lúc đó là mất bóng.
+export function boardSnapshot() {
+  if (G.locked || G.flyers.length || G.finished || !G.tubes.length) return null;
+  return {
+    level: G.level, cap: G.cap, par: G.par, plan: G.plan, moves: G.moves,
+    tubes: G.tubes.map((t) => t.slice()),
+    initial: G.initial.tubes.map((t) => t.slice()),
+    history: G.history.slice(-20).map((h) => ({ tubes: h.tubes.map((t) => t.slice()), moves: h.moves, done: h.done })),
+  };
+}
+
+export function restoreLevel(b) {
+  G.level = b.level;
+  G.cap = b.cap;
+  G.plan = b.plan || null;
+  G.par = b.par || b.cap * 4;
+  G.tubes = b.tubes.map((t) => t.slice());
+  G.initial = { tubes: b.initial.map((t) => t.slice()), cap: b.cap, plan: b.plan, par: b.par };
+  G.moves = b.moves || 0;
+  G.history = (b.history || []).map((h) => ({ tubes: h.tubes.map((t) => t.slice()), moves: h.moves, done: h.done }));
+  G.sel = -1;
+  G.flyers.length = 0;
+  G.doneSet = new Set();
+  G.doneAt = new Map();
+  G.nudgeAt = new Map();
+  G.hint = null;
+  G.wandMode = false;
+  G.finished = false;
+  G.locked = false;
+  FX.clearFx();
+  relayout();
+  markDone();
+  hooks.onChange && hooks.onChange();
+}
+
 // Ống đã đầy một màu thì coi như đóng nút chai: khoá lại, chạm vào cũng không mở.
 export function isSealed(i) {
   return G.tubes[i].length === G.cap && isPure(G.tubes[i]);

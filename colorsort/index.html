@@ -942,7 +942,19 @@ function runLen(t) {
 }
 
 const isPure = (t) => t.length === 0 || t.every((c) => c === t[0]);
-const solved = (tubes) => tubes.every(isPure);
+
+// Xong vòng khi MỌI ống chỉ còn một màu VÀ mỗi màu gom trọn vào đúng một ống.
+// Cùng một màu còn nằm ở hai ống là chưa xong, dù ống nào cũng thuần một màu.
+function solved(tubes) {
+  const seen = new Set();
+  for (const t of tubes) {
+    if (!t.length) continue;
+    if (!isPure(t)) return false;
+    if (seen.has(t[0])) return false;
+    seen.add(t[0]);
+  }
+  return true;
+}
 
 // Nước đi hợp lệ: đổ dải trên cùng của `from` sang `to`.
 function canPour(tubes, from, to, cap) {
@@ -1089,7 +1101,7 @@ M.state = (function () {
 // ── Tiến trình người chơi, lưu vào localStorage ──
 const { SAVE_KEY } = M.config;
 
-const DEFAULTS = { level: 1, gems: 40, stars: 0, best: 1, items: { tube: 1, wand: 1, hint: 2 } };
+const DEFAULTS = { level: 1, gems: 40, stars: 0, best: 1, board: null, items: { tube: 1, wand: 1, hint: 2 } };
 
 const save = load();
 
@@ -1115,11 +1127,25 @@ function useItem(k) {
   if ((save.items[k] || 0) <= 0) return false;
   save.items[k]--; persist(); return true;
 }
+// Ván đang chơi dở: cất lại để bé đóng máy rồi mở ra vẫn chơi tiếp được.
+function saveBoard(b) { save.board = b; persist(); }
+function clearBoard() { save.board = null; persist(); }
+
+// Dữ liệu cũ hoặc hỏng thì bỏ qua, thà xếp ván mới còn hơn vào một bàn lỗi.
+function validBoard(b, level) {
+  return !!b && b.level === level
+    && Number.isInteger(b.cap) && b.cap > 0
+    && Array.isArray(b.tubes) && b.tubes.length > 1
+    && Array.isArray(b.initial) && b.initial.length === b.tubes.length
+    && b.tubes.every((t) => Array.isArray(t) && t.length <= b.cap
+        && t.every((c) => Number.isInteger(c) && c >= 0));
+}
+
 function resetAll() {
   Object.assign(save, { ...DEFAULTS, items: { ...DEFAULTS.items } });
   persist();
 }
-return { save, persist, addGems, addItem, useItem, resetAll };
+return { save, persist, addGems, addItem, useItem, saveBoard, clearBoard, validBoard, resetAll };
 })();
 
 /* ══════════ render.js ══════════ */
@@ -1562,6 +1588,43 @@ function startLevel(n, keepBoard) {
 // Chơi lại đúng bàn cũ chứ không xáo ván mới, để bé thử lại cách khác.
 function restartLevel() { startLevel(G.level, G.initial); }
 
+// ── Cất / dựng lại ván đang chơi dở ──
+// Chỉ cất khi bàn đang đứng yên: lúc bóng còn bay, số bóng đã rời ống nguồn
+// nhưng chưa tới ống đích, cất lúc đó là mất bóng.
+function boardSnapshot() {
+  if (G.locked || G.flyers.length || G.finished || !G.tubes.length) return null;
+  return {
+    level: G.level, cap: G.cap, par: G.par, plan: G.plan, moves: G.moves,
+    tubes: G.tubes.map((t) => t.slice()),
+    initial: G.initial.tubes.map((t) => t.slice()),
+    history: G.history.slice(-20).map((h) => ({ tubes: h.tubes.map((t) => t.slice()), moves: h.moves, done: h.done })),
+  };
+}
+
+function restoreLevel(b) {
+  G.level = b.level;
+  G.cap = b.cap;
+  G.plan = b.plan || null;
+  G.par = b.par || b.cap * 4;
+  G.tubes = b.tubes.map((t) => t.slice());
+  G.initial = { tubes: b.initial.map((t) => t.slice()), cap: b.cap, plan: b.plan, par: b.par };
+  G.moves = b.moves || 0;
+  G.history = (b.history || []).map((h) => ({ tubes: h.tubes.map((t) => t.slice()), moves: h.moves, done: h.done }));
+  G.sel = -1;
+  G.flyers.length = 0;
+  G.doneSet = new Set();
+  G.doneAt = new Map();
+  G.nudgeAt = new Map();
+  G.hint = null;
+  G.wandMode = false;
+  G.finished = false;
+  G.locked = false;
+  FX.clearFx();
+  relayout();
+  markDone();
+  hooks.onChange && hooks.onChange();
+}
+
 // Ống đã đầy một màu thì coi như đóng nút chai: khoá lại, chạm vào cũng không mở.
 function isSealed(i) {
   return G.tubes[i].length === G.cap && isPure(G.tubes[i]);
@@ -1888,14 +1951,14 @@ function draw(now) {
   FX.drawFx(ctx);
   ctx.restore();
 }
-return { G, initGame, resize, startLevel, restartLevel, isSealed, undo, addTube, armWand, disarmWand, showHint };
+return { G, initGame, resize, startLevel, restartLevel, boardSnapshot, restoreLevel, isSealed, undo, addTube, armWand, disarmWand, showHint };
 })();
 
 /* ══════════ ui.js ══════════ */
 M.ui = (function () {
 // ── Màn hình, thanh thông tin, cửa hàng và bảng chúc mừng ──
 const { ITEMS } = M.config;
-const { save, persist, addGems, addItem, useItem } = M.state;
+const { save, persist, addGems, addItem, useItem, saveBoard, clearBoard, validBoard } = M.state;
 const A = M.audio;
 const Game = M.game;
 const { G } = M.game;
@@ -1960,7 +2023,15 @@ function wire() {
   });
 
   $('btn-next').addEventListener('click', () => { A.sTap(); els['ov-win'].hidden = true; play(pendingNext); });
-  $('btn-replay').addEventListener('click', () => { A.sTap(); els['ov-win'].hidden = true; Game.restartLevel(); });
+  $('btn-replay').addEventListener('click', () => {
+    A.sTap();
+    els['ov-win'].hidden = true;
+    // Quay lại chơi vòng vừa xong thì tiến trình cũng phải lùi về vòng đó,
+    // không thì lần mở sau bé lại nhảy sang vòng kế tiếp.
+    save.level = G.level;
+    persist();
+    Game.restartLevel();
+  });
 
   A.initSoundToggle(document.querySelector('.snd-btn'));
   A.initMusicToggle(document.querySelector('.music-btn'));
@@ -1979,7 +2050,9 @@ function play(level) {
   // Nhường một nhịp để vòng quay kịp hiện ra trước khi sinh vòng chơi.
   setTimeout(() => {
     Game.resize();
-    Game.startLevel(level);
+    // Còn ván dở đúng vòng này thì dựng lại đúng chỗ bé đang chơi.
+    if (validBoard(save.board, level)) Game.restoreLevel(save.board);
+    else Game.startLevel(level);
     els['loading'].hidden = true;
     A.startMusic();
   }, 60);
@@ -1988,6 +2061,12 @@ function play(level) {
 function openMenu() { els['ov-menu'].hidden = false; }
 
 /* ══ THANH THÔNG TIN ══ */
+// Cất ván sau mỗi nước đi để đóng máy giữa chừng vẫn chơi tiếp được.
+function persistBoard() {
+  const b = Game.boardSnapshot();
+  if (b) saveBoard(b);
+}
+
 let stuckTimer = 0;
 function showStuck() {
   const el = $('stuck-tip');
@@ -2013,9 +2092,13 @@ function syncHud() {
 }
 
 function syncTitle() {
-  els['title-meta'].textContent = save.best > 1
-    ? `Bé đang ở vòng ${save.level} · ⭐ ${save.stars} · 💎 ${save.gems}`
-    : 'Vòng đầu tiên đang đợi bé!';
+  if (save.best <= 1 && !validBoard(save.board, save.level)) {
+    els['title-meta'].textContent = 'Vòng đầu tiên đang đợi bé!';
+    return;
+  }
+  const dang = validBoard(save.board, save.level) && save.board.moves > 0 ? ' · đang chơi dở' : '';
+  els['title-meta'].textContent =
+    `Bé đang ở vòng ${save.level} · ⭐ ${save.stars} · 💎 ${save.gems}${dang}`;
 }
 
 /* ══ CỬA HÀNG ══ */
@@ -2073,6 +2156,7 @@ function showWin({ level, moves, stars }) {
   save.stars += stars;
   save.level = level + 1;
   save.best = Math.max(save.best, save.level);
+  save.board = null;          // vòng này xong rồi, vòng sau xếp bàn mới
   persist();
   pendingNext = level + 1;
 
@@ -2102,13 +2186,13 @@ function showWin({ level, moves, stars }) {
   syncHud();
   syncTitle();
 }
-return { initUI, play, showStuck, syncHud, openShop, showWin };
+return { initUI, play, persistBoard, showStuck, syncHud, openShop, showWin };
 })();
 
 /* ══════════ main.js ══════════ */
 M.main = (function () {
 // ── Khởi động trò chơi ──
-const { initUI, syncHud, showWin, showStuck } = M.ui;
+const { initUI, syncHud, showWin, showStuck, persistBoard } = M.ui;
 const { initGame } = M.game;
 const { startMusic } = M.audio;
 
@@ -2116,7 +2200,7 @@ window.__csReady = true;   // cho lớp báo lỗi biết mã trò chơi đã ch
 
 initUI();
 initGame(document.getElementById('board'), {
-  onChange: syncHud,
+  onChange: () => { syncHud(); persistBoard(); },
   onWin: showWin,
   onStuck: showStuck,
 });
