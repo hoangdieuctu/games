@@ -5,6 +5,7 @@ const TUBE_H_EXTRA = 0.52;   // phần miệng + đáy ống cộng thêm (theo 
 const GAP_X = 0.26;          // khoảng hở ngang, theo bề ngang ống
 const GAP_Y = 0.22;          // khoảng hở dọc, theo chiều cao ống
 const LANE = 1.35;           // chiều cao "đường bay" phía trên, theo đường kính bóng
+const LABEL = 0.62;          // chỗ chừa dưới hàng cuối cho số thứ tự của ống
 const D_MAX = 118;           // bóng không to quá mức này
 
 export function computeLayout(W, H, count, cap) {
@@ -19,7 +20,7 @@ export function computeLayout(W, H, count, cap) {
     if (rows > 1 && Math.ceil(count / (rows - 1)) === perRow) continue; // thêm hàng mà không lợi gì
     const tubeW = availW / (perRow * (1 + GAP_X) - GAP_X);
     const dW = tubeW / TUBE_W_RATIO;
-    const dH = availH / ((cap + TUBE_H_EXTRA) * (rows * (1 + GAP_Y) - GAP_Y) + LANE);
+    const dH = availH / ((cap + TUBE_H_EXTRA) * (rows * (1 + GAP_Y) - GAP_Y) + LANE + LABEL);
     const d = Math.min(dW, dH, D_MAX);
     if (!best || d > best.d) best = { rows, perRow, d };
   }
@@ -39,7 +40,8 @@ export function computeLayout(W, H, count, cap) {
     counts.push(n); left -= n;
   }
 
-  const blockH = rows * tubeH + (rows - 1) * gapY;
+  // Khối ống cộng thêm dải số dưới hàng cuối, để số không bị cắt mất ở đáy màn.
+  const blockH = rows * tubeH + (rows - 1) * gapY + d * LABEL;
   // Canh giữa khối ống, chỉ đẩy xuống khi cần chừa chỗ cho bóng bay phía trên.
   const top = Math.max(padY + d * 1.15, padY + (availH - blockH) / 2);
 

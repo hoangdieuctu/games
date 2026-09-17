@@ -1,15 +1,14 @@
 // ── Luật chơi, hoạt ảnh rót bóng và các vật phẩm hỗ trợ ──
 import { COLORS, BALL_DUR, BALL_STAGGER } from './config.js';
-import { buildLevel, canPour, runLen, topColor, solved, isPure, hintMove } from './level.js';
+import { buildLevel, canPour, runLen, topColor, solved, isPure } from './level.js';
 import { computeLayout } from './layout.js';
 import * as R from './render.js';
 import * as FX from './fx.js';
-import * as A from './audio.js';
 
 export const G = {
   level: 1, tubes: [], cap: 4, plan: null, par: 10,
   moves: 0, sel: -1, flyers: [], history: [],
-  doneSet: new Set(), doneAt: new Map(), nudgeAt: new Map(), hint: null, hintUntil: 0, wandMode: false,
+  doneSet: new Set(), doneAt: new Map(), nudgeAt: new Map(), mark: null,
   layout: null, initial: null, W: 0, H: 0, locked: true, finished: false,
 };
 
@@ -22,6 +21,10 @@ export function initGame(cv, callbacks) {
   window.addEventListener('resize', resize);
   window.addEventListener('orientationchange', () => setTimeout(resize, 250));
   canvas.addEventListener('pointerdown', onPointer);
+  // Số trên bóng được vẽ sẵn vào sprite; phông chữ về muộn thì vẽ lại cả bộ.
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(() => { R.invalidateSprites(); relayout(); });
+  }
   resize();
   requestAnimationFrame(loop);
 }
@@ -59,8 +62,7 @@ export function startLevel(n, keepBoard) {
   G.doneSet = new Set();
   G.doneAt = new Map();
   G.nudgeAt = new Map();
-  G.hint = null;
-  G.wandMode = false;
+  G.mark = null;
   G.finished = false;
   G.locked = false;
   FX.clearFx();
@@ -82,6 +84,7 @@ export function boardSnapshot() {
     tubes: G.tubes.map((t) => t.slice()),
     initial: G.initial.tubes.map((t) => t.slice()),
     history: G.history.slice(-20).map((h) => ({ tubes: h.tubes.map((t) => t.slice()), moves: h.moves, done: h.done })),
+    mark: G.mark ? { tubes: G.mark.tubes.map((t) => t.slice()), moves: G.mark.moves, done: G.mark.done.slice() } : null,
   };
 }
 
@@ -99,8 +102,7 @@ export function restoreLevel(b) {
   G.doneSet = new Set();
   G.doneAt = new Map();
   G.nudgeAt = new Map();
-  G.hint = null;
-  G.wandMode = false;
+  G.mark = b.mark ? { tubes: b.mark.tubes.map((t) => t.slice()), moves: b.mark.moves, done: b.mark.done.slice() } : null;
   G.finished = false;
   G.locked = false;
   FX.clearFx();
@@ -137,29 +139,25 @@ function onPointer(e) {
   if (G.locked || G.finished) return;
   const rect = canvas.getBoundingClientRect();
   const i = tubeAt(e.clientX - rect.left, e.clientY - rect.top);
-  if (i < 0) { if (G.sel >= 0) { G.sel = -1; A.sBack(); } return; }
-  A.ac();
-  if (G.wandMode) { useWandOn(i); return; }
+  if (i < 0) { G.sel = -1; return; }
   tapTube(i);
 }
 
 function tapTube(i) {
-  G.hint = null;
   // Ống đã đóng nút: chỉ cho nút nảy một cái rồi thôi, không chọn được.
-  if (isSealed(i)) { G.nudgeAt.set(i, performance.now()); A.sBack(); return; }
+  if (isSealed(i)) { G.nudgeAt.set(i, performance.now()); return; }
 
   if (G.sel < 0) {
-    if (!G.tubes[i].length) { A.sBack(); return; }
+    if (!G.tubes[i].length) return;
     G.sel = i;
-    A.sLift();
     return;
   }
-  if (i === G.sel) { G.sel = -1; A.sBack(); return; }
+  if (i === G.sel) { G.sel = -1; return; }
   const k = canPour(G.tubes, G.sel, i, G.cap);
   if (!k) {
     // Không rót được: thử chọn ống mới cho bé đỡ phải chạm hai lần.
-    if (G.tubes[i].length) { G.sel = i; A.sLift(); }
-    else { A.sNope(); shake = 1; }
+    if (G.tubes[i].length) { G.sel = i; }
+    else { shake = 1; }
     return;
   }
   doMove(G.sel, i, k);
@@ -201,14 +199,12 @@ function landFlyer(f) {
   G.tubes[f.to].push(f.color);
   const L = G.layout, t = L.tubes[f.to];
   const y = L.ballY(t, G.tubes[f.to].length - 1);
-  A.sDrop(G.tubes[f.to].length - 1);
   FX.splash(t.cx, y + L.r * 0.5, COLORS[f.color].light, 7);
 
   if (isSealed(f.to) && !G.doneSet.has(f.to)) {
     G.doneSet.add(f.to);
     G.doneAt.set(f.to, performance.now());
     const c = COLORS[f.color];
-    A.sTubeDone(G.doneSet.size - 1);
     FX.sparkBurst(t.cx, t.y + t.h * 0.45, c.light, 20, 1.25);
     FX.sparkBurst(t.cx, t.y + t.h * 0.45, '#fff6c8', 10, 0.9);
     FX.ring(t.cx, t.y + t.h * 0.5, c.light, L.r * 0.6, L.r * 3.4, 620);
@@ -238,8 +234,6 @@ function finish() {
   G.finished = true;
   G.locked = true;
   const stars = G.moves <= G.par * 1.5 ? 3 : G.moves <= G.par * 2.2 ? 2 : 1;
-  A.duckMusic(2600);
-  A.sWin();
   FX.confetti(G.W, G.H, 110);
   for (const t of G.layout.tubes) {
     FX.sparkBurst(t.cx, t.y + t.h * 0.4, '#fff2b0', 8, 1);
@@ -256,8 +250,6 @@ export function undo() {
   G.doneSet = new Set(h.done);
   for (const i of [...G.doneAt.keys()]) if (!G.doneSet.has(i)) G.doneAt.delete(i);
   G.sel = -1;
-  G.hint = null;
-  A.sUndo();
   hooks.onChange && hooks.onChange();
   return true;
 }
@@ -266,52 +258,42 @@ export function addTube() {
   if (G.locked || G.finished) return false;
   G.tubes.push([]);
   G.history.forEach((h) => h.tubes.push([]));
+  if (G.mark) G.mark.tubes.push([]);
   relayout();
   const t = G.layout.tubes[G.tubes.length - 1];
-  A.sNewTube();
   FX.sparkBurst(t.cx, t.y + t.h * 0.5, '#bfefff', 22, 1.2);
   FX.ring(t.cx, t.y + t.h * 0.5, '#bfefff', 10, G.layout.r * 3.6, 620);
   hooks.onChange && hooks.onChange();
   return true;
 }
 
-export function armWand() {
-  if (G.locked || G.finished) return false;
-  G.wandMode = true; G.sel = -1; G.hint = null;
-  canvas.classList.add('wand');
+/* ── Đánh dấu một chỗ để quay về ──
+   Bé cắm "cờ" trước khi thử một nước mạo hiểm; hỏng thì bấm lần nữa là về đúng
+   chỗ đã cắm, khỏi phải bấm Quay lại chục lần. Về tới nơi thì cờ nhổ đi, cắm
+   lại ngay được nếu muốn thử tiếp lần nữa. */
+export function setMark() {
+  if (G.locked || G.finished || !G.tubes.length) return false;
+  G.mark = { tubes: G.tubes.map((t) => t.slice()), moves: G.moves, done: [...G.doneSet] };
+  const L = G.layout;
+  if (L) for (const t of L.tubes) FX.sparkBurst(t.cx, t.y + t.h + L.d * 0.2, '#ffe07a', 3, 0.7);
+  hooks.onChange && hooks.onChange();
   return true;
 }
-export function disarmWand() { G.wandMode = false; canvas.classList.remove('wand'); }
 
-function useWandOn(i) {
-  // Ống đã đóng nút thì đũa thần cũng chịu — giữ đũa lại cho bé chọn ống khác.
-  if (isSealed(i)) { G.nudgeAt.set(i, performance.now()); A.sNope(); return; }
-  if (!G.tubes[i].length) { A.sNope(); return; }
-  snapshot();
-  const L = G.layout, t = L.tubes[i];
-  const y = L.ballY(t, G.tubes[i].length - 1);
-  const c = COLORS[G.tubes[i].pop()];
-  A.sWand();
-  FX.sparkBurst(t.cx, y, c.light, 26, 1.3);
-  FX.sparkBurst(t.cx, y, '#ffffff', 12, 0.8);
-  FX.ring(t.cx, y, c.light, 6, L.r * 3, 560);
-  disarmWand();
-  G.doneSet.delete(i);
-  G.doneAt.delete(i);
-  markDone();
-  if (solved(G.tubes)) { finish(); return; }
-  hooks.onChange && hooks.onChange();
-  checkStuck();
-}
-
-export function showHint() {
-  if (G.locked || G.finished) return false;
-  const m = hintMove(G.tubes, G.cap);
-  if (!m) { A.sNope(); return false; }
-  G.hint = m;
-  G.hintUntil = performance.now() + 4200;
+export function gotoMark() {
+  if (G.locked || G.finished || !G.mark) return false;
+  snapshot();                       // vẫn bấm Quay lại được nếu bé đổi ý
+  const m = G.mark;
+  G.tubes = m.tubes.map((t) => t.slice());
+  G.moves = m.moves;
+  G.doneSet = new Set(m.done);
+  G.doneAt = new Map([...G.doneSet].map((i) => [i, 0]));
+  G.nudgeAt = new Map();
   G.sel = -1;
-  A.sHint();
+  G.mark = null;
+  const L = G.layout;
+  if (L) FX.ring(G.W / 2, G.H / 2, '#ffe07a', 20, Math.max(G.W, G.H) * 0.5, 520);
+  hooks.onChange && hooks.onChange();
   return true;
 }
 
@@ -372,12 +354,15 @@ function draw(now) {
   if (shake > 0) {
     ctx.translate(Math.sin(now * 0.07) * 7 * shake, Math.sin(now * 0.11) * 3 * shake);
   }
-  R.drawBackground(ctx, G.W, G.H, now);
+  R.drawBackground(ctx, G.W, G.H, dpr);
   if (!L) { ctx.restore(); return; }
 
   const liftedIdx = G.sel >= 0 ? G.tubes[G.sel].length - 1 : -1;
 
   for (const t of L.tubes) R.drawTubeBack(ctx, t, L.d);
+
+  // Số thứ tự của từng ống, nằm ngay dưới đáy.
+  for (let i = 0; i < L.tubes.length; i++) R.drawTubeNumber(ctx, L.tubes[i], L.d, i + 1, i === G.sel);
 
   // Bóng đang nằm yên trong ống (bỏ qua quả đang được nhấc lên).
   for (let i = 0; i < G.tubes.length; i++) {
@@ -398,7 +383,6 @@ function draw(now) {
     let glow = 0, done = false;
     if (G.doneSet.has(i)) { glow = 0.45 + Math.sin(now * 0.003 + i) * 0.16; done = true; }
     if (i === G.sel) glow = Math.max(glow, 0.55 + pulse * 0.45);
-    if (G.hint && now < G.hintUntil && (i === G.hint[0] || i === G.hint[1])) glow = Math.max(glow, pulse);
     R.drawTubeGlass(ctx, L.tubes[i], L.d, { glow, done: done && i !== G.sel });
   }
 
@@ -423,13 +407,6 @@ function draw(now) {
   for (const f of G.flyers) {
     const { x, y } = flyerPos(f);
     R.drawBall(ctx, x, y, f.color);
-  }
-
-  // Mũi tên gợi ý.
-  if (G.hint && now < G.hintUntil) {
-    const a = L.tubes[G.hint[0]], b = L.tubes[G.hint[1]];
-    R.drawHintArrow(ctx, a.cx, a.y - L.d * 0.95, now);
-    R.drawHintArrow(ctx, b.cx, b.y - L.d * 0.95, now + 300);
   }
 
   FX.drawFx(ctx);

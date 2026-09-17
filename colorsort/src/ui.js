@@ -1,7 +1,6 @@
 // ── Màn hình, thanh thông tin, cửa hàng và bảng chúc mừng ──
 import { ITEMS } from './config.js';
 import { save, persist, addGems, addItem, useItem, saveBoard, clearBoard, validBoard } from './state.js';
-import * as A from './audio.js';
 import * as Game from './game.js';
 import { G } from './game.js';
 
@@ -11,8 +10,8 @@ let pendingNext = 1;
 
 export function initUI() {
   ['scr-title', 'scr-game', 'ov-win', 'ov-shop', 'ov-menu', 'loading',
-   'g-level', 'g-moves', 'g-gems', 'g-chal', 'title-meta', 'wand-tip',
-   'c-hint', 'c-wand', 'c-tube', 'win-stars', 'win-level', 'win-moves',
+   'g-level', 'g-moves', 'g-gems', 'g-chal', 'title-meta', 'tip',
+   'mark-ic', 'mark-lb', 'c-tube', 'win-stars', 'win-level', 'win-moves',
    'win-gems', 'win-item', 'win-item-ic', 'win-item-tx', 'shop-gems', 'shop-list',
   ].forEach((id) => { els[id] = $(id); });
 
@@ -36,27 +35,27 @@ function buildBubbles() {
 }
 
 function wire() {
-  $('btn-play').addEventListener('click', () => { A.ac(); A.sTap(); A.startMusic(); play(save.level); });
-  $('g-home').addEventListener('click', () => { A.sTap(); openMenu(); });
-  $('btn-resume').addEventListener('click', () => { A.sTap(); els['ov-menu'].hidden = true; });
-  $('btn-menu-restart').addEventListener('click', () => { A.sTap(); els['ov-menu'].hidden = true; Game.restartLevel(); });
+  $('btn-play').addEventListener('click', () => play(save.level));
+  $('g-home').addEventListener('click', openMenu);
+  $('btn-resume').addEventListener('click', () => { els['ov-menu'].hidden = true; });
+  $('btn-menu-restart').addEventListener('click', () => { els['ov-menu'].hidden = true; Game.restartLevel(); });
 
-  $('g-shop').addEventListener('click', () => { A.sTap(); openShop(); });
-  $('btn-shop-close').addEventListener('click', () => { A.sTap(); els['ov-shop'].hidden = true; });
+  $('g-shop').addEventListener('click', () => openShop());
+  $('btn-shop-close').addEventListener('click', () => { els['ov-shop'].hidden = true; });
 
   $('t-undo').addEventListener('click', () => { Game.undo(); });
-  $('t-again').addEventListener('click', () => { A.sTap(); Game.restartLevel(); });
+  $('t-again').addEventListener('click', () => Game.restartLevel());
 
-  $('t-hint').addEventListener('click', () => {
+  // Đánh dấu: một nút, hai lượt. Chưa có cờ thì cắm cờ; đã có cờ thì quay về
+  // đúng chỗ cắm. Dùng bao nhiêu lần cũng được, không tốn 💎.
+  $('t-mark').addEventListener('click', () => {
     if (G.locked || G.finished) return;
-    if (!save.items.hint) { needGems('hint'); return; }
-    if (Game.showHint()) { useItem('hint'); syncHud(); }
-  });
-  $('t-wand').addEventListener('click', () => {
-    if (G.locked || G.finished) return;
-    if (G.wandMode) { Game.disarmWand(); syncHud(); return; }
-    if (!save.items.wand) { needGems('wand'); return; }
-    if (Game.armWand()) { useItem('wand'); A.sTap(); syncHud(); }
+    if (G.mark) {
+      if (Game.gotoMark()) showTip('🚩 Về lại chỗ đánh dấu rồi nhé!');
+    } else if (Game.setMark()) {
+      showTip('📍 Đã đánh dấu chỗ này! Bấm 🚩 là quay về đây.');
+    }
+    syncHud();
   });
   $('t-tube').addEventListener('click', () => {
     if (G.locked || G.finished) return;
@@ -64,9 +63,8 @@ function wire() {
     if (Game.addTube()) { useItem('tube'); syncHud(); }
   });
 
-  $('btn-next').addEventListener('click', () => { A.sTap(); els['ov-win'].hidden = true; play(pendingNext); });
+  $('btn-next').addEventListener('click', () => { els['ov-win'].hidden = true; play(pendingNext); });
   $('btn-replay').addEventListener('click', () => {
-    A.sTap();
     els['ov-win'].hidden = true;
     // Quay lại chơi vòng vừa xong thì tiến trình cũng phải lùi về vòng đó,
     // không thì lần mở sau bé lại nhảy sang vòng kế tiếp.
@@ -74,13 +72,9 @@ function wire() {
     persist();
     Game.restartLevel();
   });
-
-  A.initSoundToggle(document.querySelector('.snd-btn'));
-  A.initMusicToggle(document.querySelector('.music-btn'));
 }
 
 function needGems(key) {
-  A.sNope();
   openShop(key);
 }
 
@@ -96,7 +90,6 @@ export function play(level) {
     if (validBoard(save.board, level)) Game.restoreLevel(save.board);
     else Game.startLevel(level);
     els['loading'].hidden = true;
-    A.startMusic();
   }, 60);
 }
 
@@ -109,13 +102,19 @@ export function persistBoard() {
   if (b) saveBoard(b);
 }
 
-let stuckTimer = 0;
-export function showStuck() {
-  const el = $('stuck-tip');
+let tipTimer = 0;
+// Dải nhắc nổi lên phía trên thanh vật phẩm rồi tự tắt.
+function showTip(text, ms = 2600, warn = false) {
+  const el = els['tip'];
+  el.textContent = text;
+  el.classList.toggle('warn', warn);
   el.hidden = false;
-  A.sNope();
-  clearTimeout(stuckTimer);
-  stuckTimer = setTimeout(() => { el.hidden = true; }, 4200);
+  clearTimeout(tipTimer);
+  tipTimer = setTimeout(() => { el.hidden = true; }, ms);
+}
+
+export function showStuck() {
+  showTip('Hết chỗ rót rồi! Bấm ↩️ Quay lại hoặc 🧪 Ống thêm nhé.', 4200, true);
 }
 
 export function syncHud() {
@@ -123,13 +122,16 @@ export function syncHud() {
   els['g-moves'].textContent = G.moves;
   els['g-gems'].textContent = save.gems;
   els['g-chal'].hidden = !(G.plan && G.plan.challenge);
-  for (const k of ['hint', 'wand', 'tube']) {
+  for (const k of ['tube']) {
     const n = save.items[k] || 0;
     els['c-' + k].textContent = n;
     $('t-' + k).classList.toggle('empty', n === 0);
   }
-  $('t-wand').classList.toggle('armed', G.wandMode);
-  els['wand-tip'].hidden = !G.wandMode;
+  const marked = !!G.mark;
+  els['mark-ic'].textContent = marked ? '🚩' : '📍';
+  els['mark-lb'].textContent = marked ? 'Về dấu' : 'Đánh dấu';
+  $('t-mark').classList.toggle('marked', marked);
+  $('t-mark').disabled = G.locked || G.finished;
   $('t-undo').disabled = !G.history.length || G.locked;
 }
 
@@ -163,10 +165,9 @@ function buildShop() {
 
 function buy(key) {
   const it = ITEMS[key];
-  if (save.gems < it.price) { A.sNope(); return; }
+  if (save.gems < it.price) { return; }
   addGems(-it.price);
   addItem(key, 1);
-  A.sCoin();
   refreshShop();
   syncHud();
 }
@@ -223,7 +224,7 @@ export function showWin({ level, moves, stars }) {
   for (const s of sp) s.classList.remove('on');
   els['ov-win'].hidden = false;
   for (let i = 0; i < stars; i++) {
-    setTimeout(() => { sp[i].classList.add('on'); A.sCoin(); }, 260 + i * 280);
+    setTimeout(() => { sp[i].classList.add('on'); }, 260 + i * 280);
   }
   syncHud();
   syncTitle();

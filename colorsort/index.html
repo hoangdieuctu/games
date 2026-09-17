@@ -150,7 +150,6 @@ html, body {
   transition: transform .1s, background .15s;
 }
 .btn:active { transform: scale(.92); background: var(--panel-2); }
-.btn.off { opacity: .45; }
 
 .pill {
   flex: 0 0 auto;
@@ -175,7 +174,6 @@ html, body {
 
 .board-wrap { flex: 1 1 auto; position: relative; min-height: 0; }
 #board { position: absolute; top: 0; left: 0; width: 100%; height: 100%; touch-action: none; display: block; }
-#board.wand { cursor: crosshair; }
 
 /* ══ THANH VẬT PHẨM ══ */
 .dock {
@@ -210,14 +208,15 @@ html, body {
 }
 .tool.empty { opacity: .58; }
 .tool.empty .cnt { background: linear-gradient(180deg, #9aa3c0, #5b6484); }
-.tool.armed {
-  background: linear-gradient(180deg, rgba(255,235,140,.9), rgba(255,180,40,.85));
+/* Đang có cờ cắm trên bàn: nút sáng vàng, đứng yên (không nhấp nháy cho đỡ rối mắt). */
+.tool.marked {
+  background: linear-gradient(180deg, rgba(255,235,140,.95), rgba(255,180,40,.9));
   color: #4a1d00; border-color: #fff;
-  animation: chalPulse 1s ease-in-out infinite;
+  box-shadow: 0 5px 0 #c96a00;
 }
 .tool:disabled { opacity: .4; }
 
-.wand-tip {
+.tip {
   position: absolute; left: 50%; transform: translateX(-50%);
   bottom: calc(var(--safe-b) + 128px);
   background: rgba(255,255,255,.94); color: #33165c;
@@ -225,11 +224,10 @@ html, body {
   padding: 12px 22px; border-radius: 999px;
   box-shadow: 0 8px 24px rgba(0,0,0,.4);
   z-index: 4; pointer-events: none;
-  animation: chalPulse 1.2s ease-in-out infinite;
 }
 
 /* ══ LỚP PHỦ ══ */
-.stuck-tip { background: rgba(255,232,150,.97); color: #5a2b00; }
+.tip.warn { background: rgba(255,232,150,.97); color: #5a2b00; }
 
 .overlay {
   position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 10;
@@ -347,7 +345,7 @@ html, body {
   .tool .ic { font-size: 24px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .title-bubbles i, .badge-chal, .wand-tip, .tool.armed { animation: none; }
+  .title-bubbles i, .badge-chal { animation: none; }
 }
 
 /* ══ BÁO LỖI KHI KHÔNG TẢI ĐƯỢC MÃ TRÒ CHƠI ══ */
@@ -417,22 +415,18 @@ html, body {
     <div class="spacer"></div>
     <div class="pill gem">💎 <b id="g-gems">0</b></div>
     <button class="btn" id="g-shop" aria-label="Cửa hàng">🛒</button>
-    <button class="btn music-btn" aria-label="Nhạc nền">🎵</button>
-    <button class="btn snd-btn" aria-label="Âm thanh">🔊</button>
   </header>
 
   <div class="board-wrap"><canvas id="board"></canvas></div>
 
   <footer class="dock">
     <button class="tool" id="t-undo"><span class="ic">↩️</span><span class="lb">Quay lại</span></button>
-    <button class="tool" id="t-hint"><span class="ic">💡</span><span class="lb">Gợi ý</span><b class="cnt" id="c-hint">0</b></button>
-    <button class="tool" id="t-wand"><span class="ic">🪄</span><span class="lb">Đũa thần</span><b class="cnt" id="c-wand">0</b></button>
+    <button class="tool" id="t-mark"><span class="ic" id="mark-ic">📍</span><span class="lb" id="mark-lb">Đánh dấu</span></button>
     <button class="tool" id="t-tube"><span class="ic">🧪</span><span class="lb">Ống thêm</span><b class="cnt" id="c-tube">0</b></button>
     <button class="tool" id="t-again"><span class="ic">🔄</span><span class="lb">Chơi lại</span></button>
   </footer>
 
-  <div class="wand-tip" id="wand-tip" hidden>🪄 Chạm vào ống muốn búng quả trên cùng đi!</div>
-  <div class="wand-tip stuck-tip" id="stuck-tip" hidden>Hết chỗ rót rồi! Bấm ↩️ Quay lại hoặc 🧪 Ống thêm nhé.</div>
+  <div class="tip" id="tip" hidden></div>
 </section>
 
 <!-- ══ LỚP PHỦ: VÒNG HOÀN THÀNH ══ -->
@@ -518,10 +512,9 @@ const BALL_DUR = 340;       // thời gian bay của một quả bóng (ms)
 const BALL_STAGGER = 72;    // độ trễ giữa các quả trong cùng một nước đi
 
 // Vật phẩm hỗ trợ: giá bằng 💎 và mô tả ngắn.
+// (Đánh dấu chỗ quay lại không nằm ở đây — đó là nút dùng thoải mái, không mất 💎.)
 const ITEMS = {
   tube: { icon: '🧪', name: 'Ống thêm',  price: 30, desc: 'Thêm một ống trống cho vòng này' },
-  wand: { icon: '🪄', name: 'Đũa thần',  price: 25, desc: 'Búng bay quả bóng trên cùng của một ống' },
-  hint: { icon: '💡', name: 'Gợi ý',     price: 15, desc: 'Chỉ cho bé nước đi tiếp theo' },
 };
 
 const SAVE_KEY = 'colorsort_save_v1';
@@ -550,6 +543,7 @@ const TUBE_H_EXTRA = 0.52;   // phần miệng + đáy ống cộng thêm (theo 
 const GAP_X = 0.26;          // khoảng hở ngang, theo bề ngang ống
 const GAP_Y = 0.22;          // khoảng hở dọc, theo chiều cao ống
 const LANE = 1.35;           // chiều cao "đường bay" phía trên, theo đường kính bóng
+const LABEL = 0.62;          // chỗ chừa dưới hàng cuối cho số thứ tự của ống
 const D_MAX = 118;           // bóng không to quá mức này
 
 function computeLayout(W, H, count, cap) {
@@ -564,7 +558,7 @@ function computeLayout(W, H, count, cap) {
     if (rows > 1 && Math.ceil(count / (rows - 1)) === perRow) continue; // thêm hàng mà không lợi gì
     const tubeW = availW / (perRow * (1 + GAP_X) - GAP_X);
     const dW = tubeW / TUBE_W_RATIO;
-    const dH = availH / ((cap + TUBE_H_EXTRA) * (rows * (1 + GAP_Y) - GAP_Y) + LANE);
+    const dH = availH / ((cap + TUBE_H_EXTRA) * (rows * (1 + GAP_Y) - GAP_Y) + LANE + LABEL);
     const d = Math.min(dW, dH, D_MAX);
     if (!best || d > best.d) best = { rows, perRow, d };
   }
@@ -584,7 +578,8 @@ function computeLayout(W, H, count, cap) {
     counts.push(n); left -= n;
   }
 
-  const blockH = rows * tubeH + (rows - 1) * gapY;
+  // Khối ống cộng thêm dải số dưới hàng cuối, để số không bị cắt mất ở đáy màn.
+  const blockH = rows * tubeH + (rows - 1) * gapY + d * LABEL;
   // Canh giữa khối ống, chỉ đẩy xuống khi cần chừa chỗ cho bóng bay phía trên.
   const top = Math.max(padY + d * 1.15, padY + (availH - blockH) / 2);
 
@@ -718,210 +713,6 @@ function drawFx(ctx) {
 function clearFx() { parts.length = 0; rings.length = 0; }
 const fxBusy = () => parts.length > 0;
 return { sparkBurst, splash, ring, confetti, updateFx, drawFx, clearFx, fxBusy };
-})();
-
-/* ══════════ audio.js ══════════ */
-M.audio = (function () {
-// ── Âm thanh & nhạc nền tổng hợp bằng WebAudio (không cần tải file) ──
-let ctx = null, master = null;
-let soundOn = localStorage.getItem('cs_snd') !== '0';
-let musicOn = localStorage.getItem('cs_music') !== '0';
-
-function ac() {
-  if (!ctx) {
-    ctx = new (window.AudioContext || window.webkitAudioContext)();
-    master = ctx.createGain();
-    master.gain.value = 0.9;
-    master.connect(ctx.destination);
-  }
-  if (ctx.state === 'suspended') ctx.resume();
-  return ctx;
-}
-
-function env(dest, t, dur, vol, attack = 0.008) {
-  const g = ac().createGain();
-  g.gain.setValueAtTime(0.0001, t);
-  g.gain.linearRampToValueAtTime(vol, t + attack);
-  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-  g.connect(dest);
-  return g;
-}
-
-function tone(f0, f1, dur, type, vol, delay = 0, dest) {
-  if (!soundOn && !dest) return;
-  try {
-    const a = ac(), t = a.currentTime + delay;
-    const g = env(dest || master, t, dur, vol);
-    const o = a.createOscillator();
-    o.type = type || 'sine';
-    o.frequency.setValueAtTime(f0, t);
-    if (f1) o.frequency.exponentialRampToValueAtTime(Math.max(30, f1), t + dur);
-    o.connect(g);
-    o.start(t); o.stop(t + dur + 0.05);
-  } catch (e) { /* bỏ qua */ }
-}
-
-// Tiếng "bụp" nhựa dẻo khi bóng rơi vào ống — cao dần theo chiều cao chồng bóng.
-function sDrop(h = 0) {
-  if (!soundOn) return;
-  const f = 200 + h * 46;
-  tone(f * 2.4, f, 0.13, 'sine', 0.24);
-  tone(f * 1.2, f * 0.7, 0.09, 'triangle', 0.1, 0.01);
-  noise(0.05, 0.05, 1400);
-}
-
-function noise(dur, vol, hz) {
-  if (!soundOn) return;
-  try {
-    const a = ac(), t = a.currentTime;
-    const n = a.createBufferSource();
-    const buf = a.createBuffer(1, (a.sampleRate * dur) | 0, a.sampleRate);
-    const d = buf.getChannelData(0);
-    for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / d.length);
-    n.buffer = buf;
-    const f = a.createBiquadFilter();
-    f.type = 'bandpass'; f.frequency.value = hz; f.Q.value = 1.2;
-    const g = env(master, t, dur, vol, 0.004);
-    n.connect(f); f.connect(g);
-    n.start(t);
-  } catch (e) { /* bỏ qua */ }
-}
-
-const sTap    = () => tone(680, 900, 0.07, 'sine', 0.14);
-const sLift   = () => { tone(520, 880, 0.1, 'sine', 0.16); tone(1040, 1600, 0.09, 'sine', 0.05, 0.02); };
-const sBack   = () => tone(700, 460, 0.11, 'sine', 0.12);
-const sNope   = () => { tone(180, 130, 0.16, 'sawtooth', 0.09); tone(150, 110, 0.2, 'square', 0.05, 0.06); };
-const sCoin   = () => { tone(1568, 0, 0.07, 'square', 0.07); tone(2093, 0, 0.24, 'sine', 0.13, 0.06); };
-const sWand   = () => { for (let i = 0; i < 7; i++) tone(700 + i * 260, 0, 0.16, 'sine', 0.07, i * 0.035); noise(0.3, 0.05, 3000); };
-const sHint   = () => { [1046, 1318, 1568].forEach((f, i) => tone(f, 0, 0.3, 'sine', 0.1, i * 0.07)); };
-const sUndo   = () => tone(760, 420, 0.16, 'triangle', 0.12);
-const sNewTube= () => { tone(300, 900, 0.22, 'triangle', 0.12); tone(1200, 1800, 0.18, 'sine', 0.06, 0.08); };
-
-// Ống xong: rải arpeggio lấp lánh, cao dần theo số ống đã xong trong vòng.
-function sTubeDone(idx = 0) {
-  const root = 523.25 * Math.pow(2, Math.min(idx, 6) / 12);
-  [0, 4, 7, 12].forEach((st, i) => tone(root * Math.pow(2, st / 12), 0, 0.5, 'sine', 0.13, i * 0.055));
-  [0, 4, 7, 12].forEach((st, i) => tone(root * 2 * Math.pow(2, st / 12), 0, 0.28, 'triangle', 0.04, i * 0.055));
-}
-
-function sWin() {
-  const n = [523, 659, 784, 1046, 1318, 1046, 1318, 1568];
-  n.forEach((f, i) => {
-    tone(f, 0, 0.38, 'triangle', 0.13, i * 0.1);
-    tone(f * 2, 0, 0.24, 'sine', 0.05, i * 0.1);
-  });
-  tone(130.8, 0, 1.2, 'sine', 0.12, 0);
-  tone(196.0, 0, 1.2, 'sine', 0.1, 0.4);
-}
-
-/* ═══ NHẠC NỀN ═══
-   Vòng hoà thanh vui tươi (C – Am – F – G) với bass nảy, marimba và bộ gõ nhẹ. */
-let musGain = null, timer = null, nextT = 0, bar = 0;
-
-const PROG = [
-  { root: 130.81, notes: [261.63, 329.63, 392.00, 523.25] },   // C
-  { root: 110.00, notes: [261.63, 329.63, 440.00, 523.25] },   // Am
-  { root: 174.61, notes: [261.63, 349.23, 440.00, 523.25] },   // F
-  { root: 196.00, notes: [293.66, 392.00, 493.88, 587.33] },   // G
-];
-const STEP = 0.30;   // một phách móc đơn
-
-function marimba(t, f, dur, vol) {
-  const a = ac();
-  const g = env(musGain, t, dur, vol, 0.006);
-  const o = a.createOscillator(); o.type = 'sine'; o.frequency.setValueAtTime(f, t);
-  o.connect(g); o.start(t); o.stop(t + dur + 0.05);
-  const g2 = env(musGain, t, dur * 0.35, vol * 0.35, 0.004);
-  const o2 = a.createOscillator(); o2.type = 'sine'; o2.frequency.setValueAtTime(f * 4, t);
-  o2.connect(g2); o2.start(t); o2.stop(t + dur * 0.35 + 0.05);
-}
-function bass(t, f, dur, vol) {
-  const a = ac();
-  const g = env(musGain, t, dur, vol, 0.01);
-  const o = a.createOscillator(); o.type = 'triangle';
-  o.frequency.setValueAtTime(f * 1.5, t);
-  o.frequency.exponentialRampToValueAtTime(f, t + 0.05);
-  o.connect(g); o.start(t); o.stop(t + dur + 0.05);
-}
-function hat(t, vol) {
-  const a = ac();
-  const n = a.createBufferSource();
-  const buf = a.createBuffer(1, (a.sampleRate * 0.05) | 0, a.sampleRate);
-  const d = buf.getChannelData(0);
-  for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / d.length);
-  n.buffer = buf;
-  const f = a.createBiquadFilter(); f.type = 'highpass'; f.frequency.value = 7000;
-  const g = env(musGain, t, 0.05, vol, 0.003);
-  n.connect(f); f.connect(g); n.start(t);
-}
-
-function schedule() {
-  const a = ac();
-  while (nextT < a.currentTime + 1.5) {
-    const ch = PROG[bar % PROG.length];
-    // Bass nảy: phách 1 và 3 của ô nhịp 8 móc đơn.
-    bass(nextT, ch.root, STEP * 1.4, 0.10);
-    bass(nextT + STEP * 3, ch.root, STEP * 0.9, 0.07);
-    bass(nextT + STEP * 4, ch.root * 1.5, STEP * 1.2, 0.07);
-    // Marimba: mẫu giai điệu lặp có biến tấu nhẹ theo ô nhịp.
-    const r = (k) => ((bar * 53 + k * 29) % 31) / 31;
-    for (let i = 0; i < 8; i++) {
-      if (i % 2 === 1 && r(i) < 0.55) continue;
-      const f = ch.notes[(Math.floor(r(i + 3) * 4) + (i % 2)) % 4];
-      marimba(nextT + i * STEP, f * (r(i + 9) < 0.18 ? 2 : 1), STEP * 2.1, 0.055);
-    }
-    for (let i = 0; i < 8; i++) hat(nextT + i * STEP + STEP * 0.5, i % 4 === 2 ? 0.022 : 0.012);
-    nextT += STEP * 8;
-    bar++;
-  }
-}
-
-function startMusic() {
-  if (!musicOn || timer) return;
-  try {
-    const a = ac();
-    if (!musGain) { musGain = a.createGain(); musGain.gain.value = 0.55; musGain.connect(master); }
-    nextT = a.currentTime + 0.15;
-    schedule();
-    timer = setInterval(schedule, 450);
-  } catch (e) { /* bỏ qua */ }
-}
-function stopMusic() { if (timer) { clearInterval(timer); timer = null; } }
-
-// Hạ nhỏ nhạc nền trong lúc chúc mừng để fanfare nổi lên.
-function duckMusic(ms = 2200) {
-  if (!musGain) return;
-  try {
-    const a = ac(), t = a.currentTime;
-    musGain.gain.cancelScheduledValues(t);
-    musGain.gain.setValueAtTime(musGain.gain.value, t);
-    musGain.gain.linearRampToValueAtTime(0.12, t + 0.15);
-    musGain.gain.linearRampToValueAtTime(0.55, t + ms / 1000);
-  } catch (e) { /* bỏ qua */ }
-}
-
-const sndBtns = [], musBtns = [];
-function sync() {
-  for (const b of sndBtns) { b.textContent = soundOn ? '🔊' : '🔇'; b.classList.toggle('off', !soundOn); }
-  for (const b of musBtns) { b.textContent = musicOn ? '🎵' : '🎶'; b.classList.toggle('off', !musicOn); }
-}
-function initSoundToggle(btn) {
-  sndBtns.push(btn); sync();
-  btn.addEventListener('click', () => {
-    soundOn = !soundOn;
-    localStorage.setItem('cs_snd', soundOn ? '1' : '0');
-    sync(); if (soundOn) sTap();
-  });
-}
-function initMusicToggle(btn) {
-  musBtns.push(btn); sync();
-  btn.addEventListener('click', () => {
-    musicOn = !musicOn;
-    localStorage.setItem('cs_music', musicOn ? '1' : '0');
-    sync(); if (musicOn) startMusic(); else stopMusic();
-  });
-}
-return { ac, sDrop, sTap, sLift, sBack, sNope, sCoin, sWand, sHint, sUndo, sNewTube, sTubeDone, sWin, startMusic, stopMusic, duckMusic, initSoundToggle, initMusicToggle };
 })();
 
 /* ══════════ level.js ══════════ */
@@ -1074,26 +865,7 @@ function solve(tubes, cap, nodeCap = 400000, maxDepth = 120) {
   const ok = dfs(work, 0);
   return ok ? path.slice() : null;
 }
-
-// Nước đi gợi ý tiếp theo, hoặc null nếu bộ giải chịu thua.
-function hintMove(tubes, cap) {
-  const s = solve(tubes, cap, 250000, 110);
-  if (s && s.length) return s[0];
-  // Bộ giải chịu thua (ván rất rối): đưa ra nước đi tốt nhất theo kinh nghiệm.
-  let best = null, bestScore = -1;
-  for (let i = 0; i < tubes.length; i++) {
-    for (let j = 0; j < tubes.length; j++) {
-      const k = canPour(tubes, i, j, cap);
-      if (!k) continue;
-      let sc = tubes[j].length ? 40 + k * 3 : 5;
-      if (tubes[j].length + k === cap && tubes[j].length) sc += 100;
-      if (runLen(tubes[i]) === tubes[i].length) sc += 20;
-      if (sc > bestScore) { bestScore = sc; best = [i, j]; }
-    }
-  }
-  return best;
-}
-return { topColor, runLen, isPure, solved, canPour, buildLevel, solve, hintMove };
+return { topColor, runLen, isPure, solved, canPour, buildLevel, solve };
 })();
 
 /* ══════════ state.js ══════════ */
@@ -1101,7 +873,7 @@ M.state = (function () {
 // ── Tiến trình người chơi, lưu vào localStorage ──
 const { SAVE_KEY } = M.config;
 
-const DEFAULTS = { level: 1, gems: 40, stars: 0, best: 1, board: null, items: { tube: 1, wand: 1, hint: 2 } };
+const DEFAULTS = { level: 1, gems: 40, stars: 0, best: 1, board: null, items: { tube: 1 } };
 
 const save = load();
 
@@ -1158,22 +930,26 @@ const { drawFx } = M.fx;
    Mỗi màu được vẽ sẵn một lần vào canvas riêng rồi dán lại — nhẹ cho iPad. */
 let sprites = [], spriteR = 0, spritePad = 0;
 
+// Phông chữ tải xong sau khi bóng đã vẽ sẵn thì số trên bóng vẫn là phông dự
+// phòng — gọi hàm này để vẽ lại cả bộ.
+function invalidateSprites() { spriteR = 0; sprites = []; }
+
 function buildSprites(r, dpr) {
   if (Math.abs(r - spriteR) < 0.5 && sprites.length) return;
   spriteR = r;
   spritePad = Math.ceil(r * 0.34);
   const size = Math.ceil((r + spritePad) * 2);
-  sprites = COLORS.map((col) => {
+  sprites = COLORS.map((col, i) => {
     const cv = document.createElement('canvas');
     cv.width = cv.height = Math.ceil(size * dpr);
     const c = cv.getContext('2d');
     c.scale(dpr, dpr);
-    paintBall(c, size / 2, size / 2, r, col);
+    paintBall(c, size / 2, size / 2, r, col, i + 1);
     return { cv, size };
   });
 }
 
-function paintBall(c, cx, cy, r, col) {
+function paintBall(c, cx, cy, r, col, num) {
   // Thân bóng: sáng ở trên trái, tối dần xuống dưới phải.
   const g = c.createRadialGradient(cx - r * 0.36, cy - r * 0.42, r * 0.04, cx, cy, r * 1.06);
   g.addColorStop(0, col.light);
@@ -1209,6 +985,20 @@ function paintBall(c, cx, cy, r, col) {
 
   c.fillStyle = 'rgba(255,255,255,.85)';
   c.beginPath(); c.arc(cx - r * 0.12, cy - r * 0.58, r * 0.08, 0, 6.2832); c.fill();
+
+  // Số của màu: bé nào chưa chắc mắt phân biệt màu thì cứ nhìn số mà xếp.
+  // Viền trắng dày rồi mới tô ruột bằng màu tối — đọc rõ trên cả bóng nhạt.
+  c.save();
+  c.font = `800 ${(r * 0.96).toFixed(1)}px 'Baloo 2', system-ui, -apple-system, sans-serif`;
+  c.textAlign = 'center';
+  c.textBaseline = 'middle';
+  c.lineJoin = 'round';
+  c.lineWidth = r * 0.26;
+  c.strokeStyle = 'rgba(255,255,255,.92)';
+  c.strokeText(num, cx, cy + r * 0.12);
+  c.fillStyle = col.dark;
+  c.fillText(num, cx, cy + r * 0.12);
+  c.restore();
 }
 
 function drawBall(ctx, x, y, ci, scale = 1, alpha = 1) {
@@ -1221,60 +1011,66 @@ function drawBall(ctx, x, y, ci, scale = 1, alpha = 1) {
   ctx.restore();
 }
 
-/* ═══ NỀN ═══ */
-const ORBS = [];
-function seedOrbs(W, H) {
-  ORBS.length = 0;
-  const hues = ['#7ae7ff', '#ff9ad5', '#ffe07a', '#9affc4', '#b49bff'];
-  for (let i = 0; i < 11; i++) {
-    ORBS.push({
-      x: Math.random(), y: Math.random(),
-      r: 0.06 + Math.random() * 0.16,
-      sp: 0.00004 + Math.random() * 0.00009,
-      ph: Math.random() * 6.28,
-      c: hues[i % hues.length],
-      a: 0.07 + Math.random() * 0.08,
-    });
-  }
-}
+/* ═══ NỀN ═══
+   Nền đứng yên hẳn: vẽ một lần vào tấm đệm rồi dán lại mỗi khung hình. Trước
+   đây có mấy quầng sáng trôi và nhấp nháy phía sau ống — nhìn lâu rất mỏi mắt,
+   lại che mất chuyển động của bóng, nên bỏ hẳn. */
+let bgCache = null, bgW = 0, bgH = 0, bgDpr = 0;
 
-function drawBackground(ctx, W, H, t) {
-  if (!ORBS.length) seedOrbs(W, H);
-  const g = ctx.createLinearGradient(0, 0, W * 0.3, H);
+function paintBackground(c, W, H) {
+  const g = c.createLinearGradient(0, 0, W * 0.3, H);
   g.addColorStop(0, '#14306e');
   g.addColorStop(0.45, '#3a2378');
   g.addColorStop(1, '#6b2470');
-  ctx.fillStyle = g;
-  ctx.fillRect(0, 0, W, H);
+  c.fillStyle = g;
+  c.fillRect(0, 0, W, H);
 
-  ctx.save();
-  ctx.globalCompositeOperation = 'lighter';
-  for (const o of ORBS) {
-    const x = (o.x + Math.sin(t * o.sp * 1000 + o.ph) * 0.06) * W;
-    const y = (o.y + Math.cos(t * o.sp * 700 + o.ph) * 0.05) * H;
-    const r = o.r * Math.min(W, H) * (1 + Math.sin(t * 0.0006 + o.ph) * 0.08);
-    const rg = ctx.createRadialGradient(x, y, 0, x, y, r);
-    rg.addColorStop(0, o.c);
+  // Vài mảng màu êm, cố định — cho nền có chiều sâu mà không động đậy.
+  const tints = [
+    [0.18, 0.16, 0.42, '#7ae7ff', 0.10],
+    [0.84, 0.24, 0.38, '#ff9ad5', 0.10],
+    [0.12, 0.82, 0.40, '#b49bff', 0.09],
+    [0.88, 0.80, 0.36, '#9affc4', 0.07],
+  ];
+  c.save();
+  c.globalCompositeOperation = 'lighter';
+  for (const [fx, fy, fr, col, a] of tints) {
+    const x = fx * W, y = fy * H, r = fr * Math.min(W, H);
+    const rg = c.createRadialGradient(x, y, 0, x, y, r);
+    rg.addColorStop(0, col);
     rg.addColorStop(1, 'rgba(0,0,0,0)');
-    ctx.globalAlpha = o.a;
-    ctx.fillStyle = rg;
-    ctx.beginPath(); ctx.arc(x, y, r, 0, 6.2832); ctx.fill();
+    c.globalAlpha = a;
+    c.fillStyle = rg;
+    c.beginPath(); c.arc(x, y, r, 0, 6.2832); c.fill();
   }
-  ctx.restore();
+  c.restore();
 
   // Quầng sáng ấm sau khu vực đặt ống.
-  const halo = ctx.createRadialGradient(W / 2, H * 0.62, 0, W / 2, H * 0.62, Math.max(W, H) * 0.55);
+  const halo = c.createRadialGradient(W / 2, H * 0.62, 0, W / 2, H * 0.62, Math.max(W, H) * 0.55);
   halo.addColorStop(0, 'rgba(255,236,190,.13)');
   halo.addColorStop(1, 'rgba(0,0,0,0)');
-  ctx.fillStyle = halo;
-  ctx.fillRect(0, 0, W, H);
+  c.fillStyle = halo;
+  c.fillRect(0, 0, W, H);
 
   // Tối bốn góc cho bàn chơi nổi lên giữa màn.
-  const vg = ctx.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.32, W / 2, H / 2, Math.max(W, H) * 0.78);
+  const vg = c.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.32, W / 2, H / 2, Math.max(W, H) * 0.78);
   vg.addColorStop(0, 'rgba(0,0,0,0)');
   vg.addColorStop(1, 'rgba(4,2,20,.5)');
-  ctx.fillStyle = vg;
-  ctx.fillRect(0, 0, W, H);
+  c.fillStyle = vg;
+  c.fillRect(0, 0, W, H);
+}
+
+function drawBackground(ctx, W, H, dpr = 1) {
+  if (!bgCache || bgW !== W || bgH !== H || bgDpr !== dpr) {
+    bgW = W; bgH = H; bgDpr = dpr;
+    bgCache = document.createElement('canvas');
+    bgCache.width = Math.max(1, Math.round(W * dpr));
+    bgCache.height = Math.max(1, Math.round(H * dpr));
+    const c = bgCache.getContext('2d');
+    c.scale(dpr, dpr);
+    paintBackground(c, W, H);
+  }
+  ctx.drawImage(bgCache, 0, 0, W, H);
 }
 
 /* ═══ ỐNG THUỶ TINH ═══ */
@@ -1494,38 +1290,39 @@ function drawTubeCap(ctx, t, d, grow, nudge, ci) {
   ctx.restore();
 }
 
-// Mũi tên gợi ý bay lượn giữa hai ống.
-function drawHintArrow(ctx, x, y, t) {
-  const bob = Math.sin(t * 0.006) * 6;
+// ── Số của ống, gắn ngay dưới đáy ── 
+// Có số thì bé gọi được tên từng ống ("đổ ống 2 sang ống 5"), người lớn ngồi
+// cạnh cũng chỉ đường được mà không phải với tay vào màn hình.
+function drawTubeNumber(ctx, t, d, num, active) {
+  const y = t.y + t.h + d * 0.42;
   ctx.save();
-  ctx.translate(x, y + bob);
-  ctx.fillStyle = 'rgba(255,235,120,.95)';
-  ctx.shadowColor = 'rgba(255,220,80,.9)';
-  ctx.shadowBlur = 18;
-  ctx.beginPath();
-  ctx.moveTo(0, 14); ctx.lineTo(-12, -6); ctx.lineTo(-5, -6);
-  ctx.lineTo(-5, -18); ctx.lineTo(5, -18); ctx.lineTo(5, -6);
-  ctx.lineTo(12, -6); ctx.closePath();
-  ctx.fill();
+  ctx.font = `800 ${(d * 0.34).toFixed(1)}px 'Baloo 2', system-ui, -apple-system, sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.lineJoin = 'round';
+  ctx.lineWidth = d * 0.1;
+  ctx.strokeStyle = 'rgba(12,5,38,.72)';
+  ctx.strokeText(num, t.cx, y);
+  ctx.fillStyle = active ? '#ffe07a' : 'rgba(255,248,236,.82)';
+  ctx.fillText(num, t.cx, y);
   ctx.restore();
 }
-return { buildSprites, drawBall, drawBackground, drawTubeBack, clipTube, drawTubeGlass, drawTubeCap, drawHintArrow, drawFx };
+return { invalidateSprites, buildSprites, drawBall, drawBackground, drawTubeBack, clipTube, drawTubeGlass, drawTubeCap, drawTubeNumber, drawFx };
 })();
 
 /* ══════════ game.js ══════════ */
 M.game = (function () {
 // ── Luật chơi, hoạt ảnh rót bóng và các vật phẩm hỗ trợ ──
 const { COLORS, BALL_DUR, BALL_STAGGER } = M.config;
-const { buildLevel, canPour, runLen, topColor, solved, isPure, hintMove } = M.level;
+const { buildLevel, canPour, runLen, topColor, solved, isPure } = M.level;
 const { computeLayout } = M.layout;
 const R = M.render;
 const FX = M.fx;
-const A = M.audio;
 
 const G = {
   level: 1, tubes: [], cap: 4, plan: null, par: 10,
   moves: 0, sel: -1, flyers: [], history: [],
-  doneSet: new Set(), doneAt: new Map(), nudgeAt: new Map(), hint: null, hintUntil: 0, wandMode: false,
+  doneSet: new Set(), doneAt: new Map(), nudgeAt: new Map(), mark: null,
   layout: null, initial: null, W: 0, H: 0, locked: true, finished: false,
 };
 
@@ -1538,6 +1335,10 @@ function initGame(cv, callbacks) {
   window.addEventListener('resize', resize);
   window.addEventListener('orientationchange', () => setTimeout(resize, 250));
   canvas.addEventListener('pointerdown', onPointer);
+  // Số trên bóng được vẽ sẵn vào sprite; phông chữ về muộn thì vẽ lại cả bộ.
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(() => { R.invalidateSprites(); relayout(); });
+  }
   resize();
   requestAnimationFrame(loop);
 }
@@ -1575,8 +1376,7 @@ function startLevel(n, keepBoard) {
   G.doneSet = new Set();
   G.doneAt = new Map();
   G.nudgeAt = new Map();
-  G.hint = null;
-  G.wandMode = false;
+  G.mark = null;
   G.finished = false;
   G.locked = false;
   FX.clearFx();
@@ -1598,6 +1398,7 @@ function boardSnapshot() {
     tubes: G.tubes.map((t) => t.slice()),
     initial: G.initial.tubes.map((t) => t.slice()),
     history: G.history.slice(-20).map((h) => ({ tubes: h.tubes.map((t) => t.slice()), moves: h.moves, done: h.done })),
+    mark: G.mark ? { tubes: G.mark.tubes.map((t) => t.slice()), moves: G.mark.moves, done: G.mark.done.slice() } : null,
   };
 }
 
@@ -1615,8 +1416,7 @@ function restoreLevel(b) {
   G.doneSet = new Set();
   G.doneAt = new Map();
   G.nudgeAt = new Map();
-  G.hint = null;
-  G.wandMode = false;
+  G.mark = b.mark ? { tubes: b.mark.tubes.map((t) => t.slice()), moves: b.mark.moves, done: b.mark.done.slice() } : null;
   G.finished = false;
   G.locked = false;
   FX.clearFx();
@@ -1653,29 +1453,25 @@ function onPointer(e) {
   if (G.locked || G.finished) return;
   const rect = canvas.getBoundingClientRect();
   const i = tubeAt(e.clientX - rect.left, e.clientY - rect.top);
-  if (i < 0) { if (G.sel >= 0) { G.sel = -1; A.sBack(); } return; }
-  A.ac();
-  if (G.wandMode) { useWandOn(i); return; }
+  if (i < 0) { G.sel = -1; return; }
   tapTube(i);
 }
 
 function tapTube(i) {
-  G.hint = null;
   // Ống đã đóng nút: chỉ cho nút nảy một cái rồi thôi, không chọn được.
-  if (isSealed(i)) { G.nudgeAt.set(i, performance.now()); A.sBack(); return; }
+  if (isSealed(i)) { G.nudgeAt.set(i, performance.now()); return; }
 
   if (G.sel < 0) {
-    if (!G.tubes[i].length) { A.sBack(); return; }
+    if (!G.tubes[i].length) return;
     G.sel = i;
-    A.sLift();
     return;
   }
-  if (i === G.sel) { G.sel = -1; A.sBack(); return; }
+  if (i === G.sel) { G.sel = -1; return; }
   const k = canPour(G.tubes, G.sel, i, G.cap);
   if (!k) {
     // Không rót được: thử chọn ống mới cho bé đỡ phải chạm hai lần.
-    if (G.tubes[i].length) { G.sel = i; A.sLift(); }
-    else { A.sNope(); shake = 1; }
+    if (G.tubes[i].length) { G.sel = i; }
+    else { shake = 1; }
     return;
   }
   doMove(G.sel, i, k);
@@ -1717,14 +1513,12 @@ function landFlyer(f) {
   G.tubes[f.to].push(f.color);
   const L = G.layout, t = L.tubes[f.to];
   const y = L.ballY(t, G.tubes[f.to].length - 1);
-  A.sDrop(G.tubes[f.to].length - 1);
   FX.splash(t.cx, y + L.r * 0.5, COLORS[f.color].light, 7);
 
   if (isSealed(f.to) && !G.doneSet.has(f.to)) {
     G.doneSet.add(f.to);
     G.doneAt.set(f.to, performance.now());
     const c = COLORS[f.color];
-    A.sTubeDone(G.doneSet.size - 1);
     FX.sparkBurst(t.cx, t.y + t.h * 0.45, c.light, 20, 1.25);
     FX.sparkBurst(t.cx, t.y + t.h * 0.45, '#fff6c8', 10, 0.9);
     FX.ring(t.cx, t.y + t.h * 0.5, c.light, L.r * 0.6, L.r * 3.4, 620);
@@ -1754,8 +1548,6 @@ function finish() {
   G.finished = true;
   G.locked = true;
   const stars = G.moves <= G.par * 1.5 ? 3 : G.moves <= G.par * 2.2 ? 2 : 1;
-  A.duckMusic(2600);
-  A.sWin();
   FX.confetti(G.W, G.H, 110);
   for (const t of G.layout.tubes) {
     FX.sparkBurst(t.cx, t.y + t.h * 0.4, '#fff2b0', 8, 1);
@@ -1772,8 +1564,6 @@ function undo() {
   G.doneSet = new Set(h.done);
   for (const i of [...G.doneAt.keys()]) if (!G.doneSet.has(i)) G.doneAt.delete(i);
   G.sel = -1;
-  G.hint = null;
-  A.sUndo();
   hooks.onChange && hooks.onChange();
   return true;
 }
@@ -1782,52 +1572,42 @@ function addTube() {
   if (G.locked || G.finished) return false;
   G.tubes.push([]);
   G.history.forEach((h) => h.tubes.push([]));
+  if (G.mark) G.mark.tubes.push([]);
   relayout();
   const t = G.layout.tubes[G.tubes.length - 1];
-  A.sNewTube();
   FX.sparkBurst(t.cx, t.y + t.h * 0.5, '#bfefff', 22, 1.2);
   FX.ring(t.cx, t.y + t.h * 0.5, '#bfefff', 10, G.layout.r * 3.6, 620);
   hooks.onChange && hooks.onChange();
   return true;
 }
 
-function armWand() {
-  if (G.locked || G.finished) return false;
-  G.wandMode = true; G.sel = -1; G.hint = null;
-  canvas.classList.add('wand');
+/* ── Đánh dấu một chỗ để quay về ──
+   Bé cắm "cờ" trước khi thử một nước mạo hiểm; hỏng thì bấm lần nữa là về đúng
+   chỗ đã cắm, khỏi phải bấm Quay lại chục lần. Về tới nơi thì cờ nhổ đi, cắm
+   lại ngay được nếu muốn thử tiếp lần nữa. */
+function setMark() {
+  if (G.locked || G.finished || !G.tubes.length) return false;
+  G.mark = { tubes: G.tubes.map((t) => t.slice()), moves: G.moves, done: [...G.doneSet] };
+  const L = G.layout;
+  if (L) for (const t of L.tubes) FX.sparkBurst(t.cx, t.y + t.h + L.d * 0.2, '#ffe07a', 3, 0.7);
+  hooks.onChange && hooks.onChange();
   return true;
 }
-function disarmWand() { G.wandMode = false; canvas.classList.remove('wand'); }
 
-function useWandOn(i) {
-  // Ống đã đóng nút thì đũa thần cũng chịu — giữ đũa lại cho bé chọn ống khác.
-  if (isSealed(i)) { G.nudgeAt.set(i, performance.now()); A.sNope(); return; }
-  if (!G.tubes[i].length) { A.sNope(); return; }
-  snapshot();
-  const L = G.layout, t = L.tubes[i];
-  const y = L.ballY(t, G.tubes[i].length - 1);
-  const c = COLORS[G.tubes[i].pop()];
-  A.sWand();
-  FX.sparkBurst(t.cx, y, c.light, 26, 1.3);
-  FX.sparkBurst(t.cx, y, '#ffffff', 12, 0.8);
-  FX.ring(t.cx, y, c.light, 6, L.r * 3, 560);
-  disarmWand();
-  G.doneSet.delete(i);
-  G.doneAt.delete(i);
-  markDone();
-  if (solved(G.tubes)) { finish(); return; }
-  hooks.onChange && hooks.onChange();
-  checkStuck();
-}
-
-function showHint() {
-  if (G.locked || G.finished) return false;
-  const m = hintMove(G.tubes, G.cap);
-  if (!m) { A.sNope(); return false; }
-  G.hint = m;
-  G.hintUntil = performance.now() + 4200;
+function gotoMark() {
+  if (G.locked || G.finished || !G.mark) return false;
+  snapshot();                       // vẫn bấm Quay lại được nếu bé đổi ý
+  const m = G.mark;
+  G.tubes = m.tubes.map((t) => t.slice());
+  G.moves = m.moves;
+  G.doneSet = new Set(m.done);
+  G.doneAt = new Map([...G.doneSet].map((i) => [i, 0]));
+  G.nudgeAt = new Map();
   G.sel = -1;
-  A.sHint();
+  G.mark = null;
+  const L = G.layout;
+  if (L) FX.ring(G.W / 2, G.H / 2, '#ffe07a', 20, Math.max(G.W, G.H) * 0.5, 520);
+  hooks.onChange && hooks.onChange();
   return true;
 }
 
@@ -1888,12 +1668,15 @@ function draw(now) {
   if (shake > 0) {
     ctx.translate(Math.sin(now * 0.07) * 7 * shake, Math.sin(now * 0.11) * 3 * shake);
   }
-  R.drawBackground(ctx, G.W, G.H, now);
+  R.drawBackground(ctx, G.W, G.H, dpr);
   if (!L) { ctx.restore(); return; }
 
   const liftedIdx = G.sel >= 0 ? G.tubes[G.sel].length - 1 : -1;
 
   for (const t of L.tubes) R.drawTubeBack(ctx, t, L.d);
+
+  // Số thứ tự của từng ống, nằm ngay dưới đáy.
+  for (let i = 0; i < L.tubes.length; i++) R.drawTubeNumber(ctx, L.tubes[i], L.d, i + 1, i === G.sel);
 
   // Bóng đang nằm yên trong ống (bỏ qua quả đang được nhấc lên).
   for (let i = 0; i < G.tubes.length; i++) {
@@ -1914,7 +1697,6 @@ function draw(now) {
     let glow = 0, done = false;
     if (G.doneSet.has(i)) { glow = 0.45 + Math.sin(now * 0.003 + i) * 0.16; done = true; }
     if (i === G.sel) glow = Math.max(glow, 0.55 + pulse * 0.45);
-    if (G.hint && now < G.hintUntil && (i === G.hint[0] || i === G.hint[1])) glow = Math.max(glow, pulse);
     R.drawTubeGlass(ctx, L.tubes[i], L.d, { glow, done: done && i !== G.sel });
   }
 
@@ -1941,17 +1723,10 @@ function draw(now) {
     R.drawBall(ctx, x, y, f.color);
   }
 
-  // Mũi tên gợi ý.
-  if (G.hint && now < G.hintUntil) {
-    const a = L.tubes[G.hint[0]], b = L.tubes[G.hint[1]];
-    R.drawHintArrow(ctx, a.cx, a.y - L.d * 0.95, now);
-    R.drawHintArrow(ctx, b.cx, b.y - L.d * 0.95, now + 300);
-  }
-
   FX.drawFx(ctx);
   ctx.restore();
 }
-return { G, initGame, resize, startLevel, restartLevel, boardSnapshot, restoreLevel, isSealed, undo, addTube, armWand, disarmWand, showHint };
+return { G, initGame, resize, startLevel, restartLevel, boardSnapshot, restoreLevel, isSealed, undo, addTube, setMark, gotoMark };
 })();
 
 /* ══════════ ui.js ══════════ */
@@ -1959,7 +1734,6 @@ M.ui = (function () {
 // ── Màn hình, thanh thông tin, cửa hàng và bảng chúc mừng ──
 const { ITEMS } = M.config;
 const { save, persist, addGems, addItem, useItem, saveBoard, clearBoard, validBoard } = M.state;
-const A = M.audio;
 const Game = M.game;
 const { G } = M.game;
 
@@ -1969,8 +1743,8 @@ let pendingNext = 1;
 
 function initUI() {
   ['scr-title', 'scr-game', 'ov-win', 'ov-shop', 'ov-menu', 'loading',
-   'g-level', 'g-moves', 'g-gems', 'g-chal', 'title-meta', 'wand-tip',
-   'c-hint', 'c-wand', 'c-tube', 'win-stars', 'win-level', 'win-moves',
+   'g-level', 'g-moves', 'g-gems', 'g-chal', 'title-meta', 'tip',
+   'mark-ic', 'mark-lb', 'c-tube', 'win-stars', 'win-level', 'win-moves',
    'win-gems', 'win-item', 'win-item-ic', 'win-item-tx', 'shop-gems', 'shop-list',
   ].forEach((id) => { els[id] = $(id); });
 
@@ -1994,27 +1768,27 @@ function buildBubbles() {
 }
 
 function wire() {
-  $('btn-play').addEventListener('click', () => { A.ac(); A.sTap(); A.startMusic(); play(save.level); });
-  $('g-home').addEventListener('click', () => { A.sTap(); openMenu(); });
-  $('btn-resume').addEventListener('click', () => { A.sTap(); els['ov-menu'].hidden = true; });
-  $('btn-menu-restart').addEventListener('click', () => { A.sTap(); els['ov-menu'].hidden = true; Game.restartLevel(); });
+  $('btn-play').addEventListener('click', () => play(save.level));
+  $('g-home').addEventListener('click', openMenu);
+  $('btn-resume').addEventListener('click', () => { els['ov-menu'].hidden = true; });
+  $('btn-menu-restart').addEventListener('click', () => { els['ov-menu'].hidden = true; Game.restartLevel(); });
 
-  $('g-shop').addEventListener('click', () => { A.sTap(); openShop(); });
-  $('btn-shop-close').addEventListener('click', () => { A.sTap(); els['ov-shop'].hidden = true; });
+  $('g-shop').addEventListener('click', () => openShop());
+  $('btn-shop-close').addEventListener('click', () => { els['ov-shop'].hidden = true; });
 
   $('t-undo').addEventListener('click', () => { Game.undo(); });
-  $('t-again').addEventListener('click', () => { A.sTap(); Game.restartLevel(); });
+  $('t-again').addEventListener('click', () => Game.restartLevel());
 
-  $('t-hint').addEventListener('click', () => {
+  // Đánh dấu: một nút, hai lượt. Chưa có cờ thì cắm cờ; đã có cờ thì quay về
+  // đúng chỗ cắm. Dùng bao nhiêu lần cũng được, không tốn 💎.
+  $('t-mark').addEventListener('click', () => {
     if (G.locked || G.finished) return;
-    if (!save.items.hint) { needGems('hint'); return; }
-    if (Game.showHint()) { useItem('hint'); syncHud(); }
-  });
-  $('t-wand').addEventListener('click', () => {
-    if (G.locked || G.finished) return;
-    if (G.wandMode) { Game.disarmWand(); syncHud(); return; }
-    if (!save.items.wand) { needGems('wand'); return; }
-    if (Game.armWand()) { useItem('wand'); A.sTap(); syncHud(); }
+    if (G.mark) {
+      if (Game.gotoMark()) showTip('🚩 Về lại chỗ đánh dấu rồi nhé!');
+    } else if (Game.setMark()) {
+      showTip('📍 Đã đánh dấu chỗ này! Bấm 🚩 là quay về đây.');
+    }
+    syncHud();
   });
   $('t-tube').addEventListener('click', () => {
     if (G.locked || G.finished) return;
@@ -2022,9 +1796,8 @@ function wire() {
     if (Game.addTube()) { useItem('tube'); syncHud(); }
   });
 
-  $('btn-next').addEventListener('click', () => { A.sTap(); els['ov-win'].hidden = true; play(pendingNext); });
+  $('btn-next').addEventListener('click', () => { els['ov-win'].hidden = true; play(pendingNext); });
   $('btn-replay').addEventListener('click', () => {
-    A.sTap();
     els['ov-win'].hidden = true;
     // Quay lại chơi vòng vừa xong thì tiến trình cũng phải lùi về vòng đó,
     // không thì lần mở sau bé lại nhảy sang vòng kế tiếp.
@@ -2032,13 +1805,9 @@ function wire() {
     persist();
     Game.restartLevel();
   });
-
-  A.initSoundToggle(document.querySelector('.snd-btn'));
-  A.initMusicToggle(document.querySelector('.music-btn'));
 }
 
 function needGems(key) {
-  A.sNope();
   openShop(key);
 }
 
@@ -2054,7 +1823,6 @@ function play(level) {
     if (validBoard(save.board, level)) Game.restoreLevel(save.board);
     else Game.startLevel(level);
     els['loading'].hidden = true;
-    A.startMusic();
   }, 60);
 }
 
@@ -2067,13 +1835,19 @@ function persistBoard() {
   if (b) saveBoard(b);
 }
 
-let stuckTimer = 0;
-function showStuck() {
-  const el = $('stuck-tip');
+let tipTimer = 0;
+// Dải nhắc nổi lên phía trên thanh vật phẩm rồi tự tắt.
+function showTip(text, ms = 2600, warn = false) {
+  const el = els['tip'];
+  el.textContent = text;
+  el.classList.toggle('warn', warn);
   el.hidden = false;
-  A.sNope();
-  clearTimeout(stuckTimer);
-  stuckTimer = setTimeout(() => { el.hidden = true; }, 4200);
+  clearTimeout(tipTimer);
+  tipTimer = setTimeout(() => { el.hidden = true; }, ms);
+}
+
+function showStuck() {
+  showTip('Hết chỗ rót rồi! Bấm ↩️ Quay lại hoặc 🧪 Ống thêm nhé.', 4200, true);
 }
 
 function syncHud() {
@@ -2081,13 +1855,16 @@ function syncHud() {
   els['g-moves'].textContent = G.moves;
   els['g-gems'].textContent = save.gems;
   els['g-chal'].hidden = !(G.plan && G.plan.challenge);
-  for (const k of ['hint', 'wand', 'tube']) {
+  for (const k of ['tube']) {
     const n = save.items[k] || 0;
     els['c-' + k].textContent = n;
     $('t-' + k).classList.toggle('empty', n === 0);
   }
-  $('t-wand').classList.toggle('armed', G.wandMode);
-  els['wand-tip'].hidden = !G.wandMode;
+  const marked = !!G.mark;
+  els['mark-ic'].textContent = marked ? '🚩' : '📍';
+  els['mark-lb'].textContent = marked ? 'Về dấu' : 'Đánh dấu';
+  $('t-mark').classList.toggle('marked', marked);
+  $('t-mark').disabled = G.locked || G.finished;
   $('t-undo').disabled = !G.history.length || G.locked;
 }
 
@@ -2121,10 +1898,9 @@ function buildShop() {
 
 function buy(key) {
   const it = ITEMS[key];
-  if (save.gems < it.price) { A.sNope(); return; }
+  if (save.gems < it.price) { return; }
   addGems(-it.price);
   addItem(key, 1);
-  A.sCoin();
   refreshShop();
   syncHud();
 }
@@ -2181,7 +1957,7 @@ function showWin({ level, moves, stars }) {
   for (const s of sp) s.classList.remove('on');
   els['ov-win'].hidden = false;
   for (let i = 0; i < stars; i++) {
-    setTimeout(() => { sp[i].classList.add('on'); A.sCoin(); }, 260 + i * 280);
+    setTimeout(() => { sp[i].classList.add('on'); }, 260 + i * 280);
   }
   syncHud();
   syncTitle();
@@ -2194,7 +1970,6 @@ M.main = (function () {
 // ── Khởi động trò chơi ──
 const { initUI, syncHud, showWin, showStuck, persistBoard } = M.ui;
 const { initGame } = M.game;
-const { startMusic } = M.audio;
 
 window.__csReady = true;   // cho lớp báo lỗi biết mã trò chơi đã chạy được
 
@@ -2205,10 +1980,6 @@ initGame(document.getElementById('board'), {
   onStuck: showStuck,
 });
 syncHud();
-
-// iPad chỉ cho phát tiếng sau khi bé chạm màn hình lần đầu.
-const kick = () => { startMusic(); window.removeEventListener('pointerdown', kick); };
-window.addEventListener('pointerdown', kick);
 
 // Chặn zoom hai ngón cho bàn chơi luôn đứng yên. Nháy đúp đã được
 // `touch-action: manipulation` trong CSS lo, không tự chặn touchend ở đây nữa —

@@ -18,7 +18,7 @@ const here = dirname(fileURLToPath(import.meta.url));
 const src = (f) => join(here, 'src', f);
 
 // Xếp theo phụ thuộc: module nào cũng phải đứng sau thứ nó cần.
-const ORDER = ['config', 'layout', 'fx', 'audio', 'level', 'state', 'render', 'game', 'ui', 'main'];
+const ORDER = ['config', 'layout', 'fx', 'level', 'state', 'render', 'game', 'ui', 'main'];
 
 function exportedNames(code) {
   const names = new Set();

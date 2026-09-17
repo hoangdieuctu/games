@@ -1,7 +1,7 @@
 // ── Tiến trình người chơi, lưu vào localStorage ──
 import { SAVE_KEY } from './config.js';
 
-const DEFAULTS = { level: 1, gems: 40, stars: 0, best: 1, board: null, items: { tube: 1, wand: 1, hint: 2 } };
+const DEFAULTS = { level: 1, gems: 40, stars: 0, best: 1, board: null, items: { tube: 1 } };
 
 export const save = load();
 

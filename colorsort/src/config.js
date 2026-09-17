@@ -20,10 +20,9 @@ export const BALL_DUR = 340;       // thời gian bay của một quả bóng (m
 export const BALL_STAGGER = 72;    // độ trễ giữa các quả trong cùng một nước đi
 
 // Vật phẩm hỗ trợ: giá bằng 💎 và mô tả ngắn.
+// (Đánh dấu chỗ quay lại không nằm ở đây — đó là nút dùng thoải mái, không mất 💎.)
 export const ITEMS = {
   tube: { icon: '🧪', name: 'Ống thêm',  price: 30, desc: 'Thêm một ống trống cho vòng này' },
-  wand: { icon: '🪄', name: 'Đũa thần',  price: 25, desc: 'Búng bay quả bóng trên cùng của một ống' },
-  hint: { icon: '💡', name: 'Gợi ý',     price: 15, desc: 'Chỉ cho bé nước đi tiếp theo' },
 };
 
 export const SAVE_KEY = 'colorsort_save_v1';

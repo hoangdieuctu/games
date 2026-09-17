@@ -146,22 +146,3 @@ export function solve(tubes, cap, nodeCap = 400000, maxDepth = 120) {
   const ok = dfs(work, 0);
   return ok ? path.slice() : null;
 }
-
-// Nước đi gợi ý tiếp theo, hoặc null nếu bộ giải chịu thua.
-export function hintMove(tubes, cap) {
-  const s = solve(tubes, cap, 250000, 110);
-  if (s && s.length) return s[0];
-  // Bộ giải chịu thua (ván rất rối): đưa ra nước đi tốt nhất theo kinh nghiệm.
-  let best = null, bestScore = -1;
-  for (let i = 0; i < tubes.length; i++) {
-    for (let j = 0; j < tubes.length; j++) {
-      const k = canPour(tubes, i, j, cap);
-      if (!k) continue;
-      let sc = tubes[j].length ? 40 + k * 3 : 5;
-      if (tubes[j].length + k === cap && tubes[j].length) sc += 100;
-      if (runLen(tubes[i]) === tubes[i].length) sc += 20;
-      if (sc > bestScore) { bestScore = sc; best = [i, j]; }
-    }
-  }
-  return best;
-}

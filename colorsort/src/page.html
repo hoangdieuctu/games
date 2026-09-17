@@ -63,22 +63,18 @@
     <div class="spacer"></div>
     <div class="pill gem">💎 <b id="g-gems">0</b></div>
     <button class="btn" id="g-shop" aria-label="Cửa hàng">🛒</button>
-    <button class="btn music-btn" aria-label="Nhạc nền">🎵</button>
-    <button class="btn snd-btn" aria-label="Âm thanh">🔊</button>
   </header>
 
   <div class="board-wrap"><canvas id="board"></canvas></div>
 
   <footer class="dock">
     <button class="tool" id="t-undo"><span class="ic">↩️</span><span class="lb">Quay lại</span></button>
-    <button class="tool" id="t-hint"><span class="ic">💡</span><span class="lb">Gợi ý</span><b class="cnt" id="c-hint">0</b></button>
-    <button class="tool" id="t-wand"><span class="ic">🪄</span><span class="lb">Đũa thần</span><b class="cnt" id="c-wand">0</b></button>
+    <button class="tool" id="t-mark"><span class="ic" id="mark-ic">📍</span><span class="lb" id="mark-lb">Đánh dấu</span></button>
     <button class="tool" id="t-tube"><span class="ic">🧪</span><span class="lb">Ống thêm</span><b class="cnt" id="c-tube">0</b></button>
     <button class="tool" id="t-again"><span class="ic">🔄</span><span class="lb">Chơi lại</span></button>
   </footer>
 
-  <div class="wand-tip" id="wand-tip" hidden>🪄 Chạm vào ống muốn búng quả trên cùng đi!</div>
-  <div class="wand-tip stuck-tip" id="stuck-tip" hidden>Hết chỗ rót rồi! Bấm ↩️ Quay lại hoặc 🧪 Ống thêm nhé.</div>
+  <div class="tip" id="tip" hidden></div>
 </section>
 
 <!-- ══ LỚP PHỦ: VÒNG HOÀN THÀNH ══ -->
