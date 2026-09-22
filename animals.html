@@ -648,7 +648,8 @@ const Speech = {
     const vs = speechSynthesis.getVoices();
     if (!vs.length) return;
     this.enVoice =
-        vs.find(v => /^en[-_]US/i.test(v.lang) && /google|samantha|zira|aria/i.test(v.name)) ||
+        vs.find(v => /^google us english/i.test(v.name)) ||
+        vs.find(v => /^google/i.test(v.name) && /^en/i.test(v.lang)) ||
         vs.find(v => /^en[-_]US/i.test(v.lang)) ||
         vs.find(v => /^en[-_]GB/i.test(v.lang)) ||
         vs.find(v => /^en/i.test(v.lang)) || null;
@@ -656,23 +657,39 @@ const Speech = {
     updateSpeakWarn();
   },
 
-  cancel() { if (this.supported) { try { speechSynthesis.cancel(); } catch(e){} } },
+  cancel() {
+    if (!this.supported) return;
+    clearTimeout(this._guard);
+    try { speechSynthesis.cancel(); } catch (e) {}
+  },
 
   say(text, onEnd) {
     if (!this.supported || !text) { if (onEnd) onEnd(); return; }
     if (!this.loaded) this.loadVoices();
+    this.cancel();
+
+    const done = onceOnly(onEnd);
     const u = new SpeechSynthesisUtterance(text);
     u.lang = this.enVoice ? this.enVoice.lang : 'en-US';
     if (this.enVoice) u.voice = this.enVoice;
-    u.rate = 0.8;
-    u.pitch = 1.1;
+    u.rate = 0.92;
+    u.pitch = 1.05;
     u.volume = 1;
-    u.onend = u.onerror = () => { if (onEnd) onEnd(); };
+    u.onend = u.onerror = () => { clearTimeout(this._guard); done(); };
     // Chrome đôi khi "kẹt" hàng đợi sau khi cancel — resume cho chắc.
-    try { speechSynthesis.resume(); } catch(e){}
+    try { speechSynthesis.resume(); } catch (e) {}
+    // speak() phải nằm ngay trong cú chạm của người dùng: hoãn dù chỉ một
+    // nhịp là mất quyền phát tiếng và trình duyệt nuốt luôn câu đọc.
     speechSynthesis.speak(u);
+    // Vài trình duyệt không bắn onend — tự gỡ hiệu ứng khi đã đủ lâu.
+    this._guard = setTimeout(done, 1200 + text.length * 140);
   }
 };
+
+function onceOnly(fn) {
+  let called = false;
+  return () => { if (!called) { called = true; if (fn) fn(); } };
+}
 
 if (Speech.supported) {
   Speech.loadVoices();
