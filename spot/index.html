@@ -1,0 +1,1700 @@
+<!DOCTYPE html>
+<!-- TỆP NÀY ĐƯỢC TẠO TỰ ĐỘNG — đừng sửa trực tiếp.
+     Sửa trong spot/src/ rồi chạy: node spot/build.mjs -->
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Tìm Điểm Khác">
+<meta name="theme-color" content="#1a5f7a">
+<link rel="apple-touch-icon" href="data:image/png;base64,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">
+<title>Tìm Điểm Khác Nhau</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231a5f7a'/%3E%3Crect x='4' y='8' width='11' height='14' rx='2' fill='%23fff'/%3E%3Crect x='17' y='8' width='11' height='14' rx='2' fill='%23fff'/%3E%3Ccircle cx='9.5' cy='13' r='2.5' fill='%23fdd835'/%3E%3Ccircle cx='22.5' cy='13' r='2.5' fill='%23fb8c00'/%3E%3Ccircle cx='22.5' cy='14' r='6' fill='none' stroke='%23e53935' stroke-width='2'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg1: #1a5f7a; --bg2: #57c5b6; --ink: #1b2a33; --paper: #fffdf7;
+  --accent: #ff7043; --gold: #ffb300; --green: #2e7d32;
+  --hud-h: 60px; --dock-h: 78px;
+}
+html, body { width: 100%; height: 100%; overflow: hidden; }
+body {
+  font-family: 'Baloo 2', 'Nunito', system-ui, sans-serif; color: var(--ink);
+  background: radial-gradient(ellipse at 20% 10%, #7fdcd0 0%, var(--bg2) 35%, var(--bg1) 100%);
+  -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none;
+  touch-action: manipulation;
+}
+button { font: inherit; color: inherit; cursor: pointer; border: 0; background: none; }
+button:disabled { opacity: .45; cursor: default; }
+[hidden] { display: none !important; }
+
+/* ── màn hình ── */
+.screen { position: fixed; inset: 0; display: none; flex-direction: column; }
+.screen.show { display: flex; }
+
+/* ── trang đầu ── */
+#scr-title { align-items: center; justify-content: center; padding: 20px; overflow-y: auto; }
+.title-card {
+  width: min(460px, 100%); background: var(--paper); border-radius: 28px; padding: 24px 24px 20px;
+  box-shadow: 0 18px 50px rgba(0,0,0,.28); text-align: center; display: flex; flex-direction: column; align-items: center; gap: 10px;
+}
+.title-art { width: 100%; max-width: 300px; }
+h1 { font-size: 38px; line-height: 1.02; font-weight: 800; color: var(--bg1); }
+h1 span { color: var(--accent); }
+.title-sub { font-size: 15px; color: #4c5e69; line-height: 1.4; max-width: 340px; }
+.title-coins { font-size: 20px; font-weight: 800; color: #8a5a00; background: #fff3c4; border-radius: 999px; padding: 4px 18px; }
+.big-btn {
+  width: 100%; max-width: 320px; padding: 14px 20px; border-radius: 999px; font-size: 21px; font-weight: 800; color: #fff;
+  background: linear-gradient(180deg, #ff8a65, var(--accent)); box-shadow: 0 6px 0 #c9502a, 0 10px 20px rgba(0,0,0,.2);
+  transition: transform .08s, box-shadow .08s;
+}
+.big-btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #c9502a; }
+.ghost-btn {
+  display: block; width: 100%; max-width: 320px; padding: 10px 18px; border-radius: 999px; font-size: 16px; font-weight: 700;
+  color: var(--bg1); background: #e6f3f5; text-decoration: none; text-align: center;
+}
+.ghost-btn.danger { color: #b71c1c; background: #fdecea; margin: 18px auto 0; }
+.title-meta { font-size: 13px; color: #6b7c86; }
+.title-themes { font-size: 13px; color: #4c5e69; }
+.link-back { font-size: 13px; color: #6b7c86; text-decoration: none; margin-top: 4px; }
+
+/* ── HUD ── */
+.hud {
+  height: var(--hud-h); display: flex; align-items: center; gap: 8px; padding: 8px 12px;
+  padding-top: calc(8px + env(safe-area-inset-top, 0px)); flex: none;
+}
+.hud .spacer { flex: 1; }
+.btn {
+  width: 44px; height: 44px; border-radius: 14px; background: rgba(255,255,255,.92); font-size: 22px;
+  box-shadow: 0 3px 0 rgba(0,0,0,.15); display: grid; place-items: center;
+}
+.pill {
+  height: 44px; padding: 0 14px; border-radius: 14px; background: rgba(255,255,255,.92); font-size: 16px; font-weight: 700;
+  display: flex; align-items: center; gap: 6px; box-shadow: 0 3px 0 rgba(0,0,0,.15); white-space: nowrap;
+}
+.pill b { font-weight: 800; }
+.pill .theme { font-size: 14px; color: #4c5e69; margin-left: 4px; }
+.pill.coin { color: #8a5a00; background: #fff3c4; }
+.pill.coin.bump { animation: bump .45s ease; }
+@keyframes bump { 0% { transform: scale(1); } 30% { transform: scale(1.18); background: #ffe082; } 100% { transform: scale(1); } }
+.dots { display: flex; gap: 4px; margin-left: 4px; }
+.dots span { width: 10px; height: 10px; border-radius: 50%; background: #cfd8dc; }
+.dots span.on { background: var(--green); }
+
+/* ── hai bức tranh ── */
+.panes {
+  flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; gap: 12px; padding: 4px 12px;
+}
+.panes.row { flex-direction: row; }
+.panes.col { flex-direction: column; }
+.pane {
+  flex: none; background: #fff; border-radius: 14px; overflow: hidden; border: 4px solid #fff;
+  box-shadow: 0 8px 24px rgba(0,0,0,.25); position: relative; cursor: crosshair;
+}
+.pane svg { display: block; width: 100%; height: 100%; }
+.pane.shake { animation: shake .35s ease; }
+@keyframes shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+
+/* ── thanh công cụ ── */
+.dock {
+  height: var(--dock-h); flex: none; display: flex; justify-content: center; gap: 12px; padding: 8px 12px;
+  padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+}
+.tool {
+  min-width: 96px; padding: 4px 14px; border-radius: 16px; background: rgba(255,255,255,.92); display: flex; flex-direction: column; align-items: center; gap: 0;
+  box-shadow: 0 3px 0 rgba(0,0,0,.15); font-weight: 700; font-size: 13px; color: #4c5e69; position: relative;
+}
+.tool .ic { font-size: 22px; line-height: 1.1; }
+.tool.hint { background: #fff3c4; color: #8a5a00; min-width: 120px; }
+.tool .cost { position: absolute; top: -8px; right: -6px; background: var(--gold); color: #fff; font-size: 12px; padding: 1px 8px; border-radius: 999px; box-shadow: 0 2px 0 #b57f00; }
+.tool:active { transform: translateY(2px); box-shadow: 0 1px 0 rgba(0,0,0,.15); }
+
+.tip {
+  position: absolute; left: 50%; bottom: calc(var(--dock-h) + 12px); transform: translateX(-50%);
+  background: rgba(27,42,51,.92); color: #fff; padding: 10px 18px; border-radius: 14px; font-size: 15px; font-weight: 700;
+  max-width: 90vw; text-align: center; z-index: 5;
+}
+
+/* ── chọn vòng ── */
+.level-scroll { flex: 1; overflow-y: auto; padding: 8px 14px 30px; -webkit-overflow-scrolling: touch; }
+.level-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; max-width: 620px; margin: 0 auto; }
+.tile {
+  aspect-ratio: 1; border-radius: 16px; background: rgba(255,255,255,.95); display: flex; flex-direction: column; align-items: center; justify-content: center;
+  box-shadow: 0 4px 0 rgba(0,0,0,.15); gap: 0; font-size: 12px;
+}
+.tile b { font-size: 22px; font-weight: 800; line-height: 1; }
+.tile .tile-em { font-size: 20px; line-height: 1.1; }
+.tile .tile-stars { color: var(--gold); font-size: 13px; letter-spacing: 1px; }
+.tile .tile-stars i { color: #d8d8d8; font-style: normal; }
+.tile.next { outline: 3px solid var(--accent); }
+.tile.next .tile-stars { color: var(--accent); font-size: 11px; font-weight: 800; }
+.tile.locked { background: rgba(255,255,255,.45); color: #7d8a92; box-shadow: none; }
+
+/* ── lớp phủ ── */
+.overlay { position: fixed; inset: 0; background: rgba(10,30,40,.55); display: flex; align-items: center; justify-content: center; padding: 20px; z-index: 10; }
+.card {
+  width: min(400px, 100%); background: var(--paper); border-radius: 26px; padding: 26px 22px 22px; text-align: center;
+  box-shadow: 0 20px 50px rgba(0,0,0,.35); display: flex; flex-direction: column; align-items: center; gap: 10px;
+  animation: pop .3s ease;
+}
+@keyframes pop { from { transform: scale(.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.card h2 { font-size: 26px; font-weight: 800; color: var(--bg1); }
+.win-ribbon { background: var(--accent); color: #fff; font-weight: 800; padding: 6px 22px; border-radius: 999px; font-size: 18px; margin-top: -44px; box-shadow: 0 4px 0 #c9502a; }
+.stars { font-size: 46px; color: #dcdcdc; line-height: 1; display: flex; gap: 6px; }
+.stars span.lit { color: var(--gold); text-shadow: 0 0 14px rgba(255,179,0,.6); animation: pop .4s ease; }
+.win-reward { font-size: 30px; font-weight: 800; color: #8a5a00; background: #fff3c4; border-radius: 999px; padding: 4px 22px; display: flex; gap: 8px; align-items: center; }
+.win-line { font-size: 14px; color: #6b7c86; }
+.row-btns { display: flex; gap: 10px; width: 100%; max-width: 320px; }
+.row-btns .ghost-btn { flex: 1; }
+
+.boot-error { position: fixed; inset: 0; background: var(--paper); padding: 40px 24px; text-align: center; z-index: 50; }
+.boot-error h2 { font-size: 26px; color: #b71c1c; margin-bottom: 12px; }
+.boot-error p { margin-bottom: 10px; color: #4c5e69; }
+
+@media (max-width: 520px) {
+  .pill .theme { display: none; }
+  .pill.found .dots { display: none; }
+  h1 { font-size: 32px; }
+  .level-grid { gap: 8px; }
+  .tile b { font-size: 18px; }
+}
+
+@media (min-width: 900px) {
+  .level-grid { grid-template-columns: repeat(10, 1fr); max-width: 1000px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ══ MÀN HÌNH TIÊU ĐỀ ══ -->
+<section class="screen show" id="scr-title">
+  <div class="title-card">
+    <div class="title-art" aria-hidden="true">
+      <svg viewBox="0 0 260 130" width="100%" height="100%">
+        <rect x="6" y="14" width="118" height="100" rx="10" fill="#fff" stroke="#c9d6df" stroke-width="3"/>
+        <rect x="136" y="14" width="118" height="100" rx="10" fill="#fff" stroke="#c9d6df" stroke-width="3"/>
+        <g>
+          <rect x="14" y="22" width="102" height="84" rx="6" fill="#bde6ff"/>
+          <circle cx="42" cy="46" r="12" fill="#fdd835"/>
+          <path d="M14 106 Q45 70 80 92 T116 84 V106 Z" fill="#7cc576"/>
+          <rect x="70" y="72" width="22" height="22" fill="#ef5350"/><path d="M66 74 L81 60 L96 74 Z" fill="#8d6e63"/>
+        </g>
+        <g>
+          <rect x="144" y="22" width="102" height="84" rx="6" fill="#bde6ff"/>
+          <circle cx="172" cy="46" r="12" fill="#fb8c00"/>
+          <path d="M144 106 Q175 70 210 92 T246 84 V106 Z" fill="#7cc576"/>
+          <rect x="200" y="72" width="22" height="22" fill="#42a5f5"/><path d="M196 74 L211 60 L226 74 Z" fill="#8d6e63"/>
+        </g>
+        <circle cx="211" cy="83" r="24" fill="none" stroke="#e53935" stroke-width="5"/>
+        <path d="M228 100 L246 120" stroke="#e53935" stroke-width="8" stroke-linecap="round"/>
+        <circle cx="172" cy="46" r="20" fill="none" stroke="#e53935" stroke-width="4" stroke-dasharray="8 6"/>
+      </svg>
+    </div>
+    <h1>Tìm Điểm<br><span>Khác Nhau</span></h1>
+    <p class="title-sub">Hai bức tranh giống nhau… gần như thế! Chạm vào chỗ khác nhau để kiếm tiền vàng nhé.</p>
+    <div class="title-coins">🪙 <b id="title-coins">0</b></div>
+    <button class="big-btn" id="btn-play">Chơi ngay ▸</button>
+    <button class="ghost-btn" id="btn-levels">Chọn vòng chơi</button>
+    <div class="title-meta" id="title-meta"></div>
+    <div class="title-themes" id="theme-list"></div>
+    <a class="link-back" href="../index.html">‹ Về kho trò chơi</a>
+  </div>
+</section>
+
+<!-- ══ CHỌN VÒNG ══ -->
+<section class="screen" id="scr-levels">
+  <header class="hud">
+    <button class="btn" id="lv-back" aria-label="Quay lại">‹</button>
+    <div class="pill lv">Chọn vòng</div>
+    <div class="pill" id="lv-stars">⭐ 0</div>
+    <div class="spacer"></div>
+    <div class="pill coin">🪙 <b id="lv-coins">0</b></div>
+  </header>
+  <div class="level-scroll">
+    <div class="level-grid" id="level-grid"></div>
+    <button class="ghost-btn danger" id="btn-reset">Xoá tiến trình, chơi lại từ đầu</button>
+  </div>
+</section>
+
+<!-- ══ MÀN CHƠI ══ -->
+<section class="screen" id="scr-game">
+  <header class="hud">
+    <button class="btn" id="g-home" aria-label="Tạm dừng">🏠</button>
+    <div class="pill lv">Vòng <b id="g-level">1</b> <span class="theme" id="g-theme"></span></div>
+    <div class="pill found">🔍 <b id="g-found">0/3</b><span class="dots" id="g-dots"></span></div>
+    <div class="spacer"></div>
+    <div class="pill coin">🪙 <b id="g-coins">0</b></div>
+    <button class="btn" id="g-sound" aria-label="Âm thanh">🔊</button>
+  </header>
+
+  <div class="panes" id="panes">
+    <div class="pane" id="pane-l"></div>
+    <div class="pane" id="pane-r"></div>
+  </div>
+
+  <footer class="dock">
+    <button class="tool" id="t-levels"><span class="ic">📋</span><span class="lb">Chọn vòng</span></button>
+    <button class="tool hint" id="t-hint"><span class="ic">💡</span><span class="lb">Gợi ý</span><b class="cost"><span id="hint-cost">30</span> 🪙</b></button>
+    <button class="tool" id="t-again"><span class="ic">🔄</span><span class="lb">Chơi lại</span></button>
+  </footer>
+
+  <div class="tip" id="tip" hidden></div>
+</section>
+
+<!-- ══ LỚP PHỦ: VÒNG HOÀN THÀNH ══ -->
+<div class="overlay" id="ov-win" hidden>
+  <div class="card win-card">
+    <div class="win-ribbon" id="win-ribbon">Tuyệt vời!</div>
+    <div class="stars" id="win-stars"><span>★</span><span>★</span><span>★</span></div>
+    <h2>Xong vòng <b id="win-level">1</b>!</h2>
+    <div class="win-reward"><span class="rw-ic">🪙</span><b id="win-coins">+0</b></div>
+    <p class="win-line" id="win-line"></p>
+    <button class="big-btn" id="btn-next">Vòng tiếp theo ▸</button>
+    <div class="row-btns">
+      <button class="ghost-btn" id="btn-replay">Chơi lại</button>
+      <button class="ghost-btn" id="btn-win-levels">Chọn vòng</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ LỚP PHỦ: TẠM DỪNG ══ -->
+<div class="overlay" id="ov-menu" hidden>
+  <div class="card menu-card">
+    <h2>Tạm nghỉ</h2>
+    <button class="big-btn" id="btn-resume">Chơi tiếp ▸</button>
+    <button class="ghost-btn" id="btn-menu-restart">Chơi lại vòng này</button>
+    <button class="ghost-btn" id="btn-menu-levels">Chọn vòng</button>
+    <button class="ghost-btn" id="btn-menu-home">Về trang đầu</button>
+    <a class="ghost-btn" href="../index.html">Về kho trò chơi</a>
+  </div>
+</div>
+
+<!-- Lưới an toàn: nếu mã trò chơi không chạy được thì nói rõ lý do. -->
+<div class="boot-error" id="boot-error" hidden>
+  <h2>Chưa chạy được trò chơi 😢</h2>
+  <p id="boot-why"></p>
+  <p class="boot-fix">Bé thử tải lại trang xem sao. Nếu vẫn vậy thì có thể trình duyệt đã quá cũ — hãy cập nhật iPadOS hoặc mở bằng Safari / Chrome mới nhất.</p>
+</div>
+
+<script>
+window.__spBootMsg = '';
+window.addEventListener('error', function (e) {
+  if (!window.__spBootMsg && e && e.message) window.__spBootMsg = e.message;
+}, true);
+</script>
+
+<script>
+(function () {
+'use strict';
+const M = {};
+
+/* ══════════ config.js ══════════ */
+M.config = (function () {
+// ── Hằng số và đường cong độ khó ──
+const SCENE_W = 800;
+const SCENE_H = 500;
+const TOTAL_LEVELS = 100;
+const HINT_COST = 30;       // giá một gợi ý (tiền vàng)
+const START_COINS = 60;     // tiền có sẵn khi mới chơi
+const HINT_SECONDS = 6;     // vòng gợi ý nhấp nháy bao lâu
+const SAVE_KEY = 'spot-diff-v1';
+
+// Tham số sinh vòng chơi theo số vòng L (1..100).
+//   t = 0 ở vòng 1 → 1 ở vòng 100: khác biệt càng lúc càng tinh vi.
+//   u = 0 cho tới vòng 50 → 1 ở vòng 100: đồ vật thu nhỏ, chen chúc, khác biệt nằm ở chi tiết bé xíu.
+function levelParams(L) {
+  const t = Math.max(0, Math.min(1, (L - 1) / (TOTAL_LEVELS - 1)));
+  const u = Math.max(0, Math.min(1, (L - 50) / 50));
+  const w = { color: 3, missing: 3, size: 2 };   // trọng số các kiểu khác biệt
+  if (L >= 5)  { w.flip = 2; w.rot = 2; }
+  if (L >= 12) { w.move = 2; w.count = 2; }
+  if (L >= 18) { w.part = 2.5; }
+  if (L >= 25) { w.missing = 1.5; w.color = 2; }
+  if (L >= 40) { w.missing = 1; }
+  if (L >= 50) { w.tint = 3; w.part = 4; w.count = 3; w.color = 1.5; w.size = 1.5; w.rot = 1.5; w.missing = 0.8; }
+  if (L >= 75) { w.tint = 4; w.part = 5; w.missing = 0.5; w.size = 1; w.flip = 1.5; }
+  return {
+    t, u,
+    diffs: Math.min(10, 3 + Math.floor((L - 1) / 12)),  // 3 → 10 điểm khác nhau
+    objects: Math.round(9 + 14 * t + 10 * u),           // 9 → 23 → 33 đồ vật trong cảnh
+    maxDup: L >= 50 ? 3 : 2,                            // một loại đồ vật xuất hiện tối đa bao nhiêu lần
+    scaleMul: 1 - 0.3 * u,                              // đồ vật nhỏ dần từ vòng 50
+    sizeMul: 1.45 - 0.33 * t,                           // to/nhỏ hơn bao nhiêu lần (1.45 → 1.12)
+    rotDeg: 32 - 24 * t,                                // xoay bao nhiêu độ (32 → 8)
+    moveDist: 50 - 36 * t,                              // dịch đi bao xa (50 → 14)
+    tint: 0.32 - 0.14 * u,                              // đổi sắc độ đậm/nhạt bao nhiêu (0.32 → 0.18)
+    w,
+  };
+}
+
+// Tiền thưởng
+function coinPerDiff(L, replay) { return replay ? 1 : 3 + Math.floor(L / 10); }
+function coinClearBonus(L, replay) { return replay ? 5 : 10 + L; }
+function coinStarBonus(stars, replay) { return replay ? 0 : (stars === 3 ? 15 : stars === 2 ? 5 : 0); }
+function starsFor(hints, wrong) {
+  if (hints === 0 && wrong <= 3) return 3;
+  if (hints <= 1 && wrong <= 6) return 2;
+  return 1;
+}
+return { SCENE_W, SCENE_H, TOTAL_LEVELS, HINT_COST, START_COINS, HINT_SECONDS, SAVE_KEY, levelParams, coinPerDiff, coinClearBonus, coinStarBonus, starsFor };
+})();
+
+/* ══════════ rng.js ══════════ */
+M.rng = (function () {
+// ── Bộ sinh số giả ngẫu nhiên có hạt (mulberry32) ──
+// Cùng một hạt → cùng một dãy số, nên vòng 7 luôn là cùng một bức tranh.
+function rng(seed) {
+  let a = seed >>> 0;
+  const next = () => {
+    a = (a + 0x6D2B79F5) >>> 0;
+    let t = a;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+  const R = next;
+  R.range = (lo, hi) => lo + (hi - lo) * next();
+  R.int = (lo, hi) => Math.floor(lo + (hi - lo + 1) * next());
+  R.chance = (p) => next() < p;
+  R.pick = (arr) => arr[Math.floor(next() * arr.length)];
+  R.shuffle = (arr) => {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(next() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  };
+  R.weighted = (pairs) => {          // [[value, weight], ...]
+    let sum = 0;
+    for (const p of pairs) sum += p[1];
+    let x = next() * sum;
+    for (const p of pairs) { x -= p[1]; if (x <= 0) return p[0]; }
+    return pairs[pairs.length - 1][0];
+  };
+  return R;
+}
+return { rng };
+})();
+
+/* ══════════ draw.js ══════════ */
+M.draw = (function () {
+// ── Bảng màu và các hàm vẽ SVG dùng chung ──
+const PALETTE = {
+  red: '#e53935', orange: '#fb8c00', yellow: '#fdd835', lime: '#9ccc65',
+  green: '#43a047', teal: '#26a69a', cyan: '#29b6f6', blue: '#1e88e5',
+  navy: '#3949ab', purple: '#8e24aa', pink: '#ec407a', brown: '#8d6e63',
+  gray: '#90a4ae', white: '#fafafa', cream: '#fff3d6', black: '#455a64',
+};
+// Màu "gần giống" — vòng sau dùng để đổi màu tinh vi hơn.
+const NEAR = {
+  red: ['orange', 'pink'], orange: ['red', 'yellow'], yellow: ['orange', 'lime', 'cream'],
+  lime: ['green', 'yellow'], green: ['lime', 'teal'], teal: ['green', 'cyan'],
+  cyan: ['teal', 'blue'], blue: ['cyan', 'navy'], navy: ['blue', 'purple'],
+  purple: ['navy', 'pink'], pink: ['purple', 'red'], brown: ['orange', 'gray'],
+  gray: ['brown', 'navy', 'black'], white: ['cream', 'gray'], cream: ['white', 'yellow'],
+  black: ['navy', 'gray'],
+};
+const col = (k) => PALETTE[k] || k;
+
+// Làm tối (amt < 0) hoặc sáng (amt > 0) một màu hex.
+function shade(hex, amt) {
+  const n = parseInt(hex.slice(1), 16);
+  const f = (v) => Math.round(amt < 0 ? v * (1 + amt) : v + (255 - v) * amt);
+  const r = f(n >> 16), g = f((n >> 8) & 255), b = f(n & 255);
+  return '#' + [r, g, b].map((v) => v.toString(16).padStart(2, '0')).join('');
+}
+
+// Thuộc tính tô màu có viền đậm kiểu hoạt hình.
+const S = (fill, sw = 2.5) =>
+  `fill="${fill}" stroke="${shade(fill, -0.45)}" stroke-width="${sw}" stroke-linejoin="round" stroke-linecap="round"`;
+// Thuộc tính nét vẽ không tô.
+const L = (color, sw = 3) =>
+  `fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round"`;
+// Lặp một mẩu SVG n lần.
+const rep = (n, f) => { let s = ''; for (let i = 0; i < n; i++) s += f(i); return s; };
+// Vệt sáng bóng.
+const hl = (x, y, w, h, r = 4) =>
+  `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${r}" fill="#fff" opacity=".3"/>`;
+// Toạ độ x của mục thứ i trong n mục trải đều từ x1 đến x2.
+const spread = (i, n, x1, x2) => (n <= 1 ? (x1 + x2) / 2 : x1 + (x2 - x1) * i / (n - 1));
+// Móc treo áo: từ đỉnh -h xuống thanh ngang ở -h+26.
+const hanger = (h) =>
+  `<path d="M0 ${-h + 12} Q0 ${-h} 6 ${-h} Q12 ${-h} 12 ${-h + 6}" ${L('#78909c', 2.5)}/>`
+  + `<path d="M-32 ${-h + 26} L0 ${-h + 10} L32 ${-h + 26} Z" ${L('#a1887f', 3.5)}/>`;
+// Ngôi sao 5 cánh tâm (cx,cy).
+function star(cx, cy, ro, ri) {
+  let d = '';
+  for (let i = 0; i < 10; i++) {
+    const r = i % 2 ? ri : ro, a = -Math.PI / 2 + i * Math.PI / 5;
+    d += (i ? 'L' : 'M') + (cx + r * Math.cos(a)).toFixed(1) + ' ' + (cy + r * Math.sin(a)).toFixed(1);
+  }
+  return d + 'Z';
+}
+return { PALETTE, NEAR, col, shade, S, L, rep, hl, spread, hanger, star };
+})();
+
+/* ══════════ kitchen.js ══════════ */
+M.kitchen = (function () {
+// ── Chủ đề NHÀ BẾP: nền và đồ vật ──
+const { S, L, rep, hl, spread, shade } = M.draw;
+
+const WOOD = '#8d6e63', DARK = '#455a64', METAL = '#c7ccd1';
+
+const KITCHEN_OBJECTS = [
+  { id: 'pot', w: 84, h: 66, zones: ['counter', 'shelf'], c1: ['red', 'blue', 'green', 'orange', 'gray', 'teal'], parts: ['lid', 'handle'],
+    draw: ({ c, hide }) =>
+      (hide !== 'handle' ? `<path d="M-36 -34 h-10 v9 h10 M36 -34 h10 v9 h-10" ${L(shade(c, -.45), 4.5)}/>` : '')
+      + `<rect x="-34" y="-44" width="68" height="44" rx="8" ${S(c)}/>${hl(-28, -38, 10, 30, 5)}`
+      + (hide !== 'lid' ? `<path d="M-38 -44 h76 v-5 a8 8 0 0 0 -8 -8 h-60 a8 8 0 0 0 -8 8 z" ${S(METAL)}/><rect x="-6" y="-64" width="12" height="8" rx="3" ${S(DARK)}/>` : '') },
+
+  { id: 'pan', w: 104, h: 30, zones: ['counter', 'shelf'], c1: ['black', 'gray', 'red', 'blue', 'teal'], asym: true,
+    draw: ({ c }) =>
+      `<rect x="20" y="-22" width="44" height="8" rx="4" ${S(WOOD)}/>`
+      + `<path d="M-50 -24 H24 L18 -2 H-44 Z" ${S(c)}/><rect x="-46" y="-23" width="66" height="4" fill="${shade(c, .35)}"/>` },
+
+  { id: 'kettle', w: 84, h: 74, zones: ['counter', 'shelf'], c1: ['red', 'blue', 'teal', 'cream', 'purple', 'gray'], asym: true, parts: ['handle'],
+    draw: ({ c, hide }) =>
+      `<path d="M-30 -30 L-46 -50 L-38 -54 L-22 -36 Z" ${S(c)}/>`
+      + `<path d="M-32 0 H32 Q40 -30 20 -48 H-20 Q-40 -30 -32 0 Z" ${S(c)}/>${hl(-22, -40, 8, 26, 4)}`
+      + `<rect x="-16" y="-54" width="32" height="8" rx="3" ${S(shade(c, -.2))}/><circle cx="0" cy="-56" r="4" ${S(DARK)}/>`
+      + (hide !== 'handle' ? `<path d="M-12 -54 Q0 -76 12 -54" ${L(DARK, 5)}/>` : '') },
+
+  { id: 'mug', w: 56, h: 46, zones: ['counter', 'shelf'], c1: ['red', 'blue', 'green', 'yellow', 'pink', 'purple', 'cyan'], n: [2, 5], asym: true,
+    draw: ({ c, n }) =>
+      `<path d="M20 -32 Q40 -32 40 -20 Q40 -8 20 -8" ${L(shade(c, -.45), 10)}/><path d="M20 -32 Q40 -32 40 -20 Q40 -8 20 -8" ${L(c, 5)}/>`
+      + `<rect x="-20" y="-42" width="40" height="42" rx="6" ${S(c)}/>`
+      + rep(n, (i) => `<circle cx="${spread(i, n, -13, 13).toFixed(1)}" cy="${-22 + (i % 2) * 9}" r="3.2" fill="#fff" opacity=".85"/>`) },
+
+  { id: 'plate', w: 58, h: 58, zones: ['counter', 'shelf'], c1: ['blue', 'red', 'green', 'pink', 'orange', 'purple'], n: [4, 8], rot: false,
+    draw: ({ c, n }) =>
+      `<circle cx="0" cy="-29" r="29" ${S('#fafafa', 2)}/><circle cx="0" cy="-29" r="19" fill="${shade(c, .6)}" stroke="${c}" stroke-width="3"/>`
+      + rep(n, (i) => { const a = -Math.PI / 2 + i * 2 * Math.PI / n; return `<circle cx="${(24 * Math.cos(a)).toFixed(1)}" cy="${(-29 + 24 * Math.sin(a)).toFixed(1)}" r="3" fill="${c}"/>`; }) },
+
+  { id: 'knife', w: 92, h: 20, zones: ['counter'], c1: ['black', 'brown', 'red', 'blue'], asym: true,
+    draw: ({ c }) =>
+      `<path d="M-46 -10 H22 Q32 -10 32 -5 L-46 -2 Z" ${S('#cfd8dc', 2)}/><rect x="28" y="-14" width="32" height="12" rx="4" ${S(c)}/>` },
+
+  { id: 'board', w: 92, h: 40, zones: ['counter'], c1: ['red', 'green', 'orange'], n: [1, 4], asym: true,
+    draw: ({ c, n }) =>
+      `<rect x="-46" y="-40" width="72" height="40" rx="8" ${S('#c8955a')}/><circle cx="36" cy="-20" r="10" ${S('#c8955a')}/><circle cx="36" cy="-20" r="3.5" fill="#6d4c41"/>`
+      + rep(n, (i) => `<circle cx="${spread(i, n, -32, 10).toFixed(1)}" cy="-20" r="8" ${S(c)}/><circle cx="${spread(i, n, -32, 10).toFixed(1)}" cy="-20" r="4" fill="#fff" opacity=".45"/>`) },
+
+  { id: 'apple', w: 44, h: 50, zones: ['counter', 'shelf'], c1: ['red', 'green', 'yellow'], asym: true, parts: ['leaf'],
+    draw: ({ c, hide }) =>
+      `<circle cx="0" cy="-20" r="20" ${S(c)}/><ellipse cx="-8" cy="-27" rx="5" ry="8" fill="#fff" opacity=".35"/>`
+      + `<path d="M0 -40 Q2 -48 6 -50" ${L('#5d4037', 3)}/>`
+      + (hide !== 'leaf' ? `<path d="M2 -44 Q14 -56 20 -46 Q10 -40 2 -44 Z" ${S('#43a047')}/>` : '') },
+
+  { id: 'banana', w: 70, h: 36, zones: ['counter', 'shelf'], c1: ['yellow', 'lime', 'green'], asym: true,
+    draw: ({ c }) =>
+      `<path d="M-34 -32 Q-10 8 34 -16 Q38 -8 32 -8 Q-6 14 -36 -28 Z" ${S(c)}/><path d="M32 -18 l6 -8" ${L(shade(c, -.5), 3)}/>` },
+
+  { id: 'bottle', w: 32, h: 92, zones: ['counter', 'shelf'], c1: ['yellow', 'green', 'red', 'orange', 'brown', 'teal'], c2: ['red', 'blue', 'black', 'white', 'green'], parts: ['cap', 'label'],
+    draw: ({ c, d, hide }) =>
+      `<rect x="-14" y="-62" width="28" height="62" rx="6" ${S(shade(c, .1))}/><path d="M-14 -62 L-6 -80 H6 L14 -62 Z" ${S(c)}/>`
+      + (hide !== 'cap' ? `<rect x="-7" y="-91" width="14" height="12" rx="3" ${S(d)}/>` : '')
+      + (hide !== 'label' ? `<rect x="-11" y="-46" width="22" height="20" rx="3" fill="#fff" stroke="#ddd"/><rect x="-7" y="-40" width="14" height="3" fill="${c}"/><rect x="-7" y="-34" width="10" height="3" fill="#bbb"/>` : '') },
+
+  { id: 'jar', w: 50, h: 60, zones: ['counter', 'shelf'], c1: ['red', 'blue', 'green', 'yellow', 'black'], c2: ['brown', 'pink', 'yellow', 'lime', 'purple'], n: [2, 6],
+    draw: ({ c, d, n }) =>
+      `<rect x="-22" y="-48" width="44" height="48" rx="8" fill="#e3f2fd" stroke="#90a4ae" stroke-width="2.5"/>`
+      + rep(n, (i) => `<circle cx="${-12 + (i % 3) * 12}" cy="${-12 - Math.floor(i / 3) * 14}" r="6" ${S(d, 1.5)}/>`)
+      + `<rect x="-24" y="-60" width="48" height="13" rx="4" ${S(c)}/>${hl(-14, -44, 6, 36, 3)}` },
+
+  { id: 'toaster', w: 76, h: 60, zones: ['counter'], c1: ['red', 'cyan', 'cream', 'gray', 'pink', 'lime'], n: [0, 2], asym: true,
+    draw: ({ c, n }) =>
+      rep(n, (i) => `<path d="M${-24 + i * 28} -44 v-12 a10 10 0 0 1 20 0 v12 z" ${S('#e0b168')}/>`)
+      + `<rect x="-36" y="-42" width="72" height="42" rx="8" ${S(c)}/><rect x="-26" y="-46" width="22" height="7" rx="2" fill="${DARK}"/><rect x="2" y="-46" width="22" height="7" rx="2" fill="${DARK}"/>`
+      + `<rect x="34" y="-30" width="7" height="14" rx="2" ${S(DARK, 1.5)}/>${hl(-30, -34, 8, 26, 4)}` },
+
+  { id: 'clock', w: 56, h: 56, zones: ['wall'], c1: ['red', 'blue', 'yellow', 'green', 'black'], asym: true,
+    draw: ({ c }) =>
+      `<circle cx="0" cy="-28" r="28" ${S(c)}/><circle cx="0" cy="-28" r="21" fill="#fff" stroke="#cfd8dc" stroke-width="2"/>`
+      + `<path d="M0 -46 v4 M0 -14 v4 M-18 -28 h4 M18 -28 h-4" ${L('#555', 2)}/>`
+      + `<path d="M0 -28 V-42 M0 -28 L10 -20" ${L('#333', 3)}/><circle cx="0" cy="-28" r="2.5" fill="#e53935"/>` },
+
+  { id: 'ladle', w: 34, h: 76, zones: ['wall'], c1: ['gray', 'black', 'red', 'yellow', 'teal'],
+    draw: ({ c }) =>
+      `<circle cx="0" cy="-70" r="4" ${L('#555', 2.5)}/><path d="M0 -66 V-20" ${L(c, 7)}/>`
+      + `<path d="M-15 -20 H15 Q15 0 0 0 Q-15 0 -15 -20 Z" ${S(c)}/>` },
+
+  { id: 'towel', w: 52, h: 66, zones: ['wall'], c1: ['red', 'blue', 'green', 'yellow', 'pink', 'purple', 'cyan'], n: [1, 4],
+    draw: ({ c, n }) =>
+      `<rect x="-20" y="-58" width="40" height="58" rx="4" ${S(c)}/>`
+      + rep(n, (i) => `<rect x="-20" y="${-50 + i * 12}" width="40" height="5" fill="#fff" opacity=".65"/>`)
+      + `<rect x="-26" y="-66" width="52" height="7" rx="3.5" ${S(WOOD)}/>` },
+
+  { id: 'shaker', w: 26, h: 44, zones: ['counter', 'shelf'], c1: ['red', 'blue', 'black', 'green', 'yellow'],
+    draw: ({ c }) =>
+      `<rect x="-10" y="-33" width="20" height="33" rx="5" fill="#fff" stroke="#b0bec5" stroke-width="2"/><rect x="-6" y="-24" width="12" height="12" rx="2" fill="${shade(c, .5)}"/>`
+      + `<rect x="-11" y="-44" width="22" height="12" rx="4" ${S(c)}/><circle cx="-5" cy="-38" r="1.5" fill="#fff"/><circle cx="0" cy="-38" r="1.5" fill="#fff"/><circle cx="5" cy="-38" r="1.5" fill="#fff"/>` },
+
+  { id: 'bowl', w: 70, h: 46, zones: ['counter', 'shelf'], c1: ['blue', 'red', 'green', 'cream', 'purple'], c2: ['orange', 'red', 'green', 'yellow', 'purple'], n: [1, 4],
+    draw: ({ c, d, n }) =>
+      rep(n, (i) => `<circle cx="${spread(i, n, -20, 20).toFixed(1)}" cy="${-32 + (i % 2) * 3}" r="10" ${S(d)}/>`)
+      + `<path d="M-33 -26 H33 Q31 0 0 0 Q-31 0 -33 -26 Z" ${S(c)}/>${hl(-24, -20, 8, 12, 4)}` },
+
+  { id: 'cat', w: 68, h: 54, zones: ['floor'], c1: ['orange', 'gray', 'black', 'white', 'brown'], asym: true, parts: ['tail'],
+    draw: ({ c, hide }) =>
+      (hide !== 'tail' ? `<path d="M30 -18 Q48 -30 42 -48" ${L(shade(c, -.45), 8)}/><path d="M30 -18 Q48 -30 42 -48" ${L(c, 4.5)}/>` : '')
+      + `<ellipse cx="6" cy="-14" rx="26" ry="14" ${S(c)}/>`
+      + `<path d="M-30 -40 l-3 -13 l11 6 z M-6 -40 l3 -13 l-11 6 z" ${S(c)}/><circle cx="-18" cy="-32" r="14" ${S(c)}/>`
+      + `<circle cx="-23" cy="-34" r="2.2" fill="#222"/><circle cx="-13" cy="-34" r="2.2" fill="#222"/><path d="M-20 -27 q2 2 4 0" ${L('#222', 1.5)}/>`
+      + `<path d="M-30 -28 h-8 M-30 -25 h-8 M-6 -28 h8 M-6 -25 h8" ${L('#555', 1.2)}/>` },
+
+  { id: 'bin', w: 54, h: 64, zones: ['floor'], c1: ['green', 'gray', 'blue', 'red', 'black'], parts: ['lid'],
+    draw: ({ c, hide }) =>
+      `<path d="M-20 0 H20 L24 -50 H-24 Z" ${S(c)}/><path d="M-12 -40 V-10 M0 -40 V-10 M12 -40 V-10" ${L(shade(c, -.3), 2)}/>`
+      + (hide !== 'lid' ? `<rect x="-27" y="-58" width="54" height="10" rx="4" ${S(shade(c, -.15))}/><rect x="-6" y="-64" width="12" height="6" rx="2" ${S(shade(c, -.3))}/>` : '') },
+
+  { id: 'stool', w: 56, h: 60, zones: ['floor'], c1: ['red', 'blue', 'yellow', 'green', 'pink', 'brown'],
+    draw: ({ c }) =>
+      `<path d="M-18 -50 L-24 0 M18 -50 L24 0 M-20 -20 H20" ${L(WOOD, 5)}/><rect x="-28" y="-60" width="56" height="12" rx="6" ${S(c)}/>` },
+];
+
+const WALLS = ['#fde9c9', '#dcedc8', '#e3f2fd'];
+const COUNTERS = ['#8d6e63', '#546e7a', '#a1887f'];
+const CABS = ['#f5f5f5', '#fff8e1', '#ffffff'];
+
+function kitchenBg(v) {
+  const wall = WALLS[v], counter = COUNTERS[v], cab = CABS[v];
+  let s = `<rect width="800" height="500" fill="${wall}"/>`;
+  // gạch ốp tường
+  s += `<g stroke="${shade(wall, -.08)}" stroke-width="1.5">`;
+  for (let x = 0; x <= 800; x += 50) s += `<path d="M${x} 0 V330"/>`;
+  for (let y = 0; y <= 330; y += 50) s += `<path d="M0 ${y} H800"/>`;
+  s += '</g>';
+  // cửa sổ
+  s += `<rect x="574" y="44" width="172" height="152" rx="6" fill="#81d4fa" stroke="#eceff1" stroke-width="8"/>`
+     + `<path d="M660 44 V196 M574 120 H746" stroke="#eceff1" stroke-width="6"/>`
+     + `<circle cx="620" cy="90" r="16" fill="#fff59d"/><ellipse cx="700" cy="150" rx="26" ry="9" fill="#fff" opacity=".8"/>`
+     + `<path d="M574 40 H620 Q610 120 590 196 H574 Z" fill="#ef9a9a" opacity=".9"/><path d="M746 40 H700 Q710 120 730 196 H746 Z" fill="#ef9a9a" opacity=".9"/>`;
+  // kệ treo tường
+  s += `<rect x="40" y="150" width="490" height="12" rx="3" fill="${counter}" stroke="${shade(counter, -.3)}" stroke-width="2"/>`
+     + `<path d="M70 162 v14 M500 162 v14" stroke="${shade(counter, -.3)}" stroke-width="4"/>`;
+  // mặt bàn bếp và tủ dưới
+  s += `<rect x="0" y="372" width="800" height="98" fill="${cab}" stroke="#cfd8dc" stroke-width="2"/>`;
+  for (let x = 20; x < 800; x += 130) {
+    s += `<rect x="${x}" y="386" width="110" height="72" rx="6" fill="none" stroke="#cfd8dc" stroke-width="3"/><circle cx="${x + 55}" cy="422" r="4" fill="#90a4ae"/>`;
+  }
+  s += `<rect x="0" y="332" width="800" height="42" rx="4" fill="${counter}" stroke="${shade(counter, -.35)}" stroke-width="2"/><rect x="0" y="332" width="800" height="8" fill="${shade(counter, .25)}"/>`;
+  // sàn ca-rô
+  s += `<rect x="0" y="470" width="800" height="30" fill="#d7ccc8"/>`;
+  for (let x = 0; x < 800; x += 60) s += `<rect x="${x}" y="470" width="30" height="30" fill="#bcaaa4"/><rect x="${x + 30}" y="485" width="30" height="15" fill="#bcaaa4" opacity=".5"/>`;
+  return s;
+}
+
+const KITCHEN = {
+  id: 'kitchen', name: 'Nhà bếp', emoji: '🍳', variants: 3,
+  zones: {
+    shelf:   { rects: [{ x1: 60, x2: 510, y1: 150, y2: 150 }], scale: 0.72 },
+    wall:    { rects: [{ x1: 60, x2: 740, y1: 236, y2: 300 }], scale: 0.95 },
+    counter: { rects: [{ x1: 40, x2: 760, y1: 338, y2: 366 }], scale: 1 },
+    floor:   { rects: [{ x1: 50, x2: 750, y1: 480, y2: 494 }], scale: 1 },
+  },
+  objects: KITCHEN_OBJECTS,
+  bg: kitchenBg,
+};
+return { KITCHEN_OBJECTS, kitchenBg, KITCHEN };
+})();
+
+/* ══════════ restaurant.js ══════════ */
+M.restaurant = (function () {
+// ── Chủ đề QUÁN ĂN: nền và đồ vật ──
+const { S, L, rep, hl, spread, shade } = M.draw;
+
+const BUN = '#e0a050', DARK = '#455a64', WOOD = '#8d6e63';
+
+const RESTAURANT_OBJECTS = [
+  { id: 'cake', w: 54, h: 56, zones: ['table'], c1: ['pink', 'brown', 'yellow', 'cream', 'purple'], parts: ['cherry'],
+    draw: ({ c, hide }) =>
+      `<path d="M-25 0 H25 V-30 L0 -44 L-25 -30 Z" ${S(c)}/><path d="M-25 -20 H25 M-25 -10 H25" ${L('#fff', 3)}/>`
+      + `<path d="M-25 -30 L0 -44 L25 -30 L25 -26 L0 -40 L-25 -26 Z" fill="#fff" opacity=".7"/>`
+      + (hide !== 'cherry' ? `<circle cx="0" cy="-49" r="5" ${S('#e53935')}/><path d="M0 -53 q3 -5 6 -6" ${L('#43a047', 2)}/>` : '') },
+
+  { id: 'pizza', w: 64, h: 48, zones: ['table'], c1: ['red', 'green', 'brown', 'black'], n: [2, 6],
+    draw: ({ c, n }) =>
+      `<ellipse cx="0" cy="-22" rx="31" ry="22" ${S(BUN)}/><ellipse cx="0" cy="-22" rx="26" ry="17" fill="#e53935"/><ellipse cx="0" cy="-22" rx="23" ry="14" fill="#ffd54f"/>`
+      + rep(n, (i) => { const a = i * 2 * Math.PI / n + .6; return `<circle cx="${(15 * Math.cos(a)).toFixed(1)}" cy="${(-22 + 9 * Math.sin(a)).toFixed(1)}" r="4" ${S(c, 1.5)}/>`; }) },
+
+  { id: 'burger', w: 60, h: 54, zones: ['table'], c1: ['yellow', 'orange', 'red'], n: [2, 5],
+    draw: ({ c, n }) =>
+      `<path d="M-27 0 H27 V-10 H-27 Z" ${S(BUN)}/><rect x="-29" y="-19" width="58" height="10" rx="3" ${S('#6d4c41')}/>`
+      + `<path d="M-29 -22 H29 L22 -14 L14 -22 L6 -14 L-2 -22 L-10 -14 L-18 -22 L-26 -14 Z" ${S(c, 1.5)}/>`
+      + `<path d="M-30 -24 q5 -6 10 0 q5 -6 10 0 q5 -6 10 0 q5 -6 10 0 q5 -6 10 0 q5 -6 10 0 v5 h-60 z" ${S('#43a047', 1.5)}/>`
+      + `<path d="M-29 -26 Q0 -56 29 -26 Z" ${S(BUN)}/>`
+      + rep(n, (i) => `<ellipse cx="${spread(i, n, -16, 16).toFixed(1)}" cy="${-42 + (i % 2) * 5}" rx="2.5" ry="1.5" fill="#fff8e1"/>`) },
+
+  { id: 'drink', w: 46, h: 78, zones: ['table'], c1: ['orange', 'red', 'lime', 'purple', 'cyan', 'yellow'], asym: true, parts: ['straw', 'lemon'],
+    draw: ({ c, hide }) =>
+      (hide !== 'straw' ? `<path d="M4 -50 L16 -76" ${L('#e53935', 4)}/>` : '')
+      + `<path d="M-16 -56 H16 L12 0 H-12 Z" ${S(shade(c, .15))}/><path d="M-16 -56 H16 L15 -48 H-15 Z" fill="#fff" opacity=".5"/>${hl(-10, -46, 5, 36, 2.5)}`
+      + (hide !== 'lemon' ? `<circle cx="-16" cy="-56" r="8" ${S('#fdd835', 1.5)}/><path d="M-16 -56 v-8 M-16 -56 l7 4 M-16 -56 l-7 4" ${L('#fff', 1.5)}/>` : '') },
+
+  { id: 'noodles', w: 72, h: 68, zones: ['table'], c1: ['blue', 'red', 'green', 'cream', 'purple', 'teal'], asym: true, parts: ['chopsticks'],
+    draw: ({ c, hide }) =>
+      (hide !== 'chopsticks' ? `<path d="M-10 -34 L26 -66 M-2 -34 L32 -64" ${L(WOOD, 3.5)}/>` : '')
+      + `<ellipse cx="0" cy="-28" rx="33" ry="9" ${S('#ffcc80', 2)}/><ellipse cx="-6" cy="-30" rx="12" ry="4" fill="#fff"/><circle cx="12" cy="-31" r="4" fill="#43a047"/><circle cx="-16" cy="-27" r="3" fill="#e53935"/>`
+      + `<path d="M-33 -28 H33 Q31 0 0 0 Q-31 0 -33 -28 Z" ${S(c)}/><path d="M-30 -16 H30" ${L('#fff', 2)}/>` },
+
+  { id: 'icecream', w: 40, h: 92, zones: ['table'], c1: ['pink', 'brown', 'lime', 'yellow', 'purple'], c2: ['cream', 'cyan', 'red', 'green'], n: [1, 3],
+    draw: ({ c, d, n }) => {
+      const cols = [c, d, '#fff'];
+      return `<path d="M-16 -42 H16 L0 0 Z" ${S(BUN)}/><path d="M-10 -34 L6 -12 M10 -34 L-6 -12 M-14 -26 H14" ${L(shade(BUN, -.35), 1.5)}/>`
+        + rep(n, (i) => `<circle cx="0" cy="${-52 - i * 16}" r="16" ${S(cols[i])}/>`);
+    } },
+
+  { id: 'coffee', w: 62, h: 46, zones: ['table'], c1: ['red', 'blue', 'green', 'yellow', 'pink', 'black'], asym: true, parts: ['steam'],
+    draw: ({ c, hide }) =>
+      `<ellipse cx="0" cy="-4" rx="30" ry="5" ${S('#fff', 2)}/>`
+      + `<path d="M18 -26 Q30 -26 28 -14 Q26 -10 16 -10" ${L(shade(c, -.45), 7)}/><path d="M18 -26 Q30 -26 28 -14 Q26 -10 16 -10" ${L(c, 3.5)}/>`
+      + `<path d="M-18 -30 H18 L14 -6 H-14 Z" ${S(c)}/><ellipse cx="0" cy="-30" rx="18" ry="4" fill="#6d4c41"/>`
+      + (hide !== 'steam' ? `<path d="M-6 -36 q4 -6 0 -12 M6 -36 q4 -6 0 -12" ${L('#b0bec5', 2)}/>` : '') },
+
+  { id: 'ketchup', w: 28, h: 62, zones: ['table'], c1: ['red', 'yellow', 'brown', 'green'], parts: ['label'],
+    draw: ({ c, hide }) =>
+      `<rect x="-11" y="-42" width="22" height="42" rx="6" ${S(c)}/><path d="M-11 -42 L-5 -52 H5 L11 -42 Z" ${S(c)}/><rect x="-6" y="-61" width="12" height="10" rx="3" ${S('#fafafa', 2)}/>`
+      + (hide !== 'label' ? `<rect x="-8" y="-32" width="16" height="16" rx="2" fill="#fff"/><rect x="-5" y="-27" width="10" height="3" fill="${c}"/><rect x="-5" y="-22" width="7" height="2" fill="#999"/>` : '') },
+
+  { id: 'sushi', w: 74, h: 32, zones: ['table'], c1: ['black', 'blue', 'red', 'cream', 'green'], n: [2, 4],
+    draw: ({ c, n }) =>
+      `<ellipse cx="0" cy="-6" rx="36" ry="7" ${S(c)}/>`
+      + rep(n, (i) => { const x = spread(i, n, -22, 22); return `<rect x="${(x - 9).toFixed(1)}" y="-24" width="18" height="16" rx="3" ${S('#fff', 1.5)}/><rect x="${(x - 9).toFixed(1)}" y="-29" width="18" height="8" rx="3" ${S('#ff7043', 1.5)}/><rect x="${(x - 2).toFixed(1)}" y="-29" width="4" height="21" fill="#2e7d32"/>`; }) },
+
+  { id: 'vase', w: 44, h: 78, zones: ['table'], c1: ['blue', 'teal', 'cream', 'purple', 'pink'], c2: ['pink', 'red', 'yellow', 'purple', 'white'], n: [1, 3],
+    draw: ({ c, d, n }) => {
+      const pos = [[0, -66], [-15, -60], [15, -60]];
+      return `<path d="M0 -40 V-62 M-8 -40 L-15 -56 M8 -40 L15 -56" ${L('#43a047', 3)}/>`
+        + rep(n, (i) => `<circle cx="${pos[i][0]}" cy="${pos[i][1]}" r="8" ${S(d, 1.5)}/><circle cx="${pos[i][0]}" cy="${pos[i][1]}" r="3" fill="#ffd54f"/>`)
+        + `<path d="M-14 -40 H14 L18 0 H-18 Z" ${S(c)}/>${hl(-10, -34, 5, 26, 2.5)}`;
+    } },
+
+  { id: 'candle', w: 26, h: 62, zones: ['table'], c1: ['white', 'red', 'cream', 'pink', 'blue'], parts: ['flame'],
+    draw: ({ c, hide }) =>
+      `<path d="M-12 0 H12 L8 -10 H-8 Z" ${S('#c9a227')}/><rect x="-6" y="-46" width="12" height="36" rx="2" ${S(c)}/>`
+      + (hide !== 'flame' ? `<path d="M0 -62 Q7 -52 0 -46 Q-7 -52 0 -62 Z" ${S('#ffb300', 1.5)}/><path d="M0 -56 Q3 -52 0 -48 Q-3 -52 0 -56 Z" fill="#fff59d"/>` : '') },
+
+  { id: 'menu', w: 64, h: 72, zones: ['wall'], c1: ['brown', 'red', 'green', 'blue', 'black'], n: [2, 4],
+    draw: ({ c, n }) =>
+      `<rect x="-31" y="-72" width="62" height="66" rx="4" ${S(c)}/><rect x="-26" y="-66" width="52" height="54" fill="#263238"/>`
+      + `<rect x="-14" y="-60" width="28" height="5" rx="2" fill="#ffd54f"/>`
+      + rep(n, (i) => `<rect x="-20" y="${-48 + i * 10}" width="${36 - (i % 2) * 12}" height="4" rx="2" fill="#fff" opacity=".85"/>`) },
+
+  { id: 'picture', w: 60, h: 52, zones: ['wall'], c1: ['brown', 'yellow', 'red', 'black', 'white'], asym: true, parts: ['sun'],
+    draw: ({ c, hide }) =>
+      `<rect x="-30" y="-52" width="60" height="46" rx="3" ${S(c)}/><rect x="-24" y="-46" width="48" height="34" fill="#81d4fa"/>`
+      + `<path d="M-24 -12 L-10 -32 L0 -20 L10 -30 L24 -12 Z" fill="#66bb6a"/>`
+      + (hide !== 'sun' ? `<circle cx="14" cy="-38" r="4.5" fill="#ffd54f"/>` : '') },
+
+  { id: 'lamp', w: 64, h: 140, zones: ['ceiling'], c1: ['red', 'green', 'yellow', 'teal', 'pink', 'cream'], hy: 0.14, rot: false,
+    draw: ({ c }) =>
+      `<path d="M0 -140 V-40" ${L('#546e7a', 2.5)}/><path d="M-31 -10 H31 L17 -40 H-17 Z" ${S(c)}/><ellipse cx="0" cy="-10" rx="31" ry="5" ${S(shade(c, -.15), 1.5)}/><ellipse cx="0" cy="-8" rx="20" ry="4" fill="#fff59d" opacity=".9"/>` },
+
+  { id: 'plant', w: 60, h: 84, zones: ['floor'], c1: ['orange', 'red', 'blue', 'cream', 'gray'], n: [3, 5],
+    draw: ({ c, n }) =>
+      rep(n, (i) => `<ellipse cx="0" cy="-56" rx="9" ry="24" transform="rotate(${((i - (n - 1) / 2) * 28).toFixed(0)} 0 -30)" ${S('#43a047', 2)}/>`)
+      + `<path d="M-20 0 H20 L26 -32 H-26 Z" ${S(c)}/><rect x="-28" y="-36" width="56" height="8" rx="3" ${S(shade(c, -.15), 2)}/>` },
+
+  { id: 'chair', w: 54, h: 90, zones: ['floor'], c1: ['brown', 'red', 'blue', 'green', 'black', 'cream'], n: [1, 3],
+    draw: ({ c, n }) =>
+      `<path d="M-20 -38 V0 M20 -38 V0" ${L(shade(c, -.3), 5)}/><path d="M-18 -46 V-90 M18 -46 V-90" ${L(shade(c, -.3), 5)}/>`
+      + `<rect x="-22" y="-90" width="44" height="9" rx="4" ${S(c)}/>`
+      + rep(n, (i) => `<rect x="-18" y="${-76 + i * 9}" width="36" height="5" rx="2" ${S(c, 1.5)}/>`)
+      + `<rect x="-26" y="-46" width="52" height="10" rx="4" ${S(c)}/>` },
+
+  { id: 'bell', w: 42, h: 40, zones: ['table'], c1: ['red', 'blue', 'black', 'green', 'purple'],
+    draw: ({ c }) =>
+      `<path d="M-16 -8 Q-16 -34 0 -34 Q16 -34 16 -8 Z" ${S('#fbc02d')}/><rect x="-4" y="-40" width="8" height="7" rx="2" ${S('#f57f17', 1.5)}/>${hl(-10, -28, 5, 14, 2.5)}`
+      + `<rect x="-21" y="-8" width="42" height="8" rx="3" ${S(c)}/>` },
+
+  { id: 'teapot', w: 88, h: 52, zones: ['table'], c1: ['blue', 'red', 'cream', 'green', 'pink', 'purple'], asym: true, parts: ['handle'],
+    draw: ({ c, hide }) =>
+      (hide !== 'handle' ? `<path d="M-24 -32 Q-48 -22 -24 -10" ${L(shade(c, -.45), 8)}/><path d="M-24 -32 Q-48 -22 -24 -10" ${L(c, 4)}/>` : '')
+      + `<path d="M22 -28 Q40 -34 42 -50" ${L(shade(c, -.45), 9)}/><path d="M22 -28 Q40 -34 42 -50" ${L(c, 5)}/>`
+      + `<ellipse cx="0" cy="-20" rx="26" ry="20" ${S(c)}/><ellipse cx="0" cy="-40" rx="12" ry="4" ${S(shade(c, -.15), 1.5)}/><circle cx="0" cy="-45" r="4" ${S(shade(c, -.3), 1.5)}/>${hl(-18, -30, 6, 16, 3)}` },
+
+  { id: 'donut', w: 46, h: 46, zones: ['table'], c1: ['pink', 'brown', 'purple', 'cyan', 'yellow'], n: [3, 8],
+    draw: ({ c, n }) =>
+      `<circle cx="0" cy="-23" r="23" ${S(BUN)}/><circle cx="0" cy="-23" r="18" fill="${c}"/><circle cx="0" cy="-23" r="6" ${S(BUN, 1.5)}/>`
+      + rep(n, (i) => { const a = i * 2.4 + .5, r = 11 + (i % 2) * 3; return `<rect x="${(r * Math.cos(a) - 2.5).toFixed(1)}" y="${(-23 + r * Math.sin(a) - 1).toFixed(1)}" width="5" height="2" rx="1" fill="#fff" transform="rotate(${(i * 40) % 180} ${(r * Math.cos(a)).toFixed(1)} ${(-23 + r * Math.sin(a)).toFixed(1)})"/>`; }) },
+
+  { id: 'fries', w: 50, h: 60, zones: ['table'], c1: ['red', 'yellow', 'blue', 'green'], n: [3, 6],
+    draw: ({ c, n }) =>
+      rep(n, (i) => `<rect x="${(spread(i, n, -16, 10)).toFixed(1)}" y="${-58 + (i % 2) * 7}" width="6" height="34" rx="2" ${S('#ffd54f', 1.5)}/>`)
+      + `<path d="M-20 0 H20 L25 -34 H-25 Z" ${S(c)}/><path d="M-25 -34 Q0 -26 25 -34" ${L(shade(c, -.45), 2)}/>` },
+];
+
+const WALLS = ['#f8e1e7', '#e0f2f1', '#fff3e0'];
+const STRIPES = ['#f3c6d2', '#c8e6e3', '#ffe0b2'];
+const CLOTHS = ['#e53935', '#1e88e5', '#43a047'];
+
+function restaurantBg(v) {
+  const wall = WALLS[v], stripe = STRIPES[v], cloth = CLOTHS[v];
+  let s = `<rect width="800" height="500" fill="${wall}"/>`;
+  for (let x = 0; x < 800; x += 60) s += `<rect x="${x}" y="0" width="24" height="280" fill="${stripe}"/>`;
+  // ốp chân tường
+  s += `<rect x="0" y="280" width="800" height="100" fill="#d7ccc8"/><rect x="0" y="280" width="800" height="8" fill="#a1887f"/>`;
+  for (let x = 20; x < 800; x += 80) s += `<rect x="${x}" y="300" width="50" height="60" rx="3" fill="none" stroke="#bcaaa4" stroke-width="3"/>`;
+  // sàn gỗ
+  s += `<rect x="0" y="380" width="800" height="120" fill="#c8955a"/>`;
+  for (let y = 380; y < 500; y += 24) s += `<path d="M0 ${y} H800" stroke="#a9773f" stroke-width="2"/>`;
+  for (let i = 0; i < 20; i++) s += `<path d="M${(i * 137) % 800} ${380 + (i % 5) * 24} v24" stroke="#a9773f" stroke-width="2"/>`;
+  // hai bàn khăn trải
+  for (const tx of [120, 420]) {
+    s += `<path d="M${tx + 24} 470 V310 M${tx + 236} 470 V310" stroke="#6d4c41" stroke-width="8" stroke-linecap="round"/>`
+       + `<path d="M${tx} 300 H${tx + 260} L${tx + 250} 348 H${tx + 10} Z" fill="${cloth}" stroke="${shade(cloth, -.35)}" stroke-width="2"/>`
+       + `<rect x="${tx}" y="296" width="260" height="10" rx="3" fill="#fff" stroke="#e0e0e0" stroke-width="2"/>`;
+    for (let x = tx + 20; x < tx + 250; x += 40) s += `<path d="M${x} 314 l8 22" stroke="#fff" stroke-width="3" opacity=".6"/>`;
+  }
+  return s;
+}
+
+const RESTAURANT = {
+  id: 'restaurant', name: 'Quán ăn', emoji: '🍕', variants: 3,
+  zones: {
+    ceiling: { rects: [{ x1: 60, x2: 740, y1: 0, y2: 0 }], top: 0, scale: 0.9 },
+    wall:    { rects: [{ x1: 60, x2: 740, y1: 150, y2: 260 }], scale: 1 },
+    table:   { rects: [{ x1: 130, x2: 370, y1: 294, y2: 300 }, { x1: 430, x2: 670, y1: 294, y2: 300 }], scale: 0.8 },
+    floor:   { rects: [{ x1: 40, x2: 760, y1: 466, y2: 494 }], scale: 1 },
+  },
+  objects: RESTAURANT_OBJECTS,
+  bg: restaurantBg,
+};
+return { RESTAURANT_OBJECTS, restaurantBg, RESTAURANT };
+})();
+
+/* ══════════ clothes.js ══════════ */
+M.clothes = (function () {
+// ── Chủ đề QUẦN ÁO: nền và đồ vật ──
+const { S, L, rep, hl, spread, shade, hanger } = M.draw;
+
+const CLOTHES_OBJECTS = [
+  { id: 'tshirt', w: 84, h: 110, zones: ['rail'], c1: ['red', 'blue', 'green', 'yellow', 'pink', 'purple', 'cyan', 'white'], n: [0, 3], asym: true, parts: ['pocket'],
+    draw: ({ c, n, hide }) =>
+      hanger(110)
+      + `<path d="M-24 -84 L-40 -72 L-32 -56 L-24 -60 V0 H24 V-60 L32 -56 L40 -72 L24 -84 Q0 -72 -24 -84 Z" ${S(c)}/>`
+      + rep(n, (i) => `<rect x="-24" y="${-44 + i * 13}" width="48" height="5" fill="#fff" opacity=".65"/>`)
+      + (hide !== 'pocket' ? `<rect x="6" y="-58" width="13" height="12" rx="2" ${S(shade(c, -.18), 1.5)}/>` : '') },
+
+  { id: 'dress', w: 84, h: 130, zones: ['rail'], c1: ['pink', 'red', 'purple', 'blue', 'yellow', 'teal', 'orange'], c2: ['white', 'black', 'yellow', 'red'], n: [3, 7], parts: ['bow'],
+    draw: ({ c, d, n, hide }) =>
+      hanger(130)
+      + `<path d="M-16 -104 L-20 -70 H20 L16 -104 Q0 -96 -16 -104 Z" ${S(c)}/><path d="M-20 -70 H20 L38 0 H-38 Z" ${S(c)}/>`
+      + rep(n, (i) => `<circle cx="${(-22 + (i * 37) % 44).toFixed(0)}" cy="${(-60 + Math.floor(i * 1.3) * 11)}" r="3" fill="#fff" opacity=".8"/>`)
+      + `<rect x="-21" y="-73" width="42" height="7" fill="${d}"/>`
+      + (hide !== 'bow' ? `<path d="M0 -70 l-8 -5 v10 z M0 -70 l8 -5 v10 z" ${S(d, 1.5)}/>` : '') },
+
+  { id: 'jacket', w: 92, h: 120, zones: ['rail'], c1: ['navy', 'brown', 'black', 'red', 'green', 'gray', 'orange'], c2: ['yellow', 'white', 'black'], n: [2, 4], asym: true,
+    draw: ({ c, d, n }) =>
+      hanger(120)
+      + `<path d="M-28 -94 L-44 -80 L-36 -62 L-28 -66 V0 H28 V-66 L36 -62 L44 -80 L28 -94 L0 -80 Z" ${S(c)}/>`
+      + `<path d="M-28 -94 L0 -80 L28 -94 L14 -90 L0 -72 L-14 -90 Z" ${S(shade(c, -.2))}/><path d="M0 -76 V0" ${L(shade(c, -.5), 2)}/>`
+      + rep(n, (i) => `<circle cx="7" cy="${-60 + i * 15}" r="3.2" fill="${d}" stroke="${shade(d, -.4)}" stroke-width="1"/>`) },
+
+  { id: 'pants', w: 60, h: 120, zones: ['rail'], c1: ['navy', 'blue', 'black', 'brown', 'gray', 'cream', 'pink'], asym: true, parts: ['patch'],
+    draw: ({ c, hide }) =>
+      hanger(120) + `<path d="M-20 -94 V-84 M20 -94 V-84" ${L('#78909c', 3)}/>`
+      + `<path d="M-24 -74 H24 V0 H6 L0 -40 L-6 0 H-24 Z" ${S(c)}/><rect x="-24" y="-86" width="48" height="12" rx="2" ${S(shade(c, -.15))}/>`
+      + (hide !== 'patch' ? `<rect x="9" y="-32" width="11" height="11" rx="2" ${S('#fbc02d', 1.5)}/>` : '') },
+
+  { id: 'skirt', w: 72, h: 90, zones: ['rail'], c1: ['red', 'pink', 'blue', 'green', 'purple', 'yellow', 'navy'], n: [2, 5],
+    draw: ({ c, n }) =>
+      hanger(90) + `<path d="M-16 -64 V-56 M16 -64 V-56" ${L('#78909c', 3)}/>`
+      + `<path d="M-16 -58 H16 L34 0 H-34 Z" ${S(c)}/>`
+      + rep(n, (i) => { const x = spread(i, n, -10, 10); return `<path d="M${x.toFixed(1)} -58 L${(x * 2.1).toFixed(1)} 0" ${L(shade(c, -.4), 2)}/>`; })
+      + `<rect x="-17" y="-62" width="34" height="6" rx="2" ${S(shade(c, -.2), 1.5)}/>` },
+
+  { id: 'scarf', w: 40, h: 116, zones: ['rail'], c1: ['red', 'orange', 'blue', 'purple', 'green', 'pink'], c2: ['white', 'yellow', 'black', 'cream'], n: [2, 5],
+    draw: ({ c, d, n }) =>
+      `<path d="M-6 -116 Q0 -122 6 -116" ${L('#78909c', 2.5)}/>`
+      + `<rect x="-16" y="-110" width="32" height="102" rx="4" ${S(c)}/>`
+      + rep(n, (i) => `<rect x="-16" y="${-100 + i * 19}" width="32" height="7" fill="${d}"/>`)
+      + `<path d="M-12 -8 V0 M-6 -8 V0 M0 -8 V0 M6 -8 V0 M12 -8 V0" ${L(shade(c, -.3), 2)}/>` },
+
+  { id: 'hat', w: 72, h: 44, zones: ['shelf'], c1: ['brown', 'black', 'cream', 'red', 'pink', 'navy'], c2: ['red', 'yellow', 'white', 'black', 'blue'], asym: true, parts: ['bow'],
+    draw: ({ c, d, hide }) =>
+      `<ellipse cx="0" cy="-8" rx="35" ry="8" ${S(c)}/><path d="M-20 -8 V-36 Q0 -46 20 -36 V-8 Z" ${S(c)}/><rect x="-20" y="-19" width="40" height="7" fill="${d}"/>`
+      + (hide !== 'bow' ? `<path d="M18 -15 l-7 -5 v10 z M18 -15 l7 -5 v10 z" ${S(d, 1.5)}/>` : '') },
+
+  { id: 'cap', w: 70, h: 38, zones: ['shelf'], c1: ['red', 'blue', 'green', 'black', 'yellow', 'purple', 'navy'], c2: ['white', 'yellow', 'red'], asym: true, parts: ['logo'],
+    draw: ({ c, d, hide }) =>
+      `<path d="M-24 -6 H24 Q44 -4 40 2 H-22 Z" ${S(shade(c, -.2))}/><path d="M-24 -6 Q-24 -36 0 -36 Q24 -36 24 -6 Z" ${S(c)}/><circle cx="0" cy="-36" r="3" fill="${d}"/>`
+      + (hide !== 'logo' ? `<circle cx="0" cy="-20" r="6.5" fill="${d}" stroke="${shade(d, -.35)}" stroke-width="1.5"/>` : '') },
+
+  { id: 'shoes', w: 74, h: 30, zones: ['floor', 'shelf'], c1: ['red', 'blue', 'white', 'black', 'pink', 'green', 'purple'], asym: true, parts: ['laces'],
+    draw: ({ c, hide }) => rep(2, (k) => { const o = k * 38; return `<path d="M${-36 + o} 0 H${-4 + o} Q${-2 + o} -16 ${-14 + o} -24 H${-30 + o} Q${-38 + o} -10 ${-36 + o} 0 Z" ${S(c)}/><path d="M${-36 + o} -3 H${-4 + o}" ${L('#fff', 3)}/>`
+      + (hide !== 'laces' ? `<path d="M${-26 + o} -14 h8 M${-25 + o} -10 h7" ${L('#fff', 2)}/>` : ''); }) },
+
+  { id: 'boots', w: 60, h: 62, zones: ['floor'], c1: ['brown', 'black', 'red', 'yellow', 'pink', 'navy'], asym: true, parts: ['buckle'],
+    draw: ({ c, hide }) =>
+      `<path d="M-30 -60 H-8 V-14 H4 Q12 -12 10 0 H-30 Z" ${S(c)}/><path d="M-6 -60 H16 V-14 H28 Q36 -12 34 0 H-6 Z" ${S(c)}/>`
+      + `<rect x="-30" y="-60" width="22" height="8" fill="${shade(c, .3)}"/><rect x="-6" y="-60" width="22" height="8" fill="${shade(c, .3)}"/>`
+      + (hide !== 'buckle' ? `<rect x="-2" y="-36" width="9" height="7" rx="1.5" ${S('#fbc02d', 1.5)}/><rect x="22" y="-36" width="9" height="7" rx="1.5" ${S('#fbc02d', 1.5)}/>` : '') },
+
+  { id: 'sock', w: 42, h: 60, zones: ['shelf'], c1: ['red', 'blue', 'green', 'yellow', 'pink', 'purple', 'orange'], n: [1, 4], asym: true,
+    draw: ({ c, n }) =>
+      `<path d="M-10 -60 H14 V-24 Q14 -4 -2 -2 H-16 Q-24 -4 -22 -14 Q-16 -22 -10 -24 Z" ${S(c)}/>`
+      + rep(n, (i) => `<rect x="-10" y="${-46 + i * 7}" width="24" height="3.5" fill="#fff" opacity=".8"/>`)
+      + `<rect x="-10" y="-60" width="24" height="9" fill="#fff" stroke="${shade(c, -.45)}" stroke-width="2"/>` },
+
+  { id: 'bag', w: 62, h: 66, zones: ['floor', 'shelf'], c1: ['red', 'brown', 'pink', 'blue', 'black', 'purple', 'yellow'], parts: ['buckle'],
+    draw: ({ c, hide }) =>
+      `<path d="M-14 -44 Q-14 -66 0 -66 Q14 -66 14 -44" ${L(shade(c, -.45), 6)}/><path d="M-14 -44 Q-14 -66 0 -66 Q14 -66 14 -44" ${L(c, 3)}/>`
+      + `<rect x="-29" y="-46" width="58" height="46" rx="8" ${S(c)}/><path d="M-29 -40 H29 V-28 Q0 -20 -29 -28 Z" ${S(shade(c, -.15))}/>`
+      + (hide !== 'buckle' ? `<rect x="-5" y="-30" width="10" height="8" rx="2" ${S('#fbc02d', 1.5)}/>` : '') },
+
+  { id: 'glasses', w: 62, h: 26, zones: ['shelf'], c1: ['black', 'red', 'blue', 'purple', 'pink', 'brown'],
+    draw: ({ c }) =>
+      `<circle cx="-14" cy="-13" r="12" fill="#b3e5fc" opacity=".6" stroke="${c}" stroke-width="3.5"/><circle cx="14" cy="-13" r="12" fill="#b3e5fc" opacity=".6" stroke="${c}" stroke-width="3.5"/>`
+      + `<path d="M-2 -13 H2 M-26 -13 L-31 -18 M26 -13 L31 -18" ${L(c, 3.5)}/>` },
+
+  { id: 'bowtie', w: 52, h: 28, zones: ['shelf'], c1: ['red', 'blue', 'black', 'purple', 'green', 'pink', 'yellow'], n: [0, 4],
+    draw: ({ c, n }) =>
+      `<path d="M-25 -26 L0 -14 L-25 -2 Z M25 -26 L0 -14 L25 -2 Z" ${S(c)}/><rect x="-6" y="-20" width="12" height="12" rx="3" ${S(shade(c, -.2), 1.5)}/>`
+      + rep(n, (i) => `<circle cx="${i % 2 ? 16 : -16}" cy="${-20 + Math.floor(i / 2) * 10}" r="2.2" fill="#fff"/>`) },
+
+  { id: 'mittens', w: 60, h: 52, zones: ['shelf'], c1: ['red', 'blue', 'pink', 'purple', 'green', 'cyan'], c2: ['white', 'yellow', 'cream'], parts: ['snow'],
+    draw: ({ c, d, hide }) =>
+      `<path d="M-28 0 H-6 V-30 Q-6 -50 -17 -50 Q-28 -50 -28 -30 Z" ${S(c)}/><path d="M-28 -24 Q-40 -30 -36 -16 Q-32 -10 -28 -14 Z" ${S(c)}/>`
+      + `<path d="M28 0 H6 V-30 Q6 -50 17 -50 Q28 -50 28 -30 Z" ${S(c)}/><path d="M28 -24 Q40 -30 36 -16 Q32 -10 28 -14 Z" ${S(c)}/>`
+      + `<rect x="-28" y="-10" width="22" height="10" fill="${d}"/><rect x="6" y="-10" width="22" height="10" fill="${d}"/>`
+      + (hide !== 'snow' ? `<path d="M-17 -38 v12 M-23 -32 h12 M-21 -36 l8 8 M-13 -36 l-8 8 M17 -38 v12 M11 -32 h12 M13 -36 l8 8 M21 -36 l-8 8" ${L('#fff', 1.5)}/>` : '') },
+
+  { id: 'umbrella', w: 30, h: 92, zones: ['floor'], c1: ['red', 'blue', 'purple', 'green', 'pink', 'navy'], c2: ['white', 'yellow', 'black'], asym: true,
+    draw: ({ c, d }) =>
+      `<path d="M0 -92 L-13 -22 Q0 -12 13 -22 Z" ${S(c)}/><path d="M0 -88 L-4 -18 M0 -88 L4 -18" ${L(d, 2.5)}/>`
+      + `<path d="M0 -14 V-2 Q0 4 7 4" ${L('#5d4037', 4.5)}/><circle cx="0" cy="-92" r="2.5" fill="#5d4037"/>` },
+
+  { id: 'belt', w: 52, h: 30, zones: ['shelf'], c1: ['brown', 'black', 'red', 'navy', 'pink'], asym: true, parts: ['buckle'],
+    draw: ({ c, hide }) =>
+      `<ellipse cx="0" cy="-14" rx="25" ry="14" ${S(c)}/><ellipse cx="0" cy="-14" rx="15" ry="7" fill="${shade(c, .3)}" stroke="${shade(c, -.3)}" stroke-width="1.5"/>`
+      + (hide !== 'buckle' ? `<rect x="14" y="-24" width="13" height="11" rx="2" ${S('#fbc02d', 1.5)}/>` : '') },
+
+  { id: 'necklace', w: 42, h: 56, zones: ['shelf'], c1: ['yellow', 'white', 'red', 'purple', 'cyan', 'pink'], c2: ['red', 'blue', 'green', 'purple'], n: [5, 9], parts: ['pendant'],
+    draw: ({ c, d, n, hide }) =>
+      `<path d="M-16 -50 Q-16 -14 0 -14 Q16 -14 16 -50" ${L('#9e9e9e', 1.5)}/>`
+      + rep(n, (i) => { const t = Math.PI * (i / (n - 1)); const x = -16 * Math.cos(t), y = -50 + 36 * Math.sin(t); return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="4" ${S(c, 1.5)}/>`; })
+      + (hide !== 'pendant' ? `<path d="M0 -14 L7 -6 L0 2 L-7 -6 Z" ${S(d, 1.5)}/>` : '') },
+];
+
+const WALLS = ['#f3e5f5', '#e8f5e9', '#fff8e1'];
+const FLOORS = ['#b39ddb', '#a5d6a7', '#ffcc80'];
+
+function clothesBg(v) {
+  const wall = WALLS[v], floor = FLOORS[v];
+  let s = `<rect width="800" height="500" fill="${wall}"/>`;
+  for (let x = 30; x < 800; x += 90) for (let y = 30; y < 400; y += 90) s += `<circle cx="${x}" cy="${y}" r="5" fill="${shade(wall, -.08)}"/>`;
+  // thanh treo
+  s += `<path d="M30 60 V110 M770 60 V110" stroke="#78909c" stroke-width="6" stroke-linecap="round"/>`
+     + `<rect x="24" y="104" width="752" height="8" rx="4" fill="#90a4ae" stroke="#546e7a" stroke-width="2"/>`;
+  // kệ
+  s += `<rect x="30" y="330" width="740" height="12" rx="3" fill="#a1887f" stroke="#6d4c41" stroke-width="2"/><path d="M60 342 v20 M740 342 v20 M400 342 v20" stroke="#6d4c41" stroke-width="5"/>`;
+  // sàn
+  s += `<rect x="0" y="400" width="800" height="100" fill="${floor}"/><rect x="0" y="400" width="800" height="6" fill="${shade(floor, -.25)}"/>`;
+  for (let x = 0; x < 800; x += 80) s += `<path d="M${x} 406 L${x - 30} 500" stroke="${shade(floor, -.12)}" stroke-width="2"/>`;
+  return s;
+}
+
+const CLOTHES = {
+  id: 'clothes', name: 'Quần áo', emoji: '👕', variants: 3,
+  zones: {
+    rail:  { rects: [{ x1: 60, x2: 740, y1: 110, y2: 110 }], top: 110, scale: 0.85 },
+    shelf: { rects: [{ x1: 50, x2: 750, y1: 328, y2: 331 }], scale: 0.85 },
+    floor: { rects: [{ x1: 40, x2: 760, y1: 476, y2: 494 }], scale: 1 },
+  },
+  objects: CLOTHES_OBJECTS,
+  bg: clothesBg,
+};
+return { CLOTHES_OBJECTS, clothesBg, CLOTHES };
+})();
+
+/* ══════════ beach.js ══════════ */
+M.beach = (function () {
+// ── Chủ đề BÃI BIỂN: nền và đồ vật ──
+const { S, L, rep, hl, spread, shade, star } = M.draw;
+
+const SAND = '#e6c98a', WOOD = '#5d4037', GREEN = '#43a047';
+
+const BEACH_OBJECTS = [
+  { id: 'cloud', w: 92, h: 42, zones: ['sky'], c1: ['white', 'cream', 'gray'], asym: true, rot: false,
+    draw: ({ c }) =>
+      `<path d="M-38 0 H38 Q50 0 48 -12 Q46 -24 32 -22 Q28 -40 8 -36 Q-4 -46 -18 -34 Q-38 -36 -36 -20 Q-50 -16 -38 0 Z" ${S(c, 2)}/>` },
+
+  { id: 'seagull', w: 64, h: 28, zones: ['sky'], c1: ['white', 'gray', 'black'], asym: true,
+    draw: ({ c }) =>
+      `<path d="M-32 -14 Q-16 -28 0 -14 Q16 -28 32 -14" ${L('#455a64', 4.5)}/><ellipse cx="0" cy="-10" rx="11" ry="6.5" ${S(c, 2)}/>`
+      + `<path d="M11 -11 L20 -8 L11 -6 Z" fill="#fb8c00"/><circle cx="6" cy="-12" r="1.5" fill="#222"/>` },
+
+  { id: 'kite', w: 52, h: 104, zones: ['sky'], c1: ['red', 'blue', 'green', 'purple', 'orange', 'pink'], c2: ['red', 'yellow', 'white', 'blue'], n: [1, 4], asym: true,
+    draw: ({ c, d, n }) =>
+      `<path d="M0 -104 L23 -72 L0 -30 L-23 -72 Z" ${S(c)}/><path d="M0 -104 V-30 M-23 -72 H23" ${L(shade(c, -.4), 2)}/>`
+      + `<path d="M0 -30 Q12 -14 0 0" ${L('#555', 2)}/>`
+      + rep(n, (i) => { const t = (i + 1) / (n + 1); const bx = 12 * Math.sin(Math.PI * t) * .9, by = -30 + 30 * t; return `<path d="M${(bx - 5).toFixed(1)} ${(by - 4).toFixed(1)} l10 4 l-10 4 z" fill="${d}"/>`; }) },
+
+  { id: 'balloon', w: 42, h: 84, zones: ['sky'], c1: ['red', 'blue', 'yellow', 'green', 'pink', 'purple', 'orange'],
+    draw: ({ c }) =>
+      `<ellipse cx="0" cy="-60" rx="19" ry="23" ${S(c)}/><ellipse cx="-7" cy="-68" rx="4" ry="7" fill="#fff" opacity=".4"/>`
+      + `<path d="M-4 -38 L0 -33 L4 -38 Z" ${S(c, 1.5)}/><path d="M0 -33 Q7 -16 0 0" ${L('#555', 2)}/>` },
+
+  { id: 'plane', w: 94, h: 34, zones: ['sky'], c1: ['white', 'red', 'blue', 'yellow'], c2: ['red', 'blue', 'yellow', 'orange'], n: [2, 5], asym: true,
+    draw: ({ c, d, n }) =>
+      `<path d="M-40 -16 L-30 -34 H-18 L-26 -16 Z" ${S(d)}/>`
+      + `<path d="M-42 -16 H30 Q47 -16 45 -9 Q41 -2 30 -2 H-42 Q-48 -9 -42 -16 Z" ${S(c)}/>`
+      + `<path d="M-6 -8 L-18 6 H2 L12 -8 Z" ${S(d)}/>`
+      + rep(n, (i) => `<circle cx="${-26 + i * 10}" cy="-10" r="2.6" fill="#81d4fa"/>`) },
+
+  { id: 'sailboat', w: 74, h: 84, zones: ['sea'], c1: ['red', 'blue', 'brown', 'green', 'orange'], c2: ['white', 'red', 'yellow', 'cyan', 'pink'], asym: true, parts: ['flag'],
+    draw: ({ c, d, hide }) =>
+      `<path d="M0 -14 V-82" ${L(WOOD, 3.5)}/><path d="M3 -78 L32 -18 H3 Z" ${S(d)}/><path d="M-3 -70 L-26 -18 H-3 Z" ${S('#fafafa', 2)}/>`
+      + (hide !== 'flag' ? `<path d="M0 -84 L13 -80 L0 -75 Z" ${S('#e53935', 1.5)}/>` : '')
+      + `<path d="M-35 -14 H35 L27 0 H-27 Z" ${S(c)}/><path d="M-30 -10 H30" ${L(shade(c, .4), 2)}/>` },
+
+  { id: 'fish', w: 54, h: 32, zones: ['sea'], c1: ['orange', 'blue', 'yellow', 'pink', 'green', 'purple'], n: [0, 3], asym: true,
+    draw: ({ c, n }) =>
+      `<path d="M12 -16 L27 -28 L27 -4 Z" ${S(c)}/><ellipse cx="-4" cy="-16" rx="19" ry="11" ${S(c)}/>`
+      + rep(n, (i) => `<path d="M${-8 + i * 7} -26 q3 10 0 20" ${L(shade(c, -.4), 2.5)}/>`)
+      + `<circle cx="-13" cy="-18" r="3" fill="#fff"/><circle cx="-12" cy="-18" r="1.6" fill="#222"/>` },
+
+  { id: 'buoy', w: 32, h: 42, zones: ['sea'], c1: ['red', 'orange', 'yellow'], c2: ['white', 'black'],
+    draw: ({ c, d }) =>
+      `<path d="M-10 0 H10 L14 -30 H-14 Z" ${S(c)}/><rect x="-12" y="-20" width="24" height="6" fill="${d}"/><rect x="-15" y="-42" width="30" height="13" rx="3" ${S(d)}/><path d="M0 -42 V-48" ${L('#555', 3)}/>` },
+
+  { id: 'duck', w: 54, h: 44, zones: ['sea'], c1: ['yellow', 'white', 'pink', 'lime'], asym: true,
+    draw: ({ c }) =>
+      `<ellipse cx="0" cy="-12" rx="25" ry="12" ${S(c)}/><circle cx="14" cy="-30" r="11" ${S(c)}/><path d="M23 -31 L34 -28 L23 -24 Z" ${S('#fb8c00', 1.5)}/><circle cx="16" cy="-33" r="2" fill="#222"/><path d="M-22 -16 Q-30 -26 -20 -26" ${L(shade(c, -.45), 3)}/>` },
+
+  { id: 'parasol', w: 112, h: 124, zones: ['sand'], c1: ['red', 'blue', 'green', 'pink', 'purple', 'orange'], c2: ['white', 'yellow', 'cream'], hy: 0.7,
+    draw: ({ c, d }) => {
+      let s = `<path d="M0 0 V-100" ${L(WOOD, 4.5)}/>`;
+      for (let i = 0; i < 6; i++) {
+        const a1 = Math.PI + i * Math.PI / 6, a2 = a1 + Math.PI / 6;
+        s += `<path d="M0 -84 L${(56 * Math.cos(a1)).toFixed(1)} ${(-84 + 40 * Math.sin(a1)).toFixed(1)} A56 40 0 0 1 ${(56 * Math.cos(a2)).toFixed(1)} ${(-84 + 40 * Math.sin(a2)).toFixed(1)} Z" ${S(i % 2 ? d : c, 2)}/>`;
+      }
+      return s + `<circle cx="0" cy="-124" r="4" ${S(WOOD, 1.5)}/>`;
+    } },
+
+  { id: 'ball', w: 52, h: 52, zones: ['sand'], c1: ['red', 'blue', 'green', 'purple', 'orange'], c2: ['yellow', 'cyan', 'pink', 'white'],
+    draw: ({ c, d }) => {
+      const cols = [c, d, '#fafafa'];
+      let s = '';
+      for (let i = 0; i < 6; i++) {
+        const a1 = -Math.PI / 2 + i * Math.PI / 3, a2 = a1 + Math.PI / 3;
+        s += `<path d="M0 -26 L${(25 * Math.cos(a1)).toFixed(1)} ${(-26 + 25 * Math.sin(a1)).toFixed(1)} A25 25 0 0 1 ${(25 * Math.cos(a2)).toFixed(1)} ${(-26 + 25 * Math.sin(a2)).toFixed(1)} Z" fill="${cols[i % 3]}"/>`;
+      }
+      return s + `<circle cx="0" cy="-26" r="25" ${L(shade(c, -.45), 2.5)}/><ellipse cx="-9" cy="-36" rx="5" ry="3" fill="#fff" opacity=".5"/>`;
+    } },
+
+  { id: 'bucket', w: 56, h: 68, zones: ['sand'], c1: ['red', 'blue', 'yellow', 'green', 'pink', 'purple'], parts: ['handle'],
+    draw: ({ c, hide }) =>
+      (hide !== 'handle' ? `<path d="M-22 -46 Q0 -70 22 -46" ${L(shade(c, -.45), 4)}/>` : '')
+      + `<path d="M-20 0 H20 L25 -40 H-25 Z" ${S(c)}/><rect x="-27" y="-48" width="54" height="10" rx="3" ${S(shade(c, -.15))}/>${hl(-18, -36, 6, 28, 3)}` },
+
+  { id: 'spade', w: 28, h: 66, zones: ['sand'], c1: ['red', 'blue', 'yellow', 'green', 'orange', 'purple'],
+    draw: ({ c }) =>
+      `<path d="M0 -60 V-20" ${L(WOOD, 5)}/><rect x="-9" y="-66" width="18" height="7" rx="3.5" ${S(WOOD, 1.5)}/><path d="M-13 -24 H13 L11 -4 Q0 3 -11 -4 Z" ${S(c)}/>` },
+
+  { id: 'castle', w: 94, h: 84, zones: ['sand'], c1: ['red', 'blue', 'yellow', 'green', 'pink'], n: [0, 3], parts: ['door'],
+    draw: ({ c, n, hide }) => {
+      const tw = [[-30, 42], [0, 56], [30, 42]];
+      let s = `<rect x="-46" y="-30" width="92" height="30" rx="3" ${S(SAND)}/>`;
+      for (const [tx, th] of tw) s += `<rect x="${tx - 12}" y="${-30 - th}" width="24" height="${th}" ${S(SAND)}/><path d="M${tx - 12} ${-30 - th} v-7 h6 v7 h6 v-7 h6 v7 h6 v-7 h-3" ${L(shade(SAND, -.45), 2)}/>`;
+      s += rep(n, (i) => { const [tx, th] = tw[i]; return `<path d="M${tx} ${-38 - th} V${-54 - th} l13 5 l-13 5" ${S(c, 1.5)}/>`; });
+      if (hide !== 'door') s += `<path d="M-8 0 V-14 A8 8 0 0 1 8 -14 V0 Z" ${S('#8d6e63', 1.5)}/>`;
+      return s + `<rect x="-24" y="-56" width="6" height="8" fill="#8d6e63"/><rect x="18" y="-56" width="6" height="8" fill="#8d6e63"/>`;
+    } },
+
+  { id: 'starfish', w: 48, h: 48, zones: ['sand'], c1: ['orange', 'pink', 'red', 'yellow', 'purple'],
+    draw: ({ c }) =>
+      `<path d="${star(0, -24, 24, 11)}" ${S(c)}/><circle cx="0" cy="-24" r="3" fill="${shade(c, -.3)}"/><circle cx="0" cy="-36" r="2" fill="${shade(c, -.3)}"/><circle cx="-10" cy="-19" r="2" fill="${shade(c, -.3)}"/><circle cx="10" cy="-19" r="2" fill="${shade(c, -.3)}"/>` },
+
+  { id: 'shell', w: 42, h: 36, zones: ['sand'], c1: ['cream', 'pink', 'orange', 'white', 'purple'],
+    draw: ({ c }) =>
+      `<path d="M-20 -6 Q-20 -36 0 -36 Q20 -36 20 -6 Q0 4 -20 -6 Z" ${S(c)}/><path d="M0 -36 L-12 -6 M0 -36 V-4 M0 -36 L12 -6 M0 -36 L-19 -14 M0 -36 L19 -14" ${L(shade(c, -.35), 2)}/>` },
+
+  { id: 'crab', w: 74, h: 44, zones: ['sand'], c1: ['red', 'orange', 'pink', 'purple'], parts: ['claw'],
+    draw: ({ c, hide }) =>
+      `<path d="M-18 -8 L-30 0 M-10 -4 L-16 4 M18 -8 L30 0 M10 -4 L16 4" ${L(shade(c, -.3), 3)}/>`
+      + `<path d="M-14 -22 Q-26 -30 -30 -24 M14 -22 Q26 -30 30 -24" ${L(shade(c, -.3), 3)}/>`
+      + `<circle cx="-31" cy="-26" r="8" ${S(c)}/>` + (hide !== 'claw' ? `<circle cx="31" cy="-26" r="8" ${S(c)}/>` : '')
+      + `<ellipse cx="0" cy="-14" rx="22" ry="14" ${S(c)}/>`
+      + `<path d="M-8 -26 V-36 M8 -26 V-36" ${L(shade(c, -.4), 3)}/><circle cx="-8" cy="-38" r="4" fill="#fff" stroke="#333" stroke-width="1.5"/><circle cx="8" cy="-38" r="4" fill="#fff" stroke="#333" stroke-width="1.5"/><circle cx="-7" cy="-38" r="1.6" fill="#222"/><circle cx="9" cy="-38" r="1.6" fill="#222"/>`
+      + `<path d="M-6 -10 q6 4 12 0" ${L('#333', 1.5)}/>` },
+
+  { id: 'palm', w: 104, h: 170, zones: ['sand'], c1: ['green', 'lime', 'teal'], n: [0, 3], asym: true, hy: 0.8,
+    draw: ({ c, n }) =>
+      `<path d="M-6 0 Q-4 -80 10 -140" ${L('#8d6e63', 13)}/><path d="M-6 0 Q-4 -80 10 -140" ${L('#a1887f', 5)} stroke-dasharray="6 14"/>`
+      + rep(5, (i) => `<ellipse cx="10" cy="-152" rx="42" ry="12" transform="rotate(${-70 + i * 35} 10 -140)" ${S(c, 2)}/>`)
+      + rep(n, (i) => `<circle cx="${10 + (i - 1) * 13}" cy="-134" r="7" ${S('#6d4c41', 1.5)}/>`) },
+
+  { id: 'flipflops', w: 58, h: 32, zones: ['sand'], c1: ['red', 'blue', 'green', 'pink', 'purple', 'orange'], c2: ['white', 'black', 'yellow'],
+    draw: ({ c, d }) => rep(2, (k) => { const x = k ? 15 : -15; return `<ellipse cx="${x}" cy="-15" rx="12" ry="15" ${S(c)}/><path d="M${x} -20 L${x - 8} -8 M${x} -20 L${x + 8} -8" ${L(d, 3)}/>`; }) },
+
+  { id: 'sunglasses', w: 62, h: 26, zones: ['sand'], c1: ['black', 'purple', 'blue', 'pink', 'red'],
+    draw: ({ c }) =>
+      `<path d="M-30 -20 H30" ${L('#37474f', 3.5)}/><path d="M-30 -20 L-24 -2 Q-14 4 -6 -4 L-2 -18 Z" ${S(c)}/><path d="M30 -20 L24 -2 Q14 4 6 -4 L2 -18 Z" ${S(c)}/>${hl(-24, -16, 6, 8, 3)}${hl(8, -16, 6, 8, 3)}` },
+
+  { id: 'towel', w: 104, h: 32, zones: ['sand'], c1: ['red', 'blue', 'green', 'purple', 'orange', 'pink'], n: [2, 5],
+    draw: ({ c, n }) =>
+      `<path d="M-44 -30 H44 L52 0 H-52 Z" ${S(c)}/>`
+      + rep(n, (i) => { const t = (i + 1) / (n + 1), y = -30 + 30 * t, k = 44 + 8 * t; return `<path d="M${(-k).toFixed(1)} ${y.toFixed(1)} H${k.toFixed(1)}" ${L('#fff', 4)} opacity=".8"/>`; }) },
+
+  { id: 'coconut', w: 50, h: 72, zones: ['sand'], c1: ['red', 'blue', 'yellow', 'green', 'pink'], c2: ['pink', 'yellow', 'red', 'purple'], asym: true, parts: ['umbrella'],
+    draw: ({ c, d, hide }) =>
+      `<circle cx="0" cy="-22" r="22" ${S('#8d6e63')}/><ellipse cx="0" cy="-42" rx="9" ry="3.5" fill="#fff8e1" stroke="#a1887f" stroke-width="1.5"/>`
+      + `<path d="M4 -44 L15 -64" ${L(c, 4)}/>`
+      + (hide !== 'umbrella' ? `<path d="M-14 -46 L-22 -70" ${L('#555', 1.5)}/><path d="M-38 -66 Q-22 -84 -6 -64 Z" ${S(d, 1.5)}/>` : '') },
+
+  { id: 'surfboard', w: 32, h: 112, zones: ['sand'], c1: ['red', 'blue', 'yellow', 'green', 'pink', 'cyan'], c2: ['white', 'yellow', 'black'], n: [0, 3],
+    draw: ({ c, d, n }) =>
+      `<ellipse cx="0" cy="-56" rx="15" ry="56" ${S(c)}/><path d="M0 -104 V-8" ${L(d, 3)}/>`
+      + rep(n, (i) => `<rect x="-14" y="${-82 + i * 20}" width="28" height="7" fill="${d}"/>`) },
+
+  { id: 'turtle', w: 64, h: 38, zones: ['sand'], c1: ['green', 'teal', 'brown', 'purple'], n: [3, 6], asym: true,
+    draw: ({ c, n }) =>
+      `<ellipse cx="-18" cy="-4" rx="8" ry="4" ${S('#8bc34a', 1.5)}/><ellipse cx="12" cy="-4" rx="8" ry="4" ${S('#8bc34a', 1.5)}/><circle cx="26" cy="-16" r="8" ${S('#8bc34a', 1.5)}/><circle cx="29" cy="-18" r="1.6" fill="#222"/>`
+      + `<ellipse cx="0" cy="-18" rx="23" ry="15" ${S(c)}/>`
+      + rep(n, (i) => `<circle cx="${(-12 + (i * 9) % 26).toFixed(0)}" cy="${-24 + Math.floor(i / 3) * 10}" r="3" fill="${shade(c, -.3)}"/>`) },
+];
+
+const SKIES = [['#7fd3ff', '#cfefff'], ['#ffb26b', '#ffe3c2'], ['#5fb8ff', '#e0f4ff']];
+const SEAS = ['#1e88e5', '#3f51b5', '#26a69a'];
+
+function beachBg(v, uid) {
+  const [sk1, sk2] = SKIES[v], sea = SEAS[v];
+  let s = `<defs><linearGradient id="sky${uid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${sk1}"/><stop offset="1" stop-color="${sk2}"/></linearGradient></defs>`
+    + `<rect width="800" height="500" fill="url(#sky${uid})"/>`
+    + `<circle cx="720" cy="70" r="34" fill="#fff176" stroke="#ffd54f" stroke-width="4"/>`
+    + `<rect x="0" y="200" width="800" height="120" fill="${sea}"/>`;
+  for (let y = 214; y < 310; y += 22) {
+    let d = `M0 ${y}`;
+    for (let x = 0; x <= 800; x += 40) d += ` q10 -6 20 0 t20 0`;
+    s += `<path d="${d}" fill="none" stroke="#fff" stroke-width="2" opacity=".35"/>`;
+  }
+  s += `<path d="M0 308 Q200 296 400 310 T800 304 V500 H0 Z" fill="${SAND}"/><path d="M0 312 Q200 300 400 314 T800 308" fill="none" stroke="#fff" stroke-width="5" opacity=".7"/>`;
+  for (let i = 0; i < 40; i++) s += `<circle cx="${(i * 197) % 800}" cy="${340 + (i * 53) % 150}" r="1.6" fill="${shade(SAND, -.2)}"/>`;
+  return s;
+}
+
+const BEACH = {
+  id: 'beach', name: 'Bãi biển', emoji: '🏖️', variants: 3,
+  zones: {
+    sky:  { rects: [{ x1: 50, x2: 640, y1: 70, y2: 170 }], scale: 0.95 },
+    sea:  { rects: [{ x1: 40, x2: 760, y1: 238, y2: 298 }], scale: 0.9 },
+    sand: { rects: [{ x1: 40, x2: 760, y1: 348, y2: 492 }], scale: 1 },
+  },
+  objects: BEACH_OBJECTS,
+  bg: beachBg,
+};
+return { BEACH_OBJECTS, beachBg, BEACH };
+})();
+
+/* ══════════ themes.js ══════════ */
+M.themes = (function () {
+// ── Danh sách chủ đề; vòng L dùng chủ đề thứ (L-1) mod 4 ──
+const { KITCHEN } = M.kitchen;
+const { RESTAURANT } = M.restaurant;
+const { CLOTHES } = M.clothes;
+const { BEACH } = M.beach;
+
+const THEMES = [KITCHEN, RESTAURANT, CLOTHES, BEACH];
+const themeFor = (L) => THEMES[(L - 1) % THEMES.length];
+return { THEMES, themeFor };
+})();
+
+/* ══════════ level.js ══════════ */
+M.level = (function () {
+// ── Sinh vòng chơi: đặt đồ vật vào cảnh rồi tạo các điểm khác nhau ──
+const { SCENE_W, SCENE_H, levelParams } = M.config;
+const { rng } = M.rng;
+const { NEAR } = M.draw;
+const { themeFor } = M.themes;
+
+function bbox(spec, x, y, s) {
+  return { x1: x - spec.w * s / 2, x2: x + spec.w * s / 2, y1: y - spec.h * s, y2: y };
+}
+// Hai hộp có chạm nhau không (mỗi hộp co lại một chút để đồ vật được đứng sát nhau).
+function overlaps(a, b) {
+  const sa = 0.1 * Math.min(a.x2 - a.x1, a.y2 - a.y1), sb = 0.1 * Math.min(b.x2 - b.x1, b.y2 - b.y1);
+  return a.x1 + sa < b.x2 - sb && a.x2 - sa > b.x1 + sb && a.y1 + sa < b.y2 - sb && a.y2 - sa > b.y1 + sb;
+}
+function inScene(box) {
+  return box.x1 >= 2 && box.x2 <= SCENE_W - 2 && box.y1 >= 2 && box.y2 <= SCENE_H - 2;
+}
+// Tâm và bán kính vùng chạm của một đồ vật.
+function hitOf(o) {
+  const hy = o.spec.hy == null ? 0.5 : o.spec.hy;
+  const r = Math.max(36, Math.min(84, 0.5 * Math.max(o.spec.w, o.spec.h) * o.s));
+  return { x: o.x, y: o.y - o.spec.h * o.s * hy, r };
+}
+
+function placeObjects(theme, P, R) {
+  const placed = [], counts = {};
+  let tries = 0;
+  while (placed.length < P.objects && tries < 2500) {
+    tries++;
+    const spec = R.pick(theme.objects);
+    if ((counts[spec.id] || 0) >= P.maxDup) continue;
+    const zoneName = R.pick(spec.zones);
+    const zone = theme.zones[zoneName];
+    const rect = R.pick(zone.rects);
+    const s = zone.scale * P.scaleMul * R.range(0.85, 1.15);
+    const hw = spec.w * s / 2;
+    if (rect.x2 - hw < rect.x1 + hw) continue;
+    const x = R.range(rect.x1 + hw, rect.x2 - hw);
+    const y = zone.top != null ? zone.top + spec.h * s : R.range(Math.max(rect.y1, spec.h * s + 4), Math.max(rect.y1, rect.y2));
+    const box = bbox(spec, x, y, s);
+    if (!inScene(box)) continue;
+    if (placed.some((o) => overlaps(box, o.box))) continue;
+    placed.push({
+      spec, x, y, s, rot: 0, flip: spec.asym && R.chance(0.3) ? -1 : 1,
+      c1: R.pick(spec.c1), c2: spec.c2 ? R.pick(spec.c2) : null,
+      n: spec.n ? R.int(spec.n[0], spec.n[1]) : 0, hide: null, tint: 0, zone: zoneName, box, gone: false,
+      top: zone.top != null ? zone.top : null,
+    });
+    counts[spec.id] = (counts[spec.id] || 0) + 1;
+  }
+  return placed;
+}
+
+function pickColor(spec, cur, t, R) {
+  const cands = spec.c1.filter((k) => k !== cur);
+  const near = cands.filter((k) => (NEAR[cur] || []).includes(k));
+  const far = cands.filter((k) => !near.includes(k));
+  if (near.length && (R.chance(t) || !far.length)) return R.pick(near);
+  return R.pick(far.length ? far : cands);
+}
+
+// Tạo một điểm khác nhau trên bản sao `r` của đồ vật `o`. Trả về mô tả hoặc null.
+function mutate(o, r, P, R, used, others) {
+  const spec = o.spec, opts = [];
+  const add = (k) => { if (P.w[k]) opts.push([k, P.w[k] / (1 + 1.5 * (used[k] || 0))]); };
+  if (spec.c1.length > 1) add('color');
+  add('tint');
+  add('missing'); add('size');
+  if (spec.asym) add('flip');
+  if (spec.rot !== false) add('rot');
+  add('move');
+  if (spec.n && spec.n[1] > spec.n[0]) add('count');
+  if (spec.parts && spec.parts.length) add('part');
+  if (!opts.length) return null;
+
+  const kind = R.weighted(opts);
+  const hit = hitOf(o);
+  const hits = [hit];
+  switch (kind) {
+    case 'color': r.c1 = pickColor(spec, o.c1, P.t, R); break;
+    case 'missing': r.gone = true; break;
+    case 'size': {
+      const bigger = R.chance(0.5) || o.s < 0.8;
+      r.s = o.s * (bigger ? P.sizeMul : 1 / P.sizeMul);
+      if (o.top != null) r.y = o.top + spec.h * r.s;   // đồ treo: giữ móc ở thanh
+      if (!inScene(bbox(spec, r.x, r.y, r.s))) { r.s = o.s / P.sizeMul; if (o.top != null) r.y = o.top + spec.h * r.s; }
+      hits[0] = hitOf(r.s > o.s ? r : o);
+      break;
+    }
+    case 'flip': r.flip = -o.flip; break;
+    case 'rot': r.rot = (R.chance(0.5) ? 1 : -1) * P.rotDeg; break;
+    case 'move': {
+      let ok = false;
+      for (let k = 0; k < 12 && !ok; k++) {
+        const a = R.range(0, Math.PI * 2);
+        let dx = Math.cos(a) * P.moveDist, dy = o.top != null ? 0 : Math.sin(a) * P.moveDist * 0.7;
+        if (Math.abs(dx) < P.moveDist * 0.5 || o.top != null) dx = Math.sign(dx || 1) * P.moveDist;
+        const nx = o.x + dx, ny = o.y + dy;
+        const box = bbox(spec, nx, ny, o.s);
+        if (!inScene(box)) continue;
+        // không đè hẳn lên đồ vật khác
+        if (others.some((q) => q !== o && overlaps(box, q.box))) continue;
+        r.x = nx; r.y = ny; ok = true;
+      }
+      if (!ok) { r.x = o.x + (o.x < SCENE_W / 2 ? P.moveDist : -P.moveDist); }
+      hits.push(hitOf(r));
+      break;
+    }
+    case 'count': {
+      const [lo, hi] = spec.n;
+      let cands = [];
+      for (let v = lo; v <= hi; v++) if (v !== o.n) cands.push(v);
+      if (P.t > 0.45) { const one = cands.filter((v) => Math.abs(v - o.n) === 1); if (one.length) cands = one; }
+      r.n = R.pick(cands);
+      break;
+    }
+    case 'part': r.hide = R.pick(spec.parts); break;
+    case 'tint': r.tint = (R.chance(0.5) ? 1 : -1) * P.tint; break;
+  }
+  used[kind] = (used[kind] || 0) + 1;
+  return { kind, hits, obj: o.spec.id };
+}
+
+// Sinh toàn bộ vòng L. Kết quả luôn giống nhau với cùng L.
+function buildLevel(L) {
+  const theme = themeFor(L);
+  const P = levelParams(L);
+  const R = rng(L * 7919 + 104729);
+  const variant = R.int(0, theme.variants - 1);
+  const left = placeObjects(theme, P, R);
+  const right = left.map((o) => ({ ...o }));
+  const order = R.shuffle(left.map((_, i) => i));
+  const diffs = [], used = {};
+  for (const i of order) {
+    if (diffs.length >= P.diffs) break;
+    const d = mutate(left[i], right[i], P, R, used, left);
+    if (d) { d.index = i; diffs.push(d); }
+  }
+  return { L, theme, variant, left, right, diffs, P };
+}
+return { hitOf, buildLevel };
+})();
+
+/* ══════════ state.js ══════════ */
+M.state = (function () {
+// ── Tiến trình người chơi, lưu vào localStorage ──
+const { SAVE_KEY, START_COINS, TOTAL_LEVELS } = M.config;
+
+const save = {
+  coins: START_COINS,
+  unlocked: 1,        // vòng cao nhất được mở
+  stars: {},          // { "3": 2 } — sao từng vòng
+  sound: true,
+  cur: null,          // vòng đang chơi dở: { L, found:[...], wrong, hints }
+};
+
+function load() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(SAVE_KEY) || '{}');
+    if (typeof raw.coins === 'number') save.coins = raw.coins;
+    if (typeof raw.unlocked === 'number') save.unlocked = Math.max(1, Math.min(TOTAL_LEVELS, raw.unlocked));
+    if (raw.stars && typeof raw.stars === 'object') save.stars = raw.stars;
+    if (typeof raw.sound === 'boolean') save.sound = raw.sound;
+    if (raw.cur && typeof raw.cur.L === 'number') save.cur = raw.cur;
+  } catch (e) { /* bỏ qua tệp lưu hỏng */ }
+}
+
+function persist() {
+  try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } catch (e) { /* bỏ qua */ }
+}
+
+const isDone = (L) => !!save.stars[L];
+function totalStars() { let n = 0; for (const k in save.stars) n += save.stars[k]; return n; }
+return { save, load, persist, isDone, totalStars };
+})();
+
+/* ══════════ render.js ══════════ */
+M.render = (function () {
+// ── Vẽ cảnh thành SVG ──
+const { SCENE_W, SCENE_H } = M.config;
+const { col, shade } = M.draw;
+
+function objectSVG(o) {
+  const spec = o.spec;
+  const p = { c: o.tint ? shade(col(o.c1), o.tint) : col(o.c1), d: o.c2 ? col(o.c2) : null, n: o.n, hide: o.hide };
+  const tf = `translate(${o.x.toFixed(1)} ${o.y.toFixed(1)}) rotate(${o.rot} 0 ${(o.top != null ? -spec.h * o.s : -spec.h * o.s / 2).toFixed(1)}) scale(${(o.s * o.flip).toFixed(3)} ${o.s.toFixed(3)})`;
+  return `<g transform="${tf}">${spec.draw(p)}</g>`;
+}
+
+// side: 'L' (bản gốc) hoặc 'R' (bản có khác biệt)
+function sceneSVG(level, side) {
+  const objs = side === 'L' ? level.left : level.right;
+  const sorted = objs.map((o, i) => ({ o, i })).sort((a, b) => a.o.y - b.o.y || a.i - b.i);
+  let s = level.theme.bg(level.variant, side);
+  for (const { o } of sorted) if (!o.gone) s += objectSVG(o);
+  return `<svg viewBox="0 0 ${SCENE_W} ${SCENE_H}" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">`
+    + `<g class="scene">${s}</g><g class="marks"></g></svg>`;
+}
+
+const SVG_NS = 'http://www.w3.org/2000/svg';
+function el(tag, attrs) {
+  const e = document.createElementNS(SVG_NS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  return e;
+}
+
+// Vòng tròn xanh đánh dấu điểm đã tìm được.
+function markFound(svg, hit) {
+  const g = svg.querySelector('.marks');
+  const ring = el('circle', { cx: hit.x, cy: hit.y, r: hit.r, fill: 'rgba(76,175,80,.18)', stroke: '#2e7d32', 'stroke-width': 5 });
+  const a = el('animate', { attributeName: 'r', from: hit.r * 1.8, to: hit.r, dur: '0.35s', fill: 'freeze' });
+  ring.appendChild(a);
+  g.appendChild(ring);
+  const ok = el('text', { x: hit.x + hit.r * 0.7, y: hit.y - hit.r * 0.7, 'font-size': 30, 'text-anchor': 'middle', fill: '#2e7d32', 'font-weight': 'bold' });
+  ok.textContent = '✓';
+  g.appendChild(ok);
+}
+
+// Dấu ✕ đỏ mờ dần khi bấm nhầm.
+function markWrong(svg, x, y) {
+  const g = svg.querySelector('.marks');
+  const grp = el('g', { transform: `translate(${x} ${y})`, opacity: 1 });
+  grp.appendChild(el('path', { d: 'M-16 -16 L16 16 M16 -16 L-16 16', stroke: '#e53935', 'stroke-width': 7, 'stroke-linecap': 'round', fill: 'none' }));
+  grp.appendChild(el('animate', { attributeName: 'opacity', from: 1, to: 0, begin: '0.3s', dur: '0.5s', fill: 'freeze' }));
+  g.appendChild(grp);
+  setTimeout(() => grp.remove(), 900);
+}
+
+// Vòng gợi ý nhấp nháy; trả về hàm để xoá.
+function markHint(svg, hit, seconds) {
+  const g = svg.querySelector('.marks');
+  const ring = el('circle', { cx: hit.x, cy: hit.y, r: hit.r, fill: 'none', stroke: '#ffb300', 'stroke-width': 6, 'stroke-dasharray': '14 10', class: 'hint-ring' });
+  ring.appendChild(el('animate', { attributeName: 'r', values: `${hit.r};${hit.r + 14};${hit.r}`, dur: '1s', repeatCount: 'indefinite' }));
+  g.appendChild(ring);
+  const t = setTimeout(() => ring.remove(), seconds * 1000);
+  return () => { clearTimeout(t); ring.remove(); };
+}
+return { sceneSVG, markFound, markWrong, markHint };
+})();
+
+/* ══════════ sound.js ══════════ */
+M.sound = (function () {
+// ── Âm thanh nhỏ bằng WebAudio, không cần tệp ngoài ──
+const { save } = M.state;
+
+let ctx = null;
+function ac() {
+  if (!save.sound) return null;
+  try {
+    if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
+    if (ctx.state === 'suspended') ctx.resume();
+    return ctx;
+  } catch (e) { return null; }
+}
+function tone(freq, t0, dur, type = 'sine', vol = 0.18) {
+  const c = ac(); if (!c) return;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, c.currentTime + t0);
+  g.gain.linearRampToValueAtTime(vol, c.currentTime + t0 + 0.01);
+  g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + t0 + dur);
+  o.connect(g).connect(c.destination);
+  o.start(c.currentTime + t0); o.stop(c.currentTime + t0 + dur + 0.05);
+}
+const sfx = {
+  found() { tone(880, 0, .12); tone(1320, .1, .18); },
+  wrong() { tone(180, 0, .18, 'square', .08); },
+  coin()  { tone(1560, 0, .08, 'triangle', .12); tone(2080, .07, .12, 'triangle', .12); },
+  hint()  { tone(660, 0, .1, 'triangle'); tone(660, .15, .1, 'triangle'); },
+  win()   { [523, 659, 784, 1046].forEach((f, i) => tone(f, i * .12, .3, 'triangle', .16)); },
+  tap()   { tone(600, 0, .05, 'triangle', .06); },
+};
+return { sfx };
+})();
+
+/* ══════════ game.js ══════════ */
+M.game = (function () {
+// ── Luật chơi: chạm, tìm điểm khác, tiền vàng, gợi ý ──
+const { buildLevel } = M.level;
+const { sceneSVG, markFound, markWrong, markHint } = M.render;
+const { save, persist } = M.state;
+const { coinPerDiff, coinClearBonus, coinStarBonus, starsFor, HINT_COST, HINT_SECONDS, TOTAL_LEVELS } = M.config;
+const { sfx } = M.sound;
+
+const G = { level: null, found: new Set(), wrong: 0, hints: 0, replay: false, earned: 0, done: false, hintClears: [] };
+let cb = {}, panes = {};
+
+function svgPoint(svg, e) {
+  const pt = svg.createSVGPoint();
+  pt.x = e.clientX; pt.y = e.clientY;
+  const m = svg.getScreenCTM();
+  if (!m) return null;
+  return pt.matrixTransform(m.inverse());
+}
+
+function initGame(elL, elR, callbacks) {
+  panes = { L: elL, R: elR };
+  cb = callbacks;
+  for (const side of ['L', 'R']) {
+    panes[side].addEventListener('click', (e) => {
+      const svg = panes[side].querySelector('svg');
+      if (!svg || !G.level) return;
+      const p = svgPoint(svg, e);
+      if (p) onTap(side, p.x, p.y);
+    });
+  }
+}
+
+function saveCur() {
+  if (G.done || !G.level) return;
+  save.cur = { L: G.level.L, found: [...G.found], wrong: G.wrong, hints: G.hints };
+  persist();
+}
+
+function startLevel(L, resume) {
+  clearHints();
+  G.level = buildLevel(L);
+  G.found = new Set(resume && resume.found ? resume.found.filter((i) => i < G.level.diffs.length) : []);
+  G.wrong = resume ? resume.wrong || 0 : 0;
+  G.hints = resume ? resume.hints || 0 : 0;
+  G.replay = !!save.stars[L];
+  G.earned = 0;
+  G.done = false;
+  panes.L.innerHTML = sceneSVG(G.level, 'L');
+  panes.R.innerHTML = sceneSVG(G.level, 'R');
+  for (const i of G.found) drawFound(i);
+  saveCur();
+  cb.onChange();
+}
+
+function drawFound(i) {
+  for (const h of G.level.diffs[i].hits) {
+    markFound(panes.L.querySelector('svg'), h);
+    markFound(panes.R.querySelector('svg'), h);
+  }
+}
+
+function onTap(side, x, y) {
+  if (G.done) return;
+  const diffs = G.level.diffs;
+  for (let i = 0; i < diffs.length; i++) {
+    if (G.found.has(i)) continue;
+    for (const h of diffs[i].hits) {
+      const dx = x - h.x, dy = y - h.y;
+      if (dx * dx + dy * dy <= (h.r + 8) * (h.r + 8)) { hit(i); return; }
+    }
+  }
+  G.wrong++;
+  markWrong(panes[side].querySelector('svg'), x, y);
+  sfx.wrong();
+  cb.onWrong(panes[side]);
+  saveCur();
+  cb.onChange();
+}
+
+function hit(i) {
+  clearHints();
+  G.found.add(i);
+  drawFound(i);
+  const per = coinPerDiff(G.level.L, G.replay);
+  save.coins += per; G.earned += per;
+  sfx.found();
+  cb.onCoins(per);
+  saveCur();
+  cb.onChange();
+  if (G.found.size === G.level.diffs.length) complete();
+}
+
+function complete() {
+  G.done = true;
+  clearHints();
+  const L = G.level.L;
+  const stars = starsFor(G.hints, G.wrong);
+  const bonus = coinClearBonus(L, G.replay) + coinStarBonus(stars, G.replay);
+  save.coins += bonus; G.earned += bonus;
+  save.stars[L] = Math.max(save.stars[L] || 0, stars);
+  save.unlocked = Math.max(save.unlocked, Math.min(TOTAL_LEVELS, L + 1));
+  save.cur = null;
+  persist();
+  sfx.win();
+  cb.onChange();
+  setTimeout(() => cb.onWin({ L, stars, earned: G.earned, wrong: G.wrong, hints: G.hints }), 800);
+}
+
+function clearHints() { for (const f of G.hintClears) f(); G.hintClears = []; }
+
+// Trả về true nếu mua được gợi ý.
+function useHint() {
+  if (!G.level || G.done) return false;
+  if (save.coins < HINT_COST) { cb.onNoCoins(); return false; }
+  const left = [];
+  for (let i = 0; i < G.level.diffs.length; i++) if (!G.found.has(i)) left.push(i);
+  if (!left.length) return false;
+  clearHints();
+  const i = left[Math.floor(Math.random() * left.length)];
+  save.coins -= HINT_COST; G.hints++;
+  sfx.hint();
+  for (const h of G.level.diffs[i].hits) {
+    G.hintClears.push(markHint(panes.L.querySelector('svg'), h, HINT_SECONDS));
+    G.hintClears.push(markHint(panes.R.querySelector('svg'), h, HINT_SECONDS));
+  }
+  saveCur();
+  cb.onChange();
+  return true;
+}
+return { G, initGame, startLevel, useHint };
+})();
+
+/* ══════════ ui.js ══════════ */
+M.ui = (function () {
+// ── Màn hình, HUD, lớp phủ ──
+const { TOTAL_LEVELS, HINT_COST, START_COINS } = M.config;
+const { save, persist, totalStars } = M.state;
+const { THEMES, themeFor } = M.themes;
+const { G, initGame, startLevel, useHint } = M.game;
+const { sfx } = M.sound;
+
+const $ = (id) => document.getElementById(id);
+let tipTimer = 0;
+
+function show(screen) {
+  document.querySelectorAll('.screen').forEach((s) => s.classList.toggle('show', s.id === screen));
+  if (screen === 'scr-game') { layout(); requestAnimationFrame(layout); }
+}
+function overlay(id, on) { $(id).hidden = !on; }
+function tip(msg, ms = 2200) {
+  const t = $('tip'); t.textContent = msg; t.hidden = false;
+  clearTimeout(tipTimer); tipTimer = setTimeout(() => { t.hidden = true; }, ms);
+}
+
+// ── Xếp hai bức tranh: cạnh nhau hay chồng lên nhau, cái nào to hơn thì chọn ──
+function layout() {
+  const wrap = $('panes');
+  const W = wrap.clientWidth - 24, H = wrap.clientHeight - 8, gap = 12;
+  if (!W || !H) return;
+  const row = Math.min((W - gap) / 2, H * 1.6);
+  const col = Math.min(W, ((H - gap) / 2) * 1.6);
+  const useRow = row >= col;
+  wrap.classList.toggle('row', useRow);
+  wrap.classList.toggle('col', !useRow);
+  const pw = Math.floor(useRow ? row : col), ph = Math.floor(pw / 1.6);
+  for (const id of ['pane-l', 'pane-r']) { $(id).style.width = pw + 'px'; $(id).style.height = ph + 'px'; }
+}
+
+// ── HUD ──
+function syncHud() {
+  const lv = G.level;
+  $('g-coins').textContent = save.coins;
+  $('title-coins').textContent = save.coins;
+  $('lv-coins').textContent = save.coins;
+  $('g-sound').textContent = save.sound ? '🔊' : '🔇';
+  $('t-hint').disabled = !lv || G.done || save.coins < HINT_COST;
+  if (!lv) return;
+  $('g-level').textContent = lv.L;
+  $('g-theme').textContent = lv.theme.emoji + ' ' + lv.theme.name;
+  const n = lv.diffs.length, f = G.found.size;
+  $('g-found').textContent = `${f}/${n}`;
+  let dots = '';
+  for (let i = 0; i < n; i++) dots += `<span class="${i < f ? 'on' : ''}"></span>`;
+  $('g-dots').innerHTML = dots;
+}
+
+function bumpCoins() {
+  for (const id of ['g-coins']) {
+    const el = $(id).parentElement;
+    el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump');
+  }
+}
+
+function syncTitle() {
+  const next = save.cur ? save.cur.L : Math.min(save.unlocked, TOTAL_LEVELS);
+  $('btn-play').textContent = save.cur ? `Chơi tiếp ▸ Vòng ${next}` : (save.unlocked === 1 && !save.stars[1] ? 'Chơi ngay ▸' : `Vòng ${next} ▸`);
+  const stars = totalStars();
+  $('title-meta').textContent = stars ? `⭐ ${stars}/${TOTAL_LEVELS * 3} sao · Đã mở ${save.unlocked}/${TOTAL_LEVELS} vòng` : `${TOTAL_LEVELS} vòng · 4 chủ đề · thu thập tiền vàng`;
+}
+
+// ── Danh sách vòng ──
+function renderLevels() {
+  const grid = $('level-grid');
+  let html = '';
+  for (let L = 1; L <= TOTAL_LEVELS; L++) {
+    const th = themeFor(L), st = save.stars[L] || 0;
+    const locked = L > save.unlocked;
+    const cls = locked ? 'locked' : st ? 'done' : 'next';
+    const stars = st ? '★'.repeat(st) + '<i>' + '★'.repeat(3 - st) + '</i>' : (locked ? '' : 'mới');
+    html += `<button class="tile ${cls}" data-l="${L}" ${locked ? 'disabled' : ''}>`
+      + `<span class="tile-em">${locked ? '🔒' : th.emoji}</span><b>${L}</b><span class="tile-stars">${stars}</span></button>`;
+  }
+  grid.innerHTML = html;
+  $('lv-stars').textContent = `⭐ ${totalStars()}`;
+}
+
+function play(L, resume) {
+  overlay('ov-win', false); overlay('ov-menu', false);
+  startLevel(L, resume);
+  show('scr-game');
+  syncHud();
+}
+
+// ── Lớp phủ thắng ──
+function showWin({ L, stars, earned, wrong, hints }) {
+  const st = $('win-stars').children;
+  for (let i = 0; i < 3; i++) st[i].classList.toggle('lit', i < stars);
+  $('win-level').textContent = L;
+  $('win-coins').textContent = '+' + earned;
+  $('win-line').textContent = `Bấm nhầm ${wrong} lần · Dùng ${hints} gợi ý`;
+  const last = L >= TOTAL_LEVELS;
+  $('win-ribbon').textContent = last ? '🏆 Hoàn thành tất cả!' : stars === 3 ? 'Tuyệt vời!' : stars === 2 ? 'Giỏi lắm!' : 'Xong rồi!';
+  $('btn-next').textContent = last ? 'Chơi lại từ vòng 1 ▸' : 'Vòng tiếp theo ▸';
+  $('btn-next').onclick = () => play(last ? 1 : L + 1);
+  overlay('ov-win', true);
+}
+
+function initUI() {
+  initGame($('pane-l'), $('pane-r'), {
+    onChange: syncHud,
+    onCoins: bumpCoins,
+    onWrong: (pane) => { pane.classList.remove('shake'); void pane.offsetWidth; pane.classList.add('shake'); },
+    onNoCoins: () => tip(`Chưa đủ tiền! Gợi ý cần ${HINT_COST} 🪙 — tìm thêm điểm khác nhau để kiếm tiền nhé.`),
+    onWin: showWin,
+  });
+
+  // Trang đầu
+  $('btn-play').onclick = () => { sfx.tap(); if (save.cur) play(save.cur.L, save.cur); else play(Math.min(save.unlocked, TOTAL_LEVELS)); };
+  $('btn-levels').onclick = () => { sfx.tap(); renderLevels(); show('scr-levels'); };
+  $('lv-back').onclick = () => { syncTitle(); show('scr-title'); };
+  $('level-grid').onclick = (e) => {
+    const b = e.target.closest('.tile'); if (!b || b.disabled) return;
+    sfx.tap(); play(+b.dataset.l);
+  };
+
+  // HUD
+  $('g-home').onclick = () => { sfx.tap(); overlay('ov-menu', true); };
+  $('g-sound').onclick = () => { save.sound = !save.sound; persist(); syncHud(); sfx.tap(); };
+  $('t-hint').onclick = () => { if (useHint()) tip('Nhìn vào vòng vàng nhấp nháy nhé! 👀', 1800); };
+  $('t-levels').onclick = () => { sfx.tap(); renderLevels(); show('scr-levels'); };
+  $('t-again').onclick = () => { sfx.tap(); play(G.level.L); };
+
+  // Lớp phủ
+  $('btn-replay').onclick = () => play(G.level.L);
+  $('btn-win-levels').onclick = () => { overlay('ov-win', false); renderLevels(); show('scr-levels'); };
+  $('btn-resume').onclick = () => overlay('ov-menu', false);
+  $('btn-menu-restart').onclick = () => play(G.level.L);
+  $('btn-menu-levels').onclick = () => { overlay('ov-menu', false); renderLevels(); show('scr-levels'); };
+  $('btn-menu-home').onclick = () => { overlay('ov-menu', false); syncTitle(); show('scr-title'); };
+
+  // Hộp thoại đặt lại
+  $('btn-reset').onclick = () => {
+    if (!confirm('Xoá toàn bộ tiến trình và bắt đầu lại từ vòng 1?')) return;
+    save.coins = START_COINS; save.unlocked = 1; save.stars = {}; save.cur = null; persist();
+    syncTitle(); syncHud(); renderLevels();
+  };
+
+  window.addEventListener('resize', layout);
+  window.addEventListener('orientationchange', () => setTimeout(layout, 120));
+  $('hint-cost').textContent = HINT_COST;
+  $('theme-list').textContent = THEMES.map((t) => t.emoji + ' ' + t.name).join(' · ');
+  syncTitle();
+  syncHud();
+}
+return { layout, syncHud, initUI };
+})();
+
+/* ══════════ main.js ══════════ */
+M.main = (function () {
+// ── Khởi động trò chơi ──
+const { load } = M.state;
+const { initUI } = M.ui;
+
+window.__spReady = true;   // cho lớp báo lỗi biết mã trò chơi đã chạy được
+load();
+initUI();
+
+// Chặn zoom hai ngón trên iPad để hai bức tranh luôn đứng yên.
+document.addEventListener('gesturestart', (e) => e.preventDefault());
+return {  };
+})();
+})();
+</script>
+
+<script>
+setTimeout(function () {
+  if (window.__spReady) return;
+  document.getElementById('boot-why').textContent =
+    window.__spBootMsg || 'Trình duyệt không chạy được phần mã của trò chơi.';
+  document.getElementById('boot-error').hidden = false;
+}, 2500);
+</script>
+</body>
+</html>

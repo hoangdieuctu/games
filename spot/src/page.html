@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Tìm Điểm Khác">
+<meta name="theme-color" content="#1a5f7a">
+<link rel="apple-touch-icon" href="/*__ICON__*/">
+<title>Tìm Điểm Khác Nhau</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231a5f7a'/%3E%3Crect x='4' y='8' width='11' height='14' rx='2' fill='%23fff'/%3E%3Crect x='17' y='8' width='11' height='14' rx='2' fill='%23fff'/%3E%3Ccircle cx='9.5' cy='13' r='2.5' fill='%23fdd835'/%3E%3Ccircle cx='22.5' cy='13' r='2.5' fill='%23fb8c00'/%3E%3Ccircle cx='22.5' cy='14' r='6' fill='none' stroke='%23e53935' stroke-width='2'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&display=swap" rel="stylesheet">
+<style>/*__CSS__*/</style>
+</head>
+<body>
+
+<!-- ══ MÀN HÌNH TIÊU ĐỀ ══ -->
+<section class="screen show" id="scr-title">
+  <div class="title-card">
+    <div class="title-art" aria-hidden="true">
+      <svg viewBox="0 0 260 130" width="100%" height="100%">
+        <rect x="6" y="14" width="118" height="100" rx="10" fill="#fff" stroke="#c9d6df" stroke-width="3"/>
+        <rect x="136" y="14" width="118" height="100" rx="10" fill="#fff" stroke="#c9d6df" stroke-width="3"/>
+        <g>
+          <rect x="14" y="22" width="102" height="84" rx="6" fill="#bde6ff"/>
+          <circle cx="42" cy="46" r="12" fill="#fdd835"/>
+          <path d="M14 106 Q45 70 80 92 T116 84 V106 Z" fill="#7cc576"/>
+          <rect x="70" y="72" width="22" height="22" fill="#ef5350"/><path d="M66 74 L81 60 L96 74 Z" fill="#8d6e63"/>
+        </g>
+        <g>
+          <rect x="144" y="22" width="102" height="84" rx="6" fill="#bde6ff"/>
+          <circle cx="172" cy="46" r="12" fill="#fb8c00"/>
+          <path d="M144 106 Q175 70 210 92 T246 84 V106 Z" fill="#7cc576"/>
+          <rect x="200" y="72" width="22" height="22" fill="#42a5f5"/><path d="M196 74 L211 60 L226 74 Z" fill="#8d6e63"/>
+        </g>
+        <circle cx="211" cy="83" r="24" fill="none" stroke="#e53935" stroke-width="5"/>
+        <path d="M228 100 L246 120" stroke="#e53935" stroke-width="8" stroke-linecap="round"/>
+        <circle cx="172" cy="46" r="20" fill="none" stroke="#e53935" stroke-width="4" stroke-dasharray="8 6"/>
+      </svg>
+    </div>
+    <h1>Tìm Điểm<br><span>Khác Nhau</span></h1>
+    <p class="title-sub">Hai bức tranh giống nhau… gần như thế! Chạm vào chỗ khác nhau để kiếm tiền vàng nhé.</p>
+    <div class="title-coins">🪙 <b id="title-coins">0</b></div>
+    <button class="big-btn" id="btn-play">Chơi ngay ▸</button>
+    <button class="ghost-btn" id="btn-levels">Chọn vòng chơi</button>
+    <div class="title-meta" id="title-meta"></div>
+    <div class="title-themes" id="theme-list"></div>
+    <a class="link-back" href="../index.html">‹ Về kho trò chơi</a>
+  </div>
+</section>
+
+<!-- ══ CHỌN VÒNG ══ -->
+<section class="screen" id="scr-levels">
+  <header class="hud">
+    <button class="btn" id="lv-back" aria-label="Quay lại">‹</button>
+    <div class="pill lv">Chọn vòng</div>
+    <div class="pill" id="lv-stars">⭐ 0</div>
+    <div class="spacer"></div>
+    <div class="pill coin">🪙 <b id="lv-coins">0</b></div>
+  </header>
+  <div class="level-scroll">
+    <div class="level-grid" id="level-grid"></div>
+    <button class="ghost-btn danger" id="btn-reset">Xoá tiến trình, chơi lại từ đầu</button>
+  </div>
+</section>
+
+<!-- ══ MÀN CHƠI ══ -->
+<section class="screen" id="scr-game">
+  <header class="hud">
+    <button class="btn" id="g-home" aria-label="Tạm dừng">🏠</button>
+    <div class="pill lv">Vòng <b id="g-level">1</b> <span class="theme" id="g-theme"></span></div>
+    <div class="pill found">🔍 <b id="g-found">0/3</b><span class="dots" id="g-dots"></span></div>
+    <div class="spacer"></div>
+    <div class="pill coin">🪙 <b id="g-coins">0</b></div>
+    <button class="btn" id="g-sound" aria-label="Âm thanh">🔊</button>
+  </header>
+
+  <div class="panes" id="panes">
+    <div class="pane" id="pane-l"></div>
+    <div class="pane" id="pane-r"></div>
+  </div>
+
+  <footer class="dock">
+    <button class="tool" id="t-levels"><span class="ic">📋</span><span class="lb">Chọn vòng</span></button>
+    <button class="tool hint" id="t-hint"><span class="ic">💡</span><span class="lb">Gợi ý</span><b class="cost"><span id="hint-cost">30</span> 🪙</b></button>
+    <button class="tool" id="t-again"><span class="ic">🔄</span><span class="lb">Chơi lại</span></button>
+  </footer>
+
+  <div class="tip" id="tip" hidden></div>
+</section>
+
+<!-- ══ LỚP PHỦ: VÒNG HOÀN THÀNH ══ -->
+<div class="overlay" id="ov-win" hidden>
+  <div class="card win-card">
+    <div class="win-ribbon" id="win-ribbon">Tuyệt vời!</div>
+    <div class="stars" id="win-stars"><span>★</span><span>★</span><span>★</span></div>
+    <h2>Xong vòng <b id="win-level">1</b>!</h2>
+    <div class="win-reward"><span class="rw-ic">🪙</span><b id="win-coins">+0</b></div>
+    <p class="win-line" id="win-line"></p>
+    <button class="big-btn" id="btn-next">Vòng tiếp theo ▸</button>
+    <div class="row-btns">
+      <button class="ghost-btn" id="btn-replay">Chơi lại</button>
+      <button class="ghost-btn" id="btn-win-levels">Chọn vòng</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ LỚP PHỦ: TẠM DỪNG ══ -->
+<div class="overlay" id="ov-menu" hidden>
+  <div class="card menu-card">
+    <h2>Tạm nghỉ</h2>
+    <button class="big-btn" id="btn-resume">Chơi tiếp ▸</button>
+    <button class="ghost-btn" id="btn-menu-restart">Chơi lại vòng này</button>
+    <button class="ghost-btn" id="btn-menu-levels">Chọn vòng</button>
+    <button class="ghost-btn" id="btn-menu-home">Về trang đầu</button>
+    <a class="ghost-btn" href="../index.html">Về kho trò chơi</a>
+  </div>
+</div>
+
+<!-- Lưới an toàn: nếu mã trò chơi không chạy được thì nói rõ lý do. -->
+<div class="boot-error" id="boot-error" hidden>
+  <h2>Chưa chạy được trò chơi 😢</h2>
+  <p id="boot-why"></p>
+  <p class="boot-fix">Bé thử tải lại trang xem sao. Nếu vẫn vậy thì có thể trình duyệt đã quá cũ — hãy cập nhật iPadOS hoặc mở bằng Safari / Chrome mới nhất.</p>
+</div>
+
+<script>
+window.__spBootMsg = '';
+window.addEventListener('error', function (e) {
+  if (!window.__spBootMsg && e && e.message) window.__spBootMsg = e.message;
+}, true);
+</script>
+
+<script>
+/*__JS__*/
+</script>
+
+<script>
+setTimeout(function () {
+  if (window.__spReady) return;
+  document.getElementById('boot-why').textContent =
+    window.__spBootMsg || 'Trình duyệt không chạy được phần mã của trò chơi.';
+  document.getElementById('boot-error').hidden = false;
+}, 2500);
+</script>
+</body>
+</html>
