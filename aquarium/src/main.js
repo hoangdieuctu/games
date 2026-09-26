@@ -67,6 +67,6 @@ function boot() {
 // móc gỡ lỗi (dùng trong console): __hoca.add('dragon'), __hoca.discoverAll()
 window.__hoca = { get S() { return S; }, SPECIES, add(id, n = 1) { const out = []; for (let i = 0; i < n; i++) { const f = newFish(id, S.current); S.fish.push(f); out.push(f); } return out; }, discoverAll() { for (const k in SPECIES) S.discovered[k] = true; }, coins(n) { S.coins += n; }, save: saveState, catchUp };
 try { boot(); } catch (err) {
-  document.body.insertAdjacentHTML('beforeend', `<div style="position:fixed;inset:0;background:#0d141d;color:#fff;padding:30px;font:14px monospace;z-index:99;overflow:auto"><h2>Không khởi động được</h2><pre>${String(err && err.stack || err).replace(/</g, '&lt;')}</pre><button onclick="localStorage.removeItem('${SAVE_KEY}');location.reload()" style="padding:10px 16px;margin-top:12px">Xoá bản lưu và thử lại</button></div>`);
+  document.body.insertAdjacentHTML('beforeend', `<div style="position:fixed;inset:0;background:#fffdf7;color:#1c3b64;padding:30px;font:14px monospace;z-index:99;overflow:auto"><h2>Không khởi động được</h2><pre>${String(err && err.stack || err).replace(/</g, '&lt;')}</pre><button onclick="localStorage.removeItem('${SAVE_KEY}');location.reload()" style="padding:10px 16px;margin-top:12px">Xoá bản lưu và thử lại</button></div>`);
   console.error(err);
 }

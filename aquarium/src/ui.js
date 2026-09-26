@@ -35,7 +35,7 @@ function speciesIcon(spId, size = 46, silhouette = false) {
   const L = { x: 0, y: 0, s, W: 100, H: 100 };
   const f = { id: spId, sp: spId, x: (size / 2 + (sp.shape === 'veil' || sp.shape === 'fan' ? size * 0.12 : 0)) / s, y: size / 2 / s, vx: 1, vy: 0, growth: 1, health: 100, disease: null, variant: 0 };
   drawFish(ctx, f, L, 1.3, { face: 1, phase: 0.6, speedN: 0.3 });
-  if (silhouette) { ctx.globalCompositeOperation = 'source-atop'; ctx.fillStyle = '#233043'; ctx.fillRect(0, 0, size, size); }
+  if (silhouette) { ctx.globalCompositeOperation = 'source-atop'; ctx.fillStyle = '#2c4a72'; ctx.fillRect(0, 0, size, size); }
   ICON_CACHE.set(key, c); return c;
 }
 function decoIcon(type, w = 90, h = 56) {
@@ -227,7 +227,7 @@ function designPanel() {
       const items = Object.entries(DECO).filter(([, D]) => (g === 'plant') === !!D.plant);
       html += `<div class="sec"><h3>${name}</h3><div class="deco-grid">${items.map(([k, D]) => `<button class="opt ${UI.placing === k ? 'on' : ''} ${S.coins < D.price ? 'dis' : ''}" data-deco="${k}"><canvas data-dc="${k}"></canvas>${esc(D.name)}<small>${D.price} xu${D.hide >= 1 ? ' · trốn' : ''}${D.o2 ? ' · O₂' : ''}</small></button>`).join('')}</div></div>`;
     }
-    html += `<div class="sec"><h3>Đang có trong hồ (${t.deco.length})</h3><div class="row">${t.deco.map((x) => `<button class="pbtn ghost ${x.id === UI.designSel ? 'on' : ''}" data-selD="${x.id}" style="${x.id === UI.designSel ? 'border-color:var(--accent);color:#fff' : ''}">${esc(DECO[x.type]?.name || '?')}</button>`).join('') || '<span class="note">Trống</span>'}</div></div>`;
+    html += `<div class="sec"><h3>Đang có trong hồ (${t.deco.length})</h3><div class="row">${t.deco.map((x) => `<button class="pbtn ghost ${x.id === UI.designSel ? 'on' : ''}" data-selD="${x.id}" style="${x.id === UI.designSel ? 'border-color:var(--accent);color:var(--ink)' : ''}">${esc(DECO[x.type]?.name || '?')}</button>`).join('') || '<span class="note">Trống</span>'}</div></div>`;
   } else if (tab === 'eq') {
     const E = EQUIPMENT, eq = t.eq;
     html += `<div class="sec"><h3>${E.filter.name}</h3><div class="grid3">${E.filter.levels.map((n, i) => `<button class="opt ${eq.filter === i ? 'on' : ''}" data-filter="${i}">${n}<small>${eq.filter === i ? 'đang dùng' : i > eq.filter ? (E.filter.price[i] - E.filter.price[eq.filter]) + ' xu' : 'hạ cấp'}</small></button>`).join('')}</div><p class="note">Lọc hút cặn và chuyển hoá chất độc. Hồ càng nhiều cá càng cần lọc lớn.</p></div>

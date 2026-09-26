@@ -17,11 +17,11 @@ const OFFLINE_CAP = 8 * H;   // tối đa bù thời gian khi mở lại (giây)
 const MAX_TANKS = 6;
 
 const RARITY = [
-  { key: 'common',    name: 'Thường',      color: '#9fb3c8' },
-  { key: 'uncommon',  name: 'Khá',         color: '#5ad17a' },
-  { key: 'rare',      name: 'Hiếm',        color: '#4aa8ff' },
-  { key: 'epic',      name: 'Cực hiếm',    color: '#c774ff' },
-  { key: 'legendary', name: 'Huyền thoại', color: '#ffc63a' },
+  { key: 'common',    name: 'Thường',      color: '#6b8299' },
+  { key: 'uncommon',  name: 'Khá',         color: '#2fae5a' },
+  { key: 'rare',      name: 'Hiếm',        color: '#2f86e0' },
+  { key: 'epic',      name: 'Cực hiếm',    color: '#a04ce8' },
+  { key: 'legendary', name: 'Huyền thoại', color: '#e09a00' },
 ];
 // tỉ lệ ép đẻ cơ bản & thời gian (phút) theo độ hiếm của con lai
 const BREED_BASE   = [0.85, 0.65, 0.45, 0.28, 0.12];
@@ -41,17 +41,19 @@ const TANK_KINDS = {
 const KIND_NAME = { main: 'Hồ chính', breed: 'Hồ ép đẻ', hospital: 'Hồ dưỡng bệnh' };
 const KIND_ICON = { main: '🐠', breed: '🥚', hospital: '🩺' };
 
+// c1 nền, c2 đốm cát; speck + dots: sỏi nhiều màu
 const SUBSTRATES = {
-  sand:   { name: 'Cát trắng', price: 15, c1: '#e8d9b5', c2: '#cbb98f' },
-  gravel: { name: 'Sỏi màu',   price: 20, c1: '#a58a6c', c2: '#7a6350', speck: true },
-  dark:   { name: 'Nền đen',   price: 25, c1: '#2b2f36', c2: '#171a1f', speck: true },
+  sand:   { name: 'Cát vàng',  price: 15, c1: '#f4dfa6', c2: '#dfbf7a' },
+  gravel: { name: 'Sỏi màu',   price: 20, c1: '#c9b391', c2: '#a88f68', speck: true, dots: ['#ff8fb8', '#7cc4ff', '#ffd23f', '#9be08a', '#ffffff'] },
+  dark:   { name: 'Nền xanh đêm', price: 25, c1: '#3a4f78', c2: '#2b3d60', speck: true, dots: ['#5f7bb0', '#8fa6d8'] },
   bare:   { name: 'Không nền', price: 0,  c1: null },
 };
+// top/bot màu nước, hill màu đồi đá phía sau
 const BACKGROUNDS = {
-  blue:   { name: 'Xanh biển',   price: 0,  top: '#6fd3ff', bot: '#0b5b93' },
-  deep:   { name: 'Biển sâu',    price: 15, top: '#1f6fa8', bot: '#031d38' },
-  black:  { name: 'Đen huyền',   price: 20, top: '#233042', bot: '#05070c' },
-  forest: { name: 'Rừng thủy sinh', price: 25, top: '#8fd9a8', bot: '#0d4a3a' },
+  blue:   { name: 'Biển xanh',   price: 0,  top: '#79d3f7', bot: '#2b8fd8', hill: '#1f4f8c' },
+  deep:   { name: 'Biển sâu',    price: 15, top: '#3a8fd0', bot: '#123a78', hill: '#0d2a5a' },
+  black:  { name: 'Đêm biển',    price: 20, top: '#2a4a80', bot: '#0d1a3a', hill: '#081330' },
+  forest: { name: 'Vịnh xanh lá', price: 25, top: '#8fe0c8', bot: '#1f8a7a', hill: '#0f5a50' },
 };
 
 const EQUIPMENT = {
@@ -68,7 +70,14 @@ const DECO = {
   wood:    { name: 'Gỗ lũa',         price: 40, kind: 'wood',    w: 24, h: 16, hide: 1 },
   cave:    { name: 'Hang đá',        price: 45, kind: 'cave',    w: 16, h: 10, hide: 1.5 },
   castle:  { name: 'Lâu đài',        price: 60, kind: 'castle',  w: 14, h: 18, hide: 1 },
-  shell:   { name: 'Vỏ sò',          price: 8,  kind: 'shell',   w: 6,  h: 4,  hide: 0 },
+  shell:   { name: 'Sò hồng',        price: 8,  kind: 'shell',   w: 7,  h: 5,  hide: 0, col: '#ff8fb8' },
+  shell2:  { name: 'Sò cam',         price: 8,  kind: 'shell',   w: 7,  h: 5,  hide: 0, col: '#ffb060' },
+  star:    { name: 'Sao biển cam',   price: 12, kind: 'star',    w: 7,  h: 7,  hide: 0, col: '#ffa62b' },
+  star2:   { name: 'Sao biển tím',   price: 12, kind: 'star',    w: 6,  h: 6,  hide: 0, col: '#b56ee8' },
+  coral_p: { name: 'San hô hồng',    price: 30, kind: 'coral',   w: 14, h: 16, hide: 0.8, style: 'branch', col: '#ff7aa8' },
+  coral_r: { name: 'San hô đỏ',      price: 30, kind: 'coral',   w: 14, h: 15, hide: 0.8, style: 'branch', col: '#ff6b5e' },
+  coral_o: { name: 'Quạt biển cam',  price: 35, kind: 'coral',   w: 14, h: 14, hide: 0.6, style: 'fan',    col: '#ffa040' },
+  coral_v: { name: 'San hô ống tím', price: 35, kind: 'coral',   w: 12, h: 14, hide: 0.8, style: 'tube',   col: '#a06ee8' },
   bubbler: { name: 'Đá sủi',         price: 20, kind: 'bubbler', w: 5,  h: 3,  hide: 0, o2: 6 },
   moss:    { name: 'Rêu Java',       price: 10, kind: 'plant',   w: 8,  h: 4,  hide: 0.5, plant: 1, o2: 2, style: 'moss' },
   anubias: { name: 'Ráy Nana',       price: 15, kind: 'plant',   w: 10, h: 8,  hide: 0.8, plant: 1, o2: 3, style: 'round' },
@@ -76,6 +85,7 @@ const DECO = {
   vallis:  { name: 'Cỏ hẹ nước',     price: 12, kind: 'plant',   w: 8,  h: 24, hide: 1,   plant: 1, o2: 4, style: 'grass' },
   amazon:  { name: 'Trầu bà Amazon', price: 20, kind: 'plant',   w: 16, h: 18, hide: 1.2, plant: 1, o2: 4, style: 'broad' },
   red:     { name: 'Huyết tâm lan',  price: 25, kind: 'plant',   w: 10, h: 16, hide: 0.8, plant: 1, o2: 3, style: 'red' },
+  kelp:    { name: 'Rong biển',      price: 22, kind: 'plant',   w: 12, h: 28, hide: 1.3, plant: 1, o2: 5, style: 'kelp' },
 };
 
 const MEDS = {
@@ -143,7 +153,7 @@ const SPECIES = {
     desc: 'Dễ nuôi, đẻ nhiều, đuôi xoè rực rỡ. Thích sống theo nhóm nhỏ.' },
   neon: { name: 'Cá Neon', sub: 'Neon tetra', rarity: 0, price: 6, size: 3, shape: 'torpedo', zone: 'mid', speed: 9,
     school: 6, temper: 'peace', shy: true, temp: [22, 27], hardy: 1.1, pattern: 'neon',
-    col: { body: '#cfd8e6', fin: '#ff3b3b', accent: '#00e5ff' },
+    col: { body: '#e6f2fb', fin: '#ff4d5e', accent: '#22d7ff', belly: '#ffffff' },
     desc: 'Sọc lam phát sáng, đi đàn từ 6 con mới yên tâm. Cần cây để trốn.' },
   platy: { name: 'Cá Hột Lựu', sub: 'Platy', rarity: 0, price: 8, size: 5, shape: 'oval', zone: 'mid', speed: 6,
     school: 3, temper: 'peace', temp: [22, 28], hardy: 0.8, pattern: 'plain',
@@ -152,13 +162,13 @@ const SPECIES = {
   molly: { name: 'Cá Trân Châu', sub: 'Molly', rarity: 0, price: 10, size: 7, shape: 'oval', zone: 'mid', speed: 6,
     school: 3, temper: 'peace', temp: [24, 28], hardy: 0.9, pattern: 'plain',
     variants: [
-      { body: '#242a35', fin: '#161a22', accent: '#3a4250' },
+      { body: '#3a4256', fin: '#262c3b', accent: '#556079', belly: '#6b768f' },
       { body: '#f2f2f2', fin: '#d8d8d8', accent: '#222', spots: true },
     ],
     desc: 'Đen tuyền hoặc trắng đốm. Ăn rêu nhẹ, hiền lành.' },
   danio: { name: 'Cá Ngựa Vằn', sub: 'Zebra danio', rarity: 0, price: 6, size: 4, shape: 'torpedo', zone: 'top', speed: 12,
     school: 6, temper: 'peace', temp: [18, 27], hardy: 0.7, pattern: 'hstripes',
-    col: { body: '#dbe4ee', fin: '#c0ccd9', accent: '#2c3e50' },
+    col: { body: '#eaf2f8', fin: '#b9cbe0', accent: '#2f4a6e', belly: '#ffffff' },
     desc: 'Bơi nhanh không ngừng, chịu lạnh tốt. Đàn 6 con trở lên.' },
   sword: { name: 'Cá Đuôi Kiếm', sub: 'Swordtail', rarity: 0, price: 10, size: 8, shape: 'sword', zone: 'mid', speed: 7,
     school: 3, temper: 'peace', temp: [22, 28], hardy: 0.8, pattern: 'plain',
@@ -166,7 +176,7 @@ const SPECIES = {
     desc: 'Đuôi dưới kéo dài như lưỡi kiếm. Khoẻ, hiền.' },
   cory: { name: 'Cá Chuột', sub: 'Corydoras', rarity: 0, price: 12, size: 5, shape: 'bottom', zone: 'bottom', speed: 5,
     school: 4, temper: 'peace', temp: [22, 27], hardy: 0.9, pattern: 'spots', cleaner: 'dirt',
-    col: { body: '#b9a27f', fin: '#9c8666', accent: '#5c4a32' },
+    col: { body: '#d9bf93', fin: '#b89a6c', accent: '#6b5236', belly: '#fff2d8' },
     desc: 'Lục lọi đáy hồ ăn thức ăn thừa, giúp hồ sạch hơn. Đi nhóm 4+.' },
   betta: { name: 'Cá Xiêm', sub: 'Betta', rarity: 1, price: 25, size: 6, shape: 'veil', zone: 'top', speed: 4,
     school: 0, temper: 'aggr', longFin: true, temp: [25, 30], hardy: 0.9, pattern: 'iridescent', minLitres: 20,
@@ -178,11 +188,11 @@ const SPECIES = {
     desc: 'Cá nước mát, ăn nhiều thải nhiều. Cần hồ rộng và lọc tốt.' },
   angel: { name: 'Cá Thần Tiên', sub: 'Angelfish', rarity: 1, price: 35, size: 12, shape: 'tall', zone: 'mid', speed: 5,
     school: 2, temper: 'semi', temp: [24, 29], hardy: 1.1, pattern: 'bars', minLitres: 100,
-    col: { body: '#e8eef5', fin: '#cfd8e6', accent: '#1c2333' },
+    col: { body: '#f2f6fb', fin: '#c9d6e8', accent: '#26344f', belly: '#ffffff' },
     desc: 'Dáng cao thanh thoát. Có thể ăn cá nhỏ như neon khi lớn.' },
   pleco: { name: 'Cá Lau Kiếng', sub: 'Bristlenose pleco', rarity: 1, price: 30, size: 10, shape: 'pleco', zone: 'bottom', speed: 3,
     school: 0, temper: 'peace', temp: [23, 28], hardy: 0.8, pattern: 'spots', cleaner: 'algae', minLitres: 60,
-    col: { body: '#4b3d2e', fin: '#3a2e22', accent: '#d9c7a0' },
+    col: { body: '#6a5240', fin: '#4e3b2c', accent: '#f0dcb0', belly: '#b89a7c' },
     desc: 'Chuyên cạo rêu trên kính và đá. Bám kính cả ngày.' },
   barb: { name: 'Cá Tứ Vân', sub: 'Tiger barb', rarity: 1, price: 12, size: 6, shape: 'oval', zone: 'mid', speed: 10,
     school: 6, temper: 'semi', nipper: true, temp: [22, 27], hardy: 0.8, pattern: 'bars',
@@ -190,7 +200,7 @@ const SPECIES = {
     desc: 'Sọc hổ nghịch ngợm, hay rỉa vây cá vây dài. Đàn 6 con giảm tính hung.' },
   discus: { name: 'Cá Dĩa', sub: 'Discus', rarity: 2, price: 90, size: 15, shape: 'disc', zone: 'mid', speed: 4,
     school: 5, temper: 'peace', shy: true, temp: [28, 31], hardy: 1.7, pattern: 'wave', minLitres: 200,
-    col: { body: '#3f8cff', fin: '#2f6fd8', accent: '#ff6b3d' },
+    col: { body: '#5aa0ff', fin: '#3d7fe0', accent: '#ff7a4d', belly: '#c8e2ff' },
     desc: 'Vua hồ thủy sinh: đẹp nhưng khó, cần nước ấm 28–31°C và rất sạch.' },
   koi: { name: 'Cá Koi', sub: 'Koi', rarity: 2, price: 150, size: 25, shape: 'koi', zone: 'mid', speed: 4,
     school: 2, temper: 'peace', temp: [15, 26], hardy: 0.9, pattern: 'patch', bioload: 2, minLitres: 300,

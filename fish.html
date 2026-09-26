@@ -18,7 +18,7 @@ html, body {
   width: 100%; height: 100%;
   overflow: hidden;
   position: fixed;
-  background: #0b5b93;
+  background: #4fb6ec;
   font-family: 'Baloo 2', 'Arial Rounded MT Bold', Arial, sans-serif;
   -webkit-user-select: none; user-select: none;
   -webkit-touch-callout: none;
@@ -475,20 +475,20 @@ const PRAISE = ['Có bạn mới!', 'Thêm một bạn!', 'Cá mới tới!'];
 /* Cứ 60 giây bể lại đổi cảnh, màu chuyển mượt trong 4 giây. */
 const THEMES = [
   { label: '☀️ Trời sáng rồi!', hue: 200,
-    water: [[127,220,247],[41,174,226],[15,107,165],[8,69,110]],
-    sand: [232,209,153], ray: 0.95, rayCol: [255,255,255], tint: [0,0,0,0], glow: 0 },
+    water: [[125,214,247],[80,188,238],[52,158,222],[38,135,205]], hill: [31,79,140],
+    sand: [244,223,166], ray: 0.95, rayCol: [255,255,255], tint: [0,0,0,0], glow: 0 },
 
   { label: '🌇 Hoàng hôn rồi!', hue: 25,
     water: [[255,206,150],[248,150,110],[196,92,124],[86,54,110]],
-    sand: [226,180,136], ray: 0.8, rayCol: [255,214,160], tint: [255,150,80,0.10], glow: 0 },
+    hill: [110,60,100], sand: [236,196,150], ray: 0.8, rayCol: [255,214,160], tint: [255,150,80,0.10], glow: 0 },
 
   { label: '🌙 Đêm xuống rồi!', hue: 235,
     water: [[46,80,140],[28,56,104],[16,34,74],[7,16,44]],
-    sand: [143,159,192], ray: 0.22, rayCol: [190,215,255], tint: [10,20,60,0.24], glow: 1 },
+    hill: [10,24,60], sand: [143,159,192], ray: 0.22, rayCol: [190,215,255], tint: [10,20,60,0.24], glow: 1 },
 
   { label: '🌅 Bình minh rồi!', hue: 330,
     water: [[255,209,232],[168,201,240],[64,133,186],[13,74,120]],
-    sand: [240,217,181], ray: 0.7, rayCol: [255,225,235], tint: [255,180,200,0.08], glow: 0.25 }
+    hill: [70,110,170], sand: [244,222,180], ray: 0.7, rayCol: [255,225,235], tint: [255,180,200,0.08], glow: 0.25 }
 ];
 
 const THEME_MS = 60000;    /* mỗi cảnh kéo dài 1 phút */
@@ -509,6 +509,7 @@ function mixTheme() {
     label: b.label, hue: lerpN(a.hue, b.hue, t),
     water: a.water.map((c, i) => mixArr(c, b.water[i], t)),
     sand: mixArr(a.sand, b.sand, t),
+    hill: mixArr(a.hill, b.hill, t),
     ray: lerpN(a.ray, b.ray, t),
     rayCol: mixArr(a.rayCol, b.rayCol, t),
     tint: [lerpN(a.tint[0], b.tint[0], t), lerpN(a.tint[1], b.tint[1], t),
@@ -575,11 +576,11 @@ function layout() {
     weeds.push({
       x: rnd(0, W),
       h: rnd(H * 0.12, H * 0.32),
-      w: rnd(7, 16),
-      hue: rnd(95, 150),
+      w: rnd(13, 24),
+      hue: rnd(100, 150),
       phase: rnd(0, 6.28),
       speed: rnd(0.5, 1.1),
-      blades: Math.round(rnd(2, 4))
+      blades: Math.round(rnd(2, 3))
     });
   }
 
@@ -598,12 +599,13 @@ function layout() {
   rocks.length = 0;
   const nr = Math.max(3, Math.round(W / 260));
   for (let i = 0; i < nr; i++) {
-    const coral = Math.random() < 0.45;
+    const coral = Math.random() < 0.55;
     rocks.push({
       x: rnd(W * 0.05, W * 0.95),
-      r: rnd(26, 62),
+      r: rnd(30, 66),
       coral,
-      hue: coral ? pick([340, 20, 300, 175]) : rnd(200, 220),
+      style: pick(['branch', 'branch', 'tube', 'fan']),
+      hue: coral ? pick([340, 5, 25, 275, 300]) : rnd(205, 215),
       lumps: Math.round(rnd(3, 5)),
       phase: rnd(0, 6.28)
     });
@@ -782,15 +784,16 @@ const CRITTER_VN = {
   crab:     'Cua biển',
   star:     'Sao biển',
   ray:      'Cá đuối',
-  octopus:  'Bạch tuộc'
+  octopus:  'Bạch tuộc',
+  shark:    'Cá mập con'
 };
-const CRITTER_KINDS = ['jelly', 'turtle', 'seahorse', 'crab', 'star', 'ray', 'octopus'];
+const CRITTER_KINDS = ['jelly', 'turtle', 'seahorse', 'crab', 'star', 'ray', 'octopus', 'shark'];
 const ON_FLOOR = { crab: 1, star: 1, octopus: 1 };
 
 function critterSize(kind) {
   const base = Math.min(W, H);
   const k = { star: 0.075, crab: 0.058, jelly: 0.072, seahorse: 0.078,
-              octopus: 0.085, turtle: 0.105, ray: 0.115 }[kind] || 0.08;
+              octopus: 0.085, turtle: 0.105, ray: 0.115, shark: 0.15 }[kind] || 0.08;
   return base * k;
 }
 
@@ -815,10 +818,10 @@ function makeCritter(kind, opts) {
     dir: Math.random() < 0.5 ? -1 : 1,
     hue: { jelly: rnd(280, 330), turtle: rnd(95, 135), seahorse: rnd(30, 55),
            crab: rnd(5, 20), star: rnd(15, 45), ray: rnd(200, 225),
-           octopus: rnd(285, 315) }[kind],
+           octopus: rnd(285, 315), shark: rnd(200, 212) }[kind],
     speed: { jelly: rnd(9, 16), turtle: rnd(26, 40), seahorse: rnd(8, 14),
              crab: rnd(22, 38), star: rnd(1.5, 4), ray: rnd(34, 52),
-             octopus: rnd(16, 28) }[kind],
+             octopus: rnd(16, 28), shark: rnd(30, 46) }[kind],
     hop: 0            /* bạch tuộc phụt lên */
   };
   c.maxSize = size * 1.6;
@@ -830,7 +833,7 @@ function makeCritter(kind, opts) {
 function stockCritters() {
   critters.length = 0;
   const k = clamp(Math.round((W * H) / 450000), 1, 2);
-  const plan = { jelly: k + 1, star: k + 1, crab: k, seahorse: k, turtle: 1, ray: 1, octopus: 1 };
+  const plan = { jelly: k + 1, star: k + 1, crab: k, seahorse: k, turtle: 1, ray: 1, octopus: 1, shark: 1 };
   for (const kind in plan) {
     for (let i = 0; i < plan[kind]; i++) critters.push(makeCritter(kind));
   }
@@ -859,7 +862,7 @@ function newCritterTarget(c) {
 }
 
 /* loài nào biết ăn mồi (sứa thì không) */
-const EATER = { turtle: 1, ray: 1, seahorse: 1, octopus: 1, crab: 1, star: 1 };
+const EATER = { turtle: 1, ray: 1, seahorse: 1, octopus: 1, crab: 1, star: 1, shark: 1 };
 
 /* tìm viên thức ăn gần nhất trong tầm */
 function nearestFood(x, y, reach) {
@@ -920,7 +923,7 @@ function updateCritter(c, dt) {
   const dx = gx - c.x, dy = gy - c.y;
   const d = Math.max(0.001, Math.hypot(dx, dy));
   const sp = c.speed * boost * chase;
-  const turn = c.kind === 'ray' ? 1.2 : 0.9;
+  const turn = c.kind === 'ray' || c.kind === 'shark' ? 1.2 : 0.9;
   c.vx += ((dx / d) * sp - c.vx) * Math.min(1, dt * turn);
   c.vy += ((dy / d) * sp - c.vy) * Math.min(1, dt * turn);
 
@@ -968,6 +971,48 @@ function eatFood(a, fd) {
   onFed();
 }
 
+/* ── nét vẽ hoạt hình phẳng: không viền, hai tông màu, mắt to ── */
+const TAU = 6.2832;
+const hsl = (h, sat, l) => 'hsl(' + h + ',' + sat + '%,' + l + '%)';
+function dot(x, y, rx, ry) { ctx.beginPath(); ctx.ellipse(x, y, rx, ry == null ? rx : ry, 0, 0, TAU); ctx.fill(); }
+function rr(x, y, w, h, r) {
+  r = Math.min(r, w / 2, h / 2);
+  ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+}
+/* lá / vây bo tròn từ (0,0) lên (0,-len) */
+function leaf(len, wd) {
+  ctx.beginPath(); ctx.moveTo(0, 0);
+  ctx.bezierCurveTo(-wd, -len * 0.25, -wd, -len * 0.75, 0, -len);
+  ctx.bezierCurveTo(wd, -len * 0.75, wd, -len * 0.25, 0, 0); ctx.closePath();
+}
+/* hai mắt trắng to kề nhau, con ngươi đen nhìn về +x */
+function eyes(x, y, r, look) {
+  look = look == null ? 0.25 : look;
+  for (const k of [1, 0]) {
+    const cx = x - k * r * 1.85, cy = y - k * r * 0.1;
+    ctx.fillStyle = '#fff'; dot(cx, cy, r * 0.85, r);
+    ctx.fillStyle = '#1a1a1a'; dot(cx + r * look, cy + r * 0.1, r * 0.45, r * 0.6);
+    ctx.fillStyle = '#fff'; dot(cx + r * (look - 0.15), cy - r * 0.22, r * 0.15);
+  }
+}
+function eye1(x, y, r, look) {
+  look = look == null ? 0.25 : look;
+  ctx.fillStyle = '#fff'; dot(x, y, r * 0.9, r);
+  ctx.fillStyle = '#1a1a1a'; dot(x + r * look, y + r * 0.1, r * 0.48, r * 0.62);
+  ctx.fillStyle = '#fff'; dot(x + r * (look - 0.15), y - r * 0.22, r * 0.15);
+}
+/* miệng cười; open > 0 thì há ra */
+function smile(x, y, r, open) {
+  if (open > 0) {
+    ctx.fillStyle = '#4a1a2a'; dot(x, y + r * 0.4, r * 0.7, r * (0.35 + open * 0.8));
+    ctx.fillStyle = '#ff7f95'; dot(x, y + r * 0.4 + r * (0.35 + open * 0.8) * 0.45, r * 0.4, r * 0.22);
+    return;
+  }
+  ctx.strokeStyle = 'rgba(40,20,30,.72)'; ctx.lineWidth = Math.max(1, r * 0.3); ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.arc(x, y, r, 0.15 * Math.PI, 0.85 * Math.PI); ctx.stroke();
+}
+
 /* ── vẽ từng loài ── */
 function drawJelly(c, t) {
   const s = c.size * (1 + 0.25 * c.pop);
@@ -983,7 +1028,7 @@ function drawJelly(c, t) {
     gg.addColorStop(0, 'hsla(' + c.hue + ',95%,75%,' + (0.35 * glow) + ')');
     gg.addColorStop(1, 'hsla(' + c.hue + ',95%,70%,0)');
     ctx.fillStyle = gg;
-    ctx.beginPath(); ctx.arc(0, 0, s * 1.5, 0, 6.2832); ctx.fill();
+    ctx.beginPath(); ctx.arc(0, 0, s * 1.5, 0, TAU); ctx.fill();
   }
 
   /* tua rua */
@@ -992,37 +1037,26 @@ function drawJelly(c, t) {
     const ox = (i / 6 - 0.5) * rx * 1.5;
     const len = s * (0.9 + 0.5 * Math.sin(i * 1.7));
     const sw = Math.sin(c.phase * 1.2 + i * 0.8) * s * 0.22;
-    ctx.strokeStyle = 'hsla(' + c.hue + ',85%,' + (72 + glow * 15) + '%,.55)';
-    ctx.lineWidth = Math.max(1.5, s * 0.055);
+    ctx.strokeStyle = 'hsla(' + c.hue + ',85%,' + (70 + glow * 15) + '%,.7)';
+    ctx.lineWidth = Math.max(2, s * 0.07);
     ctx.beginPath();
     ctx.moveTo(ox, ry * 0.75);
     ctx.quadraticCurveTo(ox + sw, ry * 0.75 + len * 0.55, ox + sw * 1.7, ry * 0.75 + len);
     ctx.stroke();
   }
 
-  /* chuông */
-  const bg = ctx.createRadialGradient(-rx * 0.25, -ry * 0.4, rx * 0.1, 0, 0, rx * 1.25);
-  bg.addColorStop(0, 'hsla(' + c.hue + ',95%,92%,.85)');
-  bg.addColorStop(0.6, 'hsla(' + c.hue + ',90%,74%,.6)');
-  bg.addColorStop(1, 'hsla(' + c.hue + ',88%,62%,.35)');
-  ctx.fillStyle = bg;
+  /* chuông phẳng hai tông */
+  ctx.fillStyle = 'hsla(' + c.hue + ',90%,72%,.85)';
   ctx.beginPath();
   ctx.ellipse(0, 0, rx, ry, 0, Math.PI, 0);
   ctx.quadraticCurveTo(rx * 0.55, ry * 0.85, 0, ry * 0.62);
   ctx.quadraticCurveTo(-rx * 0.55, ry * 0.85, -rx, 0);
   ctx.fill();
+  ctx.fillStyle = 'hsla(' + c.hue + ',95%,88%,.8)';
+  dot(-rx * 0.2, -ry * 0.45, rx * 0.4, ry * 0.3);
 
-  ctx.strokeStyle = 'hsla(' + c.hue + ',95%,88%,.75)';
-  ctx.lineWidth = Math.max(1.5, s * 0.04);
-  ctx.beginPath(); ctx.ellipse(0, 0, rx, ry, 0, Math.PI, 0); ctx.stroke();
-
-  /* đốm sáng trong chuông */
-  ctx.fillStyle = 'hsla(' + c.hue + ',100%,95%,.55)';
-  for (let i = -1; i <= 1; i++) {
-    ctx.beginPath();
-    ctx.ellipse(i * rx * 0.4, -ry * 0.25, rx * 0.11, ry * 0.2, 0, 0, 6.2832);
-    ctx.fill();
-  }
+  eyes(rx * 0.25, ry * 0.15, s * 0.07, 0.15);
+  smile(rx * 0.1, ry * 0.42, s * 0.05, 0);
   ctx.restore();
 }
 
@@ -1034,40 +1068,27 @@ function drawTurtle(c, t) {
   ctx.scale(c.dir, 1);
 
   const flap = Math.sin(c.phase * 0.9);
+  const skin = hsl(c.hue, 45, 52), shell = hsl(c.hue, 50, 40), shell2 = hsl(c.hue + 10, 55, 55);
 
-  /* chân chèo sau */
-  ctx.fillStyle = 'hsl(' + c.hue + ',42%,42%)';
-  ctx.beginPath(); ctx.ellipse(-s * 0.44, s * 0.2, s * 0.16, s * 0.09, -0.5 + flap * 0.2, 0, 6.2832); ctx.fill();
-  /* chân chèo trước */
-  ctx.beginPath(); ctx.ellipse(s * 0.28, s * 0.24 + flap * s * 0.07, s * 0.26, s * 0.1, 0.5 + flap * 0.5, 0, 6.2832); ctx.fill();
-  ctx.beginPath(); ctx.ellipse(s * 0.2, -s * 0.26 - flap * s * 0.07, s * 0.24, s * 0.09, -0.45 - flap * 0.45, 0, 6.2832); ctx.fill();
+  /* chân chèo */
+  ctx.fillStyle = skin;
+  dot(-s * 0.44, s * 0.2, s * 0.16, s * 0.09);
+  ctx.save(); ctx.translate(s * 0.22, s * 0.22); ctx.rotate(2.1 + flap * 0.45); leaf(s * 0.42, s * 0.11); ctx.fill(); ctx.restore();
+  ctx.save(); ctx.translate(s * 0.16, -s * 0.24); ctx.rotate(0.9 - flap * 0.45); leaf(s * 0.4, s * 0.1); ctx.fill(); ctx.restore();
 
   /* đầu */
-  ctx.fillStyle = 'hsl(' + c.hue + ',40%,50%)';
-  ctx.beginPath(); ctx.ellipse(s * 0.5, -s * 0.02, s * 0.17, s * 0.13, 0, 0, 6.2832); ctx.fill();
-  ctx.fillStyle = '#20303a';
-  ctx.beginPath(); ctx.arc(s * 0.58, -s * 0.06, s * 0.032, 0, 6.2832); ctx.fill();
+  dot(s * 0.52, -s * 0.02, s * 0.19, s * 0.15);
+  ctx.fillStyle = hsl(c.hue, 45, 70); dot(s * 0.52, s * 0.05, s * 0.14, s * 0.06);
 
-  /* mai */
-  const sg = ctx.createLinearGradient(0, -s * 0.4, 0, s * 0.4);
-  sg.addColorStop(0, 'hsl(' + c.hue + ',45%,52%)');
-  sg.addColorStop(1, 'hsl(' + (c.hue - 12) + ',48%,30%)');
-  ctx.fillStyle = sg;
-  ctx.beginPath(); ctx.ellipse(0, 0, s * 0.5, s * 0.36, 0, 0, 6.2832); ctx.fill();
-
-  /* hoa văn mai */
-  ctx.fillStyle = 'hsla(' + (c.hue + 20) + ',55%,68%,.55)';
+  /* mai phẳng hai tông */
+  ctx.fillStyle = shell; dot(0, 0, s * 0.5, s * 0.36);
+  ctx.fillStyle = shell2;
   const spots = [[0, 0, 0.17, 0.13], [-0.26, -0.06, 0.12, 0.1], [0.26, -0.05, 0.12, 0.1],
                  [-0.13, 0.19, 0.1, 0.08], [0.14, 0.19, 0.1, 0.08], [0, -0.22, 0.11, 0.08]];
-  for (const sp of spots) {
-    ctx.beginPath();
-    ctx.ellipse(sp[0] * s, sp[1] * s, sp[2] * s, sp[3] * s, 0, 0, 6.2832);
-    ctx.fill();
-  }
-  ctx.strokeStyle = 'hsla(' + (c.hue - 20) + ',45%,25%,.5)';
-  ctx.lineWidth = Math.max(1, s * 0.02);
-  ctx.beginPath(); ctx.ellipse(0, 0, s * 0.5, s * 0.36, 0, 0, 6.2832); ctx.stroke();
+  for (const sp of spots) dot(sp[0] * s, sp[1] * s, sp[2] * s, sp[3] * s);
 
+  eyes(s * 0.6, -s * 0.07, s * 0.055, 0.3);
+  smile(s * 0.6, s * 0.06, s * 0.04, c.pop > 0.5 ? c.pop : 0);
   ctx.restore();
 }
 
@@ -1080,14 +1101,14 @@ function drawSeahorse(c, t) {
   ctx.scale(c.dir, 1);
 
   /* vây lưng rung */
-  ctx.fillStyle = 'hsla(' + (c.hue + 15) + ',85%,70%,.85)';
+  ctx.fillStyle = hsl(c.hue + 15, 85, 72);
   ctx.beginPath();
   ctx.moveTo(-s * 0.12, -s * 0.15);
-  ctx.quadraticCurveTo(-s * 0.34 + Math.sin(c.phase * 6) * s * 0.03, 0, -s * 0.12, s * 0.22);
+  ctx.quadraticCurveTo(-s * 0.36 + Math.sin(c.phase * 6) * s * 0.03, 0, -s * 0.12, s * 0.22);
   ctx.closePath(); ctx.fill();
 
   /* thân cong chữ S + đuôi cuộn */
-  ctx.strokeStyle = 'hsl(' + c.hue + ',88%,55%)';
+  ctx.strokeStyle = hsl(c.hue, 88, 58);
   ctx.lineWidth = s * 0.26;
   ctx.lineCap = 'round';
   ctx.beginPath();
@@ -1096,8 +1117,8 @@ function drawSeahorse(c, t) {
   ctx.quadraticCurveTo(-s * 0.16, s * 0.42, s * 0.04, s * 0.46);
   ctx.stroke();
 
-  /* bụng sáng */
-  ctx.strokeStyle = 'hsla(' + (c.hue + 10) + ',92%,76%,.6)';
+  /* bụng sáng + đốt */
+  ctx.strokeStyle = hsl(c.hue + 10, 92, 82);
   ctx.lineWidth = s * 0.1;
   ctx.beginPath();
   ctx.moveTo(s * 0.06, -s * 0.22);
@@ -1105,19 +1126,17 @@ function drawSeahorse(c, t) {
   ctx.stroke();
 
   /* đầu và mõm */
-  ctx.fillStyle = 'hsl(' + c.hue + ',88%,58%)';
-  ctx.beginPath(); ctx.ellipse(s * 0.02, -s * 0.36, s * 0.15, s * 0.13, -0.3, 0, 6.2832); ctx.fill();
+  ctx.fillStyle = hsl(c.hue, 88, 60);
+  dot(s * 0.02, -s * 0.36, s * 0.16, s * 0.14);
   ctx.beginPath();
   ctx.moveTo(s * 0.1, -s * 0.42);
-  ctx.quadraticCurveTo(s * 0.32, -s * 0.36, s * 0.3, -s * 0.28);
-  ctx.quadraticCurveTo(s * 0.18, -s * 0.28, s * 0.1, -s * 0.32);
+  ctx.quadraticCurveTo(s * 0.34, -s * 0.36, s * 0.32, -s * 0.28);
+  ctx.quadraticCurveTo(s * 0.18, -s * 0.27, s * 0.1, -s * 0.31);
   ctx.fill();
+  ctx.fillStyle = hsl(c.hue + 15, 85, 72);
+  for (let i = 0; i < 3; i++) dot(-s * 0.06 + i * s * 0.03, -s * 0.5 + i * s * 0.02, s * 0.035);
 
-  ctx.fillStyle = '#fff';
-  ctx.beginPath(); ctx.arc(s * 0.08, -s * 0.4, s * 0.055, 0, 6.2832); ctx.fill();
-  ctx.fillStyle = '#20303a';
-  ctx.beginPath(); ctx.arc(s * 0.095, -s * 0.4, s * 0.028, 0, 6.2832); ctx.fill();
-
+  eye1(s * 0.07, -s * 0.4, s * 0.07, 0.3);
   ctx.restore();
 }
 
@@ -1128,8 +1147,9 @@ function drawCrab(c, t) {
   ctx.translate(c.x, c.y);
   ctx.scale(c.dir, 1);
 
-  ctx.strokeStyle = 'hsl(' + c.hue + ',75%,38%)';
-  ctx.lineWidth = Math.max(2, s * 0.07);
+  const body = hsl(c.hue, 82, 58), dark = hsl(c.hue, 75, 45);
+  ctx.strokeStyle = dark;
+  ctx.lineWidth = Math.max(2.5, s * 0.08);
   ctx.lineCap = 'round';
   for (let i = 0; i < 3; i++) {
     const bx = (-0.3 + i * 0.3) * s;
@@ -1137,50 +1157,34 @@ function drawCrab(c, t) {
     for (const sgn of [-1, 1]) {
       ctx.beginPath();
       ctx.moveTo(bx, sgn * s * 0.12);
-      ctx.quadraticCurveTo(bx + sgn * 0 - s * 0.04, sgn * s * 0.34, bx - s * 0.1, sgn * (s * 0.44) + lift);
+      ctx.quadraticCurveTo(bx - s * 0.04, sgn * s * 0.34, bx - s * 0.1, sgn * (s * 0.44) + lift);
       ctx.stroke();
     }
   }
 
   /* càng */
-  ctx.fillStyle = 'hsl(' + c.hue + ',80%,48%)';
   for (const sgn of [-1, 1]) {
     const a = sgn * (0.5 + step * 0.12);
     ctx.save();
     ctx.translate(s * 0.42, sgn * s * 0.24);
     ctx.rotate(a * 0.4);
-    ctx.beginPath(); ctx.ellipse(0, 0, s * 0.2, s * 0.13, 0, 0, 6.2832); ctx.fill();
-    ctx.fillStyle = 'hsl(' + c.hue + ',80%,58%)';
-    ctx.beginPath(); ctx.ellipse(s * 0.13, -s * 0.05, s * 0.1, s * 0.05, -0.4 + step * 0.25, 0, 6.2832); ctx.fill();
-    ctx.fillStyle = 'hsl(' + c.hue + ',80%,48%)';
+    ctx.fillStyle = body; dot(0, 0, s * 0.2, s * 0.13);
+    ctx.fillStyle = dark; dot(s * 0.14, -s * 0.05, s * 0.1, s * 0.05);
     ctx.restore();
   }
 
-  /* mai */
-  const bg = ctx.createLinearGradient(0, -s * 0.3, 0, s * 0.3);
-  bg.addColorStop(0, 'hsl(' + c.hue + ',85%,62%)');
-  bg.addColorStop(1, 'hsl(' + c.hue + ',80%,44%)');
-  ctx.fillStyle = bg;
-  ctx.beginPath(); ctx.ellipse(0, 0, s * 0.42, s * 0.3, 0, 0, 6.2832); ctx.fill();
+  /* mai phẳng */
+  ctx.fillStyle = body; dot(0, 0, s * 0.42, s * 0.3);
+  ctx.fillStyle = hsl(c.hue, 85, 70); dot(-s * 0.1, -s * 0.12, s * 0.18, s * 0.08);
 
   /* mắt trên cuống */
-  ctx.strokeStyle = 'hsl(' + c.hue + ',75%,42%)';
-  ctx.lineWidth = Math.max(2, s * 0.05);
+  ctx.strokeStyle = dark;
+  ctx.lineWidth = Math.max(2, s * 0.06);
   for (const sgn of [-1, 1]) {
-    ctx.beginPath();
-    ctx.moveTo(sgn * s * 0.13, -s * 0.16);
-    ctx.lineTo(sgn * s * 0.16, -s * 0.36);
-    ctx.stroke();
-    ctx.fillStyle = '#fff';
-    ctx.beginPath(); ctx.arc(sgn * s * 0.16, -s * 0.4, s * 0.075, 0, 6.2832); ctx.fill();
-    ctx.fillStyle = '#20303a';
-    ctx.beginPath(); ctx.arc(sgn * s * 0.17, -s * 0.4, s * 0.036, 0, 6.2832); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(sgn * s * 0.13, -s * 0.16); ctx.lineTo(sgn * s * 0.16, -s * 0.36); ctx.stroke();
+    eye1(sgn * s * 0.16, -s * 0.42, s * 0.09, sgn * 0.2);
   }
-  /* miệng cười */
-  ctx.strokeStyle = 'hsla(0,0%,100%,.7)';
-  ctx.lineWidth = Math.max(1.5, s * 0.035);
-  ctx.beginPath(); ctx.arc(0, s * 0.02, s * 0.13, 0.35, Math.PI - 0.35); ctx.stroke();
-
+  smile(0, s * 0.02, s * 0.1, 0);
   ctx.restore();
 }
 
@@ -1189,34 +1193,35 @@ function drawStar(c, t) {
   ctx.save();
   ctx.translate(c.x, c.y);
   ctx.rotate(c.rot);
-  ctx.scale(1, 0.62);                       /* nằm bẹp trên cát */
+  ctx.scale(1, 0.72);                       /* nằm hơi bẹp trên cát */
 
   ctx.beginPath();
   for (let i = 0; i < 5; i++) {
-    const a1 = (i / 5) * 6.2832 - Math.PI / 2;
-    const a2 = a1 + 6.2832 / 10;
+    const a1 = (i / 5) * TAU - Math.PI / 2;
+    const a2 = a1 + TAU / 10;
     const bend = 1 + 0.05 * Math.sin(c.phase * 0.6 + i);
     const px1 = Math.cos(a1) * s * 0.55 * bend, py1 = Math.sin(a1) * s * 0.55 * bend;
     const px2 = Math.cos(a2) * s * 0.22, py2 = Math.sin(a2) * s * 0.22;
     if (i === 0) ctx.moveTo(px1, py1); else ctx.quadraticCurveTo(px2 * 1.5, py2 * 1.5, px1, py1);
-    ctx.quadraticCurveTo(px2 * 1.5, py2 * 1.5, Math.cos(a2 + 6.2832 / 10) * s * 0.55 * bend,
-                                               Math.sin(a2 + 6.2832 / 10) * s * 0.55 * bend);
+    ctx.quadraticCurveTo(px2 * 1.5, py2 * 1.5, Math.cos(a2 + TAU / 10) * s * 0.55 * bend,
+                                               Math.sin(a2 + TAU / 10) * s * 0.55 * bend);
   }
   ctx.closePath();
-  const g = ctx.createRadialGradient(0, 0, s * 0.06, 0, 0, s * 0.55);
-  g.addColorStop(0, 'hsl(' + (c.hue + 12) + ',92%,72%)');
-  g.addColorStop(1, 'hsl(' + c.hue + ',88%,52%)');
-  ctx.fillStyle = g;
+  ctx.fillStyle = hsl(c.hue, 90, 62);
+  ctx.lineJoin = 'round'; ctx.strokeStyle = hsl(c.hue, 90, 62); ctx.lineWidth = s * 0.1; ctx.stroke();
   ctx.fill();
 
-  ctx.fillStyle = 'hsla(' + (c.hue + 20) + ',95%,85%,.75)';
-  for (let i = 0; i < 9; i++) {
-    const a = (i / 9) * 6.2832 + c.phase * 0.1;
-    const rr = s * (0.12 + 0.22 * ((i % 3) / 2));
-    ctx.beginPath();
-    ctx.arc(Math.cos(a) * rr, Math.sin(a) * rr, s * 0.045, 0, 6.2832);
-    ctx.fill();
+  ctx.fillStyle = hsl(c.hue, 80, 45);
+  for (let i = 0; i < 5; i++) {
+    const a = (i / 5) * TAU - Math.PI / 2;
+    dot(Math.cos(a) * s * 0.36, Math.sin(a) * s * 0.36, s * 0.04);
+    dot(Math.cos(a) * s * 0.2, Math.sin(a) * s * 0.2, s * 0.035);
   }
+  ctx.restore();
+  /* mặt luôn thẳng đứng */
+  ctx.save(); ctx.translate(c.x, c.y);
+  eyes(s * 0.08, -s * 0.05, s * 0.07, 0.1);
+  smile(0, s * 0.08, s * 0.06, 0);
   ctx.restore();
 }
 
@@ -1229,19 +1234,16 @@ function drawRay(c, t) {
   ctx.scale(c.dir, 1);
 
   /* đuôi */
-  ctx.strokeStyle = 'hsl(' + c.hue + ',35%,38%)';
-  ctx.lineWidth = Math.max(1.5, s * 0.045);
+  ctx.strokeStyle = hsl(c.hue, 40, 45);
+  ctx.lineWidth = Math.max(2, s * 0.05);
   ctx.lineCap = 'round';
   ctx.beginPath();
   ctx.moveTo(-s * 0.38, 0);
   ctx.quadraticCurveTo(-s * 0.7, flap * s * 0.12, -s * 0.95, flap * s * 0.2);
   ctx.stroke();
 
-  /* thân + cánh vẫy */
-  const g = ctx.createLinearGradient(0, -s * 0.4, 0, s * 0.4);
-  g.addColorStop(0, 'hsl(' + c.hue + ',48%,64%)');
-  g.addColorStop(1, 'hsl(' + (c.hue + 8) + ',46%,44%)');
-  ctx.fillStyle = g;
+  /* thân + cánh vẫy, phẳng */
+  ctx.fillStyle = hsl(c.hue, 50, 60);
   ctx.beginPath();
   ctx.moveTo(s * 0.42, 0);
   ctx.quadraticCurveTo(s * 0.1, -s * 0.16, -s * 0.1, -s * (0.34 + flap * 0.12));
@@ -1249,18 +1251,14 @@ function drawRay(c, t) {
   ctx.quadraticCurveTo(-s * 0.34, s * (0.24 + flap * 0.08), -s * 0.1, s * (0.34 + flap * 0.12));
   ctx.quadraticCurveTo(s * 0.1, s * 0.16, s * 0.42, 0);
   ctx.fill();
+  ctx.fillStyle = hsl(c.hue, 55, 78); dot(s * 0.05, 0, s * 0.3, s * 0.1);
 
   /* đốm trên lưng */
-  ctx.fillStyle = 'hsla(' + (c.hue + 15) + ',55%,78%,.4)';
-  for (const sp of [[-0.02, -0.14], [-0.12, 0.06], [0.1, 0.08], [-0.2, -0.04]]) {
-    ctx.beginPath(); ctx.ellipse(sp[0] * s, sp[1] * s, s * 0.05, s * 0.035, 0, 0, 6.2832); ctx.fill();
-  }
+  ctx.fillStyle = hsl(c.hue + 15, 55, 80);
+  for (const sp of [[-0.12, -0.2], [-0.2, 0.16], [-0.26, -0.04]]) dot(sp[0] * s, sp[1] * s, s * 0.045, s * 0.035);
 
-  /* mắt */
-  ctx.fillStyle = '#182838';
-  for (const sgn of [-1, 1]) {
-    ctx.beginPath(); ctx.arc(s * 0.26, sgn * s * 0.09, s * 0.033, 0, 6.2832); ctx.fill();
-  }
+  eyes(s * 0.3, -s * 0.06, s * 0.065, 0.3);
+  smile(s * 0.32, s * 0.08, s * 0.05, 0);
   ctx.restore();
 }
 
@@ -1271,34 +1269,77 @@ function drawOctopus(c, t) {
   ctx.scale(c.dir, 1);
 
   /* 8 tua */
-  ctx.strokeStyle = 'hsl(' + c.hue + ',62%,52%)';
+  ctx.strokeStyle = hsl(c.hue, 62, 55);
   ctx.lineCap = 'round';
   for (let i = 0; i < 8; i++) {
     const ox = ((i / 7) - 0.5) * s * 0.62;
     const w = Math.sin(c.phase * 1.4 + i * 0.9);
     const len = s * (0.5 + 0.22 * Math.sin(i * 1.3));
-    ctx.lineWidth = Math.max(2, s * 0.085 * (1 - Math.abs(i - 3.5) / 9));
+    ctx.lineWidth = Math.max(2.5, s * 0.1 * (1 - Math.abs(i - 3.5) / 9));
     ctx.beginPath();
     ctx.moveTo(ox, s * 0.16);
     ctx.quadraticCurveTo(ox + w * s * 0.18, s * 0.16 + len * 0.6, ox + w * s * 0.3, s * 0.16 + len);
     ctx.stroke();
   }
 
-  /* đầu */
-  const g = ctx.createRadialGradient(-s * 0.12, -s * 0.18, s * 0.05, 0, 0, s * 0.46);
-  g.addColorStop(0, 'hsl(' + c.hue + ',70%,72%)');
-  g.addColorStop(1, 'hsl(' + c.hue + ',64%,48%)');
-  ctx.fillStyle = g;
-  ctx.beginPath(); ctx.ellipse(0, -s * 0.04, s * 0.4, s * 0.42, 0, 0, 6.2832); ctx.fill();
+  /* đầu phẳng + mảng sáng */
+  ctx.fillStyle = hsl(c.hue, 65, 60); dot(0, -s * 0.04, s * 0.4, s * 0.42);
+  ctx.fillStyle = hsl(c.hue, 70, 75); dot(-s * 0.1, -s * 0.28, s * 0.18, s * 0.1);
 
-  /* mắt to */
-  for (const sgn of [-1, 1]) {
+  eyes(s * 0.14, -s * 0.06, s * 0.11, 0.05);
+  smile(s * 0.02, s * 0.14, s * 0.07, 0);
+  ctx.restore();
+}
+
+function drawShark(c, t) {
+  const s = c.size * (1 + 0.25 * c.pop);
+  const wag = Math.sin(c.phase * 1.3);
+  ctx.save();
+  ctx.translate(c.x, c.y);
+  ctx.rotate(Math.atan2(c.vy * 0.4, Math.abs(c.vx) + 60) * c.dir);
+  ctx.scale(c.dir, 1);
+  const body = hsl(c.hue, 70, 72), fin = hsl(c.hue, 60, 62), belly = '#eaf5fc';
+
+  /* đuôi: thuỳ trên dài hơn */
+  const tx = -s * 0.5, wg = wag * s * 0.08;
+  ctx.fillStyle = fin; ctx.beginPath(); ctx.moveTo(tx + 2, 0);
+  ctx.bezierCurveTo(tx - s * 0.1, -s * 0.1 + wg, tx - s * 0.3, -s * 0.45 + wg, tx - s * 0.32, -s * 0.5 + wg);
+  ctx.bezierCurveTo(tx - s * 0.2, -s * 0.35 + wg, tx - s * 0.2, -s * 0.05, tx - s * 0.22, wg * 0.5);
+  ctx.bezierCurveTo(tx - s * 0.25, s * 0.15 + wg, tx - s * 0.3, s * 0.28 + wg, tx - s * 0.3, s * 0.3 + wg);
+  ctx.bezierCurveTo(tx - s * 0.15, s * 0.2 + wg, tx - s * 0.05, s * 0.05, tx + 2, 0); ctx.fill();
+  /* vây lưng */
+  ctx.beginPath(); ctx.moveTo(s * 0.12, -s * 0.3); ctx.quadraticCurveTo(-s * 0.02, -s * 0.64, -s * 0.18, -s * 0.6);
+  ctx.quadraticCurveTo(-s * 0.22, -s * 0.45, -s * 0.3, -s * 0.22); ctx.fill();
+
+  /* thân */
+  const bp = () => {
+    ctx.beginPath(); ctx.moveTo(s * 0.65, s * 0.02);
+    ctx.bezierCurveTo(s * 0.5, -s * 0.35, s * 0.1, -s * 0.4, -s * 0.15, -s * 0.32);
+    ctx.bezierCurveTo(-s * 0.4, -s * 0.22, -s * 0.5, -s * 0.08, -s * 0.52, 0);
+    ctx.bezierCurveTo(-s * 0.5, s * 0.1, -s * 0.4, s * 0.25, -s * 0.15, s * 0.32);
+    ctx.bezierCurveTo(s * 0.1, s * 0.4, s * 0.5, s * 0.32, s * 0.65, s * 0.02); ctx.closePath();
+  };
+  bp(); ctx.fillStyle = body; ctx.fill();
+  ctx.save(); bp(); ctx.clip(); ctx.fillStyle = belly; dot(s * 0.1, s * 0.3, s * 0.6, s * 0.22); ctx.restore();
+
+  /* vây ngực */
+  ctx.fillStyle = fin; ctx.save(); ctx.translate(s * 0.1, s * 0.2); ctx.rotate(2.2 + wag * 0.15); leaf(s * 0.34, s * 0.1); ctx.fill(); ctx.restore();
+
+  /* mang */
+  ctx.strokeStyle = 'rgba(0,0,0,.2)'; ctx.lineWidth = Math.max(1, s * 0.02); ctx.lineCap = 'round';
+  for (let i = 0; i < 3; i++) { ctx.beginPath(); ctx.arc(s * 0.02 - i * s * 0.06, s * 0.02, s * 0.1, -0.5, 0.5); ctx.stroke(); }
+
+  /* mặt: mắt to, miệng cười có răng nhỏ */
+  eyes(s * 0.42, -s * 0.1, s * 0.11, 0.3);
+  if (c.pop > 0.5) { smile(s * 0.44, s * 0.12, s * 0.08, c.pop); }
+  else {
+    ctx.strokeStyle = 'rgba(40,20,30,.7)'; ctx.lineWidth = Math.max(1, s * 0.025);
+    ctx.beginPath(); ctx.arc(s * 0.4, s * 0.1, s * 0.17, 0.25, Math.PI * 0.75); ctx.stroke();
     ctx.fillStyle = '#fff';
-    ctx.beginPath(); ctx.ellipse(sgn * s * 0.16, -s * 0.08, s * 0.12, s * 0.13, 0, 0, 6.2832); ctx.fill();
-    ctx.fillStyle = '#182838';
-    ctx.beginPath(); ctx.arc(sgn * s * 0.17, -s * 0.06, s * 0.058, 0, 6.2832); ctx.fill();
-    ctx.fillStyle = 'rgba(255,255,255,.9)';
-    ctx.beginPath(); ctx.arc(sgn * s * 0.19, -s * 0.1, s * 0.022, 0, 6.2832); ctx.fill();
+    for (let i = 0; i < 3; i++) {
+      const a = 0.5 + i * 0.35, px = s * 0.4 + Math.cos(a) * s * 0.17, py = s * 0.1 + Math.sin(a) * s * 0.17;
+      ctx.beginPath(); ctx.moveTo(px - s * 0.025, py - s * 0.005); ctx.lineTo(px + s * 0.025, py - s * 0.005); ctx.lineTo(px, py + s * 0.045); ctx.closePath(); ctx.fill();
+    }
   }
   ctx.restore();
 }
@@ -1312,6 +1353,7 @@ function drawCritter(c, t) {
     case 'star':     drawStar(c, t); break;
     case 'ray':      drawRay(c, t); break;
     case 'octopus':  drawOctopus(c, t); break;
+    case 'shark':    drawShark(c, t); break;
   }
 }
 
@@ -1380,71 +1422,112 @@ function drawWater(t) {
 }
 
 function drawSand(t) {
+  /* đồi đá xanh navy phía xa (2 lớp) */
+  for (const [amp, freq, alpha, off] of [[0.2, 2.3, 0.35, 0.4], [0.12, 3.7, 0.55, 2.1]]) {
+    ctx.fillStyle = rgba(theme.hill, alpha);
+    ctx.beginPath(); ctx.moveTo(0, H);
+    for (let x = 0; x <= W + 20; x += 20) {
+      const k = x / W;
+      ctx.lineTo(x, sandY - H * amp * (0.35 + 0.65 * (0.5 + 0.5 * Math.sin(k * freq * 3.5 + off))));
+    }
+    ctx.lineTo(W, H); ctx.closePath(); ctx.fill();
+  }
+  /* cát phẳng, gợn nhẹ */
   ctx.fillStyle = rgb(theme.sand);
   ctx.beginPath();
   ctx.moveTo(0, H);
   ctx.lineTo(0, sandY + 12);
-  const step = Math.max(60, W / 8);
+  const step = Math.max(80, W / 6);
   for (let x = 0; x <= W + step; x += step) {
-    ctx.quadraticCurveTo(x + step * 0.5, sandY + (Math.sin(x * 0.011) * 12) - 6, x + step, sandY + 8);
+    ctx.quadraticCurveTo(x + step * 0.5, sandY + (Math.sin(x * 0.011) * 12) - 8, x + step, sandY + 8);
   }
   ctx.lineTo(W, H);
   ctx.closePath();
   ctx.fill();
-
-  ctx.fillStyle = 'rgba(255,255,255,.28)';
-  ctx.beginPath();
-  ctx.ellipse(W * 0.5, sandY + 10, W * 0.6, 10, 0, 0, 6.2832);
-  ctx.fill();
+  /* đốm cát sẫm */
+  ctx.fillStyle = rgba(theme.sand.map((v) => v * 0.86), 0.9);
+  for (let i = 0; i < 14; i++) {
+    const k = ((i * 7919) % 100) / 100, k2 = ((i * 104729) % 100) / 100;
+    dot(k * W, sandY + 16 + k2 * (H - sandY - 20), 6 + k2 * 8, 2.5 + k * 3);
+  }
 }
 
 function drawRocks(t) {
   for (const r of rocks) {
-    if (r.coral) {
-      /* san hô: mấy nhánh tròn xếp chồng */
-      for (let i = 0; i < r.lumps; i++) {
-        const a = -Math.PI / 2 + (i - (r.lumps - 1) / 2) * 0.5;
-        const sway = Math.sin(t * 0.8 + r.phase + i) * 3;
-        const bx = r.x + Math.cos(a) * r.r * 0.5 + sway;
-        const by = sandY - Math.abs(Math.sin(a)) * r.r * 0.9;
-        ctx.fillStyle = 'hsl(' + r.hue + ',72%,' + (58 + i * 3) + '%)';
-        ctx.beginPath();
-        ctx.ellipse(bx, by, r.r * 0.26, r.r * 0.5, a * 0.35, 0, 6.2832);
-        ctx.fill();
-        ctx.fillStyle = 'hsla(' + r.hue + ',80%,80%,.5)';
-        ctx.beginPath();
-        ctx.arc(bx, by - r.r * 0.3, r.r * 0.12, 0, 6.2832);
-        ctx.fill();
-      }
-    } else {
-      ctx.fillStyle = 'hsl(' + r.hue + ',22%,38%)';
-      ctx.beginPath();
-      ctx.ellipse(r.x, sandY + 4, r.r, r.r * 0.62, 0, Math.PI, 0);
-      ctx.fill();
-      ctx.fillStyle = 'hsla(' + r.hue + ',25%,60%,.5)';
-      ctx.beginPath();
-      ctx.ellipse(r.x - r.r * 0.3, sandY - r.r * 0.3, r.r * 0.3, r.r * 0.16, -0.5, 0, 6.2832);
-      ctx.fill();
-    }
+    if (r.coral) { drawCoral(r, t); continue; }
+    /* tảng đá xanh navy phẳng, mảng sáng và đốm tối */
+    const R = r.r;
+    ctx.fillStyle = hsl(r.hue, 55, 32);
+    ctx.beginPath(); ctx.moveTo(r.x - R, sandY + 8);
+    ctx.bezierCurveTo(r.x - R * 1.1, sandY - R * 0.55, r.x - R * 0.3, sandY - R * 0.8, r.x + R * 0.15, sandY - R * 0.68);
+    ctx.bezierCurveTo(r.x + R * 0.7, sandY - R * 0.58, r.x + R * 1.05, sandY - R * 0.25, r.x + R, sandY + 8);
+    ctx.closePath(); ctx.fill();
+    ctx.fillStyle = hsl(r.hue, 50, 44); dot(r.x - R * 0.25, sandY - R * 0.48, R * 0.32, R * 0.13);
+    ctx.fillStyle = hsl(r.hue, 60, 22); dot(r.x + R * 0.4, sandY - R * 0.25, R * 0.09); dot(r.x - R * 0.55, sandY - R * 0.12, R * 0.07);
   }
 }
 
+/* san hô phẳng: cành, ống, quạt */
+function drawCoral(r, t) {
+  const c = hsl(r.hue, 85, 68), c2 = hsl(r.hue, 90, 78), c3 = hsl(r.hue, 70, 52);
+  const sway = Math.sin(t * 0.8 + r.phase) * 0.06;
+  const R = r.r;
+  ctx.save(); ctx.translate(r.x, sandY + 6); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  if (r.style === 'branch') {
+    const branch = (x, y, len, ang, wd, depth) => {
+      const ex = x + Math.cos(ang) * len, ey = y + Math.sin(ang) * len;
+      ctx.strokeStyle = depth > 1 ? c : c2; ctx.lineWidth = wd;
+      ctx.beginPath(); ctx.moveTo(x, y); ctx.quadraticCurveTo(x + Math.cos(ang - 0.3) * len * 0.5, y + Math.sin(ang - 0.3) * len * 0.5, ex, ey); ctx.stroke();
+      if (depth <= 0) { ctx.fillStyle = c2; dot(ex, ey, wd * 0.7); return; }
+      const k = 0.5 + 0.5 * Math.sin(depth * 3.1 + x * 0.05 + r.phase);
+      branch(ex, ey, len * 0.68, ang - 0.5 - k * 0.3 + sway, wd * 0.7, depth - 1);
+      branch(ex, ey, len * 0.62, ang + 0.45 + k * 0.3 + sway, wd * 0.7, depth - 1);
+      if (depth === 2) branch(ex, ey, len * 0.5, ang + (k - 0.5) * 0.4, wd * 0.6, 0);
+    };
+    branch(0, 0, R * 0.55, -Math.PI / 2 + sway * 0.5, Math.max(3, R * 0.16), 3);
+  } else if (r.style === 'tube') {
+    for (let i = 0; i < 5; i++) {
+      const bx = (i - 2) * R * 0.28, len = R * (0.7 + 0.5 * (0.5 + 0.5 * Math.sin(i * 2.3 + r.phase))), wd = R * 0.2;
+      const top = bx + sway * len * 1.2 + (i - 2) * R * 0.06;
+      ctx.strokeStyle = i % 2 ? c : c2; ctx.lineWidth = wd;
+      ctx.beginPath(); ctx.moveTo(bx, 0); ctx.quadraticCurveTo(bx + sway * len * 0.6, -len * 0.5, top, -len); ctx.stroke();
+      ctx.fillStyle = c3; dot(top, -len, wd * 0.42, wd * 0.28);
+    }
+  } else {
+    ctx.rotate(sway * 0.5);
+    ctx.fillStyle = 'hsla(' + r.hue + ',85%,68%,.3)'; ctx.beginPath(); ctx.moveTo(0, 0);
+    ctx.arc(0, 0, R * 1.2, Math.PI * 1.22, Math.PI * 1.78); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = c; ctx.lineWidth = Math.max(2, R * 0.06);
+    for (let i = -3; i <= 3; i++) {
+      const a = -Math.PI / 2 + i * 0.26;
+      ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(Math.cos(a) * R * 1.2, Math.sin(a) * R * 1.2); ctx.stroke();
+      ctx.fillStyle = c2; dot(Math.cos(a) * R * 1.2, Math.sin(a) * R * 1.2, R * 0.06);
+    }
+    ctx.lineWidth = Math.max(1.5, R * 0.04);
+    for (let k = 1; k <= 3; k++) { ctx.beginPath(); ctx.arc(0, 0, R * 0.38 * k, Math.PI * 1.22, Math.PI * 1.78); ctx.stroke(); }
+    ctx.lineWidth = Math.max(3, R * 0.12); ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, -R * 0.25); ctx.stroke();
+  }
+  ctx.restore();
+}
+
 function drawWeeds(t) {
+  /* rong biển dải rộng uốn lượn, hai tông xanh phẳng */
   for (const wd of weeds) {
     for (let b = 0; b < wd.blades; b++) {
-      const off = (b - (wd.blades - 1) / 2) * wd.w * 0.9;
+      const off = (b - (wd.blades - 1) / 2) * wd.w * 1.4;
       const h = wd.h * (1 - Math.abs(b - (wd.blades - 1) / 2) * 0.16);
-      const sway = Math.sin(t * wd.speed + wd.phase + b) * (wd.w * 1.6);
-      const grd = ctx.createLinearGradient(0, sandY, 0, sandY - h);
-      grd.addColorStop(0, 'hsl(' + wd.hue + ',60%,26%)');
-      grd.addColorStop(1, 'hsl(' + wd.hue + ',65%,48%)');
-      ctx.fillStyle = grd;
-      ctx.beginPath();
-      ctx.moveTo(wd.x + off - wd.w * 0.42, sandY + 6);
-      ctx.quadraticCurveTo(wd.x + off + sway * 0.4, sandY - h * 0.55, wd.x + off + sway, sandY - h);
-      ctx.quadraticCurveTo(wd.x + off + sway * 0.4 + wd.w * 0.5, sandY - h * 0.55, wd.x + off + wd.w * 0.42, sandY + 6);
-      ctx.closePath();
-      ctx.fill();
+      const width = wd.w * 0.75, seg = 6;
+      ctx.fillStyle = b % 2 ? hsl(wd.hue, 55, 40) : hsl(wd.hue, 60, 50);
+      ctx.beginPath(); ctx.moveTo(wd.x + off - width, sandY + 8);
+      for (let k = 1; k <= seg; k++) {
+        const y = sandY - h * (k / seg), sw = Math.sin(t * wd.speed + wd.phase + b + k * 0.9) * wd.w * 1.2 * (k / seg);
+        ctx.lineTo(wd.x + off + sw - width * (1 - (k / seg) * 0.6), y);
+      }
+      for (let k = seg; k >= 0; k--) {
+        const y = sandY - h * (k / seg), sw = Math.sin(t * wd.speed + wd.phase + b + k * 0.9) * wd.w * 1.2 * (k / seg);
+        ctx.lineTo(wd.x + off + sw + width * (1 - (k / seg) * 0.6), y);
+      }
+      ctx.closePath(); ctx.fill();
     }
   }
 }
@@ -1462,91 +1545,69 @@ function drawFish(f, t) {
 
   const wag = Math.sin(t * f.wagSpeed + f.phase);
   const hue = f.hue;
+  const body = hsl(hue, 85, 58), fin = hsl(hue, 80, 48), belly = hsl(hue, 90, 88), lite = hsl(hue, 95, 78);
 
-  /* đuôi */
-  ctx.fillStyle = 'hsl(' + hue + ',85%,52%)';
-  ctx.beginPath();
-  ctx.moveTo(-s * 0.5, 0);
-  ctx.quadraticCurveTo(-s * 0.85, -s * 0.1 + wag * s * 0.12, -s * 1.05, -s * 0.36 + wag * s * 0.3);
-  ctx.quadraticCurveTo(-s * 0.78, 0, -s * 1.05, s * 0.36 + wag * s * 0.3);
-  ctx.quadraticCurveTo(-s * 0.85, s * 0.1 + wag * s * 0.12, -s * 0.5, 0);
-  ctx.fill();
+  /* đuôi chẻ hai thuỳ bo tròn */
+  const tx = -s * 0.52, tl = s * 0.42, th = s * 0.36, wg = wag * s * 0.1;
+  ctx.fillStyle = fin;
+  ctx.beginPath(); ctx.moveTo(tx + 2, 0);
+  ctx.bezierCurveTo(tx - tl * 0.3, -th * 0.35 + wg * 0.5, tx - tl * 1.1, -th * 1.15 + wg, tx - tl, -th + wg);
+  ctx.bezierCurveTo(tx - tl * 0.8, -th * 0.5 + wg, tx - tl * 0.55, wg * 0.8, tx - tl * 0.45, wg * 0.8);
+  ctx.bezierCurveTo(tx - tl * 0.55, wg * 0.8, tx - tl * 0.8, th * 0.5 + wg, tx - tl, th + wg);
+  ctx.bezierCurveTo(tx - tl * 1.1, th * 1.15 + wg, tx - tl * 0.3, th * 0.35 + wg * 0.5, tx + 2, 0);
+  ctx.closePath(); ctx.fill();
 
-  /* vây lưng */
-  ctx.fillStyle = 'hsl(' + hue + ',88%,58%)';
-  ctx.beginPath();
-  ctx.moveTo(-s * 0.28, -s * 0.3);
-  ctx.quadraticCurveTo(-s * 0.05, -s * 0.72 + wag * s * 0.05, s * 0.22, -s * 0.26);
-  ctx.closePath();
-  ctx.fill();
+  /* vây lưng, vây bụng bo tròn */
+  ctx.beginPath(); ctx.moveTo(s * 0.2, -s * 0.36);
+  ctx.quadraticCurveTo(-s * 0.02, -s * 0.78 + wag * s * 0.04, -s * 0.26, -s * 0.62);
+  ctx.quadraticCurveTo(-s * 0.34, -s * 0.45, -s * 0.38, -s * 0.22); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(-s * 0.02, s * 0.36);
+  ctx.quadraticCurveTo(-s * 0.14, s * 0.62 + wag * s * 0.04, -s * 0.3, s * 0.47);
+  ctx.quadraticCurveTo(-s * 0.33, s * 0.35, -s * 0.38, s * 0.22); ctx.fill();
 
-  /* vây bụng */
-  ctx.beginPath();
-  ctx.moveTo(-s * 0.2, s * 0.28);
-  ctx.quadraticCurveTo(-s * 0.02, s * 0.56 + wag * s * 0.05, s * 0.16, s * 0.24);
-  ctx.closePath();
-  ctx.fill();
+  /* thân giọt nước: đầu tròn, thon về đuôi */
+  const bodyPath = () => {
+    ctx.beginPath(); ctx.moveTo(s * 0.62, 0);
+    ctx.bezierCurveTo(s * 0.58, -s * 0.5, s * 0.1, -s * 0.52, -s * 0.1, -s * 0.43);
+    ctx.bezierCurveTo(-s * 0.35, -s * 0.32, -s * 0.5, -s * 0.12, -s * 0.54, 0);
+    ctx.bezierCurveTo(-s * 0.5, s * 0.12, -s * 0.35, s * 0.32, -s * 0.1, s * 0.43);
+    ctx.bezierCurveTo(s * 0.1, s * 0.52, s * 0.58, s * 0.5, s * 0.62, 0); ctx.closePath();
+  };
+  bodyPath(); ctx.fillStyle = body; ctx.fill();
 
-  /* thân */
-  const bg = ctx.createLinearGradient(0, -s * 0.45, 0, s * 0.45);
-  bg.addColorStop(0, 'hsl(' + hue + ',92%,72%)');
-  bg.addColorStop(0.55, 'hsl(' + hue + ',88%,58%)');
-  bg.addColorStop(1, 'hsl(' + hue + ',80%,42%)');
-  ctx.fillStyle = bg;
-  ctx.beginPath();
-  ctx.ellipse(0, 0, s * 0.62, s * 0.42, 0, 0, 6.2832);
-  ctx.fill();
-
-  /* hoa văn */
-  ctx.save();
-  ctx.beginPath();
-  ctx.ellipse(0, 0, s * 0.62, s * 0.42, 0, 0, 6.2832);
-  ctx.clip();
+  ctx.save(); bodyPath(); ctx.clip();
+  ctx.fillStyle = belly; dot(s * 0.08, s * 0.28, s * 0.52, s * 0.28);
   if (f.pattern === 'stripes') {
-    ctx.fillStyle = 'hsla(' + hue + ',95%,88%,.55)';
-    for (let i = -1; i <= 2; i++) {
-      ctx.save();
-      ctx.translate(i * s * 0.26 - s * 0.05, 0);
-      ctx.rotate(0.22);
-      ctx.fillRect(-s * 0.055, -s * 0.5, s * 0.11, s);
-      ctx.restore();
+    ctx.fillStyle = lite;
+    for (let i = -1; i <= 1; i++) {
+      ctx.save(); ctx.translate(i * s * 0.24 - s * 0.08, 0); ctx.rotate(0.15);
+      rr(-s * 0.06, -s * 0.5, s * 0.12, s, s * 0.06); ctx.fill(); ctx.restore();
     }
   } else if (f.pattern === 'dots') {
-    ctx.fillStyle = 'hsla(' + hue + ',95%,90%,.6)';
-    for (let i = 0; i < 5; i++) {
+    ctx.fillStyle = lite;
+    for (let i = 0; i < 5; i++) dot(-s * 0.36 + i * s * 0.18, (i % 2 ? -1 : 1) * s * 0.14, s * 0.07);
+  } else {
+    /* vảy nhẹ nửa sau */
+    ctx.strokeStyle = 'rgba(255,255,255,.28)'; ctx.lineWidth = Math.max(1, s * 0.02);
+    for (let r2 = 0; r2 < 4; r2++) for (let c2 = -2; c2 <= 2; c2++) {
       ctx.beginPath();
-      ctx.arc(-s * 0.35 + i * s * 0.2, (i % 2 ? -1 : 1) * s * 0.14, s * 0.075, 0, 6.2832);
-      ctx.fill();
+      ctx.arc(-s * 0.05 - r2 * s * 0.12, c2 * s * 0.14 + (r2 % 2) * s * 0.07, s * 0.065, Math.PI * 0.75, Math.PI * 1.25);
+      ctx.stroke();
     }
   }
-  /* bụng sáng */
-  ctx.fillStyle = 'rgba(255,255,255,.3)';
-  ctx.beginPath();
-  ctx.ellipse(s * 0.05, s * 0.3, s * 0.45, s * 0.16, 0, 0, 6.2832);
-  ctx.fill();
   ctx.restore();
 
   /* vây ngực */
-  ctx.fillStyle = 'hsla(' + hue + ',90%,78%,.85)';
-  ctx.beginPath();
-  ctx.ellipse(s * 0.06, s * 0.12, s * 0.2, s * 0.11, 0.5 + wag * 0.2, 0, 6.2832);
-  ctx.fill();
+  ctx.fillStyle = hsl(hue, 80, 52);
+  ctx.save(); ctx.translate(s * 0.1, s * 0.16); ctx.rotate(2.1 + wag * 0.25); leaf(s * 0.32, s * 0.09); ctx.fill(); ctx.restore();
 
-  /* mắt */
-  ctx.fillStyle = '#fff';
-  ctx.beginPath(); ctx.arc(s * 0.34, -s * 0.1, s * 0.125, 0, 6.2832); ctx.fill();
-  ctx.fillStyle = '#182838';
-  ctx.beginPath(); ctx.arc(s * 0.37, -s * 0.1, s * 0.065, 0, 6.2832); ctx.fill();
-  ctx.fillStyle = 'rgba(255,255,255,.95)';
-  ctx.beginPath(); ctx.arc(s * 0.40, -s * 0.135, s * 0.026, 0, 6.2832); ctx.fill();
+  /* mang */
+  ctx.strokeStyle = 'rgba(0,0,0,.2)'; ctx.lineWidth = Math.max(1, s * 0.02); ctx.lineCap = 'round';
+  for (let i = 0; i < 2; i++) { ctx.beginPath(); ctx.arc(s * 0.02 - i * s * 0.07, s * 0.02, s * 0.1, -0.5, 0.5); ctx.stroke(); }
 
-  /* miệng: mở khi vừa đớp mồi */
-  ctx.fillStyle = 'hsl(' + hue + ',60%,30%)';
-  ctx.beginPath();
-  if (f.munch > 0) ctx.ellipse(s * 0.6, s * 0.04, s * 0.075, s * 0.075 * (0.4 + f.munch), 0, 0, 6.2832);
-  else ctx.ellipse(s * 0.6, s * 0.05, s * 0.055, s * 0.028, 0, 0, 6.2832);
-  ctx.fill();
-
+  /* mặt: hai mắt to, miệng cười (há ra khi đớp mồi) */
+  eyes(s * 0.38, -s * 0.12, s * 0.11, 0.3);
+  smile(s * 0.5, s * 0.18, s * 0.06, f.munch);
   ctx.restore();
 }
 
@@ -1671,7 +1732,7 @@ function frame(now) {
   for (const c of critters) if (ON_FLOOR[c.kind]) drawCritter(c, time);
 
   for (const fd of foods) {
-    ctx.fillStyle = '#c9762c';
+    ctx.fillStyle = '#b8662c';
     ctx.beginPath(); ctx.arc(fd.x, fd.y, fd.r, 0, 6.2832); ctx.fill();
     ctx.fillStyle = 'rgba(255,220,160,.75)';
     ctx.beginPath(); ctx.arc(fd.x - fd.r * 0.3, fd.y - fd.r * 0.3, fd.r * 0.35, 0, 6.2832); ctx.fill();
@@ -1684,7 +1745,7 @@ function frame(now) {
     ctx.strokeStyle = 'rgba(255,255,255,.7)';
     ctx.lineWidth = Math.max(1, b.r * 0.22);
     ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, 6.2832); ctx.stroke();
-    ctx.fillStyle = 'rgba(255,255,255,.18)';
+    ctx.fillStyle = 'rgba(255,255,255,.32)';
     ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, 6.2832); ctx.fill();
     ctx.fillStyle = 'rgba(255,255,255,.9)';
     ctx.beginPath(); ctx.arc(b.x - b.r * 0.32, b.y - b.r * 0.32, b.r * 0.22, 0, 6.2832); ctx.fill();
