@@ -170,7 +170,8 @@ input[type=range] { width: 100%; accent-color: var(--accent); padding: 0; border
 .opt { padding: 10px; border-radius: 14px; background: #fff; border: 2px solid var(--line); font-size: 13px; text-align: center; font-weight: 700; color: var(--ink); }
 .opt.on { border-color: var(--accent); background: var(--accent2); }
 .opt small { display: block; color: var(--muted); font-weight: 600; font-size: 11px; margin-top: 2px; }
-.swatch { height: 28px; border-radius: 8px; margin-bottom: 6px; }
+.swatch { height: 56px; border-radius: 10px; margin-bottom: 6px; overflow: hidden; }
+.swatch canvas { width: 100%; height: 100%; display: block; }
 .deco-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
 .deco-grid .opt canvas { width: 100%; height: 56px; display: block; margin-bottom: 4px; }
 .prog { height: 12px; border-radius: 6px; background: #e4ecf4; overflow: hidden; margin: 8px 0; }

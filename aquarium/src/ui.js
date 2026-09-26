@@ -47,6 +47,9 @@ function decoIcon(type, w = 90, h = 56) {
   return c;
 }
 
+// phông nền đã mua (mua một lần, dùng cho mọi hồ)
+const bgOwned = () => S.bgOwned || (S.bgOwned = { blue: true });
+
 /* ── HUD ── */
 function refreshHUD() {
   $('#coinsV').textContent = fmtCoins(S.coins);
@@ -216,7 +219,7 @@ function designPanel() {
       html += `<div class="sec"><h3>Kích cỡ (${d.W}×${d.H} cm · ${d.litres}L)</h3><div class="grid3">${Object.entries(TANK_KINDS.main).map(([k, s]) => { const up = s.price - cur; return `<button class="opt ${t.size === k ? 'on' : ''}" data-size="${k}" ${s.price <= cur && t.size !== k ? 'disabled style="opacity:.4"' : ''}>${esc(s.name)}<small>${t.size === k ? 'đang dùng' : up > 0 ? 'nâng cấp ' + up + ' xu' : 'nhỏ hơn'}</small></button>`; }).join('')}</div><p class="note">Hồ lớn hơn chứa được nhiều cá, nước ổn định hơn. 1 cm cá cần khoảng 1 lít nước.</p></div>`;
     }
     html += `<div class="sec"><h3>Nền đáy</h3><div class="grid2">${Object.entries(SUBSTRATES).map(([k, s]) => `<button class="opt ${t.substrate === k ? 'on' : ''}" data-sub="${k}"><div class="swatch" style="background:${s.c1 ? `linear-gradient(${s.c1},${s.c2})` : 'transparent;border:1px dashed var(--line)'}"></div>${esc(s.name)}<small>${t.substrate === k ? 'đang dùng' : s.price + ' xu'}</small></button>`).join('')}</div></div>
-    <div class="sec"><h3>Phông nền</h3><div class="grid2">${Object.entries(BACKGROUNDS).map(([k, s]) => `<button class="opt ${t.bg === k ? 'on' : ''}" data-bg="${k}"><div class="swatch" style="background:linear-gradient(${s.top},${s.bot})"></div>${esc(s.name)}<small>${t.bg === k ? 'đang dùng' : s.price + ' xu'}</small></button>`).join('')}</div></div>`;
+    <div class="sec"><h3>Phông nền</h3><div class="grid2">${Object.entries(BACKGROUNDS).map(([k, s]) => `<button class="opt ${t.bg === k ? 'on' : ''}" data-bg="${k}"><div class="swatch bgprev" data-bgprev="${k}"></div>${esc(s.name)}<small>${t.bg === k ? 'đang dùng' : bgOwned()[k] ? 'đã có' : s.price + ' xu'}</small></button>`).join('')}</div></div>`;
     if (S.tanks.length > 1) html += `<button class="pbtn red big" id="delTank" ${fishIn(t.id).length ? 'disabled' : ''}>🗑 Bỏ hồ này ${fishIn(t.id).length ? '(hồ phải trống)' : ''}</button>`;
   } else if (tab === 'deco') {
     const sel = t.deco.find((x) => x.id === UI.designSel);
@@ -247,7 +250,8 @@ function designPanel() {
     const rt = b.querySelector('#renameT'); if (rt) rt.onclick = () => promptModal('Tên hồ', t.name, (v) => { t.name = v; renderPanel(); refreshHUD(); });
     b.querySelectorAll('[data-size]').forEach((bt) => bt.onclick = () => { const k = bt.dataset.size, up = TANK_KINDS.main[k].price - TANK_KINDS.main[t.size].price; if (up <= 0) return; if (!spend(up)) return toast('Không đủ xu', 'bad'); t.size = k; for (const f of fishIn(t.id)) { f.x = Math.min(f.x, tankDims(t).W - 2); } for (const dc of t.deco) dc.x = Math.min(dc.x, tankDims(t).W - 3); toast('Đã nâng cấp hồ!', 'good'); onLayoutChange(); renderPanel(); refreshHUD(); });
     b.querySelectorAll('[data-sub]').forEach((bt) => bt.onclick = () => { const k = bt.dataset.sub; if (t.substrate === k) return; if (!spend(SUBSTRATES[k].price)) return toast('Không đủ xu', 'bad'); t.substrate = k; renderPanel(); });
-    b.querySelectorAll('[data-bg]').forEach((bt) => bt.onclick = () => { const k = bt.dataset.bg; if (t.bg === k) return; if (!spend(BACKGROUNDS[k].price)) return toast('Không đủ xu', 'bad'); t.bg = k; renderPanel(); });
+    b.querySelectorAll('[data-bgprev]').forEach((el) => el.appendChild(bgIcon(el.dataset.bgprev)));
+    b.querySelectorAll('[data-bg]').forEach((bt) => bt.onclick = () => { const k = bt.dataset.bg; if (t.bg === k) return; const own = bgOwned(); if (!own[k]) { if (!spend(BACKGROUNDS[k].price)) return toast('Không đủ xu', 'bad'); own[k] = true; } t.bg = k; renderPanel(); });
     const dt = b.querySelector('#delTank'); if (dt) dt.onclick = () => confirmModal('Bỏ hồ?', `Bỏ <b>${esc(t.name)}</b> và hoàn lại một nửa giá trị.`, 'Bỏ hồ', () => { const spec = tankSpec(t.kind, t.size); S.coins += Math.floor(spec.price / 2); S.tanks.splice(S.tanks.indexOf(t), 1); S.current = S.tanks[0].id; closePanel(); onLayoutChange(); });
     b.querySelectorAll('[data-deco]').forEach((bt) => bt.onclick = () => { const k = bt.dataset.deco; if (S.coins < DECO[k].price) return toast('Không đủ xu', 'bad'); UI.mode = 'place'; UI.placing = k; $('#placeHint').hidden = false; $('#placeHint b').textContent = DECO[k].name; renderPanel(); });
     b.querySelectorAll('[data-selD]').forEach((bt) => bt.onclick = () => { UI.designSel = bt.dataset.selD; renderPanel(); });

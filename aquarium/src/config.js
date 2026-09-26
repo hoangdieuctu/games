@@ -48,12 +48,22 @@ const SUBSTRATES = {
   dark:   { name: 'Nền xanh đêm', price: 25, c1: '#3a4f78', c2: '#2b3d60', speck: true, dots: ['#5f7bb0', '#8fa6d8'] },
   bare:   { name: 'Không nền', price: 0,  c1: null },
 };
-// top/bot màu nước, hill màu đồi đá phía sau
+// top/bot màu nước, hill màu đồi, scene kiểu cảnh vật vẽ phía sau hồ
 const BACKGROUNDS = {
-  blue:   { name: 'Biển xanh',   price: 0,  top: '#79d3f7', bot: '#2b8fd8', hill: '#1f4f8c' },
-  deep:   { name: 'Biển sâu',    price: 15, top: '#3a8fd0', bot: '#123a78', hill: '#0d2a5a' },
-  black:  { name: 'Đêm biển',    price: 20, top: '#2a4a80', bot: '#0d1a3a', hill: '#081330' },
-  forest: { name: 'Vịnh xanh lá', price: 25, top: '#8fe0c8', bot: '#1f8a7a', hill: '#0f5a50' },
+  blue:    { name: 'Biển xanh',      price: 0,  top: '#79d3f7', bot: '#2b8fd8', hill: '#1f4f8c', scene: 'hills' },
+  deep:    { name: 'Biển sâu',       price: 15, top: '#3a8fd0', bot: '#123a78', hill: '#0d2a5a', scene: 'hills' },
+  forest:  { name: 'Vịnh xanh lá',   price: 25, top: '#8fe0c8', bot: '#1f8a7a', hill: '#0f5a50', scene: 'kelp' },
+  reef:    { name: 'Rạn san hô',     price: 30, top: '#7fe3ea', bot: '#1f9ac4', hill: '#176a9a', scene: 'reef' },
+  sunset:  { name: 'Hoàng hôn',      price: 35, top: '#ffb36b', bot: '#7a3d8f', hill: '#4a2560', scene: 'sunset' },
+  black:   { name: 'Đêm trăng',      price: 35, top: '#2a4a80', bot: '#0d1a3a', hill: '#081330', scene: 'moon' },
+  sakura:  { name: 'Hồ hoa anh đào', price: 40, top: '#ffd6e8', bot: '#a86fc9', hill: '#7a4a9a', scene: 'sakura' },
+  ship:    { name: 'Tàu đắm',        price: 45, top: '#5cc0d8', bot: '#123e5e', hill: '#0c2d47', scene: 'ship' },
+  ice:     { name: 'Băng cực',       price: 45, top: '#d9f6ff', bot: '#4a9fd8', hill: '#2f6fa8', scene: 'ice' },
+  ruins:   { name: 'Thành phố cổ',   price: 50, top: '#8fb8ff', bot: '#2f2f8a', hill: '#22246a', scene: 'ruins' },
+  rainbow: { name: 'Cầu vồng',       price: 50, top: '#a9e6ff', bot: '#3ba0e8', hill: '#2e8f5e', scene: 'rainbow' },
+  candy:   { name: 'Xứ kẹo ngọt',    price: 55, top: '#ffe9f3', bot: '#8fd8ff', hill: '#ff9ccb', scene: 'candy' },
+  volcano: { name: 'Núi lửa',        price: 60, top: '#6e3a4a', bot: '#1f0d16', hill: '#120609', scene: 'volcano' },
+  galaxy:  { name: 'Dải ngân hà',    price: 80, top: '#3a2a7a', bot: '#0b0a2e', hill: '#100a3a', scene: 'galaxy' },
 };
 
 const EQUIPMENT = {
