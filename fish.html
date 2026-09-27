@@ -572,6 +572,9 @@ let schoolT = 0, schoolTx = 0, schoolTy = 0, schoolHue = 50;
 let fed = 0, started = false, bubbleTimer = 0;
 
 const MAX_FISH = 22;
+/* đói: quá HUNGRY giây thì buồn, quá WARN thì cảnh báo, quá LEAVE thì bỏ đi (luôn giữ lại ít nhất MIN_KEEP con) */
+const HUNGRY = 75, WARN = 110, LEAVE = 150, MIN_KEEP = 2;
+let warnT = 0;
 const MAX_CRIT = 14;
 const MAX_FOOD = 16;
 
@@ -789,7 +792,9 @@ function makeFish(opts) {
     maxSize: size * 1.7,
     pop: 0,
     full: false,
-    stage: 0
+    stage: 0,
+    hunger: 0,
+    leaving: false
   };
 }
 
@@ -1188,7 +1193,7 @@ function stepRest(a, dt) {
     if (a.hide.goT > 12) leaveSpot(a);                             /* không tới được thì thôi */
     return false;
   }
-  if (foods.length === 0 && a.startle <= 0 && a.kind !== 'jelly') {
+  if (foods.length === 0 && a.startle <= 0 && a.kind !== 'jelly' && !a.leaving) {
     if (a.kind !== 'clam' && Math.random() < dt * (0.004 + theme.glow * 0.03)) { a.sleep = rnd(10, 24); return true; }
     if (!IN_SAND[a.kind] && spots.length && Math.random() < dt * 0.007) {
       const sp = pick(spots);
@@ -1246,6 +1251,20 @@ function drawBling(a, t, lvl) {
     if (Math.random() < 0.06) parts.push({ kind: 'spark', x: a.x + rnd(-s * 0.5, s * 0.5), y: a.y + rnd(-s * 0.4, s * 0.4), vx: rnd(-20, 20), vy: rnd(-60, -20), r: rnd(2, 4), life: 1, decay: 1.2, c: '255,225,110' });
   }
 }
+/* cá đói: bong bóng nghĩ tới viên mồi; đói lắm thì thêm dấu chấm than đỏ */
+function drawHungerSign(f, t) {
+  if (f.hunger <= HUNGRY || f.sleep > 0 || f.munch > 0) return;
+  const s = f.size * f.grow, dir = f.vx < 0 ? -1 : 1;
+  const bx = f.x + dir * s * 0.45, by = f.y - s * 1.3 + Math.sin(t * 2.5 + f.phase) * 3, r = Math.max(9, s * 0.24);
+  ctx.fillStyle = 'rgba(255,255,255,.92)';
+  dot(f.x + dir * s * 0.3, f.y - s * 0.72, r * 0.18); dot(f.x + dir * s * 0.38, f.y - s * 0.95, r * 0.28); dot(bx, by, r, r * 0.85);
+  ctx.fillStyle = '#b8662c'; dot(bx, by, r * 0.36);
+  ctx.fillStyle = 'rgba(255,220,160,.8)'; dot(bx - r * 0.12, by - r * 0.12, r * 0.12);
+  if (f.hunger > WARN) {
+    ctx.fillStyle = '#ff5a5a'; ctx.font = '800 ' + Math.round(r * 1.6) + "px 'Baloo 2', Arial, sans-serif"; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText('!', bx + r * 1.1, by - r * 0.4);
+  }
+}
 function drawAnimal(a, t) {
   const lvl = growLvl(a);
   drawHalo(a, lvl);
@@ -1253,6 +1272,7 @@ function drawAnimal(a, t) {
   if (a.kind) drawCritter(a, t); else drawFish(a, t);
   FACE.sleep = false;
   drawBling(a, t, lvl);
+  if (!a.kind) drawHungerSign(a, t);
 }
 
 /* ══════════ sinh sản: cùng loài có từ 2 con trưởng thành thì có em bé ══════════ */
@@ -1276,7 +1296,7 @@ function spawnBaby(p1, p2) {
     fishes.push(baby);
     updateCount();
   }
-  baby.stage = 0; baby.full = false;
+  baby.stage = 0; baby.full = false; baby.hunger = 0;
   return baby;
 }
 function stepBreeding(dt) {
@@ -1312,6 +1332,14 @@ function eatFood(a, fd) {
 
   a.size = Math.min(a.maxSize, a.size * 1.045);
   a.pop = 1;
+  if (!a.kind) {
+    const wasHungry = a.hunger > HUNGRY;
+    a.hunger = 0;
+    if (a.leaving || a.cameBack) { a.leaving = false; a.cameBack = false; a.retarget = 0; texts.push({ x: a.x, y: a.y - a.size, txt: '💕 Ở lại rồi!', life: 1, decay: 0.7, size: 30, hue: 340 }); }
+    else if (wasHungry) texts.push({ x: a.x, y: a.y - a.size, txt: '😋 Ngon quá!', life: 1, decay: 0.8, size: 28, hue: 45 });
+    /* bể vắng thì mùi thức ăn gọi thêm cá tới */
+    if (fishes.length < 8 && Math.random() < 0.35) addFish();
+  }
   if (a.munch !== undefined) a.munch = 1;
   playNom();
 
@@ -1364,7 +1392,7 @@ function leaf(len, wd) {
   ctx.bezierCurveTo(-wd, -len * 0.25, -wd, -len * 0.75, 0, -len);
   ctx.bezierCurveTo(wd, -len * 0.75, wd, -len * 0.25, 0, 0); ctx.closePath();
 }
-const FACE = { sleep: false };   /* đặt trước khi vẽ một con: đang ngủ thì mắt nhắm */
+const FACE = { sleep: false, sad: false };   /* đặt trước khi vẽ một con: ngủ thì mắt nhắm, đói thì mặt buồn */
 function closedEye(x, y, r) {
   ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = Math.max(1.5, r * 0.26); ctx.lineCap = 'round';
   ctx.beginPath(); ctx.arc(x, y - r * 0.15, r * 0.6, 0.2 * Math.PI, 0.8 * Math.PI); ctx.stroke();
@@ -1378,6 +1406,7 @@ function eyes(x, y, r, look) {
     ctx.fillStyle = '#fff'; dot(cx, cy, r * 0.85, r);
     ctx.fillStyle = '#1a1a1a'; dot(cx + r * look, cy + r * 0.1, r * 0.47, r * 0.62);
     ctx.fillStyle = '#fff'; dot(cx + r * (look - 0.15), cy - r * 0.22, r * 0.16); dot(cx + r * (look + 0.18), cy + r * 0.32, r * 0.07);
+    if (FACE.sad) { ctx.strokeStyle = 'rgba(30,20,30,.75)'; ctx.lineWidth = Math.max(1.5, r * 0.22); ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(cx - r * 0.7, cy - r * 1.45); ctx.lineTo(cx + r * 0.6, cy - r * 1.1); ctx.stroke(); }
   }
 }
 function eye1(x, y, r, look) {
@@ -1396,7 +1425,10 @@ function smile(x, y, r, open) {
     return;
   }
   ctx.strokeStyle = 'rgba(40,20,30,.72)'; ctx.lineWidth = Math.max(1, r * 0.3); ctx.lineCap = 'round';
-  ctx.beginPath(); ctx.arc(x, y, r, 0.15 * Math.PI, 0.85 * Math.PI); ctx.stroke();
+  ctx.beginPath();
+  if (FACE.sad) ctx.arc(x, y + r * 1.1, r, 1.2 * Math.PI, 1.8 * Math.PI);   /* miệng xị */
+  else ctx.arc(x, y, r, 0.15 * Math.PI, 0.85 * Math.PI);
+  ctx.stroke();
 }
 
 /* ── vẽ từng loài ── */
@@ -2223,9 +2255,11 @@ function drawFish(f, t) {
   for (let i = 0; i < 2; i++) { ctx.beginPath(); ctx.arc(s * 0.02 - i * s * 0.07, s * 0.02, s * 0.1, -0.5, 0.5); ctx.stroke(); }
 
   /* mặt: hai mắt to, miệng cười (há ra khi đớp mồi) */
+  FACE.sad = !FACE.sleep && f.hunger > HUNGRY && f.munch <= 0;
   blush(s * 0.3, s * 0.1, s * 0.07);
   eyes(s * 0.38, -s * 0.12, s * 0.11, 0.3);
   smile(s * 0.5, s * 0.18, s * 0.06, FACE.sleep ? 0 : f.munch);
+  FACE.sad = false;
   ctx.restore();
 }
 
@@ -2303,7 +2337,17 @@ function frame(now) {
     if (f.munch > 0) f.munch = Math.max(0, f.munch - dt * 3);
     if (f.pop > 0) f.pop = Math.max(0, f.pop - dt * 3.2);
     if (f.startle > 0) f.startle = Math.max(0, f.startle - dt * 1.2);
+    f.hunger += dt * (f.sleep > 0 ? 0.5 : 1);
     if (stepRest(f, dt)) continue;
+    if (!f.leaving && f.hunger > LEAVE && fishes.length > MIN_KEEP) {
+      f.leaving = true; f.entering = false;
+      if (f.hide) leaveSpot(f);
+      texts.push({ x: f.x, y: f.y - f.size, txt: '👋 Đói quá, đi đây...', life: 1, decay: 0.55, size: 30, hue: 210 });
+    }
+    if (f.hunger > WARN && f.hunger < LEAVE && time - warnT > 30) {
+      warnT = time;
+      texts.push({ x: W / 2, y: H * 0.3, txt: '⚠️ Cá đói! Chạm cho ăn kẻo cá bỏ đi', life: 1, decay: 0.35, size: 40, hue: 20 });
+    }
 
     /* tìm mồi gần nhất */
     let target = null, bestD = Infinity;
@@ -2315,7 +2359,10 @@ function frame(now) {
     }
 
     let tx, ty, speed = f.speed;
-    if (f.hide && f.hide.phase === 'go') {
+    if (target && f.leaving) { f.leaving = false; f.cameBack = true; f.hunger = LEAVE - 25; }   /* thấy mồi thì quay lại, cho 25 giây để kịp ăn */
+    if (f.leaving) {
+      tx = f.x < W / 2 ? -200 : W + 200; ty = f.y; speed = f.speed * 1.3;
+    } else if (f.hide && f.hide.phase === 'go') {
       const an = spotAnchor(f.hide.spot, f); tx = an.x; ty = an.y;
       if (Math.hypot(tx - f.x, ty - f.y) < f.size * 0.45) { f.hide.phase = 'in'; f.vx = f.hide.side * 0.01; f.vy = 0; continue; }
     } else if (target) {
@@ -2335,7 +2382,15 @@ function frame(now) {
 
     f.x += f.vx * dt;
     f.y += f.vy * dt;
-    if (!f.hide) keepInTank(f);
+    if (!f.hide && !f.leaving) keepInTank(f);
+  }
+  /* cá bỏ đi ra khỏi bể thì biến mất */
+  for (let i = fishes.length - 1; i >= 0; i--) {
+    const f = fishes[i];
+    if (f.leaving && (f.x < -150 || f.x > W + 150)) {
+      fishes.splice(i, 1); updateCount(); playBlub();
+      texts.push({ x: W / 2, y: H * 0.36, txt: '😢 Một chú cá đói đã bỏ đi', life: 1, decay: 0.4, size: 38, hue: 210 });
+    }
   }
 
   for (const c of critters) updateCritter(c, dt);
