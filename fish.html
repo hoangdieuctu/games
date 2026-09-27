@@ -568,10 +568,6 @@ const spots   = [];        /* chỗ trốn: cột đá, san hô thùng */
 const pebbles = [];        /* sỏi màu trang trí trên cát */
 const plankton = [];
 const school  = [];        /* đàn cá con bơi theo bầy */
-const farFish = [];        /* lớp xa: bóng cá mờ bơi chậm sau đồi */
-const farWeeds = [];       /* lớp xa: rong mờ trên đồi */
-const fgItems = [];        /* lớp cận cảnh: cây, đá, san hô lớn ở mép dưới */
-const motes   = [];        /* hạt lơ lửng gần ống kính */
 let schoolT = 0, schoolTx = 0, schoolTy = 0, schoolHue = 50;
 let fed = 0, started = false, bubbleTimer = 0;
 
@@ -672,25 +668,6 @@ function layout() {
   }
   try { for (const a of fishes.concat(critters)) a.hide = null; } catch (e) { /* lần đầu, critters chưa khai báo */ }
 
-  /* lớp xa */
-  farFish.length = 0;
-  for (let i = 0; i < Math.max(5, Math.round(W / 220)); i++) {
-    farFish.push({ x: rnd(0, W), y: rnd(H * 0.08, H * 0.6), s: rnd(14, 30), v: rnd(8, 18) * (Math.random() < 0.5 ? -1 : 1), phase: rnd(0, 6.28), k: rnd(0.35, 0.7) });
-  }
-  farWeeds.length = 0;
-  for (let i = 0; i < Math.max(6, Math.round(W / 120)); i++) {
-    farWeeds.push({ x: rnd(0, W), h: rnd(H * 0.06, H * 0.16), w: rnd(4, 9), phase: rnd(0, 6.28), layer: Math.random() < 0.5 ? 0 : 1 });
-  }
-  /* lớp cận cảnh: mỗi góc dưới một cụm */
-  fgItems.length = 0;
-  const corners = [0.02, 0.98, 0.13, 0.87];
-  corners.forEach((k, i) => {
-    const type = i < 2 ? 'plant' : pick(['rock', 'coral']);
-    fgItems.push({ type, x: W * k + rnd(-20, 20), h: H * (i < 2 ? rnd(0.32, 0.5) : rnd(0.16, 0.26)), w: rnd(26, 44), hue: type === 'coral' ? pick([335, 10]) : rnd(110, 140), phase: rnd(0, 6.28), blades: 3, edge: i < 2 });
-  });
-  motes.length = 0;
-  for (let i = 0; i < 18; i++) motes.push({ x: rnd(0, W), y: rnd(0, H), r: rnd(3, 8), vx: rnd(-4, 4), vy: rnd(-6, -2), phase: rnd(0, 6.28) });
-
   /* đàn cá con */
   school.length = 0;
   const nsch = clamp(Math.round(W / 70), 12, 22), sx = rnd(W * 0.3, W * 0.7), sy = rnd(H * 0.2, H * 0.5);
@@ -724,10 +701,6 @@ function stepZoom(dt) {
   for (const o of plankton) sc(o);
   for (const o of pebbles) { o.x *= kx; o.y = sandY + (o.y - oldSand) * ky; }
   for (const o of weeds) o.x *= kx;
-  for (const o of farWeeds) o.x *= kx;
-  for (const o of farFish) sc(o);
-  for (const o of fgItems) o.x *= kx;
-  for (const o of motes) sc(o);
   for (const o of rocks) o.x *= kx;
   for (const o of spots) { o.x *= kx; if (o.kind === 'sponge') o.hy = sandY + 6 - o.r * 1.05; }
   schoolTx *= kx; schoolTy *= ky;
@@ -2015,40 +1988,17 @@ function drawWater(t) {
   ctx.restore();
 }
 
-/* lớp xa: bóng cá mờ, nhỏ, nhạt màu do sương nước */
-function drawFarFish(t, dt) {
-  const col = theme.hill;
-  for (const f of farFish) {
-    f.x += f.v * dt; f.y += Math.sin(t * 0.5 + f.phase) * 4 * dt;
-    if (f.x < -40) f.x = W + 40; if (f.x > W + 40) f.x = -40;
-    const dir = f.v < 0 ? -1 : 1, sz = f.s, wag = Math.sin(t * 5 + f.phase) * sz * 0.15;
-    ctx.save(); ctx.translate(f.x, f.y); ctx.scale(dir, 1);
-    ctx.fillStyle = rgba(col, f.k * 0.55);
-    ctx.beginPath(); ctx.moveTo(-sz * 0.45, 0); ctx.lineTo(-sz * 0.85, -sz * 0.3 + wag); ctx.lineTo(-sz * 0.85, sz * 0.3 + wag); ctx.closePath(); ctx.fill();
-    dot(0, 0, sz * 0.55, sz * 0.3);
-    ctx.beginPath(); ctx.moveTo(sz * 0.1, -sz * 0.28); ctx.quadraticCurveTo(-sz * 0.05, -sz * 0.6, -sz * 0.25, -sz * 0.26); ctx.fill();
-    ctx.restore();
-  }
-}
-function drawFarWeeds(t, layer, baseY) {
-  for (const wd of farWeeds) {
-    if (wd.layer !== layer) continue;
-    const y0 = baseY(wd.x), sw = Math.sin(t * 0.7 + wd.phase) * wd.w * 1.5;
-    ctx.strokeStyle = rgba(theme.hill, layer ? 0.55 : 0.35); ctx.lineWidth = wd.w; ctx.lineCap = 'round';
-    ctx.beginPath(); ctx.moveTo(wd.x, y0 + 6); ctx.quadraticCurveTo(wd.x + sw * 0.4, y0 - wd.h * 0.5, wd.x + sw, y0 - wd.h); ctx.stroke();
-  }
-}
 function drawSand(t) {
-  /* đồi đá xanh navy phía xa (2 lớp), mỗi lớp có rong mờ trên đỉnh */
-  const layers = [[0.2, 2.3, 0.35, 0.4], [0.12, 3.7, 0.55, 2.1]];
-  const hillY = (k, freq, amp, off) => sandY - H * amp * (0.35 + 0.65 * (0.5 + 0.5 * Math.sin(k * freq * 3.5 + off)));
-  layers.forEach(([amp, freq, alpha, off], li) => {
-    drawFarWeeds(t, li, (x) => hillY(x / W, freq, amp, off) + 2);
+  /* đồi đá xanh navy phía xa (2 lớp) */
+  for (const [amp, freq, alpha, off] of [[0.2, 2.3, 0.35, 0.4], [0.12, 3.7, 0.55, 2.1]]) {
     ctx.fillStyle = rgba(theme.hill, alpha);
     ctx.beginPath(); ctx.moveTo(0, H);
-    for (let x = 0; x <= W + 20; x += 20) ctx.lineTo(x, hillY(x / W, freq, amp, off));
+    for (let x = 0; x <= W + 20; x += 20) {
+      const k = x / W;
+      ctx.lineTo(x, sandY - H * amp * (0.35 + 0.65 * (0.5 + 0.5 * Math.sin(k * freq * 3.5 + off))));
+    }
     ctx.lineTo(W, H); ctx.closePath(); ctx.fill();
-  });
+  }
   /* cát phẳng, gợn nhẹ */
   ctx.fillStyle = rgb(theme.sand);
   ctx.beginPath();
@@ -2346,59 +2296,6 @@ function drawFish(f, t) {
   ctx.restore();
 }
 
-/* lớp cận cảnh: cây, đá, san hô lớn tối màu ở mép dưới, hơi nhoè; hạt lơ lửng gần ống kính; tối nhẹ ở góc */
-function drawForeground(t, dt) {
-  ctx.save();
-  ctx.filter = 'blur(1.5px)';
-  ctx.globalAlpha = 0.9;
-  ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-  for (const it of fgItems) {
-    const base = H + 10;
-    if (it.type === 'plant') {
-      for (let b = 0; b < it.blades; b++) {
-        const off = (b - 1) * it.w * 1.6, h = it.h * (1 - Math.abs(b - 1) * 0.2), width = it.w, seg = 7;
-        const cx = (k) => it.x + off + Math.sin(t * 0.5 + it.phase + b + k * 0.8) * it.w * 1.4 * (k / seg);
-        const cy = (k) => base - h * (k / seg), wk = (k) => width * (1 - (k / seg) * 0.5);
-        ctx.fillStyle = b % 2 ? hsl(it.hue, 45, 20) : hsl(it.hue, 50, 26);
-        ctx.beginPath(); ctx.moveTo(cx(0) - wk(0), cy(0));
-        for (let k = 1; k <= seg; k++) ctx.lineTo(cx(k) - wk(k), cy(k));
-        ctx.quadraticCurveTo(cx(seg), cy(seg) - wk(seg) * 1.4, cx(seg) + wk(seg), cy(seg));
-        for (let k = seg - 1; k >= 0; k--) ctx.lineTo(cx(k) + wk(k), cy(k));
-        ctx.closePath(); ctx.fill();
-      }
-    } else if (it.type === 'rock') {
-      const w = it.w * 5, h = it.h * 0.45;
-      ctx.fillStyle = hsl(225, 45, 22);
-      ctx.beginPath(); ctx.moveTo(it.x - w, base); ctx.bezierCurveTo(it.x - w * 1.05, base - h * 0.6, it.x - w * 0.3, base - h * 1.1, it.x + w * 0.2, base - h);
-      ctx.bezierCurveTo(it.x + w * 0.7, base - h * 0.9, it.x + w * 1.05, base - h * 0.3, it.x + w, base); ctx.closePath(); ctx.fill();
-      ctx.fillStyle = hsl(225, 45, 30); dot(it.x - w * 0.2, base - h * 0.7, w * 0.3, h * 0.14);
-    } else {
-      const R = it.h * 0.5, c = hsl(it.hue, 60, 38), c2 = hsl(it.hue, 65, 48);
-      const branch = (x, y, len, ang, wd, depth) => {
-        const ex = x + Math.cos(ang) * len, ey = y + Math.sin(ang) * len;
-        ctx.strokeStyle = depth > 1 ? c : c2; ctx.lineWidth = wd;
-        ctx.beginPath(); ctx.moveTo(x, y); ctx.quadraticCurveTo(x + Math.cos(ang - 0.3) * len * 0.5, y + Math.sin(ang - 0.3) * len * 0.5, ex, ey); ctx.stroke();
-        if (depth <= 0) { ctx.fillStyle = c2; dot(ex, ey, wd * 0.7); return; }
-        const k = 0.5 + 0.5 * Math.sin(depth * 3.1 + x * 0.05 + it.phase), sw = Math.sin(t * 0.5 + it.phase) * 0.05;
-        branch(ex, ey, len * 0.68, ang - 0.5 - k * 0.3 + sw, wd * 0.7, depth - 1);
-        branch(ex, ey, len * 0.62, ang + 0.45 + k * 0.3 + sw, wd * 0.7, depth - 1);
-      };
-      branch(it.x, base, R * 0.55, -Math.PI / 2, Math.max(6, R * 0.16), 3);
-    }
-  }
-  ctx.restore();
-  /* hạt lơ lửng gần ống kính: to, mờ, trôi chậm */
-  for (const m of motes) {
-    m.x += m.vx * dt; m.y += m.vy * dt + Math.sin(t * 0.6 + m.phase) * 3 * dt;
-    if (m.y < -10) { m.y = H + 10; m.x = rnd(0, W); } if (m.x < -10) m.x = W + 10; if (m.x > W + 10) m.x = -10;
-    ctx.fillStyle = 'rgba(255,255,255,' + (0.05 + 0.05 * Math.sin(t + m.phase)) + ')'; dot(m.x, m.y, m.r);
-  }
-  /* tối nhẹ ở góc và mép dưới để lớp giữa nổi lên */
-  const vg = ctx.createRadialGradient(W * 0.5, H * 0.45, Math.min(W, H) * 0.45, W * 0.5, H * 0.5, Math.max(W, H) * 0.8);
-  vg.addColorStop(0, 'rgba(0,25,70,0)'); vg.addColorStop(1, 'rgba(0,25,70,.28)');
-  ctx.fillStyle = vg; ctx.fillRect(0, 0, W, H);
-}
-
 /* phủ sắc ánh sáng của cảnh lên toàn bể (cả cá, rong, cát) */
 function drawTint() {
   if (theme.tint[3] <= 0.001) return;
@@ -2542,7 +2439,6 @@ function frame(now) {
 
   /* ── vẽ ── */
   drawWater(time);
-  drawFarFish(time, dt);
   drawSand(time);
   drawRocks(time);
   drawSpots(time);
@@ -2570,7 +2466,6 @@ function frame(now) {
     ctx.beginPath(); ctx.arc(b.x - b.r * 0.32, b.y - b.r * 0.32, b.r * 0.22, 0, 6.2832); ctx.fill();
   }
 
-  drawForeground(time, dt);
   drawTint();
   drawPlankton(time, dt);
 
