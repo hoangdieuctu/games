@@ -562,6 +562,8 @@ const parts   = [];
 const texts   = [];
 const weeds   = [];
 const rocks   = [];
+const spots   = [];        /* chỗ trốn: cột đá, san hô thùng */
+const pebbles = [];        /* sỏi màu trang trí trên cát */
 const plankton = [];
 let fed = 0, started = false, bubbleTimer = 0;
 
@@ -589,18 +591,23 @@ function layout() {
   ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
   sandY = H - Math.max(60, H * 0.13);
 
-  /* rong biển */
+  /* cây thủy sinh: 5 kiểu, xếp rải rác */
   weeds.length = 0;
-  const nw = Math.max(5, Math.round(W / 130));
+  const nw = Math.max(6, Math.round(W / 150));
+  const TYPES = ['kelp', 'kelp', 'fern', 'round', 'grass', 'red', 'kelp', 'fern', 'grass'];
   for (let i = 0; i < nw; i++) {
+    const type = TYPES[i % TYPES.length];
+    const hr = { kelp: [0.2, 0.36], fern: [0.14, 0.26], round: [0.15, 0.27], grass: [0.08, 0.15], red: [0.12, 0.22] }[type];
     weeds.push({
-      x: rnd(0, W),
-      h: rnd(H * 0.12, H * 0.32),
+      type,
+      x: W * ((i + rnd(0.15, 0.85)) / nw),
+      h: rnd(H * hr[0], H * hr[1]),
       w: rnd(13, 24),
-      hue: rnd(100, 150),
+      hue: type === 'red' ? rnd(320, 345) : type === 'round' ? rnd(160, 180) : rnd(95, 140),
       phase: rnd(0, 6.28),
       speed: rnd(0.5, 1.1),
-      blades: Math.round(rnd(2, 3))
+      blades: 2,
+      n: Math.round(rnd(5, 8))
     });
   }
 
@@ -631,6 +638,26 @@ function layout() {
     });
   }
   rocks.sort((a, b) => b.r - a.r);
+
+  /* chỗ trốn: cột đá xanh cao và san hô thùng có lỗ */
+  spots.length = 0;
+  const np2 = Math.max(2, Math.round(W / 520)), ns = Math.max(2, Math.round(W / 440));
+  for (let i = 0; i < np2; i++) {
+    const w = rnd(90, 140);
+    spots.push({ kind: 'pillar', x: W * (0.12 + (i + rnd(0.15, 0.85)) / np2 * 0.76), w, h: rnd(H * 0.24, H * 0.4), occ: 0, phase: rnd(0, 6.28) });
+  }
+  for (let i = 0; i < ns; i++) {
+    const r = rnd(34, 50);
+    const sp = { kind: 'sponge', x: W * (0.06 + (i + rnd(0.1, 0.9)) / ns * 0.88), r, hue: pick([8, 22, 36, 350]), occ: 0, phase: rnd(0, 6.28) };
+    sp.hy = sandY + 6 - r * 1.05;
+    spots.push(sp);
+  }
+  /* sỏi màu */
+  pebbles.length = 0;
+  for (let i = 0; i < Math.round(W / 70); i++) {
+    pebbles.push({ x: rnd(0, W), y: rnd(sandY + 18, H - 8), rx: rnd(5, 11), ry: rnd(2.5, 5), hue: pick([160, 270, 200, 40, 330]) });
+  }
+  try { for (const a of fishes.concat(critters)) a.hide = null; } catch (e) { /* lần đầu, critters chưa khai báo */ }
 }
 layout();
 window.addEventListener('resize', layout);
@@ -659,9 +686,11 @@ function makeFish(opts) {
     munch: 0,
     startle: 0,
     entering: false,
+    size0: size,
     maxSize: size * 1.7,
     pop: 0,
-    full: false
+    full: false,
+    stage: 0
   };
 }
 
@@ -734,6 +763,7 @@ function addBubble(x, y, r) {
 
 /* ══════════ chạm ══════════ */
 const pointers = new Map();
+const wokeNow = new Set();     /* vừa được đánh thức trong lần chạm này, không giật mình thêm */
 
 function onDown(e) {
   ac();
@@ -744,9 +774,25 @@ function onDown(e) {
   }
   pointers.set(e.pointerId, { x: e.clientX, y: e.clientY, moved: 0 });
 
+  /* con đang ngủ: chạm để đánh thức; con đang trốn: chạm là chui ra */
+  let startled = false;
+  wokeNow.clear();
+  for (const a of critters.concat(fishes)) {
+    if (Math.hypot(e.clientX - a.x, e.clientY - a.y) > a.size * 0.8) continue;
+    if (a.sleep > 0) { wakeUp(a); wokeNow.add(a); startled = true; }
+    else if (a.hide && a.hide.phase === 'in') { leaveSpot(a); wokeNow.add(a); startled = true; }
+  }
+  for (const sp of spots) {
+    const hx = sp.x, hy = sp.kind === 'sponge' ? sp.hy : sandY - sp.h * 0.5, hr = sp.kind === 'sponge' ? sp.r * 1.2 : Math.max(sp.w, sp.h) * 0.55;
+    if (Math.hypot(e.clientX - hx, e.clientY - hy) > hr) continue;
+    for (const a of critters.concat(fishes)) if (a.hide && a.hide.spot === sp && a.hide.phase === 'in') { leaveSpot(a); wokeNow.add(a); startled = true; }
+  }
+  if (startled) playSparkle();
+
   /* chạm vào sinh vật biển: mỗi loài phản ứng một kiểu */
-  let startled = touchCritter(e.clientX, e.clientY);
+  startled = touchCritter(e.clientX, e.clientY) || startled;
   for (const f of fishes) {
+    if (wokeNow.has(f)) continue;
     if (Math.hypot(e.clientX - f.x, e.clientY - f.y) < f.size * 0.75) {
       const bd = bounds(f);
       f.startle = 1;
@@ -812,8 +858,8 @@ const ON_FLOOR = { crab: 1, star: 1, octopus: 1 };
 
 function critterSize(kind) {
   const base = Math.min(W, H);
-  const k = { star: 0.075, crab: 0.058, jelly: 0.072, seahorse: 0.078,
-              octopus: 0.085, turtle: 0.105, ray: 0.115, shark: 0.15 }[kind] || 0.08;
+  const k = { star: 0.08, crab: 0.07, jelly: 0.085, seahorse: 0.09,
+              octopus: 0.095, turtle: 0.115, ray: 0.125, shark: 0.15 }[kind] || 0.08;
   return base * k;
 }
 
@@ -844,7 +890,7 @@ function makeCritter(kind, opts) {
              octopus: rnd(16, 28), shark: rnd(30, 46) }[kind],
     hop: 0            /* bạch tuộc phụt lên */
   };
-  c.maxSize = size * 1.6;
+  c.size0 = size; c.maxSize = size * 1.6; c.stage = 0;
   c.y = ON_FLOOR[kind] ? floorY(c) : (o.y != null ? o.y : rnd(H * 0.15, sandY - size));
   if (kind === 'seahorse') c.y = rnd(sandY - H * 0.3, sandY - size * 0.7);
   return c;
@@ -899,6 +945,7 @@ function updateCritter(c, dt) {
   if (c.startle > 0) c.startle = Math.max(0, c.startle - dt * 0.8);
   if (c.hop > 0) c.hop = Math.max(0, c.hop - dt * 1.1);
   if (c.pop > 0) c.pop = Math.max(0, c.pop - dt * 3.2);
+  if (stepRest(c, dt)) return;
 
   const m = c.size * 0.8;
   const boost = 1 + c.startle * 2.2;
@@ -910,6 +957,15 @@ function updateCritter(c, dt) {
   if (near && near.d < c.size * 0.6) { eatFood(c, near.fd); }
 
   if (ON_FLOOR[c.kind]) {
+    /* bò tới chỗ trốn */
+    if (c.hide && c.hide.phase === 'go') {
+      const an = spotAnchor(c.hide.spot, c);
+      c.dir = an.x > c.x ? 1 : -1;
+      c.x += c.dir * Math.max(22, c.speed * 1.4) * dt;
+      c.y = floorY(c);
+      if (Math.abs(an.x - c.x) < c.size * 0.25) { c.hide.phase = 'in'; c.dir = c.hide.side; }
+      return;
+    }
     /* bò ngang trên cát */
     if (near && c.kind !== 'star') {
       c.dir = near.fd.x > c.x ? 1 : -1;
@@ -935,10 +991,13 @@ function updateCritter(c, dt) {
 
   /* các loài bơi trong nước */
   c.retarget -= dt;
-  if (c.retarget <= 0 || Math.hypot(c.tx - c.x, c.ty - c.y) < c.size * 0.7) newCritterTarget(c);
+  if (!c.hide && (c.retarget <= 0 || Math.hypot(c.tx - c.x, c.ty - c.y) < c.size * 0.7)) newCritterTarget(c);
 
   let gx = c.tx, gy = c.ty, chase = 1;
-  if (near) { gx = near.fd.x; gy = near.fd.y; chase = 1.8; }
+  if (c.hide && c.hide.phase === 'go') {
+    const an = spotAnchor(c.hide.spot, c); gx = an.x; gy = an.y; chase = 1.3;
+    if (Math.hypot(an.x - c.x, an.y - c.y) < c.size * 0.45) { c.hide.phase = 'in'; c.vx = c.vy = 0; c.dir = c.hide.side; return; }
+  } else if (near) { gx = near.fd.x; gy = near.fd.y; chase = 1.8; }
 
   const dx = gx - c.x, dy = gy - c.y;
   const d = Math.max(0.001, Math.hypot(dx, dy));
@@ -958,6 +1017,176 @@ function updateCritter(c, dt) {
   if (c.y < top) { c.y = top; c.vy =  Math.abs(c.vy) + 5; c.ty = rnd((top + bot) / 2, bot); }
   if (c.y > bot) { c.y = bot; c.vy = -Math.abs(c.vy) - 5; c.ty = rnd(top, (top + bot) / 2); }
   if (c.kind !== 'seahorse') c.dir = c.vx < 0 ? -1 : 1;
+  else if (c.hide) c.dir = c.hide.side;
+}
+
+/* ══════════ ngủ & trốn ══════════ */
+/* điểm neo của một con khi trốn ở một chỗ */
+function spotAnchor(sp, a) {
+  if (sp.kind === 'sponge') return { x: sp.x, y: ON_FLOOR[a.kind] ? sp.hy + sp.r * 0.1 : sp.hy };
+  const side = a.hide ? a.hide.side : 1;
+  const y = ON_FLOOR[a.kind] ? floorY(a)
+          : a.kind === 'seahorse' ? sandY - a.size * 0.8
+          : Math.max(H * 0.1 + a.size * 0.5, sandY - sp.h * (a.hide ? a.hide.yk : 0.5));
+  return { x: sp.x + side * sp.w * 0.5, y };
+}
+function leaveSpot(a) {
+  if (!a.hide) return;
+  a.hide.spot.occ = Math.max(0, a.hide.spot.occ - 1);
+  a.hide = null; a.startle = 0.3; a.retarget = 0;
+  if (a.kind) { a.dir = Math.random() < 0.5 ? -1 : 1; }
+  for (let k = 0; k < 3; k++) addBubble(a.x + rnd(-8, 8), a.y - a.size * 0.2, rnd(2, 5));
+}
+function wakeUp(a) {
+  a.sleep = 0; a.pop = 1; a.startle = 0.4; a.zzz = 0;
+  texts.push({ x: a.x, y: a.y - a.size * 0.8, txt: '!', life: 1, decay: 1.3, size: 30, hue: 45 });
+  for (let k = 0; k < 4; k++) addBubble(a.x + rnd(-8, 8), a.y - a.size * 0.3, rnd(2, 5));
+}
+/* xử lý ngủ / đang trốn; trả về true nếu con này đứng yên khung hình này */
+function stepRest(a, dt) {
+  a.zzz = (a.zzz || 0) - dt;
+  const hidden = a.hide && a.hide.phase === 'in';
+  if (a.sleep > 0) {
+    a.sleep -= dt;
+    if (a.zzz <= 0) {
+      a.zzz = 1.2;
+      parts.push({ kind: 'zzz', x: a.x + a.size * 0.35 * (a.dir || (a.vx < 0 ? -1 : 1)), y: a.y - a.size * 0.45,
+                   vx: 6, vy: -20, life: 1, decay: 0.45, r: Math.max(12, a.size * 0.2) });
+    }
+    if (!hidden && !ON_FLOOR[a.kind]) {
+      a.vx *= Math.max(0, 1 - dt * 2); a.vy *= Math.max(0, 1 - dt * 2);
+      a.x += a.vx * dt; a.y += a.vy * dt + Math.sin(a.phase * 0.4) * 4 * dt;
+      const bd = { l: a.size * 0.7, r: W - a.size * 0.7, t: H * 0.08 + a.size * 0.4, b: sandY - a.size * 0.5 };
+      a.x = clamp(a.x, bd.l, bd.r); a.y = clamp(a.y, bd.t, bd.b);
+    }
+    return true;
+  }
+  if (hidden) {
+    a.hide.t -= dt;
+    const an = spotAnchor(a.hide.spot, a); a.x = an.x; a.y = an.y; a.vx = a.hide.side * 0.01; a.vy = 0;
+    if (a.hide.t <= 0) leaveSpot(a);
+    else if (Math.random() < dt * 0.04) a.sleep = rnd(8, 16);      /* trốn kỹ rồi ngủ luôn */
+    return true;
+  }
+  if (a.hide && a.hide.phase === 'go') {
+    a.hide.goT = (a.hide.goT || 0) + dt;
+    if (a.hide.goT > 12) leaveSpot(a);                             /* không tới được thì thôi */
+    return false;
+  }
+  if (foods.length === 0 && a.startle <= 0 && a.kind !== 'jelly') {
+    if (Math.random() < dt * (0.004 + theme.glow * 0.03)) { a.sleep = rnd(10, 24); return true; }
+    if (spots.length && Math.random() < dt * 0.007) {
+      const sp = pick(spots);
+      if (sp.occ < 2 && !(sp.kind === 'sponge' && a.size > sp.r * 2.6)) {
+        sp.occ++;
+        a.hide = { spot: sp, phase: 'go', t: rnd(7, 18), side: Math.random() < 0.5 ? -1 : 1, yk: rnd(0.3, 0.75), goT: 0 };
+      }
+    }
+  }
+  return false;
+}
+const vis = (a) => !(a.hide && a.hide.phase === 'in');
+/* mức trưởng thành 0..1: ăn càng nhiều càng lớn, càng lấp lánh */
+function growLvl(a) {
+  const s0 = a.size0 || a.size, mx = a.maxSize || s0;
+  return mx > s0 ? clamp((a.size - s0) / (mx - s0), 0, 1) : 0;
+}
+function star4(x, y, r) {
+  ctx.beginPath();
+  ctx.moveTo(x, y - r); ctx.quadraticCurveTo(x, y, x + r, y); ctx.quadraticCurveTo(x, y, x, y + r);
+  ctx.quadraticCurveTo(x, y, x - r, y); ctx.quadraticCurveTo(x, y, x, y - r); ctx.closePath(); ctx.fill();
+}
+/* hào quang vàng phía sau (mức 2+) */
+function drawHalo(a, lvl) {
+  if (lvl < 0.6) return;
+  const s = a.size * (a.grow || 1), k = (lvl - 0.6) / 0.4;
+  const g = ctx.createRadialGradient(a.x, a.y, s * 0.15, a.x, a.y, s * 0.95);
+  g.addColorStop(0, 'rgba(255,225,110,' + (0.18 + 0.22 * k) + ')');
+  g.addColorStop(1, 'rgba(255,225,110,0)');
+  ctx.fillStyle = g; ctx.beginPath(); ctx.arc(a.x, a.y, s * 0.95, 0, TAU); ctx.fill();
+}
+/* lấp lánh, ngôi sao và vương miện (mức 1, 2, 3) */
+function drawBling(a, t, lvl) {
+  if (lvl < 0.3) return;
+  const s = a.size * (a.grow || 1);
+  const n = Math.round(3 + lvl * 8);
+  for (let i = 0; i < n; i++) {
+    const ang = i * 2.4 + a.phase * 0.02, rad = s * (0.18 + 0.4 * ((i * 7) % 5) / 5);
+    const tw = 0.5 + 0.5 * Math.sin(t * 4 + i * 1.3 + (a.phase || 0));
+    ctx.fillStyle = i % 3 ? 'rgba(255,255,255,' + (0.4 + 0.6 * tw) + ')' : 'rgba(255,230,120,' + (0.5 + 0.5 * tw) + ')';
+    star4(a.x + Math.cos(ang) * rad, a.y + Math.sin(ang) * rad * 0.7, s * 0.05 * (0.3 + tw));
+  }
+  if (lvl >= 0.6) {   /* ngôi sao vàng lớn trên đầu */
+    const tw = 0.6 + 0.4 * Math.sin(t * 3 + (a.phase || 0));
+    ctx.fillStyle = '#ffd23f'; star4(a.x + s * 0.35, a.y - s * 0.5, s * 0.14 * tw);
+    ctx.fillStyle = '#fff6c8'; star4(a.x + s * 0.35, a.y - s * 0.5, s * 0.06 * tw);
+  }
+  if (lvl >= 0.999) { /* vương miện */
+    const cx = a.x, cy = a.y - s * 0.58, cw = s * 0.28, ch = s * 0.2;
+    ctx.fillStyle = '#ffc531';
+    ctx.beginPath(); ctx.moveTo(cx - cw / 2, cy + ch * 0.5); ctx.lineTo(cx - cw / 2, cy - ch * 0.4); ctx.lineTo(cx - cw * 0.25, cy);
+    ctx.lineTo(cx, cy - ch * 0.6); ctx.lineTo(cx + cw * 0.25, cy); ctx.lineTo(cx + cw / 2, cy - ch * 0.4); ctx.lineTo(cx + cw / 2, cy + ch * 0.5); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#ff5e5e'; dot(cx, cy + ch * 0.2, cw * 0.09, cw * 0.09);
+    ctx.fillStyle = '#5ad0ff'; dot(cx - cw * 0.3, cy + ch * 0.2, cw * 0.07, cw * 0.07); dot(cx + cw * 0.3, cy + ch * 0.2, cw * 0.07, cw * 0.07);
+    if (Math.random() < 0.06) parts.push({ kind: 'spark', x: a.x + rnd(-s * 0.5, s * 0.5), y: a.y + rnd(-s * 0.4, s * 0.4), vx: rnd(-20, 20), vy: rnd(-60, -20), r: rnd(2, 4), life: 1, decay: 1.2, c: '255,225,110' });
+  }
+}
+function drawAnimal(a, t) {
+  const lvl = growLvl(a);
+  drawHalo(a, lvl);
+  FACE.sleep = a.sleep > 0;
+  if (a.kind) drawCritter(a, t); else drawFish(a, t);
+  FACE.sleep = false;
+  drawBling(a, t, lvl);
+}
+
+/* ══════════ sinh sản: cùng loài có từ 2 con trưởng thành thì có em bé ══════════ */
+let breedTimer = 12;
+const BREED_COOLDOWN = 90;      /* giây nghỉ giữa hai lần sinh của một con */
+function speciesKey(a) { return a.kind ? 'c:' + a.kind : 'f:' + a.hue; }
+function spawnBaby(p1, p2) {
+  const x = (p1.x + p2.x) / 2, y = (p1.y + p2.y) / 2;
+  let baby;
+  if (p1.kind) {
+    if (critters.length >= MAX_CRIT) return null;
+    baby = makeCritter(p1.kind, { x, y });
+    baby.size = critterSize(p1.kind) * 0.5; baby.size0 = baby.size; baby.maxSize = critterSize(p1.kind) * rnd(1.4, 1.7);
+    if (ON_FLOOR[p1.kind]) baby.y = floorY(baby);
+    critters.push(baby);
+  } else {
+    if (fishes.length >= MAX_FISH) return null;
+    baby = makeFish({ x, y, hue: p1.hue, size: p1.size0 * 0.55, grow: true });
+    baby.pattern = pick([p1.pattern, p2.pattern]);
+    baby.maxSize = Math.max(p1.maxSize, p2.maxSize) * rnd(0.9, 1.05);
+    fishes.push(baby);
+    updateCount();
+  }
+  baby.stage = 0; baby.full = false;
+  return baby;
+}
+function stepBreeding(dt) {
+  breedTimer -= dt;
+  if (breedTimer > 0) return;
+  breedTimer = rnd(10, 18);
+  const groups = new Map();
+  for (const a of critters.concat(fishes)) {
+    if (!a.full || a.sleep > 0 || (a.hide && a.hide.phase === 'in')) continue;
+    if (time - (a.bredAt || -999) < BREED_COOLDOWN) continue;
+    const k = speciesKey(a);
+    if (!groups.has(k)) groups.set(k, []);
+    groups.get(k).push(a);
+  }
+  for (const [, list] of groups) {
+    if (list.length < 2) continue;
+    const p1 = list[0], p2 = list[1];
+    const baby = spawnBaby(p1, p2);
+    if (!baby) continue;
+    p1.bredAt = time; p2.bredAt = time; p1.pop = 1; p2.pop = 1;
+    playSparkle();
+    texts.push({ x: baby.x, y: baby.y - baby.size - 20, txt: '💕 Có em bé!', life: 1, decay: 0.5, size: 40, hue: 340 });
+    for (let k = 0; k < 8; k++) texts.push({ x: baby.x + rnd(-60, 60), y: baby.y + rnd(-20, 30), txt: '❤', life: 1, decay: rnd(0.5, 0.9), size: rnd(16, 26), hue: 350 });
+    break;                     /* mỗi lượt một em bé cho khỏi rối */
+  }
 }
 
 /* ăn một viên mồi: lớn thêm một chút, phồng lên một nhịp */
@@ -977,11 +1206,25 @@ function eatFood(a, fd) {
   }
   addBubble(a.x + a.size * 0.3, a.y - a.size * 0.2, rnd(2, 5));
 
+  /* mốc lấp lánh: 30% → rắc lấp lánh, 60% → ngôi sao & hào quang */
+  const lvl = growLvl(a);
+  const st = lvl >= 0.6 ? 2 : lvl >= 0.3 ? 1 : 0;
+  if (st > (a.stage || 0)) {
+    a.stage = st;
+    playSparkle();
+    texts.push({ x: a.x, y: a.y - a.size, txt: st === 1 ? '✨ Lấp lánh!' : '🌟 Toả sáng!', life: 1, decay: 0.75, size: 32, hue: 45 });
+    for (let k = 0; k < 10; k++) {
+      const ang = rnd(0, 6.28);
+      parts.push({ kind: 'spark', x: a.x, y: a.y, vx: Math.cos(ang) * rnd(40, 180), vy: Math.sin(ang) * rnd(40, 180), r: rnd(2, 5), life: 1, decay: 1.5, c: '255,225,110' });
+    }
+  }
+
   /* vừa đạt cỡ trưởng thành */
   if (!a.full && a.size >= a.maxSize - 0.05) {
     a.full = true;
     playSparkle();
-    texts.push({ x: a.x, y: a.y - a.size, txt: '🎉 Lớn rồi!', life: 1, decay: 0.75, size: 34, hue: 45 });
+    a.stage = 3;
+    texts.push({ x: a.x, y: a.y - a.size, txt: '👑 Lớn rồi!', life: 1, decay: 0.75, size: 34, hue: 45 });
     for (let k = 0; k < 14; k++) {
       const ang = rnd(0, 6.28);
       parts.push({ kind: 'spark', x: a.x, y: a.y, vx: Math.cos(ang) * rnd(60, 240),
@@ -1006,22 +1249,30 @@ function leaf(len, wd) {
   ctx.bezierCurveTo(-wd, -len * 0.25, -wd, -len * 0.75, 0, -len);
   ctx.bezierCurveTo(wd, -len * 0.75, wd, -len * 0.25, 0, 0); ctx.closePath();
 }
-/* hai mắt trắng to kề nhau, con ngươi đen nhìn về +x */
+const FACE = { sleep: false };   /* đặt trước khi vẽ một con: đang ngủ thì mắt nhắm */
+function closedEye(x, y, r) {
+  ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = Math.max(1.5, r * 0.26); ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.arc(x, y - r * 0.15, r * 0.6, 0.2 * Math.PI, 0.8 * Math.PI); ctx.stroke();
+}
+/* hai mắt trắng to kề nhau, con ngươi đen bóng nhìn về +x */
 function eyes(x, y, r, look) {
   look = look == null ? 0.25 : look;
   for (const k of [1, 0]) {
     const cx = x - k * r * 1.85, cy = y - k * r * 0.1;
+    if (FACE.sleep) { closedEye(cx, cy, r); continue; }
     ctx.fillStyle = '#fff'; dot(cx, cy, r * 0.85, r);
-    ctx.fillStyle = '#1a1a1a'; dot(cx + r * look, cy + r * 0.1, r * 0.45, r * 0.6);
-    ctx.fillStyle = '#fff'; dot(cx + r * (look - 0.15), cy - r * 0.22, r * 0.15);
+    ctx.fillStyle = '#1a1a1a'; dot(cx + r * look, cy + r * 0.1, r * 0.47, r * 0.62);
+    ctx.fillStyle = '#fff'; dot(cx + r * (look - 0.15), cy - r * 0.22, r * 0.16); dot(cx + r * (look + 0.18), cy + r * 0.32, r * 0.07);
   }
 }
 function eye1(x, y, r, look) {
   look = look == null ? 0.25 : look;
+  if (FACE.sleep) { closedEye(x, y, r); return; }
   ctx.fillStyle = '#fff'; dot(x, y, r * 0.9, r);
-  ctx.fillStyle = '#1a1a1a'; dot(x + r * look, y + r * 0.1, r * 0.48, r * 0.62);
-  ctx.fillStyle = '#fff'; dot(x + r * (look - 0.15), y - r * 0.22, r * 0.15);
+  ctx.fillStyle = '#1a1a1a'; dot(x + r * look, y + r * 0.1, r * 0.5, r * 0.64);
+  ctx.fillStyle = '#fff'; dot(x + r * (look - 0.15), y - r * 0.22, r * 0.16); dot(x + r * (look + 0.18), y + r * 0.32, r * 0.07);
 }
+function blush(x, y, r) { ctx.fillStyle = 'rgba(255,110,140,.45)'; dot(x, y, r, r * 0.62); }
 /* miệng cười; open > 0 thì há ra */
 function smile(x, y, r, open) {
   if (open > 0) {
@@ -1039,6 +1290,7 @@ function drawJelly(c, t) {
   const pulse = Math.sin(c.phase);
   const rx = s * (0.5 + 0.06 * pulse), ry = s * (0.42 - 0.06 * pulse);
   const glow = theme.glow;
+  const body = hsl(c.hue, 85, 72), pale = hsl(c.hue, 90, 88), dark = hsl(c.hue, 70, 58);
 
   ctx.save();
   ctx.translate(c.x, c.y);
@@ -1051,32 +1303,34 @@ function drawJelly(c, t) {
     ctx.beginPath(); ctx.arc(0, 0, s * 1.5, 0, TAU); ctx.fill();
   }
 
-  /* tua rua */
+  /* tua: dải mập uốn lượn, đầu bo tròn */
   ctx.lineCap = 'round';
-  for (let i = 0; i < 7; i++) {
-    const ox = (i / 6 - 0.5) * rx * 1.5;
-    const len = s * (0.9 + 0.5 * Math.sin(i * 1.7));
-    const sw = Math.sin(c.phase * 1.2 + i * 0.8) * s * 0.22;
-    ctx.strokeStyle = 'hsla(' + c.hue + ',85%,' + (70 + glow * 15) + '%,.7)';
-    ctx.lineWidth = Math.max(2, s * 0.07);
+  for (let i = 0; i < 5; i++) {
+    const ox = (i / 4 - 0.5) * rx * 1.3;
+    const len = s * (0.75 + 0.35 * Math.sin(i * 1.7 + 1));
+    const sw = Math.sin(c.phase * 1.2 + i * 0.9) * s * 0.2;
+    ctx.strokeStyle = i % 2 ? dark : body;
+    ctx.lineWidth = Math.max(3, s * 0.1);
     ctx.beginPath();
-    ctx.moveTo(ox, ry * 0.75);
-    ctx.quadraticCurveTo(ox + sw, ry * 0.75 + len * 0.55, ox + sw * 1.7, ry * 0.75 + len);
+    ctx.moveTo(ox, ry * 0.6);
+    ctx.bezierCurveTo(ox + sw, ry * 0.6 + len * 0.35, ox - sw, ry * 0.6 + len * 0.7, ox + sw * 1.3, ry * 0.6 + len);
     ctx.stroke();
   }
 
-  /* chuông phẳng hai tông */
-  ctx.fillStyle = 'hsla(' + c.hue + ',90%,72%,.85)';
-  ctx.beginPath();
-  ctx.ellipse(0, 0, rx, ry, 0, Math.PI, 0);
-  ctx.quadraticCurveTo(rx * 0.55, ry * 0.85, 0, ry * 0.62);
-  ctx.quadraticCurveTo(-rx * 0.55, ry * 0.85, -rx, 0);
-  ctx.fill();
-  ctx.fillStyle = 'hsla(' + c.hue + ',95%,88%,.8)';
-  dot(-rx * 0.2, -ry * 0.45, rx * 0.4, ry * 0.3);
+  /* chuông hai tông: thân đậm, viền dưới nhạt lượn sóng */
+  ctx.fillStyle = body;
+  ctx.beginPath(); ctx.ellipse(0, 0, rx, ry, 0, Math.PI, 0);
+  ctx.quadraticCurveTo(rx * 0.55, ry * 0.9, 0, ry * 0.7);
+  ctx.quadraticCurveTo(-rx * 0.55, ry * 0.9, -rx, 0); ctx.fill();
+  ctx.fillStyle = pale;
+  ctx.beginPath(); ctx.moveTo(-rx * 0.98, ry * 0.05);
+  for (let i = 0; i < 4; i++) { const x0 = -rx * 0.98 + (i / 4) * rx * 1.96, x1 = x0 + rx * 0.49; ctx.quadraticCurveTo((x0 + x1) / 2, ry * 0.95, x1, ry * 0.4 + Math.abs(i - 1.5) * ry * -0.12); }
+  ctx.lineTo(rx * 0.98, ry * 0.05); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = 'rgba(255,255,255,.55)'; dot(-rx * 0.35, -ry * 0.5, rx * 0.22, ry * 0.16);
 
-  eyes(rx * 0.25, ry * 0.15, s * 0.07, 0.15);
-  smile(rx * 0.1, ry * 0.42, s * 0.05, 0);
+  blush(-rx * 0.3, ry * 0.3, s * 0.06); blush(rx * 0.5, ry * 0.3, s * 0.06);
+  eyes(rx * 0.22, ry * 0.08, s * 0.09, 0.15);
+  smile(rx * 0.05, ry * 0.5, s * 0.07, c.pop > 0.5 ? c.pop : 0);
   ctx.restore();
 }
 
@@ -1088,27 +1342,30 @@ function drawTurtle(c, t) {
   ctx.scale(c.dir, 1);
 
   const flap = Math.sin(c.phase * 0.9);
-  const skin = hsl(c.hue, 45, 52), shell = hsl(c.hue, 50, 40), shell2 = hsl(c.hue + 10, 55, 55);
+  const skin = hsl(c.hue, 45, 55), skinPale = hsl(c.hue, 45, 78), shell = hsl(c.hue, 50, 40), plate = hsl(c.hue + 10, 55, 55), rim = hsl(c.hue + 5, 50, 70);
 
-  /* chân chèo */
+  /* chân chèo mập, bo tròn */
   ctx.fillStyle = skin;
-  dot(-s * 0.44, s * 0.2, s * 0.16, s * 0.09);
-  ctx.save(); ctx.translate(s * 0.22, s * 0.22); ctx.rotate(2.1 + flap * 0.45); leaf(s * 0.42, s * 0.11); ctx.fill(); ctx.restore();
-  ctx.save(); ctx.translate(s * 0.16, -s * 0.24); ctx.rotate(0.9 - flap * 0.45); leaf(s * 0.4, s * 0.1); ctx.fill(); ctx.restore();
+  ctx.save(); ctx.translate(-s * 0.42, s * 0.18); ctx.rotate(2.6 + flap * 0.2); leaf(s * 0.3, s * 0.1); ctx.fill(); ctx.restore();
+  ctx.save(); ctx.translate(s * 0.2, s * 0.24); ctx.rotate(2.1 + flap * 0.5); leaf(s * 0.5, s * 0.15); ctx.fill(); ctx.restore();
+  ctx.save(); ctx.translate(s * 0.14, -s * 0.26); ctx.rotate(0.9 - flap * 0.5); leaf(s * 0.46, s * 0.13); ctx.fill(); ctx.restore();
 
-  /* đầu */
-  dot(s * 0.52, -s * 0.02, s * 0.19, s * 0.15);
-  ctx.fillStyle = hsl(c.hue, 45, 70); dot(s * 0.52, s * 0.05, s * 0.14, s * 0.06);
+  /* đầu to tròn, cằm nhạt */
+  ctx.fillStyle = skin; dot(s * 0.6, -s * 0.02, s * 0.24, s * 0.2);
+  ctx.fillStyle = skinPale; dot(s * 0.62, s * 0.08, s * 0.18, s * 0.09);
 
-  /* mai phẳng hai tông */
-  ctx.fillStyle = shell; dot(0, 0, s * 0.5, s * 0.36);
-  ctx.fillStyle = shell2;
-  const spots = [[0, 0, 0.17, 0.13], [-0.26, -0.06, 0.12, 0.1], [0.26, -0.05, 0.12, 0.1],
-                 [-0.13, 0.19, 0.1, 0.08], [0.14, 0.19, 0.1, 0.08], [0, -0.22, 0.11, 0.08]];
+  /* mai hai tông: viền nhạt dưới, mảng vảy sáng */
+  ctx.fillStyle = shell; dot(0, 0, s * 0.52, s * 0.38);
+  ctx.fillStyle = rim; ctx.beginPath(); ctx.ellipse(0, 0, s * 0.52, s * 0.38, 0, 0.15, Math.PI - 0.15); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = shell; dot(0, -s * 0.02, s * 0.46, s * 0.3);
+  ctx.fillStyle = plate;
+  const spots = [[0, -0.02, 0.15, 0.12], [-0.25, -0.06, 0.11, 0.09], [0.25, -0.05, 0.11, 0.09],
+                 [-0.13, 0.15, 0.1, 0.07], [0.14, 0.15, 0.1, 0.07], [0, -0.2, 0.1, 0.06]];
   for (const sp of spots) dot(sp[0] * s, sp[1] * s, sp[2] * s, sp[3] * s);
 
-  eyes(s * 0.6, -s * 0.07, s * 0.055, 0.3);
-  smile(s * 0.6, s * 0.06, s * 0.04, c.pop > 0.5 ? c.pop : 0);
+  blush(s * 0.6, s * 0.06, s * 0.05);
+  eyes(s * 0.7, -s * 0.08, s * 0.08, 0.3);
+  smile(s * 0.72, s * 0.07, s * 0.055, c.pop > 0.5 ? c.pop : 0);
   ctx.restore();
 }
 
@@ -1119,44 +1376,44 @@ function drawSeahorse(c, t) {
   ctx.translate(c.x, c.y + Math.sin(c.phase * 0.5) * s * 0.06);
   ctx.rotate(sway);
   ctx.scale(c.dir, 1);
+  const body = hsl(c.hue, 88, 58), pale = hsl(c.hue, 92, 84), fin = hsl(c.hue + 15, 85, 72), dark = hsl(c.hue, 80, 45);
 
-  /* vây lưng rung */
-  ctx.fillStyle = hsl(c.hue + 15, 85, 72);
+  /* vây lưng rung, bo tròn */
+  ctx.fillStyle = fin;
   ctx.beginPath();
-  ctx.moveTo(-s * 0.12, -s * 0.15);
-  ctx.quadraticCurveTo(-s * 0.36 + Math.sin(c.phase * 6) * s * 0.03, 0, -s * 0.12, s * 0.22);
+  ctx.moveTo(-s * 0.1, -s * 0.16);
+  ctx.quadraticCurveTo(-s * 0.42 + Math.sin(c.phase * 6) * s * 0.03, -s * 0.02, -s * 0.34, s * 0.12);
+  ctx.quadraticCurveTo(-s * 0.2, s * 0.22, -s * 0.06, s * 0.22);
   ctx.closePath(); ctx.fill();
 
-  /* thân cong chữ S + đuôi cuộn */
-  ctx.strokeStyle = hsl(c.hue, 88, 58);
-  ctx.lineWidth = s * 0.26;
+  /* thân mập cong chữ S + đuôi cuộn */
   ctx.lineCap = 'round';
+  ctx.strokeStyle = body; ctx.lineWidth = s * 0.32;
   ctx.beginPath();
-  ctx.moveTo(0, -s * 0.3);
+  ctx.moveTo(0, -s * 0.28);
   ctx.quadraticCurveTo(s * 0.16, -s * 0.02, -s * 0.02, s * 0.22);
-  ctx.quadraticCurveTo(-s * 0.16, s * 0.42, s * 0.04, s * 0.46);
+  ctx.quadraticCurveTo(-s * 0.16, s * 0.42, s * 0.06, s * 0.46);
   ctx.stroke();
+  ctx.strokeStyle = body; ctx.lineWidth = s * 0.14;
+  ctx.beginPath(); ctx.moveTo(s * 0.06, s * 0.46); ctx.quadraticCurveTo(s * 0.2, s * 0.44, s * 0.14, s * 0.34); ctx.stroke();
+  /* bụng nhạt */
+  ctx.strokeStyle = pale; ctx.lineWidth = s * 0.14;
+  ctx.beginPath(); ctx.moveTo(s * 0.08, -s * 0.18); ctx.quadraticCurveTo(s * 0.22, -s * 0.02, s * 0.04, s * 0.2); ctx.stroke();
+  /* gai lưng */
+  ctx.fillStyle = dark;
+  for (let i = 0; i < 5; i++) dot(-s * 0.13 + Math.sin(i * 0.9) * s * 0.03, -s * 0.2 + i * s * 0.11, s * 0.035, s * 0.028);
 
-  /* bụng sáng + đốt */
-  ctx.strokeStyle = hsl(c.hue + 10, 92, 82);
-  ctx.lineWidth = s * 0.1;
-  ctx.beginPath();
-  ctx.moveTo(s * 0.06, -s * 0.22);
-  ctx.quadraticCurveTo(s * 0.2, -s * 0.02, s * 0.02, s * 0.18);
-  ctx.stroke();
+  /* đầu to, mõm bo tròn, mào */
+  ctx.fillStyle = body; dot(s * 0.02, -s * 0.38, s * 0.2, s * 0.17);
+  ctx.strokeStyle = body; ctx.lineWidth = s * 0.12;
+  ctx.beginPath(); ctx.moveTo(s * 0.14, -s * 0.36); ctx.quadraticCurveTo(s * 0.3, -s * 0.36, s * 0.36, -s * 0.3); ctx.stroke();
+  ctx.fillStyle = pale; dot(s * 0.06, -s * 0.28, s * 0.14, s * 0.06);
+  ctx.fillStyle = fin;
+  for (let i = 0; i < 3; i++) dot(-s * 0.1 + i * s * 0.07, -s * 0.54 + Math.abs(i - 1) * s * 0.02, s * 0.045, s * 0.04);
 
-  /* đầu và mõm */
-  ctx.fillStyle = hsl(c.hue, 88, 60);
-  dot(s * 0.02, -s * 0.36, s * 0.16, s * 0.14);
-  ctx.beginPath();
-  ctx.moveTo(s * 0.1, -s * 0.42);
-  ctx.quadraticCurveTo(s * 0.34, -s * 0.36, s * 0.32, -s * 0.28);
-  ctx.quadraticCurveTo(s * 0.18, -s * 0.27, s * 0.1, -s * 0.31);
-  ctx.fill();
-  ctx.fillStyle = hsl(c.hue + 15, 85, 72);
-  for (let i = 0; i < 3; i++) dot(-s * 0.06 + i * s * 0.03, -s * 0.5 + i * s * 0.02, s * 0.035);
-
-  eye1(s * 0.07, -s * 0.4, s * 0.07, 0.3);
+  blush(s * 0.02, -s * 0.3, s * 0.045);
+  eyes(s * 0.1, -s * 0.42, s * 0.07, 0.3);
+  smile(s * 0.34, -s * 0.24, s * 0.035, 0);
   ctx.restore();
 }
 
@@ -1167,10 +1424,12 @@ function drawCrab(c, t) {
   ctx.translate(c.x, c.y);
   ctx.scale(c.dir, 1);
 
-  const body = hsl(c.hue, 82, 58), dark = hsl(c.hue, 75, 45);
-  ctx.strokeStyle = dark;
-  ctx.lineWidth = Math.max(2.5, s * 0.08);
+  const body = hsl(c.hue, 82, 58), dark = hsl(c.hue, 75, 45), pale = hsl(c.hue, 85, 78);
   ctx.lineCap = 'round';
+
+  /* chân mập */
+  ctx.strokeStyle = dark;
+  ctx.lineWidth = Math.max(3, s * 0.1);
   for (let i = 0; i < 3; i++) {
     const bx = (-0.3 + i * 0.3) * s;
     const lift = Math.sin(c.phase * 2.2 + i) * s * 0.06;
@@ -1182,38 +1441,43 @@ function drawCrab(c, t) {
     }
   }
 
-  /* càng */
+  /* càng to */
   for (const sgn of [-1, 1]) {
-    const a = sgn * (0.5 + step * 0.12);
     ctx.save();
-    ctx.translate(s * 0.42, sgn * s * 0.24);
-    ctx.rotate(a * 0.4);
-    ctx.fillStyle = body; dot(0, 0, s * 0.2, s * 0.13);
-    ctx.fillStyle = dark; dot(s * 0.14, -s * 0.05, s * 0.1, s * 0.05);
+    ctx.translate(s * 0.4, sgn * s * 0.3);
+    ctx.rotate(sgn * (0.25 + step * 0.12));
+    ctx.strokeStyle = dark; ctx.lineWidth = Math.max(3, s * 0.1);
+    ctx.beginPath(); ctx.moveTo(-s * 0.2, -sgn * s * 0.05); ctx.lineTo(0, 0); ctx.stroke();
+    ctx.fillStyle = body; dot(s * 0.12, 0, s * 0.22, s * 0.16);
+    ctx.fillStyle = dark; dot(s * 0.28, -s * 0.09, s * 0.12, s * 0.06);
+    ctx.fillStyle = hsl(c.hue, 20, 25); dot(s * 0.3, -s * 0.02, s * 0.06, s * 0.035);
     ctx.restore();
   }
 
-  /* mai phẳng */
-  ctx.fillStyle = body; dot(0, 0, s * 0.42, s * 0.3);
-  ctx.fillStyle = hsl(c.hue, 85, 70); dot(-s * 0.1, -s * 0.12, s * 0.18, s * 0.08);
+  /* mai hai tông */
+  ctx.fillStyle = body; dot(0, 0, s * 0.46, s * 0.32);
+  ctx.fillStyle = pale; ctx.beginPath(); ctx.ellipse(0, 0, s * 0.46, s * 0.32, 0, 0.3, Math.PI - 0.3); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = body; dot(0, -s * 0.02, s * 0.4, s * 0.24);
+  ctx.fillStyle = 'rgba(255,255,255,.35)'; dot(-s * 0.16, -s * 0.14, s * 0.14, s * 0.06);
 
-  /* mắt trên cuống */
-  ctx.strokeStyle = dark;
-  ctx.lineWidth = Math.max(2, s * 0.06);
+  /* mắt trên cuống mập */
+  ctx.strokeStyle = dark; ctx.lineWidth = Math.max(3, s * 0.08);
   for (const sgn of [-1, 1]) {
-    ctx.beginPath(); ctx.moveTo(sgn * s * 0.13, -s * 0.16); ctx.lineTo(sgn * s * 0.16, -s * 0.36); ctx.stroke();
-    eye1(sgn * s * 0.16, -s * 0.42, s * 0.09, sgn * 0.2);
+    ctx.beginPath(); ctx.moveTo(sgn * s * 0.13, -s * 0.16); ctx.lineTo(sgn * s * 0.17, -s * 0.36); ctx.stroke();
+    eye1(sgn * s * 0.17, -s * 0.42, s * 0.1, sgn * 0.15);
   }
-  smile(0, s * 0.02, s * 0.1, 0);
+  ctx.fillStyle = 'rgba(255,120,140,.45)'; dot(-s * 0.26, s * 0.05, s * 0.06, s * 0.035); dot(s * 0.26, s * 0.05, s * 0.06, s * 0.035);
+  smile(0, s * 0.02, s * 0.1, c.pop > 0.5 ? c.pop : 0);
   ctx.restore();
 }
 
 function drawStar(c, t) {
   const s = c.size * (1 + 0.25 * c.pop);
+  const body = hsl(c.hue, 90, 62), dark = hsl(c.hue, 80, 45);
   ctx.save();
   ctx.translate(c.x, c.y);
   ctx.rotate(c.rot);
-  ctx.scale(1, 0.72);                       /* nằm hơi bẹp trên cát */
+  ctx.scale(1, 0.75);
 
   ctx.beginPath();
   for (let i = 0; i < 5; i++) {
@@ -1221,27 +1485,28 @@ function drawStar(c, t) {
     const a2 = a1 + TAU / 10;
     const bend = 1 + 0.05 * Math.sin(c.phase * 0.6 + i);
     const px1 = Math.cos(a1) * s * 0.55 * bend, py1 = Math.sin(a1) * s * 0.55 * bend;
-    const px2 = Math.cos(a2) * s * 0.22, py2 = Math.sin(a2) * s * 0.22;
+    const px2 = Math.cos(a2) * s * 0.24, py2 = Math.sin(a2) * s * 0.24;
     if (i === 0) ctx.moveTo(px1, py1); else ctx.quadraticCurveTo(px2 * 1.5, py2 * 1.5, px1, py1);
     ctx.quadraticCurveTo(px2 * 1.5, py2 * 1.5, Math.cos(a2 + TAU / 10) * s * 0.55 * bend,
                                                Math.sin(a2 + TAU / 10) * s * 0.55 * bend);
   }
   ctx.closePath();
-  ctx.fillStyle = hsl(c.hue, 90, 62);
-  ctx.lineJoin = 'round'; ctx.strokeStyle = hsl(c.hue, 90, 62); ctx.lineWidth = s * 0.1; ctx.stroke();
+  ctx.fillStyle = body;
+  ctx.lineJoin = 'round'; ctx.strokeStyle = body; ctx.lineWidth = s * 0.16; ctx.stroke();
   ctx.fill();
 
-  ctx.fillStyle = hsl(c.hue, 80, 45);
+  ctx.fillStyle = dark;
   for (let i = 0; i < 5; i++) {
     const a = (i / 5) * TAU - Math.PI / 2;
-    dot(Math.cos(a) * s * 0.36, Math.sin(a) * s * 0.36, s * 0.04);
-    dot(Math.cos(a) * s * 0.2, Math.sin(a) * s * 0.2, s * 0.035);
+    dot(Math.cos(a) * s * 0.42, Math.sin(a) * s * 0.42, s * 0.045);
+    dot(Math.cos(a) * s * 0.26, Math.sin(a) * s * 0.26, s * 0.04);
   }
   ctx.restore();
   /* mặt luôn thẳng đứng */
   ctx.save(); ctx.translate(c.x, c.y);
-  eyes(s * 0.08, -s * 0.05, s * 0.07, 0.1);
-  smile(0, s * 0.08, s * 0.06, 0);
+  eyes(s * 0.1, -s * 0.06, s * 0.085, 0.1);
+  ctx.fillStyle = 'rgba(255,120,140,.45)'; dot(-s * 0.2, s * 0.06, s * 0.05, s * 0.03); dot(s * 0.2, s * 0.06, s * 0.05, s * 0.03);
+  smile(0, s * 0.08, s * 0.07, c.pop > 0.5 ? c.pop : 0);
   ctx.restore();
 }
 
@@ -1252,33 +1517,34 @@ function drawRay(c, t) {
   ctx.translate(c.x, c.y);
   ctx.rotate(Math.atan2(c.vy * 0.4, Math.abs(c.vx) + 60) * c.dir);
   ctx.scale(c.dir, 1);
+  const body = hsl(c.hue, 50, 60), pale = hsl(c.hue, 55, 84), dark = hsl(c.hue, 45, 48);
 
-  /* đuôi */
-  ctx.strokeStyle = hsl(c.hue, 40, 45);
-  ctx.lineWidth = Math.max(2, s * 0.05);
+  /* đuôi mập thon dần */
   ctx.lineCap = 'round';
-  ctx.beginPath();
-  ctx.moveTo(-s * 0.38, 0);
-  ctx.quadraticCurveTo(-s * 0.7, flap * s * 0.12, -s * 0.95, flap * s * 0.2);
-  ctx.stroke();
+  ctx.strokeStyle = dark; ctx.lineWidth = Math.max(4, s * 0.09);
+  ctx.beginPath(); ctx.moveTo(-s * 0.36, 0); ctx.quadraticCurveTo(-s * 0.62, flap * s * 0.1, -s * 0.78, flap * s * 0.16); ctx.stroke();
+  ctx.lineWidth = Math.max(2, s * 0.045);
+  ctx.beginPath(); ctx.moveTo(-s * 0.76, flap * s * 0.16); ctx.quadraticCurveTo(-s * 0.9, flap * s * 0.2, -s * 1.02, flap * s * 0.24); ctx.stroke();
 
-  /* thân + cánh vẫy, phẳng */
-  ctx.fillStyle = hsl(c.hue, 50, 60);
-  ctx.beginPath();
-  ctx.moveTo(s * 0.42, 0);
-  ctx.quadraticCurveTo(s * 0.1, -s * 0.16, -s * 0.1, -s * (0.34 + flap * 0.12));
-  ctx.quadraticCurveTo(-s * 0.34, -s * (0.24 + flap * 0.08), -s * 0.36, 0);
-  ctx.quadraticCurveTo(-s * 0.34, s * (0.24 + flap * 0.08), -s * 0.1, s * (0.34 + flap * 0.12));
-  ctx.quadraticCurveTo(s * 0.1, s * 0.16, s * 0.42, 0);
-  ctx.fill();
-  ctx.fillStyle = hsl(c.hue, 55, 78); dot(s * 0.05, 0, s * 0.3, s * 0.1);
+  /* thân + cánh vẫy, mập hơn */
+  const bp = () => {
+    ctx.beginPath();
+    ctx.moveTo(s * 0.46, 0);
+    ctx.quadraticCurveTo(s * 0.2, -s * 0.2, -s * 0.05, -s * (0.44 + flap * 0.12));
+    ctx.quadraticCurveTo(-s * 0.36, -s * (0.3 + flap * 0.08), -s * 0.4, 0);
+    ctx.quadraticCurveTo(-s * 0.36, s * (0.3 + flap * 0.08), -s * 0.05, s * (0.44 + flap * 0.12));
+    ctx.quadraticCurveTo(s * 0.2, s * 0.2, s * 0.46, 0); ctx.closePath();
+  };
+  bp(); ctx.fillStyle = body; ctx.fill();
+  ctx.save(); bp(); ctx.clip(); ctx.fillStyle = pale; dot(s * 0.12, s * 0.1, s * 0.4, s * 0.16); ctx.restore();
 
   /* đốm trên lưng */
   ctx.fillStyle = hsl(c.hue + 15, 55, 80);
-  for (const sp of [[-0.12, -0.2], [-0.2, 0.16], [-0.26, -0.04]]) dot(sp[0] * s, sp[1] * s, s * 0.045, s * 0.035);
+  for (const sp of [[-0.1, -0.26], [-0.22, 0.2], [-0.26, -0.06], [0.02, -0.3]]) dot(sp[0] * s, sp[1] * s, s * 0.05, s * 0.04);
 
-  eyes(s * 0.3, -s * 0.06, s * 0.065, 0.3);
-  smile(s * 0.32, s * 0.08, s * 0.05, 0);
+  blush(s * 0.22, s * 0.08, s * 0.05);
+  eyes(s * 0.3, -s * 0.07, s * 0.085, 0.3);
+  smile(s * 0.33, s * 0.09, s * 0.06, c.pop > 0.5 ? c.pop : 0);
   ctx.restore();
 }
 
@@ -1287,27 +1553,33 @@ function drawOctopus(c, t) {
   ctx.save();
   ctx.translate(c.x, c.y);
   ctx.scale(c.dir, 1);
+  const body = hsl(c.hue, 65, 62), pale = hsl(c.hue, 70, 82), dark = hsl(c.hue, 60, 52);
 
-  /* 8 tua */
-  ctx.strokeStyle = hsl(c.hue, 62, 55);
+  /* 6 tua mập, cuộn đầu, có đốm hút */
   ctx.lineCap = 'round';
-  for (let i = 0; i < 8; i++) {
-    const ox = ((i / 7) - 0.5) * s * 0.62;
+  for (let i = 0; i < 6; i++) {
+    const ox = ((i / 5) - 0.5) * s * 0.7;
     const w = Math.sin(c.phase * 1.4 + i * 0.9);
-    const len = s * (0.5 + 0.22 * Math.sin(i * 1.3));
-    ctx.lineWidth = Math.max(2.5, s * 0.1 * (1 - Math.abs(i - 3.5) / 9));
+    const len = s * (0.5 + 0.2 * Math.sin(i * 1.3));
+    const curl = (i < 3 ? -1 : 1) * s * 0.18;
+    ctx.strokeStyle = i % 2 ? dark : body;
+    ctx.lineWidth = Math.max(4, s * 0.13);
     ctx.beginPath();
-    ctx.moveTo(ox, s * 0.16);
-    ctx.quadraticCurveTo(ox + w * s * 0.18, s * 0.16 + len * 0.6, ox + w * s * 0.3, s * 0.16 + len);
+    ctx.moveTo(ox, s * 0.14);
+    ctx.bezierCurveTo(ox + w * s * 0.1, s * 0.14 + len * 0.5, ox + w * s * 0.25, s * 0.14 + len, ox + w * s * 0.2 + curl, s * 0.14 + len * 0.9);
     ctx.stroke();
+    ctx.fillStyle = pale;
+    dot(ox + w * s * 0.08, s * 0.14 + len * 0.45, s * 0.03); dot(ox + w * s * 0.18, s * 0.14 + len * 0.75, s * 0.028);
   }
 
-  /* đầu phẳng + mảng sáng */
-  ctx.fillStyle = hsl(c.hue, 65, 60); dot(0, -s * 0.04, s * 0.4, s * 0.42);
-  ctx.fillStyle = hsl(c.hue, 70, 75); dot(-s * 0.1, -s * 0.28, s * 0.18, s * 0.1);
+  /* đầu hai tông */
+  ctx.fillStyle = body; dot(0, -s * 0.06, s * 0.44, s * 0.46);
+  ctx.fillStyle = pale; dot(0, s * 0.16, s * 0.34, s * 0.16);
+  ctx.fillStyle = 'rgba(255,255,255,.4)'; dot(-s * 0.16, -s * 0.34, s * 0.16, s * 0.08);
 
-  eyes(s * 0.14, -s * 0.06, s * 0.11, 0.05);
-  smile(s * 0.02, s * 0.14, s * 0.07, 0);
+  eyes(s * 0.16, -s * 0.1, s * 0.12, 0.05);
+  ctx.fillStyle = 'rgba(255,120,140,.45)'; dot(-s * 0.28, s * 0.06, s * 0.07, s * 0.04); dot(s * 0.28, s * 0.06, s * 0.07, s * 0.04);
+  smile(s * 0.02, s * 0.1, s * 0.08, c.pop > 0.5 ? c.pop : 0);
   ctx.restore();
 }
 
@@ -1350,8 +1622,10 @@ function drawShark(c, t) {
   for (let i = 0; i < 3; i++) { ctx.beginPath(); ctx.arc(s * 0.02 - i * s * 0.06, s * 0.02, s * 0.1, -0.5, 0.5); ctx.stroke(); }
 
   /* mặt: mắt to, miệng cười có răng nhỏ */
+  blush(s * 0.28, s * 0.06, s * 0.07);
   eyes(s * 0.42, -s * 0.1, s * 0.11, 0.3);
-  if (c.pop > 0.5) { smile(s * 0.44, s * 0.12, s * 0.08, c.pop); }
+  if (FACE.sleep) { smile(s * 0.44, s * 0.12, s * 0.06, 0); }
+  else if (c.pop > 0.5) { smile(s * 0.44, s * 0.12, s * 0.08, c.pop); }
   else {
     ctx.strokeStyle = 'rgba(40,20,30,.7)'; ctx.lineWidth = Math.max(1, s * 0.025);
     ctx.beginPath(); ctx.arc(s * 0.4, s * 0.1, s * 0.17, 0.25, Math.PI * 0.75); ctx.stroke();
@@ -1381,6 +1655,7 @@ function drawCritter(c, t) {
 function touchCritter(px, py) {
   for (let i = critters.length - 1; i >= 0; i--) {
     const c = critters[i];
+    if (wokeNow.has(c) || c.sleep > 0) continue;
     if (Math.hypot(px - c.x, py - c.y) > c.size * 0.75) continue;
 
     c.startle = 1;
@@ -1470,6 +1745,7 @@ function drawSand(t) {
     const k = ((i * 7919) % 100) / 100, k2 = ((i * 104729) % 100) / 100;
     dot(k * W, sandY + 16 + k2 * (H - sandY - 20), 6 + k2 * 8, 2.5 + k * 3);
   }
+  for (const p of pebbles) { ctx.fillStyle = hsl(p.hue, 55, 55); dot(p.x, p.y, p.rx, p.ry); ctx.fillStyle = hsl(p.hue, 55, 70); dot(p.x - p.rx * 0.3, p.y - p.ry * 0.3, p.rx * 0.35, p.ry * 0.35); }
 }
 
 function drawRocks(t) {
@@ -1530,26 +1806,140 @@ function drawCoral(r, t) {
   ctx.restore();
 }
 
-function drawWeeds(t) {
-  /* rong biển dải rộng uốn lượn, hai tông xanh phẳng */
-  for (const wd of weeds) {
-    for (let b = 0; b < wd.blades; b++) {
-      const off = (b - (wd.blades - 1) / 2) * wd.w * 1.4;
-      const h = wd.h * (1 - Math.abs(b - (wd.blades - 1) / 2) * 0.16);
-      const width = wd.w * 0.75, seg = 6;
-      ctx.fillStyle = b % 2 ? hsl(wd.hue, 55, 40) : hsl(wd.hue, 60, 50);
-      ctx.beginPath(); ctx.moveTo(wd.x + off - width, sandY + 8);
-      for (let k = 1; k <= seg; k++) {
-        const y = sandY - h * (k / seg), sw = Math.sin(t * wd.speed + wd.phase + b + k * 0.9) * wd.w * 1.2 * (k / seg);
-        ctx.lineTo(wd.x + off + sw - width * (1 - (k / seg) * 0.6), y);
+/* cột đá xanh cao có rong bám, sỏi cam dưới chân; con trốn được vẽ trước để ló nửa người */
+function drawPillar(p, t) {
+  const x = p.x, w = p.w, h = p.h, base = sandY + 10;
+  ctx.fillStyle = hsl(228, 72, 50);
+  ctx.beginPath(); ctx.moveTo(x - w * 0.5, base);
+  ctx.lineTo(x - w * 0.44, base - h * 0.62); ctx.quadraticCurveTo(x - w * 0.4, base - h * 1.02, x - w * 0.08, base - h);
+  ctx.quadraticCurveTo(x + w * 0.3, base - h * 0.98, x + w * 0.4, base - h * 0.7); ctx.lineTo(x + w * 0.5, base); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = hsl(228, 75, 62); dot(x - w * 0.12, base - h * 0.72, w * 0.22, h * 0.13); dot(x + w * 0.16, base - h * 0.4, w * 0.14, h * 0.09);
+  ctx.fillStyle = hsl(228, 70, 36); dot(x + w * 0.2, base - h * 0.86, w * 0.08, h * 0.045); dot(x - w * 0.24, base - h * 0.3, w * 0.07, h * 0.04);
+  /* rong xanh bám trên đá */
+  ctx.lineCap = 'round';
+  for (let i = 0; i < 3; i++) {
+    const bx = x + (i - 1) * w * 0.22, by = base - h * (0.55 + i * 0.15), len = h * 0.22, sw = Math.sin(t * 1.3 + p.phase + i) * w * 0.12;
+    ctx.strokeStyle = i % 2 ? hsl(85, 60, 52) : hsl(95, 55, 42); ctx.lineWidth = Math.max(3, w * 0.06);
+    ctx.beginPath(); ctx.moveTo(bx, by); ctx.quadraticCurveTo(bx + sw * 0.4, by - len * 0.5, bx + sw, by - len); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(bx, by); ctx.quadraticCurveTo(bx - sw * 0.3 + w * 0.06, by - len * 0.4, bx + w * 0.1 - sw * 0.5, by - len * 0.8); ctx.stroke();
+  }
+  ctx.fillStyle = hsl(25, 82, 58);
+  for (let i = 0; i < 4; i++) dot(x - w * 0.55 + i * w * 0.36, base - 3, w * 0.1, w * 0.05);
+}
+/* san hô thùng: thân tròn có đốm, lỗ tối phía trên để chui vào */
+function drawSpongeBody(sp) {
+  const x = sp.x, r = sp.r, by = sandY + 8;
+  ctx.fillStyle = hsl(sp.hue, 80, 55);
+  rr(x - r, by - r * 1.75, r * 2, r * 1.75, r * 0.7); ctx.fill();
+  ctx.fillStyle = hsl(sp.hue, 85, 72);
+  for (let i = 0; i < 6; i++) dot(x - r * 0.7 + (i % 3) * r * 0.7, by - r * (0.5 + Math.floor(i / 3) * 0.5) - (i % 2) * r * 0.15, r * 0.11, r * 0.09);
+  ctx.fillStyle = hsl(sp.hue, 60, 20); dot(x, sp.hy, r * 0.72, r * 0.44);
+}
+function drawSpongeRim(sp) {
+  ctx.strokeStyle = hsl(sp.hue, 80, 62); ctx.lineWidth = Math.max(3, sp.r * 0.16);
+  ctx.beginPath(); ctx.ellipse(sp.x, sp.hy, sp.r * 0.72, sp.r * 0.44, 0, 0, TAU); ctx.stroke();
+}
+function drawSpots(t) {
+  const all = critters.concat(fishes);
+  for (const sp of spots) {
+    const inside = all.filter((a) => a.hide && a.hide.spot === sp && a.hide.phase === 'in');
+    if (sp.kind === 'pillar') {
+      for (const a of inside) drawAnimal(a, t);
+      drawPillar(sp, t);
+    } else {
+      drawSpongeBody(sp);
+      for (const a of inside) {
+        const k = Math.min(1, sp.r * 1.15 / a.size);
+        ctx.save();
+        ctx.beginPath(); ctx.ellipse(sp.x, sp.hy, sp.r * 0.72, sp.r * 0.44, 0, 0, TAU); ctx.clip();
+        ctx.translate(sp.x, sp.hy + sp.r * 0.12); ctx.scale(k, k); ctx.translate(-a.x, -a.y);
+        drawAnimal(a, t);
+        ctx.restore();
       }
-      for (let k = seg; k >= 0; k--) {
-        const y = sandY - h * (k / seg), sw = Math.sin(t * wd.speed + wd.phase + b + k * 0.9) * wd.w * 1.2 * (k / seg);
-        ctx.lineTo(wd.x + off + sw + width * (1 - (k / seg) * 0.6), y);
-      }
-      ctx.closePath(); ctx.fill();
+      drawSpongeRim(sp);
     }
   }
+}
+
+function drawWeeds(t) {
+  ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  for (const wd of weeds) {
+    const sw = (k, f) => Math.sin(t * wd.speed * (f || 1) + wd.phase + k) ;
+    switch (wd.type) {
+      case 'fern': case 'red': {
+        /* thân cong + lá kép hai bên nhỏ dần về ngọn */
+        const dark = hsl(wd.hue, wd.type === 'red' ? 70 : 55, wd.type === 'red' ? 45 : 32);
+        const lite = hsl(wd.hue, wd.type === 'red' ? 75 : 60, wd.type === 'red' ? 62 : 48);
+        for (let b = 0; b < 2; b++) {
+          const off = (b - 0.5) * wd.w * 1.2, h = wd.h * (b ? 0.8 : 1), lean = sw(b, 0.9) * wd.w * 1.5;
+          const px = (k) => wd.x + off + lean * k * k, py = (k) => sandY + 6 - h * k;
+          ctx.strokeStyle = dark; ctx.lineWidth = Math.max(2, wd.w * 0.14);
+          ctx.beginPath(); ctx.moveTo(px(0), py(0)); ctx.quadraticCurveTo(px(0.5) - lean * 0.15, py(0.5), px(1), py(1)); ctx.stroke();
+          const n = wd.n + 2;
+          for (let k = 1; k <= n; k++) {
+            const u = k / n, x = px(u), y = py(u), len = wd.w * (1.6 - u * 1.1), wdl = wd.w * (0.28 - u * 0.12);
+            const jig = sw(k * 0.7, 2.2) * 0.12;
+            for (const sgn of [-1, 1]) {
+              ctx.save(); ctx.translate(x, y); ctx.rotate(sgn * (1.15 - u * 0.35) + jig + lean * 0.004);
+              ctx.fillStyle = (k + b) % 2 ? lite : dark; leaf(len, wdl); ctx.fill();
+              ctx.restore();
+            }
+          }
+        }
+        break;
+      }
+      case 'round': {
+        /* thân mảnh với lá tròn so le, lá dưới to hơn */
+        const dark = hsl(wd.hue, 50, 36), lite = hsl(wd.hue, 55, 52), pale = hsl(wd.hue, 50, 70);
+        for (let b = 0; b < 2; b++) {
+          const off = (b - 0.5) * wd.w * 1.4, h = wd.h * (b ? 0.75 : 1), lean = sw(b, 0.8) * wd.w * 1.6;
+          const px = (k) => wd.x + off + lean * k * k, py = (k) => sandY + 6 - h * k;
+          ctx.strokeStyle = dark; ctx.lineWidth = Math.max(2, wd.w * 0.12);
+          ctx.beginPath(); ctx.moveTo(px(0), py(0)); ctx.quadraticCurveTo(px(0.5) - lean * 0.2, py(0.5), px(1), py(1)); ctx.stroke();
+          const n = wd.n;
+          for (let k = 1; k <= n; k++) {
+            const u = k / n, r = wd.w * (0.62 - u * 0.28), sgn = k % 2 ? -1 : 1, jig = sw(k, 1.8) * r * 0.15;
+            const x = px(u) + sgn * r * 0.9 + jig, y = py(u) + r * 0.2;
+            ctx.fillStyle = k % 2 ? lite : dark; dot(x, y, r, r * 0.9);
+            ctx.fillStyle = pale; dot(x - r * 0.3, y - r * 0.3, r * 0.3, r * 0.22);
+          }
+        }
+        break;
+      }
+      case 'grass': {
+        /* bụi cỏ mảnh nhiều lá, mỗi lá nhún riêng */
+        const n = wd.n + 3;
+        for (let k = 0; k < n; k++) {
+          const bx = wd.x + (k - (n - 1) / 2) * wd.w * 0.32, h = wd.h * (0.6 + 0.4 * Math.abs(Math.sin(k * 1.7)));
+          const swk = sw(k, 1.1) * wd.w * 1.1;
+          ctx.strokeStyle = hsl(wd.hue, 60, 38 + (k % 3) * 8); ctx.lineWidth = Math.max(2, wd.w * 0.16);
+          ctx.beginPath(); ctx.moveTo(bx, sandY + 6); ctx.quadraticCurveTo(bx + swk * 0.3, sandY - h * 0.5, bx + swk, sandY - h); ctx.stroke();
+        }
+        break;
+      }
+      default: {
+        /* rong dải rộng uốn lượn, có sống lá sáng và ngọn tròn */
+        for (let b = 0; b < wd.blades; b++) {
+          const off = (b - (wd.blades - 1) / 2) * wd.w * 1.4;
+          const h = wd.h * (1 - Math.abs(b - (wd.blades - 1) / 2) * 0.16);
+          const width = wd.w * 0.75, seg = 7;
+          const cx = (k) => wd.x + off + Math.sin(t * wd.speed + wd.phase + b + k * 0.9) * wd.w * 1.2 * (k / seg);
+          const cy = (k) => sandY + 6 - h * (k / seg);
+          const wk = (k) => width * (1 - (k / seg) * 0.55);
+          ctx.fillStyle = b % 2 ? hsl(wd.hue, 55, 40) : hsl(wd.hue, 60, 50);
+          ctx.beginPath(); ctx.moveTo(cx(0) - wk(0), cy(0));
+          for (let k = 1; k <= seg; k++) ctx.lineTo(cx(k) - wk(k), cy(k));
+          ctx.quadraticCurveTo(cx(seg), cy(seg) - wk(seg) * 1.4, cx(seg) + wk(seg), cy(seg));
+          for (let k = seg - 1; k >= 0; k--) ctx.lineTo(cx(k) + wk(k), cy(k));
+          ctx.closePath(); ctx.fill();
+          ctx.strokeStyle = 'rgba(255,255,255,.28)'; ctx.lineWidth = Math.max(1.5, width * 0.22);
+          ctx.beginPath(); ctx.moveTo(cx(0), cy(0)); for (let k = 1; k <= seg - 1; k++) ctx.lineTo(cx(k), cy(k)); ctx.stroke();
+        }
+      }
+    }
+  }
+  /* cây thỉnh thoảng nhả bong bóng oxy */
+  if (weeds.length && Math.random() < 0.012) { const wd = pick(weeds); addBubble(wd.x + rnd(-wd.w, wd.w), sandY - wd.h * rnd(0.4, 0.95), rnd(2, 4)); }
 }
 
 /* ══════════ vẽ cá ══════════ */
@@ -1626,8 +2016,9 @@ function drawFish(f, t) {
   for (let i = 0; i < 2; i++) { ctx.beginPath(); ctx.arc(s * 0.02 - i * s * 0.07, s * 0.02, s * 0.1, -0.5, 0.5); ctx.stroke(); }
 
   /* mặt: hai mắt to, miệng cười (há ra khi đớp mồi) */
+  blush(s * 0.3, s * 0.1, s * 0.07);
   eyes(s * 0.38, -s * 0.12, s * 0.11, 0.3);
-  smile(s * 0.5, s * 0.18, s * 0.06, f.munch);
+  smile(s * 0.5, s * 0.18, s * 0.06, FACE.sleep ? 0 : f.munch);
   ctx.restore();
 }
 
@@ -1672,6 +2063,7 @@ function frame(now) {
   time += dt;
 
   stepTheme(dt);
+  stepBreeding(dt);
 
   /* bong bóng nền */
   bubbleTimer -= dt;
@@ -1702,6 +2094,7 @@ function frame(now) {
     if (f.munch > 0) f.munch = Math.max(0, f.munch - dt * 3);
     if (f.pop > 0) f.pop = Math.max(0, f.pop - dt * 3.2);
     if (f.startle > 0) f.startle = Math.max(0, f.startle - dt * 1.2);
+    if (stepRest(f, dt)) continue;
 
     /* tìm mồi gần nhất */
     let target = null, bestD = Infinity;
@@ -1713,7 +2106,10 @@ function frame(now) {
     }
 
     let tx, ty, speed = f.speed;
-    if (target) {
+    if (f.hide && f.hide.phase === 'go') {
+      const an = spotAnchor(f.hide.spot, f); tx = an.x; ty = an.y;
+      if (Math.hypot(tx - f.x, ty - f.y) < f.size * 0.45) { f.hide.phase = 'in'; f.vx = f.hide.side * 0.01; f.vy = 0; continue; }
+    } else if (target) {
       tx = target.x; ty = target.y; speed = f.speed * 1.9;
       if (bestD < f.size * 0.55) eatFood(f, target);   /* đớp trúng → lớn thêm chút */
     } else {
@@ -1730,7 +2126,7 @@ function frame(now) {
 
     f.x += f.vx * dt;
     f.y += f.vy * dt;
-    keepInTank(f);
+    if (!f.hide) keepInTank(f);
   }
 
   for (const c of critters) updateCritter(c, dt);
@@ -1748,8 +2144,9 @@ function frame(now) {
   drawWater(time);
   drawSand(time);
   drawRocks(time);
+  drawSpots(time);
   drawWeeds(time);
-  for (const c of critters) if (ON_FLOOR[c.kind]) drawCritter(c, time);
+  for (const c of critters) if (ON_FLOOR[c.kind] && vis(c)) drawAnimal(c, time);
 
   for (const fd of foods) {
     ctx.fillStyle = '#b8662c';
@@ -1758,8 +2155,8 @@ function frame(now) {
     ctx.beginPath(); ctx.arc(fd.x - fd.r * 0.3, fd.y - fd.r * 0.3, fd.r * 0.35, 0, 6.2832); ctx.fill();
   }
 
-  for (const f of fishes) drawFish(f, time);
-  for (const c of critters) if (!ON_FLOOR[c.kind]) drawCritter(c, time);
+  for (const f of fishes) if (vis(f)) drawAnimal(f, time);
+  for (const c of critters) if (!ON_FLOOR[c.kind] && vis(c)) drawAnimal(c, time);
 
   for (const b of bubbles) {
     ctx.strokeStyle = 'rgba(255,255,255,.7)';
@@ -1791,6 +2188,15 @@ function frame(now) {
       continue;
     }
 
+    if (p.kind === 'zzz') {
+      p.x += p.vx * dt; p.y += p.vy * dt;
+      ctx.save(); ctx.globalAlpha = Math.min(1, p.life * 1.5);
+      ctx.font = '800 ' + Math.round(p.r * (1.5 - p.life * 0.5)) + "px 'Baloo 2', Arial, sans-serif";
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
+      ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(20,60,110,.55)'; ctx.strokeText('z', p.x, p.y);
+      ctx.fillStyle = '#fff'; ctx.fillText('z', p.x, p.y);
+      ctx.restore(); continue;
+    }
     if (p.kind === 'ring') {
       const t2 = 1 - p.life;
       const rr = p.r + (p.gr - p.r) * (1 - Math.pow(1 - t2, 2));
@@ -1808,8 +2214,8 @@ function frame(now) {
       ctx.fillStyle = 'rgba(201,118,44,' + p.life + ')';
       ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, 6.2832); ctx.fill();
     } else {
-      ctx.fillStyle = 'rgba(255,255,255,' + (p.life * 0.95) + ')';
-      ctx.beginPath(); ctx.arc(p.x, p.y, p.r * p.life, 0, 6.2832); ctx.fill();
+      ctx.fillStyle = 'rgba(' + (p.c || '255,255,255') + ',' + (p.life * 0.95) + ')';
+      if (p.c) star4(p.x, p.y, p.r * 1.6 * p.life); else { ctx.beginPath(); ctx.arc(p.x, p.y, p.r * p.life, 0, 6.2832); ctx.fill(); }
     }
   }
 
