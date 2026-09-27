@@ -919,19 +919,17 @@ const CRITTER_VN = {
   ray:      'Cá đuối',
   octopus:  'Bạch tuộc',
   shark:    'Cá mập con',
-  eel:      'Lươn vườn',
   clam:     'Ngao ngọc',
-  flounder: 'Cá bơn',
   angler:   'Cá lồng đèn'
 };
-const CRITTER_KINDS = ['jelly', 'turtle', 'seahorse', 'crab', 'star', 'ray', 'octopus', 'shark', 'eel', 'clam', 'flounder', 'angler'];
-const ON_FLOOR = { crab: 1, star: 1, octopus: 1, eel: 1, clam: 1, flounder: 1 };
-const IN_SAND  = { eel: 1, clam: 1, flounder: 1 };      /* sống dưới cát: không đi trốn, không lang thang */
+const CRITTER_KINDS = ['jelly', 'turtle', 'seahorse', 'crab', 'star', 'ray', 'octopus', 'shark', 'clam', 'angler'];
+const ON_FLOOR = { crab: 1, star: 1, octopus: 1, clam: 1 };
+const IN_SAND  = { clam: 1 };      /* sống dưới cát: không đi trốn, không lang thang */
 
 function critterSize(kind) {
   const base = Math.min(W, H);
   const k = { star: 0.08, crab: 0.07, jelly: 0.085, seahorse: 0.09,
-              octopus: 0.095, turtle: 0.115, ray: 0.125, shark: 0.15, eel: 0.1, clam: 0.075, flounder: 0.12, angler: 0.12 }[kind] || 0.08;
+              octopus: 0.095, turtle: 0.115, ray: 0.125, shark: 0.15, clam: 0.075, angler: 0.12 }[kind] || 0.08;
   return base * k;
 }
 
@@ -956,12 +954,12 @@ function makeCritter(kind, opts) {
     dir: Math.random() < 0.5 ? -1 : 1,
     hue: { jelly: rnd(280, 330), turtle: rnd(95, 135), seahorse: rnd(30, 55),
            crab: rnd(5, 20), star: rnd(15, 45), ray: rnd(200, 225),
-           octopus: rnd(285, 315), shark: rnd(200, 212), eel: rnd(35, 50), clam: rnd(330, 350), flounder: rnd(35, 45), angler: rnd(255, 275) }[kind],
+           octopus: rnd(285, 315), shark: rnd(200, 212), clam: rnd(330, 350), angler: rnd(255, 275) }[kind],
     speed: { jelly: rnd(9, 16), turtle: rnd(26, 40), seahorse: rnd(8, 14),
              crab: rnd(22, 38), star: rnd(1.5, 4), ray: rnd(34, 52),
-             octopus: rnd(16, 28), shark: rnd(30, 46), eel: 0, clam: 0, flounder: rnd(6, 10), angler: rnd(14, 24) }[kind],
+             octopus: rnd(16, 28), shark: rnd(30, 46), clam: 0, angler: rnd(14, 24) }[kind],
     hop: 0,           /* bạch tuộc phụt lên */
-    up: 1, open: 0, openTarget: 1, openT: rnd(1, 4), buried: 1   /* lươn thò lên, ngao mở, cá bơn vùi cát */
+    open: 0, openTarget: 1, openT: rnd(1, 4)   /* ngao mở / khép */
   };
   c.size0 = size; c.maxSize = size * 1.6; c.stage = 0;
   c.y = ON_FLOOR[kind] ? floorY(c) : (o.y != null ? o.y : rnd(H * 0.15, sandY - size));
@@ -972,7 +970,7 @@ function makeCritter(kind, opts) {
 function stockCritters() {
   critters.length = 0;
   const k = clamp(Math.round((W * H) / 450000), 1, 2);
-  const plan = { jelly: k + 1, star: k + 1, crab: k, seahorse: k, turtle: 1, ray: 1, octopus: 1, shark: 1, eel: k, clam: 1, flounder: 1, angler: 1 };
+  const plan = { jelly: k + 1, star: k + 1, crab: k, seahorse: k, turtle: 1, ray: 1, octopus: 1, shark: 1, clam: 1, angler: 1 };
   for (const kind in plan) {
     for (let i = 0; i < plan[kind]; i++) critters.push(makeCritter(kind));
   }
@@ -1001,7 +999,7 @@ function newCritterTarget(c) {
 }
 
 /* loài nào biết ăn mồi (sứa thì không) */
-const EATER = { turtle: 1, ray: 1, seahorse: 1, octopus: 1, crab: 1, star: 1, shark: 1, eel: 1, flounder: 1, angler: 1 };
+const EATER = { turtle: 1, ray: 1, seahorse: 1, octopus: 1, crab: 1, star: 1, shark: 1, angler: 1 };
 
 /* tìm viên thức ăn gần nhất trong tầm */
 function nearestFood(x, y, reach) {
@@ -1030,20 +1028,11 @@ function updateCritter(c, dt) {
   if (near && near.d < c.size * 0.6) { eatFood(c, near.fd); }
 
   if (IN_SAND[c.kind]) {
+    /* ngao: mở/khép theo nhịp, giật mình thì khép ngay */
     const scared = c.startle > 0;
-    if (c.kind === 'eel') c.up += ((scared ? 0 : 1) - c.up) * Math.min(1, dt * (scared ? 6 : 1.5));
-    if (c.kind === 'clam') {
-      c.openT -= dt;
-      if (c.openT <= 0) { c.openTarget = Math.random() < 0.55 ? 1 : 0; c.openT = rnd(3, 8); }
-      c.open += ((scared ? 0 : c.openTarget) - c.open) * Math.min(1, dt * (scared ? 10 : 2));
-    }
-    if (c.kind === 'flounder') {
-      const was = c.buried;
-      c.buried += ((scared || near ? 0 : 1) - c.buried) * Math.min(1, dt * (scared ? 6 : 0.8));
-      if (was < 0.5 && c.buried >= 0.5) for (let k = 0; k < 8; k++) parts.push({ kind: 'crumb', x: c.x + rnd(-c.size * 0.5, c.size * 0.5), y: sandY, vx: rnd(-40, 40), vy: rnd(-70, -20), r: rnd(2, 3.5), life: 1, decay: 1.6, sand: 1 });
-      if (scared || near) { c.dir = near ? (near.fd.x > c.x ? 1 : -1) : c.dir; c.x += c.dir * c.speed * (scared ? 5 : 2) * dt; }
-      c.x = clamp(c.x, m, W - m);
-    }
+    c.openT -= dt;
+    if (c.openT <= 0) { c.openTarget = Math.random() < 0.55 ? 1 : 0; c.openT = rnd(3, 8); }
+    c.open += ((scared ? 0 : c.openTarget) - c.open) * Math.min(1, dt * (scared ? 10 : 2));
     c.y = floorY(c);
     return;
   }
@@ -1754,34 +1743,6 @@ function sandMound(x, y, w, h) {
   ctx.fillStyle = rgb(theme.sand.map((v) => v * 0.96)); dot(x, y, w, h);
   ctx.fillStyle = rgba(theme.sand.map((v) => v * 0.82), 0.8); dot(x - w * 0.4, y + h * 0.2, w * 0.14, h * 0.3); dot(x + w * 0.45, y + h * 0.1, w * 0.12, h * 0.3);
 }
-/* lươn vườn: thân dài đốm thò lên từ hang, giật mình thì rụt xuống */
-function drawEel(c, t) {
-  const s = c.size * (1 + 0.25 * c.pop), up = c.up;
-  ctx.save(); ctx.translate(c.x, c.y);
-  sandMound(0, s * 0.02, s * 0.5, s * 0.14);
-  ctx.fillStyle = 'rgba(60,40,20,.55)'; dot(0, 0, s * 0.2, s * 0.08);
-  const body = hsl(c.hue, 70, 72), dark = hsl(c.hue, 60, 52), pale = hsl(c.hue, 70, 88);
-  const len = s * 1.25 * up;
-  if (len > s * 0.05) {
-    const px = (k) => Math.sin(t * 1.4 + c.phase + k * 2.2) * s * 0.08 * k * up, py = (k) => -len * k;
-    ctx.save(); ctx.beginPath(); ctx.rect(-s, -s * 2, s * 2, s * 2); ctx.clip();     /* chỉ vẽ phần trên miệng hang */
-    ctx.lineCap = 'round';
-    ctx.strokeStyle = body; ctx.lineWidth = s * 0.2;
-    ctx.beginPath(); ctx.moveTo(0, s * 0.05); for (let k = 0.2; k <= 1; k += 0.2) ctx.lineTo(px(k), py(k)); ctx.stroke();
-    ctx.strokeStyle = pale; ctx.lineWidth = s * 0.07;
-    ctx.beginPath(); ctx.moveTo(s * 0.04, 0); for (let k = 0.2; k <= 0.9; k += 0.2) ctx.lineTo(px(k) + s * 0.04, py(k)); ctx.stroke();
-    ctx.fillStyle = dark; for (let k = 0.15; k < 0.95; k += 0.2) dot(px(k) - s * 0.04, py(k), s * 0.035, s * 0.03);
-    /* đầu */
-    const hx = px(1), hy = py(1);
-    ctx.fillStyle = body; dot(hx + s * 0.03, hy - s * 0.02, s * 0.14, s * 0.13);
-    ctx.fillStyle = dark; dot(hx + s * 0.16, hy + s * 0.02, s * 0.03, s * 0.02);
-    blush(hx + s * 0.07, hy + s * 0.05, s * 0.035);
-    eyes(hx + s * 0.09, hy - s * 0.05, s * 0.05, 0.3);
-    smile(hx + s * 0.12, hy + s * 0.05, s * 0.028, c.pop > 0.5 ? c.pop : 0);
-    ctx.restore();
-  }
-  ctx.restore();
-}
 /* ngao ngọc: nửa chìm trong cát, mở ra khoe ngọc, chạm là khép lại */
 function drawClam(c, t) {
   const s = c.size * (1 + 0.25 * c.pop), open = c.open;
@@ -1808,33 +1769,6 @@ function drawClam(c, t) {
   smile(rx * 0.68, s * 0.1, s * 0.03, 0);
   /* cát phủ nửa dưới */
   sandMound(0, ry * 0.75, rx * 1.25, ry * 0.5);
-  ctx.restore();
-}
-/* cá bơn: dẹt, màu cát, vùi mình chỉ lộ đôi mắt; giật mình thì bật lên bơi */
-function drawFlounder(c, t) {
-  const s = c.size * (1 + 0.25 * c.pop), bur = c.buried;
-  ctx.save(); ctx.translate(c.x, c.y - (1 - bur) * s * 0.35); ctx.scale(c.dir, 1);
-  const body = hsl(c.hue, 45, 68), dark = hsl(c.hue, 40, 52), fin = hsl(c.hue, 45, 58);
-  const wag = Math.sin(t * 6 + c.phase) * (1 - bur);
-  /* đuôi + viền vây */
-  ctx.fillStyle = fin;
-  ctx.beginPath(); ctx.moveTo(-s * 0.5, 0); ctx.quadraticCurveTo(-s * 0.7, -s * 0.16 + wag * s * 0.05, -s * 0.74, -s * 0.12); ctx.quadraticCurveTo(-s * 0.62, 0, -s * 0.74, s * 0.12); ctx.quadraticCurveTo(-s * 0.7, s * 0.16, -s * 0.5, 0); ctx.fill();
-  dot(0, 0, s * 0.6, s * 0.26);
-  /* thân dẹt */
-  ctx.fillStyle = body; dot(0, 0, s * 0.55, s * 0.2);
-  ctx.fillStyle = dark; for (const sp of [[-0.3, -0.05], [-0.1, 0.08], [0.12, -0.06], [0.3, 0.05], [-0.2, 0.1]]) dot(sp[0] * s, sp[1] * s, s * 0.04, s * 0.03);
-  ctx.fillStyle = 'rgba(255,255,255,.35)'; dot(-s * 0.05, -s * 0.1, s * 0.3, s * 0.05);
-  /* mắt cùng bên, lồi lên */
-  blush(s * 0.3, s * 0.06, s * 0.04);
-  eyes(s * 0.32, -s * 0.16, s * 0.07, 0.25);
-  smile(s * 0.42, s * 0.03, s * 0.03, c.pop > 0.5 ? c.pop : 0);
-  /* lớp cát phủ khi vùi mình: chừa đôi mắt */
-  if (bur > 0.05) {
-    ctx.fillStyle = rgba(theme.sand, bur * 0.95);
-    ctx.beginPath(); ctx.ellipse(-s * 0.06, s * 0.02, s * 0.66, s * 0.24, 0, 0, TAU); ctx.fill();
-    ctx.fillStyle = rgba(theme.sand.map((v) => v * 0.86), bur * 0.9); dot(-s * 0.3, s * 0.06, s * 0.06, s * 0.025); dot(s * 0.1, s * 0.1, s * 0.05, s * 0.02);
-    ctx.globalAlpha = bur; eyes(s * 0.32, -s * 0.16, s * 0.07, 0.25); ctx.globalAlpha = 1;
-  }
   ctx.restore();
 }
 
@@ -1884,9 +1818,7 @@ function drawCritter(c, t) {
     case 'ray':      drawRay(c, t); break;
     case 'octopus':  drawOctopus(c, t); break;
     case 'shark':    drawShark(c, t); break;
-    case 'eel':      drawEel(c, t); break;
     case 'clam':     drawClam(c, t); break;
-    case 'flounder': drawFlounder(c, t); break;
     case 'angler':   drawAngler(c, t); break;
   }
 }
