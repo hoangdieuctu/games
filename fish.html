@@ -243,6 +243,8 @@ html, body {
 const cv = document.getElementById('cv');
 const ctx = cv.getContext('2d');
 let W = 0, H = 0, DPR = 1, sandY = 0;
+let VIEW_W = 0, VIEW_H = 0;          /* kích thước màn hình (px) */
+let zoom = 1, zoomTarget = 1;        /* camera tự thu nhỏ khi bể đông hoặc cá to; W,H là kích thước thế giới = màn hình / zoom */
 
 /* ══════════ âm thanh ══════════ */
 let audioCtx = null, master = null, noiseBuf = null, soundOn = true;
@@ -586,11 +588,13 @@ function updateCount() {
 /* ══════════ bố cục bể ══════════ */
 function layout() {
   DPR = Math.min(window.devicePixelRatio || 1, 2);
-  W = window.innerWidth;
-  H = window.innerHeight;
-  cv.width  = Math.round(W * DPR);
-  cv.height = Math.round(H * DPR);
-  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  VIEW_W = window.innerWidth;
+  VIEW_H = window.innerHeight;
+  W = VIEW_W / zoom;
+  H = VIEW_H / zoom;
+  cv.width  = Math.round(VIEW_W * DPR);
+  cv.height = Math.round(VIEW_H * DPR);
+  ctx.setTransform(DPR * zoom, 0, 0, DPR * zoom, 0, 0);
   sandY = H - Math.max(60, H * 0.13);
 
   /* cây thủy sinh: 5 kiểu, xếp rải rác */
@@ -666,9 +670,38 @@ function layout() {
   const nsch = clamp(Math.round(W / 70), 12, 22), sx = rnd(W * 0.3, W * 0.7), sy = rnd(H * 0.2, H * 0.5);
   schoolHue = pick([50, 195, 30, 165]);
   for (let i = 0; i < nsch; i++) {
-    school.push({ x: sx + rnd(-60, 60), y: sy + rnd(-40, 40), vx: rnd(-30, 30), vy: rnd(-10, 10), s: Math.min(W, H) * rnd(0.02, 0.028), phase: rnd(0, 6.28), startle: 0 });
+    school.push({ x: sx + rnd(-60, 60), y: sy + rnd(-40, 40), vx: rnd(-30, 30), vy: rnd(-10, 10), s: Math.min(VIEW_W, VIEW_H) * rnd(0.02, 0.028), phase: rnd(0, 6.28), startle: 0 });
   }
   schoolT = 0;
+}
+
+/* ══════════ camera tự thu phóng ══════════ */
+const ZOOM_MIN = 0.55, ZOOM_FILL = 0.13;   /* thu nhỏ tới 55%; giữ tổng diện tích sinh vật ≤ 13% màn hình */
+function stepZoom(dt) {
+  let area = 0;
+  for (const f of fishes) { const sz = f.size * f.grow; area += sz * sz; }
+  for (const c of critters) area += c.size * c.size * (c.kind === 'jelly' || c.kind === 'seahorse' ? 0.6 : 1);
+  zoomTarget = clamp(Math.sqrt(ZOOM_FILL * VIEW_W * VIEW_H / Math.max(1, area)), ZOOM_MIN, 1);
+  const nz = zoom + (zoomTarget - zoom) * Math.min(1, dt * 0.6);
+  if (Math.abs(nz - zoom) < 1e-4) return;
+  const oldW = W, oldH = H;
+  zoom = nz; W = VIEW_W / zoom; H = VIEW_H / zoom;
+  const kx = W / oldW, ky = H / oldH;
+  const oldSand = sandY; sandY = H - Math.max(60, H * 0.13);
+  const sc = (o) => { o.x *= kx; o.y *= ky; };
+  for (const a of fishes.concat(critters)) { sc(a); a.tx *= kx; a.ty *= ky; }
+  for (const o of school) sc(o);
+  for (const o of foods) sc(o);
+  for (const o of bubbles) sc(o);
+  for (const o of parts) sc(o);
+  for (const o of texts) sc(o);
+  for (const o of plankton) sc(o);
+  for (const o of pebbles) { o.x *= kx; o.y = sandY + (o.y - oldSand) * ky; }
+  for (const o of weeds) o.x *= kx;
+  for (const o of rocks) o.x *= kx;
+  for (const o of spots) { o.x *= kx; if (o.kind === 'sponge') o.hy = sandY + 6 - o.r * 1.05; }
+  schoolTx *= kx; schoolTy *= ky;
+  ctx.setTransform(DPR * zoom, 0, 0, DPR * zoom, 0, 0);
 }
 
 function stepSchool(dt) {
@@ -732,7 +765,7 @@ window.addEventListener('orientationchange', () => setTimeout(layout, 120));
 /* ══════════ cá ══════════ */
 function makeFish(opts) {
   const o = opts || {};
-  const base = Math.min(W, H);
+  const base = Math.min(VIEW_W, VIEW_H);
   const size = o.size != null ? o.size : rnd(base * 0.055, base * 0.1);
   return {
     x: o.x != null ? o.x : rnd(size, W - size),
@@ -833,45 +866,46 @@ const wokeNow = new Set();     /* vừa được đánh thức trong lần chạ
 
 function onDown(e) {
   ac();
+  const px = px / zoom, py = py / zoom;
   if (!started) {
     started = true;
     hintEl.classList.add('gone');
     setTimeout(() => hintEl.remove(), 700);
   }
-  pointers.set(e.pointerId, { x: e.clientX, y: e.clientY, moved: 0 });
+  pointers.set(e.pointerId, { x: px, y: py, moved: 0 });
 
   /* con đang ngủ: chạm để đánh thức; con đang trốn: chạm là chui ra */
   let startled = false;
   wokeNow.clear();
   for (const a of critters.concat(fishes)) {
-    if (Math.hypot(e.clientX - a.x, e.clientY - a.y) > a.size * 0.8) continue;
+    if (Math.hypot(px - a.x, py - a.y) > a.size * 0.8) continue;
     if (a.sleep > 0) { wakeUp(a); wokeNow.add(a); startled = true; }
     else if (a.hide && a.hide.phase === 'in') { leaveSpot(a); wokeNow.add(a); startled = true; }
   }
   for (const sp of spots) {
     const hx = sp.x, hy = sp.kind === 'sponge' ? sp.hy : sandY - sp.h * 0.5, hr = sp.kind === 'sponge' ? sp.r * 1.2 : Math.max(sp.w, sp.h) * 0.55;
-    if (Math.hypot(e.clientX - hx, e.clientY - hy) > hr) continue;
+    if (Math.hypot(px - hx, py - hy) > hr) continue;
     for (const a of critters.concat(fishes)) if (a.hide && a.hide.spot === sp && a.hide.phase === 'in') { leaveSpot(a); wokeNow.add(a); startled = true; }
   }
   if (startled) playSparkle();
-  if (scareSchool(e.clientX, e.clientY, 70)) startled = true;
+  if (scareSchool(px, py, 70)) startled = true;
 
   /* chạm vào sinh vật biển: mỗi loài phản ứng một kiểu */
-  startled = touchCritter(e.clientX, e.clientY) || startled;
+  startled = touchCritter(px, py) || startled;
   for (const f of fishes) {
     if (wokeNow.has(f)) continue;
-    if (Math.hypot(e.clientX - f.x, e.clientY - f.y) < f.size * 0.75) {
+    if (Math.hypot(px - f.x, py - f.y) < f.size * 0.75) {
       const bd = bounds(f);
       f.startle = 1;
-      f.tx = clamp(e.clientX + (f.x - e.clientX) * 8, bd.l, bd.r);
-      f.ty = clamp(e.clientY + (f.y - e.clientY) * 8, bd.t, bd.b);
+      f.tx = clamp(px + (f.x - px) * 8, bd.l, bd.r);
+      f.ty = clamp(py + (f.y - py) * 8, bd.t, bd.b);
       f.retarget = 1.6;
       for (let i = 0; i < 4; i++) addBubble(f.x + rnd(-8, 8), f.y - f.size * 0.2, rnd(2, 6));
       startled = true;
     }
   }
   if (startled) playBlub();
-  else if (e.clientY < sandY) dropFood(e.clientX, e.clientY);
+  else if (py < sandY) dropFood(px, py);
 
   e.preventDefault();
 }
@@ -879,14 +913,15 @@ function onDown(e) {
 function onMove(e) {
   const p = pointers.get(e.pointerId);
   if (!p) return;
-  const d = Math.hypot(e.clientX - p.x, e.clientY - p.y);
+  const px = px / zoom, py = py / zoom;
+  const d = Math.hypot(px - p.x, py - p.y);
   p.moved += d;
   /* vuốt tạo dòng bong bóng và đẩy cá dạt ra */
   if (p.moved > 26) {
     p.moved = 0;
-    addBubble(e.clientX + rnd(-6, 6), e.clientY, rnd(3, 9));
+    addBubble(px + rnd(-6, 6), py, rnd(3, 9));
     for (const f of fishes) {
-      const dx = f.x - e.clientX, dy = f.y - e.clientY;
+      const dx = f.x - px, dy = f.y - py;
       const dist = Math.hypot(dx, dy);
       if (dist < f.size * 2.4 && dist > 0.01) {
         f.vx += (dx / dist) * 40;
@@ -894,7 +929,7 @@ function onMove(e) {
       }
     }
   }
-  p.x = e.clientX; p.y = e.clientY;
+  p.x = px; p.y = py;
   e.preventDefault();
 }
 
@@ -927,7 +962,7 @@ const ON_FLOOR = { crab: 1, star: 1, octopus: 1, clam: 1 };
 const IN_SAND  = { clam: 1 };      /* sống dưới cát: không đi trốn, không lang thang */
 
 function critterSize(kind) {
-  const base = Math.min(W, H);
+  const base = Math.min(VIEW_W, VIEW_H);
   const k = { star: 0.08, crab: 0.07, jelly: 0.085, seahorse: 0.09,
               octopus: 0.095, turtle: 0.115, ray: 0.125, shark: 0.15, clam: 0.075, angler: 0.12 }[kind] || 0.08;
   return base * k;
@@ -2235,6 +2270,7 @@ function frame(now) {
   time += dt;
 
   stepTheme(dt);
+  stepZoom(dt);
   stepBreeding(dt);
   stepSchool(dt);
 
@@ -2404,8 +2440,8 @@ function frame(now) {
     const sc = 1 + (1 - tx.life) * 0.3;
     ctx.scale(sc, sc);
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.font = '800 ' + tx.size + "px 'Baloo 2', Arial, sans-serif";
-    ctx.lineWidth = tx.size * 0.16;
+    ctx.font = '800 ' + (tx.size / zoom) + "px 'Baloo 2', Arial, sans-serif";
+    ctx.lineWidth = tx.size * 0.16 / zoom;
     ctx.lineJoin = 'round';
     ctx.strokeStyle = 'rgba(255,255,255,.95)';
     ctx.strokeText(tx.txt, 0, 0);
