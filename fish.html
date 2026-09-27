@@ -866,7 +866,7 @@ const wokeNow = new Set();     /* vừa được đánh thức trong lần chạ
 
 function onDown(e) {
   ac();
-  const px = px / zoom, py = py / zoom;
+  const px = e.clientX / zoom, py = e.clientY / zoom;
   if (!started) {
     started = true;
     hintEl.classList.add('gone');
@@ -913,7 +913,7 @@ function onDown(e) {
 function onMove(e) {
   const p = pointers.get(e.pointerId);
   if (!p) return;
-  const px = px / zoom, py = py / zoom;
+  const px = e.clientX / zoom, py = e.clientY / zoom;
   const d = Math.hypot(px - p.x, py - p.y);
   p.moved += d;
   /* vuốt tạo dòng bong bóng và đẩy cá dạt ra */
@@ -1170,7 +1170,7 @@ function stepRest(a, dt) {
     }
     if (!hidden && !ON_FLOOR[a.kind]) {
       a.vx *= Math.max(0, 1 - dt * 2); a.vy *= Math.max(0, 1 - dt * 2);
-      a.x += a.vx * dt; a.y += a.vy * dt + Math.sin(a.phase * 0.4) * 4 * dt;
+      a.x += a.vx * dt; a.y += a.vy * dt + Math.sin(time * 0.8 + a.phase) * 6 * dt;
       const bd = { l: a.size * 0.7, r: W - a.size * 0.7, t: H * 0.08 + a.size * 0.4, b: sandY - a.size * 0.5 };
       a.x = clamp(a.x, bd.l, bd.r); a.y = clamp(a.y, bd.t, bd.b);
     }
