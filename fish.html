@@ -565,6 +565,8 @@ const rocks   = [];
 const spots   = [];        /* chỗ trốn: cột đá, san hô thùng */
 const pebbles = [];        /* sỏi màu trang trí trên cát */
 const plankton = [];
+const school  = [];        /* đàn cá con bơi theo bầy */
+let schoolT = 0, schoolTx = 0, schoolTy = 0, schoolHue = 50;
 let fed = 0, started = false, bubbleTimer = 0;
 
 const MAX_FISH = 22;
@@ -658,6 +660,70 @@ function layout() {
     pebbles.push({ x: rnd(0, W), y: rnd(sandY + 18, H - 8), rx: rnd(5, 11), ry: rnd(2.5, 5), hue: pick([160, 270, 200, 40, 330]) });
   }
   try { for (const a of fishes.concat(critters)) a.hide = null; } catch (e) { /* lần đầu, critters chưa khai báo */ }
+
+  /* đàn cá con */
+  school.length = 0;
+  const nsch = clamp(Math.round(W / 70), 12, 22), sx = rnd(W * 0.3, W * 0.7), sy = rnd(H * 0.2, H * 0.5);
+  schoolHue = pick([50, 195, 30, 165]);
+  for (let i = 0; i < nsch; i++) {
+    school.push({ x: sx + rnd(-60, 60), y: sy + rnd(-40, 40), vx: rnd(-30, 30), vy: rnd(-10, 10), s: Math.min(W, H) * rnd(0.02, 0.028), phase: rnd(0, 6.28), startle: 0 });
+  }
+  schoolT = 0;
+}
+
+function stepSchool(dt) {
+  if (!school.length) return;
+  schoolT -= dt;
+  if (schoolT <= 0) { schoolTx = rnd(W * 0.12, W * 0.88); schoolTy = rnd(H * 0.14, sandY - 60); schoolT = rnd(3, 7); }
+  let cx = 0, cy = 0, avx = 0, avy = 0;
+  for (const m of school) { cx += m.x; cy += m.y; avx += m.vx; avy += m.vy; }
+  cx /= school.length; cy /= school.length; avx /= school.length; avy /= school.length;
+  for (const m of school) {
+    if (m.startle > 0) m.startle = Math.max(0, m.startle - dt * 0.9);
+    let ax = (schoolTx - m.x) * 0.5 + (cx - m.x) * 0.9 + (avx - m.vx) * 1.2;
+    let ay = (schoolTy - m.y) * 0.5 + (cy - m.y) * 0.9 + (avy - m.vy) * 1.2;
+    for (const o of school) {
+      if (o === m) continue;
+      const dx = m.x - o.x, dy = m.y - o.y, d2 = dx * dx + dy * dy + 1;
+      if (d2 < 900) { ax += dx / d2 * 900; ay += dy / d2 * 900; }
+    }
+    /* né cá lớn và bàn tay */
+    for (const f of fishes) { const dx = m.x - f.x, dy = m.y - f.y, d = Math.hypot(dx, dy); if (d < f.size * 1.2 && d > 0.01) { ax += dx / d * 260; ay += dy / d * 260; } }
+    m.vx += ax * dt; m.vy += ay * dt;
+    const sp = Math.hypot(m.vx, m.vy), max = m.startle > 0 ? 260 : 120, min = 35;
+    if (sp > max) { m.vx *= max / sp; m.vy *= max / sp; } else if (sp < min && sp > 0.01) { m.vx *= min / sp; m.vy *= min / sp; }
+    m.x += m.vx * dt; m.y += m.vy * dt;
+    const mg = 20;
+    if (m.x < mg) { m.x = mg; m.vx = Math.abs(m.vx); } if (m.x > W - mg) { m.x = W - mg; m.vx = -Math.abs(m.vx); }
+    const top = H * 0.06, bot = sandY - 14;
+    if (m.y < top) { m.y = top; m.vy = Math.abs(m.vy); } if (m.y > bot) { m.y = bot; m.vy = -Math.abs(m.vy); }
+    m.phase += dt * 14;
+  }
+}
+function scareSchool(px, py, r) {
+  let hit = false;
+  for (const m of school) {
+    const dx = m.x - px, dy = m.y - py, d = Math.hypot(dx, dy);
+    if (d > r) continue;
+    hit = true; m.startle = 1;
+    m.vx += dx / (d + 1) * 220; m.vy += dy / (d + 1) * 220;
+  }
+  return hit;
+}
+function drawSchool(t) {
+  const body = hsl(schoolHue, 85, 62), fin = hsl(schoolHue, 80, 50), pale = hsl(schoolHue, 90, 85);
+  for (const m of school) {
+    const s = m.s, ang = Math.atan2(m.vy, Math.abs(m.vx) + 0.01), dir = m.vx < 0 ? -1 : 1, wag = Math.sin(m.phase) * s * 0.18;
+    ctx.save(); ctx.translate(m.x, m.y); ctx.scale(dir, 1); ctx.rotate(ang);
+    ctx.fillStyle = fin;
+    ctx.beginPath(); ctx.moveTo(-s * 0.45, 0); ctx.lineTo(-s * 0.85, -s * 0.32 + wag); ctx.lineTo(-s * 0.7, wag * 0.5); ctx.lineTo(-s * 0.85, s * 0.32 + wag); ctx.closePath(); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(s * 0.1, -s * 0.3); ctx.quadraticCurveTo(-s * 0.05, -s * 0.6, -s * 0.25, -s * 0.28); ctx.fill();
+    ctx.fillStyle = body; dot(0, 0, s * 0.55, s * 0.32);
+    ctx.fillStyle = pale; dot(s * 0.05, s * 0.12, s * 0.38, s * 0.14);
+    ctx.fillStyle = '#fff'; dot(s * 0.3, -s * 0.08, s * 0.11, s * 0.12);
+    ctx.fillStyle = '#1a1a1a'; dot(s * 0.33, -s * 0.07, s * 0.06, s * 0.07);
+    ctx.restore();
+  }
 }
 layout();
 window.addEventListener('resize', layout);
@@ -788,6 +854,7 @@ function onDown(e) {
     for (const a of critters.concat(fishes)) if (a.hide && a.hide.spot === sp && a.hide.phase === 'in') { leaveSpot(a); wokeNow.add(a); startled = true; }
   }
   if (startled) playSparkle();
+  if (scareSchool(e.clientX, e.clientY, 70)) startled = true;
 
   /* chạm vào sinh vật biển: mỗi loài phản ứng một kiểu */
   startled = touchCritter(e.clientX, e.clientY) || startled;
@@ -851,19 +918,24 @@ const CRITTER_VN = {
   star:     'Sao biển',
   ray:      'Cá đuối',
   octopus:  'Bạch tuộc',
-  shark:    'Cá mập con'
+  shark:    'Cá mập con',
+  eel:      'Lươn vườn',
+  clam:     'Ngao ngọc',
+  flounder: 'Cá bơn',
+  angler:   'Cá lồng đèn'
 };
-const CRITTER_KINDS = ['jelly', 'turtle', 'seahorse', 'crab', 'star', 'ray', 'octopus', 'shark'];
-const ON_FLOOR = { crab: 1, star: 1, octopus: 1 };
+const CRITTER_KINDS = ['jelly', 'turtle', 'seahorse', 'crab', 'star', 'ray', 'octopus', 'shark', 'eel', 'clam', 'flounder', 'angler'];
+const ON_FLOOR = { crab: 1, star: 1, octopus: 1, eel: 1, clam: 1, flounder: 1 };
+const IN_SAND  = { eel: 1, clam: 1, flounder: 1 };      /* sống dưới cát: không đi trốn, không lang thang */
 
 function critterSize(kind) {
   const base = Math.min(W, H);
   const k = { star: 0.08, crab: 0.07, jelly: 0.085, seahorse: 0.09,
-              octopus: 0.095, turtle: 0.115, ray: 0.125, shark: 0.15 }[kind] || 0.08;
+              octopus: 0.095, turtle: 0.115, ray: 0.125, shark: 0.15, eel: 0.1, clam: 0.075, flounder: 0.12, angler: 0.12 }[kind] || 0.08;
   return base * k;
 }
 
-function floorY(c) { return sandY - c.size * (c.kind === 'star' ? 0.06 : 0.16); }
+function floorY(c) { return sandY - c.size * (c.kind === 'star' ? 0.06 : IN_SAND[c.kind] ? -0.02 : 0.16); }
 
 function makeCritter(kind, opts) {
   const o = opts || {};
@@ -884,11 +956,12 @@ function makeCritter(kind, opts) {
     dir: Math.random() < 0.5 ? -1 : 1,
     hue: { jelly: rnd(280, 330), turtle: rnd(95, 135), seahorse: rnd(30, 55),
            crab: rnd(5, 20), star: rnd(15, 45), ray: rnd(200, 225),
-           octopus: rnd(285, 315), shark: rnd(200, 212) }[kind],
+           octopus: rnd(285, 315), shark: rnd(200, 212), eel: rnd(35, 50), clam: rnd(330, 350), flounder: rnd(35, 45), angler: rnd(255, 275) }[kind],
     speed: { jelly: rnd(9, 16), turtle: rnd(26, 40), seahorse: rnd(8, 14),
              crab: rnd(22, 38), star: rnd(1.5, 4), ray: rnd(34, 52),
-             octopus: rnd(16, 28), shark: rnd(30, 46) }[kind],
-    hop: 0            /* bạch tuộc phụt lên */
+             octopus: rnd(16, 28), shark: rnd(30, 46), eel: 0, clam: 0, flounder: rnd(6, 10), angler: rnd(14, 24) }[kind],
+    hop: 0,           /* bạch tuộc phụt lên */
+    up: 1, open: 0, openTarget: 1, openT: rnd(1, 4), buried: 1   /* lươn thò lên, ngao mở, cá bơn vùi cát */
   };
   c.size0 = size; c.maxSize = size * 1.6; c.stage = 0;
   c.y = ON_FLOOR[kind] ? floorY(c) : (o.y != null ? o.y : rnd(H * 0.15, sandY - size));
@@ -899,7 +972,7 @@ function makeCritter(kind, opts) {
 function stockCritters() {
   critters.length = 0;
   const k = clamp(Math.round((W * H) / 450000), 1, 2);
-  const plan = { jelly: k + 1, star: k + 1, crab: k, seahorse: k, turtle: 1, ray: 1, octopus: 1, shark: 1 };
+  const plan = { jelly: k + 1, star: k + 1, crab: k, seahorse: k, turtle: 1, ray: 1, octopus: 1, shark: 1, eel: k, clam: 1, flounder: 1, angler: 1 };
   for (const kind in plan) {
     for (let i = 0; i < plan[kind]; i++) critters.push(makeCritter(kind));
   }
@@ -928,7 +1001,7 @@ function newCritterTarget(c) {
 }
 
 /* loài nào biết ăn mồi (sứa thì không) */
-const EATER = { turtle: 1, ray: 1, seahorse: 1, octopus: 1, crab: 1, star: 1, shark: 1 };
+const EATER = { turtle: 1, ray: 1, seahorse: 1, octopus: 1, crab: 1, star: 1, shark: 1, eel: 1, flounder: 1, angler: 1 };
 
 /* tìm viên thức ăn gần nhất trong tầm */
 function nearestFood(x, y, reach) {
@@ -952,10 +1025,28 @@ function updateCritter(c, dt) {
 
   /* ăn mồi và lớn lên */
   const near = EATER[c.kind] && c.startle <= 0
-    ? nearestFood(c.x, c.y, c.kind === 'star' ? c.size * 0.9 : Math.min(W, H) * 0.4)
+    ? nearestFood(c.x, c.y, c.kind === 'star' || IN_SAND[c.kind] ? c.size * 1.1 : Math.min(W, H) * 0.4)
     : null;
   if (near && near.d < c.size * 0.6) { eatFood(c, near.fd); }
 
+  if (IN_SAND[c.kind]) {
+    const scared = c.startle > 0;
+    if (c.kind === 'eel') c.up += ((scared ? 0 : 1) - c.up) * Math.min(1, dt * (scared ? 6 : 1.5));
+    if (c.kind === 'clam') {
+      c.openT -= dt;
+      if (c.openT <= 0) { c.openTarget = Math.random() < 0.55 ? 1 : 0; c.openT = rnd(3, 8); }
+      c.open += ((scared ? 0 : c.openTarget) - c.open) * Math.min(1, dt * (scared ? 10 : 2));
+    }
+    if (c.kind === 'flounder') {
+      const was = c.buried;
+      c.buried += ((scared || near ? 0 : 1) - c.buried) * Math.min(1, dt * (scared ? 6 : 0.8));
+      if (was < 0.5 && c.buried >= 0.5) for (let k = 0; k < 8; k++) parts.push({ kind: 'crumb', x: c.x + rnd(-c.size * 0.5, c.size * 0.5), y: sandY, vx: rnd(-40, 40), vy: rnd(-70, -20), r: rnd(2, 3.5), life: 1, decay: 1.6, sand: 1 });
+      if (scared || near) { c.dir = near ? (near.fd.x > c.x ? 1 : -1) : c.dir; c.x += c.dir * c.speed * (scared ? 5 : 2) * dt; }
+      c.x = clamp(c.x, m, W - m);
+    }
+    c.y = floorY(c);
+    return;
+  }
   if (ON_FLOOR[c.kind]) {
     /* bò tới chỗ trốn */
     if (c.hide && c.hide.phase === 'go') {
@@ -1074,8 +1165,8 @@ function stepRest(a, dt) {
     return false;
   }
   if (foods.length === 0 && a.startle <= 0 && a.kind !== 'jelly') {
-    if (Math.random() < dt * (0.004 + theme.glow * 0.03)) { a.sleep = rnd(10, 24); return true; }
-    if (spots.length && Math.random() < dt * 0.007) {
+    if (a.kind !== 'clam' && Math.random() < dt * (0.004 + theme.glow * 0.03)) { a.sleep = rnd(10, 24); return true; }
+    if (!IN_SAND[a.kind] && spots.length && Math.random() < dt * 0.007) {
       const sp = pick(spots);
       if (sp.occ < 2 && !(sp.kind === 'sponge' && a.size > sp.r * 2.6)) {
         sp.occ++;
@@ -1342,30 +1433,50 @@ function drawTurtle(c, t) {
   ctx.scale(c.dir, 1);
 
   const flap = Math.sin(c.phase * 0.9);
-  const skin = hsl(c.hue, 45, 55), skinPale = hsl(c.hue, 45, 78), shell = hsl(c.hue, 50, 40), plate = hsl(c.hue + 10, 55, 55), rim = hsl(c.hue + 5, 50, 70);
+  const skin = hsl(c.hue, 45, 58), skinDark = hsl(c.hue, 45, 46), skinPale = hsl(c.hue, 40, 80);
+  const shell = hsl(c.hue - 8, 55, 36), plate = hsl(c.hue + 10, 55, 52), plateLite = hsl(c.hue + 15, 60, 64), rim = hsl(45, 70, 62), belly = hsl(48, 75, 84);
+  const hexa = (x, y, r) => { ctx.beginPath(); for (let i = 0; i < 6; i++) { const a = Math.PI / 6 + i * Math.PI / 3; ctx.lineTo(x + Math.cos(a) * r, y + Math.sin(a) * r * 0.8); } ctx.closePath(); ctx.fill(); };
 
-  /* chân chèo mập, bo tròn */
+  /* chân chèo sau và đuôi (phía sau mai) */
+  ctx.fillStyle = skinDark;
+  ctx.save(); ctx.translate(-s * 0.36, s * 0.16); ctx.rotate(2.5 - flap * 0.25); leaf(s * 0.34, s * 0.11); ctx.fill(); ctx.restore();
+  ctx.beginPath(); ctx.moveTo(-s * 0.5, s * 0.02); ctx.lineTo(-s * 0.68, s * 0.1); ctx.lineTo(-s * 0.5, s * 0.16); ctx.closePath(); ctx.fill();
+
+  /* cổ + đầu to */
   ctx.fillStyle = skin;
-  ctx.save(); ctx.translate(-s * 0.42, s * 0.18); ctx.rotate(2.6 + flap * 0.2); leaf(s * 0.3, s * 0.1); ctx.fill(); ctx.restore();
-  ctx.save(); ctx.translate(s * 0.2, s * 0.24); ctx.rotate(2.1 + flap * 0.5); leaf(s * 0.5, s * 0.15); ctx.fill(); ctx.restore();
-  ctx.save(); ctx.translate(s * 0.14, -s * 0.26); ctx.rotate(0.9 - flap * 0.5); leaf(s * 0.46, s * 0.13); ctx.fill(); ctx.restore();
+  rr(s * 0.3, -s * 0.1, s * 0.3, s * 0.26, s * 0.1); ctx.fill();
+  dot(s * 0.62, 0, s * 0.24, s * 0.21);
+  ctx.fillStyle = skinPale; dot(s * 0.64, s * 0.1, s * 0.17, s * 0.08);
 
-  /* đầu to tròn, cằm nhạt */
-  ctx.fillStyle = skin; dot(s * 0.6, -s * 0.02, s * 0.24, s * 0.2);
-  ctx.fillStyle = skinPale; dot(s * 0.62, s * 0.08, s * 0.18, s * 0.09);
+  /* yếm nhạt và viền mai vàng */
+  ctx.fillStyle = belly; dot(-s * 0.02, s * 0.18, s * 0.5, s * 0.15);
+  ctx.fillStyle = rim; rr(-s * 0.58, s * 0.0, s * 1.1, s * 0.15, s * 0.07); ctx.fill();
 
-  /* mai hai tông: viền nhạt dưới, mảng vảy sáng */
-  ctx.fillStyle = shell; dot(0, 0, s * 0.52, s * 0.38);
-  ctx.fillStyle = rim; ctx.beginPath(); ctx.ellipse(0, 0, s * 0.52, s * 0.38, 0, 0.15, Math.PI - 0.15); ctx.closePath(); ctx.fill();
-  ctx.fillStyle = shell; dot(0, -s * 0.02, s * 0.46, s * 0.3);
+  /* mai vòm */
+  ctx.fillStyle = shell;
+  ctx.beginPath(); ctx.moveTo(-s * 0.56, s * 0.05);
+  ctx.bezierCurveTo(-s * 0.56, -s * 0.36, -s * 0.28, -s * 0.5, 0, -s * 0.5);
+  ctx.bezierCurveTo(s * 0.28, -s * 0.5, s * 0.52, -s * 0.36, s * 0.52, s * 0.05); ctx.closePath(); ctx.fill();
+  /* vảy lục giác */
+  ctx.save(); ctx.beginPath(); ctx.moveTo(-s * 0.56, s * 0.05);
+  ctx.bezierCurveTo(-s * 0.56, -s * 0.36, -s * 0.28, -s * 0.5, 0, -s * 0.5);
+  ctx.bezierCurveTo(s * 0.28, -s * 0.5, s * 0.52, -s * 0.36, s * 0.52, s * 0.05); ctx.closePath(); ctx.clip();
   ctx.fillStyle = plate;
-  const spots = [[0, -0.02, 0.15, 0.12], [-0.25, -0.06, 0.11, 0.09], [0.25, -0.05, 0.11, 0.09],
-                 [-0.13, 0.15, 0.1, 0.07], [0.14, 0.15, 0.1, 0.07], [0, -0.2, 0.1, 0.06]];
-  for (const sp of spots) dot(sp[0] * s, sp[1] * s, sp[2] * s, sp[3] * s);
+  hexa(0, -s * 0.2, s * 0.17); hexa(-s * 0.32, -s * 0.1, s * 0.13); hexa(s * 0.3, -s * 0.1, s * 0.13);
+  hexa(-s * 0.16, -s * 0.4, s * 0.11); hexa(s * 0.15, -s * 0.4, s * 0.11);
+  hexa(-s * 0.16, s * 0.06, s * 0.11); hexa(s * 0.15, s * 0.06, s * 0.11);
+  ctx.fillStyle = plateLite; hexa(-s * 0.03, -s * 0.24, s * 0.08); hexa(-s * 0.34, -s * 0.13, s * 0.06); hexa(s * 0.28, -s * 0.13, s * 0.06);
+  ctx.fillStyle = 'rgba(255,255,255,.3)'; dot(-s * 0.2, -s * 0.38, s * 0.14, s * 0.05);
+  ctx.restore();
 
-  blush(s * 0.6, s * 0.06, s * 0.05);
-  eyes(s * 0.7, -s * 0.08, s * 0.08, 0.3);
-  smile(s * 0.72, s * 0.07, s * 0.055, c.pop > 0.5 ? c.pop : 0);
+  /* chân chèo trước to, vẫy (trước mai) */
+  ctx.fillStyle = skin;
+  ctx.save(); ctx.translate(s * 0.16, s * 0.18); ctx.rotate(2.0 + flap * 0.55); leaf(s * 0.56, s * 0.16); ctx.fill();
+  ctx.fillStyle = skinPale; leaf(s * 0.4, s * 0.07); ctx.fill(); ctx.restore();
+
+  blush(s * 0.58, s * 0.07, s * 0.06);
+  eyes(s * 0.7, -s * 0.08, s * 0.085, 0.3);
+  smile(s * 0.74, s * 0.08, s * 0.055, c.pop > 0.5 ? c.pop : 0);
   ctx.restore();
 }
 
@@ -1638,6 +1749,131 @@ function drawShark(c, t) {
   ctx.restore();
 }
 
+/* ụ cát nhỏ quanh hang */
+function sandMound(x, y, w, h) {
+  ctx.fillStyle = rgb(theme.sand.map((v) => v * 0.96)); dot(x, y, w, h);
+  ctx.fillStyle = rgba(theme.sand.map((v) => v * 0.82), 0.8); dot(x - w * 0.4, y + h * 0.2, w * 0.14, h * 0.3); dot(x + w * 0.45, y + h * 0.1, w * 0.12, h * 0.3);
+}
+/* lươn vườn: thân dài đốm thò lên từ hang, giật mình thì rụt xuống */
+function drawEel(c, t) {
+  const s = c.size * (1 + 0.25 * c.pop), up = c.up;
+  ctx.save(); ctx.translate(c.x, c.y);
+  sandMound(0, s * 0.02, s * 0.5, s * 0.14);
+  ctx.fillStyle = 'rgba(60,40,20,.55)'; dot(0, 0, s * 0.2, s * 0.08);
+  const body = hsl(c.hue, 70, 72), dark = hsl(c.hue, 60, 52), pale = hsl(c.hue, 70, 88);
+  const len = s * 1.25 * up;
+  if (len > s * 0.05) {
+    const px = (k) => Math.sin(t * 1.4 + c.phase + k * 2.2) * s * 0.08 * k * up, py = (k) => -len * k;
+    ctx.save(); ctx.beginPath(); ctx.rect(-s, -s * 2, s * 2, s * 2); ctx.clip();     /* chỉ vẽ phần trên miệng hang */
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = body; ctx.lineWidth = s * 0.2;
+    ctx.beginPath(); ctx.moveTo(0, s * 0.05); for (let k = 0.2; k <= 1; k += 0.2) ctx.lineTo(px(k), py(k)); ctx.stroke();
+    ctx.strokeStyle = pale; ctx.lineWidth = s * 0.07;
+    ctx.beginPath(); ctx.moveTo(s * 0.04, 0); for (let k = 0.2; k <= 0.9; k += 0.2) ctx.lineTo(px(k) + s * 0.04, py(k)); ctx.stroke();
+    ctx.fillStyle = dark; for (let k = 0.15; k < 0.95; k += 0.2) dot(px(k) - s * 0.04, py(k), s * 0.035, s * 0.03);
+    /* đầu */
+    const hx = px(1), hy = py(1);
+    ctx.fillStyle = body; dot(hx + s * 0.03, hy - s * 0.02, s * 0.14, s * 0.13);
+    ctx.fillStyle = dark; dot(hx + s * 0.16, hy + s * 0.02, s * 0.03, s * 0.02);
+    blush(hx + s * 0.07, hy + s * 0.05, s * 0.035);
+    eyes(hx + s * 0.09, hy - s * 0.05, s * 0.05, 0.3);
+    smile(hx + s * 0.12, hy + s * 0.05, s * 0.028, c.pop > 0.5 ? c.pop : 0);
+    ctx.restore();
+  }
+  ctx.restore();
+}
+/* ngao ngọc: nửa chìm trong cát, mở ra khoe ngọc, chạm là khép lại */
+function drawClam(c, t) {
+  const s = c.size * (1 + 0.25 * c.pop), open = c.open;
+  ctx.save(); ctx.translate(c.x, c.y);
+  const shell = hsl(c.hue, 70, 70), dark = hsl(c.hue, 60, 55), inner = hsl(c.hue, 60, 88);
+  const rx = s * 0.55, ry = s * 0.3;
+  /* vỏ dưới */
+  ctx.fillStyle = dark; ctx.beginPath(); ctx.ellipse(0, 0, rx, ry, 0, 0, Math.PI); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = inner; dot(0, -s * 0.02, rx * 0.8, ry * 0.25);
+  /* ngọc */
+  if (open > 0.1) {
+    ctx.fillStyle = '#ffe3ef'; dot(0, -s * 0.12 * open, s * 0.13 * open, s * 0.13 * open);
+    ctx.fillStyle = '#fff'; dot(-s * 0.04 * open, -s * 0.17 * open, s * 0.045 * open, s * 0.04 * open);
+  }
+  /* vỏ trên xoay quanh bản lề phía sau */
+  ctx.save(); ctx.translate(-rx * 0.85, 0); ctx.rotate(-1.35 * open); ctx.translate(rx * 0.85, 0);
+  ctx.fillStyle = shell; ctx.beginPath(); ctx.ellipse(0, 0, rx, ry, 0, Math.PI, 0); ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = dark; ctx.lineWidth = Math.max(1.5, s * 0.03); ctx.lineCap = 'round';
+  for (let i = -3; i <= 3; i++) { const a = -Math.PI / 2 + i * 0.32; ctx.beginPath(); ctx.moveTo(0, -ry * 0.05); ctx.lineTo(Math.cos(a) * rx * 0.92, Math.sin(a) * ry * 0.92); ctx.stroke(); }
+  ctx.restore();
+  /* mặt trên mép vỏ dưới */
+  blush(rx * 0.55, s * 0.08, s * 0.045);
+  eyes(rx * 0.62, -s * 0.0, s * 0.06, 0.2);
+  smile(rx * 0.68, s * 0.1, s * 0.03, 0);
+  /* cát phủ nửa dưới */
+  sandMound(0, ry * 0.75, rx * 1.25, ry * 0.5);
+  ctx.restore();
+}
+/* cá bơn: dẹt, màu cát, vùi mình chỉ lộ đôi mắt; giật mình thì bật lên bơi */
+function drawFlounder(c, t) {
+  const s = c.size * (1 + 0.25 * c.pop), bur = c.buried;
+  ctx.save(); ctx.translate(c.x, c.y - (1 - bur) * s * 0.35); ctx.scale(c.dir, 1);
+  const body = hsl(c.hue, 45, 68), dark = hsl(c.hue, 40, 52), fin = hsl(c.hue, 45, 58);
+  const wag = Math.sin(t * 6 + c.phase) * (1 - bur);
+  /* đuôi + viền vây */
+  ctx.fillStyle = fin;
+  ctx.beginPath(); ctx.moveTo(-s * 0.5, 0); ctx.quadraticCurveTo(-s * 0.7, -s * 0.16 + wag * s * 0.05, -s * 0.74, -s * 0.12); ctx.quadraticCurveTo(-s * 0.62, 0, -s * 0.74, s * 0.12); ctx.quadraticCurveTo(-s * 0.7, s * 0.16, -s * 0.5, 0); ctx.fill();
+  dot(0, 0, s * 0.6, s * 0.26);
+  /* thân dẹt */
+  ctx.fillStyle = body; dot(0, 0, s * 0.55, s * 0.2);
+  ctx.fillStyle = dark; for (const sp of [[-0.3, -0.05], [-0.1, 0.08], [0.12, -0.06], [0.3, 0.05], [-0.2, 0.1]]) dot(sp[0] * s, sp[1] * s, s * 0.04, s * 0.03);
+  ctx.fillStyle = 'rgba(255,255,255,.35)'; dot(-s * 0.05, -s * 0.1, s * 0.3, s * 0.05);
+  /* mắt cùng bên, lồi lên */
+  blush(s * 0.3, s * 0.06, s * 0.04);
+  eyes(s * 0.32, -s * 0.16, s * 0.07, 0.25);
+  smile(s * 0.42, s * 0.03, s * 0.03, c.pop > 0.5 ? c.pop : 0);
+  /* lớp cát phủ khi vùi mình: chừa đôi mắt */
+  if (bur > 0.05) {
+    ctx.fillStyle = rgba(theme.sand, bur * 0.95);
+    ctx.beginPath(); ctx.ellipse(-s * 0.06, s * 0.02, s * 0.66, s * 0.24, 0, 0, TAU); ctx.fill();
+    ctx.fillStyle = rgba(theme.sand.map((v) => v * 0.86), bur * 0.9); dot(-s * 0.3, s * 0.06, s * 0.06, s * 0.025); dot(s * 0.1, s * 0.1, s * 0.05, s * 0.02);
+    ctx.globalAlpha = bur; eyes(s * 0.32, -s * 0.16, s * 0.07, 0.25); ctx.globalAlpha = 1;
+  }
+  ctx.restore();
+}
+
+/* cá lồng đèn: thân tròn tím sẫm, đèn phát sáng trước đầu, răng nhỏ hiền */
+function drawAngler(c, t) {
+  const s = c.size * (1 + 0.25 * c.pop);
+  const wag = Math.sin(c.phase * 1.2);
+  ctx.save();
+  ctx.translate(c.x, c.y);
+  ctx.rotate(Math.atan2(c.vy * 0.4, Math.abs(c.vx) + 50) * c.dir);
+  ctx.scale(c.dir, 1);
+  const body = hsl(c.hue, 45, 38), belly = hsl(c.hue, 40, 58), fin = hsl(c.hue, 45, 30);
+  /* đèn: cuống cong + bóng đèn phát sáng, sáng hơn khi tối */
+  const lx = s * 0.6, ly = -s * 0.48 + Math.sin(t * 2 + c.phase) * s * 0.03, glow = 0.45 + theme.glow * 0.5;
+  ctx.strokeStyle = fin; ctx.lineWidth = Math.max(2, s * 0.045); ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(s * 0.12, -s * 0.34); ctx.quadraticCurveTo(s * 0.2, -s * 0.72, lx, ly); ctx.stroke();
+  const g = ctx.createRadialGradient(lx, ly, s * 0.03, lx, ly, s * 0.55);
+  g.addColorStop(0, 'rgba(255,240,150,' + glow + ')'); g.addColorStop(1, 'rgba(255,220,100,0)');
+  ctx.fillStyle = g; ctx.beginPath(); ctx.arc(lx, ly, s * 0.55, 0, TAU); ctx.fill();
+  ctx.fillStyle = '#ffe36b'; dot(lx, ly, s * 0.1, s * 0.1);
+  ctx.fillStyle = '#fff8d0'; dot(lx - s * 0.03, ly - s * 0.03, s * 0.045, s * 0.04);
+  /* đuôi + vây */
+  ctx.fillStyle = fin;
+  ctx.beginPath(); ctx.moveTo(-s * 0.42, 0); ctx.quadraticCurveTo(-s * 0.62, -s * 0.22 + wag * s * 0.06, -s * 0.7, -s * 0.24); ctx.quadraticCurveTo(-s * 0.58, 0, -s * 0.7, s * 0.24); ctx.quadraticCurveTo(-s * 0.62, s * 0.22 + wag * s * 0.06, -s * 0.42, 0); ctx.fill();
+  for (let i = 0; i < 3; i++) { const bx = -s * 0.05 - i * s * 0.12; ctx.beginPath(); ctx.moveTo(bx + s * 0.06, -s * 0.34); ctx.lineTo(bx, -s * 0.52 + i * s * 0.03); ctx.lineTo(bx - s * 0.07, -s * 0.34); ctx.closePath(); ctx.fill(); }
+  /* thân tròn, bụng nhạt */
+  ctx.fillStyle = body; dot(0, 0, s * 0.52, s * 0.4);
+  ctx.save(); ctx.beginPath(); ctx.ellipse(0, 0, s * 0.52, s * 0.4, 0, 0, TAU); ctx.clip(); ctx.fillStyle = belly; dot(s * 0.08, s * 0.24, s * 0.5, s * 0.22); ctx.restore();
+  ctx.fillStyle = fin; ctx.save(); ctx.translate(s * 0.02, s * 0.14); ctx.rotate(2.1 + wag * 0.25); leaf(s * 0.3, s * 0.09); ctx.fill(); ctx.restore();
+  /* miệng rộng cười, răng nhỏ */
+  ctx.strokeStyle = 'rgba(30,10,40,.8)'; ctx.lineWidth = Math.max(1.5, s * 0.03);
+  ctx.beginPath(); ctx.arc(s * 0.3, s * 0.06, s * 0.2, 0.15, Math.PI * 0.85); ctx.stroke();
+  ctx.fillStyle = '#fff';
+  for (let i = 0; i < 4; i++) { const a = 0.4 + i * 0.4, px = s * 0.3 + Math.cos(a) * s * 0.2, py = s * 0.06 + Math.sin(a) * s * 0.2; ctx.beginPath(); ctx.moveTo(px - s * 0.025, py - s * 0.005); ctx.lineTo(px + s * 0.025, py - s * 0.005); ctx.lineTo(px, py + s * 0.05); ctx.closePath(); ctx.fill(); }
+  blush(s * 0.16, s * 0.02, s * 0.07);
+  eyes(s * 0.32, -s * 0.14, s * 0.12, 0.3);
+  ctx.restore();
+}
+
 function drawCritter(c, t) {
   switch (c.kind) {
     case 'jelly':    drawJelly(c, t); break;
@@ -1648,6 +1884,10 @@ function drawCritter(c, t) {
     case 'ray':      drawRay(c, t); break;
     case 'octopus':  drawOctopus(c, t); break;
     case 'shark':    drawShark(c, t); break;
+    case 'eel':      drawEel(c, t); break;
+    case 'clam':     drawClam(c, t); break;
+    case 'flounder': drawFlounder(c, t); break;
+    case 'angler':   drawAngler(c, t); break;
   }
 }
 
@@ -2064,6 +2304,7 @@ function frame(now) {
 
   stepTheme(dt);
   stepBreeding(dt);
+  stepSchool(dt);
 
   /* bong bóng nền */
   bubbleTimer -= dt;
@@ -2155,6 +2396,7 @@ function frame(now) {
     ctx.beginPath(); ctx.arc(fd.x - fd.r * 0.3, fd.y - fd.r * 0.3, fd.r * 0.35, 0, 6.2832); ctx.fill();
   }
 
+  drawSchool(time);
   for (const f of fishes) if (vis(f)) drawAnimal(f, time);
   for (const c of critters) if (!ON_FLOOR[c.kind] && vis(c)) drawAnimal(c, time);
 
@@ -2211,7 +2453,7 @@ function frame(now) {
     p.y += p.vy * dt;
 
     if (p.kind === 'crumb') {
-      ctx.fillStyle = 'rgba(201,118,44,' + p.life + ')';
+      ctx.fillStyle = p.sand ? rgba(theme.sand.map((v) => v * 0.9), p.life) : 'rgba(201,118,44,' + p.life + ')';
       ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, 6.2832); ctx.fill();
     } else {
       ctx.fillStyle = 'rgba(' + (p.c || '255,255,255') + ',' + (p.life * 0.95) + ')';
