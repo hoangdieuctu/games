@@ -78,10 +78,59 @@ button:disabled { opacity: .4; cursor: default; }
 .horse.can { cursor: pointer; }
 .horse.can .ring { opacity: 1; animation: ring 1s ease-in-out infinite; }
 @keyframes ring { 0%, 100% { transform: scale(1); opacity: .9; } 50% { transform: scale(1.18); opacity: .35; } }
-.target { pointer-events: none; animation: blink 1s ease-in-out infinite; }
-@keyframes blink { 50% { opacity: .35; } }
+.target { pointer-events: none; }
+.target * { transform-box: fill-box; transform-origin: center; }
+.target .t-glow { opacity: .28; animation: tbreath 1.3s ease-in-out infinite; }
+.target .t-ripple { fill: none; stroke-width: 2.5; opacity: 0; animation: tripple 1.6s ease-out infinite; }
+.target .t-ripple.r2 { animation-delay: .8s; }
+.target .t-spin { fill: none; stroke-width: 2.5; stroke-dasharray: 5.5 4.5; stroke-linecap: round; animation: tspin 5s linear infinite; }
+.target .t-core { stroke: #fff; stroke-width: 2.5; animation: tbob 1.3s ease-in-out infinite; }
+.target .t-icon { font-size: 15px; text-anchor: middle; dominant-baseline: central; animation: tbob 1.3s ease-in-out infinite; }
+.target.kick .t-spin { stroke-dasharray: 3 3; animation-duration: 1.8s; }
+.target.hot .t-glow { opacity: .5; animation: none; transform: scale(1.15); }
+.target.hot .t-core, .target.hot .t-icon { animation: none; transform: scale(1.35); }
+.target.hot .t-spin { animation-duration: 1.5s; stroke-width: 3.5; }
+@keyframes tbreath { 50% { transform: scale(.82); opacity: .16; } }
+@keyframes tripple { 0% { transform: scale(.5); opacity: .8; } 100% { transform: scale(1.55); opacity: 0; } }
+@keyframes tspin { to { transform: rotate(360deg); } }
+@keyframes tbob { 50% { transform: scale(.8); } }
+.pathdot { pointer-events: none; opacity: 0; animation: pathin .25s ease-out forwards; }
+@keyframes pathin { from { opacity: 0; transform: scale(.2); } to { opacity: .7; transform: scale(1); } }
 .boom { pointer-events: none; animation: boom .6s ease-out forwards; transform-box: fill-box; transform-origin: center; }
 @keyframes boom { from { transform: scale(.4); opacity: 1; } to { transform: scale(1.8); opacity: 0; } }
+/* ── bị đá: chớp sao "BỐP!", tia lửa, bàn cờ rung, ngựa bị đá lộn vòng bay về chuồng ── */
+.fx { pointer-events: none; transform-box: fill-box; transform-origin: center; }
+.pow { animation: pow .75s cubic-bezier(.2, 1.6, .4, 1) forwards; }
+@keyframes pow {
+  0% { transform: scale(.1) rotate(-30deg); opacity: 1; }
+  30% { transform: scale(1.15) rotate(6deg); opacity: 1; }
+  45% { transform: scale(1) rotate(0); }
+  75% { opacity: 1; }
+  100% { transform: scale(1.1); opacity: 0; }
+}
+.pow-text { font: 900 22px 'Baloo 2', system-ui, sans-serif; text-anchor: middle; dominant-baseline: central; paint-order: stroke; }
+.puff { animation: puff .5s ease-out forwards; }
+@keyframes puff { from { transform: scale(.3); opacity: .8; } to { transform: scale(1.6); opacity: 0; } }
+.horse.hit .hbody { animation: hit .16s ease-in-out 2; }
+@keyframes hit { 25% { transform: translateX(-3px); filter: brightness(1.8); } 75% { transform: translateX(3px); filter: brightness(1.8); } }
+.horse.kicker .hbody { animation: kicker .22s ease-out; }
+@keyframes kicker { 40% { transform: scale(1.25) translateY(-6px) rotate(-10deg); } }
+#board.shake { animation: shake .38s ease-out; }
+@keyframes shake {
+  15% { transform: translate(-6px, 3px); } 30% { transform: translate(5px, -4px); } 45% { transform: translate(-4px, -2px); }
+  60% { transform: translate(3px, 3px); } 80% { transform: translate(-1px, 1px); }
+}
+@media (prefers-reduced-motion: reduce) { #board.shake { animation: none; } }
+/* ── ra quân: ngựa chồm lên hí, nhảy vọt ra ô xuất phát kéo vệt sáng, đáp xuống tung pháo sao ── */
+.horse.rear .hbody { transform-box: fill-box; transform-origin: 50% 100%; animation: rear .34s ease-in-out; }
+@keyframes rear {
+  25% { transform: rotate(-22deg) translateY(-6px); } 45% { transform: rotate(-18deg) translateY(-8px); }
+  65% { transform: rotate(-24deg) translateY(-6px); } 100% { transform: rotate(0); }
+}
+.trail { opacity: 0; animation: trail .45s ease-out forwards; }
+@keyframes trail { 0% { transform: scale(1); opacity: .75; } 100% { transform: scale(.2); opacity: 0; } }
+.glow { animation: glow .7s ease-out forwards; }
+@keyframes glow { 0% { opacity: 0; transform: scale(.6); } 25% { opacity: .9; transform: scale(1.1); } 100% { opacity: 0; transform: scale(1.35); } }
 
 /* ── cảm xúc: mặt to hiện trên chuồng của người gửi ── */
 .emote { pointer-events: none; transform-box: fill-box; transform-origin: center; animation: emote 2.8s ease-out forwards; }
@@ -265,7 +314,7 @@ button:disabled { opacity: .4; cursor: default; }
 
 @media (prefers-reduced-motion: reduce) {
   .horse { transition: none; }
-  .emote, .emo-pop, .horse.can .ring, .horse.jump .hbody, .horse.jump .shadow, .target, .dice, .die.hop, .die.hop::after, .dots span, .panel, .overlay { animation: none; }
+  .emote, .emo-pop, .horse.can .ring, .horse.jump .hbody, .horse.jump .shadow, .target *, .pathdot, .dice, .die.hop, .die.hop::after, .dots span, .panel, .overlay { animation: none; }
   .cube { transition: none; }
 }
 </style>
@@ -285,6 +334,7 @@ button:disabled { opacity: .4; cursor: default; }
     <g id="gBoard"></g>
     <g id="gTargets"></g>
     <g id="gHorses"></g>
+    <g id="gTargetsTop"></g>
     <g id="gFx"></g>
     <g id="gEmote"></g>
   </svg>
@@ -523,6 +573,8 @@ const store = {
 const rand6 = () => 1 + (crypto.getRandomValues(new Uint8Array(1))[0] % 6);
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 const STEP_MS = 130;
+const KICK_MS = 1150; // thời gian hiệu ứng đá ngựa sau bước cuối
+const ENTER_MS = 1050; // thời gian hiệu ứng ra quân
 
 let G = null;
 let setup = store.get('cangua.setup', ['you', 'bot', 'bot', 'bot']);
@@ -612,7 +664,7 @@ function drive(ev) {
 function animMs(ev) {
   if (!ev) return 0;
   if (ev.type === 'roll') return 1050;
-  if (ev.type === 'move') return (ev.from < 0 ? 1 : ev.to - ev.from) * STEP_MS + (ev.kick ? 450 : 0);
+  if (ev.type === 'move') return (ev.from < 0 ? ENTER_MS : (ev.to - ev.from) * STEP_MS) + (ev.kick ? KICK_MS : 0);
   return 0;
 }
 
@@ -901,11 +953,7 @@ function playNeigh() {
   band(950, 4, 0.9); band(2300, 6, 0.4); band(3400, 8, 0.15);
   trem.connect(env);
   // hơi thở
-  if (!breathBuf) {
-    breathBuf = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
-    const d = breathBuf.getChannelData(0);
-    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
-  }
+  noise(ctx);
   const br = ctx.createBufferSource(), brF = ctx.createBiquadFilter(), brG = ctx.createGain();
   br.buffer = breathBuf; br.loop = true;
   brF.type = 'bandpass'; brF.frequency.value = 2800; brF.Q.value = 0.8; brG.gain.value = 0.1;
@@ -927,6 +975,66 @@ function playPop() {
   o.type = 'sine'; o.frequency.setValueAtTime(520, t); o.frequency.exponentialRampToValueAtTime(1250, t + 0.07);
   g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.35, t + 0.01); g.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
   o.connect(g).connect(ctx.destination); o.start(t); o.stop(t + 0.14);
+}
+// tiếng đá ngựa: cú "bốp" (trống trầm tụt cao độ + nhiễu đập) rồi tiếng gió vút
+// theo đường bay, ngựa bị đá hí thất thanh (bản ghi phát cao lên) và rơi "bịch" ở chuồng
+function noise(ctx) {
+  if (!breathBuf) {
+    breathBuf = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
+    const d = breathBuf.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+  }
+  return breathBuf;
+}
+function playKick(flyMs) {
+  if (muted) return;
+  const ctx = audio();
+  if (!ctx || ctx.state !== 'running') return;
+  const t = ctx.currentTime + 0.005, fly = flyMs / 1000;
+  // bốp
+  const o = ctx.createOscillator(), og = ctx.createGain();
+  o.type = 'sine'; o.frequency.setValueAtTime(180, t); o.frequency.exponentialRampToValueAtTime(42, t + 0.2);
+  og.gain.setValueAtTime(0.9, t); og.gain.exponentialRampToValueAtTime(0.001, t + 0.26);
+  o.connect(og).connect(ctx.destination); o.start(t); o.stop(t + 0.28);
+  const n = ctx.createBufferSource(), nf = ctx.createBiquadFilter(), ng = ctx.createGain();
+  n.buffer = noise(ctx); nf.type = 'lowpass'; nf.frequency.setValueAtTime(3200, t); nf.frequency.exponentialRampToValueAtTime(500, t + 0.1);
+  ng.gain.setValueAtTime(0.8, t); ng.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
+  n.connect(nf).connect(ng).connect(ctx.destination); n.start(t); n.stop(t + 0.14);
+  clack(t, 0.7, 1400, 0.05);
+  // gió vút
+  const tw = t + 0.12, w = ctx.createBufferSource(), wf = ctx.createBiquadFilter(), wg = ctx.createGain();
+  w.buffer = noise(ctx); w.loop = true;
+  wf.type = 'bandpass'; wf.Q.value = 3;
+  wf.frequency.setValueAtTime(500, tw); wf.frequency.exponentialRampToValueAtTime(2600, tw + fly * 0.45); wf.frequency.exponentialRampToValueAtTime(600, tw + fly);
+  wg.gain.setValueAtTime(0.0001, tw); wg.gain.exponentialRampToValueAtTime(0.4, tw + fly * 0.4); wg.gain.exponentialRampToValueAtTime(0.001, tw + fly);
+  w.connect(wf).connect(wg).connect(ctx.destination); w.start(tw); w.stop(tw + fly + 0.05);
+  // hí thất thanh
+  if (!playSfx('neigh', 0.55, 1.3)) {
+    const s = ctx.createOscillator(), sg = ctx.createGain(), s0 = t + 0.08;
+    s.type = 'triangle'; s.frequency.setValueAtTime(1500, s0); s.frequency.exponentialRampToValueAtTime(300, s0 + fly);
+    sg.gain.setValueAtTime(0.0001, s0); sg.gain.exponentialRampToValueAtTime(0.25, s0 + 0.04); sg.gain.exponentialRampToValueAtTime(0.001, s0 + fly);
+    s.connect(sg).connect(ctx.destination); s.start(s0); s.stop(s0 + fly + 0.05);
+  }
+  // rơi bịch
+  thud(tw + fly, 0.5);
+  clack(tw + fly, 0.35, 900, 0.06);
+}
+// kèn xuất quân: bốn nốt đi lên thật nhanh (Đô Mi Son Đô), nốt cuối ngân
+function playFanfare() {
+  if (muted) return;
+  const ctx = audio();
+  if (!ctx || ctx.state !== 'running') return;
+  const t0 = ctx.currentTime + 0.01;
+  [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => {
+    const t = t0 + i * 0.075, len = i === 3 ? 0.42 : 0.1;
+    for (const [type, vol] of [['triangle', 0.22], ['square', 0.05]]) {
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = type; o.frequency.value = f;
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.012);
+      g.gain.exponentialRampToValueAtTime(0.001, t + len);
+      o.connect(g).connect(ctx.destination); o.start(t); o.stop(t + len + 0.02);
+    }
+  });
 }
 function syncMute() { $('bMute').textContent = muted ? '🔇' : '🔊'; }
 $('bMute').onclick = () => { muted = !muted; store.set('cangua.mute', muted); syncMute(); if (!muted) audio(); };
@@ -950,9 +1058,9 @@ function show(ng, ev) {
 async function animateMove(ev, tok) {
   const { s, h, from, to } = ev, g = horseEls[s][h];
   g.parentNode.appendChild(g);
+  if (from < 0 && !(await animateEnter(s, h, tok))) return;
   const path = [];
-  if (from < 0) { path.push(0); playNeigh(); }
-  else for (let p = from + 1; p <= to; p++) path.push(p);
+  if (from >= 0) for (let p = from + 1; p <= to; p++) path.push(p);
   for (const [i, p] of path.entries()) {
     if (tok !== animTok) return;
     placeHorse(s, h, p);
@@ -960,16 +1068,121 @@ async function animateMove(ev, tok) {
     playHoof(i);
     await sleep(STEP_MS);
   }
-  if (ev.kick && tok === animTok) {
-    const [x, y] = pxOf(cellOf(s, h, to));
-    el('circle', { cx: x, cy: y, r: 20, fill: 'none', stroke: COLORS[ev.kick.s].main, 'stroke-width': 5, class: 'boom' }, $('gFx'));
-    setTimeout(() => { $('gFx').innerHTML = ''; }, 700);
-    await sleep(250);
-    if (tok !== animTok) return;
-    placeHorse(ev.kick.s, ev.kick.h, -1);
-    await sleep(200);
-  }
+  if (ev.kick && tok === animTok && !(await animateKick(s, h, to, ev.kick, tok))) return;
   if (tok === animTok) { animating = false; paint(); }
+}
+// hiệu ứng tạm trên lớp gFx, tự gỡ khi xong
+function fx(tag, attrs, ms) {
+  const e = el(tag, attrs, $('gFx'));
+  setTimeout(() => e.remove(), ms);
+  return e;
+}
+// cho quân ngựa bay theo đường cong bậc hai từ ô này sang ô khác (Web Animations),
+// xong thì đặt hẳn vào ô đích; trả về khi đã đáp
+function flyHorse(s, h, from, to, { ms, height, spin = 0, grow = 0, easing = 'ease-in-out' }) {
+  const g = horseEls[s][h], [x0, y0] = from, [x1, y1] = to;
+  const cx = (x0 + x1) / 2, cy = Math.min(y0, y1) - height, frames = [];
+  for (let i = 0; i <= 16; i++) {
+    const t = i / 16, u = 1 - t;
+    const px = u * u * x0 + 2 * u * t * cx + t * t * x1, py = u * u * y0 + 2 * u * t * cy + t * t * y1;
+    frames.push({ transform: `translate(${px}px, ${py}px) rotate(${spin * t}deg) scale(${1 + grow * Math.sin(Math.PI * t)})` });
+  }
+  g.style.transition = 'none';
+  const a = g.animate(frames, { duration: ms, easing });
+  g.style.transform = `translate(${x1}px, ${y1}px)`;
+  return new Promise(r => {
+    const done = () => { void g.getBoundingClientRect(); g.style.transition = ''; r(); };
+    a.onfinish = a.oncancel = done; setTimeout(done, ms + 50);
+  });
+}
+// tia sao bắn toả ra từ (x, y)
+function burst(x, y, n, colors, dist) {
+  for (let i = 0; i < n; i++) {
+    const a = (i / n) * Math.PI * 2 + Math.random() * 0.4, d = dist * (0.7 + Math.random() * 0.5);
+    const p = fx('text', { x, y, class: 'num', style: `font-size:${10 + Math.random() * 8}px`, fill: colors[i % colors.length] }, 800);
+    p.textContent = '★';
+    p.animate([{ transform: 'translate(0,0) scale(.4)', opacity: 1 },
+      { transform: `translate(${Math.cos(a) * d}px, ${Math.sin(a) * d}px) scale(1) rotate(${Math.random() * 180}deg)`, opacity: 0 }],
+      { duration: 600 + Math.random() * 150, easing: 'cubic-bezier(.1,.7,.3,1)', fill: 'forwards' });
+  }
+}
+const REAR_MS = 340, LEAP_MS = 480;
+async function animateEnter(s, h, tok) {
+  const g = horseEls[s][h], C = COLORS[s];
+  const a = pxOf(cellOf(s, h, -1)), b = pxOf(cellOf(s, h, 0));
+  // chồm lên hí trong chuồng, vòng sáng màu quân loé quanh
+  playNeigh();
+  fx('circle', { cx: a[0], cy: a[1] - 4, r: 24, fill: C.soft, stroke: C.main, 'stroke-width': 3, class: 'fx glow' }, 750);
+  g.classList.remove('rear'); void g.getBoundingClientRect(); g.classList.add('rear');
+  await sleep(REAR_MS);
+  g.classList.remove('rear');
+  if (tok !== animTok) return false;
+  // nhảy vọt ra ô xuất phát, để lại vệt chấm sáng dọc đường bay
+  const leap = flyHorse(s, h, a, b, { ms: LEAP_MS, height: 60, grow: 0.3 });
+  const cx = (a[0] + b[0]) / 2, cy = Math.min(a[1], b[1]) - 60;
+  for (let i = 1; i < 10; i++) {
+    const t = i / 10, u = 1 - t;
+    const px = u * u * a[0] + 2 * u * t * cx + t * t * b[0], py = u * u * a[1] + 2 * u * t * cy + t * t * b[1];
+    fx('circle', { cx: px, cy: py, r: 6 - t * 2, fill: i % 2 ? C.main : '#ffd23f', class: 'fx trail', style: `animation-delay:${Math.round(t * LEAP_MS)}ms` }, LEAP_MS + 500);
+  }
+  await leap;
+  if (tok !== animTok) return false;
+  // đáp xuống: vó gõ hai nhịp, kèn xuất quân, sóng màu + pháo sao + bụi
+  playHoof(0); setTimeout(() => playHoof(1), 70);
+  playFanfare();
+  jumpHorse(s, h);
+  fx('circle', { cx: b[0], cy: b[1], r: 20, fill: 'none', stroke: C.main, 'stroke-width': 5, class: 'boom' }, 700);
+  fx('circle', { cx: b[0], cy: b[1] + 8, r: 16, fill: 'rgba(120,110,95,.3)', class: 'fx puff' }, 550);
+  burst(b[0], b[1] - 6, 10, [C.main, '#ffd23f', C.main, '#fff'], 48);
+  await sleep(ENTER_MS - REAR_MS - LEAP_MS);
+  return tok === animTok;
+}
+const FLY_MS = 720;
+async function animateKick(s, h, to, kick, tok) {
+  const [x, y] = pxOf(cellOf(s, h, to)), vic = horseEls[kick.s][kick.h], C = COLORS[kick.s];
+  const kicker = horseEls[s][h];
+  kicker.classList.remove('kicker'); void kicker.getBoundingClientRect(); kicker.classList.add('kicker');
+  await sleep(90);
+  if (tok !== animTok) return false;
+  // cú đá: sao vàng "BỐP!", vòng sóng màu ngựa bị đá, tia lửa bắn ra, bàn cờ rung
+  playKick(FLY_MS);
+  if (navigator.vibrate) try { navigator.vibrate(70); } catch (e) {}
+  const board = $('board');
+  board.classList.remove('shake'); void board.getBoundingClientRect(); board.classList.add('shake');
+  fx('circle', { cx: x, cy: y, r: 20, fill: 'none', stroke: C.main, 'stroke-width': 5, class: 'boom' }, 700);
+  const star = [];
+  for (let i = 0; i < 20; i++) {
+    const a = (i / 20) * Math.PI * 2 - Math.PI / 2, r = i % 2 ? 17 : 34 + (i % 4 ? 0 : 6);
+    star.push(`${(x + Math.cos(a) * r).toFixed(1)},${(y - 30 + Math.sin(a) * r).toFixed(1)}`);
+  }
+  const pow = fx('g', { class: 'fx pow' }, 800);
+  el('polygon', { points: star.join(' '), fill: '#ffd23f', stroke: '#f26b1d', 'stroke-width': 3, 'stroke-linejoin': 'round' }, pow);
+  const tx = el('text', { x, y: y - 30, class: 'pow-text', fill: '#e8323c', stroke: '#fff', 'stroke-width': 4, transform: `rotate(-12 ${x} ${y - 30})` }, pow);
+  tx.textContent = 'BỐP!';
+  for (let i = 0; i < 12; i++) {
+    const a = Math.random() * Math.PI * 2, d = 40 + Math.random() * 45;
+    const p = fx('circle', { cx: x, cy: y - 4, r: 2.5 + Math.random() * 3, fill: i % 3 ? '#ffb020' : C.main }, 700);
+    p.animate([{ transform: 'translate(0,0)', opacity: 1 },
+      { transform: `translate(${Math.cos(a) * d}px, ${Math.sin(a) * d}px)`, opacity: 0 }],
+      { duration: 550 + Math.random() * 150, easing: 'cubic-bezier(.1,.7,.3,1)', fill: 'forwards' });
+  }
+  vic.classList.add('hit');
+  await sleep(140);
+  if (tok !== animTok) { vic.classList.remove('hit'); return false; }
+  vic.classList.remove('hit');
+  // ngựa bị đá lộn vòng theo đường cong bay về ô của nó trong chuồng
+  vic.parentNode.appendChild(vic);
+  const [x1, y1] = pxOf(cellOf(kick.s, kick.h, -1));
+  await flyHorse(kick.s, kick.h, [x, y], [x1, y1],
+    { ms: FLY_MS, height: 140, spin: (x1 >= x ? 1 : -1) * 720, grow: 0.45, easing: 'cubic-bezier(.3,.1,.6,1)' });
+  if (tok !== animTok) return false;
+  // rơi xuống chuồng: bụi tung, choáng váng một chút
+  fx('circle', { cx: x1, cy: y1 + 8, r: 20, fill: 'rgba(120,110,95,.35)', class: 'fx puff' }, 550);
+  jumpHorse(kick.s, kick.h);
+  const dz = fx('text', { x: x1, y: y1 - 30, class: 'num fx puff', style: 'font-size:18px;animation-duration:.9s' }, 950);
+  dz.textContent = '💫';
+  await sleep(KICK_MS - 90 - 140 - FLY_MS);
+  return tok === animTok;
 }
 async function animateRoll(ev, tok) {
   playRollSound();
@@ -1000,6 +1213,48 @@ function describe(ev) {
   return null;
 }
 
+// dấu ô đích: quầng sáng thở, hai gợn sóng lan, vòng nét đứt xoay, giữa là chấm màu quân;
+// ô có ngựa đối thủ thì vòng đỏ xoay nhanh + 💥, lên bậc cuối chuồng đích thì 🏁
+const KICK_RED = '#e8323c';
+function drawTarget(gt, s, m) {
+  const [x, y] = pxOf(cellOf(s, m.h, m.to)), C = COLORS[s], col = m.kick ? KICK_RED : C.main;
+  const mk = parent => {
+    const g = el('g', { class: 'target' + (m.kick ? ' kick' : '') }, parent);
+    g.dataset.key = m.h + ':' + m.to;
+    return g;
+  };
+  const g = mk(gt);
+  el('circle', { cx: x, cy: y, r: 17, fill: col, class: 't-glow' }, g);
+  el('circle', { cx: x, cy: y, r: 15, stroke: col, class: 't-ripple' }, g);
+  el('circle', { cx: x, cy: y, r: 15, stroke: col, class: 't-ripple r2' }, g);
+  if (m.kick) {
+    // ô có ngựa đối thủ: vòng xoay và 💥 vẽ đè lên con ngựa đó cho khỏi bị che
+    const top = mk($('gTargetsTop'));
+    el('circle', { cx: x, cy: y, r: 17, stroke: col, class: 't-spin' }, top);
+    el('text', { x: x + 13, y: y - 15, class: 't-icon' }, top).textContent = '💥';
+    return;
+  }
+  el('circle', { cx: x, cy: y, r: 15.5, stroke: col, class: 't-spin' }, g);
+  if (m.to === GATE + 6) el('text', { x, y: y + 1, class: 't-icon' }, g).textContent = '🏁';
+  else el('circle', { cx: x, cy: y, r: 6.5, fill: C.main, class: 't-core' }, g);
+}
+// rê chuột vào ngựa/ô đích: phóng to dấu đích đó và chấm đường đi qua các ô
+let hotMove = null;
+function setHot(m) {
+  const key = m ? m.h + ':' + m.to : null;
+  if ((hotMove && hotMove.h + ':' + hotMove.to) === key) return;
+  hotMove = m;
+  const gt = $('gTargets');
+  gt.querySelectorAll('.pathdot').forEach(e => e.remove());
+  $('board').querySelectorAll('.target').forEach(e => e.classList.toggle('hot', e.dataset.key === key));
+  if (!m) return;
+  const s = G.turn, from = G.horses[s][m.h], C = COLORS[s];
+  if (from < 0) return;
+  for (let p = from + 1, i = 0; p < m.to; p++, i++) {
+    const [x, y] = pxOf(cellOf(s, m.h, p));
+    el('circle', { cx: x, cy: y, r: 4, fill: C.main, stroke: '#fff', 'stroke-width': 1.5, class: 'pathdot', style: `animation-delay:${i * 35}ms` }, gt);
+  }
+}
 function paint(skipHorses) {
   if (!G) return;
   const inPlay = G.phase !== 'lobby';
@@ -1017,12 +1272,11 @@ function paint(skipHorses) {
   }
   // nước có thể đi
   const gt = $('gTargets');
-  gt.innerHTML = '';
+  gt.innerHTML = ''; $('gTargetsTop').innerHTML = ''; hotMove = null;
   const me = G.phase === 'play' && canAct(G.turn) && G.rolled && !busy() && !pending;
   if (me) for (const m of legalMoves(G, G.turn, G.dice)) {
     horseEls[G.turn][m.h].classList.add('can');
-    const [x, y] = pxOf(cellOf(G.turn, m.h, m.to));
-    el('circle', { cx: x, cy: y, r: 9, fill: COLORS[G.turn].main, opacity: .55, class: 'target' }, gt);
+    drawTarget(gt, G.turn, m);
   }
   // người chơi
   const pl = $('players');
@@ -1081,8 +1335,8 @@ function showResult() {
 }
 
 // chạm vào bàn: chọn ngựa (chạm vào ngựa, ô đích của nó, hoặc chuồng khi ra quân)
-$('board').addEventListener('click', e => {
-  if (!G || !G.rolled || !canAct(G.turn)) return;
+function moveAt(e) {
+  if (!G || !G.rolled || !canAct(G.turn) || busy() || pending) return null;
   const r = $('board').getBoundingClientRect();
   const x = (e.clientX - r.left) / r.width * SIZE, y = (e.clientY - r.top) / r.height * SIZE;
   const moves = legalMoves(G, G.turn, G.dice);
@@ -1094,8 +1348,11 @@ $('board').addEventListener('click', e => {
       if (d < bd - 0.5 || (Math.abs(d - bd) <= 0.5 && best && m.h === best.h && m.to > best.to)) { bd = Math.min(d, bd); best = m; }
     }
   }
-  if (best && bd < CELL * 0.9) uiMove(best.h, best.to);
-});
+  return best && bd < CELL * 0.9 ? best : null;
+}
+$('board').addEventListener('click', e => { const m = moveAt(e); if (m) uiMove(m.h, m.to); });
+$('board').addEventListener('pointermove', e => { if (e.pointerType === 'mouse') setHot(moveAt(e)); });
+$('board').addEventListener('pointerleave', () => setHot(null));
 $('dice').onclick = uiRoll;
 document.addEventListener('keydown', e => {
   if ((e.key === ' ' || e.key === 'Enter') && e.target === document.body) { e.preventDefault(); uiRoll(); }
