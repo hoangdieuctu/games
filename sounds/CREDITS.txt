@@ -1,0 +1,10 @@
+Âm thanh dùng trong Cờ Cá Ngựa (cangua.html). Tất cả đều CC0 / public domain,
+đã được cắt, trộn và chuẩn hoá âm lượng bằng ffmpeg.
+
+dice-roll.mp3  Ghép từ dice-shake-1, dice-throw-3, die-throw-1 trong bộ "Casino Audio"
+               của Kenney (www.kenney.nl) — CC0 1.0.
+hoof-1..3.mp3  Ba nhịp vó cắt từ "Six Horses Galloping By.ogg" (Freesound Community,
+               qua Wikimedia Commons) — CC0 1.0.
+               https://commons.wikimedia.org/wiki/File:Six_Horses_Galloping_By.ogg
+neigh.mp3      Cắt từ "Wiehern.ogg" (Wikimedia Commons) — public domain.
+               https://commons.wikimedia.org/wiki/File:Wiehern.ogg

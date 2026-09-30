@@ -1,0 +1,1389 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Cá Ngựa">
+<meta name="theme-color" content="#dfe8f1">
+<title>Cờ Cá Ngựa</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23fffdf6'/%3E%3Crect x='2' y='2' width='11' height='11' rx='3' fill='%23e53935'/%3E%3Crect x='19' y='2' width='11' height='11' rx='3' fill='%231e6fd8'/%3E%3Crect x='19' y='19' width='11' height='11' rx='3' fill='%23f5b700'/%3E%3Crect x='2' y='19' width='11' height='11' rx='3' fill='%232e9d4f'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --desk1: #e8eff6; --desk2: #cfdceb; --ink: #23324a; --muted: #6b7a90;
+  --paper: #fffdf6; --line: #cfd9e5; --card: #ffffff;
+  --c0: #e53935; --c1: #1e6fd8; --c2: #f5b700; --c3: #2e9d4f;
+}
+html, body { width: 100%; height: 100%; overflow: hidden; }
+body {
+  font-family: 'Baloo 2', 'Nunito', system-ui, sans-serif; color: var(--ink);
+  background: radial-gradient(ellipse at 30% 0%, #f7fbff 0%, var(--desk1) 40%, var(--desk2) 100%);
+  -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none;
+  touch-action: manipulation; overscroll-behavior: none;
+  display: flex; flex-direction: column;
+  padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
+}
+button { font: inherit; color: inherit; cursor: pointer; border: 0; background: none; }
+button:disabled { opacity: .4; cursor: default; }
+[hidden] { display: none !important; }
+
+/* ── thanh trên ── */
+.top {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 16px 4px; max-width: 760px; width: 100%; margin: 0 auto;
+}
+.back {
+  width: 44px; height: 44px; flex: 0 0 auto; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(255,255,255,.8); color: var(--ink); text-decoration: none;
+  font-size: 26px; font-weight: 800; line-height: 1;
+  box-shadow: 0 3px 10px rgba(35,50,74,.12);
+}
+.top h1 { font-size: 26px; font-weight: 800; letter-spacing: .5px; flex: 1; white-space: nowrap; }
+.top h1 span:nth-child(1) { color: var(--c0); } .top h1 span:nth-child(2) { color: var(--c1); }
+.top h1 span:nth-child(3) { color: var(--c3); }
+.mute {
+  width: 44px; height: 44px; flex: 0 0 auto; border-radius: 50%; font-size: 20px;
+  background: rgba(255,255,255,.8); box-shadow: 0 3px 10px rgba(35,50,74,.12);
+}
+.room-tag {
+  background: rgba(255,255,255,.85); border-radius: 999px; padding: 4px 14px; font-weight: 700; font-size: 14px;
+  box-shadow: 0 3px 10px rgba(35,50,74,.1); white-space: nowrap; color: var(--muted);
+}
+
+/* ── bàn cờ ── */
+.board-wrap { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; padding: 0 12px; }
+#board {
+  display: block; background: var(--paper); border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(35,50,74,.18), 0 1px 0 rgba(255,255,255,.9) inset;
+  touch-action: none;
+}
+.cell { fill: #fff; stroke: var(--line); stroke-width: 1.2; }
+.num { font: 800 17px 'Baloo 2', system-ui, sans-serif; text-anchor: middle; dominant-baseline: central; pointer-events: none; }
+.corner-name { font: 800 17px 'Baloo 2', system-ui, sans-serif; text-anchor: middle; dominant-baseline: central; pointer-events: none; }
+.corner.off { opacity: .3; }
+.horse { transition: transform .12s ease-out; cursor: default; }
+#board.init .horse { transition: none; }
+.horse .body { stroke: #fff; stroke-width: 3; }
+.horse .glyph { font: 22px 'Segoe UI Symbol', 'Apple Symbols', 'DejaVu Sans', serif; fill: #fff; text-anchor: middle; dominant-baseline: central; pointer-events: none; }
+.horse .ring { fill: none; stroke-width: 3.5; opacity: 0; }
+.horse.can { cursor: pointer; }
+.horse.can .ring { opacity: 1; animation: ring 1s ease-in-out infinite; }
+@keyframes ring { 0%, 100% { transform: scale(1); opacity: .9; } 50% { transform: scale(1.18); opacity: .35; } }
+.target { pointer-events: none; animation: blink 1s ease-in-out infinite; }
+@keyframes blink { 50% { opacity: .35; } }
+.boom { pointer-events: none; animation: boom .6s ease-out forwards; transform-box: fill-box; transform-origin: center; }
+@keyframes boom { from { transform: scale(.4); opacity: 1; } to { transform: scale(1.8); opacity: 0; } }
+
+/* ── cột bên ── */
+.shell { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.side { display: flex; flex-direction: column; gap: 6px; padding: 8px 16px 0; max-width: 760px; width: 100%; margin: 0 auto; }
+.play-row { display: flex; align-items: center; gap: 12px; }
+.players { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.pl {
+  display: flex; align-items: center; gap: 6px; min-width: 0;
+  background: rgba(255,255,255,.75); border-radius: 12px; padding: 4px 10px; font-weight: 700; font-size: 14px;
+  border: 2px solid transparent; transition: border-color .2s, background .2s;
+}
+.pl .chip { width: 14px; height: 14px; border-radius: 50%; flex: 0 0 auto; background: var(--c); }
+.pl .nm { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pl .nm small { color: var(--muted); font-weight: 600; }
+.pl .hm { color: var(--muted); font-size: 13px; white-space: nowrap; }
+.pl.turn { border-color: var(--c); background: #fff; box-shadow: 0 3px 10px rgba(35,50,74,.12); }
+.pl.off { opacity: .55; }
+.dice {
+  --s: 46px;
+  flex: 0 0 auto; display: flex; align-items: center; justify-content: center; gap: calc(var(--s) * .32);
+  padding: calc(var(--s) * .26) calc(var(--s) * .34) calc(var(--s) * .36); border-radius: 20px; background: rgba(255,255,255,.85);
+  box-shadow: 0 4px 14px rgba(35,50,74,.18); border: 3px solid var(--c, #ccd); transition: transform .1s, box-shadow .2s;
+}
+.dice:not(:disabled):active { transform: scale(.95); }
+.dice:not(:disabled) { animation: nudge 1.4s ease-in-out infinite; }
+@keyframes nudge { 0%, 100% { transform: rotate(0); } 8% { transform: rotate(-5deg); } 16% { transform: rotate(5deg); } 24% { transform: rotate(0); } }
+.dice:disabled { opacity: 1; }
+.dice.bonus { box-shadow: 0 0 0 5px rgba(255,179,0,.45), 0 4px 14px rgba(35,50,74,.18); }
+/* xúc xắc 3D: sáu mặt quanh một khối, thêm ba tấm lõi để lấp chỗ hở ở góc bo */
+.die { width: var(--s); height: var(--s); position: relative; perspective: calc(var(--s) * 9); }
+.die::after {
+  content: ''; position: absolute; left: 4%; right: 4%; bottom: -16%; height: 20%; border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(0,0,0,.3), transparent 70%); z-index: -1;
+}
+.cube { position: absolute; inset: 0; transform-style: preserve-3d; transition: transform .95s cubic-bezier(.18,.8,.3,1); }
+.cube.snap { transition: none; }
+.face, .core { position: absolute; inset: 0; }
+.face {
+  border-radius: 18%; background: linear-gradient(145deg, #ffffff 0%, #f2f3f5 50%, #d6d9de 100%);
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,.06), inset -2px -3px 6px rgba(0,0,0,.12), inset 2px 2px 4px rgba(255,255,255,.95);
+  display: grid; grid-template: repeat(3, 1fr) / repeat(3, 1fr); padding: 12%; backface-visibility: hidden;
+}
+.core { background: #cfd3d9; border-radius: 10%; }
+.core.c2 { transform: rotateY(90deg); } .core.c3 { transform: rotateX(90deg); }
+.pip {
+  width: 78%; height: 78%; place-self: center; border-radius: 50%;
+  background: radial-gradient(circle at 36% 30%, #8a8a8a 0 8%, #222 34%, #000 72%);
+  box-shadow: inset 0 -1px 1px rgba(255,255,255,.3), 0 1px 0 rgba(255,255,255,.7);
+}
+.f1 { transform: translateZ(calc(var(--s) / 2)); }
+.f6 { transform: rotateY(180deg) translateZ(calc(var(--s) / 2)); }
+.f2 { transform: rotateY(90deg) translateZ(calc(var(--s) / 2)); }
+.f5 { transform: rotateY(-90deg) translateZ(calc(var(--s) / 2)); }
+.f3 { transform: rotateX(90deg) translateZ(calc(var(--s) / 2)); }
+.f4 { transform: rotateX(-90deg) translateZ(calc(var(--s) / 2)); }
+.die.hop { animation: hop .95s linear; }
+.die:nth-child(2).hop { animation-duration: 1s; }
+@keyframes hop {
+  0% { transform: translate(0, 0) rotate(0); animation-timing-function: ease-out; }
+  22% { transform: translate(-6%, -70%) rotate(-14deg); animation-timing-function: ease-in; }
+  46% { transform: translate(0, 0) rotate(4deg); animation-timing-function: ease-out; }
+  60% { transform: translate(3%, -22%) rotate(0); animation-timing-function: ease-in; }
+  73% { transform: translate(0, 0); animation-timing-function: ease-out; }
+  82% { transform: translate(0, -6%); animation-timing-function: ease-in; }
+  90%, 100% { transform: translate(0, 0); }
+}
+.die.hop::after { animation: shade .95s linear; }
+@keyframes shade { 22% { transform: scale(.55); opacity: .45; } 46% { transform: scale(1); opacity: 1; } 60% { transform: scale(.85); } 73% { transform: scale(1); } }
+.status { text-align: center; font-weight: 700; font-size: 16px; min-height: 46px; line-height: 1.35; display: flex; flex-direction: column; justify-content: center; }
+.status .ev { color: var(--muted); font-size: 14px; font-weight: 600; }
+.dots span { display: inline-block; animation: dot 1.1s infinite; }
+.dots span:nth-child(2) { animation-delay: .15s; } .dots span:nth-child(3) { animation-delay: .3s; }
+@keyframes dot { 0%, 60%, 100% { opacity: .2; } 30% { opacity: 1; } }
+
+.dock { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; padding: 4px 0 14px; }
+.dock button {
+  display: flex; align-items: center; gap: 6px;
+  background: var(--card); border-radius: 14px; padding: 8px 16px; min-height: 44px;
+  font-weight: 700; font-size: 15px; box-shadow: 0 3px 10px rgba(35,50,74,.12); transition: transform .1s;
+}
+.dock button:not(:disabled):active { transform: scale(.95); }
+.dock button.primary { background: var(--ink); color: #fff; }
+
+@media (orientation: landscape) and (min-width: 600px) {
+  .top { max-width: none; padding: 8px 12px 4px 16px; }
+  .shell { flex-direction: row; align-items: stretch; justify-content: center; padding: 0 12px 10px; }
+  .board-wrap { flex: 0 0 auto; padding: 0 14px 0 0; }
+  .side { flex: 0 0 230px; width: 230px; margin: 0; padding: 0; justify-content: center; gap: 12px; }
+  .play-row { flex-direction: column; }
+  .players { grid-template-columns: 1fr; width: 100%; }
+  .dice { --s: 54px; }
+  .dock { flex-direction: column; flex-wrap: nowrap; padding: 0; }
+  .dock button { justify-content: center; width: 100%; }
+}
+@media (orientation: landscape) and (min-width: 600px) and (max-height: 520px) {
+  .top { padding-top: 6px; padding-bottom: 0; } .top h1 { font-size: 22px; }
+  .side { gap: 8px; } .dice { --s: 42px; }
+  .dock { gap: 6px; } .dock button { min-height: 38px; padding: 4px 12px; font-size: 14px; }
+  .pl { padding: 2px 10px; }
+}
+@media (max-width: 420px) {
+  .top h1 { font-size: 22px; }
+  .dock button { padding: 8px 12px; font-size: 14px; }
+  .pl { font-size: 13px; padding: 3px 8px; }
+  .dice { --s: 38px; }
+}
+
+/* ── bảng ── */
+.overlay {
+  position: fixed; inset: 0; z-index: 20; display: flex; align-items: center; justify-content: center;
+  background: rgba(35,50,74,.35); padding: 16px;
+  -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); animation: fade .2s ease-out;
+}
+@keyframes fade { from { opacity: 0; } }
+.panel {
+  background: var(--card); border-radius: 22px; padding: 22px 22px 20px; width: 100%; max-width: 400px;
+  max-height: 100%; overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(35,50,74,.3); animation: pop .25s cubic-bezier(.2,1.4,.5,1);
+}
+@keyframes pop { from { transform: scale(.9); opacity: 0; } }
+.panel h2 { font-size: 24px; font-weight: 800; text-align: center; margin-bottom: 12px; }
+.panel .label { font-size: 14px; font-weight: 700; color: var(--muted); margin: 12px 0 6px; }
+.seg { display: flex; background: #eef2f7; border-radius: 12px; padding: 3px; gap: 3px; flex: 1; }
+.seg button { flex: 1; border-radius: 9px; padding: 5px 2px; font-weight: 700; font-size: 14px; color: var(--muted); }
+.seg button.on { background: #fff; color: var(--ink); box-shadow: 0 2px 6px rgba(35,50,74,.15); }
+.seat { display: flex; align-items: center; gap: 10px; margin-top: 6px; min-height: 36px; font-weight: 700; }
+.seat .chip { width: 22px; height: 22px; border-radius: 50%; background: var(--c); flex: 0 0 auto; box-shadow: 0 0 0 3px #fff, 0 0 0 4px var(--c); }
+.seat .who { width: 84px; flex: 0 0 auto; }
+.seat .nm { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.seat .nm.empty { color: var(--muted); font-weight: 600; }
+.seat .tag { font-size: 12px; font-weight: 700; color: var(--muted); background: #eef2f7; border-radius: 999px; padding: 1px 8px; }
+.panel .go {
+  display: block; width: 100%; margin-top: 18px; background: var(--ink); color: #fff;
+  border-radius: 14px; padding: 12px; font-weight: 800; font-size: 18px;
+}
+.panel .rule { margin-top: 12px; font-size: 13px; color: var(--muted); line-height: 1.45; }
+.panel .rule.center { text-align: center; }
+.rules { font-size: 14.5px; line-height: 1.5; padding-left: 18px; }
+.rules li { margin: 4px 0; }
+.result-emoji { font-size: 56px; text-align: center; line-height: 1.1; }
+.result-msg { text-align: center; color: var(--muted); font-weight: 600; margin-top: -4px; line-height: 1.4; }
+.row { display: flex; gap: 10px; margin-top: 18px; }
+.row button { flex: 1; border-radius: 14px; padding: 11px; font-weight: 800; font-size: 16px; background: #eef2f7; }
+.row button.go { margin: 0; }
+.row + .row { margin-top: 10px; }
+.link, .name {
+  display: block; width: 100%; padding: 10px 12px; border-radius: 12px;
+  border: 2px dashed var(--line); background: #f5f8fc; color: var(--ink);
+  font: 600 14px/1.3 system-ui, sans-serif; text-align: center; outline: none;
+}
+.link { margin-top: 14px; user-select: all; -webkit-user-select: all; }
+.name { border-style: solid; font: 700 16px 'Baloo 2', system-ui, sans-serif; user-select: text; -webkit-user-select: text; }
+.name:focus { border-color: #9fb6d2; background: #fff; }
+.panel .note { margin-top: 10px; font-size: 13px; color: #c0392b; text-align: center; line-height: 1.4; }
+.check { display: flex; align-items: center; gap: 8px; margin-top: 14px; font-weight: 700; font-size: 15px; cursor: pointer; }
+.check input { width: 20px; height: 20px; accent-color: var(--ink); }
+
+@media (prefers-reduced-motion: reduce) {
+  .horse { transition: none; }
+  .horse.can .ring, .target, .dice, .die.hop, .die.hop::after, .dots span, .panel, .overlay { animation: none; }
+  .cube { transition: none; }
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <a class="back" href="index.html" aria-label="Về trang chính">‹</a>
+  <h1><span>Cờ</span> <span>Cá</span> <span>Ngựa</span></h1>
+  <span class="room-tag" id="roomTag" hidden></span>
+  <button class="mute" id="bMute" aria-label="Bật/tắt âm thanh">🔊</button>
+</header>
+
+<div class="shell">
+<main class="board-wrap" id="wrap">
+  <svg id="board" class="init" viewBox="0 0 680 680" aria-label="Bàn cờ cá ngựa">
+    <g id="gBoard"></g>
+    <g id="gTargets"></g>
+    <g id="gHorses"></g>
+    <g id="gFx"></g>
+  </svg>
+</main>
+
+<aside class="side">
+  <div class="play-row">
+    <div class="players" id="players"></div>
+    <button class="dice" id="dice" aria-label="Tung xúc xắc"><div class="die"></div><div class="die"></div></button>
+  </div>
+  <div class="status" id="status"></div>
+  <nav class="dock">
+    <button id="bNew" class="primary">＋ Ván mới</button>
+    <button id="bOnline">🌐 Chơi online</button>
+    <button id="bInvite" hidden>🔗 Phòng chơi</button>
+    <button id="bLeave" hidden>✕ Thoát online</button>
+    <button id="bRules">📖 Luật</button>
+  </nav>
+</aside>
+</div>
+
+<!-- ván mới (chơi trên máy này) -->
+<div class="overlay" id="setupSheet" hidden>
+  <div class="panel">
+    <h2>Ván mới</h2>
+    <div class="label">Ai chơi màu nào? (cần ít nhất 2 bên)</div>
+    <div id="setupSeats"></div>
+    <button class="go" id="bStart">Bắt đầu</button>
+    <p class="rule center">"Người" là một người khác ngồi chơi chung máy này. Muốn chơi với bạn ở xa thì bấm 🌐 Chơi online.</p>
+  </div>
+</div>
+
+<!-- phòng chờ online -->
+<div class="overlay" id="lobbySheet" hidden>
+  <div class="panel">
+    <h2>Phòng chơi</h2>
+    <div id="lbHostBox">
+      <p class="result-msg">Gửi link này cho bạn bè (tối đa 3 người). Mở link là vào phòng.</p>
+      <input class="link" id="lbLink" readonly>
+      <p class="note" id="lbNote" hidden>Bạn đang mở file trên máy nên link này chỉ dùng được trên máy này. Hãy mở game từ trang web để mời bạn.</p>
+      <div class="row"><button class="go" id="lbCopy">Copy link</button><button id="lbShare" hidden>Chia sẻ</button></div>
+    </div>
+    <div class="label">Người chơi</div>
+    <div id="lbSeats"></div>
+    <div class="label">Tên của bạn</div>
+    <input class="name" id="lbName" maxlength="16" autocomplete="off" spellcheck="false">
+    <div id="lbHostCtl">
+      <label class="check"><input type="checkbox" id="lbFill"> Cho máy chơi các ghế còn trống</label>
+      <div class="row"><button id="lbCancel">Huỷ phòng</button><button class="go" id="lbStart">Bắt đầu</button></div>
+      <p class="rule center" id="lbHint"></p>
+    </div>
+    <div id="lbGuestCtl">
+      <p class="rule center">Đang chờ chủ phòng bắt đầu<span class="dots"><span>.</span><span>.</span><span>.</span></span></p>
+      <div class="row"><button id="lbLeave">Rời phòng</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- kết quả -->
+<div class="overlay" id="resultSheet" hidden>
+  <div class="panel">
+    <div class="result-emoji" id="rEmoji"></div>
+    <h2 id="rTitle"></h2>
+    <p class="result-msg" id="rMsg"></p>
+    <div class="row">
+      <button id="bView">Xem bàn cờ</button>
+      <button class="go" id="bAgain">Chơi lại</button>
+    </div>
+  </div>
+</div>
+
+<!-- luật -->
+<div class="overlay" id="rulesSheet" hidden>
+  <div class="panel">
+    <h2>Luật chơi</h2>
+    <ol class="rules">
+      <li>Mỗi bên có 4 ngựa trong chuồng. Lần lượt theo chiều kim đồng hồ, mỗi người tung <b>hai xúc xắc</b>.</li>
+      <li>Tung được <b>1 và 6</b> hoặc <b>một đôi</b> (hai mặt giống nhau) thì được chọn <b>ra quân</b> một con hoặc đi một ngựa đang ở ngoài, rồi được <b>tung thêm lượt</b>.</li>
+      <li>Ngựa đi theo <b>tổng</b> số nút hai xúc xắc và <b>không được nhảy qua đầu ngựa khác</b>.</li>
+      <li>Đi trúng ô có ngựa đối thủ là <b>đá</b> ngựa đó về chuồng. Không được đi vào ô có ngựa mình.</li>
+      <li>Đi hết một vòng, ngựa phải dừng đúng ở <b>cửa đích</b> (ô ngay trước bậc 1 của màu mình). Nước vào cửa đích được dùng số của một xúc xắc hoặc tổng.</li>
+      <li>Ở cửa đích, lên bậc bằng số của <b>một xúc xắc hoặc tổng</b> hai xúc xắc (tối đa bậc 6). Đang ở bậc <i>n</i> thì cần một xúc xắc hoặc tổng đúng bằng <i>n + 1</i> mới lên tiếp.</li>
+      <li>Ai đưa đủ 4 ngựa lên các bậc 3, 4, 5, 6 trước là thắng.</li>
+    </ol>
+    <button class="go" id="bRulesOk">Đã hiểu</button>
+  </div>
+</div>
+
+<!-- trạng thái kết nối -->
+<div class="overlay" id="netSheet" hidden>
+  <div class="panel" id="netPanel"></div>
+</div>
+
+<script>
+// ═══════════════════════════ bàn cờ & luật ═══════════════════════════
+// Lưới 17 × 17: bốn góc 7 × 7 là chuồng, bốn nhánh chữ thập rộng 3 ô.
+// Đường đi 60 ô chạy vòng theo chiều kim đồng hồ quanh chữ thập (mỗi nhánh
+// 15 ô: cột trái đi ra, ô đầu nhánh, cột phải đi vào). Cột giữa mỗi nhánh là
+// sáu bậc đích của màu đó. Màu k ứng với nhánh k (0 trên, 1 phải, 2 dưới,
+// 3 trái), chuồng nằm ở góc ngay sau nhánh theo chiều kim đồng hồ.
+//
+// Vị trí một con ngựa: -1 trong chuồng, 0..59 số bước đã đi trên đường
+// (0 là ô xuất phát, 59 là cửa đích), 60..65 là bậc 1..6.
+const CELL = 40, SIZE = 17 * CELL;
+const $ = id => document.getElementById(id);
+const svgNS = 'http://www.w3.org/2000/svg';
+const COLORS = [
+  { name: 'Đỏ', main: '#e53935', soft: '#fde2e0', mid: '#f4a19c' },
+  { name: 'Xanh dương', main: '#1e6fd8', soft: '#dce8fb', mid: '#94b9ee' },
+  { name: 'Vàng', main: '#f5b700', soft: '#fff2c6', mid: '#f8d56b' },
+  { name: 'Xanh lá', main: '#2e9d4f', soft: '#daf1e1', mid: '#8fd0a2' },
+];
+
+const rot = ([r, c]) => [c, 16 - r];
+const rotK = (p, k) => { for (let i = 0; i < k; i++) p = rot(p); return p; };
+const TOP_SEG = [];
+for (let r = 6; r >= 0; r--) TOP_SEG.push([r, 7]);
+TOP_SEG.push([0, 8]);
+for (let r = 0; r <= 6; r++) TOP_SEG.push([r, 9]);
+const TRACK = [];
+for (let k = 0; k < 4; k++) for (const p of TOP_SEG) TRACK.push(rotK(p, k));
+const HOME = [0, 1, 2, 3].map(k => [1, 2, 3, 4, 5, 6].map(r => rotK([r, 8], k)));
+const CORNER = [0, 1, 2, 3].map(k => rotK([3, 13], k));
+const SLOTS = CORNER.map(([r, c]) => [[r - 1, c - 1], [r - 1, c + 1], [r + 1, c - 1], [r + 1, c + 1]]);
+const START = s => s * 15 + 8, GATE = 59;
+const absOf = (s, p) => (START(s) + p) % 60;
+const cellOf = (s, h, p) => (p < 0 ? SLOTS[s][h] : p <= GATE ? TRACK[absOf(s, p)] : HOME[s][p - 60]);
+const pxOf = ([r, c]) => [c * CELL + CELL / 2, r * CELL + CELL / 2];
+
+function occupant(G, abs) {
+  for (let s = 0; s < 4; s++) for (let h = 0; h < 4; h++) {
+    const p = G.horses[s][h];
+    if (p >= 0 && p <= GATE && absOf(s, p) === abs) return { s, h };
+  }
+  return null;
+}
+// hai xúc xắc: tung 1 và 6 hoặc một đôi thì được ra quân và được tung thêm
+const isBonus = d => Array.isArray(d) && (d[0] === d[1] || (d[0] + d[1] === 7 && (d[0] === 1 || d[0] === 6)));
+// các nước đi hợp lệ của bên s với hai xúc xắc [a, b]: trên đường đi theo
+// tổng (vào đúng cửa đích thì được dùng một xúc xắc); ở cửa đích và trong
+// đích dùng số của một xúc xắc hoặc tổng
+function legalMoves(G, s, dice) {
+  const out = [], mine = G.horses[s];
+  if (!Array.isArray(dice)) return out;
+  const sum = dice[0] + dice[1], homeVals = [...new Set([dice[0], dice[1], sum])].filter(v => v <= 6);
+  let exit = false;
+  for (let h = 0; h < 4; h++) {
+    const p = mine[h];
+    if (p < 0) {
+      if (!isBonus(dice) || exit) continue;
+      exit = true;
+      const o = occupant(G, START(s));
+      if (!o || o.s !== s) out.push({ h, to: 0, kick: o });
+    } else if (p === GATE) {
+      for (const v of homeVals) {
+        let ok = true;
+        for (let q = 60; q <= GATE + v; q++) if (mine.includes(q)) ok = false;
+        if (ok) out.push({ h, to: GATE + v, kick: null });
+      }
+    } else if (p < GATE) {
+      // đi theo tổng; riêng nước vừa đúng tới cửa đích thì dùng một xúc xắc cũng được
+      // (không thì ngựa cách cửa 1 ô sẽ kẹt mãi vì tổng nhỏ nhất là 2)
+      for (const dist of new Set([sum, dice[0], dice[1]])) {
+        const to = p + dist;
+        if (to > GATE || (dist !== sum && to !== GATE)) continue;
+        let ok = true;
+        for (let i = 1; i < dist && ok; i++) if (occupant(G, absOf(s, p + i))) ok = false;
+        if (!ok) continue;
+        const o = occupant(G, absOf(s, to));
+        if (o && o.s === s) continue;
+        out.push({ h, to, kick: o });
+      }
+    } else {
+      const step = p - GATE; // bậc hiện tại 1..6
+      if (step < 6 && homeVals.includes(step + 1) && !mine.includes(p + 1)) out.push({ h, to: p + 1, kick: null });
+    }
+  }
+  return out;
+}
+const hasWon = hs => hs.slice().sort((a, b) => a - b).join() === '62,63,64,65';
+const homeCount = hs => hs.filter(p => p > GATE).length;
+
+// máy chọn nước: ưu tiên đá, lên đích, ra quân; tránh đứng ngay trước mũi ngựa đối thủ
+function inDanger(G, s, abs) {
+  for (let o = 0; o < 4; o++) {
+    if (o === s || !G.seats[o]) continue;
+    const hs = G.horses[o];
+    if (abs === START(o) && hs.some(p => p < 0)) return true;
+    for (const p of hs) {
+      if (p < 0 || p >= GATE) continue;
+      const a = absOf(o, p), dist = (abs - a + 60) % 60;
+      if (dist < 2 || dist > 12 || p + dist > GATE) continue;
+      let free = true;
+      for (let i = 1; i < dist && free; i++) if (occupant(G, (a + i) % 60)) free = false;
+      if (free) return true;
+    }
+  }
+  return false;
+}
+function botPick(G, s, moves) {
+  let best = moves[0], bv = -Infinity;
+  for (const m of moves) {
+    const p = G.horses[s][m.h];
+    let v = Math.random() * 4;
+    if (m.kick) v += 70 + Math.max(0, G.horses[m.kick.s][m.kick.h]) * 0.6;
+    if (p < 0) v += 45;
+    if (m.to > GATE) v += 55 + m.to - GATE;
+    else if (m.to === GATE) v += 35;
+    else {
+      v += m.to * 0.2;
+      const was = p >= 0 && inDanger(G, s, absOf(s, p));
+      G.horses[s][m.h] = m.to;
+      const now = inDanger(G, s, absOf(s, m.to));
+      G.horses[s][m.h] = p;
+      if (now) v -= 30 + m.to * 0.4;
+      if (was && !now) v += 25;
+    }
+    if (v > bv) { bv = v; best = m; }
+  }
+  return best;
+}
+</script>
+
+<script>
+// ═══════════════════════════ ván cờ ═══════════════════════════
+// G là toàn bộ trạng thái ván. Chơi một mình hoặc làm chủ phòng thì máy này
+// giữ G và tự chạy luật (bộ điều khiển); khách online chỉ gửi ý định (tung,
+// chọn ngựa) và vẽ lại theo G chủ phòng gửi về.
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
+};
+const rand6 = () => 1 + (crypto.getRandomValues(new Uint8Array(1))[0] % 6);
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const STEP_MS = 130;
+
+let G = null;
+let setup = store.get('cangua.setup', ['you', 'bot', 'bot', 'bot']);
+
+function freshGame(seats) {
+  return { phase: 'play', seats, horses: [0, 1, 2, 3].map(() => [-1, -1, -1, -1]),
+    turn: firstTurn(seats), dice: 0, rolled: false, winner: null, seq: 0 };
+}
+function firstTurn(seats) {
+  const act = [0, 1, 2, 3].filter(s => seats[s]);
+  return act[Math.floor(Math.random() * act.length)];
+}
+function seatsFromSetup() {
+  return setup.map((t, k) => t === 'you' ? { type: 'human', name: 'Bạn', me: true }
+    : t === 'human' ? { type: 'human', name: 'Người ' + COLORS[k].name }
+    : t === 'bot' ? { type: 'bot', name: 'Máy ' + COLORS[k].name } : null);
+}
+
+// ── ai được đi ──
+const isController = () => !net.on || net.host;
+const seatAuto = s => { const x = G.seats[s]; return !!x && (x.type === 'bot' || (x.remote && !x.online)); };
+const mySeat = () => (net.on ? net.seat : -1);
+function canAct(s) {
+  if (!G || G.phase !== 'play' || G.turn !== s || seatAuto(s)) return false;
+  return net.on ? s === net.seat : G.seats[s].type === 'human';
+}
+function who(s) {
+  if (s === mySeat() || (!net.on && G.seats[s] && G.seats[s].me)) return 'Bạn';
+  return G.seats[s] ? G.seats[s].name : COLORS[s] ? COLORS[s].name : '';
+}
+
+// ── hành động (chỉ bộ điều khiển chạy) ──
+function doRoll(s) {
+  if (G.phase !== 'play' || G.turn !== s || G.rolled) return;
+  G.dice = [rand6(), rand6()]; G.rolled = true;
+  commit({ type: 'roll', s, d: G.dice.slice(), none: !legalMoves(G, s, G.dice).length });
+}
+function doMove(s, h, to) {
+  if (G.phase !== 'play' || G.turn !== s || !G.rolled) return;
+  const m = legalMoves(G, s, G.dice).find(x => x.h === h && (to === undefined || x.to === to));
+  if (!m) return;
+  const from = G.horses[s][h];
+  G.horses[s][h] = m.to;
+  let kick = null;
+  if (m.kick) { kick = { s: m.kick.s, h: m.kick.h, from: G.horses[m.kick.s][m.kick.h] }; G.horses[kick.s][kick.h] = -1; }
+  const won = hasWon(G.horses[s]), again = isBonus(G.dice) && !won;
+  if (won) { G.phase = 'over'; G.winner = s; G.rolled = false; } else nextTurn(again);
+  commit({ type: 'move', s, h, from, to: m.to, kick, again, won });
+}
+function doPass() {
+  if (G.phase !== 'play' || !G.rolled) return;
+  const s = G.turn, again = isBonus(G.dice);
+  nextTurn(again);
+  commit({ type: 'pass', s, again });
+}
+function nextTurn(again) {
+  G.rolled = false;
+  if (again) return;
+  let t = G.turn;
+  do t = (t + 1) % 4; while (!G.seats[t]);
+  G.turn = t;
+}
+
+function commit(ev) {
+  G.seq++;
+  if (net.on && net.host) netBroadcast({ t: 'state', G: Object.assign({}, G, { seats: G.seats.map(x => x && Object.assign({}, x, { cid: undefined })) }), ev });
+  if (!net.on) store.set('cangua.game', G.phase === 'play' ? G : null);
+  show(G, ev);
+  drive(ev);
+}
+
+// chạy lượt máy, tự bỏ lượt khi không đi được, tự đi khi chỉ có một cách
+let driveT = 0;
+function drive(ev) {
+  clearTimeout(driveT);
+  if (!isController() || !G || G.phase !== 'play') return;
+  const s = G.turn, auto = seatAuto(s), wait = animMs(ev);
+  if (!G.rolled) { if (auto) driveT = setTimeout(() => doRoll(s), wait + 700); return; }
+  const ms = legalMoves(G, s, G.dice);
+  if (!ms.length) driveT = setTimeout(doPass, wait + 900);
+  else if (auto) driveT = setTimeout(() => { const m = botPick(G, s, ms); doMove(s, m.h, m.to); }, wait + 600);
+  else if (ms.length === 1) driveT = setTimeout(() => doMove(s, ms[0].h, ms[0].to), wait + 650);
+}
+function animMs(ev) {
+  if (!ev) return 0;
+  if (ev.type === 'roll') return 1050;
+  if (ev.type === 'move') return (ev.from < 0 ? 1 : ev.to - ev.from) * STEP_MS + (ev.kick ? 450 : 0);
+  return 0;
+}
+
+// ── thao tác của người chơi trên máy này ──
+let pending = false; // khách đã gửi ý định, chờ chủ phòng trả lời
+function uiRoll() {
+  if (!G || busy() || pending || G.rolled || !canAct(G.turn)) return;
+  if (net.on && !net.host) { sendIntent({ t: 'roll' }); } else doRoll(G.turn);
+}
+function uiMove(h, to) {
+  if (!G || busy() || pending || !G.rolled || !canAct(G.turn)) return;
+  if (!legalMoves(G, G.turn, G.dice).some(m => m.h === h && m.to === to)) return;
+  clearTimeout(driveT);
+  if (net.on && !net.host) { sendIntent({ t: 'move', h, to }); } else doMove(G.turn, h, to);
+}
+let pendingT = 0;
+function sendIntent(msg) {
+  pending = true; netSend(msg); paint();
+  clearTimeout(pendingT);
+  pendingT = setTimeout(() => { if (pending) { pending = false; paint(); } }, 3000);
+}
+</script>
+
+<script>
+// ═══════════════════════════ vẽ ═══════════════════════════
+function el(tag, attrs, parent) {
+  const e = document.createElementNS(svgNS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(e);
+  return e;
+}
+const cornerEls = [], cornerNames = [];
+(function drawBoard() {
+  const g = $('gBoard');
+  for (let k = 0; k < 4; k++) {
+    const C = COLORS[k], [cr, cc] = CORNER[k], [cx, cy] = pxOf([cr, cc]);
+    const cg = el('g', { class: 'corner' }, g);
+    el('rect', { x: (cc - 3) * CELL + 6, y: (cr - 3) * CELL + 6, width: 7 * CELL - 12, height: 7 * CELL - 12, rx: 22, fill: C.soft, stroke: C.main, 'stroke-width': 3 }, cg);
+    el('rect', { x: cx - 78, y: cy - 78, width: 156, height: 156, rx: 20, fill: '#fff', stroke: C.mid, 'stroke-width': 2 }, cg);
+    for (const p of SLOTS[k]) { const [x, y] = pxOf(p); el('circle', { cx: x, cy: y, r: 22, fill: C.soft, stroke: C.mid, 'stroke-width': 2, 'stroke-dasharray': '5 4' }, cg); }
+    const t = el('text', { x: cx, y: cy + 108, class: 'corner-name', fill: C.main }, cg);
+    cornerEls.push(cg); cornerNames.push(t);
+  }
+  TRACK.forEach(([r, c], i) => {
+    const k = Math.floor(i / 15), j = i % 15;
+    let fill = '#fff';
+    if (j === 8) fill = COLORS[k].main;          // ô xuất phát
+    else if (j === 7) fill = COLORS[k].soft;     // cửa đích
+    el('rect', { x: c * CELL + 1, y: r * CELL + 1, width: CELL - 2, height: CELL - 2, rx: 6, class: 'cell', style: `fill:${fill}` }, g);
+    if (j === 8) { const [x, y] = pxOf([r, c]); el('text', { x, y, class: 'num', fill: '#fff' }, g).textContent = '★'; }
+  });
+  HOME.forEach((cells, k) => cells.forEach(([r, c], i) => {
+    el('rect', { x: c * CELL + 1, y: r * CELL + 1, width: CELL - 2, height: CELL - 2, rx: 6, class: 'cell', style: `fill:${COLORS[k].soft};stroke:${COLORS[k].mid}` }, g);
+    const [x, y] = pxOf([r, c]);
+    el('text', { x, y, class: 'num', fill: COLORS[k].main }, g).textContent = i + 1;
+  }));
+  const tri = [[280, 280], [400, 280], [340, 340]];
+  for (let k = 0; k < 4; k++) {
+    let pts = tri;
+    for (let i = 0; i < k; i++) pts = pts.map(([x, y]) => [680 - y, x]);
+    el('polygon', { points: pts.map(p => p.join(',')).join(' '), fill: COLORS[k].main, stroke: '#fff', 'stroke-width': 2, 'stroke-linejoin': 'round' }, g);
+  }
+  el('circle', { cx: 340, cy: 340, r: 18, fill: '#fff' }, g);
+  el('text', { x: 340, y: 341, class: 'num', style: 'font-size:20px' }, g).textContent = '🏆';
+})();
+
+const horseEls = [0, 1, 2, 3].map(s => [0, 1, 2, 3].map(h => {
+  const g = el('g', { class: 'horse' }, $('gHorses'));
+  g.dataset.s = s; g.dataset.h = h;
+  el('circle', { r: 19, class: 'ring', stroke: COLORS[s].main }, g);
+  el('circle', { r: 15.5, class: 'body', fill: COLORS[s].main }, g);
+  el('text', { class: 'glyph', y: 1 }, g).textContent = '♞︎';
+  return g;
+}));
+function placeHorse(s, h, p) {
+  const [x, y] = pxOf(cellOf(s, h, p));
+  horseEls[s][h].style.transform = `translate(${x}px, ${y}px)`;
+}
+
+// xúc xắc 3D. Muốn mặt v quay ra trước thì xoay khối ngược với góc đặt mặt đó;
+// cộng thêm vài vòng 360° để lúc tung khối lộn nhiều vòng rồi mới dừng.
+const PIP_CELLS = { 1: [4], 2: [2, 6], 3: [2, 4, 6], 4: [0, 2, 6, 8], 5: [0, 2, 4, 6, 8], 6: [0, 2, 3, 5, 6, 8] };
+const FACE_ROT = { 1: [0, 0], 6: [0, 180], 2: [0, -90], 5: [0, 90], 3: [-90, 0], 4: [90, 0] };
+const TILT = [[-24, 26, -6], [-20, -22, 5]];
+const dice3d = [...document.querySelectorAll('#dice .die')].map((die, i) => {
+  const cube = document.createElement('div');
+  cube.className = 'cube';
+  cube.innerHTML = '<div class="core"></div><div class="core c2"></div><div class="core c3"></div>';
+  for (let v = 1; v <= 6; v++) {
+    const f = document.createElement('div');
+    f.className = 'face f' + v;
+    for (let k = 0; k < 9; k++) {
+      const c = document.createElement('span');
+      if (PIP_CELLS[v].includes(k)) { c.className = 'pip'; c.style.gridArea = `${(k / 3 | 0) + 1} / ${k % 3 + 1}`; }
+      else continue;
+      f.appendChild(c);
+    }
+    cube.appendChild(f);
+  }
+  die.appendChild(cube);
+  return { die, cube, x: 0, y: 0, v: 0, tilt: TILT[i] };
+});
+function setDie(i, v, roll) {
+  const D = dice3d[i];
+  if (!roll && D.v === v) return;
+  const [fx, fy] = FACE_ROT[v];
+  if (roll) {
+    const turns = () => 2 + Math.floor(Math.random() * 2);
+    D.x = fx + 360 * (Math.ceil((D.x - fx) / 360) + turns());
+    D.y = fy + 360 * (Math.ceil((D.y - fy) / 360) + turns());
+  } else { D.x = fx; D.y = fy; }
+  D.v = v;
+  const [tx, ty, tz] = D.tilt;
+  if (!roll) D.cube.classList.add('snap');
+  D.cube.style.transform = `rotateZ(${tz}deg) rotateX(${tx}deg) rotateY(${ty}deg) rotateX(${D.x}deg) rotateY(${D.y}deg)`;
+  if (!roll) { void D.cube.offsetWidth; D.cube.classList.remove('snap'); }
+  else { D.die.classList.remove('hop'); void D.die.offsetWidth; D.die.classList.add('hop'); }
+}
+
+// ── âm thanh: bản ghi thật trong sounds/ (CC0, xem sounds/CREDITS.txt), nạp
+// bằng Web Audio cho khỏi trễ. Chưa nạp được (mở bằng file://, mất mạng) thì
+// dùng tiếng tự tổng hợp bên dưới thay thế ──
+let actx = null, muted = store.get('cangua.mute', false), noiseBuf = null;
+const SFX_FILES = { dice: 'sounds/dice-roll.mp3', neigh: 'sounds/neigh.mp3',
+  hoof1: 'sounds/hoof-1.mp3', hoof2: 'sounds/hoof-2.mp3', hoof3: 'sounds/hoof-3.mp3' };
+const sfx = {};
+let sfxLoading = false;
+function audio() {
+  if (!actx) { try { actx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return null; } }
+  if (actx.state === 'suspended') actx.resume().catch(() => {});
+  loadSfx();
+  return actx;
+}
+function loadSfx() {
+  if (sfxLoading || !actx) return;
+  sfxLoading = true;
+  for (const [k, url] of Object.entries(SFX_FILES)) {
+    fetch(url).then(r => (r.ok ? r.arrayBuffer() : Promise.reject(r.status)))
+      .then(b => new Promise((ok, bad) => actx.decodeAudioData(b, ok, bad)))
+      .then(buf => { sfx[k] = buf; })
+      .catch(() => {});
+  }
+}
+// phát một bản ghi; trả false nếu chưa có để nơi gọi dùng tiếng tổng hợp
+function playSfx(name, vol = 1, rate = 1) {
+  const b = sfx[name];
+  if (!b || !actx) return false;
+  const src = actx.createBufferSource(), g = actx.createGain();
+  src.buffer = b; src.playbackRate.value = rate; g.gain.value = vol;
+  src.connect(g).connect(actx.destination);
+  src.start();
+  return true;
+}
+// trình duyệt chỉ cho phát tiếng sau khi người dùng chạm/bấm: thử mở lại ở mỗi lần chạm cho tới khi chạy được
+const unlockAudio = () => { if (!muted && (!actx || actx.state !== 'running')) audio(); };
+document.addEventListener('pointerdown', unlockAudio, true);
+document.addEventListener('keydown', unlockAudio, true);
+function clack(t, vol, freq, len = 0.045) {
+  const ctx = actx;
+  if (!noiseBuf) {
+    noiseBuf = ctx.createBuffer(1, Math.floor(ctx.sampleRate * 0.08), ctx.sampleRate);
+    const d = noiseBuf.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / d.length, 5);
+  }
+  const src = ctx.createBufferSource(), bp = ctx.createBiquadFilter(), g = ctx.createGain();
+  src.buffer = noiseBuf; bp.type = 'bandpass'; bp.frequency.value = freq; bp.Q.value = 4;
+  g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.001, t + len);
+  src.connect(bp).connect(g).connect(ctx.destination);
+  src.start(t); src.stop(t + len + 0.02);
+}
+function thud(t, vol) {
+  const ctx = actx, o = ctx.createOscillator(), g = ctx.createGain();
+  o.frequency.setValueAtTime(190, t); o.frequency.exponentialRampToValueAtTime(70, t + 0.09);
+  g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
+  o.connect(g).connect(ctx.destination); o.start(t); o.stop(t + 0.12);
+}
+function playRollSound() {
+  if (muted) return;
+  const ctx = audio();
+  if (!ctx || ctx.state !== 'running' || playSfx('dice', 0.9)) return;
+  const t0 = ctx.currentTime + 0.01;
+  for (let i = 0; i < 12; i++) clack(t0 + i * 0.03 + Math.random() * 0.012, 0.18 + Math.random() * 0.15, 2600 + Math.random() * 2600, 0.03);
+  // hai viên rơi xuống bàn rồi nảy nhỏ dần (khớp với nhịp nảy của hoạt hoạ)
+  [[0.44, 1], [0.47, 0.8], [0.57, 0.5], [0.69, 0.35], [0.74, 0.3], [0.79, 0.18], [0.86, 0.12]].forEach(([dt, v]) => {
+    clack(t0 + dt, 0.9 * v, 1100 + Math.random() * 700, 0.06);
+    clack(t0 + dt + 0.01, 0.5 * v, 2400 + Math.random() * 900, 0.04);
+    if (v > 0.4) thud(t0 + dt, 0.35 * v);
+  });
+}
+// tiếng vó ngựa "lộc cộc" cho mỗi bước: hai tiếng gõ gỗ sát nhau, bước chẵn lẻ
+// cao thấp xen kẽ để nghe như hai chân trước sau
+function playHoof(i) {
+  if (muted) return;
+  const ctx = audio();
+  if (!ctx || ctx.state !== 'running') return;
+  // xoay vòng ba nhịp vó thật, đổi nhẹ cao độ cho khỏi đều đều như máy
+  if (playSfx('hoof' + (1 + i % 3), 0.75, 0.94 + Math.random() * 0.12)) return;
+  const t = ctx.currentTime + 0.005, hi = i % 2 === 0, o = ctx.createOscillator(), g = ctx.createGain();
+  o.type = 'triangle';
+  o.frequency.setValueAtTime(hi ? 440 : 340, t); o.frequency.exponentialRampToValueAtTime(hi ? 170 : 130, t + 0.06);
+  g.gain.setValueAtTime(0.32, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.07);
+  o.connect(g).connect(ctx.destination); o.start(t); o.stop(t + 0.08);
+  clack(t, 0.5, hi ? 1600 : 1150, 0.045);
+  clack(t + 0.042, 0.28, hi ? 1300 : 950, 0.035);
+}
+// tiếng ngựa hí khi ra quân: giọng răng cưa vút lên rồi hạ dần, rung nhanh
+// (vibrato + tremolo) qua hai formant, thêm hơi thở và một tiếng khịt mũi cuối
+let breathBuf = null;
+function playNeigh() {
+  if (muted) return;
+  const ctx = audio();
+  if (!ctx || ctx.state !== 'running' || playSfx('neigh', 1)) return;
+  const t = ctx.currentTime + 0.03, T = 1.55;
+  const out = ctx.createGain(); out.gain.value = 1.05; out.connect(ctx.destination);
+  const env = ctx.createGain();
+  env.gain.setValueAtTime(0.0001, t);
+  env.gain.exponentialRampToValueAtTime(1, t + 0.07);
+  env.gain.setValueAtTime(1, t + 1.05);
+  env.gain.exponentialRampToValueAtTime(0.001, t + T);
+  env.connect(out);
+  // giọng
+  const osc = ctx.createOscillator(), f = osc.frequency;
+  osc.type = 'sawtooth';
+  f.setValueAtTime(480, t);
+  f.exponentialRampToValueAtTime(1180, t + 0.2);
+  f.exponentialRampToValueAtTime(980, t + 0.5);
+  f.exponentialRampToValueAtTime(640, t + 1.0);
+  f.exponentialRampToValueAtTime(360, t + T);
+  const vib = ctx.createOscillator(), vibG = ctx.createGain();
+  vib.frequency.setValueAtTime(8, t); vib.frequency.linearRampToValueAtTime(21, t + 0.45); vib.frequency.linearRampToValueAtTime(13, t + T);
+  vibG.gain.setValueAtTime(15, t); vibG.gain.linearRampToValueAtTime(120, t + 0.55); vibG.gain.linearRampToValueAtTime(55, t + T);
+  vib.connect(vibG).connect(f);
+  const trem = ctx.createGain(), tl = ctx.createOscillator(), tlG = ctx.createGain();
+  trem.gain.value = 0.7;
+  tl.frequency.setValueAtTime(15, t); tl.frequency.linearRampToValueAtTime(24, t + T);
+  tlG.gain.setValueAtTime(0.05, t); tlG.gain.linearRampToValueAtTime(0.32, t + 0.5);
+  tl.connect(tlG).connect(trem.gain);
+  const band = (freq, q, gain) => {
+    const b = ctx.createBiquadFilter(), g = ctx.createGain();
+    b.type = 'bandpass'; b.frequency.value = freq; b.Q.value = q; g.gain.value = gain;
+    osc.connect(b).connect(g).connect(trem);
+  };
+  band(950, 4, 0.9); band(2300, 6, 0.4); band(3400, 8, 0.15);
+  trem.connect(env);
+  // hơi thở
+  if (!breathBuf) {
+    breathBuf = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
+    const d = breathBuf.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+  }
+  const br = ctx.createBufferSource(), brF = ctx.createBiquadFilter(), brG = ctx.createGain();
+  br.buffer = breathBuf; br.loop = true;
+  brF.type = 'bandpass'; brF.frequency.value = 2800; brF.Q.value = 0.8; brG.gain.value = 0.1;
+  br.connect(brF).connect(brG).connect(env);
+  // khịt mũi
+  const sn = ctx.createBufferSource(), snF = ctx.createBiquadFilter(), snG = ctx.createGain(), ts = t + T + 0.08;
+  sn.buffer = breathBuf; snF.type = 'lowpass'; snF.frequency.value = 800;
+  snG.gain.setValueAtTime(0.0001, ts); snG.gain.exponentialRampToValueAtTime(0.9, ts + 0.03); snG.gain.exponentialRampToValueAtTime(0.001, ts + 0.28);
+  sn.connect(snF).connect(snG).connect(out);
+  for (const n of [osc, vib, tl, br]) { n.start(t); n.stop(t + T + 0.05); }
+  sn.start(ts); sn.stop(ts + 0.3);
+}
+function syncMute() { $('bMute').textContent = muted ? '🔇' : '🔊'; }
+$('bMute').onclick = () => { muted = !muted; store.set('cangua.mute', muted); syncMute(); if (!muted) audio(); };
+syncMute();
+
+// ── hoạt hoạ ──
+let animTok = 0, animating = false, rolling = false, statusEv = '';
+const busy = () => animating || rolling;
+function show(ng, ev) {
+  G = ng; pending = false;
+  const tok = ++animTok;
+  animating = rolling = false;
+  if (ev) { const t = describe(ev); if (t !== null) statusEv = t; }
+  if (ev && ev.type === 'move') { animating = true; paint(true); animateMove(ev, tok); }
+  else if (ev && ev.type === 'roll' && Array.isArray(ev.d)) { rolling = true; paint(true); animateRoll(ev, tok); }
+  else paint();
+  if (ev && ev.won) setTimeout(() => { if (tok === animTok || G.phase === 'over') showResult(); }, animMs(ev) + 500);
+  if (ev && ev.type === 'start') { $('resultSheet').hidden = true; $('lobbySheet').hidden = true; }
+  syncLobby();
+}
+async function animateMove(ev, tok) {
+  const { s, h, from, to } = ev, g = horseEls[s][h];
+  g.parentNode.appendChild(g);
+  const path = [];
+  if (from < 0) { path.push(0); playNeigh(); }
+  else for (let p = from + 1; p <= to; p++) path.push(p);
+  for (const [i, p] of path.entries()) {
+    if (tok !== animTok) return;
+    placeHorse(s, h, p);
+    playHoof(i);
+    await sleep(STEP_MS);
+  }
+  if (ev.kick && tok === animTok) {
+    const [x, y] = pxOf(cellOf(s, h, to));
+    el('circle', { cx: x, cy: y, r: 20, fill: 'none', stroke: COLORS[ev.kick.s].main, 'stroke-width': 5, class: 'boom' }, $('gFx'));
+    setTimeout(() => { $('gFx').innerHTML = ''; }, 700);
+    await sleep(250);
+    if (tok !== animTok) return;
+    placeHorse(ev.kick.s, ev.kick.h, -1);
+    await sleep(200);
+  }
+  if (tok === animTok) { animating = false; paint(); }
+}
+async function animateRoll(ev, tok) {
+  playRollSound();
+  ev.d.forEach((v, i) => setDie(i, v, true));
+  await sleep(1000);
+  if (tok === animTok) { rolling = false; paint(); }
+}
+
+function describe(ev) {
+  if (ev.type === 'start') return 'Bắt đầu! Tung 1 và 6 hoặc một đôi để ra quân.';
+  if (!Number.isInteger(ev.s) || ev.s < 0 || ev.s > 3) return null;
+  const w = who(ev.s);
+  const more = ev.again ? ' · được tung tiếp!' : '';
+  if (ev.type === 'roll') {
+    if (!Array.isArray(ev.d)) return null;
+    const [a, b] = ev.d, bonus = isBonus(ev.d);
+    const tag = bonus ? (a === b ? ` — đôi ${a}! 🎉` : ' — 1 và 6! 🎉') : '';
+    return `${w} tung được ${a} + ${b}${tag}` + (ev.none ? (bonus ? ', không đi được · được tung tiếp!' : ', không đi được.') : '');
+  }
+  if (ev.type === 'move') {
+    if (ev.won) return `🏆 ${w} đã đưa đủ 4 ngựa về đích!`;
+    if (ev.kick) return `💥 ${w} đá ngựa ${who(ev.kick.s) === 'Bạn' ? 'của bạn' : who(ev.kick.s)} về chuồng!${more}`;
+    if (ev.from < 0) return `${w} ra quân${more}`;
+    if (ev.to > GATE) return `${w} lên bậc ${ev.to - GATE}${more}`;
+    if (ev.to === GATE) return `${w} đã tới cửa đích${more}`;
+    return `${w} đi ${ev.to - ev.from} bước${more}`;
+  }
+  return null;
+}
+
+function paint(skipHorses) {
+  if (!G) return;
+  const inPlay = G.phase !== 'lobby';
+  // chuồng & tên
+  for (let k = 0; k < 4; k++) {
+    cornerEls[k].classList.toggle('off', inPlay && !G.seats[k]);
+    cornerNames[k].textContent = G.seats[k] ? who(k) : '';
+  }
+  // ngựa
+  for (let s = 0; s < 4; s++) for (let h = 0; h < 4; h++) {
+    const g = horseEls[s][h];
+    g.style.display = inPlay && G.seats[s] ? '' : 'none';
+    g.classList.remove('can');
+    if (!skipHorses) placeHorse(s, h, G.horses[s][h]);
+  }
+  // nước có thể đi
+  const gt = $('gTargets');
+  gt.innerHTML = '';
+  const me = G.phase === 'play' && canAct(G.turn) && G.rolled && !busy() && !pending;
+  if (me) for (const m of legalMoves(G, G.turn, G.dice)) {
+    horseEls[G.turn][m.h].classList.add('can');
+    const [x, y] = pxOf(cellOf(G.turn, m.h, m.to));
+    el('circle', { cx: x, cy: y, r: 9, fill: COLORS[G.turn].main, opacity: .55, class: 'target' }, gt);
+  }
+  // người chơi
+  const pl = $('players');
+  pl.innerHTML = '';
+  for (let s = 0; s < 4; s++) {
+    const x = G.seats[s];
+    if (!x) continue;
+    const d = document.createElement('div');
+    d.className = 'pl' + (G.phase === 'play' && G.turn === s ? ' turn' : '') + (x.remote && !x.online ? ' off' : '');
+    d.style.setProperty('--c', COLORS[s].main);
+    d.innerHTML = `<span class="chip"></span><span class="nm"></span><span class="hm">🏁 ${homeCount(G.horses[s])}/4</span>`;
+    d.querySelector('.nm').textContent = x.type === 'bot' ? '🤖 Máy' : who(s) + (x.remote && !x.online ? ' 📴' : '');
+    d.title = x.name;
+    pl.appendChild(d);
+  }
+  // xúc xắc
+  const dice = $('dice'), tc = COLORS[G.turn] ? COLORS[G.turn].main : '#ccd';
+  dice.style.setProperty('--c', tc);
+  dice.disabled = !(G.phase === 'play' && canAct(G.turn) && !G.rolled && !busy() && !pending);
+  const dv = Array.isArray(G.dice) ? G.dice : [6, 1];
+  if (!rolling) { setDie(0, dv[0], false); setDie(1, dv[1], false); }
+  dice.classList.toggle('bonus', G.rolled && isBonus(G.dice) && !rolling);
+  // trạng thái
+  const st = $('status'), dots = '<span class="dots"><span>.</span><span>.</span><span>.</span></span>';
+  let main = '';
+  if (G.phase === 'over') main = G.winner === mySeat() || (!net.on && G.seats[G.winner].me) ? '🎉 Bạn thắng rồi!' : `${who(G.winner)} thắng ván này.`;
+  else if (G.phase === 'lobby') main = `Đang chờ bắt đầu${dots}`;
+  else if (net.on && !net.host && !net.conn) main = 'Mất kết nối với chủ phòng.';
+  else if (canAct(G.turn)) {
+    const name = net.on || G.seats.filter(x => x && x.type === 'human').length === 1 ? 'bạn' : who(G.turn);
+    const ms = G.rolled ? legalMoves(G, G.turn, G.dice) : [];
+    const choose = ms.some(m => G.horses[G.turn][m.h] < 0) && ms.some(m => G.horses[G.turn][m.h] >= 0) ? 'Chọn: ra quân hoặc đi ngựa' : 'Chọn ngựa để đi';
+    main = !G.rolled ? `Đến lượt ${name} — bấm xúc xắc` : busy() || pending ? '' : ms.length > 1 ? choose : '';
+  } else if (net.on && net.seat < 0) main = `Bạn đang xem · lượt của ${who(G.turn)}`;
+  else main = `${who(G.turn)}${G.seats[G.turn].type === 'human' && seatAuto(G.turn) ? ' (máy đánh thay)' : ''} đang chơi${dots}`;
+  st.innerHTML = `<span class="ev"></span><span>${main}</span>`;
+  st.querySelector('.ev').textContent = statusEv;
+  // nút
+  const host = net.on && net.host;
+  $('bNew').hidden = net.on && !net.host;
+  $('bOnline').hidden = net.on; $('bInvite').hidden = !net.on; $('bLeave').hidden = !net.on;
+  $('roomTag').hidden = !net.on;
+  $('roomTag').textContent = net.on ? (host ? 'Chủ phòng' : net.seat < 0 ? 'Đang xem' : 'Online') : '';
+}
+
+function showResult() {
+  if (G.phase !== 'over') return;
+  const s = G.winner, meWon = s === mySeat() || (!net.on && G.seats[s].me);
+  $('rEmoji').textContent = meWon ? '🏆' : G.seats[s].type === 'bot' ? '🤖' : '🐴';
+  $('rTitle').textContent = meWon ? 'Bạn thắng!' : `${who(s)} thắng!`;
+  $('rMsg').textContent = (meWon ? 'Cả 4 chú ngựa đã về đích. Giỏi quá!' : 'Ván sau cố lên nhé!') + (net.on && !net.host ? ' Chờ chủ phòng mở ván mới.' : '');
+  $('bAgain').hidden = net.on && !net.host;
+  $('resultSheet').hidden = false;
+}
+
+// chạm vào bàn: chọn ngựa (chạm vào ngựa, ô đích của nó, hoặc chuồng khi ra quân)
+$('board').addEventListener('click', e => {
+  if (!G || !G.rolled || !canAct(G.turn)) return;
+  const r = $('board').getBoundingClientRect();
+  const x = (e.clientX - r.left) / r.width * SIZE, y = (e.clientY - r.top) / r.height * SIZE;
+  const moves = legalMoves(G, G.turn, G.dice);
+  let best = null, bd = Infinity;
+  for (const m of moves) {
+    for (const p of [G.horses[G.turn][m.h], m.to]) {
+      const [cx, cy] = pxOf(cellOf(G.turn, m.h, p)), d = Math.hypot(cx - x, cy - y);
+      // chạm vào con ngựa có nhiều nước (trong đích) thì chọn nước xa nhất
+      if (d < bd - 0.5 || (Math.abs(d - bd) <= 0.5 && best && m.h === best.h && m.to > best.to)) { bd = Math.min(d, bd); best = m; }
+    }
+  }
+  if (best && bd < CELL * 0.9) uiMove(best.h, best.to);
+});
+$('dice').onclick = uiRoll;
+document.addEventListener('keydown', e => {
+  if ((e.key === ' ' || e.key === 'Enter') && e.target === document.body) { e.preventDefault(); uiRoll(); }
+});
+
+// ── co giãn ──
+function fit() {
+  const w = $('wrap'), shell = w.parentElement, side = shell.querySelector('.side'), cs = getComputedStyle(w);
+  const row = getComputedStyle(shell).flexDirection === 'row';
+  const padX = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
+  const availW = shell.clientWidth - (row ? side.offsetWidth : 0) - padX - 8;
+  const s = Math.max(240, Math.floor(Math.min(availW, w.clientHeight - 4, 860)));
+  $('board').style.width = $('board').style.height = s + 'px';
+}
+window.addEventListener('resize', fit);
+</script>
+
+<script>
+// ═══════════════════════════ chơi online (PeerJS) ═══════════════════════════
+// Hình sao: chủ phòng nối với từng khách. Chủ phòng giữ G, chạy luật, tung
+// xúc xắc và gửi {t:'state', G, ev} cho mọi người sau mỗi thay đổi. Khách
+// gửi hello {cid, name} khi vào, roll / move {h} khi tới lượt, name khi đổi
+// tên. cid lưu trong sessionStorage nên tải lại trang vẫn giành lại được ghế
+// của mình; khách rớt mạng giữa ván thì máy đánh thay cho tới khi vào lại.
+const PEERJS_URL = 'https://cdn.jsdelivr.net/npm/peerjs@1.5.5/dist/peerjs.min.js';
+const ROOM_PREFIX = 'cangua-vibe-';
+const JOIN_ORDER = [2, 1, 3]; // khách thứ nhất ngồi đối diện chủ phòng
+const freshNet = () => ({ on: false, host: false, code: null, peer: null, conn: null, conns: new Map(), seat: -1, timer: 0, left: false });
+let net = freshNet();
+const myCid = (() => {
+  try { let v = sessionStorage.getItem('cangua.cid'); if (!v) { v = randCode() + randCode(); sessionStorage.setItem('cangua.cid', v); } return v; }
+  catch (e) { return randCode() + randCode(); }
+})();
+function myName() { return (store.get('cangua.name', '') || '').trim(); }
+
+function loadPeerJs() {
+  if (window.Peer) return Promise.resolve();
+  return new Promise((ok, bad) => {
+    const s = document.createElement('script');
+    s.src = PEERJS_URL; s.onload = ok; s.onerror = () => { s.remove(); bad(new Error('peerjs')); };
+    document.head.appendChild(s);
+  });
+}
+function randCode() { return Array.from(crypto.getRandomValues(new Uint8Array(6)), b => 'abcdefghijkmnpqrstuvwxyz23456789'[b % 32]).join(''); }
+const inviteUrl = () => location.href.split('#')[0] + '#room=' + net.code;
+function netSend(msg) { if (net.conn && net.conn.open) try { net.conn.send(msg); } catch (e) {} }
+function netBroadcast(msg) { for (const c of net.conns.keys()) if (c.open) try { c.send(msg); } catch (e) {} }
+const DOTS = '<span class="dots"><span>.</span><span>.</span><span>.</span></span>';
+
+// bảng thông báo kết nối: rows là các hàng nút [{ label, go, fn }]
+function netSheet(emoji, title, msg, rows = []) {
+  const p = $('netPanel');
+  p.innerHTML = `<div class="result-emoji">${emoji}</div><h2>${title}</h2><p class="result-msg">${msg}</p>`;
+  for (const r of rows) {
+    const row = document.createElement('div'); row.className = 'row';
+    for (const b of r) {
+      const e = document.createElement('button');
+      e.textContent = b.label; if (b.go) e.className = 'go';
+      e.onclick = () => b.fn(e);
+      row.appendChild(e);
+    }
+    p.appendChild(row);
+  }
+  for (const id of ['resultSheet', 'setupSheet', 'lobbySheet']) $(id).hidden = true;
+  $('netSheet').hidden = false;
+}
+const hideNetSheet = () => { $('netSheet').hidden = true; };
+function netFail(title, msg, retry) {
+  const rows = [[{ label: 'Chơi với máy', fn: () => leaveOnline() }]];
+  if (retry) rows[0].push({ label: 'Thử lại', go: true, fn: retry });
+  netSheet('😕', title, msg, rows);
+}
+
+function closeNet() {
+  clearTimeout(net.timer);
+  const bye = { t: 'bye' };
+  if (net.conn) { netSend(bye); try { net.conn.close(); } catch (e) {} }
+  for (const c of net.conns.keys()) { try { c.send(bye); c.close(); } catch (e) {} }
+  if (net.peer) try { net.peer.destroy(); } catch (e) {}
+}
+function startNet(host, code) {
+  clearTimeout(driveT);
+  closeNet();
+  net = freshNet(); net.on = true; net.host = host; net.code = code;
+  $('resultSheet').hidden = true; $('setupSheet').hidden = true;
+  return net;
+}
+function leaveOnline() {
+  closeNet();
+  net = freshNet();
+  if (location.hash) history.replaceState(null, '', location.pathname + location.search);
+  hideNetSheet(); $('lobbySheet').hidden = true;
+  resumeLocal();
+}
+
+// ── chủ phòng ──
+async function hostOnline(tries = 0) {
+  const n = startNet(true, randCode());
+  net.seat = 0;
+  G = { phase: 'lobby', seats: [{ type: 'human', name: myName() || 'Chủ phòng', cid: myCid, online: true }, null, null, null],
+    horses: [0, 1, 2, 3].map(() => [-1, -1, -1, -1]), turn: 0, dice: 0, rolled: false, winner: null, seq: 0 };
+  statusEv = '';
+  paint();
+  netSheet('🌐', 'Tạo phòng', `Đang tạo phòng${DOTS}`, [[{ label: 'Huỷ', fn: () => leaveOnline() }]]);
+  try { await loadPeerJs(); } catch (e) {
+    if (net === n) netFail('Không tải được', 'Không tải được phần chơi online. Kiểm tra mạng rồi thử lại nhé.', () => hostOnline());
+    return;
+  }
+  if (net !== n) return;
+  const peer = n.peer = new Peer(ROOM_PREFIX + n.code, { debug: 0 });
+  let opened = false;
+  peer.on('open', () => { if (net !== n) return; opened = true; hideNetSheet(); openLobby(); });
+  peer.on('connection', c => {
+    if (net !== n) return c.close();
+    c.on('data', d => { if (net === n) hostMsg(c, d); });
+    const lost = () => {
+      if (net !== n || !n.conns.has(c)) return;
+      const cid = n.conns.get(c);
+      n.conns.delete(c);
+      const s = G.seats.findIndex(x => x && x.cid === cid);
+      if (s < 0) return;
+      if ([...n.conns.values()].includes(cid)) return; // đã vào lại bằng kết nối khác
+      if (G.phase === 'lobby') G.seats[s] = null; else G.seats[s].online = false;
+      commit({ type: 'lobby' });
+    };
+    c.on('close', lost); c.on('error', lost);
+  });
+  peer.on('disconnected', () => { setTimeout(() => { if (net === n && !peer.destroyed && peer.disconnected) peer.reconnect(); }, 1500); });
+  peer.on('error', err => {
+    if (net !== n) return;
+    if (err.type === 'unavailable-id' && tries < 3) return hostOnline(tries + 1);
+    if (opened) return;
+    netFail('Không tạo được phòng', err.type === 'browser-incompatible'
+      ? 'Trình duyệt này không hỗ trợ chơi online. Thử Chrome, Safari hoặc Firefox bản mới nhé.'
+      : 'Không kết nối được máy chủ tìm bạn. Kiểm tra mạng rồi thử lại nhé.', () => hostOnline());
+  });
+}
+const cleanName = v => String(v || '').replace(/\s+/g, ' ').trim().slice(0, 16);
+function hostMsg(c, d) {
+  if (!d || typeof d !== 'object') return;
+  if (d.t === 'hello') {
+    const cid = String(d.cid || '').slice(0, 40), name = cleanName(d.name);
+    if (!cid) return;
+    // đóng kết nối cũ của cùng người (tải lại trang)
+    for (const [oc, ocid] of net.conns) if (ocid === cid && oc !== c) { net.conns.delete(oc); try { oc.close(); } catch (e) {} }
+    net.conns.set(c, cid);
+    let s = G.seats.findIndex(x => x && x.cid === cid);
+    if (s >= 0) { G.seats[s].online = true; if (name && G.phase === 'lobby') G.seats[s].name = name; }
+    else if (G.phase === 'lobby') {
+      s = JOIN_ORDER.find(k => !G.seats[k]);
+      if (s === undefined) { try { c.send({ t: 'full' }); } catch (e) {} net.conns.delete(c); setTimeout(() => c.close(), 500); return; }
+      G.seats[s] = { type: 'human', name: name || 'Người chơi ' + (s + 1), cid, online: true, remote: true };
+    } else s = -1; // ván đã bắt đầu: vào xem
+    try { c.send({ t: 'welcome', seat: s }); } catch (e) {}
+    commit({ type: 'lobby' });
+    return;
+  }
+  const s = G.seats.findIndex(x => x && x.cid === net.conns.get(c));
+  if (s < 0) return;
+  if (d.t === 'roll') doRoll(s);
+  else if (d.t === 'move' && Number.isInteger(d.h)) doMove(s, d.h, Number.isInteger(d.to) ? d.to : undefined);
+  else if (d.t === 'name' && G.phase === 'lobby') { const nm = cleanName(d.name); if (nm) { G.seats[s].name = nm; commit({ type: 'lobby' }); } }
+  else if (d.t === 'bye') { G.seats[s].online = false; }
+}
+function hostStart() {
+  const fill = $('lbFill').checked;
+  const seats = G.seats.map((x, k) => x ? Object.assign({}, x) : fill ? { type: 'bot', name: 'Máy ' + COLORS[k].name } : null);
+  if (seats.filter(Boolean).length < 2) return;
+  Object.assign(G, freshGame(seats), { seq: G.seq });
+  $('lobbySheet').hidden = true;
+  commit({ type: 'start' });
+}
+function hostRestart() {
+  const seats = G.seats;
+  Object.assign(G, freshGame(seats), { seq: G.seq });
+  commit({ type: 'start' });
+}
+
+// ── khách ──
+async function joinOnline(code) {
+  const n = startNet(false, code);
+  G = null;
+  netSheet('🌐', 'Vào phòng', `Đang kết nối với chủ phòng${DOTS}`, [[{ label: 'Huỷ', fn: () => leaveOnline() }]]);
+  const retry = () => joinOnline(code);
+  try { await loadPeerJs(); } catch (e) {
+    if (net === n) netFail('Không tải được', 'Không tải được phần chơi online. Kiểm tra mạng rồi thử lại nhé.', retry);
+    return;
+  }
+  if (net !== n) return;
+  const peer = n.peer = new Peer({ debug: 0 });
+  n.timer = setTimeout(() => {
+    if (net === n && !n.conn) netFail('Không nối được', 'Không nối được với máy chủ phòng. Có thể mạng của một trong hai bên chặn kết nối trực tiếp — thử đổi sang wifi khác hoặc 4G nhé.', retry);
+  }, 20000);
+  peer.on('open', () => {
+    if (net !== n) return;
+    const c = peer.connect(ROOM_PREFIX + code, { reliable: true });
+    c.on('open', () => {
+      if (net !== n) return c.close();
+      clearTimeout(n.timer);
+      n.conn = c;
+      c.send({ t: 'hello', cid: myCid, name: myName() });
+    });
+    c.on('data', d => { if (net === n && n.conn === c) guestMsg(d); });
+    const lost = () => {
+      if (net !== n || n.conn !== c) return;
+      n.conn = null;
+      if (G) paint();
+      netFail('Mất kết nối', n.left ? 'Chủ phòng đã đóng phòng.' : 'Mất kết nối với chủ phòng. Có thể chủ phòng đã tắt game hoặc mạng bị ngắt.', n.left ? null : retry);
+    };
+    c.on('close', lost); c.on('error', lost);
+  });
+  peer.on('error', err => {
+    if (net !== n || n.conn) return;
+    clearTimeout(n.timer);
+    if (err.type === 'peer-unavailable') netFail('Không tìm thấy phòng', 'Phòng này không còn nữa, có thể chủ phòng đã thoát. Nhờ bạn ấy gửi link mới nhé.', retry);
+    else netFail('Không vào được phòng', 'Không kết nối được máy chủ tìm bạn. Kiểm tra mạng rồi thử lại nhé.', retry);
+  });
+}
+function validState(g) {
+  return g && typeof g === 'object' && Array.isArray(g.seats) && g.seats.length === 4 && Array.isArray(g.horses) && g.horses.length === 4 &&
+    g.horses.every(hs => Array.isArray(hs) && hs.length === 4 && hs.every(p => Number.isInteger(p) && p >= -1 && p <= 65)) &&
+    Number.isInteger(g.turn) && g.turn >= 0 && g.turn < 4 &&
+    (g.dice === 0 || (Array.isArray(g.dice) && g.dice.length === 2 && g.dice.every(v => Number.isInteger(v) && v >= 1 && v <= 6)));
+}
+function guestMsg(d) {
+  if (!d || typeof d !== 'object') return;
+  if (d.t === 'welcome') { net.seat = Number.isInteger(d.seat) ? d.seat : -1; if (G) { paint(); syncLobby(); } }
+  else if (d.t === 'state') {
+    if (!validState(d.G) || (G && d.G.seq <= G.seq)) return;
+    const first = !G;
+    const ev = d.ev && typeof d.ev === 'object' ? d.ev : null;
+    if (first) { statusEv = ''; hideNetSheet(); }
+    show(d.G, first ? null : ev);
+    if (first && G.phase === 'lobby') openLobby();
+    if (first && G.phase === 'over') showResult();
+  }
+  else if (d.t === 'full') { const c = net.code; net.conn = null; netFail('Phòng đã đủ người', 'Phòng này đã có 4 người chơi rồi.', () => joinOnline(c)); }
+  else if (d.t === 'bye') net.left = true;
+}
+
+// ── phòng chờ ──
+function openLobby() {
+  if (!net.on) return;
+  $('lbHostBox').hidden = !net.host; $('lbHostCtl').hidden = !net.host; $('lbGuestCtl').hidden = net.host;
+  if (net.host) {
+    $('lbLink').value = inviteUrl();
+    $('lbNote').hidden = location.protocol !== 'file:';
+    $('lbShare').hidden = !navigator.share;
+  }
+  $('lbName').value = myName();
+  $('lbName').placeholder = net.host ? 'Chủ phòng' : 'Người chơi';
+  syncLobby(true);
+}
+function syncLobby(force) {
+  if (!net.on || !G) return;
+  const sheet = $('lobbySheet');
+  if (force || (G.phase === 'lobby' && $('netSheet').hidden)) sheet.hidden = false;
+  if (sheet.hidden) return;
+  $('lbHostBox').hidden = !net.host; $('lbHostCtl').hidden = !net.host; $('lbGuestCtl').hidden = net.host || G.phase !== 'lobby';
+  const box = $('lbSeats');
+  box.innerHTML = '';
+  const fill = $('lbFill').checked;
+  for (let k = 0; k < 4; k++) {
+    const x = G.seats[k], row = document.createElement('div');
+    row.className = 'seat'; row.style.setProperty('--c', COLORS[k].main);
+    row.innerHTML = '<span class="chip"></span><span class="nm"></span>';
+    const nm = row.querySelector('.nm');
+    if (x) {
+      nm.textContent = (k === net.seat ? x.name + ' (bạn)' : x.name);
+      const tag = x.type === 'bot' ? 'máy' : k === 0 ? 'chủ phòng' : x.online === false ? 'mất kết nối' : '';
+      if (tag) { const t = document.createElement('span'); t.className = 'tag'; t.textContent = tag; row.appendChild(t); }
+    } else { nm.textContent = G.phase === 'lobby' ? (fill && net.host ? 'Máy sẽ chơi' : 'Đang chờ…') : 'Trống'; nm.classList.add('empty'); }
+    box.appendChild(row);
+  }
+  if (net.host) {
+    const humans = G.seats.filter(x => x && x.type === 'human').length;
+    $('lbStart').hidden = G.phase !== 'lobby';
+    $('lbFill').parentElement.hidden = G.phase !== 'lobby';
+    $('lbStart').disabled = humans < 2;
+    $('lbHint').textContent = G.phase !== 'lobby' ? 'Ván đang chơi. Người vào sau link sẽ được xem.' : humans < 2 ? 'Cần ít nhất 2 người để bắt đầu.' : `${humans} người đã sẵn sàng.`;
+    $('lbCancel').textContent = G.phase === 'lobby' ? 'Huỷ phòng' : 'Đóng';
+  }
+}
+$('lbCopy').onclick = async () => {
+  const b = $('lbCopy');
+  try { await navigator.clipboard.writeText(inviteUrl()); }
+  catch (e) { $('lbLink').select(); try { document.execCommand('copy'); } catch (e2) {} }
+  b.textContent = '✓ Đã copy'; setTimeout(() => { b.textContent = 'Copy link'; }, 1600);
+};
+$('lbLink').onclick = () => $('lbLink').select();
+$('lbShare').onclick = () => navigator.share({ title: 'Cờ Cá Ngựa', text: 'Vào chơi cờ cá ngựa với mình nhé!', url: inviteUrl() }).catch(() => {});
+$('lbFill').onchange = () => syncLobby();
+$('lbStart').onclick = hostStart;
+$('lbCancel').onclick = () => { if (G && G.phase === 'lobby') leaveOnline(); else $('lobbySheet').hidden = true; };
+$('lbLeave').onclick = () => leaveOnline();
+let nameT = 0;
+$('lbName').oninput = () => {
+  clearTimeout(nameT);
+  nameT = setTimeout(() => {
+    const nm = cleanName($('lbName').value);
+    store.set('cangua.name', nm);
+    if (!nm || !net.on || !G || G.phase !== 'lobby') return;
+    if (net.host) { G.seats[0].name = nm; commit({ type: 'lobby' }); } else netSend({ t: 'name', name: nm });
+  }, 400);
+};
+$('lobbySheet').onclick = e => { if (e.target === $('lobbySheet') && G && G.phase !== 'lobby') $('lobbySheet').hidden = true; };
+</script>
+
+<script>
+// ═══════════════════════════ nút & khởi động ═══════════════════════════
+const SEAT_OPTS = [['bot', 'Máy'], ['human', 'Người'], ['off', 'Trống']];
+function renderSetup() {
+  const box = $('setupSeats');
+  box.innerHTML = '';
+  setup.forEach((t, k) => {
+    const row = document.createElement('div');
+    row.className = 'seat'; row.style.setProperty('--c', COLORS[k].main);
+    row.innerHTML = `<span class="chip"></span><span class="who"></span>`;
+    row.querySelector('.who').textContent = COLORS[k].name;
+    if (k === 0) { const n = document.createElement('span'); n.className = 'nm'; n.textContent = 'Bạn'; row.appendChild(n); }
+    else {
+      const seg = document.createElement('div'); seg.className = 'seg';
+      for (const [v, label] of SEAT_OPTS) {
+        const b = document.createElement('button');
+        b.textContent = label; if (t === v) b.className = 'on';
+        b.onclick = () => { setup[k] = v; renderSetup(); };
+        seg.appendChild(b);
+      }
+      row.appendChild(seg);
+    }
+    box.appendChild(row);
+  });
+  $('bStart').disabled = setup.filter(t => t !== 'off').length < 2;
+}
+function newLocalGame() {
+  clearTimeout(driveT);
+  G = freshGame(seatsFromSetup());
+  statusEv = '';
+  commit({ type: 'start' });
+}
+function resumeLocal() {
+  clearTimeout(driveT);
+  const saved = store.get('cangua.game', null);
+  if (saved && validState(saved) && saved.phase === 'play') { G = saved; statusEv = ''; show(G, null); drive(null); }
+  else { newLocalGame(); }
+}
+
+let newArmed = 0;
+$('bNew').onclick = () => {
+  if (!net.on) { renderSetup(); $('setupSheet').hidden = false; return; }
+  if (!net.host || !G || G.phase === 'lobby') return;
+  // đang giữa ván thì bấm hai lần mới tính
+  if (G.phase === 'play' && !newArmed) {
+    $('bNew').textContent = 'Bấm lần nữa để chơi lại';
+    newArmed = setTimeout(() => { newArmed = 0; $('bNew').textContent = '＋ Ván mới'; }, 2500);
+    return;
+  }
+  clearTimeout(newArmed); newArmed = 0; $('bNew').textContent = '＋ Ván mới';
+  hostRestart();
+};
+$('bStart').onclick = () => { store.set('cangua.setup', setup); $('setupSheet').hidden = true; newLocalGame(); };
+$('setupSheet').onclick = e => { if (e.target === $('setupSheet')) $('setupSheet').hidden = true; };
+$('bOnline').onclick = () => hostOnline();
+$('bInvite').onclick = () => openLobby();
+$('bLeave').onclick = () => leaveOnline();
+$('bRules').onclick = () => { $('rulesSheet').hidden = false; };
+$('bRulesOk').onclick = () => { $('rulesSheet').hidden = true; };
+$('rulesSheet').onclick = e => { if (e.target === $('rulesSheet')) $('rulesSheet').hidden = true; };
+$('bView').onclick = () => { $('resultSheet').hidden = true; };
+$('bAgain').onclick = () => { $('resultSheet').hidden = true; if (net.on) { if (net.host) hostRestart(); } else newLocalGame(); };
+
+fit();
+const roomInHash = () => { const m = /^#room=([a-z0-9]{4,16})$/.exec(location.hash); return m ? m[1] : null; };
+window.addEventListener('hashchange', () => { const c = roomInHash(); if (c && c !== net.code) joinOnline(c); });
+if (roomInHash()) joinOnline(roomInHash());
+else if (!store.get('cangua.setup', null)) { G = freshGame(seatsFromSetup()); show(G, null); renderSetup(); $('setupSheet').hidden = false; }
+else resumeLocal();
+requestAnimationFrame(() => requestAnimationFrame(() => $('board').classList.remove('init')));
+</script>
+</body>
+</html>
