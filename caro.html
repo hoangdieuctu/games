@@ -161,6 +161,14 @@ button:disabled { opacity: .4; cursor: default; }
 .row { display: flex; gap: 10px; margin-top: 18px; }
 .row button { flex: 1; border-radius: 14px; padding: 11px; font-weight: 800; font-size: 16px; background: #eef2f7; }
 .row button.go { margin: 0; }
+.row + .row { margin-top: 10px; }
+.link {
+  display: block; width: 100%; margin-top: 16px; padding: 11px 12px; border-radius: 12px;
+  border: 2px dashed var(--line); background: #f5f8fc; color: var(--ink);
+  font: 600 14px/1.3 system-ui, sans-serif; text-align: center; outline: none;
+  user-select: all; -webkit-user-select: all;
+}
+.panel .note { margin-top: 10px; font-size: 13px; color: #c0392b; text-align: center; line-height: 1.4; }
 
 @media (max-width: 420px) {
   .top h1 { font-size: 22px; }
@@ -178,8 +186,8 @@ button:disabled { opacity: .4; cursor: default; }
 <header class="top">
   <a class="back" href="index.html" aria-label="Về trang chính">‹</a>
   <h1><span class="x">Cờ</span> <span class="o">Caro</span></h1>
-  <div class="score" title="Tỉ số ở mức hiện tại">
-    <span class="me">Bạn <b id="sWin">0</b></span><span class="sep">–</span><span class="bot"><b id="sLose">0</b> Máy</span>
+  <div class="score" id="score">
+    <span class="me">Bạn <b id="sWin">0</b></span><span class="sep">–</span><span class="bot"><b id="sLose">0</b> <span id="sOpp">Máy</span></span>
   </div>
 </header>
 
@@ -204,6 +212,9 @@ button:disabled { opacity: .4; cursor: default; }
   <div class="status" id="status"></div>
   <nav class="dock">
     <button id="bNew" class="primary">＋ Ván mới</button>
+    <button id="bOnline">🌐 Chơi online</button>
+    <button id="bInvite" hidden>🔗 Mời bạn</button>
+    <button id="bLeave" hidden>✕ Thoát online</button>
   </nav>
 </aside>
 </div>
@@ -239,6 +250,11 @@ button:disabled { opacity: .4; cursor: default; }
       <button class="go" id="bAgain">Chơi lại</button>
     </div>
   </div>
+</div>
+
+<!-- chơi online -->
+<div class="overlay" id="netSheet" hidden>
+  <div class="panel" id="netPanel"></div>
 </div>
 
 <script>
@@ -755,9 +771,14 @@ function renderMarks() {
 // ── trạng thái ──
 const turn = () => (moves.length % 2 === 0 ? 1 : 2);
 function setStatus() {
-  const s = $('status');
+  const s = $('status'), dots = '<span class="dots"><span>.</span><span>.</span><span>.</span></span>';
   if (over) {
-    s.innerHTML = over === 'draw' ? 'Hoà! Bàn cờ đã kín.' : over === human ? '🎉 Bạn thắng rồi!' : 'Máy thắng ván này.';
+    s.innerHTML = over === 'draw' ? 'Hoà! Bàn cờ đã kín.' : over === human ? '🎉 Bạn thắng rồi!' : net.on ? 'Đối thủ thắng ván này.' : 'Máy thắng ván này.';
+  } else if (net.on) {
+    if (!net.conn) s.innerHTML = `<span>${net.host ? (moves.length ? `Đối thủ đã rời, đang chờ vào lại${dots}` : `Đang chờ bạn vào phòng${dots}`) : 'Chưa kết nối với đối thủ.'}</span>`;
+    else if (net.note) s.innerHTML = `<span class="say">${net.note}</span>`;
+    else if (turn() === human) s.innerHTML = `${iconSvg(human)}<span>Đến lượt bạn</span>`;
+    else s.innerHTML = `${iconSvg(ai)}<span>Đối thủ đang nghĩ${dots}</span>`;
   } else if (thinking) {
     s.innerHTML = `${iconSvg(ai)}<span>Máy đang nghĩ<span class="dots"><span>.</span><span>.</span><span>.</span></span></span>`;
   } else {
@@ -769,9 +790,12 @@ function setStatus() {
     }[aiNote];
     s.innerHTML = say ? `<span class="say">${say}</span>` : `${iconSvg(human)}<span>Đến lượt bạn</span>`;
   }
-  $('board').classList.toggle('busy', thinking);
-  const st = stats[settings.level];
+  $('board').classList.toggle('busy', thinking || (net.on && !over && (!net.conn || turn() !== human)));
+  const st = net.on ? net.score : stats[settings.level];
   $('sWin').textContent = st.w; $('sLose').textContent = st.l;
+  $('sOpp').textContent = net.on ? 'Đối thủ' : 'Máy';
+  $('score').title = net.on ? 'Tỉ số với đối thủ' : 'Tỉ số ở mức hiện tại';
+  $('bOnline').hidden = net.on; $('bInvite').hidden = !(net.on && net.host); $('bLeave').hidden = !net.on;
 }
 
 function lineThrough(q) {
@@ -790,11 +814,11 @@ function lineThrough(q) {
   return null;
 }
 
-function save() { store.set('caro.game', over ? null : { n: N, level: settings.level, first: settings.first, moves }); }
+function save() { if (!net.on) store.set('caro.game', over ? null : { n: N, level: settings.level, first: settings.first, moves }); }
 
 function play(q, animate = true) {
   const p = turn();
-  cells[q] = p; moves.push(q);
+  cells[q] = p; moves.push(q); net.note = '';
   pieceSvg(p, q, $('gPieces'), animate);
   ensureVisible(q);
   const line = lineThrough(q);
@@ -807,17 +831,19 @@ function play(q, animate = true) {
 }
 
 function finish() {
-  const st = stats[settings.level];
+  const st = net.on ? net.score : stats[settings.level];
   if (over === 'draw') st.d++; else if (over === human) st.w++; else st.l++;
-  store.set('caro.stats', stats);
-  const lv = LEVELS[settings.level];
+  if (!net.on) store.set('caro.stats', stats);
+  const lv = LEVELS[settings.level], opp = net.on ? 'Đối thủ' : 'Máy';
   const [emo, title, msg] = over === 'draw' ? ['🤝', 'Hoà cờ!', 'Hai bên ngang tài ngang sức.']
+    : net.on ? (over === human ? ['🏆', 'Bạn thắng!', 'Thắng bạn ấy rồi. Giỏi quá!'] : ['😅', 'Đối thủ thắng!', 'Ván sau gỡ lại nhé!'])
     : over === human ? ['🏆', 'Bạn thắng!', `Hạ được máy ở mức ${lv}. Giỏi quá!`]
     : ['🤖', 'Máy thắng!', 'Thử chặn sớm các hàng ba mở nhé.'];
+  const shown = moves;
   setTimeout(() => {
-    if (!over) return;
+    if (!over || moves !== shown) return;
     $('rEmoji').textContent = emo; $('rTitle').textContent = title;
-    $('rMsg').textContent = `${msg}  (Bạn ${st.w} – ${st.l} Máy${st.d ? `, hoà ${st.d}` : ''})`;
+    $('rMsg').textContent = `${msg}  (Bạn ${st.w} – ${st.l} ${opp}${st.d ? `, hoà ${st.d}` : ''})`;
     $('resultSheet').hidden = false;
   }, 900);
 }
@@ -835,17 +861,32 @@ function aiTurn() {
   });
 }
 
-function newGame(saved) {
+// dựng lại bàn từ danh sách nước đi (không tính điểm, không hiện bảng kết quả)
+function loadMoves(list) {
   cancelAsk();
   cells = new Array(NN).fill(0); moves = []; over = null; winCells = null; thinking = false; aiNote = null;
-  human = settings.first === 'human' ? 1 : 2; ai = 3 - human;
-  $('gPieces').innerHTML = '';
-  if (saved) for (const q of saved) { cells[q] = turn(); moves.push(q); }
+  for (const q of list || []) { cells[q] = turn(); moves.push(q); }
+  if (moves.length) {
+    const last = moves[moves.length - 1], line = lineThrough(last);
+    if (line) { over = cells[last]; winCells = line; } else if (moves.length === NN) over = 'draw';
+  }
+  $('resultSheet').hidden = true;
   renderAll();
   defaultView();
   save();
   setStatus();
-  if (turn() === ai) aiTurn();
+}
+function newGame(saved) {
+  human = settings.first === 'human' ? 1 : 2; ai = 3 - human;
+  loadMoves(saved);
+  if (!over && turn() === ai) aiTurn();
+}
+function resumeAi() {
+  const saved = store.get('caro.game', null);
+  if (saved && saved.n === N && saved.moves && saved.moves.length) {
+    settings.level = saved.level; settings.first = saved.first;
+    newGame(saved.moves);
+  } else newGame();
 }
 
 // ── camera: bàn 30 × 30 quá nhỏ trên điện thoại nên cho kéo và phóng to ──
@@ -897,10 +938,13 @@ function cellAt(e) {
 
 let ghost = null, ghostQ = -1;
 function clearGhost() { if (ghost) { ghost.remove(); ghost = null; ghostQ = -1; } }
+const canMove = q => q >= 0 && !over && !thinking && turn() === human && !cells[q] && (!net.on || !!net.conn);
 function tapCell(q) {
-  if (q < 0 || over || thinking || turn() !== human || cells[q]) return;
+  if (!canMove(q)) return;
+  const n = moves.length;
   play(q);
-  if (!over) aiTurn();
+  if (net.on) netSend({ t: 'move', q, n });
+  else if (!over) aiTurn();
 }
 const ptrs = new Map();
 let gesture = null; // { moved, pinch, sx, sy, vx, vy, dist, s, mid }
@@ -942,7 +986,7 @@ boardEl.addEventListener('pointermove', e => {
   const q = cellAt(e);
   if (q === ghostQ) return;
   clearGhost();
-  if (q < 0 || over || thinking || turn() !== human || cells[q]) return;
+  if (!canMove(q)) return;
   ghostQ = q; ghost = pieceSvg(human, q, $('gTop'), false, 'ghost');
 });
 function endPtr(e, cancel) {
@@ -965,6 +1009,220 @@ $('zIn').onclick = () => zoomAt(0.75, view.x + view.s / 2, view.y + view.s / 2);
 $('zOut').onclick = () => zoomAt(1 / 0.75, view.x + view.s / 2, view.y + view.s / 2);
 $('zFit').onclick = () => { if (view.s >= FULL) defaultView(); else { view.s = FULL; applyView(); } };
 
+// ── chơi online: hai máy nối thẳng với nhau qua WebRTC (PeerJS) ──
+// Máy chủ phòng mở một Peer có mã ngẫu nhiên rồi gửi link #room=<mã>; máy kia
+// mở link là nối vào. Server công cộng của PeerJS chỉ giúp hai bên tìm nhau,
+// các nước đi sau đó gửi thẳng giữa hai máy. Chủ phòng giữ ván "chuẩn": khi
+// hai bên lệch nhau (mất tin, vào lại giữa ván) thì chủ phòng gửi lại cả bàn.
+//
+// Tin nhắn: state {moves, hostX, score} chủ → khách · move {q, n} hai chiều
+// (n = số nước trước nước này) · hello / new khách → chủ · full, bye.
+const PEERJS_URL = 'https://cdn.jsdelivr.net/npm/peerjs@1.5.5/dist/peerjs.min.js';
+const ROOM_PREFIX = 'caro-vibe-';
+const freshNet = () => ({ on: false, host: false, code: null, peer: null, conn: null, hostX: true,
+  score: { w: 0, l: 0, d: 0 }, note: '', sheetClosable: false, timer: 0 });
+let net = freshNet();
+
+function loadPeerJs() {
+  if (window.Peer) return Promise.resolve();
+  return new Promise((ok, bad) => {
+    const s = document.createElement('script');
+    s.src = PEERJS_URL; s.onload = ok; s.onerror = () => { s.remove(); bad(new Error('peerjs')); };
+    document.head.appendChild(s);
+  });
+}
+const randCode = () => Array.from(crypto.getRandomValues(new Uint8Array(6)), b => 'abcdefghijkmnpqrstuvwxyz23456789'[b % 32]).join('');
+const inviteUrl = () => location.href.split('#')[0] + '#room=' + net.code;
+function netSend(msg) { if (net.conn && net.conn.open) try { net.conn.send(msg); } catch (e) {} }
+const DOTS = '<span class="dots"><span>.</span><span>.</span><span>.</span></span>';
+
+// bảng online: rows là các hàng nút [{ label, go, fn }]
+function netSheet(emoji, title, msg, { link = false, rows = [], closable = false, note = '' } = {}) {
+  const p = $('netPanel');
+  p.innerHTML = `<div class="result-emoji">${emoji}</div><h2>${title}</h2><p class="result-msg">${msg}</p>`;
+  if (link) {
+    const i = document.createElement('input');
+    i.className = 'link'; i.id = 'oLink'; i.readOnly = true; i.value = inviteUrl();
+    i.onclick = () => i.select();
+    p.appendChild(i);
+  }
+  if (note) { const n = document.createElement('p'); n.className = 'note'; n.textContent = note; p.appendChild(n); }
+  for (const r of rows) {
+    const row = document.createElement('div'); row.className = 'row';
+    for (const b of r) {
+      const e = document.createElement('button');
+      e.textContent = b.label; if (b.go) e.className = 'go';
+      e.onclick = () => b.fn(e);
+      row.appendChild(e);
+    }
+    p.appendChild(row);
+  }
+  net.sheetClosable = closable;
+  $('resultSheet').hidden = true; $('newSheet').hidden = true;
+  $('netSheet').hidden = false;
+}
+const hideNetSheet = () => { $('netSheet').hidden = true; };
+
+async function copyInvite(btn) {
+  const url = inviteUrl();
+  try { await navigator.clipboard.writeText(url); }
+  catch (e) { const i = $('oLink'); if (i) { i.select(); try { document.execCommand('copy'); } catch (e2) {} } }
+  btn.textContent = '✓ Đã copy';
+  setTimeout(() => { btn.textContent = 'Copy link'; }, 1600);
+}
+function showInvite() {
+  if (!net.on || !net.host || !net.code) return;
+  const first = [{ label: 'Copy link', go: true, fn: copyInvite }];
+  if (navigator.share) first.push({ label: 'Chia sẻ', fn: () => navigator.share({ title: 'Cờ Caro', text: 'Vào chơi cờ caro với mình nhé!', url: inviteUrl() }).catch(() => {}) });
+  netSheet('🔗', 'Mời bạn chơi', net.conn ? 'Đối thủ đang ở trong phòng.' : `Gửi link này cho bạn, bạn ấy mở ra là vào chơi ngay. Đang chờ${DOTS}`, {
+    link: true, closable: true,
+    note: location.protocol === 'file:' ? 'Bạn đang mở file trên máy nên link này chỉ dùng được trên máy này. Hãy mở game từ trang web để mời bạn.' : '',
+    rows: [first, [{ label: 'Để sau', fn: hideNetSheet }, { label: 'Huỷ phòng', fn: () => leaveOnline() }]],
+  });
+}
+function netFail(title, msg, retry) {
+  const rows = [[{ label: 'Chơi với máy', fn: () => leaveOnline() }]];
+  if (retry) rows[0].push({ label: 'Thử lại', go: true, fn: retry });
+  netSheet('😕', title, msg, { rows });
+}
+
+// bắt đầu một phiên online mới; bỏ phiên cũ (nếu có)
+function startNet(host, code) {
+  closeNet();
+  net = freshNet(); net.on = true; net.host = host; net.code = code;
+  human = host ? 1 : 2; ai = 3 - human;
+  loadMoves([]);
+  return net;
+}
+function closeNet() {
+  clearTimeout(net.timer);
+  if (net.conn) { netSend({ t: 'bye' }); try { net.conn.close(); } catch (e) {} }
+  if (net.peer) try { net.peer.destroy(); } catch (e) {}
+}
+function leaveOnline() {
+  closeNet();
+  net = freshNet();
+  if (location.hash) history.replaceState(null, '', location.pathname + location.search);
+  hideNetSheet();
+  resumeAi();
+}
+
+async function hostOnline(tries = 0) {
+  const n = startNet(true, randCode());
+  netSheet('🌐', 'Chơi với bạn', `Đang tạo phòng${DOTS}`, { rows: [[{ label: 'Huỷ', fn: () => leaveOnline() }]] });
+  try { await loadPeerJs(); } catch (e) {
+    if (net === n) netFail('Không tải được', 'Không tải được phần chơi online. Kiểm tra mạng rồi thử lại nhé.', () => hostOnline());
+    return;
+  }
+  if (net !== n) return;
+  const peer = n.peer = new Peer(ROOM_PREFIX + n.code, { debug: 0 });
+  let opened = false;
+  peer.on('open', () => {
+    if (net !== n) return;
+    opened = true;
+    setStatus(); showInvite();
+  });
+  peer.on('connection', c => {
+    if (net !== n) return c.close();
+    if (n.conn) { // phòng đã đủ hai người
+      c.on('open', () => { try { c.send({ t: 'full' }); } catch (e) {} setTimeout(() => c.close(), 500); });
+      return;
+    }
+    bindConn(n, c);
+  });
+  // mất nối với server tìm bạn (không ảnh hưởng ván đang chơi) → nối lại để còn nhận người vào
+  peer.on('disconnected', () => { setTimeout(() => { if (net === n && !peer.destroyed && peer.disconnected) peer.reconnect(); }, 1500); });
+  peer.on('error', err => {
+    if (net !== n) return;
+    if (err.type === 'unavailable-id' && tries < 3) return hostOnline(tries + 1);
+    if (opened) return; // lỗi lặt vặt sau khi đã mở phòng: bỏ qua, 'disconnected' sẽ tự nối lại
+    netFail('Không tạo được phòng', err.type === 'browser-incompatible'
+      ? 'Trình duyệt này không hỗ trợ chơi online. Thử Chrome, Safari hoặc Firefox bản mới nhé.'
+      : 'Không kết nối được máy chủ tìm bạn. Kiểm tra mạng rồi thử lại nhé.', () => hostOnline());
+  });
+}
+
+async function joinOnline(code) {
+  const n = startNet(false, code);
+  netSheet('🌐', 'Vào phòng', `Đang kết nối với bạn${DOTS}`, { rows: [[{ label: 'Huỷ', fn: () => leaveOnline() }]] });
+  const retry = () => joinOnline(code);
+  try { await loadPeerJs(); } catch (e) {
+    if (net === n) netFail('Không tải được', 'Không tải được phần chơi online. Kiểm tra mạng rồi thử lại nhé.', retry);
+    return;
+  }
+  if (net !== n) return;
+  const peer = n.peer = new Peer({ debug: 0 });
+  n.timer = setTimeout(() => {
+    if (net === n && !n.conn) netFail('Không nối được', 'Không nối được với máy bạn kia. Có thể mạng của một trong hai bên chặn kết nối trực tiếp — thử đổi sang wifi khác hoặc 4G nhé.', retry);
+  }, 20000);
+  peer.on('open', () => { if (net === n) bindConn(n, peer.connect(ROOM_PREFIX + code, { reliable: true })); });
+  peer.on('error', err => {
+    if (net !== n || n.conn) return;
+    clearTimeout(n.timer);
+    if (err.type === 'peer-unavailable') netFail('Không tìm thấy phòng', 'Phòng này không còn nữa, có thể bạn kia đã thoát. Nhờ bạn ấy gửi link mới nhé.', retry);
+    else netFail('Không vào được phòng', 'Không kết nối được máy chủ tìm bạn. Kiểm tra mạng rồi thử lại nhé.', retry);
+  });
+}
+
+function bindConn(n, c) {
+  c.on('open', () => {
+    if (net !== n) return c.close();
+    clearTimeout(n.timer);
+    n.conn = c;
+    if (n.host) { hideNetSheet(); n.note = 'Đối thủ đã vào phòng 👋'; sendState(); setStatus(); }
+    else c.send({ t: 'hello' });
+  });
+  c.on('data', d => { if (net === n && n.conn === c) onNetMsg(d); });
+  const lost = () => {
+    if (net !== n || n.conn !== c) return;
+    n.conn = null; n.note = '';
+    if (n.host) setStatus();
+    else { setStatus(); netFail('Mất kết nối', n.left ? 'Đối thủ đã thoát khỏi phòng.' : 'Mất kết nối với đối thủ. Có thể bạn ấy đã tắt game hoặc mạng bị ngắt.', () => joinOnline(n.code)); }
+    n.left = false;
+  };
+  c.on('close', lost);
+  c.on('error', lost);
+}
+
+function sendState() { netSend({ t: 'state', moves, hostX: net.hostX, score: net.score }); }
+const validMoves = a => Array.isArray(a) && a.length <= NN && new Set(a).size === a.length && a.every(q => Number.isInteger(q) && q >= 0 && q < NN);
+
+function netNewGame() {
+  if (!net.host) return netSend({ t: 'new' });
+  if (moves.length) net.hostX = !net.hostX; // đổi lượt đi trước mỗi ván
+  human = net.hostX ? 1 : 2; ai = 3 - human;
+  loadMoves([]);
+  sendState();
+}
+
+function onNetMsg(d) {
+  if (!d || typeof d !== 'object') return;
+  const resync = () => (net.host ? sendState() : netSend({ t: 'hello' }));
+  switch (d.t) {
+    case 'hello': if (net.host) sendState(); break;
+    case 'new': if (net.host) netNewGame(); break;
+    case 'state': {
+      if (net.host || !validMoves(d.moves)) return;
+      const sc = d.score || {};
+      net.score = { w: sc.l | 0, l: sc.w | 0, d: sc.d | 0 };
+      human = d.hostX ? 2 : 1; ai = 3 - human;
+      const fresh = !d.moves.length && !$('netSheet').hidden;
+      loadMoves(d.moves);
+      hideNetSheet();
+      if (fresh) { net.note = 'Đã vào phòng 👋'; setStatus(); }
+      break;
+    }
+    case 'move':
+      if (d.n !== moves.length || over || turn() !== ai || !Number.isInteger(d.q) || d.q < 0 || d.q >= NN || cells[d.q]) return resync();
+      play(d.q);
+      break;
+    case 'full':
+      if (!net.host) { const c = net.code; net.conn = null; netFail('Phòng đã đủ người', 'Phòng này đã có hai người chơi rồi.', () => joinOnline(c)); }
+      break;
+    case 'bye': net.left = true; break;
+  }
+}
+
 // ── nút ──
 function syncSeg() {
   for (const b of $('segLevel').children) b.classList.toggle('on', +b.dataset.v === settings.level);
@@ -972,11 +1230,27 @@ function syncSeg() {
 }
 $('segLevel').onclick = e => { const b = e.target.closest('button'); if (b) { settings.level = +b.dataset.v; syncSeg(); } };
 $('segFirst').onclick = e => { const b = e.target.closest('button'); if (b) { settings.first = b.dataset.v; syncSeg(); } };
-$('bNew').onclick = () => { syncSeg(); $('newSheet').hidden = false; };
+let newArmed = 0;
+$('bNew').onclick = () => {
+  if (!net.on) { syncSeg(); $('newSheet').hidden = false; return; }
+  if (!net.conn) return;
+  // đang giữa ván thì bấm hai lần mới tính, tránh lỡ tay xoá ván của cả hai
+  if (moves.length && !over && !newArmed) {
+    $('bNew').textContent = 'Bấm lần nữa để chơi lại';
+    newArmed = setTimeout(() => { newArmed = 0; $('bNew').textContent = '＋ Ván mới'; }, 2500);
+    return;
+  }
+  clearTimeout(newArmed); newArmed = 0; $('bNew').textContent = '＋ Ván mới';
+  netNewGame();
+};
 $('newSheet').onclick = e => { if (e.target === $('newSheet')) $('newSheet').hidden = true; };
 $('bStart').onclick = () => { store.set('caro.settings', settings); $('newSheet').hidden = true; newGame(); };
 $('bView').onclick = () => { $('resultSheet').hidden = true; };
-$('bAgain').onclick = () => { $('resultSheet').hidden = true; newGame(); };
+$('bAgain').onclick = () => { $('resultSheet').hidden = true; if (net.on) netNewGame(); else newGame(); };
+$('bOnline').onclick = () => hostOnline();
+$('bInvite').onclick = () => showInvite();
+$('bLeave').onclick = () => leaveOnline();
+$('netSheet').onclick = e => { if (e.target === $('netSheet') && net.sheetClosable) $('netSheet').hidden = true; };
 
 // ── co giãn bàn cờ theo màn hình ──
 function fit() {
@@ -993,13 +1267,14 @@ function fit() {
 window.addEventListener('resize', fit);
 fit();
 
-// ── khởi động: tiếp tục ván dở nếu có ──
-const saved = store.get('caro.game', null);
-if (saved && saved.n === N && saved.moves && saved.moves.length) {
-  settings.level = saved.level; settings.first = saved.first;
-  newGame(saved.moves);
+// ── khởi động: mở link mời thì vào phòng, không thì tiếp tục ván dở nếu có ──
+const roomInHash = () => { const m = /^#room=([a-z0-9]{4,16})$/.exec(location.hash); return m ? m[1] : null; };
+window.addEventListener('hashchange', () => { const c = roomInHash(); if (c && c !== net.code) joinOnline(c); });
+if (roomInHash()) {
+  resumeAi();
+  joinOnline(roomInHash());
 } else {
-  newGame();
+  resumeAi();
   if (!store.get('caro.settings', null)) { syncSeg(); $('newSheet').hidden = false; }
 }
 </script>
