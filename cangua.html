@@ -69,9 +69,12 @@ button:disabled { opacity: .4; cursor: default; }
 .corner.off { opacity: .3; }
 .horse { transition: transform .12s ease-out; cursor: default; }
 #board.init .horse { transition: none; }
-.horse .body { stroke: #fff; stroke-width: 3; }
-.horse .glyph { font: 22px 'Segoe UI Symbol', 'Apple Symbols', 'DejaVu Sans', serif; fill: #fff; text-anchor: middle; dominant-baseline: central; pointer-events: none; }
-.horse .ring { fill: none; stroke-width: 3.5; opacity: 0; }
+.horse .ring { fill: none; stroke-width: 3.5; opacity: 0; transform-box: fill-box; transform-origin: center; }
+.horse .shadow { transform-box: fill-box; transform-origin: center; }
+.horse.jump .hbody { animation: jump .13s ease-out; }
+.horse.jump .shadow { animation: shrink .13s ease-out; }
+@keyframes jump { 45% { transform: translateY(-8px); } }
+@keyframes shrink { 45% { transform: scale(.65); opacity: .5; } }
 .horse.can { cursor: pointer; }
 .horse.can .ring { opacity: 1; animation: ring 1s ease-in-out infinite; }
 @keyframes ring { 0%, 100% { transform: scale(1); opacity: .9; } 50% { transform: scale(1.18); opacity: .35; } }
@@ -206,9 +209,11 @@ button:disabled { opacity: .4; cursor: default; }
 .seg button.on { background: #fff; color: var(--ink); box-shadow: 0 2px 6px rgba(35,50,74,.15); }
 .seat { display: flex; align-items: center; gap: 10px; margin-top: 6px; min-height: 36px; font-weight: 700; }
 .seat .chip { width: 22px; height: 22px; border-radius: 50%; background: var(--c); flex: 0 0 auto; box-shadow: 0 0 0 3px #fff, 0 0 0 4px var(--c); }
-.seat .who { width: 84px; flex: 0 0 auto; }
+.seat .who { width: 92px; flex: 0 0 auto; white-space: nowrap; }
 .seat .nm { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .seat .nm.empty { color: var(--muted); font-weight: 600; }
+.seat input.name { flex: 1; min-width: 0; padding: 6px 10px; font-size: 15px; text-align: left; border-width: 2px; }
+.seat.sub { margin-top: 4px; padding-left: 32px; }
 .seat .tag { font-size: 12px; font-weight: 700; color: var(--muted); background: #eef2f7; border-radius: 999px; padding: 1px 8px; }
 .panel .go {
   display: block; width: 100%; margin-top: 18px; background: var(--ink); color: #fff;
@@ -238,7 +243,7 @@ button:disabled { opacity: .4; cursor: default; }
 
 @media (prefers-reduced-motion: reduce) {
   .horse { transition: none; }
-  .horse.can .ring, .target, .dice, .die.hop, .die.hop::after, .dots span, .panel, .overlay { animation: none; }
+  .horse.can .ring, .horse.jump .hbody, .horse.jump .shadow, .target, .dice, .die.hop, .die.hop::after, .dots span, .panel, .overlay { animation: none; }
   .cube { transition: none; }
 }
 </style>
@@ -282,7 +287,7 @@ button:disabled { opacity: .4; cursor: default; }
 <div class="overlay" id="setupSheet" hidden>
   <div class="panel">
     <h2>Ván mới</h2>
-    <div class="label">Ai chơi màu nào? (cần ít nhất 2 bên)</div>
+    <div class="label">Ai chơi màu nào? (cần ít nhất 2 bên) · gõ tên vào ô để đổi tên</div>
     <div id="setupSeats"></div>
     <button class="go" id="bStart">Bắt đầu</button>
     <p class="rule center">"Người" là một người khác ngồi chơi chung máy này. Muốn chơi với bạn ở xa thì bấm 🌐 Chơi online.</p>
@@ -495,6 +500,8 @@ const STEP_MS = 130;
 
 let G = null;
 let setup = store.get('cangua.setup', ['you', 'bot', 'bot', 'bot']);
+let localNames = store.get('cangua.names', ['', '', '', '']); // tên người chơi chung máy (ghế 1–3)
+const nameOf = k => (k === 0 ? (store.get('cangua.name', '') || '').trim() || 'Bạn' : (localNames[k] || '').trim() || 'Người ' + COLORS[k].name);
 
 function freshGame(seats) {
   return { phase: 'play', seats, horses: [0, 1, 2, 3].map(() => [-1, -1, -1, -1]),
@@ -505,8 +512,8 @@ function firstTurn(seats) {
   return act[Math.floor(Math.random() * act.length)];
 }
 function seatsFromSetup() {
-  return setup.map((t, k) => t === 'you' ? { type: 'human', name: 'Bạn', me: true }
-    : t === 'human' ? { type: 'human', name: 'Người ' + COLORS[k].name }
+  return setup.map((t, k) => t === 'you' ? { type: 'human', name: nameOf(0), me: true }
+    : t === 'human' ? { type: 'human', name: nameOf(k) }
     : t === 'bot' ? { type: 'bot', name: 'Máy ' + COLORS[k].name } : null);
 }
 
@@ -519,7 +526,8 @@ function canAct(s) {
   return net.on ? s === net.seat : G.seats[s].type === 'human';
 }
 function who(s) {
-  if (s === mySeat() || (!net.on && G.seats[s] && G.seats[s].me)) return 'Bạn';
+  if (s === mySeat()) return 'Bạn';
+  if (!net.on && G.seats[s] && G.seats[s].me) return G.seats[s].name || 'Bạn';
   return G.seats[s] ? G.seats[s].name : COLORS[s] ? COLORS[s].name : '';
 }
 
@@ -645,14 +653,57 @@ const cornerEls = [], cornerNames = [];
   el('text', { x: 340, y: 341, class: 'num', style: 'font-size:20px' }, g).textContent = '🏆';
 })();
 
+// ── quân ngựa 3D: đầu ngựa kiểu quân mã cờ vua trên đế trụ tròn, tô chuyển
+// sáng tối theo nguồn sáng phía trên bên trái, có vệt bóng và bóng đổ dưới đế ──
+const mixHex = (hex, to, t) => {
+  const a = [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16)), b = to === '#fff' ? [255, 255, 255] : [0, 0, 0];
+  return '#' + a.map((v, i) => Math.round(v + (b[i] - v) * t).toString(16).padStart(2, '0')).join('');
+};
+// hình đầu ngựa trong khung 100 × 100, quay mặt sang trái, đáy cổ ở y = 92
+const KNIGHT = 'M29 92 L73 92 C75 79 72 66 67 55 C77 46 82 31 74 19 C68 10 58 6 50 8 L46 1 L41 10 ' +
+  'C31 14 22 24 15 36 C11 43 9 50 13 55 C17 60 24 60 29 56 C35 52 41 52 45 55 C39 65 31 77 29 92 Z';
+const MANE = 'M72 22 C77 32 75 44 66 54 M62 12 C70 20 72 30 68 40';
+(function horseDefs() {
+  const defs = el('defs', {}, null);
+  $('board').insertBefore(defs, $('board').firstChild);
+  COLORS.forEach((C, s) => {
+    const head = el('linearGradient', { id: 'hg' + s, x1: 0, y1: 0, x2: 1, y2: 1 }, defs);
+    [[0, mixHex(C.main, '#fff', 0.55)], [0.42, C.main], [1, mixHex(C.main, '#000', 0.45)]]
+      .forEach(([o, c]) => el('stop', { offset: o, 'stop-color': c }, head));
+    const base = el('linearGradient', { id: 'bg' + s, x1: 0, y1: 0, x2: 1, y2: 0 }, defs);
+    [[0, mixHex(C.main, '#000', 0.5)], [0.32, mixHex(C.main, '#fff', 0.35)], [0.6, C.main], [1, mixHex(C.main, '#000', 0.55)]]
+      .forEach(([o, c]) => el('stop', { offset: o, 'stop-color': c }, base));
+    const top = el('radialGradient', { id: 'tg' + s, cx: 0.4, cy: 0.35, r: 0.75 }, defs);
+    [[0, mixHex(C.main, '#fff', 0.6)], [1, C.main]].forEach(([o, c]) => el('stop', { offset: o, 'stop-color': c }, top));
+  });
+  const f = el('filter', { id: 'hshadow', x: '-50%', y: '-100%', width: '200%', height: '300%' }, defs);
+  el('feGaussianBlur', { stdDeviation: 1.6 }, f);
+})();
 const horseEls = [0, 1, 2, 3].map(s => [0, 1, 2, 3].map(h => {
+  const C = COLORS[s], dark = mixHex(C.main, '#000', 0.5);
   const g = el('g', { class: 'horse' }, $('gHorses'));
   g.dataset.s = s; g.dataset.h = h;
-  el('circle', { r: 19, class: 'ring', stroke: COLORS[s].main }, g);
-  el('circle', { r: 15.5, class: 'body', fill: COLORS[s].main }, g);
-  el('text', { class: 'glyph', y: 1 }, g).textContent = '♞︎';
+  el('ellipse', { cx: 1, cy: 13.5, rx: 15, ry: 4.5, fill: 'rgba(20,30,50,.35)', filter: 'url(#hshadow)', class: 'shadow' }, g);
+  el('circle', { cy: -4, r: 21, class: 'ring', stroke: C.main }, g);
+  const b = el('g', { class: 'hbody' }, g);
+  // đế: thân trụ + mặt trên
+  el('path', { d: 'M-13 7.5 L-13 11 A13 4.6 0 0 0 13 11 L13 7.5 Z', fill: `url(#bg${s})`, stroke: dark, 'stroke-width': 0.8 }, b);
+  el('ellipse', { cx: 0, cy: 7.5, rx: 13, ry: 4.6, fill: `url(#tg${s})`, stroke: dark, 'stroke-width': 0.8 }, b);
+  // đầu ngựa
+  const k = el('g', { transform: 'translate(1 8.5) scale(.36) translate(-45 -92)' }, b);
+  el('path', { d: KNIGHT, fill: `url(#hg${s})`, stroke: dark, 'stroke-width': 3.2, 'stroke-linejoin': 'round' }, k);
+  el('path', { d: MANE, fill: 'none', stroke: dark, 'stroke-width': 3.5, 'stroke-linecap': 'round', opacity: 0.45 }, k);
+  el('ellipse', { cx: 29, cy: 30, rx: 5.5, ry: 15, transform: 'rotate(38 29 30)', fill: '#fff', opacity: 0.38 }, k);
+  el('ellipse', { cx: 37, cy: 26, rx: 3.6, ry: 4.4, fill: '#15171c' }, k);
+  el('circle', { cx: 35.8, cy: 24.6, r: 1.4, fill: '#fff' }, k);
+  el('ellipse', { cx: 17, cy: 48, rx: 2.4, ry: 1.7, fill: dark }, k);
+  el('path', { d: 'M14 55 C19 57 24 57 28 55', fill: 'none', stroke: dark, 'stroke-width': 2, 'stroke-linecap': 'round', opacity: 0.6 }, k);
   return g;
 }));
+function jumpHorse(s, h) {
+  const g = horseEls[s][h];
+  g.classList.remove('jump'); void g.getBoundingClientRect(); g.classList.add('jump');
+}
 function placeHorse(s, h, p) {
   const [x, y] = pxOf(cellOf(s, h, p));
   horseEls[s][h].style.transform = `translate(${x}px, ${y}px)`;
@@ -775,7 +826,7 @@ function playHoof(i) {
   const ctx = audio();
   if (!ctx || ctx.state !== 'running') return;
   // xoay vòng ba nhịp vó thật, đổi nhẹ cao độ cho khỏi đều đều như máy
-  if (playSfx('hoof' + (1 + i % 3), 0.75, 0.94 + Math.random() * 0.12)) return;
+  if (playSfx('hoof' + (1 + i % 3), 0.6, 0.96 + Math.random() * 0.08)) return;
   const t = ctx.currentTime + 0.005, hi = i % 2 === 0, o = ctx.createOscillator(), g = ctx.createGain();
   o.type = 'triangle';
   o.frequency.setValueAtTime(hi ? 440 : 340, t); o.frequency.exponentialRampToValueAtTime(hi ? 170 : 130, t + 0.06);
@@ -869,6 +920,7 @@ async function animateMove(ev, tok) {
   for (const [i, p] of path.entries()) {
     if (tok !== animTok) return;
     placeHorse(s, h, p);
+    jumpHorse(s, h);
     playHoof(i);
     await sleep(STEP_MS);
   }
@@ -960,7 +1012,7 @@ function paint(skipHorses) {
   // trạng thái
   const st = $('status'), dots = '<span class="dots"><span>.</span><span>.</span><span>.</span></span>';
   let main = '';
-  if (G.phase === 'over') main = G.winner === mySeat() || (!net.on && G.seats[G.winner].me) ? '🎉 Bạn thắng rồi!' : `${who(G.winner)} thắng ván này.`;
+  if (G.phase === 'over') main = G.winner === mySeat() ? '🎉 Bạn thắng rồi!' : `🎉 ${who(G.winner)} thắng ván này!`;
   else if (G.phase === 'lobby') main = `Đang chờ bắt đầu${dots}`;
   else if (net.on && !net.host && !net.conn) main = 'Mất kết nối với chủ phòng.';
   else if (canAct(G.turn)) {
@@ -982,7 +1034,8 @@ function paint(skipHorses) {
 
 function showResult() {
   if (G.phase !== 'over') return;
-  const s = G.winner, meWon = s === mySeat() || (!net.on && G.seats[s].me);
+  const solo = G.seats.filter(x => x && x.type === 'human').length === 1;
+  const s = G.winner, meWon = s === mySeat() || (!net.on && solo && G.seats[s].me);
   $('rEmoji').textContent = meWon ? '🏆' : G.seats[s].type === 'bot' ? '🤖' : '🐴';
   $('rTitle').textContent = meWon ? 'Bạn thắng!' : `${who(s)} thắng!`;
   $('rMsg').textContent = (meWon ? 'Cả 4 chú ngựa đã về đích. Giỏi quá!' : 'Ván sau cố lên nhé!') + (net.on && !net.host ? ' Chờ chủ phòng mở ván mới.' : '');
@@ -1325,7 +1378,7 @@ function renderSetup() {
     row.className = 'seat'; row.style.setProperty('--c', COLORS[k].main);
     row.innerHTML = `<span class="chip"></span><span class="who"></span>`;
     row.querySelector('.who').textContent = COLORS[k].name;
-    if (k === 0) { const n = document.createElement('span'); n.className = 'nm'; n.textContent = 'Bạn'; row.appendChild(n); }
+    if (k === 0) row.appendChild(nameInput(0, 'Tên của bạn'));
     else {
       const seg = document.createElement('div'); seg.className = 'seg';
       for (const [v, label] of SEAT_OPTS) {
@@ -1337,8 +1390,29 @@ function renderSetup() {
       row.appendChild(seg);
     }
     box.appendChild(row);
+    if (k > 0 && t === 'human') {
+      const sub = document.createElement('div');
+      sub.className = 'seat sub';
+      sub.appendChild(nameInput(k, 'Tên người chơi ' + COLORS[k].name));
+      box.appendChild(sub);
+    }
   });
   $('bStart').disabled = setup.filter(t => t !== 'off').length < 2;
+}
+function nameInput(k, placeholder) {
+  const i = document.createElement('input');
+  i.className = 'name'; i.maxLength = 16; i.placeholder = placeholder; i.autocomplete = 'off'; i.spellcheck = false;
+  i.value = k === 0 ? (store.get('cangua.name', '') || '') : localNames[k] || '';
+  i.oninput = () => {
+    const v = cleanName(i.value);
+    if (k === 0) store.set('cangua.name', v); else { localNames[k] = v; store.set('cangua.names', localNames); }
+    // đổi tên áp dụng ngay cho ván đang chơi trên máy này
+    if (!net.on && G && G.seats[k] && G.seats[k].type === 'human') {
+      G.seats[k].name = nameOf(k); paint();
+      if (G.phase === 'play') store.set('cangua.game', G);
+    }
+  };
+  return i;
 }
 function newLocalGame() {
   clearTimeout(driveT);

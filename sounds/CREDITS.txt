@@ -1,10 +1,13 @@
-Âm thanh dùng trong Cờ Cá Ngựa (cangua.html). Tất cả đều CC0 / public domain,
-đã được cắt, trộn và chuẩn hoá âm lượng bằng ffmpeg.
+Âm thanh dùng trong Cờ Cá Ngựa (cangua.html), đã được cắt, trộn và chuẩn hoá
+âm lượng bằng ffmpeg.
 
 dice-roll.mp3  Ghép từ dice-shake-1, dice-throw-3, die-throw-1 trong bộ "Casino Audio"
                của Kenney (www.kenney.nl) — CC0 1.0.
-hoof-1..3.mp3  Ba nhịp vó cắt từ "Six Horses Galloping By.ogg" (Freesound Community,
-               qua Wikimedia Commons) — CC0 1.0.
-               https://commons.wikimedia.org/wiki/File:Six_Horses_Galloping_By.ogg
-neigh.mp3      Cắt từ "Wiehern.ogg" (Wikimedia Commons) — public domain.
-               https://commons.wikimedia.org/wiki/File:Wiehern.ogg
+hoof-1..3.mp3  Tiếng vó "cọc cọc" kiểu gáo dừa (cách làm tiếng vó ngựa trong phim), tự tạo
+               bằng make-hoof.py (python3 make-hoof.py rồi nén mp3 bằng ffmpeg).
+neigh.mp3      "Tiếng Ngựa hí" từ TiếngĐộng.com — cắt lấy đoạn hí (~1,2 giây), lọc bớt trầm,
+               tăng dải sáng, nén cho dứt khoát.
+               Download hiệu ứng âm thanh miễn phí: https://TiengDong.com (Tiếng Động chấm Com)
+               Trang gốc: https://tiengdong.com/tieng-ngua-hi
+               Điều khoản: https://tiengdong.com/copyright — tải và dùng miễn phí, trang đề nghị
+               ghi nguồn như trên; trang không cam kết mọi âm thanh đều hết bản quyền.
