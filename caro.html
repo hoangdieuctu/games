@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Cờ Caro">
+<meta name="theme-color" content="#dfe8f1">
+<title>Cờ Caro</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23fffdf6'/%3E%3Cpath d='M0 11H32M0 21H32M11 0V32M21 0V32' stroke='%23b9d3ee' stroke-width='1'/%3E%3Cpath d='M3 3L9 9M9 3L3 9M13 13L19 19M19 13L13 19' stroke='%23e53935' stroke-width='2.2' stroke-linecap='round'/%3E%3Ccircle cx='26' cy='16' r='3.4' fill='none' stroke='%231e5fd8' stroke-width='2.2'/%3E%3Ccircle cx='16' cy='26' r='3.4' fill='none' stroke='%231e5fd8' stroke-width='2.2'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --desk1: #e8eff6; --desk2: #cfdceb; --ink: #23324a; --muted: #6b7a90;
+  --paper: #fffdf6; --line: #c3d8ef; --x: #e53935; --o: #1e5fd8;
+  --gold: #ffb300; --card: #ffffff;
+}
+html, body { width: 100%; height: 100%; overflow: hidden; }
+body {
+  font-family: 'Baloo 2', 'Nunito', system-ui, sans-serif; color: var(--ink);
+  background: radial-gradient(ellipse at 30% 0%, #f7fbff 0%, var(--desk1) 40%, var(--desk2) 100%);
+  -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none;
+  touch-action: manipulation; overscroll-behavior: none;
+  display: flex; flex-direction: column;
+  padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
+}
+button { font: inherit; color: inherit; cursor: pointer; border: 0; background: none; }
+button:disabled { opacity: .4; cursor: default; }
+[hidden] { display: none !important; }
+
+/* ── thanh trên ── */
+.top {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 16px 4px; max-width: 760px; width: 100%; margin: 0 auto;
+}
+.back {
+  width: 44px; height: 44px; flex: 0 0 auto; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(255,255,255,.8); color: var(--ink); text-decoration: none;
+  font-size: 26px; font-weight: 800; line-height: 1;
+  box-shadow: 0 3px 10px rgba(35,50,74,.12);
+}
+.top h1 { font-size: 26px; font-weight: 800; letter-spacing: .5px; flex: 1; white-space: nowrap; }
+.top h1 .x { color: var(--x); } .top h1 .o { color: var(--o); }
+.score {
+  display: flex; align-items: center; gap: 8px;
+  background: rgba(255,255,255,.85); border-radius: 999px; padding: 4px 14px;
+  box-shadow: 0 3px 10px rgba(35,50,74,.1); font-weight: 700; font-size: 15px; white-space: nowrap;
+}
+.score b { font-size: 20px; min-width: 16px; text-align: center; }
+.score .me b { color: var(--x); } .score .bot b { color: var(--o); }
+.score .sep { color: var(--muted); }
+
+/* ── dòng trạng thái ── */
+.status {
+  max-width: 760px; width: 100%; margin: 4px auto 6px; padding: 0 16px;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  min-height: 34px; font-weight: 700; font-size: 17px; text-align: center;
+}
+.status .piece { width: 22px; height: 22px; flex: 0 0 auto; }
+.dots span { display: inline-block; animation: dot 1.1s infinite; }
+.dots span:nth-child(2) { animation-delay: .15s; } .dots span:nth-child(3) { animation-delay: .3s; }
+@keyframes dot { 0%, 60%, 100% { opacity: .2; } 30% { opacity: 1; } }
+.status .say { color: var(--o); }
+
+/* ── bàn cờ ── */
+.board-wrap { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; padding: 0 12px; position: relative; }
+.board-box { position: relative; }
+.zoom { position: absolute; right: 10px; bottom: 10px; display: flex; flex-direction: column; gap: 8px; }
+.zoom button {
+  width: 42px; height: 42px; border-radius: 50%; background: rgba(255,255,255,.92);
+  font-size: 20px; font-weight: 800; line-height: 1; box-shadow: 0 3px 10px rgba(35,50,74,.2);
+}
+#board {
+  display: block; background: var(--paper); border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(35,50,74,.18), 0 1px 0 rgba(255,255,255,.9) inset;
+  touch-action: none; cursor: pointer;
+}
+#board.busy { cursor: wait; }
+.grid-line { stroke: var(--line); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.star { fill: #a9c4e4; }
+.last-hl { fill: #fff1b8; }
+.hint-ring { fill: none; stroke: #2e9d57; stroke-width: 3; stroke-dasharray: 6 5; animation: spin 3s linear infinite, pulse 1s ease-in-out infinite alternate; transform-box: fill-box; transform-origin: center; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes pulse { from { opacity: .5; } to { opacity: 1; } }
+.px { stroke: var(--x); stroke-width: 5.5; stroke-linecap: round; fill: none; }
+.po { stroke: var(--o); stroke-width: 5.5; fill: none; }
+.draw { stroke-dasharray: 1; stroke-dashoffset: 1; animation: draw .22s ease-out forwards; }
+.draw.d2 { animation-delay: .12s; }
+@keyframes draw { to { stroke-dashoffset: 0; } }
+.ghost { opacity: .22; pointer-events: none; }
+.win-line { stroke: #ffb300; stroke-width: 8; stroke-linecap: round; opacity: .85; stroke-dasharray: 1; stroke-dashoffset: 1; animation: draw .5s ease-out forwards; }
+.win-cell { fill: #ffe082; }
+
+/* ── thanh dưới ── */
+.dock {
+  display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;
+  padding: 10px 16px 14px; max-width: 760px; width: 100%; margin: 0 auto;
+}
+.dock button {
+  display: flex; align-items: center; gap: 6px;
+  background: var(--card); border-radius: 14px; padding: 8px 16px; min-height: 46px;
+  font-weight: 700; font-size: 16px; box-shadow: 0 3px 10px rgba(35,50,74,.12);
+  transition: transform .1s;
+}
+.dock button:not(:disabled):active { transform: scale(.95); }
+.dock button.primary { background: var(--ink); color: #fff; }
+.dock .lvl { color: var(--muted); font-weight: 600; font-size: 14px; }
+
+/* ── bảng chọn / kết quả ── */
+.overlay {
+  position: fixed; inset: 0; z-index: 20; display: flex; align-items: center; justify-content: center;
+  background: rgba(35,50,74,.35); padding: 16px;
+  -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px);
+  animation: fade .2s ease-out;
+}
+@keyframes fade { from { opacity: 0; } }
+.panel {
+  background: var(--card); border-radius: 22px; padding: 22px 22px 20px; width: 100%; max-width: 380px;
+  box-shadow: 0 20px 60px rgba(35,50,74,.3); animation: pop .25s cubic-bezier(.2,1.4,.5,1);
+}
+@keyframes pop { from { transform: scale(.9); opacity: 0; } }
+.panel h2 { font-size: 24px; font-weight: 800; text-align: center; margin-bottom: 14px; }
+.panel .label { font-size: 14px; font-weight: 700; color: var(--muted); margin: 12px 0 6px; }
+.seg { display: flex; background: #eef2f7; border-radius: 14px; padding: 4px; gap: 4px; }
+.seg button { flex: 1; border-radius: 10px; padding: 8px 4px; font-weight: 700; font-size: 16px; color: var(--muted); line-height: 1.15; }
+.seg button small { display: block; font-size: 11.5px; font-weight: 600; opacity: .8; }
+.seg button.on { background: #fff; color: var(--ink); box-shadow: 0 2px 6px rgba(35,50,74,.15); }
+.panel .go {
+  display: block; width: 100%; margin-top: 20px; background: var(--ink); color: #fff;
+  border-radius: 14px; padding: 12px; font-weight: 800; font-size: 18px;
+}
+.panel .rule { margin-top: 12px; font-size: 13px; color: var(--muted); text-align: center; line-height: 1.4; }
+.result-emoji { font-size: 56px; text-align: center; line-height: 1.1; }
+.result-msg { text-align: center; color: var(--muted); font-weight: 600; margin-top: -6px; }
+.row { display: flex; gap: 10px; margin-top: 18px; }
+.row button { flex: 1; border-radius: 14px; padding: 11px; font-weight: 800; font-size: 16px; background: #eef2f7; }
+.row button.go { margin: 0; }
+
+@media (max-width: 420px) {
+  .top h1 { font-size: 22px; }
+  .dock button { padding: 8px 12px; font-size: 15px; }
+  .dock .lvl { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .draw, .win-line { animation: none; stroke-dashoffset: 0; }
+  .hint-ring, .dots span, .panel, .overlay { animation: none; }
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <a class="back" href="index.html" aria-label="Về trang chính">‹</a>
+  <h1><span class="x">Cờ</span> <span class="o">Caro</span></h1>
+  <div class="score" title="Tỉ số ở mức hiện tại">
+    <span class="me">Bạn <b id="sWin">0</b></span><span class="sep">–</span><span class="bot"><b id="sLose">0</b> Máy</span>
+  </div>
+</header>
+
+<div class="status" id="status"></div>
+
+<main class="board-wrap" id="wrap">
+  <div class="board-box">
+  <svg id="board" viewBox="0 0 1200 1200" role="grid" aria-label="Bàn cờ 30 x 30">
+    <g id="gCells"></g>
+    <g id="gGrid"></g>
+    <g id="gPieces"></g>
+    <g id="gTop"></g>
+  </svg>
+  <div class="zoom" id="zoomBox" hidden>
+    <button id="zIn" aria-label="Phóng to">＋</button>
+    <button id="zOut" aria-label="Thu nhỏ">－</button>
+    <button id="zFit" aria-label="Xem toàn bàn">⤢</button>
+  </div>
+  </div>
+</main>
+
+<nav class="dock">
+  <button id="bNew" class="primary">＋ Ván mới</button>
+  <button id="bUndo">↶ Đi lại</button>
+  <button id="bHint">💡 Gợi ý</button>
+</nav>
+
+<!-- chọn ván mới -->
+<div class="overlay" id="newSheet" hidden>
+  <div class="panel">
+    <h2>Ván mới</h2>
+    <div class="label">Độ khó của máy</div>
+    <div class="seg" id="segLevel">
+      <button data-v="0">Dễ<small>tập chơi</small></button>
+      <button data-v="1">Vừa<small>biết chặn</small></button>
+      <button data-v="2">Khó<small>cao thủ</small></button>
+    </div>
+    <div class="label">Ai đi trước? (người đi trước cầm X)</div>
+    <div class="seg" id="segFirst">
+      <button data-v="human">Bạn đi trước</button>
+      <button data-v="ai">Máy đi trước</button>
+    </div>
+    <button class="go" id="bStart">Bắt đầu</button>
+    <p class="rule">Bàn 30 × 30 · Ai xếp được 5 quân liền nhau (ngang, dọc hoặc chéo) trước là thắng.</p>
+  </div>
+</div>
+
+<!-- kết quả -->
+<div class="overlay" id="resultSheet" hidden>
+  <div class="panel">
+    <div class="result-emoji" id="rEmoji"></div>
+    <h2 id="rTitle"></h2>
+    <p class="result-msg" id="rMsg"></p>
+    <div class="row">
+      <button id="bView">Xem bàn cờ</button>
+      <button class="go" id="bAgain">Chơi lại</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════════
+// Bộ não của máy. Hàm này được chép nguyên văn sang Web Worker nên không
+// được dùng biến nào bên ngoài nó.
+//
+// Cách máy nghĩ:
+//  1. Mỗi ô trống, mỗi hướng, mỗi bên được gán một "hình" (hai, ba mở,
+//     bốn, năm…) tra từ bảng dựng sẵn cho 8 ô lân cận. Khi đặt/gỡ quân chỉ
+//     cập nhật các ô trên 4 đường đi qua nó.
+//  2. Tìm thắng cưỡng bức: chuỗi toàn nước bốn (VCF) rồi chuỗi bốn + ba
+//     mở (VCT). Có là đánh luôn.
+//  3. Kiểm tra đối thủ có chuỗi thắng cưỡng bức không; nếu có chỉ giữ
+//     những nước phá được nó.
+//  4. Alpha-beta đào sâu dần trong giới hạn thời gian, có bảng chuyển vị.
+// ═══════════════════════════════════════════════════════════════════════
+function CaroEngine(N) {
+  const NN = N * N;
+  const OPEN2 = 3, THREE = 4, OPEN3 = 5, FOUR = 6, OPEN4 = 7, FIVE = 8;
+  // điểm theo hình: không, một, hai chặn, hai mở, ba chặn, ba mở, bốn, bốn mở, năm
+  const VAL = [0, 2, 8, 60, 50, 300, 260, 2000, 10000];
+  const DR = [0, 1, 1, 1], DC = [1, 0, 1, -1];
+  const WIN = 10000000, INF = 1000000000, ABORT = {};
+
+  // ── bảng hình: khoá là 8 ô quanh tâm (-4..-1, +1..+4), mỗi ô 0 trống / 1 mình / 2 chặn ──
+  const TABLE = new Uint8Array(6561);
+  (function build() {
+    const memo = new Int8Array(6561).fill(-1), a = new Int8Array(9);
+    const key = () => { let k = 0, m = 1; for (let i = 0; i < 9; i++) { if (i === 4) continue; k += a[i] * m; m *= 3; } return k; };
+    const five = () => {
+      for (let s = 0; s <= 4; s++) { let ok = true; for (let j = s; j < s + 5; j++) if (a[j] !== 1) { ok = false; break; } if (ok) return true; }
+      return false;
+    };
+    function cls() {
+      const k = key();
+      if (memo[k] >= 0) return memo[k];
+      let r = 0;
+      if (five()) r = FIVE;
+      else {
+        let n5 = 0;
+        for (let i = 0; i < 9; i++) if (a[i] === 0) { a[i] = 1; if (five()) n5++; a[i] = 0; }
+        if (n5 >= 2) r = OPEN4;
+        else if (n5 === 1) r = FOUR;
+        else {
+          // thêm một quân thành bốn mở → ba mở; thành bốn → ba chặn; …
+          for (let i = 0; i < 9; i++) if (a[i] === 0) {
+            a[i] = 1; const c = cls(); a[i] = 0;
+            const v = c === OPEN4 ? OPEN3 : c === FOUR ? THREE : c === OPEN3 ? OPEN2 : c === THREE ? 2 : (c === OPEN2 || c === 2) ? 1 : 0;
+            if (v > r) r = v;
+          }
+        }
+      }
+      memo[k] = r;
+      return r;
+    }
+    for (let k = 0; k < 6561; k++) {
+      let t = k;
+      for (let i = 0; i < 9; i++) { if (i === 4) { a[i] = 1; continue; } a[i] = t % 3; t = (t / 3) | 0; }
+      TABLE[k] = cls();
+    }
+  })();
+
+  const board = new Int8Array(NN);
+  const sh = [null, new Uint8Array(NN * 4), new Uint8Array(NN * 4)]; // hình theo hướng
+  const sc = [null, new Int32Array(NN), new Int32Array(NN)];         // điểm ô (0 nếu có quân)
+  const mx = [null, new Uint8Array(NN), new Uint8Array(NN)];         // hình mạnh nhất của ô
+  const tot = [0, 0, 0];                                              // tổng điểm các ô trống
+  const nb = new Int16Array(NN);                                      // số quân trong bán kính 2
+  let r0 = N, r1 = -1, c0 = N, c1 = -1;                               // khung quét: vùng có quân ± 2
+
+  let seed = 0x2f6b1d3;
+  const rnd32 = () => { seed ^= seed << 13; seed ^= seed >>> 17; seed ^= seed << 5; return seed | 0; };
+  const Z1 = [null, new Int32Array(NN), new Int32Array(NN)], Z2 = [null, new Int32Array(NN), new Int32Array(NN)];
+  for (let p = 1; p <= 2; p++) for (let q = 0; q < NN; q++) { Z1[p][q] = rnd32(); Z2[p][q] = rnd32(); }
+  let h1 = 0, h2 = 0;
+  const TTS = 1 << 20, TM = TTS - 1;
+  const ttK = new Int32Array(TTS), ttV = new Int32Array(TTS), ttM = new Int16Array(TTS);
+  const ttD = new Int8Array(TTS), ttF = new Int8Array(TTS); // 1 đúng, 2 cận dưới, 3 cận trên
+
+  function shapeAt(q, d, p) {
+    const r = (q / N) | 0, c = q - r * N, dr = DR[d], dc = DC[d];
+    let k = 0, m = 1;
+    for (let i = -4; i <= 4; i++) {
+      if (i === 0) continue;
+      const rr = r + i * dr, cc = c + i * dc;
+      let v;
+      if (rr < 0 || rr >= N || cc < 0 || cc >= N) v = 2;
+      else { const b = board[rr * N + cc]; v = b === 0 ? 0 : b === p ? 1 : 2; }
+      k += v * m; m *= 3;
+    }
+    return TABLE[k];
+  }
+  function fin(q) {
+    for (let p = 1; p <= 2; p++) {
+      const s4 = sh[p]; let s = 0, f = 0, t = 0, m = 0;
+      for (let d = 0; d < 4; d++) {
+        const v = s4[q * 4 + d]; s += VAL[v];
+        if (v > m) m = v;
+        if (v === FOUR) f++; else if (v === OPEN3) t++;
+      }
+      if (m < OPEN4) {
+        if (f >= 2) { s += 2000; m = OPEN4; }      // bốn kép: thắng như bốn mở
+        else if (f && t) s += 800;                   // bốn + ba
+        else if (t >= 2) s += 300;                   // ba kép
+      }
+      tot[p] += s - sc[p][q]; sc[p][q] = s; mx[p][q] = m;
+    }
+  }
+  function touch(q) {
+    const r = (q / N) | 0, c = q - r * N;
+    for (let d = 0; d < 4; d++) {
+      const dr = DR[d], dc = DC[d];
+      for (let i = -4; i <= 4; i++) {
+        if (i === 0) continue;
+        const rr = r + i * dr, cc = c + i * dc;
+        if (rr < 0 || rr >= N || cc < 0 || cc >= N) continue;
+        const t = rr * N + cc;
+        if (board[t] !== 0) continue;
+        sh[1][t * 4 + d] = shapeAt(t, d, 1);
+        sh[2][t * 4 + d] = shapeAt(t, d, 2);
+        fin(t);
+      }
+    }
+  }
+  function nbAdd(q, v) {
+    const r = (q / N) | 0, c = q - r * N;
+    if (v > 0) {
+      if (r - 2 < r0) r0 = Math.max(0, r - 2);
+      if (r + 2 > r1) r1 = Math.min(N - 1, r + 2);
+      if (c - 2 < c0) c0 = Math.max(0, c - 2);
+      if (c + 2 > c1) c1 = Math.min(N - 1, c + 2);
+    }
+    for (let rr = Math.max(0, r - 2); rr <= Math.min(N - 1, r + 2); rr++)
+      for (let cc = Math.max(0, c - 2); cc <= Math.min(N - 1, c + 2); cc++) nb[rr * N + cc] += v;
+  }
+  function place(q, p) {
+    board[q] = p; h1 ^= Z1[p][q]; h2 ^= Z2[p][q];
+    for (let pp = 1; pp <= 2; pp++) { tot[pp] -= sc[pp][q]; sc[pp][q] = 0; mx[pp][q] = 0; }
+    touch(q); nbAdd(q, 1);
+  }
+  function undo(q) {
+    const p = board[q];
+    board[q] = 0; h1 ^= Z1[p][q]; h2 ^= Z2[p][q];
+    for (let d = 0; d < 4; d++) { sh[1][q * 4 + d] = shapeAt(q, d, 1); sh[2][q * 4 + d] = shapeAt(q, d, 2); }
+    fin(q); touch(q); nbAdd(q, -1);
+  }
+  function reset(cells) {
+    board.fill(0); nb.fill(0); sc[1].fill(0); sc[2].fill(0); tot[1] = tot[2] = 0; h1 = h2 = 0;
+    r0 = N; r1 = -1; c0 = N; c1 = -1;
+    for (let q = 0; q < NN; q++) {
+      for (let d = 0; d < 4; d++) { sh[1][q * 4 + d] = shapeAt(q, d, 1); sh[2][q * 4 + d] = shapeAt(q, d, 2); }
+      fin(q);
+    }
+    let n = 0;
+    for (let q = 0; q < NN; q++) if (cells[q]) { place(q, cells[q]); n++; }
+    return n;
+  }
+
+  // ── quét bàn cho bên p sắp đi ──
+  let sFive, sOFive, sOFiveN, sWin, sThreat;
+  function scan(p, list) {
+    const o = 3 - p, mp = mx[p], mo = mx[o];
+    sFive = -1; sOFive = -1; sOFiveN = 0; sWin = -1; sThreat = false;
+    for (let r = r0; r <= r1; r++) for (let q = r * N + c0, qe = r * N + c1; q <= qe; q++) {
+      if (board[q] !== 0 || nb[q] === 0) continue;
+      const a = mp[q], b = mo[q];
+      if (a === FIVE) { sFive = q; return; }
+      if (b === FIVE) { sOFiveN++; sOFive = q; }
+      else if (b === OPEN4) sThreat = true;         // đối thủ có ba mở / sắp bốn kép
+      if (a === OPEN4 && sWin < 0) sWin = q;
+      list.push(q);
+    }
+  }
+  const order = (p, q) => sc[p][q] * 1.05 + sc[3 - p][q];
+  function sortBy(p, arr) {
+    const k = new Map();
+    for (const q of arr) k.set(q, order(p, q));
+    return arr.sort((a, b) => k.get(b) - k.get(a));
+  }
+  function topK(p, list, K) { return sortBy(p, list).slice(0, K); }
+  // khi đối thủ có ba mở: chỉ chặn nó, hoặc phản công bằng nước bốn
+  function defenders(p, list) {
+    const o = 3 - p;
+    return sortBy(p, list.filter(q => mx[o][q] >= FOUR || mx[p][q] >= FOUR));
+  }
+  const evaluate = p => ((tot[p] * 1.1 - tot[3 - p]) | 0);
+
+  // ── alpha-beta ──
+  let nodes = 0, deadline = 0;
+  function nega(p, depth, alpha, beta, ply) {
+    if ((++nodes & 1023) === 0 && Date.now() > deadline) throw ABORT;
+    const o = 3 - p, list = [];
+    scan(p, list);
+    if (sFive >= 0) return WIN - ply;
+    if (sOFiveN >= 2) return -(WIN - ply - 1);
+    let moves, forced = false;
+    if (sOFiveN === 1) {
+      if (ply >= 40) return evaluate(p);
+      moves = [sOFive]; forced = true;
+    } else {
+      if (sWin >= 0) return WIN - ply - 2;
+      if (depth <= 0) return evaluate(p);
+      moves = sThreat ? defenders(p, list) : topK(p, list, ply < 3 ? 12 : 9);
+      if (!moves.length) return evaluate(p);
+    }
+    const idx = h1 & TM, a0 = alpha;
+    if (ttF[idx] && ttK[idx] === h2) {
+      const tm = ttM[idx];
+      if (ttD[idx] >= depth) {
+        const v = ttV[idx], f = ttF[idx];
+        if (f === 1 || (f === 2 && v >= beta) || (f === 3 && v <= alpha)) return v;
+      }
+      const i = moves.indexOf(tm);
+      if (i > 0) { moves.splice(i, 1); moves.unshift(tm); }
+    }
+    const nd = forced ? Math.max(depth - 1, 0) : depth - 1;
+    let best = -INF, bm = moves[0];
+    for (const q of moves) {
+      place(q, p);
+      let v;
+      try { v = -nega(o, nd, -beta, -alpha, ply + 1); } finally { undo(q); }
+      if (v > best) { best = v; bm = q; }
+      if (v > alpha) alpha = v;
+      if (alpha >= beta) break;
+    }
+    ttK[idx] = h2; ttD[idx] = depth; ttV[idx] = best; ttM[idx] = bm;
+    ttF[idx] = best <= a0 ? 3 : best >= beta ? 2 : 1;
+    return best;
+  }
+  function searchRoot(p, cands, maxDepth, ms) {
+    deadline = Date.now() + ms; nodes = 0;
+    let moves = cands.slice(), best = moves[0], bestScore = -INF, reached = 0;
+    for (let depth = 2; depth <= maxDepth; depth++) {
+      const scores = new Map();
+      let cb = -1, cs = -INF, alpha = -INF, done = true;
+      try {
+        for (const q of moves) {
+          place(q, p);
+          let v;
+          try { v = -nega(3 - p, depth - 1, -INF, -alpha, 1); } finally { undo(q); }
+          scores.set(q, v);
+          if (v > cs) { cs = v; cb = q; }
+          if (v > alpha) alpha = v;
+        }
+      } catch (e) {
+        if (e !== ABORT) throw e;
+        done = false;
+      }
+      if (cb >= 0 && (done || cs > bestScore || cb === best)) { best = cb; bestScore = cs; }
+      if (!done) break;
+      reached = depth;
+      moves.sort((a, b) => scores.get(b) - scores.get(a));
+      if (bestScore >= WIN - 1000 || bestScore <= -(WIN - 1000)) break;
+      if (moves.length === 1) break;
+    }
+    return { move: best, score: bestScore, depth: reached };
+  }
+
+  // ── tìm thắng cưỡng bức: a tấn công, chỉ dùng nước bốn (và ba mở nếu three) ──
+  let vn = 0, vlim = 0;
+  function attackMoves(a, list, three) {
+    const fours = [], threes = [];
+    for (const q of list) {
+      if (mx[a][q] >= FOUR) fours.push(q);
+      else if (three && mx[a][q] === OPEN3) threes.push(q);
+    }
+    sortBy(a, fours);
+    return three ? fours.concat(sortBy(a, threes).slice(0, 10)) : fours;
+  }
+  function vAtt(a, depth, three) {
+    if (++vn > vlim) return false;
+    const list = [];
+    scan(a, list);
+    if (sFive >= 0) return true;
+    if (sOFiveN >= 2) return false;
+    if (sOFiveN === 1) {
+      if (depth <= 0) return false;
+      const q = sOFive; place(q, a);
+      const r = vDef(a, depth - 1, three); undo(q);
+      return r;
+    }
+    if (sWin >= 0) return true;
+    if (depth <= 0) return false;
+    for (const q of attackMoves(a, list, three)) {
+      place(q, a);
+      const r = vDef(a, depth - 1, three); undo(q);
+      if (r) return true;
+      if (vn > vlim) return false;
+    }
+    return false;
+  }
+  function vDef(a, depth, three) {
+    if (++vn > vlim) return false;
+    const d = 3 - a, list = [];
+    scan(d, list);
+    if (sFive >= 0) return false;
+    if (sOFiveN >= 2) return true;
+    if (sOFiveN === 1) {
+      const q = sOFive; place(q, d);
+      const r = vAtt(a, depth, three); undo(q);
+      return r;
+    }
+    if (!sThreat || sWin >= 0) return false;
+    for (const q of list) {
+      if (mx[a][q] < FOUR && mx[d][q] < FOUR) continue;
+      place(q, d);
+      const r = vAtt(a, depth, three); undo(q);
+      if (!r) return false;
+    }
+    return true;
+  }
+  function findWin(a, three, depth, limit) {
+    vn = 0; vlim = limit;
+    const list = [];
+    scan(a, list);
+    if (sOFiveN) return -1;
+    if (sWin >= 0) return sWin;
+    for (const q of attackMoves(a, list, three)) {
+      place(q, a);
+      const r = vDef(a, depth - 1, three); undo(q);
+      if (r) return q;
+      if (vn > vlim) break;
+    }
+    return -1;
+  }
+  // 2: a chắc chắn thắng cưỡng bức, 1: chưa rõ (hết ngân sách tìm), 0: không có
+  let tBudget = 0;
+  function hasWin(a, level) {
+    if (Date.now() > tBudget) return 1;
+    let unknown = false;
+    vn = 0; vlim = 6000;
+    if (vAtt(a, 12, false)) return 2;
+    if (vn > vlim) unknown = true;
+    if (level >= 2) {
+      for (let d = 4; d <= 8; d += 2) {
+        vn = 0; vlim = 12000;
+        if (vAtt(a, d, true)) return 2;
+        if (vn > vlim) { unknown = true; break; }
+      }
+    }
+    return unknown ? 1 : 0;
+  }
+
+  function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+  function think(req) {
+    const p = req.ai, o = 3 - p, level = req.level;
+    const count = reset(req.cells);
+    const center = (N >> 1) * N + (N >> 1);
+    if (count === 0) return { move: center };
+    if (count === 1 && level > 0) {
+      // nước đầu: sát quân của người chơi, hướng vào giữa bàn
+      const s = req.cells.findIndex(v => v), r = (s / N) | 0, c = s % N;
+      const opts = [];
+      for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) {
+        const rr = r + dr, cc = c + dc;
+        if ((dr || dc) && rr >= 0 && rr < N && cc >= 0 && cc < N) opts.push({ q: rr * N + cc, d: Math.abs(rr - (N >> 1)) + Math.abs(cc - (N >> 1)) });
+      }
+      const m = Math.min(...opts.map(x => x.d));
+      return { move: pick(opts.filter(x => x.d === m)).q };
+    }
+    ttF.fill(0);
+    const list = [];
+    scan(p, list);
+    if (sFive >= 0) return { move: sFive, note: 'win' };
+    if (sOFiveN >= 1) {
+      if (level === 0 && Math.random() < 0.15 && list.length > 1) return { move: pick(topK(p, list, 4)) };
+      return { move: sOFive, note: sOFiveN >= 2 ? 'lost' : 'block' };
+    }
+    if (sWin >= 0 && (level > 0 || Math.random() < 0.8)) return { move: sWin, note: 'win' };
+    const threat = sThreat;
+
+    if (level === 0) {
+      if (threat && Math.random() < 0.55) return { move: pick(defenders(p, list).slice(0, 2)) };
+      const top = topK(p, list, 5);
+      return { move: pick(top.slice(0, Math.random() < 0.5 ? 2 : 5)) };
+    }
+
+    let m = findWin(p, false, 14, 40000);
+    if (m >= 0) return { move: m, note: 'vcf' };
+    if (level === 2) {
+      const tv = Date.now() + 900;
+      for (let d = 2; d <= 8 && m < 0 && Date.now() < tv; d++) m = findWin(p, true, d, 25000);
+      if (m >= 0) return { move: m, note: 'vct' };
+    }
+
+    let cands = threat ? defenders(p, list) : topK(p, list, level === 2 ? 20 : 12);
+    let danger = false;
+    tBudget = Date.now() + 1500;
+    if (hasWin(o, level)) {
+      danger = true;
+      const pool = cands.slice(0, 24);
+      for (const q of list) if (mx[p][q] >= FOUR && pool.indexOf(q) < 0) pool.push(q);
+      const res = pool.map(q => { place(q, p); const r = hasWin(o, level); undo(q); return r; });
+      for (let k = 0; k <= 1; k++) {
+        const ok = pool.filter((q, i) => res[i] <= k);
+        if (ok.length) { cands = ok; break; }
+      }
+    }
+    if (!cands.length) cands = list.length ? list : [center];
+    // xáo nhẹ cho các ván không giống hệt nhau
+    if (level === 1 && cands.length > 2 && Math.random() < 0.3) { const t = cands[0]; cands[0] = cands[1]; cands[1] = t; }
+    const r = searchRoot(p, cands, level === 2 ? 12 : 4, level === 2 ? 1800 : 700);
+    let note = '';
+    if (r.score >= WIN - 1000) note = 'win';
+    else if (r.score <= -(WIN - 1000)) note = 'lost';
+    else if (danger || threat) note = 'block';
+    return { move: r.move, note, depth: r.depth, score: r.score, nodes };
+  }
+
+  return { think };
+}
+</script>
+
+<script>
+// ═══════════════════════════ giao diện ═══════════════════════════
+const N = 30, NN = N * N, CELL = 40;
+const $ = id => document.getElementById(id);
+const svgNS = 'http://www.w3.org/2000/svg';
+const LEVELS = ['Dễ', 'Vừa', 'Khó'];
+
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
+};
+
+let settings = store.get('caro.settings', { level: 2, first: 'human' });
+let stats = store.get('caro.stats', { 0: { w: 0, l: 0, d: 0 }, 1: { w: 0, l: 0, d: 0 }, 2: { w: 0, l: 0, d: 0 } });
+let cells, moves, human, ai, over, winCells, thinking, hint, aiNote;
+
+// ── động cơ AI trong Web Worker (lùi về luồng chính nếu không tạo được) ──
+let worker = null, local = null, reqId = 0;
+try {
+  const src = CaroEngine.toString() +
+    '\nconst E = CaroEngine(' + N + ');\nonmessage = function (e) { postMessage(Object.assign({ id: e.data.id }, E.think(e.data))); };';
+  worker = new Worker(URL.createObjectURL(new Blob([src], { type: 'text/javascript' })));
+} catch (e) { worker = null; }
+const waiting = new Map();
+if (worker) {
+  worker.onmessage = e => { const w = waiting.get(e.data.id); waiting.delete(e.data.id); if (w) w.cb(e.data); };
+  worker.onerror = () => {
+    worker = null;
+    for (const [id, w] of waiting) runLocal(w.req, w.cb);
+    waiting.clear();
+  };
+}
+function runLocal(req, cb) {
+  if (!local) local = CaroEngine(N);
+  setTimeout(() => cb(Object.assign({ id: req.id }, local.think(req))), 40);
+}
+function ask(req, cb) {
+  req.id = ++reqId;
+  const id = req.id, guarded = r => { if (id === reqId) cb(r); };
+  if (worker) { waiting.set(id, { req, cb: guarded }); worker.postMessage(req); }
+  else runLocal(req, guarded);
+}
+const cancelAsk = () => { reqId++; };
+
+// ── vẽ bàn ──
+function el(tag, attrs, parent) {
+  const e = document.createElementNS(svgNS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(e);
+  return e;
+}
+(function drawGrid() {
+  const g = $('gGrid');
+  for (let i = 1; i < N; i++) {
+    el('line', { x1: i * CELL, y1: 0, x2: i * CELL, y2: N * CELL, class: 'grid-line' }, g);
+    el('line', { x1: 0, y1: i * CELL, x2: N * CELL, y2: i * CELL, class: 'grid-line' }, g);
+  }
+  const a = Math.round(N * 0.22), b = N - 1 - a, m = N >> 1;
+  for (const [r, c] of [[a, a], [a, b], [b, a], [b, b], [m, m]])
+    el('circle', { cx: c * CELL + CELL / 2, cy: r * CELL + CELL / 2, r: 2.6, class: 'star' }, g);
+})();
+
+function pieceSvg(p, q, parent, animate, cls) {
+  const r = Math.floor(q / N), c = q % N, x = c * CELL + CELL / 2, y = r * CELL + CELL / 2, s = 11;
+  const g = el('g', cls ? { class: cls } : {}, parent);
+  const a = animate ? ' draw' : '';
+  if (p === 1) {
+    el('path', { d: `M${x - s} ${y - s}L${x + s} ${y + s}`, class: 'px' + a, pathLength: 1 }, g);
+    el('path', { d: `M${x + s} ${y - s}L${x - s} ${y + s}`, class: 'px' + a + ' d2', pathLength: 1 }, g);
+  } else {
+    el('circle', { cx: x, cy: y, r: 12.5, class: 'po' + a, pathLength: 1, transform: `rotate(-90 ${x} ${y})` }, g);
+  }
+  return g;
+}
+function iconSvg(p) {
+  return p === 1
+    ? '<svg class="piece" viewBox="0 0 24 24"><path d="M5 5L19 19M19 5L5 19" stroke="#e53935" stroke-width="3.4" stroke-linecap="round"/></svg>'
+    : '<svg class="piece" viewBox="0 0 24 24"><circle cx="12" cy="12" r="7.5" fill="none" stroke="#1e5fd8" stroke-width="3.4"/></svg>';
+}
+
+function renderAll() {
+  $('gPieces').innerHTML = '';
+  moves.forEach((q, i) => pieceSvg(i % 2 === 0 ? 1 : 2, q, $('gPieces'), false));
+  renderMarks();
+}
+function renderMarks() {
+  const gc = $('gCells'), gt = $('gTop');
+  gc.innerHTML = ''; gt.innerHTML = '';
+  const rect = (q, cls) => el('rect', { x: (q % N) * CELL + 1, y: Math.floor(q / N) * CELL + 1, width: CELL - 2, height: CELL - 2, rx: 6, class: cls }, gc);
+  if (winCells) winCells.forEach(q => rect(q, 'win-cell'));
+  else if (moves.length) rect(moves[moves.length - 1], 'last-hl');
+  if (winCells) {
+    const a = winCells[0], b = winCells[winCells.length - 1];
+    const cx = q => (q % N) * CELL + CELL / 2, cy = q => Math.floor(q / N) * CELL + CELL / 2;
+    el('line', { x1: cx(a), y1: cy(a), x2: cx(b), y2: cy(b), class: 'win-line', pathLength: 1 }, gt);
+  }
+  if (hint != null && !over)
+    el('circle', { cx: (hint % N) * CELL + CELL / 2, cy: Math.floor(hint / N) * CELL + CELL / 2, r: 16, class: 'hint-ring' }, gt);
+}
+
+// ── trạng thái ──
+const turn = () => (moves.length % 2 === 0 ? 1 : 2);
+function setStatus() {
+  const s = $('status');
+  if (over) {
+    s.innerHTML = over === 'draw' ? 'Hoà! Bàn cờ đã kín.' : over === human ? '🎉 Bạn thắng rồi!' : 'Máy thắng ván này.';
+  } else if (thinking) {
+    s.innerHTML = `${iconSvg(ai)}<span>Máy đang nghĩ<span class="dots"><span>.</span><span>.</span><span>.</span></span></span>`;
+  } else {
+    const say = {
+      vcf: 'Máy: “Hình như mình thấy đường thắng rồi đấy 😏”',
+      vct: 'Máy: “Cẩn thận nhé, mình đang giăng bẫy…”',
+      win: 'Máy: “Chặn kịp không? 😎”',
+      lost: 'Máy: “Ơ… nước này hiểm quá!”',
+    }[aiNote];
+    s.innerHTML = say ? `<span class="say">${say}</span>` : `${iconSvg(human)}<span>Đến lượt bạn</span>`;
+  }
+  $('bUndo').disabled = !!over || moves.length < (human === 1 ? 1 : 2);
+  $('bHint').disabled = !!over || thinking || turn() !== human;
+  $('board').classList.toggle('busy', thinking);
+  const st = stats[settings.level];
+  $('sWin').textContent = st.w; $('sLose').textContent = st.l;
+}
+
+function lineThrough(q) {
+  const p = cells[q], r = Math.floor(q / N), c = q % N;
+  for (const [dr, dc] of [[0, 1], [1, 0], [1, 1], [1, -1]]) {
+    const line = [q];
+    for (const s of [1, -1]) {
+      let rr = r + dr * s, cc = c + dc * s;
+      while (rr >= 0 && rr < N && cc >= 0 && cc < N && cells[rr * N + cc] === p) {
+        s > 0 ? line.push(rr * N + cc) : line.unshift(rr * N + cc);
+        rr += dr * s; cc += dc * s;
+      }
+    }
+    if (line.length >= 5) return line;
+  }
+  return null;
+}
+
+function save() { store.set('caro.game', over ? null : { n: N, level: settings.level, first: settings.first, moves }); }
+
+function play(q, animate = true) {
+  const p = turn();
+  cells[q] = p; moves.push(q); hint = null;
+  pieceSvg(p, q, $('gPieces'), animate);
+  ensureVisible(q);
+  const line = lineThrough(q);
+  if (line) { over = p; winCells = line; }
+  else if (moves.length === NN) over = 'draw';
+  renderMarks();
+  if (over) finish();
+  save();
+  setStatus();
+}
+
+function finish() {
+  const st = stats[settings.level];
+  if (over === 'draw') st.d++; else if (over === human) st.w++; else st.l++;
+  store.set('caro.stats', stats);
+  const lv = LEVELS[settings.level];
+  const [emo, title, msg] = over === 'draw' ? ['🤝', 'Hoà cờ!', 'Hai bên ngang tài ngang sức.']
+    : over === human ? ['🏆', 'Bạn thắng!', `Hạ được máy ở mức ${lv}. Giỏi quá!`]
+    : ['🤖', 'Máy thắng!', 'Thử chặn sớm các hàng ba mở nhé.'];
+  setTimeout(() => {
+    if (!over) return;
+    $('rEmoji').textContent = emo; $('rTitle').textContent = title;
+    $('rMsg').textContent = `${msg}  (Bạn ${st.w} – ${st.l} Máy${st.d ? `, hoà ${st.d}` : ''})`;
+    $('resultSheet').hidden = false;
+  }, 900);
+}
+
+function aiTurn() {
+  thinking = true; aiNote = null; setStatus();
+  const t0 = Date.now(), myId = reqId + 1;
+  ask({ cells: cells.slice(), ai, level: settings.level }, r => {
+    setTimeout(() => {
+      if (myId !== reqId || over) return;
+      thinking = false;
+      aiNote = r.note;
+      play(r.move);
+    }, Math.max(0, 450 - (Date.now() - t0)));
+  });
+}
+
+function newGame(saved) {
+  cancelAsk();
+  cells = new Array(NN).fill(0); moves = []; over = null; winCells = null; thinking = false; hint = null; aiNote = null;
+  human = settings.first === 'human' ? 1 : 2; ai = 3 - human;
+  $('gPieces').innerHTML = '';
+  if (saved) for (const q of saved) { cells[q] = turn(); moves.push(q); }
+  renderAll();
+  defaultView();
+  save();
+  setStatus();
+  if (turn() === ai) aiTurn();
+}
+
+// ── camera: bàn 30 × 30 quá nhỏ trên điện thoại nên cho kéo và phóng to ──
+// chuột trỏ chính xác hơn ngón tay nên ô có thể nhỏ hơn
+const boardEl = $('board'), FULL = N * CELL, MIN_CELL_PX = matchMedia('(pointer: fine)').matches ? 20 : 30;
+const view = { x: 0, y: 0, s: FULL };
+let boardPx = 600;
+function minView() { return Math.min(FULL, CELL * 8); }
+function applyView() {
+  view.s = Math.max(minView(), Math.min(FULL, view.s));
+  view.x = Math.max(0, Math.min(FULL - view.s, view.x));
+  view.y = Math.max(0, Math.min(FULL - view.s, view.y));
+  boardEl.setAttribute('viewBox', `${view.x} ${view.y} ${view.s} ${view.s}`);
+  $('zoomBox').hidden = boardPx / N >= MIN_CELL_PX && view.s >= FULL;
+}
+function centerOn(q) {
+  view.x = (q % N + .5) * CELL - view.s / 2;
+  view.y = (Math.floor(q / N) + .5) * CELL - view.s / 2;
+}
+function ensureVisible(q) {
+  const x = (q % N) * CELL, y = Math.floor(q / N) * CELL, m = CELL;
+  if (x < view.x + m || x + CELL > view.x + view.s - m || y < view.y + m || y + CELL > view.y + view.s - m) { centerOn(q); applyView(); }
+}
+function defaultView() {
+  // đủ lớn để ô ≥ MIN_CELL_PX, nhìn vào giữa các quân đang có
+  view.s = boardPx / N >= MIN_CELL_PX ? FULL : Math.max(minView(), boardPx / MIN_CELL_PX * CELL);
+  if (moves.length) {
+    let rs = 0, cs = 0;
+    for (const q of moves) { rs += Math.floor(q / N); cs += q % N; }
+    const r = Math.round(rs / moves.length), c = Math.round(cs / moves.length);
+    centerOn(r * N + c);
+  } else centerOn((N >> 1) * N + (N >> 1));
+  applyView();
+}
+function zoomAt(f, cx, cy) { // cx, cy: toạ độ bàn giữ cố định khi phóng
+  const ns = Math.max(minView(), Math.min(FULL, view.s * f));
+  view.x = cx - (cx - view.x) * ns / view.s;
+  view.y = cy - (cy - view.y) * ns / view.s;
+  view.s = ns; applyView();
+}
+function toBoard(clientX, clientY) {
+  const r = boardEl.getBoundingClientRect();
+  return [view.x + (clientX - r.left) / r.width * view.s, view.y + (clientY - r.top) / r.height * view.s];
+}
+function cellAt(e) {
+  const [x, y] = toBoard(e.clientX, e.clientY), c = Math.floor(x / CELL), rr = Math.floor(y / CELL);
+  return c < 0 || c >= N || rr < 0 || rr >= N ? -1 : rr * N + c;
+}
+
+let ghost = null, ghostQ = -1;
+function clearGhost() { if (ghost) { ghost.remove(); ghost = null; ghostQ = -1; } }
+function tapCell(q) {
+  if (q < 0 || over || thinking || turn() !== human || cells[q]) return;
+  play(q);
+  if (!over) aiTurn();
+}
+const ptrs = new Map();
+let gesture = null; // { moved, pinch, sx, sy, vx, vy, dist, s, mid }
+boardEl.addEventListener('pointerdown', e => {
+  boardEl.setPointerCapture(e.pointerId);
+  ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  const scale = view.s / boardEl.getBoundingClientRect().width;
+  if (ptrs.size === 1) gesture = { moved: false, pinch: false, sx: e.clientX, sy: e.clientY, vx: view.x, vy: view.y, scale };
+  else if (ptrs.size === 2) {
+    const [p1, p2] = [...ptrs.values()];
+    gesture = { moved: true, pinch: true, dist: Math.hypot(p1.x - p2.x, p1.y - p2.y), s: view.s,
+      mid: toBoard((p1.x + p2.x) / 2, (p1.y + p2.y) / 2), vx: view.x, vy: view.y };
+  }
+});
+boardEl.addEventListener('pointermove', e => {
+  if (ptrs.has(e.pointerId)) {
+    ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (!gesture) return;
+    if (gesture.pinch && ptrs.size >= 2) {
+      const [p1, p2] = [...ptrs.values()];
+      const d = Math.hypot(p1.x - p2.x, p1.y - p2.y) || 1;
+      const ns = Math.max(minView(), Math.min(FULL, gesture.s * gesture.dist / d));
+      const [mx, my] = gesture.mid;
+      view.s = ns;
+      view.x = mx - (mx - gesture.vx) * ns / gesture.s;
+      view.y = my - (my - gesture.vy) * ns / gesture.s;
+      applyView(); clearGhost();
+    } else if (!gesture.pinch) {
+      const dx = e.clientX - gesture.sx, dy = e.clientY - gesture.sy;
+      if (!gesture.moved && Math.hypot(dx, dy) > 8) gesture.moved = true;
+      if (gesture.moved && view.s < FULL) {
+        view.x = gesture.vx - dx * gesture.scale; view.y = gesture.vy - dy * gesture.scale;
+        applyView(); clearGhost();
+      }
+    }
+    if (e.pointerType !== 'mouse' || gesture.moved) return;
+  }
+  if (e.pointerType !== 'mouse') return;
+  const q = cellAt(e);
+  if (q === ghostQ) return;
+  clearGhost();
+  if (q < 0 || over || thinking || turn() !== human || cells[q]) return;
+  ghostQ = q; ghost = pieceSvg(human, q, $('gTop'), false, 'ghost');
+});
+function endPtr(e, cancel) {
+  if (!ptrs.has(e.pointerId)) return;
+  ptrs.delete(e.pointerId);
+  if (ptrs.size === 0) {
+    const g = gesture; gesture = null;
+    if (!cancel && g && !g.moved) { clearGhost(); tapCell(cellAt(e)); }
+  } else if (gesture) gesture.moved = true; // đang chụm hai ngón thì không tính là chạm
+}
+boardEl.addEventListener('pointerup', e => endPtr(e, false));
+boardEl.addEventListener('pointercancel', e => endPtr(e, true));
+boardEl.addEventListener('pointerleave', e => { if (e.pointerType === 'mouse') clearGhost(); });
+boardEl.addEventListener('wheel', e => {
+  e.preventDefault();
+  const [x, y] = toBoard(e.clientX, e.clientY);
+  zoomAt(Math.exp(e.deltaY * 0.0015), x, y);
+}, { passive: false });
+$('zIn').onclick = () => zoomAt(0.75, view.x + view.s / 2, view.y + view.s / 2);
+$('zOut').onclick = () => zoomAt(1 / 0.75, view.x + view.s / 2, view.y + view.s / 2);
+$('zFit').onclick = () => { if (view.s >= FULL) defaultView(); else { view.s = FULL; applyView(); } };
+
+// ── nút ──
+$('bUndo').onclick = () => {
+  if (over) return;
+  cancelAsk(); thinking = false; hint = null; aiNote = null;
+  // lùi về lượt gần nhất của người chơi
+  do { cells[moves.pop()] = 0; } while (moves.length && turn() !== human);
+  if (turn() !== human) { newGame(); return; }
+  renderAll(); save(); setStatus();
+};
+$('bHint').onclick = () => {
+  if (over || thinking || turn() !== human) return;
+  $('bHint').disabled = true;
+  const myLen = moves.length;
+  ask({ cells: cells.slice(), ai: human, level: 1 }, r => {
+    if (moves.length !== myLen || over) return;
+    hint = r.move; ensureVisible(hint); renderMarks(); setStatus();
+  });
+};
+
+function syncSeg() {
+  for (const b of $('segLevel').children) b.classList.toggle('on', +b.dataset.v === settings.level);
+  for (const b of $('segFirst').children) b.classList.toggle('on', b.dataset.v === settings.first);
+}
+$('segLevel').onclick = e => { const b = e.target.closest('button'); if (b) { settings.level = +b.dataset.v; syncSeg(); } };
+$('segFirst').onclick = e => { const b = e.target.closest('button'); if (b) { settings.first = b.dataset.v; syncSeg(); } };
+$('bNew').onclick = () => { syncSeg(); $('newSheet').hidden = false; };
+$('newSheet').onclick = e => { if (e.target === $('newSheet')) $('newSheet').hidden = true; };
+$('bStart').onclick = () => { store.set('caro.settings', settings); $('newSheet').hidden = true; newGame(); };
+$('bView').onclick = () => { $('resultSheet').hidden = true; };
+$('bAgain').onclick = () => { $('resultSheet').hidden = true; newGame(); };
+
+// ── co giãn bàn cờ theo màn hình ──
+function fit() {
+  const w = $('wrap'), s = Math.max(200, Math.floor(Math.min(w.clientWidth - 8, w.clientHeight - 4, 900)));
+  boardEl.style.width = boardEl.style.height = s + 'px';
+  boardPx = s;
+  if (s / N >= MIN_CELL_PX) view.s = FULL;
+  applyView();
+}
+window.addEventListener('resize', fit);
+fit();
+
+// ── khởi động: tiếp tục ván dở nếu có ──
+const saved = store.get('caro.game', null);
+if (saved && saved.n === N && saved.moves && saved.moves.length) {
+  settings.level = saved.level; settings.first = saved.first;
+  newGame(saved.moves);
+} else {
+  newGame();
+  if (!store.get('caro.settings', null)) { syncSeg(); $('newSheet').hidden = false; }
+}
+</script>
+</body>
+</html>
