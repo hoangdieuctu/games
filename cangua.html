@@ -83,6 +83,28 @@ button:disabled { opacity: .4; cursor: default; }
 .boom { pointer-events: none; animation: boom .6s ease-out forwards; transform-box: fill-box; transform-origin: center; }
 @keyframes boom { from { transform: scale(.4); opacity: 1; } to { transform: scale(1.8); opacity: 0; } }
 
+/* ── cảm xúc: mặt to hiện trên chuồng của người gửi ── */
+.emote { pointer-events: none; transform-box: fill-box; transform-origin: center; animation: emote 2.8s ease-out forwards; }
+.emote-bg { fill: rgba(255,255,255,.88); stroke: var(--c); stroke-width: 5; }
+.emote-face { font-size: 150px; text-anchor: middle; dominant-baseline: central; }
+@keyframes emote {
+  0% { transform: scale(.2); opacity: 0; }
+  12% { transform: scale(1.12); opacity: 1; }
+  20% { transform: scale(1); }
+  30% { transform: rotate(-7deg); } 40% { transform: rotate(7deg); } 50% { transform: rotate(0); }
+  85% { transform: scale(1); opacity: 1; }
+  100% { transform: scale(1.06) translateY(-8px); opacity: 0; }
+}
+.emo-pop {
+  position: fixed; z-index: 15; background: #fff; border-radius: 18px; padding: 8px;
+  display: grid; grid-template-columns: repeat(8, 42px); gap: 4px;
+  box-shadow: 0 12px 34px rgba(35,50,74,.28); animation: pop .18s cubic-bezier(.2,1.4,.5,1);
+}
+.emo-pop button { font-size: 27px; width: 42px; height: 42px; border-radius: 11px; line-height: 1; transition: transform .1s; }
+.emo-pop button:hover { background: #eef2f7; }
+.emo-pop button:active { transform: scale(.85); }
+@media (max-width: 420px) { .emo-pop { grid-template-columns: repeat(6, 42px); } }
+
 /* ── cột bên ── */
 .shell { flex: 1; min-height: 0; display: flex; flex-direction: column; }
 .side { display: flex; flex-direction: column; gap: 6px; padding: 8px 16px 0; max-width: 760px; width: 100%; margin: 0 auto; }
@@ -243,7 +265,7 @@ button:disabled { opacity: .4; cursor: default; }
 
 @media (prefers-reduced-motion: reduce) {
   .horse { transition: none; }
-  .horse.can .ring, .horse.jump .hbody, .horse.jump .shadow, .target, .dice, .die.hop, .die.hop::after, .dots span, .panel, .overlay { animation: none; }
+  .emote, .emo-pop, .horse.can .ring, .horse.jump .hbody, .horse.jump .shadow, .target, .dice, .die.hop, .die.hop::after, .dots span, .panel, .overlay { animation: none; }
   .cube { transition: none; }
 }
 </style>
@@ -264,6 +286,7 @@ button:disabled { opacity: .4; cursor: default; }
     <g id="gTargets"></g>
     <g id="gHorses"></g>
     <g id="gFx"></g>
+    <g id="gEmote"></g>
   </svg>
 </main>
 
@@ -278,6 +301,7 @@ button:disabled { opacity: .4; cursor: default; }
     <button id="bOnline">🌐 Chơi online</button>
     <button id="bInvite" hidden>🔗 Phòng chơi</button>
     <button id="bLeave" hidden>✕ Thoát online</button>
+    <button id="bEmo">😊 Cảm xúc</button>
     <button id="bRules">📖 Luật</button>
   </nav>
 </aside>
@@ -349,6 +373,8 @@ button:disabled { opacity: .4; cursor: default; }
     <button class="go" id="bRulesOk">Đã hiểu</button>
   </div>
 </div>
+
+<div class="emo-pop" id="emoPop" hidden></div>
 
 <!-- trạng thái kết nối -->
 <div class="overlay" id="netSheet" hidden>
@@ -892,6 +918,16 @@ function playNeigh() {
   for (const n of [osc, vib, tl, br]) { n.start(t); n.stop(t + T + 0.05); }
   sn.start(ts); sn.stop(ts + 0.3);
 }
+// tiếng "póc" nhỏ khi có người gửi cảm xúc
+function playPop() {
+  if (muted) return;
+  const ctx = audio();
+  if (!ctx || ctx.state !== 'running') return;
+  const t = ctx.currentTime + 0.005, o = ctx.createOscillator(), g = ctx.createGain();
+  o.type = 'sine'; o.frequency.setValueAtTime(520, t); o.frequency.exponentialRampToValueAtTime(1250, t + 0.07);
+  g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.35, t + 0.01); g.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
+  o.connect(g).connect(ctx.destination); o.start(t); o.stop(t + 0.14);
+}
 function syncMute() { $('bMute').textContent = muted ? '🔇' : '🔊'; }
 $('bMute').onclick = () => { muted = !muted; store.set('cangua.mute', muted); syncMute(); if (!muted) audio(); };
 syncMute();
@@ -1028,6 +1064,7 @@ function paint(skipHorses) {
   const host = net.on && net.host;
   $('bNew').hidden = net.on && !net.host;
   $('bOnline').hidden = net.on; $('bInvite').hidden = !net.on; $('bLeave').hidden = !net.on;
+  $('bEmo').hidden = emoteSeat() < 0;
   $('roomTag').hidden = !net.on;
   $('roomTag').textContent = net.on ? (host ? 'Chủ phòng' : net.seat < 0 ? 'Đang xem' : 'Online') : '';
 }
@@ -1218,7 +1255,8 @@ function hostMsg(c, d) {
   }
   const s = G.seats.findIndex(x => x && x.cid === net.conns.get(c));
   if (s < 0) return;
-  if (d.t === 'roll') doRoll(s);
+  if (d.t === 'emo') { if (EMOJIS.includes(d.e) && emoteOk(s)) { showEmote(s, d.e); netBroadcast({ t: 'emo', s, e: d.e }); } }
+  else if (d.t === 'roll') doRoll(s);
   else if (d.t === 'move' && Number.isInteger(d.h)) doMove(s, d.h, Number.isInteger(d.to) ? d.to : undefined);
   else if (d.t === 'name' && G.phase === 'lobby') { const nm = cleanName(d.name); if (nm) { G.seats[s].name = nm; commit({ type: 'lobby' }); } }
   else if (d.t === 'bye') { G.seats[s].online = false; }
@@ -1297,6 +1335,7 @@ function guestMsg(d) {
   }
   else if (d.t === 'full') { const c = net.code; net.conn = null; netFail('Phòng đã đủ người', 'Phòng này đã có 4 người chơi rồi.', () => joinOnline(c)); }
   else if (d.t === 'bye') net.left = true;
+  else if (d.t === 'emo' && Number.isInteger(d.s)) showEmote(d.s, d.e);
 }
 
 // ── phòng chờ ──
@@ -1368,6 +1407,65 @@ $('lobbySheet').onclick = e => { if (e.target === $('lobbySheet') && G && G.phas
 </script>
 
 <script>
+// ═══════════════════════════ cảm xúc ═══════════════════════════
+// Bấm một khuôn mặt thì nó hiện thật to trên chuồng của người gửi vài giây.
+// Online: khách gửi {t:'emo', e} cho chủ phòng, chủ phòng kiểm tra rồi phát
+// {t:'emo', s, e} cho cả phòng (kể cả người gửi). Không nằm trong G vì chỉ
+// thoáng qua, người vào sau không cần thấy.
+const EMOJIS = ['😀', '😂', '😍', '😎', '😮', '😢', '😭', '😡', '🤔', '😴', '🤣', '😜', '👍', '👏', '🔥', '🐴'];
+const emoteEls = [null, null, null, null], emoteLast = [0, 0, 0, 0];
+const emoteOk = s => { const now = Date.now(); if (now - emoteLast[s] < 1000) return false; emoteLast[s] = now; return true; };
+// ghế gửi cảm xúc từ máy này: online là ghế của mình; chơi chung máy thì là
+// người đang tới lượt (nếu là người), không thì người chơi chính
+function emoteSeat() {
+  if (!G) return -1;
+  if (net.on) return net.seat >= 0 && G.seats[net.seat] ? net.seat : -1;
+  if (G.seats[G.turn] && G.seats[G.turn].type === 'human') return G.turn;
+  return G.seats.findIndex(x => x && x.me);
+}
+function showEmote(s, e) {
+  if (!G || !Number.isInteger(s) || s < 0 || s > 3 || !G.seats[s] || !EMOJIS.includes(e)) return;
+  if (emoteEls[s]) emoteEls[s].remove();
+  const [cx, cy] = pxOf(CORNER[s]);
+  const g = el('g', { class: 'emote', style: `--c:${COLORS[s].main}` }, $('gEmote'));
+  el('circle', { cx, cy, r: 104, class: 'emote-bg' }, g);
+  el('text', { x: cx, y: cy + 8, class: 'emote-face' }, g).textContent = e;
+  emoteEls[s] = g;
+  setTimeout(() => { if (emoteEls[s] === g) { g.remove(); emoteEls[s] = null; } }, 2800);
+  playPop();
+}
+function sendEmote(e) {
+  const s = emoteSeat();
+  if (s < 0) return;
+  if (net.on && !net.host) { if (Date.now() - emoteLast[s] >= 1000) { emoteLast[s] = Date.now(); netSend({ t: 'emo', e }); } return; }
+  if (!emoteOk(s)) return;
+  showEmote(s, e);
+  if (net.on) netBroadcast({ t: 'emo', s, e });
+}
+(function buildEmoPop() {
+  const pop = $('emoPop');
+  for (const e of EMOJIS) {
+    const b = document.createElement('button');
+    b.textContent = e; b.setAttribute('aria-label', 'Gửi ' + e);
+    b.onclick = () => { sendEmote(e); pop.hidden = true; };
+    pop.appendChild(b);
+  }
+})();
+$('bEmo').onclick = e => {
+  e.stopPropagation();
+  const pop = $('emoPop');
+  if (!pop.hidden) { pop.hidden = true; return; }
+  pop.hidden = false;
+  // đặt bảng ngay trên (hoặc dưới) nút, không tràn ra ngoài màn hình
+  const r = $('bEmo').getBoundingClientRect(), w = pop.offsetWidth, h = pop.offsetHeight;
+  const left = Math.max(8, Math.min(innerWidth - w - 8, r.left + r.width / 2 - w / 2));
+  const top = r.top - h - 10 >= 8 ? r.top - h - 10 : Math.min(innerHeight - h - 8, r.bottom + 10);
+  pop.style.left = left + 'px'; pop.style.top = top + 'px';
+};
+document.addEventListener('pointerdown', e => {
+  if (!$('emoPop').hidden && !$('emoPop').contains(e.target) && e.target !== $('bEmo')) $('emoPop').hidden = true;
+});
+
 // ═══════════════════════════ nút & khởi động ═══════════════════════════
 const SEAT_OPTS = [['bot', 'Máy'], ['human', 'Người'], ['off', 'Trống']];
 function renderSetup() {
