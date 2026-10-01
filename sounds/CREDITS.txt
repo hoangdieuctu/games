@@ -1,5 +1,6 @@
-Âm thanh dùng trong Cờ Cá Ngựa (cangua.html), đã được cắt, trộn và chuẩn hoá
-âm lượng bằng ffmpeg.
+Âm thanh dùng trong Cờ Cá Ngựa (cangua.html) và Cờ Tỷ Phú (typhu.html, chỉ dùng
+dice-roll.mp3; các tiếng còn lại tự tổng hợp bằng Web Audio), đã được cắt, trộn và
+chuẩn hoá âm lượng bằng ffmpeg.
 
 dice-roll.mp3  Ghép từ dice-shake-1, dice-throw-3, die-throw-1 trong bộ "Casino Audio"
                của Kenney (www.kenney.nl) — CC0 1.0.
