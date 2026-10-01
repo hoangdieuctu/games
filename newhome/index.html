@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Nhà Mới">
+<meta name="theme-color" content="#a8d8a0">
+<title>Nhà Mới Của Chúng Ta</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%238ecb62'/%3E%3Cpath d='M6 16L16 7l10 9v10H6z' fill='%23f3e3bf'/%3E%3Cpath d='M4 17L16 6l12 11' fill='none' stroke='%23d9574a' stroke-width='3' stroke-linecap='round'/%3E%3Crect x='13' y='19' width='6' height='7' fill='%237a4a2a'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- ── màn tiêu đề ── -->
+<section class="screen show" id="scr-title">
+  <div class="title-card">
+    <div class="logo">🏕️</div>
+    <h1>Nhà Mới<br>Của Chúng Ta</h1>
+    <p>Cả nhà cùng đến một vùng đất hoang — rừng, sông, đồng cỏ, bãi biển — và cùng nhau xây nên ngôi nhà đầu tiên.</p>
+    <div class="profile">
+      <div class="avatars" id="avatars"></div>
+      <input id="nameIn" maxlength="14" placeholder="Tên của bạn" autocomplete="off">
+    </div>
+    <div id="joinBox" hidden>
+      <button class="big alt" id="btnJoin">🔗 Vào thế giới của người nhà ▸</button>
+      <p class="hint" style="color:#6b7a90;font-weight:600;font-size:13px;margin-top:6px">Bạn mở từ link mời. Nhập tên, chọn hình rồi vào nhé.</p>
+    </div>
+    <button class="big" id="btnNew">🌱 Bắt đầu thế giới mới</button>
+    <div class="saved" id="savedList"></div>
+    <ol class="steps">
+      <li>Tìm vài khúc gỗ 🪵 và viên đá 🪨</li>
+      <li>Dựng lửa trại 🔥</li>
+      <li>Xây ngôi nhà đầu tiên 🏠</li>
+      <li>Trồng vụ mùa đầu tiên 🌱</li>
+    </ol>
+    <a class="link-back" href="../index.html">‹ Về kho trò chơi</a>
+  </div>
+</section>
+
+<!-- ── màn chơi ── -->
+<section class="screen" id="scr-game">
+  <canvas id="game"></canvas>
+  <div id="stick" hidden><div id="knob"></div></div>
+
+  <div class="hud-top">
+    <button id="btnHome" class="hb" aria-label="Rời thế giới">🏡</button>
+    <div id="roster" class="roster"></div>
+    <div class="spacer"></div>
+    <button id="btnQuest" class="hb">📜</button>
+    <button id="btnInvite" class="hb">🔗<span class="txt"> Mời</span></button>
+    <button id="btnBuild" class="hb">🔨<span class="txt"> Xây</span></button>
+  </div>
+  <div id="quest" class="quest open"><h3>Chào mừng về nhà mới!</h3><ul id="questList"></ul></div>
+  <div id="toasts"></div>
+
+  <div class="hud-bottom">
+    <div class="left">
+      <div class="energy"><span>⚡</span><div class="bar"><div id="energyFill"></div></div><b id="energyTxt">100</b></div>
+      <div id="inv" class="inv"></div>
+    </div>
+    <div class="right">
+      <button id="btnCancel" class="act2" hidden>✕ Huỷ đặt</button>
+      <button id="btnAct2" class="act2" hidden></button>
+      <div style="display:flex;gap:8px;align-items:flex-end">
+        <button id="btnEmote" class="hb" aria-label="Biểu cảm và chat">😊</button>
+        <button id="btnAct" class="act"><span id="actIcon">✋</span><span id="actLabel">…</span></button>
+      </div>
+    </div>
+  </div>
+  <div id="emoteBar" class="emote-bar" hidden>
+    <div id="emotes"></div>
+    <form id="chatForm"><input id="chatIn" maxlength="80" placeholder="Nói gì với cả nhà…" autocomplete="off"><button type="submit">Gửi</button></form>
+  </div>
+
+  <div id="sheet" class="sheet" hidden><div class="panel" id="panel"></div></div>
+
+  <div id="celebrate" class="celebrate" hidden>
+    <div id="rain"></div>
+    <div class="cel-card">
+      <div class="big-emoji">🏠</div>
+      <h2>Ngôi nhà đầu tiên của chúng ta!</h2>
+      <p>Gia đình đã dựng được nhà và gieo vụ mùa đầu tiên trên vùng đất mới. Đây mới chỉ là khởi đầu.</p>
+      <p class="names" id="celebrateNames"></p>
+      <button id="celebrateClose">Tiếp tục xây 🌱</button>
+    </div>
+  </div>
+</section>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
