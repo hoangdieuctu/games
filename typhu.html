@@ -297,6 +297,17 @@ button:disabled { opacity: .4; cursor: default; }
 .panel .rule.center { text-align: center; }
 .rules { font-size: 14.5px; line-height: 1.5; padding-left: 18px; }
 .rules li { margin: 4px 0; }
+.panel.wide { max-width: 760px; }
+.panel h3, .rules-h { font-size: 16px; font-weight: 800; margin: 16px 0 6px; }
+.rules-more { display: grid; grid-template-columns: 1fr; gap: 0 22px; }
+@media (min-width: 640px) { .rules-more { grid-template-columns: 1fr 1fr; } .rules-list.cols { columns: 2; column-gap: 22px; } }
+.rules-tbl { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+.rules-tbl th, .rules-tbl td { padding: 3px 6px; text-align: left; border-bottom: 1px solid #e6ecf3; }
+.rules-tbl th { color: var(--muted); font-weight: 700; font-size: 12.5px; }
+.rules-tbl td:not(:first-child), .rules-tbl th:not(:first-child) { text-align: right; }
+.rules-list { list-style: none; font-size: 13.5px; line-height: 1.4; }
+.rules-list li { margin: 3px 0; break-inside: avoid; }
+.rules-list b { white-space: nowrap; }
 .result-emoji { font-size: 56px; text-align: center; line-height: 1.1; }
 .result-msg { text-align: center; color: var(--muted); font-weight: 600; margin-top: -4px; line-height: 1.4; }
 .row { display: flex; gap: 10px; margin-top: 18px; }
@@ -353,6 +364,15 @@ button:disabled { opacity: .4; cursor: default; }
 .lvl-ico { text-anchor: middle; dominant-baseline: central; pointer-events: none; font-size: 15px; }
 .fx-ico { text-anchor: middle; dominant-baseline: central; pointer-events: none; font-size: 13px; }
 .gold-ico { text-anchor: middle; dominant-baseline: central; pointer-events: none; font-size: 12px; }
+/* ── số bước trước khi tung ── */
+.step-hint { pointer-events: none; animation: stepin .3s ease-out backwards; }
+@keyframes stepin { from { opacity: 0; } }
+.step-num { font: 900 11px 'Baloo 2', system-ui, sans-serif; text-anchor: middle; dominant-baseline: central; }
+/* ── đủ nhóm màu: quầng thở và vệt sáng chạy quanh viền ── */
+.mono { pointer-events: none; }
+.mono-glow { animation: festglow 1.8s ease-in-out infinite; }
+.mono-shine { stroke-dasharray: 10 26; animation: monoshine 1.6s linear infinite; opacity: .95; }
+@keyframes monoshine { to { stroke-dashoffset: -36; } }
 /* ── lễ hội: quầng vàng thở, sao lấp lánh, cờ đuôi nheo đung đưa ── */
 .fest-glow { animation: festglow 1.4s ease-in-out infinite; }
 @keyframes festglow { 50% { opacity: .25; } }
@@ -394,7 +414,7 @@ button:disabled { opacity: .4; cursor: default; }
 
 @media (prefers-reduced-motion: reduce) {
   .token { transition: none; }
-  .emote, .emo-pop, .token .ring, .token.hop .tbody, .dice, .die.hop, .die.hop::after, .dots span, .panel, .overlay, .cardpop, .actions button.primary, #board.shake, .pick-ring, .pick-hand, .chars button.on, .fest-glow, .fest-star, .fest-flag { animation: none; }
+  .emote, .emo-pop, .token .ring, .token.hop .tbody, .dice, .die.hop, .die.hop::after, .dots span, .panel, .overlay, .cardpop, .actions button.primary, #board.shake, .pick-ring, .pick-hand, .chars button.on, .fest-glow, .fest-star, .fest-flag, .mono-glow, .mono-shine, .step-hint { animation: none; }
   .cube { transition: none; }
 }
 </style>
@@ -414,6 +434,7 @@ button:disabled { opacity: .4; cursor: default; }
     <g id="gBoard"></g>
     <g id="gOwn"></g>
     <g id="gBuild"></g>
+    <g id="gSteps"></g>
     <g id="gCenter"></g>
     <g id="gPick"></g>
     <g id="gTokens"></g>
@@ -518,7 +539,7 @@ button:disabled { opacity: .4; cursor: default; }
 
 <!-- luật -->
 <div class="overlay" id="rulesSheet" hidden>
-  <div class="panel">
+  <div class="panel wide">
     <h2>Luật chơi</h2>
     <ol class="rules">
       <li>Mỗi người bắt đầu với <b>$2.000</b>, lần lượt tung <b>hai xúc xắc</b> đi vòng quanh 32 ô. Qua <b>Bắt Đầu</b> nhận <b>$300</b>; dừng đúng Bắt Đầu (từ vòng 2) còn được nâng cấp một thành phố.</li>
@@ -531,6 +552,12 @@ button:disabled { opacity: .4; cursor: default; }
       <li>Tung đôi được đi tiếp, trừ khi vào Côn Đảo hay Bến Xe; không còn việc gì thì lượt tự chuyển. Thiếu tiền thì bán thành phố (được nửa vốn); bán hết cũng không đủ thì <b>phá sản</b> ngay, tài sản về tay chủ nợ.</li>
       <li><b>Thắng</b> khi: đối thủ phá sản hết · đủ <b>3 nhóm màu</b> · sở hữu <b>cả một hàng</b> · đủ <b>5 điểm du lịch</b> · hoặc <b>giàu nhất</b> khi hết số vòng. Mỗi nhân vật có một kỹ năng riêng.</li>
     </ol>
+    <div class="rules-more">
+      <section><h3>🏠 Cấp nhà</h3><table class="rules-tbl" id="rulesLevels"></table><p class="rule">Tính theo giá gốc thành phố. Ví dụ Sài Gòn ($400): nhà $400, phí $140.</p></section>
+      <section><h3>🎭 Nhân vật</h3><ul class="rules-list" id="rulesChars"></ul></section>
+    </div>
+    <h3 class="rules-h">❓ Thẻ Cơ Hội</h3>
+    <ul class="rules-list cols" id="rulesCards"></ul>
     <button class="go" id="bRulesOk">Đã hiểu</button>
   </div>
 </div>
@@ -609,6 +636,7 @@ const CHARS = [
   { id: 'rich', name: 'Phú Bà', skill: 'Thu thêm 20% phí tham quan', group: 'tăng tiền', skin: '#f6d6bd', hair: '#d4a017', style: 'wave', acc: 'crown', outfit: '#27ae60', bg: '#d1fae5' },
   { id: 'tourist', name: 'Du Khách', skill: 'Bến Xe, ra tù miễn phí; điểm du lịch rẻ hơn 30%', group: 'giảm tiền', skin: '#e9b98a', hair: '#1f1a17', style: 'short', acc: 'hat', outfit: '#f39c12', bg: '#ffedd5' },
   { id: 'detective', name: 'Thám Tử', skill: 'Thuế chỉ 5%, có sẵn một khiên chống thẻ xấu', group: 'giảm tiền', skin: '#f3cfae', hair: '#3b3b3b', style: 'fedora', acc: 'monocle', outfit: '#6b4a2a', bg: '#f5efe0' },
+  { id: 'robber', name: 'Kẻ Cướp', skill: 'Dừng đúng ô có người đứng sẵn thì cướp 10% tiền của họ', group: 'tăng tiền', skin: '#f1c7a0', hair: '#1f1a17', style: 'beanie', acc: 'mask', outfit: '#2f2f2f', bg: '#e2e8f0' },
   { id: 'chef', name: 'Vua Bếp', skill: 'Bắt đầu ván với thêm $300', group: 'tăng tiền', skin: '#ffd9b3', hair: '#4b3621', style: 'toque', acc: 'spoon', outfit: '#ffffff', bg: '#fff1f2' },
 ];
 const charOf = id => CHARS.find(c => c.id === id) || CHARS[0];
@@ -901,7 +929,18 @@ function moveBy(s, n, steps) {
   let salary = 0;
   if (passGo) { P.laps++; salary = r10(SALARY * (hasSkill(G, s, 'mc') ? 1.5 : 1)); P.cash += salary; }
   steps.push({ k: 'move', s, from, to, n, passGo, salary });
+  if (hasSkill(G, s, 'robber')) rob(s, steps);
   land(s, steps);
+}
+// Kẻ Cướp: lấy 10% tiền mặt của từng người đang đứng ở ô vừa tới
+function rob(s, steps) {
+  for (const v of active(G)) {
+    if (v === s || G.pl[v].pos !== G.pl[s].pos) continue;
+    const amt = r10(G.pl[v].cash * 0.1);
+    if (amt <= 0) continue;
+    G.pl[v].cash -= amt; G.pl[s].cash += amt;
+    steps.push({ k: 'rob', s, v, amt });
+  }
 }
 const moveTo = (s, to, steps) => moveBy(s, (to - G.pl[s].pos + N) % N, steps);
 function setPick(s, kind, opts, optional, data) { G.step = 'pick'; G.pick = { kind, opts, optional: !!optional, data: data || null }; }
@@ -1417,6 +1456,15 @@ function chibiInto(g, ch) {
       eyes('happy'); cheeks(); P('M-8 .5 Q-5 -3 -1 .5 Q-4 2.5 -8 .5 Z', '#23324a'); P('M8 .5 Q5 -3 1 .5 Q4 2.5 8 .5 Z', '#23324a'); mouth();
       R(14, -2, 3.2, 17, '#9ca3af', 1.5); el('ellipse', { cx: 15.6, cy: -6, rx: 4.2, ry: 5.5, fill: '#d1d5db', stroke: '#6b7280', 'stroke-width': 1 }, g);
       break;
+    case 'robber': // mũ len đen, mặt nạ che mắt, áo sọc, túi tiền
+      body('#2f2f2f'); for (const y of [10, 14, 18]) P(`M-15 ${y} L15 ${y}`, 'none', '#ffffff', 1.6);
+      head();
+      P('M-14 -9 Q-14 -24 0 -24 Q14 -24 14 -9 Z', '#23232b', '#000'); R(-14.5, -13, 29, 4.5, '#3b3b46', 2, '#000');
+      R(-13, -10, 26, 7, '#111', 3.5); Cc(-5.5, -6.5, 2.4, '#fff'); Cc(5.5, -6.5, 2.4, '#fff'); Cc(-5, -6.5, 1.3, '#23324a'); Cc(6, -6.5, 1.3, '#23324a');
+      P('M-6 2.2 Q0 4.5 6 1.2', 'none', '#c0392b', 1.6);
+      P('M14 4 Q12 -2 17 -4 L21 -4 Q26 -2 24 4 Q26 13 19 14 Q12 13 14 4 Z', '#d6b17a', '#8a6a3a'); P('M15.5 -2 L22.5 -2', 'none', '#8a6a3a', 1.4);
+      txt(19, 7, 'sq-price', '$', g, { fill: '#5a3d16', style: 'font-size:8px;font-weight:900' });
+      break;
     default: body(ch.outfit); head(); cap(); eyes(); mouth();
   }
 }
@@ -1440,9 +1488,10 @@ let roundText;
     el('rect', { x: r.x, y: r.y, width: r.w, height: r.h, class: 'bg' }, sg);
     sqEls.push(sg);
     if (isCorner(i)) { drawCorner(i, sg); continue; }
-    const tall = r.side === 0 || r.side === 2;
-    const cx = tall ? r.x + CW / 2 : r.side === 1 ? r.x + 31 : r.x + BAND + 31;
-    const top = r.side === 0 ? r.y + BAND : r.y;
+    const tall = r.side === 0 || r.side === 2, city = q.t === 'city';
+    // chỉ thành phố có dải màu; ô khác dùng trọn ô nên canh giữa cả ô
+    const cx = !city ? r.x + r.w / 2 : tall ? r.x + CW / 2 : r.side === 1 ? r.x + 31 : r.x + BAND + 31;
+    const top = city && r.side === 0 ? r.y + BAND : r.y;
     let icon = null, name = '', sub = '', big = null, color = null;
     if (q.t === 'city') {
       const b = bandOf(i);
@@ -1452,13 +1501,12 @@ let roundText;
     else if (q.t === 'chance') { icon = '❓'; big = 'CƠ HỘI'; color = '#e67e22'; }
     else if (q.t === 'tax') { icon = '💸'; big = 'THUẾ'; sub = '10% tài sản'; color = '#8a5a00'; }
     else if (q.t === 'casino') { icon = '🎰'; big = 'SÒNG BÀI'; sub = 'đặt ' + fmt(CASINO_BET); color = '#8e44ad'; }
-    const city = q.t === 'city', h = tall ? (city ? CORNER - BAND : CORNER) : CW; // chiều cao vùng chữ
     if (tall) {
-      if (icon) txt(cx, top + 17, 'sq-icon', icon, sg, { style: 'font-size:18px' });
-      const ny = top + (icon ? 42 : city ? 22 : 28);
+      if (icon) txt(cx, top + 22, 'sq-icon', icon, sg, { style: 'font-size:18px' });
+      const ny = top + (icon ? 48 : 22);
       if (big) txt(cx, ny, 'sq-big', big, sg, { fill: color, style: big.length > 7 ? 'font-size:10.5px' : '' });
       if (name) txt(cx, ny, 'sq-name', name, sg, { style: `font-size:${name.length > 9 ? 10.5 : name.length > 8 ? 11.5 : 12.5}px` });
-      if (sub) txt(cx, top + (icon ? 60 : city ? 42 : 50), 'sq-price', sub, sg);
+      if (sub) txt(cx, top + (icon ? 67 : 42), 'sq-price', sub, sg);
     } else {
       if (icon) txt(cx, top + 16, 'sq-icon', icon, sg, { style: 'font-size:16px' });
       const ny = top + (icon ? 38 : 28);
@@ -1489,8 +1537,9 @@ function drawCorner(i, sg) {
   } else if (q.t === 'festival') {
     bg('#f3e6fb');
     txt(cx, r.y + 30, 'sq-icon', '🎤', sg, { style: 'font-size:28px' });
-    txt(cx, r.y + 58, 'sq-big', 'ĐẠI NHẠC HỘI', sg, { fill: '#8e44ad', style: 'font-size:10.5px' });
-    txt(cx, r.y + 76, 'sq-price', 'lễ hội ' + fmt(FEST_FEE) + ' · phí ×2 mỗi lần', sg, { fill: '#8e44ad', style: 'font-size:9px' });
+    txt(cx, r.y + 56, 'sq-big', 'ĐẠI NHẠC HỘI', sg, { fill: '#8e44ad', style: 'font-size:10.5px' });
+    txt(cx, r.y + 71, 'sq-price', 'lễ hội ' + fmt(FEST_FEE), sg, { fill: '#8e44ad', style: 'font-size:9px' });
+    txt(cx, r.y + 82, 'sq-price', 'phí ×2 mỗi lần', sg, { fill: '#8e44ad', style: 'font-size:9px' });
   } else {
     bg('#e3f7e8');
     txt(cx, r.y + 30, 'sq-icon', '🚌', sg, { style: 'font-size:28px' });
@@ -1529,13 +1578,15 @@ function drawOwnership() {
     if (p.owner >= 0) {
       // nền ô tô màu nhạt của chủ, viền dày màu chủ, dải màu mép ngoài và huy hiệu mặt chủ ở góc
       const C = COLORS[p.owner], st = ownerStrip(i);
-      bg.style.fill = C.soft;
+      const mono = q.t === 'city' && ownsGroup(G, p.owner, q.g);
+      bg.style.fill = mono ? `url(#monoGrad${p.owner})` : C.soft;
       el('rect', { x: st.x, y: st.y, width: st.w, height: st.h, fill: C.main }, g);
       el('rect', { x: r.x + 2, y: r.y + 2, width: r.w - 4, height: r.h - 4, fill: 'none', stroke: C.main, 'stroke-width': 4 }, g);
       const [ax, ay] = r.side === 0 ? [r.x + 12, r.y + r.h - 12] : r.side === 1 ? [r.x + 12, r.y + 12] : r.side === 2 ? [r.x + r.w - 12, r.y + 12] : [r.x + r.w - 12, r.y + r.h - 12];
       const badge = el('g', { transform: `translate(${ax} ${ay})` }, g);
       el('circle', { cx: 0, cy: 0, r: 10.5, fill: charOf(G.pl[p.owner].char).bg, stroke: C.main, 'stroke-width': 2.2 }, badge);
       chibiInto(el('g', { transform: 'translate(0 2.6) scale(.4)' }, badge), charOf(G.pl[p.owner].char));
+      if (mono) drawMonopoly(g, i, p.owner);
     } else bg.style.fill = '';
     if (q.t === 'city' && G.gold.includes(i)) txt(r.side === 1 || r.side === 2 ? r.x + 9 : r.x + r.w - 9, r.side === 0 || r.side === 1 ? r.y + r.h - 9 : r.y + 9, 'gold-ico', '⭐', g);
     if (q.t !== 'city') continue;
@@ -1549,6 +1600,19 @@ function drawOwnership() {
       txt(x, y, 'fx-ico', ic, g);
     });
   }
+}
+// đủ nhóm màu (phí ×2): nền chuyển sắc rực màu chủ, quầng sáng thở, vệt sáng chạy quanh viền, sao lấp lánh
+function drawMonopoly(g, i, owner) {
+  const r = rectOf(i), b = bandOf(i), C = COLORS[owner], mg = el('g', { class: 'mono' }, g);
+  el('rect', { x: r.x + 3.5, y: r.y + 3.5, width: r.w - 7, height: r.h - 7, rx: 3, fill: 'none', stroke: mix(C.main, '#fff', .55), 'stroke-width': 3, class: 'mono-glow' }, mg);
+  el('rect', { x: r.x + 2, y: r.y + 2, width: r.w - 4, height: r.h - 4, fill: 'none', stroke: '#fff', 'stroke-width': 2, 'stroke-linecap': 'round', class: 'mono-shine' }, mg);
+  el('rect', { x: b.x + 1, y: b.y + 1, width: b.w - 2, height: b.h - 2, fill: 'url(#monoShine)', class: 'mono-glow', style: 'animation-delay:-1s' }, mg);
+  // sao ở các góc vùng chữ (tránh huy hiệu chủ và sao đất vàng)
+  const pts = r.side === 0 ? [[r.x + r.w - 10, b.y + b.h + 9], [r.x + 10, b.y + b.h + 9]]
+    : r.side === 2 ? [[r.x + 10, b.y - 9], [r.x + r.w - 10, b.y - 9]]
+    : r.side === 1 ? [[b.x - 9, r.y + r.h - 10], [b.x - 9, r.y + 10]]
+    : [[b.x + b.w + 9, r.y + 10], [b.x + b.w + 9, r.y + r.h - 10]];
+  pts.forEach(([x, y], k) => txt(x, y, 'sq-icon fest-star', '✦', mg, { fill: k ? '#fff' : '#ffd23f', stroke: mix(C.main, '#000', .2), 'stroke-width': .6, style: `font-size:${k ? 11 : 13}px;animation-delay:${(k * .6 + i * .13).toFixed(2)}s` }));
 }
 // ô đang mở lễ hội: nền vàng lung linh, viền vàng thở, dây cờ đuôi nheo, sao lấp lánh, băng rôn ở mép ngoài
 function drawFestival(g, i) {
@@ -1661,6 +1725,13 @@ $('board').insertBefore(defs, $('board').firstChild);
   el('stop', { offset: 0, 'stop-color': '#fff3b0', 'stop-opacity': .95 }, gr);
   el('stop', { offset: .6, 'stop-color': '#ffd23f', 'stop-opacity': .45 }, gr);
   el('stop', { offset: 1, 'stop-color': '#ff9f1c', 'stop-opacity': .15 }, gr);
+  // nền ô khi đủ nhóm màu: chuyển sắc đậm–nhạt–đậm theo màu chủ
+  COLORS.forEach((C, s) => {
+    const lg = el('linearGradient', { id: 'monoGrad' + s, x1: 0, y1: 0, x2: 1, y2: 1 }, defs);
+    [[0, mix(C.main, '#fff', .35)], [.5, mix(C.main, '#fff', .78)], [1, mix(C.main, '#fff', .35)]].forEach(([o, c]) => el('stop', { offset: o, 'stop-color': c }, lg));
+  });
+  const sh = el('linearGradient', { id: 'monoShine', x1: 0, y1: 0, x2: 1, y2: 1 }, defs);
+  [[0, 0], [.45, 0], [.5, .75], [.55, 0], [1, 0]].forEach(([o, a]) => el('stop', { offset: o, 'stop-color': '#fff', 'stop-opacity': a }, sh));
 })();
 const tokenEls = [0, 1, 2, 3].map(s => {
   const C = COLORS[s], g = el('g', { class: 'token' }, $('gTokens'));
@@ -1900,6 +1971,7 @@ function moneyDelta(st) {
     case 'festival': case 'busGo': if (st.fee) out.push([s, -st.fee]); break;
     case 'free': if (st.how === 'pay' && st.fee) out.push([s, -st.fee]); break;
     case 'sell': out.push([s, st.amt]); break;
+    case 'rob': out.push([s, st.amt], [st.v, -st.amt]); break;
     case 'forceSell': out.push([st.o, st.amt]); break;
   }
   return out;
@@ -2000,7 +2072,7 @@ function stepMs(st) {
     case 'boost': return 600; case 'island': return 800; case 'free': return 450; case 'stay': return 350; case 'triple': return 600; case 'released': return 400;
     case 'busStop': return 600; case 'busGo': return 300; case 'busNoCash': return 300;
     case 'home': return st.can ? 0 : 300; case 'norent': return 350; case 'useFree': return 800; case 'useHalf': return 600;
-    case 'pay': return 800; case 'debt': return 600; case 'card': return 2700; case 'hold': return 600; case 'nothing': return 400;
+    case 'pay': return 800; case 'rob': return 1100; case 'debt': return 600; case 'card': return 2700; case 'hold': return 600; case 'nothing': return 400;
     case 'build': return 850; case 'buyTour': return 750; case 'takeover': return 1000; case 'skip': return 250;
     case 'casinoSkip': return 300; case 'casino': return 1900; case 'noCash': return 1100; case 'festNone': return 300; case 'festival': return 1000;
     case 'pickCity': return 400; case 'pickSkip': return 250; case 'swap': return 1000; case 'forceSell': return 900; case 'destroy': return 900;
@@ -2034,6 +2106,7 @@ async function animateStep(st, tok) {
         await flyToken(s, from, to, { ms: FLY_MS, height: 160, spin: 360 });
         fx('circle', { cx: to[0], cy: to[1] + 8, r: 16, fill: 'rgba(120,110,95,.35)', class: 'fx puff' }, 550);
         if (st.passGo) { const [x, y] = centerOf(0); floatMoney(x, y - 20, st.salary); playCoin(true); }
+        clearStepHints();
         await sleep(150);
         return;
       }
@@ -2046,6 +2119,7 @@ async function animateStep(st, tok) {
         if (pos === 0 && st.passGo) { const [x, y] = centerOf(0); floatMoney(x, y - 20, st.salary); playCoin(true); }
         await sleep(STEP_MS);
       }
+      clearStepHints();
       await sleep(st.passGo ? 300 : 100);
       return;
     }
@@ -2072,6 +2146,12 @@ async function animateStep(st, tok) {
       const [x, y] = tokenPt(s);
       floatMoney(x, y - 18, -(st.amt)); playCoin(false, st.amt >= 300);
       if (st.to >= 0) { const [x2, y2] = tokenPt(st.to); setTimeout(() => { floatMoney(x2, y2 - 18, st.amt); playCoin(true, st.amt >= 300); }, 220); }
+      await sleep(ms); return;
+    }
+    case 'rob': {
+      const [x, y] = tokenPt(s), [x2, y2] = tokenPt(st.v);
+      pow(x, y - 34, 'CƯỚP!', '#23324a'); floatMoney(x2, y2 - 18, -st.amt); playCoin(false);
+      setTimeout(() => { floatMoney(x, y - 18, st.amt); playCoin(true); }, 260);
       await sleep(ms); return;
     }
     case 'useFree': { const [x, y] = tokenPt(s); floatText(x, y - 18, '🎫 miễn phí', '#1e6fd8', 1000, 18); playPop(); await sleep(ms); return; }
@@ -2197,6 +2277,7 @@ function stepText(st) {
     case 'takeoverOffer': return `${w} có thể mua lại ${nm(st.i)} với giá ${fmt(takeoverPrice(G, st.i))}`;
     case 'norent': return `${w} vào ${nm(st.i)} nhưng không mất phí${G.props[st.i] && effectOn(G, st.i, 'plague') ? ' (dịch bệnh)' : ''}`;
     case 'useFree': return `🎫 ${w} dùng vé miễn phí, khỏi trả ${fmt(st.amt)} ở ${nm(st.i)}`;
+    case 'rob': return `🦹 ${w} cướp ${fmt(st.amt)} (10%) của ${other(st.v)}!`;
     case 'useHalf': return `🏷️ ${w} dùng phiếu giảm nửa phí ở ${nm(st.i)}`;
     case 'pay': {
       if (st.why === 'rent') return `💸 ${w} trả ${fmt(st.amt)} phí tham quan ${nm(st.i)} cho ${other(st.to)}`;
@@ -2327,6 +2408,28 @@ function renderDice() {
   const dv = Array.isArray(G.dice) ? G.dice : [6, 1];
   if (!busy()) { setDie(0, dv[0], false); setDie(1, dv[1], false); }
   dice.classList.toggle('bonus', !busy() && G.phase === 'play' && G.step === 'roll' && G.again);
+  drawStepHints();
+}
+// sắp tung xúc xắc: đánh số 1–12 cho các ô phía trước quân, đặt ở mép trong ô (phía giữa bàn).
+// Số giữ nguyên trong lúc tung và lúc quân đi, chỉ xoá khi quân đã tới nơi (clearStepHints).
+const clearStepHints = () => { $('gSteps').innerHTML = ''; };
+function drawStepHints() {
+  const g = $('gSteps');
+  if (!canRoll() || G.step !== 'roll') { if (!busy() && !pending) clearStepHints(); return; }
+  g.innerHTML = '';
+  const from = G.pl[G.turn].pos, col = COLORS[G.turn].main;
+  for (let n = 1; n <= 12; n++) {
+    const i = (from + n) % N, r = rectOf(i), cx = r.x + r.w / 2, cy = r.y + r.h / 2, off = CORNER + 12;
+    let x = cx, y = cy;
+    if (isCorner(i)) { const k = CORNER - 4; x = r.x < SIZE / 2 ? k : SIZE - k; y = r.y < SIZE / 2 ? k : SIZE - k; } // ngay góc trong, tránh chồng số ô kề
+    else if (r.side === 0) y = SIZE - off;
+    else if (r.side === 1) x = off;
+    else if (r.side === 2) y = off;
+    else x = SIZE - off;
+    const b = el('g', { class: 'step-hint', transform: `translate(${x} ${y})`, style: `animation-delay:${(n * .03).toFixed(2)}s` }, g);
+    el('circle', { r: 10, fill: n === 1 ? '#fff' : col, stroke: n === 1 ? col : '#fff', 'stroke-width': 2, opacity: n === 1 ? .8 : 1 }, b);
+    txt(0, .5, 'step-num', n, b, { fill: n === 1 ? col : '#fff' });
+  }
 }
 const DOTS = '<span class="dots"><span>.</span><span>.</span><span>.</span></span>';
 const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
@@ -3011,6 +3114,13 @@ $('setupSheet').onclick = e => { if (e.target === $('setupSheet')) $('setupSheet
 $('bOnline').onclick = () => hostOnline();
 $('bInvite').onclick = () => openLobby();
 $('bLeave').onclick = () => leaveOnline();
+(function fillRules() {
+  const pct = v => Math.round(v * 100) + '%';
+  $('rulesLevels').innerHTML = '<tr><th>Cấp</th><th>Chi phí xây</th><th>Phí tham quan</th></tr>' +
+    LEVELS.slice(1).map(L => `<tr><td>${L.icon} ${L.name}</td><td>${pct(L.cost)}</td><td>${pct(L.rent)}</td></tr>`).join('');
+  $('rulesChars').innerHTML = CHARS.map(c => `<li><b>${c.name}</b>: ${c.skill}</li>`).join('');
+  $('rulesCards').innerHTML = CARDS.map(c => `<li>${c.icon} ${c.text}</li>`).join('');
+})();
 $('bRules').onclick = () => { $('rulesSheet').hidden = false; };
 $('bRulesOk').onclick = () => { $('rulesSheet').hidden = true; };
 $('rulesSheet').onclick = e => { if (e.target === $('rulesSheet')) $('rulesSheet').hidden = true; };
