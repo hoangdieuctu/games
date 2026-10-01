@@ -115,25 +115,6 @@ button:disabled { opacity: .4; cursor: default; }
 .card-text { font: 700 15.5px 'Baloo 2', system-ui, sans-serif; text-anchor: middle; dominant-baseline: central; fill: var(--ink); }
 .card-icon { font-size: 40px; text-anchor: middle; dominant-baseline: central; }
 
-/* ── cảm xúc ── */
-.emote { pointer-events: none; transform-box: fill-box; transform-origin: center; animation: emote 2.8s ease-out forwards; }
-.emote-bg { fill: rgba(255,255,255,.9); stroke: var(--c); stroke-width: 5; }
-.emote-face { font-size: 120px; text-anchor: middle; dominant-baseline: central; }
-@keyframes emote {
-  0% { transform: scale(.2); opacity: 0; } 12% { transform: scale(1.12); opacity: 1; } 20% { transform: scale(1); }
-  30% { transform: rotate(-7deg); } 40% { transform: rotate(7deg); } 50% { transform: rotate(0); }
-  85% { transform: scale(1); opacity: 1; } 100% { transform: scale(1.06) translateY(-8px); opacity: 0; }
-}
-.emo-pop {
-  position: fixed; z-index: 15; background: #fff; border-radius: 18px; padding: 8px;
-  display: grid; grid-template-columns: repeat(8, 42px); gap: 4px;
-  box-shadow: 0 12px 34px rgba(35,50,74,.28); animation: pop .18s cubic-bezier(.2,1.4,.5,1);
-}
-.emo-pop button { font-size: 27px; width: 42px; height: 42px; border-radius: 11px; line-height: 1; transition: transform .1s; }
-.emo-pop button:hover { background: #eef2f7; }
-.emo-pop button:active { transform: scale(.85); }
-@media (max-width: 420px) { .emo-pop { grid-template-columns: repeat(6, 42px); } }
-
 /* ── cột bên ── */
 .shell { flex: 1; min-height: 0; display: flex; flex-direction: column; }
 .side { display: flex; flex-direction: column; gap: 6px; padding: 8px 16px 0; max-width: 760px; width: 100%; margin: 0 auto; }
@@ -212,8 +193,11 @@ button:disabled { opacity: .4; cursor: default; }
 }
 .die.hop::after { animation: shade .95s linear; }
 @keyframes shade { 22% { transform: scale(.55); opacity: .45; } 46% { transform: scale(1); opacity: 1; } 60% { transform: scale(.85); } 73% { transform: scale(1); } }
-.status { text-align: center; font-weight: 700; font-size: 16px; min-height: 46px; line-height: 1.35; display: flex; flex-direction: column; justify-content: center; }
-.status .ev { color: var(--muted); font-size: 14px; font-weight: 600; }
+.status { text-align: center; font-weight: 700; font-size: 16px; height: 64px; line-height: 1.35; display: flex; flex-direction: column; justify-content: center; overflow: hidden; }
+/* khung cao cố định để danh sách nút bên dưới không bị đẩy lên xuống: dòng sự kiện 1 dòng, dòng chính tối đa 2 dòng */
+.status > span { display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden; flex-shrink: 0; }
+.status .ev { color: var(--muted); font-size: 14px; font-weight: 600; -webkit-line-clamp: 1; line-clamp: 1; }
+.status .main { -webkit-line-clamp: 2; line-clamp: 2; }
 .dots span { display: inline-block; animation: dot 1.1s infinite; }
 .dots span:nth-child(2) { animation-delay: .15s; } .dots span:nth-child(3) { animation-delay: .3s; }
 @keyframes dot { 0%, 60%, 100% { opacity: .2; } 30% { opacity: 1; } }
@@ -249,7 +233,7 @@ button:disabled { opacity: .4; cursor: default; }
   .side > * { flex-shrink: 0; }
   .play-row { flex-direction: column; }
   .players { grid-template-columns: 1fr; width: 100%; }
-  .status { font-size: 15px; min-height: 0; }
+  .status { font-size: 15px; height: 60px; }
   .dock, .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 0; }
   .actions:empty { display: none; }
   .dock button, .actions button { justify-content: center; width: 100%; padding: 8px 8px; font-size: 14px; }
@@ -259,7 +243,7 @@ button:disabled { opacity: .4; cursor: default; }
   .top { padding-top: 6px; padding-bottom: 0; } .top h1 { font-size: 22px; }
   .side { gap: 6px; }
   .dock, .actions { gap: 5px; } .dock button, .actions button { min-height: 36px; padding: 4px 8px; font-size: 13.5px; }
-  .pl { padding: 2px 8px; gap: 1px; } .pl-props { min-height: 0; } .status { min-height: 38px; font-size: 14px; }
+  .pl { padding: 2px 8px; gap: 1px; } .pl-props { min-height: 0; } .status { height: 54px; font-size: 14px; }
 }
 @media (max-width: 420px) {
   .top h1 { font-size: 22px; }
@@ -367,7 +351,7 @@ button:disabled { opacity: .4; cursor: default; }
 /* ── số bước trước khi tung ── */
 .step-hint { pointer-events: none; animation: stepin .3s ease-out backwards; }
 @keyframes stepin { from { opacity: 0; } }
-.step-num { font: 900 11px 'Baloo 2', system-ui, sans-serif; text-anchor: middle; dominant-baseline: central; }
+.step-num { font: 900 14px 'Baloo 2', system-ui, sans-serif; text-anchor: middle; dominant-baseline: central; }
 /* ── đủ nhóm màu: quầng thở và vệt sáng chạy quanh viền ── */
 .mono { pointer-events: none; }
 .mono-glow { animation: festglow 1.8s ease-in-out infinite; }
@@ -414,7 +398,7 @@ button:disabled { opacity: .4; cursor: default; }
 
 @media (prefers-reduced-motion: reduce) {
   .token { transition: none; }
-  .emote, .emo-pop, .token .ring, .token.hop .tbody, .dice, .die.hop, .die.hop::after, .dots span, .panel, .overlay, .cardpop, .actions button.primary, #board.shake, .pick-ring, .pick-hand, .chars button.on, .fest-glow, .fest-star, .fest-flag, .mono-glow, .mono-shine, .step-hint { animation: none; }
+  .token .ring, .token.hop .tbody, .dice, .die.hop, .die.hop::after, .dots span, .panel, .overlay, .cardpop, .actions button.primary, #board.shake, .pick-ring, .pick-hand, .chars button.on, .fest-glow, .fest-star, .fest-flag, .mono-glow, .mono-shine, .step-hint { animation: none; }
   .cube { transition: none; }
 }
 </style>
@@ -440,7 +424,6 @@ button:disabled { opacity: .4; cursor: default; }
     <g id="gTokens"></g>
     <g id="gFx"></g>
     <g id="gCard"></g>
-    <g id="gEmote"></g>
   </svg>
   <div class="dice-stage" id="diceStage">
     <button class="dice" id="dice" aria-label="Tung xúc xắc"><div class="die"></div><div class="die"></div></button>
@@ -458,7 +441,6 @@ button:disabled { opacity: .4; cursor: default; }
     <button id="bOnline">🌐 Chơi online</button>
     <button id="bInvite" hidden>🔗 Phòng chơi</button>
     <button id="bLeave" hidden>✕ Thoát online</button>
-    <button id="bEmo">😊 Cảm xúc</button>
     <button id="bRules">📖 Luật</button>
   </nav>
 </aside>
@@ -562,7 +544,6 @@ button:disabled { opacity: .4; cursor: default; }
   </div>
 </div>
 
-<div class="emo-pop" id="emoPop" hidden></div>
 
 <!-- trạng thái kết nối -->
 <div class="overlay" id="netSheet" hidden>
@@ -1998,7 +1979,10 @@ function show(ng, ev) {
   syncLobby();
 }
 function fx(tag, attrs, ms) { const e = el(tag, attrs, $('gFx')); setTimeout(() => e.remove(), ms); return e; }
+// giữ thông báo trong bàn cờ: quân ở hàng trên (hoặc sát mép) thì đẩy chữ vào trong, không bị cắt mất khúc
+const inX = (x, half) => Math.max(half + 4, Math.min(SIZE - half - 4, x));
 function floatText(x, y, s, color, ms = 1100, size = 19) {
+  x = inX(x, [...s].length * size * .32 + 4); y = Math.max(y, size + 34);
   const t = fx('text', { x, y, class: 'float', fill: color, style: `font-size:${size}px` }, ms);
   t.textContent = s;
   t.animate([{ transform: 'translateY(0) scale(.6)', opacity: 0 }, { transform: 'translateY(-14px) scale(1.1)', opacity: 1, offset: .2 }, { transform: 'translateY(-44px) scale(1)', opacity: 0 }], { duration: ms, easing: 'ease-out', fill: 'forwards' });
@@ -2007,7 +1991,7 @@ function floatText(x, y, s, color, ms = 1100, size = 19) {
 function floatMoney(x, y, delta, ms = 1900) {
   const s = (delta >= 0 ? '+' : '−') + fmt(delta), w = s.length * 12 + 18;
   const g = fx('g', { class: 'money' }, ms);
-  const inner = el('g', { transform: `translate(${Math.max(w / 2 + 4, Math.min(SIZE - w / 2 - 4, x))} ${Math.max(40, Math.min(SIZE - 16, y))})` }, g);
+  const inner = el('g', { transform: `translate(${Math.max(w / 2 + 4, Math.min(SIZE - w / 2 - 4, x))} ${Math.max(58, Math.min(SIZE - 16, y))})` }, g);
   el('rect', { x: -w / 2, y: -14, width: w, height: 28, rx: 14, fill: delta >= 0 ? '#2e9d4f' : '#e8323c', stroke: '#fff', 'stroke-width': 2.5 }, inner);
   el('text', { x: 0, y: 1 }, inner).textContent = s;
   g.animate([{ transform: 'translateY(10px) scale(.5)', opacity: 0 }, { transform: 'translateY(-10px) scale(1.15)', opacity: 1, offset: .15 }, { transform: 'translateY(-22px) scale(1)', opacity: 1, offset: .6 }, { transform: 'translateY(-50px) scale(.95)', opacity: 0 }], { duration: ms, easing: 'ease-out', fill: 'forwards' });
@@ -2023,6 +2007,7 @@ function burst(x, y, n, colors, dist, ch = '★') {
   }
 }
 function pow(x, y, s, color) {
+  x = inX(x, Math.max(44, [...s].length * 7.5 + 8)); y = Math.max(y, 48);
   const g = fx('g', { class: 'fx pow' }, 850), star = [];
   for (let i = 0; i < 20; i++) { const a = (i / 20) * Math.PI * 2 - Math.PI / 2, r = i % 2 ? 19 : 36 + (i % 4 ? 0 : 6); star.push(`${(x + Math.cos(a) * r).toFixed(1)},${(y + Math.sin(a) * r).toFixed(1)}`); }
   el('polygon', { points: star.join(' '), fill: '#ffd23f', stroke: '#f26b1d', 'stroke-width': 3, 'stroke-linejoin': 'round' }, g);
@@ -2410,7 +2395,7 @@ function renderDice() {
   dice.classList.toggle('bonus', !busy() && G.phase === 'play' && G.step === 'roll' && G.again);
   drawStepHints();
 }
-// sắp tung xúc xắc: đánh số 1–12 cho các ô phía trước quân, đặt ở mép trong ô (phía giữa bàn).
+// sắp tung xúc xắc: đánh số 1–12 cho các ô phía trước quân, đặt ngay giữa ô cho dễ nhìn.
 // Số giữ nguyên trong lúc tung và lúc quân đi, chỉ xoá khi quân đã tới nơi (clearStepHints).
 const clearStepHints = () => { $('gSteps').innerHTML = ''; };
 function drawStepHints() {
@@ -2419,15 +2404,9 @@ function drawStepHints() {
   g.innerHTML = '';
   const from = G.pl[G.turn].pos, col = COLORS[G.turn].main;
   for (let n = 1; n <= 12; n++) {
-    const i = (from + n) % N, r = rectOf(i), cx = r.x + r.w / 2, cy = r.y + r.h / 2, off = CORNER + 12;
-    let x = cx, y = cy;
-    if (isCorner(i)) { const k = CORNER - 4; x = r.x < SIZE / 2 ? k : SIZE - k; y = r.y < SIZE / 2 ? k : SIZE - k; } // ngay góc trong, tránh chồng số ô kề
-    else if (r.side === 0) y = SIZE - off;
-    else if (r.side === 1) x = off;
-    else if (r.side === 2) y = off;
-    else x = SIZE - off;
+    const [x, y] = centerOf((from + n) % N);
     const b = el('g', { class: 'step-hint', transform: `translate(${x} ${y})`, style: `animation-delay:${(n * .03).toFixed(2)}s` }, g);
-    el('circle', { r: 10, fill: n === 1 ? '#fff' : col, stroke: n === 1 ? col : '#fff', 'stroke-width': 2, opacity: n === 1 ? .8 : 1 }, b);
+    el('circle', { r: 13, fill: n === 1 ? '#fff' : col, stroke: n === 1 ? col : '#fff', 'stroke-width': 2.5, opacity: .92 }, b);
     txt(0, .5, 'step-num', n, b, { fill: n === 1 ? col : '#fff' });
   }
 }
@@ -2459,8 +2438,9 @@ function renderStatus() {
     else if (G.step === 'debt') main = `${cap(nm)} cần ${fmt(G.debt.amt)} — chạm vào thành phố của mình để bán`;
   } else if (net.on && net.seat < 0) main = `Bạn đang xem · lượt của ${who(t)}`;
   else main = `${who(t)}${G.seats[t].type === 'human' && seatAuto(t) ? ' (máy đánh thay)' : ''} đang chơi${DOTS}`;
-  st.innerHTML = `<span class="ev"></span><span>${main}</span>`;
+  st.innerHTML = `<span class="ev"></span><span class="main">${main}</span>`;
   st.querySelector('.ev').textContent = statusEv;
+  st.title = st.textContent.trim();
 }
 function btn(label, cls, fn, disabled, sub) {
   const b = document.createElement('button');
@@ -2507,7 +2487,6 @@ function renderButtons() {
   const host = net.on && net.host;
   $('bNew').hidden = net.on && !net.host;
   $('bOnline').hidden = net.on; $('bInvite').hidden = !net.on; $('bLeave').hidden = !net.on;
-  $('bEmo').hidden = emoteSeat() < 0;
   $('roomTag').hidden = !net.on;
   $('roomTag').textContent = net.on ? (host ? 'Chủ phòng' : net.seat < 0 ? 'Đang xem' : 'Online') : '';
 }
@@ -2804,8 +2783,7 @@ function hostMsg(c, d) {
   }
   const s = G.seats.findIndex(x => x && x.cid === net.conns.get(c));
   if (s < 0) return;
-  if (d.t === 'emo') { if (EMOJIS.includes(d.e) && emoteOk(s)) { showEmote(s, d.e); netBroadcast({ t: 'emo', s, e: d.e }); } }
-  else if (d.t === 'name' && G.phase === 'lobby') { const nm = cleanName(d.name); if (nm) { G.seats[s].name = nm; commit({ type: 'lobby' }); } }
+  if (d.t === 'name' && G.phase === 'lobby') { const nm = cleanName(d.name); if (nm) { G.seats[s].name = nm; commit({ type: 'lobby' }); } }
   else if (d.t === 'char' && G.phase === 'lobby') { const ch = cleanChar(d.c); if (ch && freeChar(ch, s) === ch) { G.seats[s].char = ch; G.pl[s].char = ch; commit({ type: 'lobby' }); } }
   else if (d.t === 'bye') { G.seats[s].online = false; }
   else if (INTENTS.includes(d.t) && G.phase === 'play' && G.turn === s) {
@@ -2894,7 +2872,6 @@ function guestMsg(d) {
   }
   else if (d.t === 'full') { const c = net.code; net.conn = null; netFail('Phòng đã đủ người', 'Phòng này đã có 4 người chơi rồi.', () => joinOnline(c)); }
   else if (d.t === 'bye') net.left = true;
-  else if (d.t === 'emo' && Number.isInteger(d.s)) showEmote(d.s, d.e);
 }
 
 // ── phòng chờ ──
@@ -2984,52 +2961,6 @@ $('lobbySheet').onclick = e => { if (e.target === $('lobbySheet') && G && G.phas
 </script>
 
 <script>
-// ═══════════════════════════ cảm xúc ═══════════════════════════
-const EMOJIS = ['😀', '😂', '😍', '😎', '😮', '😢', '😭', '😡', '🤔', '😴', '🤣', '😜', '👍', '👏', '🔥', '💰'];
-const emoteEls = [null, null, null, null], emoteLast = [0, 0, 0, 0];
-const emoteOk = s => { const now = Date.now(); if (now - emoteLast[s] < 1000) return false; emoteLast[s] = now; return true; };
-function emoteSeat() {
-  if (!G) return -1;
-  if (net.on) return net.seat >= 0 && G.seats[net.seat] ? net.seat : -1;
-  if (G.seats[G.turn] && G.seats[G.turn].type === 'human') return G.turn;
-  return G.seats.findIndex(x => x && x.me);
-}
-const EMOTE_AT = [[SIZE / 2 + 95, SIZE / 2 + 95], [SIZE / 2 + 95, SIZE / 2 - 95], [SIZE / 2 - 95, SIZE / 2 + 95], [SIZE / 2 - 95, SIZE / 2 - 95]];
-function showEmote(s, e) {
-  if (!G || !Number.isInteger(s) || s < 0 || s > 3 || !G.seats[s] || !EMOJIS.includes(e)) return;
-  if (emoteEls[s]) emoteEls[s].remove();
-  const [cx, cy] = EMOTE_AT[s];
-  const g = el('g', { class: 'emote', style: `--c:${COLORS[s].main}` }, $('gEmote'));
-  el('circle', { cx, cy, r: 84, class: 'emote-bg' }, g);
-  txt(cx, cy + 6, 'emote-face', e, g);
-  emoteEls[s] = g;
-  setTimeout(() => { if (emoteEls[s] === g) { g.remove(); emoteEls[s] = null; } }, 2800);
-  playPop();
-}
-function sendEmote(e) {
-  const s = emoteSeat();
-  if (s < 0) return;
-  if (net.on && !net.host) { if (Date.now() - emoteLast[s] >= 1000) { emoteLast[s] = Date.now(); netSend({ t: 'emo', e }); } return; }
-  if (!emoteOk(s)) return;
-  showEmote(s, e);
-  if (net.on) netBroadcast({ t: 'emo', s, e });
-}
-(function buildEmoPop() {
-  const pop = $('emoPop');
-  for (const e of EMOJIS) { const b = document.createElement('button'); b.textContent = e; b.setAttribute('aria-label', 'Gửi ' + e); b.onclick = () => { sendEmote(e); pop.hidden = true; }; pop.appendChild(b); }
-})();
-$('bEmo').onclick = e => {
-  e.stopPropagation();
-  const pop = $('emoPop');
-  if (!pop.hidden) { pop.hidden = true; return; }
-  pop.hidden = false;
-  const r = $('bEmo').getBoundingClientRect(), w = pop.offsetWidth, h = pop.offsetHeight;
-  const left = Math.max(8, Math.min(innerWidth - w - 8, r.left + r.width / 2 - w / 2));
-  const top = r.top - h - 10 >= 8 ? r.top - h - 10 : Math.min(innerHeight - h - 8, r.bottom + 10);
-  pop.style.left = left + 'px'; pop.style.top = top + 'px';
-};
-document.addEventListener('pointerdown', e => { if (!$('emoPop').hidden && !$('emoPop').contains(e.target) && e.target !== $('bEmo')) $('emoPop').hidden = true; });
-
 // ═══════════════════════════ nút & khởi động ═══════════════════════════
 const SEAT_OPTS = [['bot', 'Máy'], ['human', 'Người'], ['off', 'Trống']];
 const seatChar = k => (k === 0 ? myChar() : setupChars[k] || null);
