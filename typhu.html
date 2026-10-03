@@ -20,6 +20,7 @@
   --c0: #e53935; --c1: #1e6fd8; --c2: #f5b700; --c3: #2e9d4f;
 }
 html, body { width: 100%; height: 100%; overflow: hidden; }
+@supports (height: 100dvh) { html, body { height: 100dvh; } }
 body {
   font-family: 'Baloo 2', 'Nunito', system-ui, sans-serif; color: var(--ink);
   background: radial-gradient(ellipse at 30% 0%, #f7fbff 0%, var(--desk1) 40%, var(--desk2) 100%);
@@ -48,11 +49,13 @@ button:disabled { opacity: .4; cursor: default; }
 }
 
 /* ── bàn cờ ── */
-.board-wrap { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; padding: 0 12px; position: relative; }
+.board-wrap { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; padding: 0 12px; }
+/* khung bọc đúng bằng bàn cờ để khay xúc xắc luôn nằm chính giữa bàn */
+.board-box { position: relative; flex: 0 0 auto; }
 /* khay xúc xắc nằm chính giữa bàn; khi tung thì bay vào từ phía người chơi (--tx/--ty) */
 .dice-stage { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); pointer-events: none; transition: opacity .25s; }
 .dice-stage.hide { opacity: 0; }
-.dice-stage .dice { pointer-events: auto; }
+.dice-stage .dice { pointer-events: auto; will-change: transform; }
 .dice-stage.throw .dice { animation: throwin .75s cubic-bezier(.2, .9, .3, 1.08); }
 @keyframes throwin {
   0% { transform: translate(var(--tx, 0px), var(--ty, 0px)) scale(1.7) rotate(-35deg); opacity: .3; }
@@ -60,7 +63,7 @@ button:disabled { opacity: .4; cursor: default; }
   100% { transform: none; }
 }
 #board {
-  display: block; background: var(--paper); border-radius: 14px;
+  display: block; width: 100%; height: 100%; background: var(--paper); border-radius: 14px;
   box-shadow: 0 10px 30px rgba(35,50,74,.18), 0 1px 0 rgba(255,255,255,.9) inset; touch-action: none;
 }
 .sq .bg { fill: #fff; stroke: #b9c6d6; stroke-width: 1.2; }
@@ -78,10 +81,8 @@ button:disabled { opacity: .4; cursor: default; }
 .token { transition: transform .14s ease-out; pointer-events: none; }
 #board.init .token { transition: none; }
 .token .tbody { transform-box: fill-box; transform-origin: center; }
-.token.hop .tbody { animation: hop2 .14s ease-out; }
-@keyframes hop2 { 45% { transform: translateY(-7px) scale(1.1); } }
 .token .ring { fill: none; stroke-width: 3; opacity: 0; transform-box: fill-box; transform-origin: center; }
-.token.turn .ring { opacity: 1; animation: ring 1.2s ease-in-out infinite; }
+.token.turn .ring { opacity: .9; animation: ring 1.2s ease-in-out 3; }
 @keyframes ring { 0%, 100% { transform: scale(1); opacity: .9; } 50% { transform: scale(1.22); opacity: .3; } }
 .token .face { font-size: 15px; text-anchor: middle; dominant-baseline: central; }
 .token.jailed .face { opacity: .75; }
@@ -123,7 +124,7 @@ button:disabled { opacity: .4; cursor: default; }
 .pl {
   display: flex; flex-direction: column; gap: 3px; min-width: 0;
   background: rgba(255,255,255,.75); border-radius: 12px; padding: 5px 9px; font-weight: 700; font-size: 14px;
-  border: 2px solid transparent; border-left: 7px solid var(--c); transition: border-color .2s, background .2s; cursor: default;
+  border: 2px solid transparent; border-left: 7px solid var(--c); transition: border-color .2s, background .2s; cursor: pointer; text-align: left;
 }
 .pl-top { display: flex; align-items: center; gap: 6px; min-width: 0; }
 .pl .chip { width: 22px; height: 22px; border-radius: 50%; flex: 0 0 auto; background: var(--c); display: flex; align-items: center; justify-content: center; font-size: 13px; box-shadow: 0 0 0 2px #fff inset; }
@@ -137,13 +138,12 @@ button:disabled { opacity: .4; cursor: default; }
 @keyframes cashbump { 30% { transform: scale(1.25); } }
 .pl-props { display: flex; flex-wrap: wrap; gap: 3px; min-height: 10px; }
 .pl-props i {
-  display: inline-block; width: 11px; height: 11px; border-radius: 2px; background: var(--g); cursor: pointer;
+  display: inline-block; width: 14px; height: 14px; border-radius: 3px; background: var(--g); cursor: pointer;
   box-shadow: 0 0 0 1px rgba(35,50,74,.25) inset; position: relative;
 }
 .pl-props i.m { opacity: .35; }
-.pl-props i.h::after { content: ''; position: absolute; left: 3px; top: 3px; width: 5px; height: 5px; background: #fff; border-radius: 1px; }
 .pl-props i.H::after { background: #e8323c; }
-.pl .badge { font-size: 11px; color: var(--muted); font-weight: 700; white-space: nowrap; }
+.pl .badge { font-size: 11.5px; font-weight: 800; white-space: nowrap; background: #fff4d6; color: #8a5a00; border-radius: 999px; padding: 0 7px; }
 .pl.turn { border-color: var(--c); background: #fff; box-shadow: 0 3px 10px rgba(35,50,74,.12), 0 0 0 3px color-mix(in srgb, var(--c) 30%, transparent); }
 .pl.off { opacity: .55; }
 .pl.out { opacity: .45; text-decoration: line-through; }
@@ -210,12 +210,13 @@ button:disabled { opacity: .4; cursor: default; }
 }
 .actions button:not(:disabled):active { transform: scale(.95); }
 .actions button.primary { background: var(--green); color: #fff; }
-.actions button.primary:not(:disabled) { animation: pulse 1.6s ease-in-out infinite; }
-@keyframes pulse { 50% { box-shadow: 0 3px 10px rgba(35,50,74,.12), 0 0 0 6px rgba(46,157,79,.22); } }
+.actions button { position: relative; }
+.actions button.primary:not(:disabled)::after { content: ''; position: absolute; inset: -2px; border-radius: 16px; border: 3px solid rgba(46,157,79,.45); animation: pulse 1.6s ease-out infinite; pointer-events: none; will-change: transform, opacity; }
+@keyframes pulse { from { transform: scale(1); opacity: 1; } to { transform: scale(1.12, 1.3); opacity: 0; } }
 .actions button.danger { background: #fdecea; color: #c0392b; }
 .actions button.warn { background: var(--ink); color: #fff; }
 
-.dock { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; padding: 4px 0 14px; }
+.dock { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; padding: 4px 0 14px; }
 .dock button {
   display: flex; align-items: center; gap: 6px; background: var(--card); border-radius: 14px; padding: 8px 16px; min-height: 44px;
   font-weight: 700; font-size: 15px; box-shadow: 0 3px 10px rgba(35,50,74,.12); transition: transform .1s;
@@ -224,26 +225,47 @@ button:disabled { opacity: .4; cursor: default; }
 .dock button.primary { background: var(--ink); color: #fff; }
 
 @media (orientation: landscape) and (min-width: 600px) {
-  .top { max-width: none; padding: 8px 12px 4px 16px; }
-  .shell { flex-direction: row; align-items: stretch; justify-content: center; padding: 0 12px 10px; }
-  .board-wrap { flex: 0 0 auto; padding: 0 14px 0 0; }
+  /* màn ngang (iPad xoay ngang): thanh tiêu đề dời lên đầu cột bên để bàn cờ dùng trọn chiều cao */
+  :root { --side-w: clamp(290px, 29vw, 380px); }
+  .top { position: absolute; z-index: 5; top: env(safe-area-inset-top, 0px); right: env(safe-area-inset-right, 0px); width: calc(var(--side-w) + 28px); max-width: none; padding: 10px 14px 0 12px; gap: 8px; }
+  .top h1 { font-size: 22px; }
+  .shell { flex-direction: row; align-items: stretch; justify-content: center; padding: 10px 12px 10px; }
+  .board-wrap { flex: 1 1 auto; padding: 0 14px 0 0; }
   /* cột bên cuộn được khi màn hình thấp; ::before/::after co giãn để căn giữa khi còn chỗ */
-  .side { flex: 0 0 290px; width: 290px; margin: 0; padding: 0 2px; justify-content: flex-start; gap: 8px; overflow-y: auto; overflow-x: hidden; }
+  .side { flex: 0 0 var(--side-w); width: var(--side-w); margin: 0; padding: 56px 2px 0; justify-content: flex-start; gap: 8px; overflow-y: auto; overflow-x: hidden; }
   .side::before, .side::after { content: ''; flex: 1 0 0; }
   .side > * { flex-shrink: 0; }
   .play-row { flex-direction: column; }
   .players { grid-template-columns: 1fr; width: 100%; }
-  .status { font-size: 15px; height: 60px; }
-  .dock, .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 0; }
+  .status { font-size: 15px; height: 84px; }
+  .status .ev { -webkit-line-clamp: 2; line-clamp: 2; }
+  .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 0; }
   .actions:empty { display: none; }
-  .dock button, .actions button { justify-content: center; width: 100%; padding: 8px 8px; font-size: 14px; }
-  .dock button.primary, .actions button:only-child { grid-column: 1 / -1; }
+  .dock { gap: 6px; padding: 0 0 4px; }
+  .dock button { flex: 1 1 28%; justify-content: center; padding: 8px 6px; font-size: 14px; white-space: nowrap; gap: 4px; }
+  .dock button.primary { flex-basis: 100%; }
+  .actions button { justify-content: center; width: 100%; padding: 8px 8px; font-size: 14px; }
+  .actions button:only-child, .actions button:last-child:nth-child(odd) { grid-column: 1 / -1; }
+}
+/* màn lớn (iPad ngang): chữ và nút to hơn cho dễ đọc, dễ chạm */
+@media (orientation: landscape) and (min-width: 1000px) and (min-height: 640px) {
+  .pl { font-size: 15.5px; padding: 7px 10px; } .pl .cash { font-size: 16px; } .pl .ava { width: 42px; height: 42px; }
+  .status { font-size: 16.5px; height: 92px; } .status .ev { font-size: 14.5px; }
+  .actions button { font-size: 15.5px; min-height: 48px; } .dock button { font-size: 15px; min-height: 48px; }
 }
 @media (orientation: landscape) and (min-width: 600px) and (max-height: 560px) {
-  .top { padding-top: 6px; padding-bottom: 0; } .top h1 { font-size: 22px; }
-  .side { gap: 6px; }
+  .top { padding-top: 6px; } .top h1 { font-size: 20px; } .top .back, .top .mute { width: 38px; height: 38px; }
+  .side { gap: 6px; padding-top: 48px; }
   .dock, .actions { gap: 5px; } .dock button, .actions button { min-height: 36px; padding: 4px 8px; font-size: 13.5px; }
-  .pl { padding: 2px 8px; gap: 1px; } .pl-props { min-height: 0; } .status { height: 54px; font-size: 14px; }
+  .pl { padding: 2px 8px; gap: 1px; } .pl-props { min-height: 0; } .status { height: 62px; font-size: 14px; }
+}
+/* iPad dọc: 4 thẻ người chơi một hàng cho bàn cờ được to hơn */
+@media (orientation: portrait) and (min-width: 700px) {
+  .side { max-width: 900px; }
+  .players { grid-template-columns: repeat(4, 1fr); }
+  .pl { font-size: 15px; } .pl .cash { font-size: 15px; }
+  .pl-top { flex-wrap: wrap; row-gap: 0; } .pl .nm { white-space: normal; line-height: 1.15; flex-basis: calc(100% - 48px); } .pl .cash { margin-left: 44px; }
+  .actions button, .dock button { font-size: 16px; min-height: 48px; }
 }
 @media (max-width: 420px) {
   .top h1 { font-size: 22px; }
@@ -344,26 +366,15 @@ button:disabled { opacity: .4; cursor: default; }
 @keyframes pickpulse { 50% { stroke: #ffd23f; stroke-width: 8; fill: rgba(255,210,63,.42); } }
 .pick-hand { pointer-events: none; animation: handbob .75s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
 @keyframes handbob { 50% { transform: translate(var(--dx, 0), var(--dy, -6px)); } }
-.pick-hand text { font-size: 26px; text-anchor: middle; dominant-baseline: central; }
+.pick-hand text { font-size: 20px; text-anchor: middle; dominant-baseline: central; }
 .lvl-ico { text-anchor: middle; dominant-baseline: central; pointer-events: none; font-size: 15px; }
 .fx-ico { text-anchor: middle; dominant-baseline: central; pointer-events: none; font-size: 13px; }
 .gold-ico { text-anchor: middle; dominant-baseline: central; pointer-events: none; font-size: 12px; }
-/* ── số bước trước khi tung ── */
-.step-hint { pointer-events: none; animation: stepin .3s ease-out backwards; }
-@keyframes stepin { from { opacity: 0; } }
-.step-num { font: 900 14px 'Baloo 2', system-ui, sans-serif; text-anchor: middle; dominant-baseline: central; }
 /* ── đủ nhóm màu: quầng thở và vệt sáng chạy quanh viền ── */
 .mono { pointer-events: none; }
-.mono-glow { animation: festglow 1.8s ease-in-out infinite; }
-.mono-shine { stroke-dasharray: 10 26; animation: monoshine 1.6s linear infinite; opacity: .95; }
-@keyframes monoshine { to { stroke-dashoffset: -36; } }
+.mono-shine { stroke-dasharray: 10 6; opacity: .9; }
 /* ── lễ hội: quầng vàng thở, sao lấp lánh, cờ đuôi nheo đung đưa ── */
-.fest-glow { animation: festglow 1.4s ease-in-out infinite; }
-@keyframes festglow { 50% { opacity: .25; } }
-.fest-star { animation: twinkle 1.3s ease-in-out infinite; transform-box: fill-box; transform-origin: center; pointer-events: none; }
-@keyframes twinkle { 0%, 100% { opacity: .15; transform: scale(.5) rotate(0); } 50% { opacity: 1; transform: scale(1.25) rotate(25deg); } }
-.fest-flag { animation: flagwave 1.6s ease-in-out infinite; transform-box: fill-box; transform-origin: 50% 0; pointer-events: none; }
-@keyframes flagwave { 50% { transform: rotate(9deg); } }
+/* hiệu ứng lễ hội / đủ nhóm màu để tĩnh: animation lặp vô hạn trong SVG làm iPad lag dần khi bàn nhiều nhà */
 .fest-ribbon { font: 900 8px 'Baloo 2', system-ui, sans-serif; text-anchor: middle; dominant-baseline: central; fill: #fff; letter-spacing: .8px; pointer-events: none; }
 /* ── nhân vật chibi ── */
 .chibi { pointer-events: none; }
@@ -385,7 +396,7 @@ button:disabled { opacity: .4; cursor: default; }
 .pl .hold { display: inline-flex; gap: 2px; font-size: 11px; }
 .pl .hold span { background: #eef2f7; border-radius: 6px; padding: 0 5px; font-weight: 800; }
 .pl-props i.t { border-radius: 50%; }
-.pl-props i b { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 8px; color: #fff; font-weight: 900; text-shadow: 0 0 2px rgba(0,0,0,.6); }
+.pl-props i b { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 9.5px; color: #fff; font-weight: 900; text-shadow: 0 0 2px rgba(0,0,0,.6); }
 .actions button small { font-weight: 700; opacity: .8; font-size: 12px; }
 .actions button.lv { flex-direction: column; gap: 0; line-height: 1.15; padding: 6px 12px; }
 .lv-table td:first-child { white-space: nowrap; }
@@ -395,10 +406,33 @@ button:disabled { opacity: .4; cursor: default; }
 .standings .st .ava { width: 30px; height: 30px; }
 .standings .st .ava svg { width: 100%; height: 100%; display: block; }
 .standings .st .how { font-size: 12px; color: var(--muted); font-weight: 700; }
+/* ── bảng người chơi ── */
+.pl-head { display: flex; align-items: center; gap: 12px; margin: -22px -22px 12px; padding: 16px 22px 12px; border-radius: 22px 22px 0 0; background: color-mix(in srgb, var(--c) 14%, #fff); border-bottom: 4px solid var(--c); }
+.pl-head svg { width: 64px; height: 64px; flex: 0 0 auto; }
+.pl-head h2 { margin: 0; text-align: left; font-size: 22px; line-height: 1.15; }
+.pl-head .skill { font-size: 13.5px; font-weight: 600; color: var(--muted); line-height: 1.3; }
+.pl-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.pl-stats div { background: #f5f8fc; border-radius: 10px; padding: 6px 10px; font-size: 12.5px; font-weight: 700; color: var(--muted); }
+.pl-stats b { display: block; font-size: 17px; color: var(--ink); }
+.goal { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 700; margin: 4px 0; }
+.goal .bar { flex: 1; height: 8px; border-radius: 99px; background: #eef2f7; overflow: hidden; }
+.goal .bar i { display: block; height: 100%; background: var(--c); border-radius: 99px; }
+.goal .n { width: 40px; text-align: right; font-size: 13px; color: var(--muted); }
+.goal .t { width: 120px; flex: 0 0 auto; }
+.own-list { display: flex; flex-direction: column; gap: 4px; }
+.own-list button { display: flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 10px; background: #f5f8fc; font-weight: 700; font-size: 14px; text-align: left; }
+.own-list button i { width: 14px; height: 14px; border-radius: 3px; background: var(--g); flex: 0 0 auto; }
+.own-list button span { flex: 1; min-width: 0; }
+.own-list button small { color: var(--muted); font-weight: 700; font-size: 12.5px; white-space: nowrap; }
+.empty-note { color: var(--muted); font-weight: 600; font-size: 14px; }
+/* ── nhật ký ── */
+.log { list-style: none; display: flex; flex-direction: column; gap: 2px; max-height: 60vh; overflow-y: auto; }
+.log li { font-size: 14px; font-weight: 600; line-height: 1.35; padding: 5px 8px 5px 10px; border-left: 4px solid var(--c, var(--line)); border-radius: 4px; background: #f8fafd; }
+.log li.turn { margin-top: 8px; background: none; border-left: 0; padding-left: 0; font-weight: 800; color: var(--muted); font-size: 12.5px; }
 
 @media (prefers-reduced-motion: reduce) {
   .token { transition: none; }
-  .token .ring, .token.hop .tbody, .dice, .die.hop, .die.hop::after, .dots span, .panel, .overlay, .cardpop, .actions button.primary, #board.shake, .pick-ring, .pick-hand, .chars button.on, .fest-glow, .fest-star, .fest-flag, .mono-glow, .mono-shine, .step-hint { animation: none; }
+  .token .ring, .dice, .die.hop, .die.hop::after, .dots span, .panel, .overlay, .cardpop, .actions button.primary::after, #board.shake, .pick-ring, .pick-hand, .chars button.on { animation: none; }
   .cube { transition: none; }
 }
 </style>
@@ -414,11 +448,11 @@ button:disabled { opacity: .4; cursor: default; }
 
 <div class="shell">
 <main class="board-wrap" id="wrap">
+  <div class="board-box" id="boardBox">
   <svg id="board" class="init" viewBox="0 0 720 720" aria-label="Bàn cờ tỷ phú">
     <g id="gBoard"></g>
     <g id="gOwn"></g>
     <g id="gBuild"></g>
-    <g id="gSteps"></g>
     <g id="gCenter"></g>
     <g id="gPick"></g>
     <g id="gTokens"></g>
@@ -427,6 +461,7 @@ button:disabled { opacity: .4; cursor: default; }
   </svg>
   <div class="dice-stage" id="diceStage">
     <button class="dice" id="dice" aria-label="Tung xúc xắc"><div class="die"></div><div class="die"></div></button>
+  </div>
   </div>
 </main>
 
@@ -441,6 +476,7 @@ button:disabled { opacity: .4; cursor: default; }
     <button id="bOnline">🌐 Chơi online</button>
     <button id="bInvite" hidden>🔗 Phòng chơi</button>
     <button id="bLeave" hidden>✕ Thoát online</button>
+    <button id="bLog">📜 Nhật ký</button>
     <button id="bRules">📖 Luật</button>
   </nav>
 </aside>
@@ -517,6 +553,20 @@ button:disabled { opacity: .4; cursor: default; }
 <!-- ô đất -->
 <div class="overlay" id="propSheet" hidden>
   <div class="panel" id="propPanel"></div>
+</div>
+
+<!-- người chơi -->
+<div class="overlay" id="plSheet" hidden>
+  <div class="panel" id="plPanel"></div>
+</div>
+
+<!-- nhật ký -->
+<div class="overlay" id="logSheet" hidden>
+  <div class="panel">
+    <h2>Nhật ký ván</h2>
+    <ul class="log" id="logList"></ul>
+    <button class="go" id="bLogOk">Đóng</button>
+  </div>
 </div>
 
 <!-- luật -->
@@ -645,6 +695,7 @@ const CARDS = [
 const HOLD_INFO = { free: ['🎫', 'Vé miễn phí tham quan'], half: ['🏷️', 'Phiếu giảm nửa phí'], shield: ['🛡️', 'Khiên bảo vệ thành phố'], jail: ['🔓', 'Thẻ ra tù'] };
 
 // ── hình học ô ──
+const centerOf = i => { const r = rectOf(i); return [r.x + r.w / 2, r.y + r.h / 2]; };
 function rectOf(i) {
   if (i === 0) return { x: SIZE - CORNER, y: SIZE - CORNER, w: CORNER, h: CORNER, side: 0 };
   if (i < 8) return { x: SIZE - CORNER - i * CW, y: SIZE - CORNER, w: CW, h: CORNER, side: 0 };
@@ -672,22 +723,32 @@ function ownerStrip(i) {
   return { x: r.x + r.w - t, y: r.y, w: t, h: r.h };
 }
 const SLOT = [[-1, -1], [1, -1], [-1, 1], [1, 1]];
+// Mỗi ô chia ba vùng từ trong bàn ra ngoài: dải nhà (BAND) → chỗ quân đứng → tên và giá.
+// Ô hàng trên / dưới (cao 94): ba vùng xếp dọc. Ô cột trái / phải (rộng 94, cao 76): dải nhà
+// ở mép trong, phần còn lại có hàng quân ở trên, tên và giá ở dưới.
+function zones(i) {
+  const r = rectOf(i), mx = r.x + r.w / 2;
+  if (r.side === 0) return { icon: [mx, r.y + 16], tok: [mx, r.y + 45], name: [mx, r.y + 69], sub: [mx, r.y + 82], w: r.w, nameMax: CW - 12 };
+  if (r.side === 2) return { icon: [mx, r.y + 78], tok: [mx, r.y + 49], name: [mx, r.y + 13], sub: [mx, r.y + 26], w: r.w, nameMax: CW - 12 };
+  const tx = r.side === 1 ? r.x + 31 : r.x + BAND + 31, ix = r.side === 1 ? r.x + r.w - BAND / 2 : r.x + BAND / 2;
+  return { icon: [ix, r.y + r.h / 2], tok: [tx, r.y + 18], name: [tx, r.y + 44], sub: [tx, r.y + 59], w: CORNER - BAND, nameMax: CORNER - BAND - 12 };
+}
+// hàng quân ở ô góc (tính từ mép trên ô góc)
+const CORNER_TOK = { start: 74, island: 76, festival: 76, bus: 76 };
+const TOKEN_SCALE = .78;
+// quân đứng trong ô, cùng một hàng; nhiều quân thì dàn ngang, chật thì chồng lên nhau một phần
 function tokenXY(i, s, jailed) {
   const r = rectOf(i);
-  if (i === ISLAND_POS) {
-    if (jailed) return [r.x + 47 + SLOT[s][0] * 13, r.y + 45 + SLOT[s][1] * 9];
-    return [[r.x + 14, r.y + 84], [r.x + 36, r.y + 84], [r.x + 58, r.y + 84], [r.x + 80, r.y + 84]][s];
-  }
-  let cx = r.x + r.w / 2, cy = r.y + r.h / 2, dx = 19, dy = 19;
-  if (!isCorner(i)) {
-    if (r.side === 0) { cy = r.y + BAND + 33; dx = 15; dy = 13; }
-    else if (r.side === 2) { cy = r.y + 31; dx = 15; dy = 13; }
-    else if (r.side === 1) { cx = r.x + 31; dx = 14; dy = 14; }
-    else { cx = r.x + BAND + 31; dx = 14; dy = 14; }
-  }
-  return [cx + SLOT[s][0] * dx, cy + SLOT[s][1] * dy];
+  const others = G ? [0, 1, 2, 3].filter(o => o !== s && G.seats[o] && !G.pl[o].out && G.pl[o].pos === i && (G.pl[o].jail > 0) === !!jailed) : [];
+  const k = others.filter(o => o < s).length, n = others.length + 1;
+  // trong buồng giam: 1–2 quân một hàng giữa buồng, 3–4 quân thì hai hàng
+  if (i === ISLAND_POS && jailed) return n <= 2 ? [r.x + 47 + (n === 2 ? (k ? 13 : -13) : 0), r.y + 39] : [r.x + 47 + SLOT[k][0] * 13, r.y + 39 + SLOT[k][1] * 9];
+  let x, y, w;
+  if (isCorner(i)) { x = r.x + r.w / 2; y = r.y + CORNER_TOK[SQ[i].t]; w = r.w; }
+  else { const z = zones(i); [x, y] = z.tok; w = z.w; }
+  const gap = n > 1 ? Math.min(28, (w - 28) / (n - 1)) : 0;
+  return [x + (k - (n - 1) / 2) * gap, y];
 }
-const centerOf = i => { const r = rectOf(i); return [r.x + r.w / 2, r.y + r.h / 2]; };
 
 // ── trạng thái ván ──
 const freshHold = () => ({ free: 0, half: 0, shield: 0, jail: 0 });
@@ -1450,15 +1511,31 @@ function chibiInto(g, ch) {
   }
 }
 // thẻ <svg> nhỏ cho HTML (bảng người chơi, chọn nhân vật); withBg: thêm vòng nền màu riêng
+// dựng một lần rồi nhân bản: bảng người chơi vẽ lại sau mỗi lần đổi tiền nên dựng mới mỗi lần rất tốn
+const chibiCache = new Map();
 function chibiSvg(id, withBg = true) {
-  const ch = charOf(id), svg = el('svg', { viewBox: '-27 -38 54 60', class: 'chibi' });
-  if (withBg) el('circle', { cx: 0, cy: -5, r: 25, fill: ch.bg }, svg);
-  chibiInto(el('g', {}, svg), ch);
-  return svg;
+  const key = id + (withBg ? '+bg' : '');
+  let svg = chibiCache.get(key);
+  if (!svg) {
+    const ch = charOf(id);
+    svg = el('svg', { viewBox: '-27 -38 54 60', class: 'chibi' });
+    if (withBg) el('circle', { cx: 0, cy: -5, r: 25, fill: ch.bg }, svg);
+    chibiInto(el('g', {}, svg), ch);
+    chibiCache.set(key, svg);
+  }
+  return svg.cloneNode(true);
 }
 
 const sqEls = [];
 let roundText;
+// tên ô quá dài so với ô thì ép cho vừa (đo sau khi font đã tải xong)
+const fitLater = [];
+function fitNames() {
+  for (const [t, max] of fitLater) {
+    t.removeAttribute('textLength'); t.removeAttribute('lengthAdjust');
+    try { if (t.getComputedTextLength() > max) { t.setAttribute('textLength', max); t.setAttribute('lengthAdjust', 'spacingAndGlyphs'); } } catch (e) {}
+  }
+}
 (function drawBoard() {
   const g = $('gBoard');
   el('rect', { x: 0, y: 0, width: SIZE, height: SIZE, rx: 14, fill: '#f6f8fb' }, g);
@@ -1469,10 +1546,7 @@ let roundText;
     el('rect', { x: r.x, y: r.y, width: r.w, height: r.h, class: 'bg' }, sg);
     sqEls.push(sg);
     if (isCorner(i)) { drawCorner(i, sg); continue; }
-    const tall = r.side === 0 || r.side === 2, city = q.t === 'city';
-    // chỉ thành phố có dải màu; ô khác dùng trọn ô nên canh giữa cả ô
-    const cx = !city ? r.x + r.w / 2 : tall ? r.x + CW / 2 : r.side === 1 ? r.x + 31 : r.x + BAND + 31;
-    const top = city && r.side === 0 ? r.y + BAND : r.y;
+    const tall = r.side === 0 || r.side === 2, z = zones(i);
     let icon = null, name = '', sub = '', big = null, color = null;
     if (q.t === 'city') {
       const b = bandOf(i);
@@ -1482,19 +1556,13 @@ let roundText;
     else if (q.t === 'chance') { icon = '❓'; big = 'CƠ HỘI'; color = '#e67e22'; }
     else if (q.t === 'tax') { icon = '💸'; big = 'THUẾ'; sub = '10% tài sản'; color = '#8a5a00'; }
     else if (q.t === 'casino') { icon = '🎰'; big = 'SÒNG BÀI'; sub = 'đặt ' + fmt(CASINO_BET); color = '#8e44ad'; }
-    if (tall) {
-      if (icon) txt(cx, top + 22, 'sq-icon', icon, sg, { style: 'font-size:18px' });
-      const ny = top + (icon ? 48 : 22);
-      if (big) txt(cx, ny, 'sq-big', big, sg, { fill: color, style: big.length > 7 ? 'font-size:10.5px' : '' });
-      if (name) txt(cx, ny, 'sq-name', name, sg, { style: `font-size:${name.length > 9 ? 10.5 : name.length > 8 ? 11.5 : 12.5}px` });
-      if (sub) txt(cx, top + (icon ? 67 : 42), 'sq-price', sub, sg);
-    } else {
-      if (icon) txt(cx, top + 16, 'sq-icon', icon, sg, { style: 'font-size:16px' });
-      const ny = top + (icon ? 38 : 28);
-      if (big) txt(cx, ny, 'sq-big', big, sg, { fill: color, style: big.length > 7 ? 'font-size:10.5px' : '' });
-      if (name) txt(cx, ny, 'sq-name sq-side', name, sg, { style: `font-size:${name.length > 9 ? 9.5 : name.length > 7 ? 10.5 : 12}px` });
-      if (sub) txt(cx, top + (icon ? 57 : 48), 'sq-price', sub, sg);
-    }
+    // ô không phải thành phố: biểu tượng nằm ở chỗ dải nhà; không có dòng phụ thì tên dời vào giữa hai dòng
+    if (icon) txt(z.icon[0], z.icon[1], 'sq-icon', icon, sg, { style: 'font-size:18px' });
+    const [nx, ny] = sub ? z.name : [z.name[0], (z.name[1] + z.sub[1]) / 2];
+    const nameSize = tall ? (name.length > 9 ? 10.5 : name.length > 8 ? 11.5 : 12.5) : (name.length > 9 ? 9.5 : name.length > 7 ? 10.5 : 12);
+    if (big) fitLater.push([txt(nx, ny, 'sq-big', big, sg, { fill: color, style: big.length > 7 ? 'font-size:10.5px' : '' }), z.nameMax]);
+    if (name) fitLater.push([txt(nx, ny, 'sq-name' + (tall ? '' : ' sq-side'), name, sg, { style: `font-size:${nameSize}px` }), z.nameMax]);
+    if (sub) txt(z.sub[0], z.sub[1], 'sq-price', sub, sg);
   }
   drawCenter();
 })();
@@ -1503,36 +1571,32 @@ function drawCorner(i, sg) {
   const bg = f => el('rect', { x: r.x + 1, y: r.y + 1, width: r.w - 2, height: r.h - 2, fill: f }, sg);
   if (q.t === 'start') {
     bg('#fde2e0');
-    txt(cx, r.y + 22, 'sq-big', 'BẮT ĐẦU', sg, { fill: '#c0392b', style: 'font-size:14px' });
-    el('path', { d: `M${r.x + 72} ${r.y + 46} H${r.x + 28} l9 -9 M${r.x + 28} ${r.y + 46} l9 9`, fill: 'none', stroke: '#e53935', 'stroke-width': 4.5, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, sg);
-    txt(cx, r.y + 68, 'sq-price', 'lương ' + fmt(SALARY), sg, { fill: '#c0392b' });
-    txt(cx, r.y + 82, 'sq-price', 'dừng đúng: nâng cấp', sg, { fill: '#c0392b', style: 'font-size:8.5px' });
+    txt(cx, r.y + 15, 'sq-big', 'BẮT ĐẦU', sg, { fill: '#c0392b', style: 'font-size:14px' });
+    el('path', { d: `M${r.x + 70} ${r.y + 33} H${r.x + 26} l8 -8 M${r.x + 26} ${r.y + 33} l8 8`, fill: 'none', stroke: '#e53935', 'stroke-width': 4.5, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, sg);
+    txt(cx, r.y + 51, 'sq-price', 'lương ' + fmt(SALARY), sg, { fill: '#c0392b' });
   } else if (q.t === 'island') {
     bg('#e3f1f7');
-    // buồng giam canh giữa ô, chữ canh giữa; khách ghé thăm đứng hàng dưới
-    el('rect', { x: r.x + 17, y: r.y + 4, width: 60, height: 58, rx: 5, fill: '#ffe2a8', stroke: '#8a5a00', 'stroke-width': 2 }, sg);
-    for (let k = 1; k < 4; k++) el('line', { x1: r.x + 17 + k * 15, y1: r.y + 20, x2: r.x + 17 + k * 15, y2: r.y + 62, stroke: '#8a5a00', 'stroke-width': 2, opacity: .5 }, sg);
-    txt(cx, r.y + 13, 'sq-big', 'CÔN ĐẢO', sg, { fill: '#8a5a00', style: 'font-size:11px' });
-    txt(r.x + 8, r.y + 72, 'sq-icon', '🏝️', sg, { style: 'font-size:13px' });
-    txt(cx, r.y + 71, 'sq-price', 'chỉ ghé thăm', sg, { fill: '#8a5a00' });
+    // buồng giam canh giữa ô; quân chỉ ghé thăm đứng hàng dưới, ngoài buồng
+    txt(cx, r.y + 10, 'sq-big', 'CÔN ĐẢO', sg, { fill: '#8a5a00', style: 'font-size:11px' });
+    el('rect', { x: r.x + 14, y: r.y + 19, width: 66, height: 40, rx: 5, fill: '#ffe2a8', stroke: '#8a5a00', 'stroke-width': 2 }, sg);
+    for (let k = 1; k < 4; k++) el('line', { x1: r.x + 14 + k * 16.5, y1: r.y + 19, x2: r.x + 14 + k * 16.5, y2: r.y + 59, stroke: '#8a5a00', 'stroke-width': 2, opacity: .45 }, sg);
   } else if (q.t === 'festival') {
     bg('#f3e6fb');
-    txt(cx, r.y + 30, 'sq-icon', '🎤', sg, { style: 'font-size:28px' });
-    txt(cx, r.y + 56, 'sq-big', 'ĐẠI NHẠC HỘI', sg, { fill: '#8e44ad', style: 'font-size:10.5px' });
-    txt(cx, r.y + 71, 'sq-price', 'lễ hội ' + fmt(FEST_FEE), sg, { fill: '#8e44ad', style: 'font-size:9px' });
-    txt(cx, r.y + 82, 'sq-price', 'phí ×2 mỗi lần', sg, { fill: '#8e44ad', style: 'font-size:9px' });
+    txt(cx, r.y + 19, 'sq-icon', '🎤', sg, { style: 'font-size:22px' });
+    txt(cx, r.y + 40, 'sq-big', 'ĐẠI NHẠC HỘI', sg, { fill: '#8e44ad', style: 'font-size:10.5px' });
+    txt(cx, r.y + 53, 'sq-price', 'lễ hội ' + fmt(FEST_FEE) + ' · phí ×2', sg, { fill: '#8e44ad', style: 'font-size:8.5px' });
   } else {
     bg('#e3f7e8');
-    txt(cx, r.y + 30, 'sq-icon', '🚌', sg, { style: 'font-size:28px' });
-    txt(cx, r.y + 58, 'sq-big', 'BẾN XE', sg, { fill: '#1e7a3c', style: 'font-size:14px' });
-    txt(cx, r.y + 76, 'sq-price', 'đi ô bất kỳ · vé ' + fmt(BUS_FEE), sg, { fill: '#1e7a3c', style: 'font-size:9px' });
+    txt(cx, r.y + 19, 'sq-icon', '🚌', sg, { style: 'font-size:22px' });
+    txt(cx, r.y + 40, 'sq-big', 'BẾN XE', sg, { fill: '#1e7a3c', style: 'font-size:13px' });
+    txt(cx, r.y + 53, 'sq-price', 'đi ô bất kỳ · vé ' + fmt(BUS_FEE), sg, { fill: '#1e7a3c', style: 'font-size:8.5px' });
   }
 }
 function drawCenter() {
   const g = $('gCenter'), c = SIZE / 2;
   const t = txt(c, c - 150, 'center-title', '', g);
   [['CỜ ', COLORS[0].main], ['TỶ ', COLORS[1].main], ['PHÚ', COLORS[3].main]].forEach(([s, col]) => { const sp = el('tspan', { fill: col }, t); sp.textContent = s; });
-  txt(c, c - 112, 'center-sub', 'Mua đất · Xây nhà · Thu phí tham quan', g);
+  txt(c, c - 112, 'center-sub', 'Chạm vào ô đất hoặc người chơi để xem chi tiết', g);
   roundText = txt(c, c - 88, 'center-sub', '', g, { style: 'font-size:16px;font-weight:800', fill: '#23324a' });
   // khay xúc xắc (HTML) nằm đè lên đây; vẽ một vùng tròn mờ làm sàn cho khay
   el('circle', { cx: c, cy: c + 10, r: 92, fill: 'rgba(255,255,255,.55)', stroke: 'rgba(35,50,74,.08)', 'stroke-width': 1 }, g);
@@ -1542,43 +1606,51 @@ function drawCenter() {
     txt(0, -10, 'deck-icon', icon, d);
     txt(0, 20, 'deck-title', label, d);
   };
-  deck(c - 170, c + 165, -12, '#f39c12', '❓', 'CƠ HỘI');
-  txt(c + 150, c + 150, 'center-sub', '⭐ đất vàng: phí ×2', g, { style: 'font-size:13px' });
-  txt(c + 150, c + 170, 'center-sub', '🎉 lễ hội: mỗi lần phí ×2', g, { style: 'font-size:13px' });
+  deck(c - 100, c + 120, -10, '#f39c12', '❓', 'CƠ HỘI');
+  txt(c + 100, c + 130, 'center-sub', '⭐ đất vàng: phí ×2', g, { style: 'font-size:13px' });
+  txt(c + 100, c + 150, 'center-sub', '🎉 lễ hội: mỗi lần phí ×2', g, { style: 'font-size:13px' });
+  txt(c + 100, c + 170, 'center-sub', '🏁 dừng đúng Bắt Đầu: nâng cấp', g, { style: 'font-size:13px' });
 }
 function renderCenter() {
   roundText.textContent = G.phase === 'play' || G.phase === 'over' ? `Vòng ${Math.min(G.round, G.maxRound || G.round)}${G.maxRound ? ' / ' + G.maxRound : ''}` : '';
 }
 // dải chủ đất, viền màu chủ, sao đất vàng, lễ hội, dịch bệnh / mất điện
+// chỉ vẽ lại khi trạng thái đất thật sự đổi (paint() gọi rất thường xuyên)
+let ownKey = '', buildKey = '';
 function drawOwnership() {
   const g = $('gOwn');
+  const key = G ? JSON.stringify([G.pl.map(p => p.char), G.gold, PROPS.map(i => { const p = G.props[i]; return [p.owner, p.lv, p.fest, effectOn(G, i, 'plague'), effectOn(G, i, 'blackout')]; })]) : '';
+  if (key === ownKey) return;
+  ownKey = key;
   g.innerHTML = '';
-  if (!G) return;
+  if (!G) { for (const i of PROPS) sqEls[i].querySelector('.bg').style.fill = ''; return; }
   for (const i of PROPS) {
     const p = G.props[i], r = rectOf(i), q = SQ[i], bg = sqEls[i].querySelector('.bg');
     if (p.owner >= 0) {
-      // nền ô tô màu nhạt của chủ, viền dày màu chủ, dải màu mép ngoài và huy hiệu mặt chủ ở góc
+      // nền ô tô màu nhạt của chủ, viền dày màu chủ và dải màu mép ngoài
       const C = COLORS[p.owner], st = ownerStrip(i);
       const mono = q.t === 'city' && ownsGroup(G, p.owner, q.g);
-      bg.style.fill = mono ? `url(#monoGrad${p.owner})` : C.soft;
+      bg.style.fill = q.t === 'city' && p.fest ? '#fff1b8' : mono ? `url(#monoGrad${p.owner})` : C.soft;
       el('rect', { x: st.x, y: st.y, width: st.w, height: st.h, fill: C.main }, g);
       el('rect', { x: r.x + 2, y: r.y + 2, width: r.w - 4, height: r.h - 4, fill: 'none', stroke: C.main, 'stroke-width': 4 }, g);
-      const [ax, ay] = r.side === 0 ? [r.x + 12, r.y + r.h - 12] : r.side === 1 ? [r.x + 12, r.y + 12] : r.side === 2 ? [r.x + r.w - 12, r.y + 12] : [r.x + r.w - 12, r.y + r.h - 12];
-      const badge = el('g', { transform: `translate(${ax} ${ay})` }, g);
-      el('circle', { cx: 0, cy: 0, r: 10.5, fill: charOf(G.pl[p.owner].char).bg, stroke: C.main, 'stroke-width': 2.2 }, badge);
-      chibiInto(el('g', { transform: 'translate(0 2.6) scale(.4)' }, badge), charOf(G.pl[p.owner].char));
       if (mono) drawMonopoly(g, i, p.owner);
     } else bg.style.fill = '';
-    if (q.t === 'city' && G.gold.includes(i)) txt(r.side === 1 || r.side === 2 ? r.x + 9 : r.x + r.w - 9, r.side === 0 || r.side === 1 ? r.y + r.h - 9 : r.y + 9, 'gold-ico', '⭐', g);
+    if (q.t === 'city' && G.gold.includes(i)) {
+      // góc phía ngoài cạnh dòng giá (không trùng tên, quân, dải nhà)
+      const z = zones(i), gx = r.side === 1 ? r.x + 12 : r.side === 3 ? r.x + r.w - 12 : r.side === 0 ? r.x + r.w - 11 : r.x + 11;
+      txt(gx, z.sub[1], 'gold-ico', '⭐', g);
+    }
     if (q.t !== 'city') continue;
     const b = bandOf(i), icons = [];
     if (G.props[i].fest) drawFestival(g, i);
     if (effectOn(G, i, 'plague')) icons.push('☣️');
     if (effectOn(G, i, 'blackout')) icons.push('🔌');
+    // đầu "sau" của dải (xa Bắt Đầu theo chiều đi) dành cho biểu tượng hiệu ứng, xếp ngang hàng nhau
     icons.forEach((ic, k) => {
-      const x = b.vert ? b.x + b.w / 2 : b.x + 9 + k * 15;
-      const y = b.vert ? b.y + 9 + k * 15 : b.y + b.h / 2;
-      txt(x, y, 'fx-ico', ic, g);
+      const off = 8, m = icons.length > 1 ? (k ? 6 : -6) : 0;
+      const x = b.vert ? b.x + b.w / 2 + m : (r.side === 0 ? b.x + off : b.x + b.w - off);
+      const y = b.vert ? (r.side === 1 ? b.y + off : b.y + b.h - off) : b.y + b.h / 2 + m;
+      txt(x, y, 'fx-ico', ic, g, { style: icons.length > 1 ? 'font-size:10.5px' : '' });
     });
   }
 }
@@ -1588,42 +1660,17 @@ function drawMonopoly(g, i, owner) {
   el('rect', { x: r.x + 3.5, y: r.y + 3.5, width: r.w - 7, height: r.h - 7, rx: 3, fill: 'none', stroke: mix(C.main, '#fff', .55), 'stroke-width': 3, class: 'mono-glow' }, mg);
   el('rect', { x: r.x + 2, y: r.y + 2, width: r.w - 4, height: r.h - 4, fill: 'none', stroke: '#fff', 'stroke-width': 2, 'stroke-linecap': 'round', class: 'mono-shine' }, mg);
   el('rect', { x: b.x + 1, y: b.y + 1, width: b.w - 2, height: b.h - 2, fill: 'url(#monoShine)', class: 'mono-glow', style: 'animation-delay:-1s' }, mg);
-  // sao ở các góc vùng chữ (tránh huy hiệu chủ và sao đất vàng)
-  const pts = r.side === 0 ? [[r.x + r.w - 10, b.y + b.h + 9], [r.x + 10, b.y + b.h + 9]]
-    : r.side === 2 ? [[r.x + 10, b.y - 9], [r.x + r.w - 10, b.y - 9]]
-    : r.side === 1 ? [[b.x - 9, r.y + r.h - 10], [b.x - 9, r.y + 10]]
-    : [[b.x + b.w + 9, r.y + 10], [b.x + b.w + 9, r.y + r.h - 10]];
-  pts.forEach(([x, y], k) => txt(x, y, 'sq-icon fest-star', '✦', mg, { fill: k ? '#fff' : '#ffd23f', stroke: mix(C.main, '#000', .2), 'stroke-width': .6, style: `font-size:${k ? 11 : 13}px;animation-delay:${(k * .6 + i * .13).toFixed(2)}s` }));
 }
-// ô đang mở lễ hội: nền vàng lung linh, viền vàng thở, dây cờ đuôi nheo, sao lấp lánh, băng rôn ở mép ngoài
+// ô đang mở lễ hội: nền vàng (tô ở drawOwnership), viền vàng và nhãn ×N trên dải nhà
 function drawFestival(g, i) {
   const r = rectOf(i), b = bandOf(i), st = ownerStrip(i), fg = el('g', {}, g);
-  el('rect', { x: r.x + 2, y: r.y + 2, width: r.w - 4, height: r.h - 4, rx: 4, fill: 'url(#festGrad)', class: 'fest-glow' }, fg);
   el('rect', { x: r.x + 2, y: r.y + 2, width: r.w - 4, height: r.h - 4, rx: 4, fill: 'none', stroke: '#ffd23f', 'stroke-width': 4, class: 'fest-glow', style: 'animation-delay:-.7s' }, fg);
-  // dây cờ căng dọc mép trong của dải màu (phía vùng chữ)
-  const FL = ['#e8323c', '#ffd23f', '#1e6fd8', '#2e9d4f', '#ff6fa3', '#f39c12'];
-  let x0, y0, x1, y1;
-  if (r.side === 0) { x0 = r.x + 3; y0 = b.y + b.h; x1 = r.x + r.w - 3; y1 = y0; }
-  else if (r.side === 2) { x0 = r.x + 3; y0 = b.y; x1 = r.x + r.w - 3; y1 = y0; }
-  else if (r.side === 1) { x0 = b.x; y0 = r.y + 3; x1 = x0; y1 = r.y + r.h - 3; }
-  else { x0 = b.x + b.w; y0 = r.y + 3; x1 = x0; y1 = r.y + r.h - 3; }
-  el('path', { d: `M${x0} ${y0} Q${(x0 + x1) / 2 + (x0 === x1 ? 4 : 0)} ${(y0 + y1) / 2 + (y0 === y1 ? 4 : 0)} ${x1} ${y1}`, fill: 'none', stroke: '#8a5a00', 'stroke-width': 1 }, fg);
-  const n = 7, horiz = y0 === y1;
-  for (let k = 0; k < n; k++) {
-    const t = (k + .5) / n, px = x0 + (x1 - x0) * t, py = y0 + (y1 - y0) * t + (horiz ? 4 * Math.sin(Math.PI * t) : 0);
-    const qx = px + (horiz ? 0 : 4 * Math.sin(Math.PI * t) * (r.side === 1 ? 1 : -1));
-    const pts = horiz ? `${qx - 4},${py} ${qx + 4},${py} ${qx},${py + 8}` : r.side === 1 ? `${qx},${py - 4} ${qx},${py + 4} ${qx - 8},${py}` : `${qx},${py - 4} ${qx},${py + 4} ${qx + 8},${py}`;
-    el('polygon', { points: pts, fill: FL[k % FL.length], stroke: '#fff', 'stroke-width': .6, class: 'fest-flag', style: `animation-delay:${(k * .17).toFixed(2)}s` }, fg);
-  }
-  for (let k = 0; k < 7; k++) {
-    const sx = r.x + 7 + ((i * 37 + k * 53) % (r.w - 14)), sy = r.y + 7 + ((i * 17 + k * 29) % (r.h - 14));
-    txt(sx, sy, 'sq-icon fest-star', k % 2 ? '✦' : '★', fg, { fill: k % 3 ? '#ffd23f' : '#fff', style: `font-size:${9 + (k % 3) * 3}px;animation-delay:${(k * .19).toFixed(2)}s` });
-  }
-  // băng rôn LỄ HỘI đè lên dải chủ ở mép ngoài
-  const cx = st.x + st.w / 2, cy = st.y + st.h / 2, vert = st.h > st.w;
-  const rb = el('g', { transform: vert ? `translate(${cx} ${cy}) rotate(${r.side === 1 ? -90 : 90})` : `translate(${cx} ${cy})` }, fg);
-  el('rect', { x: -24, y: -6.5, width: 48, height: 13, rx: 4, fill: '#e8323c', stroke: '#ffd23f', 'stroke-width': 1.5 }, rb);
-  txt(0, .5, 'fest-ribbon', `🎉 LỄ HỘI ×${festMult(G, i)}`, rb);
+  // nhãn lễ hội ở đầu "trước" của dải nhà (đầu kia dành cho dịch bệnh / mất điện), không che chữ
+  const px = b.vert ? b.x + b.w / 2 : (r.side === 0 ? b.x + b.w - 12 : b.x + 12);
+  const py = b.vert ? (r.side === 1 ? b.y + b.h - 10 : b.y + 10) : b.y + b.h / 2;
+  const pill = el('g', { transform: `translate(${px} ${py})` }, fg);
+  el('rect', { x: -11, y: -8, width: 22, height: 16, rx: 5, fill: '#e8323c', stroke: '#ffd23f', 'stroke-width': 1.5 }, pill);
+  txt(0, .5, 'fest-ribbon', `×${festMult(G, i)}`, pill, { style: 'font-size:10px;letter-spacing:0' });
 }
 // nhà cửa 3D (isometric 2:1): tường và mái lấy màu người chơi sở hữu, nền lô đất
 // tô màu nhân vật; mỗi cấp một khối dáng riêng, có số cấp ở góc
@@ -1688,6 +1735,9 @@ function drawBuilding(g, lv, cx, cy, owner, charId) {
 }
 function drawBuild() {
   const g = $('gBuild');
+  const key = G ? JSON.stringify([G.pl.map(p => p.char), CITIES.map(i => [G.props[i].owner, G.props[i].lv])]) : '';
+  if (key === buildKey) return;
+  buildKey = key;
   g.innerHTML = '';
   if (!G) return;
   for (const i of CITIES) {
@@ -1715,14 +1765,14 @@ $('board').insertBefore(defs, $('board').firstChild);
   [[0, 0], [.45, 0], [.5, .75], [.55, 0], [1, 0]].forEach(([o, a]) => el('stop', { offset: o, 'stop-color': '#fff', 'stop-opacity': a }, sh));
 })();
 const tokenEls = [0, 1, 2, 3].map(s => {
-  const C = COLORS[s], g = el('g', { class: 'token' }, $('gTokens'));
+  const C = COLORS[s], g0 = el('g', { class: 'token' }, $('gTokens')), g = el('g', { transform: `scale(${TOKEN_SCALE})` }, g0);
   el('ellipse', { cx: 0, cy: 17, rx: 13, ry: 3.5, fill: 'rgba(20,30,50,.3)' }, g);
   el('circle', { cx: 0, cy: 0, r: 21, class: 'ring', stroke: C.main }, g);
   const b = el('g', { class: 'tbody' }, g);
   el('circle', { cx: 0, cy: 0, r: 17, class: 'tbg', fill: '#fff', stroke: C.main, 'stroke-width': 3.5 }, b);
   el('g', { class: 'face-in', transform: 'translate(0 5) scale(.72)' }, b);
-  g.style.display = 'none';
-  return g;
+  g0.style.display = 'none';
+  return g0;
 });
 function setTokenFace(s, id) {
   const g = tokenEls[s].querySelector('.face-in');
@@ -1736,7 +1786,7 @@ function placeToken(s, pos, jailed) {
   tokenEls[s].style.transform = `translate(${x}px, ${y}px)`;
   tokenEls[s].style.opacity = '';
 }
-function hopToken(s) { const g = tokenEls[s]; g.classList.remove('hop'); void g.getBoundingClientRect(); g.classList.add('hop'); }
+function hopToken(s) { tokenEls[s].querySelector('.tbody').animate([{ transform: 'none' }, { transform: 'translateY(-7px) scale(1.1)', offset: .45 }, { transform: 'none' }], { duration: 140, easing: 'ease-out' }); }
 const tokenPt = s => tokenXY(G.pl[s].pos, s, G.pl[s].jail > 0);
 
 // ── xúc xắc 3D ──
@@ -1971,8 +2021,9 @@ function show(ng, ev) {
   $('gCard').innerHTML = '';
   if (ev && ev.type === 'start') {
     statusEv = `Bắt đầu! ${who(G.turn)} đi trước.`;
-    for (const id of ['resultSheet', 'lobbySheet', 'propSheet', 'charSheet']) $(id).hidden = true;
+    for (const id of ['resultSheet', 'lobbySheet', 'propSheet', 'charSheet', 'plSheet', 'logSheet']) $(id).hidden = true;
   }
+  logSteps(ev);
   if (ev && Array.isArray(ev.steps) && ev.steps.length) { if (!viewCash) viewCash = G.pl.map(p => p.cash); animating = true; paint(true); animateSteps(ev, tok); }
   else paint();
   if (ev && ev.won) setTimeout(() => { if (tok === animTok && G.phase === 'over') showResult(); }, animMs(ev) + 600);
@@ -2091,7 +2142,6 @@ async function animateStep(st, tok) {
         await flyToken(s, from, to, { ms: FLY_MS, height: 160, spin: 360 });
         fx('circle', { cx: to[0], cy: to[1] + 8, r: 16, fill: 'rgba(120,110,95,.35)', class: 'fx puff' }, 550);
         if (st.passGo) { const [x, y] = centerOf(0); floatMoney(x, y - 20, st.salary); playCoin(true); }
-        clearStepHints();
         await sleep(150);
         return;
       }
@@ -2104,7 +2154,6 @@ async function animateStep(st, tok) {
         if (pos === 0 && st.passGo) { const [x, y] = centerOf(0); floatMoney(x, y - 20, st.salary); playCoin(true); }
         await sleep(STEP_MS);
       }
-      clearStepHints();
       await sleep(st.passGo ? 300 : 100);
       return;
     }
@@ -2225,7 +2274,8 @@ async function animateStep(st, tok) {
     case 'bankrupt': {
       const [x, y] = tokenPt(s), g = tokenEls[s];
       playSad(); pow(x, y - 34, 'PHÁ SẢN', '#e8323c');
-      g.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 800, fill: 'forwards' });
+      g.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 800 });
+      g.style.opacity = '0';
       await sleep(ms);
       g.style.display = 'none'; g.style.opacity = '';
       drawOwnership(); drawBuild();
@@ -2319,6 +2369,7 @@ function paint(skipTokens) {
   paintPicks();
   renderPlayers(); renderDice(); renderStatus(); renderActions(); renderButtons(); renderCenter();
   if (!$('propSheet').hidden) renderProp();
+  if (!$('plSheet').hidden) renderPlayerSheet();
 }
 // ô có thể chọn (bến xe, lễ hội, thẻ) nhấp nháy khi tới lượt mình chọn
 function paintPicks() {
@@ -2339,10 +2390,10 @@ function paintPicks() {
     if (opts.length > 10) return; // bến xe: quá nhiều ô, chỉ cần viền
     // bàn tay chỉ vào ô từ phía trong bàn
     const [cx, cy] = centerOf(i);
-    const hx = r.side === 1 ? r.x + r.w + 16 : r.side === 3 ? r.x - 16 : cx, hy = r.side === 0 ? r.y - 16 : r.side === 2 ? r.y + r.h + 16 : cy;
+    const hx = r.side === 1 ? r.x + r.w : r.side === 3 ? r.x : cx, hy = r.side === 0 ? r.y : r.side === 2 ? r.y + r.h : cy;
     const at = el('g', { transform: `translate(${hx} ${hy})` }, g);
     const hand = el('g', { class: 'pick-hand', style: `--dx:${r.side === 1 ? '-6px' : r.side === 3 ? '6px' : '0'};--dy:${r.side === 0 ? '6px' : r.side === 2 ? '-6px' : '0'};animation-delay:${(k % 5) * .1}s` }, at);
-    el('circle', { cx: 0, cy: 0, r: 17, fill: '#fff', stroke: '#ffb020', 'stroke-width': 2.5 }, hand);
+    el('circle', { cx: 0, cy: 0, r: 14, fill: '#fff', stroke: '#ffb020', 'stroke-width': 2.5 }, hand);
     txt(0, 1, '', r.side === 0 ? '👇' : r.side === 2 ? '👆' : r.side === 1 ? '👈' : '👉', hand);
   });
 }
@@ -2364,8 +2415,8 @@ function renderPlayers() {
     top.querySelector('.nm').textContent = (x.type === 'bot' ? '🤖 ' : '') + who(s) + (x.remote && !x.online ? ' 📴' : '');
     d.appendChild(top);
     const props = document.createElement('div'); props.className = 'pl-props';
-    if (P.jail) { const b = document.createElement('span'); b.className = 'badge'; b.textContent = '🏝️ đảo'; props.appendChild(b); }
-    if (P.bus) { const b = document.createElement('span'); b.className = 'badge'; b.textContent = '🚌 vé'; props.appendChild(b); }
+    if (P.jail && !P.out) { const b = document.createElement('span'); b.className = 'badge'; b.textContent = `🏝️ Côn Đảo · còn ${Math.max(1, 4 - P.jail)} lượt`; props.appendChild(b); }
+    if (P.bus && !P.out) { const b = document.createElement('span'); b.className = 'badge'; b.textContent = '🚌 lượt sau đi xe'; props.appendChild(b); }
     const hold = document.createElement('span'); hold.className = 'hold';
     for (const k of Object.keys(HOLD_INFO)) if (P.hold[k]) { const h = document.createElement('span'); h.textContent = HOLD_INFO[k][0] + (P.hold[k] > 1 ? P.hold[k] : ''); h.title = HOLD_INFO[k][1]; hold.appendChild(h); }
     if (hold.children.length) props.appendChild(hold);
@@ -2382,6 +2433,7 @@ function renderPlayers() {
     d.appendChild(props);
     const ch = charOf(P.char);
     d.title = `${x.name} · ${ch.name}: ${ch.skill} · tài sản ${fmt(netWorth(G, s))}`;
+    d.onclick = () => openPlayer(s);
     pl.appendChild(d);
   }
 }
@@ -2393,22 +2445,6 @@ function renderDice() {
   const dv = Array.isArray(G.dice) ? G.dice : [6, 1];
   if (!busy()) { setDie(0, dv[0], false); setDie(1, dv[1], false); }
   dice.classList.toggle('bonus', !busy() && G.phase === 'play' && G.step === 'roll' && G.again);
-  drawStepHints();
-}
-// sắp tung xúc xắc: đánh số 1–12 cho các ô phía trước quân, đặt ngay giữa ô cho dễ nhìn.
-// Số giữ nguyên trong lúc tung và lúc quân đi, chỉ xoá khi quân đã tới nơi (clearStepHints).
-const clearStepHints = () => { $('gSteps').innerHTML = ''; };
-function drawStepHints() {
-  const g = $('gSteps');
-  if (!canRoll() || G.step !== 'roll') { if (!busy() && !pending) clearStepHints(); return; }
-  g.innerHTML = '';
-  const from = G.pl[G.turn].pos, col = COLORS[G.turn].main;
-  for (let n = 1; n <= 12; n++) {
-    const [x, y] = centerOf((from + n) % N);
-    const b = el('g', { class: 'step-hint', transform: `translate(${x} ${y})`, style: `animation-delay:${(n * .03).toFixed(2)}s` }, g);
-    el('circle', { r: 13, fill: n === 1 ? '#fff' : col, stroke: n === 1 ? col : '#fff', 'stroke-width': 2.5, opacity: .92 }, b);
-    txt(0, .5, 'step-num', n, b, { fill: n === 1 ? col : '#fff' });
-  }
 }
 const DOTS = '<span class="dots"><span>.</span><span>.</span><span>.</span></span>';
 const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
@@ -2431,7 +2467,7 @@ function renderStatus() {
     else if (G.step === 'jail') main = `${cap(nm)} đang ở Côn Đảo — ${jailFee(t) ? 'nộp ' + fmt(jailFee(t)) : 'ra miễn phí'}, dùng thẻ, hoặc tung đôi`;
     else if (G.step === 'visit') {
       const v = G.visit, q = SQ[v.i];
-      main = v.mode === 'buy' ? `Mua ${q.name}? Chọn cấp nhà muốn xây` : v.mode === 'upgrade' ? `Nâng cấp ${q.name}?` : v.mode === 'tour' ? `Mua điểm du lịch ${q.name}?` : `Mua lại ${q.name} của ${who(G.props[v.i].owner)} với giá ${fmt(takeoverPrice(G, v.i))}?`;
+      main = v.mode === 'buy' ? `Mua ${q.name}? Chọn cấp nhà — xây cao thì thu phí khách càng nhiều` : v.mode === 'upgrade' ? `Nâng cấp ${q.name}? Chọn cấp mới` : v.mode === 'tour' ? `Mua điểm du lịch ${q.name}?` : `Mua lại ${q.name} của ${who(G.props[v.i].owner)} với giá ${fmt(takeoverPrice(G, v.i))}?`;
     }
     else if (G.step === 'pick') main = PICK_TEXT[G.pick.kind] + (G.pick.kind === 'bus' && busFee(t) ? ` (vé ${fmt(busFee(t))})` : G.pick.kind === 'festival' && festFee(t) ? ` (${fmt(festFee(t))})` : '');
     else if (G.step === 'casino') main = `Đặt ${fmt(CASINO_BET)}: Chẵn hay Lẻ (×2), hay Đôi (×6)?`;
@@ -2460,7 +2496,7 @@ function renderActions() {
       const from = v.mode === 'buy' ? 0 : p.lv, max = maxLevel(G, t, i);
       for (let lv = from + 1; lv <= max; lv++) {
         const cost = cumCost(i, from, lv, G, t);
-        box.appendChild(btn(`${LEVELS[lv].icon} ${LEVELS[lv].name}`, lv === from + 1 ? 'primary' : '', () => act('buy', { lv }), P.cash < cost, `${fmt(cost)} · phí ${fmt(r10(SQ[i].base * LEVELS[lv].rent))}`));
+        box.appendChild(btn(`${LEVELS[lv].icon} ${LEVELS[lv].name}`, lv === from + 1 ? 'primary' : '', () => act('buy', { lv }), P.cash < cost, `giá ${fmt(cost)} · thu ${fmt(r10(SQ[i].base * LEVELS[lv].rent))}`));
       }
       box.appendChild(btn(v.mode === 'buy' ? 'Không mua' : 'Giữ nguyên', '', () => act('skip')));
     } else if (v.mode === 'tour') {
@@ -2567,6 +2603,99 @@ function renderProp() {
 }
 $('propSheet').onclick = e => { if (e.target === $('propSheet')) $('propSheet').hidden = true; };
 
+// ── bảng người chơi: kỹ năng, tiền, thẻ đang giữ, tiến độ thắng, đất đang có ──
+let plOpen = -1;
+function openPlayer(s) { if (!G || !G.seats[s]) return; plOpen = s; renderPlayerSheet(); $('plSheet').hidden = false; playTap(); }
+function renderPlayerSheet() {
+  const s = plOpen, P = G.pl[s], ch = charOf(P.char), panel = $('plPanel');
+  if (!G.seats[s]) { $('plSheet').hidden = true; return; }
+  panel.innerHTML = '';
+  panel.style.setProperty('--c', COLORS[s].main);
+  const head = document.createElement('div'); head.className = 'pl-head';
+  head.appendChild(chibiSvg(P.char));
+  const hd = document.createElement('div'); hd.innerHTML = '<h2></h2><div class="skill"></div>';
+  hd.querySelector('h2').textContent = who(s) + (P.out ? ' ☠️' : '');
+  hd.querySelector('.skill').textContent = `${ch.name} — ${ch.skill}`;
+  head.appendChild(hd); panel.appendChild(head);
+  const stats = document.createElement('div'); stats.className = 'pl-stats';
+  const rank = active(G).sort((a, b) => netWorth(G, b) - netWorth(G, a)).indexOf(s) + 1;
+  const where = P.out ? 'đã phá sản' : P.jail ? `Côn Đảo (còn ${Math.max(1, 4 - P.jail)} lượt)` : sqName(P.pos);
+  for (const [k, v] of [['Tiền mặt', P.out ? '—' : fmt(P.cash)], ['Tổng tài sản', P.out ? '—' : fmt(netWorth(G, s)) + (rank ? ` · hạng ${rank}` : '')], ['Đang ở', where], ['Đã qua Bắt Đầu', P.laps + ' lần']]) {
+    const c = document.createElement('div'); c.textContent = k; const b = document.createElement('b'); b.textContent = v; c.appendChild(b); stats.appendChild(c);
+  }
+  panel.appendChild(stats);
+  const holds = Object.keys(HOLD_INFO).filter(k => P.hold[k]);
+  if (holds.length) {
+    const h = document.createElement('div'); h.className = 'label'; h.textContent = 'Thẻ đang giữ (tự dùng khi cần)'; panel.appendChild(h);
+    const f = document.createElement('div'); f.className = 'flags'; f.style.justifyContent = 'flex-start';
+    for (const k of holds) { const sp = document.createElement('span'); sp.textContent = `${HOLD_INFO[k][0]} ${HOLD_INFO[k][1]}${P.hold[k] > 1 ? ' ×' + P.hold[k] : ''}`; f.appendChild(sp); }
+    panel.appendChild(f);
+  }
+  if (!P.out) {
+    const h = document.createElement('div'); h.className = 'label'; h.textContent = 'Tiến độ thắng ngay (đạt một mục là thắng)'; panel.appendChild(h);
+    const bestRow = Math.max(...SIDES.map(side => countOwned(G, s, side) / side.length));
+    const goal = (t, n, max) => {
+      const d = document.createElement('div'); d.className = 'goal';
+      d.innerHTML = '<span class="t"></span><span class="bar"><i></i></span><span class="n"></span>';
+      d.querySelector('.t').textContent = t; d.querySelector('i').style.width = Math.min(100, n / max * 100) + '%'; d.querySelector('.n').textContent = `${n}/${max}`;
+      panel.appendChild(d);
+    };
+    goal('🎨 Đủ nhóm màu', groupsOwned(G, s), 3);
+    goal('🏖️ Điểm du lịch', countOwned(G, s, TOURS), TOURS.length);
+    goal('🛣️ Cả một hàng', Math.round(bestRow * 100), 100);
+    panel.lastChild.querySelector('.n').textContent = Math.round(bestRow * 100) + '%';
+  }
+  const h = document.createElement('div'); h.className = 'label'; h.textContent = 'Đất đang có · chạm để xem'; panel.appendChild(h);
+  const mine = PROPS.filter(i => G.props[i].owner === s);
+  if (!mine.length) { const e = document.createElement('p'); e.className = 'empty-note'; e.textContent = 'Chưa có ô đất nào.'; panel.appendChild(e); }
+  else {
+    const list = document.createElement('div'); list.className = 'own-list';
+    for (const i of mine) {
+      const b = document.createElement('button'), q = SQ[i];
+      b.innerHTML = '<i></i><span></span><small></small>';
+      b.querySelector('i').style.setProperty('--g', groupColor(i));
+      b.querySelector('span').textContent = (q.t === 'tour' ? '🏖️ ' : '') + q.name + (q.t === 'city' ? ` · ${LEVELS[G.props[i].lv].icon} ${LEVELS[G.props[i].lv].name}` : '');
+      b.querySelector('small').textContent = 'thu ' + fmt(rentBase(G, i));
+      b.onclick = () => { $('plSheet').hidden = true; openProp(i); };
+      list.appendChild(b);
+    }
+    panel.appendChild(list);
+  }
+  const close = document.createElement('button'); close.className = 'prop-close'; close.textContent = 'Đóng';
+  close.onclick = () => { $('plSheet').hidden = true; };
+  panel.appendChild(close);
+}
+$('plSheet').onclick = e => { if (e.target === $('plSheet')) $('plSheet').hidden = true; };
+
+// ── nhật ký: các sự kiện gần đây, xem lại khi máy đi quá nhanh ──
+const LOG_MAX = 120;
+let gameLog = [];
+function logSteps(ev) {
+  if (ev && ev.type === 'start') gameLog = [];
+  if (!ev || !Array.isArray(ev.steps)) return;
+  for (const st of ev.steps) {
+    let t = null;
+    try { t = stepText(st); } catch (e) {}
+    if (!t) continue;
+    if (st.k === 'dice') gameLog.push({ turn: true, t: `Vòng ${Math.min(G.round, G.maxRound || G.round)} · lượt của ${who(st.s)}` });
+    gameLog.push({ s: Number.isInteger(st.s) ? st.s : -1, t });
+  }
+  if (gameLog.length > LOG_MAX) gameLog = gameLog.slice(-LOG_MAX);
+}
+function renderLog() {
+  const ul = $('logList');
+  ul.innerHTML = '';
+  if (!gameLog.length) { const li = document.createElement('li'); li.textContent = 'Chưa có gì xảy ra.'; ul.appendChild(li); return; }
+  for (let k = gameLog.length - 1; k >= 0; k--) {
+    const e = gameLog[k], li = document.createElement('li');
+    if (e.turn) li.className = 'turn'; else if (e.s >= 0) li.style.setProperty('--c', COLORS[e.s].main);
+    li.textContent = e.t; ul.appendChild(li);
+  }
+}
+$('bLog').onclick = () => { renderLog(); $('logSheet').hidden = false; $('logList').scrollTop = 0; };
+$('bLogOk').onclick = () => { $('logSheet').hidden = true; };
+$('logSheet').onclick = e => { if (e.target === $('logSheet')) $('logSheet').hidden = true; };
+
 // ── chọn nhân vật ──
 let chPick = { cur: null, taken: [], onOk: null };
 function openCharSheet(cur, taken, title, onOk) {
@@ -2636,8 +2765,8 @@ function fit() {
   const row = getComputedStyle(shell).flexDirection === 'row';
   const padX = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
   const availW = shell.clientWidth - (row ? side.offsetWidth : 0) - padX - 8;
-  const s = Math.max(240, Math.floor(Math.min(availW, w.clientHeight - 4, 900)));
-  $('board').style.width = $('board').style.height = s + 'px';
+  const s = Math.max(240, Math.floor(Math.min(availW, w.clientHeight - 4, 1000)));
+  $('boardBox').style.width = $('boardBox').style.height = s + 'px';
   $('dice').style.setProperty('--s', Math.round(s * 0.085) + 'px');
 }
 window.addEventListener('resize', fit);
@@ -3059,6 +3188,8 @@ $('bView').onclick = () => { $('resultSheet').hidden = true; };
 $('bAgain').onclick = () => { $('resultSheet').hidden = true; if (net.on) { if (net.host) hostRestart(); } else newLocalGame(); };
 
 fit();
+fitNames();
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitNames);
 const roomInHash = () => { const m = /^#room=([a-z0-9]{4,16})$/.exec(location.hash); return m ? m[1] : null; };
 window.addEventListener('hashchange', () => { const c = roomInHash(); if (c && c !== net.code) joinOnline(c); });
 try { if (localStorage.getItem('typhu.game') && !validState(JSON.parse(localStorage.getItem('typhu.game')))) localStorage.removeItem('typhu.game'); } catch (e) {} // ván lưu của bản luật cũ
