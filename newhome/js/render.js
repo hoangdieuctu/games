@@ -204,7 +204,7 @@ function drawPlayer(p, now) {
   // hướng và nhịp bước suy từ quãng đường thật sự đi được (host, khách, người khác đều dùng chung)
   const dx = p.x - (p._lx ?? p.x), dy = p.y - (p._ly ?? p.y); p._lx = p.x; p._ly = p.y;
   const d = Math.hypot(dx, dy);
-  if (d > .15) { p._phase = (p._phase || 0) + d / 13;   // ~2 bước/giây ở tốc độ thường p._fx = dx / d; p._fy = dy / d; p._movedAt = now; }
+  if (d > .15) { p._phase = (p._phase || 0) + d / 13; p._fx = dx / d; p._fy = dy / d; p._movedAt = now; }   // ~2 bước/giây ở tốc độ thường
   const moving = now - (p._movedAt || 0) < 130;
   const feet = p.y + 14;
   if (me) { ctx.strokeStyle = 'rgba(255,255,255,.85)'; ctx.lineWidth = 2.5; ctx.setLineDash([5, 4]); ctx.beginPath(); ctx.ellipse(p.x, feet, 19, 8, 0, 0, 7); ctx.stroke(); ctx.setLineDash([]); }

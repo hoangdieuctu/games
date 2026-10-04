@@ -330,6 +330,13 @@ button:disabled { opacity: .4; cursor: default; }
 .name { border-style: solid; font: 700 16px 'Baloo 2', system-ui, sans-serif; user-select: text; -webkit-user-select: text; }
 .name:focus { border-color: #9fb6d2; background: #fff; }
 .panel .note { margin-top: 10px; font-size: 13px; color: #c0392b; text-align: center; line-height: 1.4; }
+.room-code { display: block; width: 100%; margin-top: 12px; padding: 8px 12px 6px; border-radius: 14px; border: 2px dashed var(--line); background: #f5f8fc; color: var(--ink); text-align: center; }
+.room-code b { display: block; font: 800 34px/1.1 'Baloo 2', system-ui, sans-serif; letter-spacing: .18em; padding-left: .18em; }
+.room-code small { display: block; font-size: 12px; font-weight: 700; color: var(--muted); }
+.code-in { margin-top: 8px; font: 800 24px/1.2 'Baloo 2', system-ui, sans-serif; letter-spacing: .15em; text-transform: uppercase; }
+.code-in::placeholder { font-size: 16px; font-weight: 600; letter-spacing: normal; text-transform: none; color: var(--muted); }
+.or { display: flex; align-items: center; gap: 10px; margin-top: 18px; font-size: 13px; font-weight: 700; color: var(--muted); }
+.or::before, .or::after { content: ''; flex: 1; border-top: 1px solid var(--line); }
 .check { display: flex; align-items: center; gap: 8px; margin-top: 14px; font-weight: 700; font-size: 15px; cursor: pointer; }
 .check input { width: 20px; height: 20px; accent-color: var(--ink); }
 .standings { margin-top: 10px; }
@@ -511,9 +518,10 @@ button:disabled { opacity: .4; cursor: default; }
   <div class="panel">
     <h2>Phòng chơi</h2>
     <div id="lbHostBox">
-      <p class="result-msg">Gửi link này cho bạn bè (tối đa 3 người). Mở link là vào phòng.</p>
+      <p class="result-msg">Gửi mã phòng hoặc link cho bạn bè (tối đa 3 người). Bạn bè bấm 🌐 Chơi online rồi nhập mã, hoặc mở link là vào phòng.</p>
+      <button class="room-code" id="lbCode"><b id="lbCodeTxt"></b><small id="lbCodeTip">Mã phòng · bấm để copy</small></button>
       <input class="link" id="lbLink" readonly>
-      <p class="note" id="lbNote" hidden>Bạn đang mở file trên máy nên link này chỉ dùng được trên máy này. Hãy mở game từ trang web để mời bạn.</p>
+      <p class="note" id="lbNote" hidden>Bạn đang mở file trên máy nên link này chỉ dùng được trên máy này. Hãy gửi mã phòng cho bạn nhé.</p>
       <div class="row"><button class="go" id="lbCopy">Copy link</button><button id="lbShare" hidden>Chia sẻ</button></div>
     </div>
     <div class="label">Người chơi</div>
@@ -2801,6 +2809,14 @@ function loadPeerJs() {
 }
 function randCode() { return Array.from(crypto.getRandomValues(new Uint8Array(6)), b => 'abcdefghijkmnpqrstuvwxyz23456789'[b % 32]).join(''); }
 const inviteUrl = () => location.href.split('#')[0] + '#room=' + net.code;
+const showCode = c => String(c || '').toUpperCase();
+// mã phòng người chơi gõ vào: không phân biệt hoa thường, bỏ khoảng trắng/gạch; dán cả link mời cũng được
+function parseCode(s) {
+  s = String(s || '').trim();
+  const m = /room=([a-z0-9]+)/i.exec(s);
+  s = (m ? m[1] : s).toLowerCase().replace(/[^a-z0-9]/g, '').replace(/1/g, 'i');
+  return /^[a-z0-9]{4,16}$/.test(s) ? s : null;
+}
 function netSend(msg) { if (net.conn && net.conn.open) try { net.conn.send(msg); } catch (e) {} }
 function netBroadcast(msg) { for (const c of net.conns.keys()) if (c.open) try { c.send(msg); } catch (e) {} }
 
@@ -2808,6 +2824,7 @@ function netSheet(emoji, title, msg, rows = []) {
   const p = $('netPanel');
   p.innerHTML = `<div class="result-emoji">${emoji}</div><h2>${title}</h2><p class="result-msg">${msg}</p>`;
   for (const r of rows) {
+    if (r instanceof Node) { p.appendChild(r); continue; }
     const row = document.createElement('div'); row.className = 'row';
     for (const b of r) { const e = document.createElement('button'); e.textContent = b.label; if (b.go) e.className = 'go'; e.onclick = () => b.fn(e); row.appendChild(e); }
     p.appendChild(row);
@@ -2816,6 +2833,28 @@ function netSheet(emoji, title, msg, rows = []) {
   $('netSheet').hidden = false;
 }
 const hideNetSheet = () => { $('netSheet').hidden = true; };
+// 🌐 Chơi online: tạo phòng mới, hoặc gõ mã phòng bạn bè gửi để vào
+function onlineMenu(val = '') {
+  const box = document.createElement('div');
+  box.innerHTML = '<div class="or">hoặc vào phòng của bạn bè</div>'
+    + '<input class="name code-in" id="oCode" maxlength="60" placeholder="Nhập mã phòng" autocomplete="off" autocapitalize="characters" spellcheck="false" enterkeyhint="go">'
+    + '<p class="note" id="oCodeErr" hidden>Mã phòng chưa đúng. Mã gồm 6 chữ và số, ví dụ K7P2QX.</p>';
+  const go = () => {
+    const c = parseCode($('oCode').value);
+    if (!c) { $('oCodeErr').hidden = false; $('oCode').focus(); return; }
+    history.replaceState(null, '', location.pathname + location.search + '#room=' + c);
+    joinOnline(c);
+  };
+  netSheet('🌐', 'Chơi online', 'Tạo phòng mới rồi gửi mã cho bạn bè, hoặc nhập mã bạn bè gửi để vào chơi cùng.', [
+    [{ label: 'Tạo phòng mới', go: true, fn: () => hostOnline() }],
+    box,
+    [{ label: 'Huỷ', fn: hideNetSheet }, { label: 'Vào phòng', go: true, fn: go }],
+  ]);
+  const i = $('oCode');
+  i.value = val;
+  i.onkeydown = e => { if (e.key === 'Enter') go(); };
+  i.oninput = () => { $('oCodeErr').hidden = true; };
+}
 function netFail(title, msg, retry) {
   const rows = [[{ label: 'Chơi với máy', fn: () => leaveOnline() }]];
   if (retry) rows[0].push({ label: 'Thử lại', go: true, fn: retry });
@@ -2974,7 +3013,8 @@ async function joinOnline(code) {
   peer.on('error', err => {
     if (net !== n || n.conn) return;
     clearTimeout(n.timer);
-    if (err.type === 'peer-unavailable') netFail('Không tìm thấy phòng', 'Phòng này không còn nữa, có thể chủ phòng đã thoát. Nhờ bạn ấy gửi link mới nhé.', retry);
+    if (err.type === 'peer-unavailable') netSheet('😕', 'Không tìm thấy phòng', `Không có phòng nào mang mã <b>${showCode(code)}</b>. Kiểm tra lại mã, hoặc có thể chủ phòng đã thoát.`,
+      [[{ label: 'Chơi với máy', fn: () => leaveOnline() }, { label: 'Nhập lại mã', go: true, fn: () => { leaveOnline(); onlineMenu(showCode(code)); } }]]);
     else netFail('Không vào được phòng', 'Không kết nối được máy chủ tìm bạn. Kiểm tra mạng rồi thử lại nhé.', retry);
   });
 }
@@ -3013,6 +3053,7 @@ function openLobby() {
   $('lbHostBox').hidden = !net.host; $('lbHostCtl').hidden = !net.host; $('lbGuestCtl').hidden = net.host;
   if (net.host) {
     $('lbLink').value = inviteUrl();
+    $('lbCodeTxt').textContent = showCode(net.code);
     $('lbNote').hidden = location.protocol !== 'file:';
     $('lbShare').hidden = !navigator.share;
     renderLenSeg($('lbLen'));
@@ -3052,7 +3093,7 @@ function syncLobby(force) {
     $('lbFill').parentElement.hidden = G.phase !== 'lobby';
     $('lbLen').hidden = G.phase !== 'lobby'; $('lbLen').previousElementSibling.hidden = G.phase !== 'lobby';
     $('lbStart').disabled = humans < 2;
-    $('lbHint').textContent = G.phase !== 'lobby' ? 'Ván đang chơi. Người vào sau link sẽ được xem.' : humans < 2 ? 'Cần ít nhất 2 người để bắt đầu.' : `${humans} người đã sẵn sàng.`;
+    $('lbHint').textContent = G.phase !== 'lobby' ? 'Ván đang chơi. Người vào sau sẽ được xem.' : humans < 2 ? 'Cần ít nhất 2 người để bắt đầu.' : `${humans} người đã sẵn sàng.`;
     $('lbCancel').textContent = G.phase === 'lobby' ? 'Huỷ phòng' : 'Đóng';
   }
 }
@@ -3063,6 +3104,11 @@ $('lbChar').onclick = () => {
     store.set('typhu.char', id);
     if (net.host) { G.seats[0].char = id; G.pl[0].char = id; commit({ type: 'lobby' }); } else netSend({ t: 'char', c: id });
   });
+};
+$('lbCode').onclick = async () => {
+  try { await navigator.clipboard.writeText(showCode(net.code)); } catch (e) {}
+  $('lbCodeTip').textContent = '✓ Đã copy mã';
+  setTimeout(() => { $('lbCodeTip').textContent = 'Mã phòng · bấm để copy'; }, 1600);
 };
 $('lbCopy').onclick = async () => {
   const b = $('lbCopy');
@@ -3171,7 +3217,7 @@ $('bNew').onclick = () => {
 };
 $('bStart').onclick = () => { store.set('typhu.setup', setup); $('setupSheet').hidden = true; newLocalGame(); };
 $('setupSheet').onclick = e => { if (e.target === $('setupSheet')) $('setupSheet').hidden = true; };
-$('bOnline').onclick = () => hostOnline();
+$('bOnline').onclick = () => onlineMenu();
 $('bInvite').onclick = () => openLobby();
 $('bLeave').onclick = () => leaveOnline();
 (function fillRules() {

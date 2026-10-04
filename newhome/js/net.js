@@ -14,6 +14,14 @@ function loadPeerJs() {
   });
 }
 export const inviteUrl = () => location.href.split('#')[0] + '#room=' + net.code;
+export const showCode = c => String(c || '').toUpperCase();
+// mã người chơi gõ vào: không phân biệt hoa thường, bỏ khoảng trắng/gạch; dán cả link mời cũng được
+export function parseCode(s) {
+  s = String(s || '').trim();
+  const m = /room=([a-z0-9]+)/i.exec(s);
+  s = (m ? m[1] : s).toLowerCase().replace(/[^a-z0-9]/g, '').replace(/1/g, 'i');
+  return /^[a-z0-9]{4,12}$/.test(s) ? s : null;
+}
 export function send(c, msg) { if (c && c.open) try { c.send(msg); } catch (e) {} }
 export function broadcast(msg) { for (const c of net.conns.keys()) send(c, msg); }
 export function guestSend(msg) { send(net.conn, msg); }
@@ -93,7 +101,7 @@ export async function joinOnline(code, H) {
   peer.on('error', err => {
     if (net.gen !== g || net.conn) return;
     clearTimeout(net.timer);
-    if (err.type === 'peer-unavailable') H.onFail('Không tìm thấy phòng', 'Chủ phòng chưa mở thế giới này. Nhờ bạn ấy mở game rồi bấm Thử lại nhé.', retry);
+    if (err.type === 'peer-unavailable') H.onFail('Không tìm thấy phòng', `Không có thế giới nào mang mã ${showCode(code)} đang mở. Kiểm tra lại mã, hoặc nhờ chủ nhà mở game rồi bấm Thử lại nhé.`, retry);
     else H.onFail('Không vào được phòng', 'Không kết nối được máy chủ tìm bạn. Kiểm tra mạng rồi thử lại nhé.', retry);
   });
 }

@@ -169,6 +169,18 @@ button:disabled { opacity: .4; cursor: default; }
   user-select: all; -webkit-user-select: all;
 }
 .panel .note { margin-top: 10px; font-size: 13px; color: #c0392b; text-align: center; line-height: 1.4; }
+.room-code { display: block; width: 100%; margin-top: 14px; padding: 8px 12px 6px; border-radius: 14px; border: 2px dashed var(--line); background: #f5f8fc; color: var(--ink); text-align: center; }
+.room-code b { display: block; font: 800 34px/1.1 'Baloo 2', system-ui, sans-serif; letter-spacing: .18em; padding-left: .18em; }
+.room-code small { display: block; font-size: 12px; font-weight: 700; color: var(--muted); }
+.code-in {
+  display: block; width: 100%; margin-top: 8px; padding: 8px 12px; border-radius: 12px;
+  border: 2px solid var(--line); background: #f5f8fc; color: var(--ink); outline: none; text-align: center;
+  font: 800 24px/1.2 'Baloo 2', system-ui, sans-serif; letter-spacing: .15em; text-transform: uppercase;
+}
+.code-in:focus { border-color: #9fb6d2; background: #fff; }
+.code-in::placeholder { font-size: 16px; font-weight: 600; letter-spacing: normal; text-transform: none; color: var(--muted); }
+.or { display: flex; align-items: center; gap: 10px; margin-top: 18px; font-size: 13px; font-weight: 700; color: var(--muted); }
+.or::before, .or::after { content: ''; flex: 1; border-top: 1px solid var(--line); }
 
 @media (max-width: 420px) {
   .top h1 { font-size: 22px; }
@@ -1010,8 +1022,8 @@ $('zOut').onclick = () => zoomAt(1 / 0.75, view.x + view.s / 2, view.y + view.s 
 $('zFit').onclick = () => { if (view.s >= FULL) defaultView(); else { view.s = FULL; applyView(); } };
 
 // ── chơi online: hai máy nối thẳng với nhau qua WebRTC (PeerJS) ──
-// Máy chủ phòng mở một Peer có mã ngẫu nhiên rồi gửi link #room=<mã>; máy kia
-// mở link là nối vào. Server công cộng của PeerJS chỉ giúp hai bên tìm nhau,
+// Máy chủ phòng mở một Peer có mã ngẫu nhiên rồi gửi mã (hoặc link #room=<mã>);
+// máy kia nhập mã hay mở link là nối vào. Server công cộng của PeerJS chỉ giúp hai bên tìm nhau,
 // các nước đi sau đó gửi thẳng giữa hai máy. Chủ phòng giữ ván "chuẩn": khi
 // hai bên lệch nhau (mất tin, vào lại giữa ván) thì chủ phòng gửi lại cả bàn.
 //
@@ -1033,6 +1045,14 @@ function loadPeerJs() {
 }
 const randCode = () => Array.from(crypto.getRandomValues(new Uint8Array(6)), b => 'abcdefghijkmnpqrstuvwxyz23456789'[b % 32]).join('');
 const inviteUrl = () => location.href.split('#')[0] + '#room=' + net.code;
+const showCode = c => String(c || '').toUpperCase();
+// mã phòng người chơi gõ vào: không phân biệt hoa thường, bỏ khoảng trắng/gạch; dán cả link mời cũng được
+function parseCode(s) {
+  s = String(s || '').trim();
+  const m = /room=([a-z0-9]+)/i.exec(s);
+  s = (m ? m[1] : s).toLowerCase().replace(/[^a-z0-9]/g, '').replace(/1/g, 'i');
+  return /^[a-z0-9]{4,16}$/.test(s) ? s : null;
+}
 function netSend(msg) { if (net.conn && net.conn.open) try { net.conn.send(msg); } catch (e) {} }
 const DOTS = '<span class="dots"><span>.</span><span>.</span><span>.</span></span>';
 
@@ -1041,6 +1061,15 @@ function netSheet(emoji, title, msg, { link = false, rows = [], closable = false
   const p = $('netPanel');
   p.innerHTML = `<div class="result-emoji">${emoji}</div><h2>${title}</h2><p class="result-msg">${msg}</p>`;
   if (link) {
+    const b = document.createElement('button');
+    b.className = 'room-code';
+    b.innerHTML = `<b>${showCode(net.code)}</b><small>Mã phòng · bấm để copy</small>`;
+    b.onclick = async () => {
+      try { await navigator.clipboard.writeText(showCode(net.code)); } catch (e) {}
+      b.lastChild.textContent = '✓ Đã copy mã';
+      setTimeout(() => { b.lastChild.textContent = 'Mã phòng · bấm để copy'; }, 1600);
+    };
+    p.appendChild(b);
     const i = document.createElement('input');
     i.className = 'link'; i.id = 'oLink'; i.readOnly = true; i.value = inviteUrl();
     i.onclick = () => i.select();
@@ -1048,6 +1077,7 @@ function netSheet(emoji, title, msg, { link = false, rows = [], closable = false
   }
   if (note) { const n = document.createElement('p'); n.className = 'note'; n.textContent = note; p.appendChild(n); }
   for (const r of rows) {
+    if (r instanceof Node) { p.appendChild(r); continue; }
     const row = document.createElement('div'); row.className = 'row';
     for (const b of r) {
       const e = document.createElement('button');
@@ -1074,11 +1104,36 @@ function showInvite() {
   if (!net.on || !net.host || !net.code) return;
   const first = [{ label: 'Copy link', go: true, fn: copyInvite }];
   if (navigator.share) first.push({ label: 'Chia sẻ', fn: () => navigator.share({ title: 'Cờ Caro', text: 'Vào chơi cờ caro với mình nhé!', url: inviteUrl() }).catch(() => {}) });
-  netSheet('🔗', 'Mời bạn chơi', net.conn ? 'Đối thủ đang ở trong phòng.' : `Gửi link này cho bạn, bạn ấy mở ra là vào chơi ngay. Đang chờ${DOTS}`, {
+  netSheet('🔗', 'Mời bạn chơi', net.conn ? 'Đối thủ đang ở trong phòng.' : `Gửi mã phòng hoặc link cho bạn. Bạn ấy bấm 🌐 Chơi online rồi nhập mã, hoặc mở link là vào chơi ngay. Đang chờ${DOTS}`, {
     link: true, closable: true,
-    note: location.protocol === 'file:' ? 'Bạn đang mở file trên máy nên link này chỉ dùng được trên máy này. Hãy mở game từ trang web để mời bạn.' : '',
+    note: location.protocol === 'file:' ? 'Bạn đang mở file trên máy nên link này chỉ dùng được trên máy này. Hãy gửi mã phòng cho bạn nhé.' : '',
     rows: [first, [{ label: 'Để sau', fn: hideNetSheet }, { label: 'Huỷ phòng', fn: () => leaveOnline() }]],
   });
+}
+// 🌐 Chơi online: tạo phòng mới, hoặc gõ mã phòng bạn bè gửi để vào
+function onlineMenu(val = '') {
+  const box = document.createElement('div');
+  box.innerHTML = '<div class="or">hoặc vào phòng của bạn bè</div>'
+    + '<input class="code-in" id="oCode" maxlength="60" placeholder="Nhập mã phòng" autocomplete="off" autocapitalize="characters" spellcheck="false" enterkeyhint="go">'
+    + '<p class="note" id="oCodeErr" hidden>Mã phòng chưa đúng. Mã gồm 6 chữ và số, ví dụ K7P2QX.</p>';
+  const go = () => {
+    const c = parseCode($('oCode').value);
+    if (!c) { $('oCodeErr').hidden = false; $('oCode').focus(); return; }
+    history.replaceState(null, '', location.pathname + location.search + '#room=' + c);
+    joinOnline(c);
+  };
+  netSheet('🌐', 'Chơi online', 'Tạo phòng mới rồi gửi mã cho bạn, hoặc nhập mã bạn gửi để vào chơi cùng.', {
+    closable: true,
+    rows: [
+      [{ label: 'Tạo phòng mới', go: true, fn: () => hostOnline() }],
+      box,
+      [{ label: 'Huỷ', fn: hideNetSheet }, { label: 'Vào phòng', go: true, fn: go }],
+    ],
+  });
+  const i = $('oCode');
+  i.value = val;
+  i.onkeydown = e => { if (e.key === 'Enter') go(); };
+  i.oninput = () => { $('oCodeErr').hidden = true; };
 }
 function netFail(title, msg, retry) {
   const rows = [[{ label: 'Chơi với máy', fn: () => leaveOnline() }]];
@@ -1159,7 +1214,8 @@ async function joinOnline(code) {
   peer.on('error', err => {
     if (net !== n || n.conn) return;
     clearTimeout(n.timer);
-    if (err.type === 'peer-unavailable') netFail('Không tìm thấy phòng', 'Phòng này không còn nữa, có thể bạn kia đã thoát. Nhờ bạn ấy gửi link mới nhé.', retry);
+    if (err.type === 'peer-unavailable') netSheet('😕', 'Không tìm thấy phòng', `Không có phòng nào mang mã <b>${showCode(code)}</b>. Kiểm tra lại mã, hoặc có thể bạn kia đã thoát.`,
+      { rows: [[{ label: 'Chơi với máy', fn: () => leaveOnline() }, { label: 'Nhập lại mã', go: true, fn: () => { leaveOnline(); onlineMenu(showCode(code)); } }]] });
     else netFail('Không vào được phòng', 'Không kết nối được máy chủ tìm bạn. Kiểm tra mạng rồi thử lại nhé.', retry);
   });
 }
@@ -1247,7 +1303,7 @@ $('newSheet').onclick = e => { if (e.target === $('newSheet')) $('newSheet').hid
 $('bStart').onclick = () => { store.set('caro.settings', settings); $('newSheet').hidden = true; newGame(); };
 $('bView').onclick = () => { $('resultSheet').hidden = true; };
 $('bAgain').onclick = () => { $('resultSheet').hidden = true; if (net.on) netNewGame(); else newGame(); };
-$('bOnline').onclick = () => hostOnline();
+$('bOnline').onclick = () => onlineMenu();
 $('bInvite').onclick = () => showInvite();
 $('bLeave').onclick = () => leaveOnline();
 $('netSheet').onclick = e => { if (e.target === $('netSheet') && net.sheetClosable) $('netSheet').hidden = true; };

@@ -2,7 +2,7 @@
 import { TILE, COLS, REACH, NODES, BUILD, AVATARS, COLORS, MAX_PLAYERS, ENERGY, RES } from './config.js';
 import { genWorld, packWorld, unpackWorld, rebuildOcc, canPlace, isWaterTile, centerOf } from './world.js';
 import { createGame, step, act, setInput, newPlayer, moveEntity, packTick, unpackInv, roster, playerMeta, dist, invCount } from './sim.js';
-import { net, hostOnline, joinOnline, closeNet, broadcast, send, guestSend, randCode } from './net.js';
+import { net, hostOnline, joinOnline, closeNet, broadcast, send, guestSend, randCode, parseCode, showCode } from './net.js';
 import { initRender, render, screenToWorld, resize } from './render.js';
 import { initInput, input } from './input.js';
 import { S, $ } from './state.js';
@@ -33,9 +33,9 @@ function renderTitle() {
       const sv = store.get('world.' + code, null); if (!sv) continue;
       const row = document.createElement('div'); row.className = 'sv';
       const n = Object.keys(sv.players || {}).length, b = Object.keys(sv.W.bld || {}).length;
-      row.innerHTML = `<span class="ic">${sv.W.flags?.house ? '🏠' : sv.W.flags?.fire ? '🔥' : '🏕️'}</span><div class="in"><b>Thế giới ${code}</b><small>${n} người · ${b} công trình · lưu ${ago(sv.savedAt)}</small></div>`;
+      row.innerHTML = `<span class="ic">${sv.W.flags?.house ? '🏠' : sv.W.flags?.fire ? '🔥' : '🏕️'}</span><div class="in"><b>Thế giới ${showCode(code)}</b><small>${n} người · ${b} công trình · lưu ${ago(sv.savedAt)}</small></div>`;
       const go = document.createElement('button'); go.textContent = 'Tiếp tục'; go.onclick = () => hostWorld(code, sv);
-      const del = document.createElement('button'); del.textContent = '✕'; del.className = 'del'; del.onclick = () => { if (confirm(`Xoá thế giới ${code}? Không khôi phục được.`)) { store.del('world.' + code); store.set('worlds', codes.filter(c => c !== code)); renderTitle(); } };
+      const del = document.createElement('button'); del.textContent = '✕'; del.className = 'del'; del.onclick = () => { if (confirm(`Xoá thế giới ${showCode(code)}? Không khôi phục được.`)) { store.del('world.' + code); store.set('worlds', codes.filter(c => c !== code)); renderTitle(); } };
       row.appendChild(go); row.appendChild(del); box.appendChild(row);
     }
   }
@@ -47,6 +47,15 @@ const roomFromHash = () => (location.hash.match(/room=([a-z0-9]{4,12})/i) || [])
 $('nameIn').oninput = () => { profile.name = cleanName($('nameIn').value); store.set('profile', profile); };
 $('btnNew').onclick = () => hostWorld(randCode(), null);
 $('btnJoin').onclick = () => { const c = roomFromHash(); if (c) join(c); };
+$('codeForm').onsubmit = e => {
+  e.preventDefault();
+  const c = parseCode($('codeIn').value);
+  if (!c) { $('codeErr').hidden = false; $('codeIn').focus(); return; }
+  $('codeErr').hidden = true;
+  history.replaceState(null, '', location.pathname + location.search + '#room=' + c);
+  join(c);
+};
+$('codeIn').oninput = () => { $('codeErr').hidden = true; };
 addEventListener('hashchange', renderTitle);
 
 function showGame() {

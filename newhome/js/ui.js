@@ -2,7 +2,7 @@
 import { RES, RES_KEYS, BUILD, BUILD_ORDER, QUESTS, CAP, ENERGY, EMOTES, TILE } from './config.js';
 import { S, $ } from './state.js';
 import { invCount, hasBuilding, dist } from './sim.js';
-import { inviteUrl, net } from './net.js';
+import { inviteUrl, net, showCode } from './net.js';
 import { charCanvas, LOOKS } from './char.js';
 
 let H = {};
@@ -99,12 +99,13 @@ export function inviteSheet() {
   let html = `<h2>🔗 Mời cả nhà</h2>`;
   if (S.host) {
     html += online
-      ? `<p class="msg">Gửi link này cho người nhà. Mở link là vào thẳng thế giới của bạn. Link không đổi, lần sau vẫn dùng được khi bạn mở lại thế giới.</p>
+      ? `<p class="msg">Gửi mã hoặc link này cho người nhà. Nhập mã ở trang đầu hoặc mở link là vào thẳng thế giới của bạn. Mã không đổi, lần sau vẫn dùng được khi bạn mở lại thế giới.</p>
+         <button class="room-code" id="lbCode"><b>${esc(showCode(net.code))}</b><small>Mã thế giới · bấm để copy</small></button>
          <div class="linkrow"><input id="lbLink" readonly value="${esc(inviteUrl())}"><button id="lbCopy" class="go">Copy</button></div>
          ${navigator.share ? '<div class="row"><button id="lbShare">Chia sẻ…</button></div>' : ''}
-         ${location.protocol === 'file:' ? '<p class="hint">⚠️ Đang mở từ file trên máy; link chỉ dùng được khi game được đưa lên web.</p>' : ''}`
+         ${location.protocol === 'file:' ? '<p class="hint">⚠️ Đang mở từ file trên máy; link chỉ dùng được khi game được đưa lên web — hãy gửi mã cho người nhà.</p>' : ''}`
       : `<p class="msg">Chưa kết nối được máy chủ tìm bạn. Bạn vẫn chơi một mình bình thường.</p><div class="row"><button id="lbRetry" class="go">Thử kết nối lại</button></div>`;
-  } else html += `<p class="msg">Bạn đang là khách trong thế giới <b>${esc(S.code)}</b>. Nhờ chủ phòng gửi link cho người khác nhé.</p>`;
+  } else html += `<p class="msg">Bạn đang là khách trong thế giới <b>${esc(showCode(S.code))}</b>. Người khác có thể nhập mã này ở trang đầu để vào cùng.</p>`;
   html += `<h3>Gia đình</h3><div class="plist">`;
   for (const p of Object.values(S.players)) {
     html += `<div class="pl"><span class="pav" style="--c:${p.color}" data-av="${p.avatar}"></span><span class="pn">${esc(p.name)}${p.pid === S.me ? ' (bạn)' : ''}</span><span class="tg">${p.online === false ? 'offline' : 'online'}</span><span class="ct">❤️ ${S.W.contrib[p.pid] || 0}</span></div>`;
@@ -115,6 +116,10 @@ export function inviteSheet() {
   const copy = $('lbCopy'); if (copy) copy.onclick = async () => {
     try { await navigator.clipboard.writeText(inviteUrl()); } catch (e) { $('lbLink').select(); try { document.execCommand('copy'); } catch (e2) {} }
     copy.textContent = '✓ Đã copy'; setTimeout(() => { copy.textContent = 'Copy'; }, 1600);
+  };
+  const cd = $('lbCode'); if (cd) cd.onclick = async () => {
+    try { await navigator.clipboard.writeText(showCode(net.code)); } catch (e) {}
+    cd.lastChild.textContent = '✓ Đã copy mã'; setTimeout(() => { cd.lastChild.textContent = 'Mã thế giới · bấm để copy'; }, 1600);
   };
   const sh = $('lbShare'); if (sh) sh.onclick = () => navigator.share({ title: 'Nhà Mới Của Chúng Ta', text: 'Vào xây nhà chung với mình nhé!', url: inviteUrl() }).catch(() => {});
   const rt = $('lbRetry'); if (rt) rt.onclick = () => { closeSheet(); H.reconnectHost(); };
