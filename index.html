@@ -175,9 +175,34 @@ html, body {
   display: flex; flex-direction: column; flex: 1;
 }
 .card-tag {
+  display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px;
+}
+.card-tag span {
   font-family: 'Nunito', sans-serif;
-  font-size: 9px; letter-spacing: .22em; color: var(--muted);
-  text-transform: uppercase; margin-bottom: 6px;
+  font-size: 11px; font-weight: 700; letter-spacing: .04em; line-height: 1;
+  color: #9fd9ff; background: rgba(56,189,248,.12); border: 1px solid rgba(56,189,248,.3);
+  border-radius: 999px; padding: 5px 10px; white-space: nowrap;
+}
+.card[hidden], .card.filtered-out { display: none !important; }
+
+/* ── thanh lọc theo loại ── */
+.filters {
+  position: relative; z-index: 1;
+  display: flex; flex-wrap: wrap; justify-content: center; gap: 8px;
+  max-width: 1200px; margin: 0 auto 28px; padding: 0 24px;
+}
+.filters button {
+  font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: .02em;
+  color: var(--parch); background: rgba(255,255,255,.04); border: 1px solid var(--border);
+  border-radius: 999px; padding: 8px 14px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+  transition: background .15s, border-color .15s, color .15s;
+}
+.filters button small { font-size: 11px; font-weight: 700; color: var(--muted); }
+.filters button:hover { border-color: var(--cyan); color: #fff; }
+.filters button.on { background: rgba(255,215,0,.12); border-color: var(--gold); color: var(--gold); }
+.filters button.on small { color: var(--gold); opacity: .8; }
+.grid-empty {
+  grid-column: 1 / -1; text-align: center; color: var(--muted); font-size: 14px; padding: 40px 0;
 }
 .card-title {
   font-family: 'Nunito', sans-serif;
@@ -196,7 +221,9 @@ html, body {
 }
 .card-meta {
   font-family: 'Nunito', sans-serif;
-  font-size: 9px; letter-spacing: .12em; color: #3a2a5a;
+  font-size: 12px; font-weight: 600; letter-spacing: .02em;
+  line-height: 1.5; color: #b3a5cc;
+  min-width: 0;
 }
 .card-play {
   display: inline-flex; align-items: center; gap: 7px;
@@ -267,10 +294,12 @@ footer {
   <span class="divider-mark">Trò Chơi</span>
 </div>
 
+<nav class="filters" id="filters" aria-label="Lọc theo loại trò chơi"></nav>
+
 <main class="grid" id="game-grid">
 
   <!-- ── Sinh Tử Môn ── -->
-  <a class="card" href="gate-of-life.html">
+  <a class="card" href="gate-of-life.html" data-cat="offline">
     <div class="card-thumb">
       <div class="card-thumb-bg"></div>
       <svg class="card-thumb-ring" viewBox="0 0 110 110" aria-hidden="true">
@@ -281,7 +310,7 @@ footer {
     <div class="card-body">
       <div class="card-tag">Tower Defense · Hành Động</div>
       <h2 class="card-title">Sinh Tử Môn</h2>
-      <p class="card-desc">Bảo vệ Cửa Thiêng trước 30 đợt tấn công. Nâng cấp vũ khí, mở khóa Dấu Ấn Huyền Thoại, và trụ vững đến đợt cuối.</p>
+      <p class="card-desc">Bảo vệ Cửa Thiêng trước 30 đợt tấn công. Nâng cấp vũ khí, mở khóa Dấu Ấn Huyền Thoại và trụ vững đến đợt cuối.</p>
       <div class="card-footer">
         <span class="card-meta">30 đợt · 6 vũ khí · 5 loại quái</span>
         <span class="card-play">Chơi Ngay</span>
@@ -290,7 +319,7 @@ footer {
   </a>
 
   <!-- ── Học Đếm Số ── -->
-  <a class="card" href="numbers.html">
+  <a class="card" href="numbers.html" data-cat="offline">
     <div class="card-thumb" style="background:linear-gradient(135deg,#fff9f0,#ffe8cc);">
       <div class="card-thumb-bg" style="background:radial-gradient(ellipse at 50% 50%,#fff0e0,#fff9f0 70%);"></div>
       <svg class="card-thumb-ring" viewBox="0 0 110 110" aria-hidden="true">
@@ -310,7 +339,7 @@ footer {
   </a>
 
   <!-- ── Ghép Đôi ── -->
-  <a class="card" href="matching.html">
+  <a class="card" href="matching.html" data-cat="offline">
     <div class="card-thumb" style="background:linear-gradient(135deg,#e8f0ff,#f5e8ff);">
       <div class="card-thumb-bg" style="background:radial-gradient(ellipse at 50% 50%,#eef2ff,#f5e8ff 70%);"></div>
       <svg class="card-thumb-ring" viewBox="0 0 110 110" aria-hidden="true">
@@ -321,7 +350,7 @@ footer {
     <div class="card-body">
       <div class="card-tag">Trí Nhớ · Trẻ Em</div>
       <h2 class="card-title">Ghép Đôi</h2>
-      <p class="card-desc">Lật bài và tìm 6 cặp giống nhau. 4 chủ đề: Động Vật, Trái Cây, Màu & Hình, Hỗn Hợp. Rèn luyện trí nhớ cho bé.</p>
+      <p class="card-desc">Lật bài và tìm 6 cặp giống nhau qua 4 chủ đề: Động Vật, Trái Cây, Màu & Hình, Hỗn Hợp. Rèn luyện trí nhớ cho bé.</p>
       <div class="card-footer">
         <span class="card-meta">6 cặp · 4 chủ đề · 2–5 tuổi</span>
         <span class="card-play">Chơi Ngay</span>
@@ -330,7 +359,7 @@ footer {
   </a>
 
   <!-- ── 100 Động Vật ── -->
-  <a class="card" href="animals.html">
+  <a class="card" href="animals.html" data-cat="offline">
     <div class="card-thumb" style="background:linear-gradient(135deg,#e8fff0,#f0fff8);">
       <div class="card-thumb-bg" style="background:radial-gradient(ellipse at 50% 50%,#edfff5,#f0fff8 70%);"></div>
       <svg class="card-thumb-ring" viewBox="0 0 110 110" aria-hidden="true">
@@ -341,7 +370,7 @@ footer {
     <div class="card-body">
       <div class="card-tag">Giáo Dục · Thiên Nhiên</div>
       <h2 class="card-title">100 Động Vật</h2>
-      <p class="card-desc">Khám phá 100 loài động vật với ảnh thật. Bấm vào từng con để xem tên và thông tin thú vị. 8 nhóm loài khác nhau.</p>
+      <p class="card-desc">Khám phá 100 loài động vật thuộc 8 nhóm với ảnh thật. Bấm vào từng con để xem tên và thông tin thú vị.</p>
       <div class="card-footer">
         <span class="card-meta">100 loài · 8 nhóm · Tiếng Việt</span>
         <span class="card-play">Khám Phá</span>
@@ -350,7 +379,7 @@ footer {
   </a>
 
   <!-- ── Cờ Các Nước ── -->
-  <a class="card" href="flags.html">
+  <a class="card" href="flags.html" data-cat="offline">
     <div class="card-thumb" style="background:linear-gradient(135deg,#e8eeff,#f0f4ff);">
       <div class="card-thumb-bg" style="background:radial-gradient(ellipse at 50% 50%,#edf0ff,#f0f4ff 70%);"></div>
       <svg class="card-thumb-ring" viewBox="0 0 110 110" aria-hidden="true">
@@ -361,7 +390,7 @@ footer {
     <div class="card-body">
       <div class="card-tag">Giáo Dục · Địa Lý</div>
       <h2 class="card-title">Cờ Các Nước</h2>
-      <p class="card-desc">Khám phá cờ và thông tin của các quốc gia trên thế giới. Bấm vào từng nước để xem thủ đô, dân số và điều thú vị. 6 châu lục.</p>
+      <p class="card-desc">Khám phá cờ và thông tin các quốc gia trên 6 châu lục. Bấm vào từng nước để xem thủ đô, dân số và điều thú vị.</p>
       <div class="card-footer">
         <span class="card-meta">50+ quốc gia · 6 châu lục · Tiếng Việt</span>
         <span class="card-play">Khám Phá</span>
@@ -370,7 +399,7 @@ footer {
   </a>
 
   <!-- ── Jewel Pop ── -->
-  <a class="card" href="jewel.html">
+  <a class="card" href="jewel.html" data-cat="offline">
     <div class="card-thumb" style="background:linear-gradient(135deg,#2d0a55,#1a0533);">
       <div class="card-thumb-bg" style="background:radial-gradient(ellipse at 50% 50%,#3d1080,#1a0533 70%);"></div>
       <svg class="card-thumb-ring" viewBox="0 0 110 110" aria-hidden="true">
@@ -381,7 +410,7 @@ footer {
     <div class="card-body">
       <div class="card-tag">Giải Đố · Chiến Thuật</div>
       <h2 class="card-title">Jewel Pop</h2>
-      <p class="card-desc">Chạm vào nhóm 2+ đá quý cùng màu để nổ tung. Nhóm càng lớn điểm càng cao theo hàm bình phương. Dùng Bom và Sét để vượt qua màn khó!</p>
+      <p class="card-desc">Chạm vào nhóm 2+ đá quý cùng màu để nổ tung, nhóm càng lớn điểm càng cao. Dùng Bom và Sét để vượt qua màn khó!</p>
       <div class="card-footer">
         <span class="card-meta">N² điểm · 6 màu · Bom & Sét</span>
         <span class="card-play">Chơi Ngay</span>
@@ -390,7 +419,7 @@ footer {
   </a>
 
   <!-- ── Nối Hình Pikachu ── -->
-  <a class="card" href="pikachu.html">
+  <a class="card" href="pikachu.html" data-cat="offline">
     <div class="card-thumb" style="background:linear-gradient(135deg,#fffbe6,#fff3cc);">
       <div class="card-thumb-bg" style="background:radial-gradient(ellipse at 50% 50%,#fffae0,#fff3cc 70%);"></div>
       <svg class="card-thumb-ring" viewBox="0 0 110 110" aria-hidden="true">
@@ -401,7 +430,7 @@ footer {
     <div class="card-body">
       <div class="card-tag">Trí Tuệ · Kết Nối</div>
       <h2 class="card-title">Nối Hình Pikachu</h2>
-      <p class="card-desc">Tìm và nối các cặp hình giống nhau bằng đường thẳng. Bắt đầu dễ với 6 cặp, số lượng tăng dần qua 6 vòng ngày càng khó hơn.</p>
+      <p class="card-desc">Tìm và nối các cặp hình giống nhau bằng đường thẳng. Bắt đầu dễ với 6 cặp, số lượng tăng dần qua 6 vòng ngày càng khó.</p>
       <div class="card-footer">
         <span class="card-meta">6 vòng · 12 chủ đề · Từ dễ đến khó</span>
         <span class="card-play">Chơi Ngay</span>
@@ -410,7 +439,7 @@ footer {
   </a>
 
   <!-- ── Tetris ── -->
-  <a class="card" href="tetris.html">
+  <a class="card" href="tetris.html" data-cat="offline">
     <div class="card-thumb" style="background:linear-gradient(135deg,#1a0e04,#2e1a06);">
       <div class="card-thumb-bg" style="background:radial-gradient(ellipse at 50% 50%,#3a1e08,#1a0e04 70%);"></div>
       <svg class="card-thumb-ring" viewBox="0 0 110 110" aria-hidden="true">
@@ -434,7 +463,7 @@ footer {
     <div class="card-body">
       <div class="card-tag">Classic · Xếp Hình</div>
       <h2 class="card-title">Tetris</h2>
-      <p class="card-desc">Tetris cổ điển với màu gỗ ấm áp. Xếp hàng để phá điểm, tốc độ tăng dần theo cấp. Có hold, ghost, combo và hiệu ứng vỡ gỗ đẹp mắt.</p>
+      <p class="card-desc">Tetris cổ điển với màu gỗ ấm áp, tốc độ tăng dần theo cấp. Có hold, ghost, combo và hiệu ứng vỡ gỗ đẹp mắt.</p>
       <div class="card-footer">
         <span class="card-meta">30 cấp · Classic · Âm thanh</span>
         <span class="card-play">Chơi Ngay</span>
@@ -443,7 +472,7 @@ footer {
   </a>
 
   <!-- ── Bong Bóng Vui ── -->
-  <a class="card" href="bubbles.html">
+  <a class="card" href="bubbles.html" data-cat="offline">
     <div class="card-thumb" style="background:linear-gradient(135deg,#d6f0ff,#ffe6f4);">
       <div class="card-thumb-bg" style="background:radial-gradient(ellipse at 50% 50%,#e6f6ff,#ffe6f4 70%);"></div>
       <svg class="card-thumb-ring" viewBox="0 0 110 110" aria-hidden="true">
@@ -480,7 +509,7 @@ footer {
     <div class="card-body">
       <div class="card-tag">Cảm Ứng · Trẻ Em</div>
       <h2 class="card-title">Bong Bóng Vui</h2>
-      <p class="card-desc">Bong bóng nhiều màu bay lên khắp màn hình. Chạm hoặc vuốt để nổ tung với hiệu ứng nước bắn rực rỡ. Có bong bóng cầu vồng và bong bóng ngôi sao bất ngờ!</p>
+      <p class="card-desc">Bong bóng nhiều màu bay lên khắp màn hình, chạm hoặc vuốt để nổ tung với hiệu ứng nước bắn rực rỡ. Có bong bóng cầu vồng và bong bóng ngôi sao bất ngờ!</p>
       <div class="card-footer">
         <span class="card-meta">Đa chạm · Toàn màn hình · Khóa cho bé</span>
         <span class="card-play">Chơi Ngay</span>
@@ -488,145 +517,8 @@ footer {
     </div>
   </a>
 
-  <!-- ── Chuột Chũi Thò Lên ── -->
-  <a class="card" href="mole.html">
-    <div class="card-thumb" style="background:linear-gradient(135deg,#e7f7d8,#d6efc4);">
-      <div class="card-thumb-bg" style="background:radial-gradient(ellipse at 50% 50%,#eefae2,#d6efc4 70%);"></div>
-      <svg class="card-thumb-ring" viewBox="0 0 110 110" aria-hidden="true">
-        <polygon points="55,4 102,29.5 102,80.5 55,106 8,80.5 8,29.5" style="stroke:rgba(90,180,70,.3);"/>
-      </svg>
-      <!-- Mini mole preview -->
-      <svg viewBox="0 0 100 100" width="88" height="88" style="position:relative;z-index:1;" aria-hidden="true">
-        <ellipse cx="50" cy="76" rx="40" ry="17" fill="#9a7048"/>
-        <ellipse cx="50" cy="73" rx="33" ry="13" fill="#3a2714"/>
-        <circle cx="50" cy="52" r="26" fill="#c99869"/>
-        <ellipse cx="50" cy="62" rx="13" ry="10" fill="#e8c7a8"/>
-        <ellipse cx="50" cy="57" rx="5" ry="4" fill="#f296af"/>
-        <circle cx="40" cy="47" r="4" fill="#281a0e"/>
-        <circle cx="60" cy="47" r="4" fill="#281a0e"/>
-        <circle cx="41.4" cy="45.6" r="1.5" fill="#fff"/>
-        <circle cx="61.4" cy="45.6" r="1.5" fill="#fff"/>
-        <path d="M17 73 A33 13 0 0 0 83 73 Z" fill="#3a2714"/>
-      </svg>
-    </div>
-    <div class="card-body">
-      <div class="card-tag">Phản Xạ · Trẻ Em</div>
-      <h2 class="card-title">Chuột Chũi Thò Lên</h2>
-      <p class="card-desc">Con vật thò lên khỏi hang, bé chạm là chui xuống kèm tiếng vui và bụi đất bay tung. Có con vật vàng ăn 5 điểm. Không thua, tốc độ tăng dần nhẹ nhàng.</p>
-      <div class="card-footer">
-        <span class="card-meta">12 con vật · Khóa cho bé · 2–6 tuổi</span>
-        <span class="card-play">Chơi Ngay</span>
-      </div>
-    </div>
-  </a>
-
-  <!-- ── Công Chúa Lấp Lánh ── -->
-  <a class="card" href="princess/index.html">
-    <div class="card-thumb" style="background:linear-gradient(135deg,#ffe6f2,#ecdcff);">
-      <div class="card-thumb-bg" style="background:radial-gradient(ellipse at 50% 50%,#fff0f7,#ecdcff 70%);"></div>
-      <svg class="card-thumb-ring" viewBox="0 0 110 110" aria-hidden="true">
-        <polygon points="55,4 102,29.5 102,80.5 55,106 8,80.5 8,29.5" style="stroke:rgba(178,108,255,.35);"/>
-      </svg>
-      <!-- Mini princess preview -->
-      <svg viewBox="0 0 100 100" width="88" height="88" style="position:relative;z-index:1;" aria-hidden="true">
-        <path d="M30 96 C30 70 36 60 50 58 C64 60 70 70 70 96 Z" fill="#ff9ccf"/>
-        <circle cx="42" cy="78" r="2" fill="#fff" opacity=".8"/><circle cx="56" cy="86" r="2" fill="#fff" opacity=".8"/><circle cx="50" cy="70" r="2" fill="#fff" opacity=".8"/>
-        <path d="M32 44 C26 60 28 74 30 82 L70 82 C72 74 74 60 68 44 Z" fill="#f3cf6a"/>
-        <circle cx="50" cy="40" r="17" fill="#ffdfc4"/>
-        <path d="M33 40 C33 24 67 24 67 40 C62 30 38 30 33 40 Z" fill="#f3cf6a"/>
-        <circle cx="44" cy="42" r="2.2" fill="#503020"/><circle cx="56" cy="42" r="2.2" fill="#503020"/>
-        <path d="M46 50 q4 3 8 0" stroke="#e06080" stroke-width="1.6" fill="none" stroke-linecap="round"/>
-        <circle cx="40" cy="47" r="2.5" fill="#ff96aa" opacity=".6"/><circle cx="60" cy="47" r="2.5" fill="#ff96aa" opacity=".6"/>
-        <path d="M38 27 L42 18 L46 24 L50 14 L54 24 L58 18 L62 27 Z" fill="#ffd84a" stroke="#d8a800" stroke-width="1"/>
-        <circle cx="50" cy="17" r="1.8" fill="#e0344d"/>
-        <path d="M84 30 l1.8 4.4 4.4 1.8 -4.4 1.8 -1.8 4.4 -1.8 -4.4 -4.4 -1.8 4.4 -1.8 Z" fill="#fff5d2"/>
-        <path d="M14 60 l2 5 5 2 -5 2 -2 5 -2 -5 -5 -2 5 -2 Z" fill="#ffd25a"/>
-      </svg>
-    </div>
-    <div class="card-body">
-      <div class="card-tag">Thời Trang · Trang Điểm</div>
-      <h2 class="card-title">Công Chúa Lấp Lánh</h2>
-      <p class="card-desc">Trang điểm, thay váy và đeo trang sức cho công chúa sao cho giống mẫu nhất. 20 vòng, gương thần gợi ý, mini game kiếm kim cương.</p>
-      <div class="card-footer">
-        <span class="card-meta">20 vòng · 15 mục · iPad</span>
-        <span class="card-play">Chơi Ngay</span>
-      </div>
-    </div>
-  </a>
-
-  <!-- ── Tiệm Spa Vui Vẻ ── -->
-  <a class="card" href="spa/index.html">
-    <div class="card-thumb" style="background:linear-gradient(135deg,#ffe3ec,#ffc9da);">
-      <div class="card-thumb-bg" style="background:radial-gradient(ellipse at 50% 50%,#ffedf3,#ffc9da 70%);"></div>
-      <svg class="card-thumb-ring" viewBox="0 0 110 110" aria-hidden="true">
-        <polygon points="55,4 102,29.5 102,80.5 55,106 8,80.5 8,29.5" style="stroke:rgba(240,98,146,.3);"/>
-      </svg>
-      <!-- Mini spa preview -->
-      <svg viewBox="0 0 100 100" width="88" height="88" style="position:relative;z-index:1;" aria-hidden="true">
-        <circle cx="50" cy="56" r="26" fill="#ffdfc4"/>
-        <path d="M24 50 a26 26 0 0 1 52 0 Z" fill="#fff"/>
-        <circle cx="50" cy="22" r="8" fill="#fff"/>
-        <circle cx="50" cy="22" r="4" fill="#f0e4eb"/>
-        <path d="M36 58 a5 5 0 0 0 10 0" stroke="#503020" stroke-width="3" fill="none" stroke-linecap="round"/>
-        <path d="M54 58 a5 5 0 0 0 10 0" stroke="#503020" stroke-width="3" fill="none" stroke-linecap="round"/>
-        <path d="M43 68 a7 7 0 0 0 14 0" stroke="#e06080" stroke-width="3" fill="none" stroke-linecap="round"/>
-        <circle cx="33" cy="65" r="4.5" fill="#ff96aa" opacity=".7"/>
-        <circle cx="67" cy="65" r="4.5" fill="#ff96aa" opacity=".7"/>
-        <path d="M14 20 l2.5 6 6 2.5 -6 2.5 -2.5 6 -2.5 -6 -6 -2.5 6 -2.5 Z" fill="#ffd25a"/>
-        <path d="M84 32 l1.8 4.4 4.4 1.8 -4.4 1.8 -1.8 4.4 -1.8 -4.4 -4.4 -1.8 4.4 -1.8 Z" fill="#fff5d2"/>
-      </svg>
-    </div>
-    <div class="card-body">
-      <div class="card-tag">Quản Lý · Nhanh Tay</div>
-      <h2 class="card-title">Tiệm Spa Vui Vẻ</h2>
-      <p class="card-desc">Điều hành tiệm spa như Sally's Spa! Cô nhân viên đi lại mát-xa, đắp và gỡ mặt nạ, mời trà khách chờ; phòng xông hơi chứa 3 khách. Đừng để khách hết tim mà giận bỏ về. Tiền kiếm được dùng nâng cấp tiệm, thuê thêm nhân viên.</p>
-      <div class="card-footer">
-        <span class="card-meta">4 dịch vụ · Nâng cấp tiệm · Lưu tiến trình</span>
-        <span class="card-play">Mở Tiệm</span>
-      </div>
-    </div>
-  </a>
-
-  <!-- ── Nhà Hàng Vui Vẻ ── -->
-  <a class="card" href="restaurant/index.html">
-    <div class="card-thumb" style="background:linear-gradient(135deg,#ffe6cc,#ffc38a);">
-      <div class="card-thumb-bg" style="background:radial-gradient(ellipse at 50% 50%,#fff1e0,#ffbe80 70%);"></div>
-      <svg class="card-thumb-ring" viewBox="0 0 110 110" aria-hidden="true">
-        <polygon points="55,4 102,29.5 102,80.5 55,106 8,80.5 8,29.5" style="stroke:rgba(245,133,47,.32);"/>
-      </svg>
-      <!-- Mini restaurant preview -->
-      <svg viewBox="0 0 100 100" width="88" height="88" style="position:relative;z-index:1;" aria-hidden="true">
-        <ellipse cx="50" cy="80" rx="34" ry="12" fill="#fff" opacity=".5"/>
-        <ellipse cx="50" cy="77" rx="30" ry="10" fill="#fff"/>
-        <path d="M13 60 L13 87" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
-        <path d="M87 60 L87 87" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
-        <circle cx="50" cy="44" r="23" fill="#6a4020"/>
-        <circle cx="50" cy="46" r="20" fill="#ffdfc4"/>
-        <path d="M30 41 a20 20 0 0 1 40 0 Z" fill="#6a4020"/>
-        <rect x="34" y="20" width="32" height="8" rx="3" fill="#fff"/>
-        <circle cx="41" cy="18" r="7.5" fill="#fff"/>
-        <circle cx="59" cy="18" r="7.5" fill="#fff"/>
-        <circle cx="50" cy="15" r="9" fill="#fff"/>
-        <path d="M40 45 a4 4 0 0 1 8 0" fill="none" stroke="#503020" stroke-width="2.8" stroke-linecap="round"/>
-        <path d="M52 45 a4 4 0 0 1 8 0" fill="none" stroke="#503020" stroke-width="2.8" stroke-linecap="round"/>
-        <ellipse cx="38" cy="53" rx="4" ry="2.6" fill="#ff7896" opacity=".5"/>
-        <ellipse cx="62" cy="53" rx="4" ry="2.6" fill="#ff7896" opacity=".5"/>
-        <path d="M44 52 a6 6 0 0 0 12 0" fill="none" stroke="#d1607a" stroke-width="2.8" stroke-linecap="round"/>
-      </svg>
-    </div>
-    <div class="card-body">
-      <div class="card-tag">Quản Lý · Nhanh Tay</div>
-      <h2 class="card-title">Nhà Hàng Vui Vẻ</h2>
-      <p class="card-desc">Làm cô chủ nhà hàng: mời khách vào bàn, ghi món, giục bếp, bưng đồ ăn, thu tiền và dọn bàn. Chuông vàng reo là có mini-game kiếm thêm vàng &amp; kinh nghiệm. Lên cấp để mở tủ đồ — đổi tóc, váy, tạp dề, phụ kiện cho cô chủ.</p>
-      <div class="card-footer">
-        <span class="card-meta">8 món · Mini-game · Tủ đồ · Lưu tiến trình</span>
-        <span class="card-play">Mở Quán</span>
-      </div>
-    </div>
-  </a>
-
   <!-- ── Bể Cá ── -->
-  <a class="card" href="fish.html">
+  <a class="card" href="fish.html" data-cat="offline">
     <div class="card-thumb" style="background:linear-gradient(135deg,#8fe0f7,#1f8fc4);">
       <div class="card-thumb-bg" style="background:radial-gradient(ellipse at 50% 40%,#a5e9fb,#0f6ba5 75%);"></div>
       <svg class="card-thumb-ring" viewBox="0 0 110 110" aria-hidden="true">
@@ -657,7 +549,7 @@ footer {
     <div class="card-body">
       <div class="card-tag">Thư Giãn · Trẻ Em</div>
       <h2 class="card-title">Bể Cá</h2>
-      <p class="card-desc">Bể biển hoạt hình mắt to má hồng: cá, đàn cá con, cá mập con, cá lồng đèn, sứa, rùa, cá ngựa, cua, sao biển, cá đuối, bạch tuộc, và ngao ngọc nửa chìm trong cát. Chạm rắc thức ăn, ăn nhiều thì lớn và mọc thêm lấp lánh, ngôi sao, vương miện. Cá trốn sau cột đá, chui vào san hô thùng, đi ngủ có Zzz, chạm để đánh thức. Hai con trưởng thành cùng loài sẽ sinh em bé. Chạm rắc thức ăn — con nào ăn cũng lớn dần lên. Chạm vào bạch tuộc là nó phun mực bỏ chạy. Mỗi phút bể lại đổi cảnh ngày, hoàng hôn, đêm, bình minh.</p>
+      <p class="card-desc">Bể biển hoạt hình mắt to má hồng với cá, sứa, rùa, cua, bạch tuộc và nhiều loài khác; chạm rắc thức ăn để cá lớn dần, mọc thêm lấp lánh và vương miện. Cá biết trốn, ngủ, sinh em bé, và bể đổi cảnh ngày đêm mỗi phút.</p>
       <div class="card-footer">
         <span class="card-meta">11 loài · Lớn &amp; lấp lánh · Trốn, ngủ, sinh con · 9 cảnh</span>
         <span class="card-play">Vào Bể</span>
@@ -666,7 +558,7 @@ footer {
   </a>
 
   <!-- ── Sắp Xếp Sắc Màu ── -->
-  <a class="card" href="colorsort/index.html">
+  <a class="card" href="colorsort/index.html" data-cat="offline">
     <div class="card-thumb" style="background:linear-gradient(135deg,#3a5fd0,#7a2b86);">
       <div class="card-thumb-bg" style="background:radial-gradient(ellipse at 50% 45%,#4a6fe0,#3a2378 72%);"></div>
       <svg class="card-thumb-ring" viewBox="0 0 110 110" aria-hidden="true">
@@ -694,7 +586,7 @@ footer {
     <div class="card-body">
       <div class="card-tag">Xếp Hình · Trí Tuệ</div>
       <h2 class="card-title">Sắp Xếp Sắc Màu 3D</h2>
-      <p class="card-desc">Rót bóng qua lại giữa các ống thuỷ tinh sao cho mỗi ống chỉ còn một màu. Bóng bi bóng loáng, tiếng "bụp" vui tai, pháo hoa khi xong vòng. Chơi không dừng, vòng sau khó hơn vòng trước, có ống thêm, đũa thần và gợi ý giúp bé gỡ thế bí.</p>
+      <p class="card-desc">Rót bóng qua lại giữa các ống thuỷ tinh sao cho mỗi ống chỉ còn một màu. Vòng sau khó hơn vòng trước, có ống thêm, đũa thần và gợi ý giúp bé gỡ thế bí.</p>
       <div class="card-footer">
         <span class="card-meta">Vô tận · 11 màu · Vật phẩm · iPad</span>
         <span class="card-play">Xếp Ngay</span>
@@ -703,7 +595,7 @@ footer {
   </a>
 
   <!-- ── Hồ Cá Thư Giãn ── -->
-  <a class="card" href="aquarium/index.html">
+  <a class="card" href="aquarium/index.html" data-cat="offline">
     <div class="card-thumb" style="background:linear-gradient(135deg,#7fdcff,#0b4f86);">
       <div class="card-thumb-bg" style="background:radial-gradient(ellipse at 50% 40%,#8fe3ff,#0b4f86 75%);"></div>
       <svg class="card-thumb-ring" viewBox="0 0 110 110" aria-hidden="true">
@@ -728,7 +620,7 @@ footer {
     <div class="card-body">
       <div class="card-tag">Mô Phỏng · Thư Giãn</div>
       <h2 class="card-title">Hồ Cá Thư Giãn</h2>
-      <p class="card-desc">Thiết kế và chăm sóc hồ cá theo thời gian thực: lọc nước, cho ăn, dọn hồ, chữa bệnh. Cá vẽ kiểu hoạt hình phẳng mắt to, đáy biển cát vàng, san hô, sao biển. Lai tạo hai loài để khám phá 11 giống cá hiếm với tạo hình đặc biệt.</p>
+      <p class="card-desc">Thiết kế và chăm sóc hồ cá theo thời gian thực: lọc nước, cho ăn, dọn hồ, chữa bệnh. Lai tạo hai loài để khám phá 11 giống cá hiếm với tạo hình đặc biệt.</p>
       <div class="card-footer">
         <span class="card-meta">Thời gian thực · 28 loài · 6 hồ</span>
         <span class="card-play">Chơi Ngay</span>
@@ -738,7 +630,7 @@ footer {
 
 
   <!-- ── Tìm Điểm Khác Nhau ── -->
-  <a class="card" href="spot/index.html">
+  <a class="card" href="spot/index.html" data-cat="offline">
     <div class="card-thumb" style="background:linear-gradient(135deg,#57c5b6,#1a5f7a);">
       <div class="card-thumb-bg" style="background:radial-gradient(ellipse at 50% 45%,#6fd3c6,#1a5f7a 75%);"></div>
       <svg class="card-thumb-ring" viewBox="0 0 110 110" aria-hidden="true">
@@ -760,7 +652,7 @@ footer {
     <div class="card-body">
       <div class="card-tag">Quan Sát · Trí Tuệ</div>
       <h2 class="card-title">Tìm Điểm Khác Nhau</h2>
-      <p class="card-desc">Hai bức tranh gần giống nhau — chạm vào chỗ khác để kiếm tiền vàng. 100 vòng qua bốn chủ đề nhà bếp, quán ăn, quần áo, bãi biển; càng lên cao cảnh càng đông đồ vật, khác biệt càng bé và càng khó tìm. Kẹt thì dùng tiền vàng mua gợi ý. Tự lưu để chơi tiếp lần sau.</p>
+      <p class="card-desc">Hai bức tranh gần giống nhau, chạm vào chỗ khác để kiếm tiền vàng qua 100 vòng với bốn chủ đề. Càng lên cao khác biệt càng khó tìm, kẹt thì dùng vàng mua gợi ý.</p>
       <div class="card-footer">
         <span class="card-meta">100 vòng · 4 chủ đề · Tiền vàng &amp; gợi ý · iPad</span>
         <span class="card-play">Soi Ngay</span>
@@ -770,7 +662,7 @@ footer {
 
 
   <!-- ── Nhà Mới Của Chúng Ta ── -->
-  <a class="card" href="newhome/index.html">
+  <a class="card" href="newhome/index.html" data-cat="offline" hidden>
     <div class="card-thumb" style="background:linear-gradient(135deg,#dff3ff,#a8d8a0);">
       <div class="card-thumb-bg" style="background:radial-gradient(ellipse at 50% 45%,#f4fff0,#8ecb62 75%);"></div>
       <svg class="card-thumb-ring" viewBox="0 0 110 110" aria-hidden="true">
@@ -795,7 +687,7 @@ footer {
     <div class="card-body">
       <div class="card-tag">Xây Dựng · Gia Đình</div>
       <h2 class="card-title">Nhà Mới Của Chúng Ta</h2>
-      <p class="card-desc">Cả nhà cùng đến một vùng đất hoang và xây nên ngôi nhà đầu tiên. Chặt cây, đập đá, hái dâu, lấy nước sông; đặt nền rồi cùng góp vật liệu dựng lửa trại, kho chung, nhà và ruộng; trồng lúa, tưới nước, thu hoạch. Không đánh nhau, không thua — thế giới lớn lên theo tay cả nhà và tự lưu để chơi tiếp.</p>
+      <p class="card-desc">Cả nhà cùng đến vùng đất hoang, thu thập vật liệu và dựng lửa trại, kho, nhà, ruộng. Không đánh nhau, không thua, thế giới lớn lên theo tay cả nhà và tự lưu để chơi tiếp.</p>
       <div class="card-footer">
         <span class="card-meta">2–4 người · Chơi online qua link · Chơi một mình cũng được · iPad</span>
         <span class="card-play">Về Nhà Thôi</span>
@@ -805,7 +697,7 @@ footer {
 
 
   <!-- ── Cờ Caro ── -->
-  <a class="card" href="caro.html">
+  <a class="card" href="caro.html" data-cat="online">
     <div class="card-thumb" style="background:linear-gradient(135deg,#f7fbff,#b9cde4);">
       <div class="card-thumb-bg" style="background:radial-gradient(ellipse at 50% 45%,#ffffff,#c9d9ec 75%);"></div>
       <svg class="card-thumb-ring" viewBox="0 0 110 110" aria-hidden="true">
@@ -825,7 +717,7 @@ footer {
     <div class="card-body">
       <div class="card-tag">Cờ · Trí Tuệ</div>
       <h2 class="card-title">Cờ Caro</h2>
-      <p class="card-desc">Xếp năm quân liền nhau để thắng máy trên bàn rộng 30 × 30. Máy ở mức Khó biết tìm chuỗi nước bốn và hàng ba để ép thắng, đồng thời dò trước bẫy của bạn để chặn kịp. Có gợi ý, đi lại, và tự lưu ván đang chơi dở.</p>
+      <p class="card-desc">Xếp năm quân liền nhau để thắng máy trên bàn 30 × 30, máy mức Khó biết ép thắng và chặn bẫy của bạn. Có gợi ý, đi lại và tự lưu ván đang chơi dở.</p>
       <div class="card-footer">
         <span class="card-meta">Bàn 30 × 30 · 3 mức độ · Gợi ý &amp; đi lại</span>
         <span class="card-play">Chơi Ngay</span>
@@ -835,7 +727,7 @@ footer {
 
 
   <!-- ── Cờ Cá Ngựa ── -->
-  <a class="card" href="cangua.html">
+  <a class="card" href="cangua.html" data-cat="online">
     <div class="card-thumb" style="background:linear-gradient(135deg,#fff8ec,#e9d6b8);">
       <div class="card-thumb-bg" style="background:radial-gradient(ellipse at 50% 45%,#ffffff,#f1e2c8 75%);"></div>
       <svg class="card-thumb-ring" viewBox="0 0 110 110" aria-hidden="true">
@@ -857,7 +749,7 @@ footer {
     <div class="card-body">
       <div class="card-tag">Cờ · Nhiều Người</div>
       <h2 class="card-title">Cờ Cá Ngựa</h2>
-      <p class="card-desc">Tung hai xúc xắc 3D đưa bốn chú ngựa đi hết vòng rồi lên đích. Ra 1 và 6 hoặc một đôi thì được ra quân và tung tiếp, đi trúng ngựa đối thủ là đá nó về chuồng. Chơi với máy, chơi chung một máy, hoặc tạo phòng online và gửi link mời 1–3 bạn cùng chơi.</p>
+      <p class="card-desc">Tung hai xúc xắc 3D đưa bốn chú ngựa đi hết vòng rồi lên đích, đi trúng ngựa đối thủ là đá nó về chuồng. Chơi với máy, chơi chung một máy, hoặc tạo phòng online mời 1–3 bạn.</p>
       <div class="card-footer">
         <span class="card-meta">2–4 người · Chơi online qua link · Có máy chơi cùng</span>
         <span class="card-play">Chơi Ngay</span>
@@ -866,7 +758,7 @@ footer {
   </a>
 
   <!-- ── Cờ Tỷ Phú ── -->
-  <a class="card" href="typhu.html">
+  <a class="card" href="typhu.html" data-cat="online">
     <div class="card-thumb" style="background:linear-gradient(135deg,#eef6ee,#c9ddc9);">
       <div class="card-thumb-bg" style="background:radial-gradient(ellipse at 50% 45%,#ffffff,#d6e7d6 75%);"></div>
       <svg class="card-thumb-ring" viewBox="0 0 110 110" aria-hidden="true">
@@ -894,7 +786,7 @@ footer {
     <div class="card-body">
       <div class="card-tag">Cờ · Nhiều Người</div>
       <h2 class="card-title">Cờ Tỷ Phú</h2>
-      <p class="card-desc">Cờ tỷ phú kiểu ZingPlay: 32 ô địa danh Việt Nam, mua đất rồi xây dần Nhà → Biệt thự → Chung cư → Khách sạn → Biểu tượng, thu phí tham quan, mua lại đất đối thủ giá gấp đôi, Côn Đảo, Bến Xe, Đại Nhạc Hội, thẻ Cơ Hội lợi hại. Chọn nhân vật chibi có kỹ năng riêng. Thắng bằng phá sản đối thủ, 3 nhóm màu, một hàng hoặc 5 điểm du lịch.</p>
+      <p class="card-desc">Cờ tỷ phú kiểu ZingPlay với 32 ô địa danh Việt Nam: mua đất, xây dần lên Biểu tượng, thu phí tham quan, mua lại đất đối thủ, thẻ Cơ Hội lợi hại. Chọn nhân vật chibi có kỹ năng riêng, thắng bằng phá sản đối thủ, 3 nhóm màu, một hàng hoặc 5 điểm du lịch.</p>
       <div class="card-footer">
         <span class="card-meta">2–4 người · 10 nhân vật · Chơi online qua link · Có máy chơi cùng</span>
         <span class="card-play">Chơi Ngay</span>
@@ -903,7 +795,7 @@ footer {
   </a>
 
   <!-- ── Xì Tố ── -->
-  <a class="card" href="xito.html">
+  <a class="card" href="xito.html" data-cat="online">
     <div class="card-thumb" style="background:linear-gradient(135deg,#1f8a5b,#0f5c39);">
       <div class="card-thumb-bg" style="background:radial-gradient(ellipse at 50% 45%,#2fa874,#146b45 75%);"></div>
       <svg class="card-thumb-ring" viewBox="0 0 110 110" aria-hidden="true">
@@ -924,7 +816,7 @@ footer {
     <div class="card-body">
       <div class="card-tag">Bài · Nhiều Người</div>
       <h2 class="card-title">Xì Tố</h2>
-      <p class="card-desc">Poker Texas Hold'em: mỗi người 2 lá tẩy, lật dần 5 lá chung giữa bàn qua flop, turn, river. Có tiền mù, nút cái, tố, theo, tất tay và tụ phụ; ghép 5 lá đẹp nhất để so bài. Chơi với 1–5 máy, hoặc tạo phòng online và gửi link mời bạn bè.</p>
+      <p class="card-desc">Poker Texas Hold'em: 2 lá tẩy, lật dần 5 lá chung qua flop, turn, river, có tiền mù, tố, theo, tất tay và tụ phụ. Chơi với 1–5 máy, hoặc tạo phòng online và gửi link mời bạn bè.</p>
       <div class="card-footer">
         <span class="card-meta">2–6 người · Chơi online qua link · Có máy chơi cùng</span>
         <span class="card-play">Chơi Ngay</span>
@@ -982,6 +874,40 @@ function tick() {
 }
 
 if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) tick();
+
+// ── tag → chip, phân loại và lọc ──
+const CATS = [
+  ['all', 'Tất cả', '🎮'], ['offline', 'Offline', '📴'], ['online', 'Online', '🌐'],
+];
+const cards = [...document.querySelectorAll('#game-grid .card')].filter(c => !c.hidden);
+for (const t of document.querySelectorAll('.card-tag')) {
+  const parts = t.textContent.split('·').map(x => x.trim()).filter(Boolean);
+  t.innerHTML = parts.map(x => `<span></span>`).join('');
+  [...t.children].forEach((sp, i) => { sp.textContent = parts[i]; });
+}
+const catOf = c => (c.dataset.cat || '').split(/\s+/).filter(Boolean);
+const filters = document.getElementById('filters');
+let empty = null;
+function applyFilter(key) {
+  for (const b of filters.children) b.classList.toggle('on', b.dataset.key === key);
+  let n = 0;
+  for (const c of cards) { const show = key === 'all' || catOf(c).includes(key); c.classList.toggle('filtered-out', !show); if (show) n++; }
+  if (!empty) { empty = document.createElement('p'); empty.className = 'grid-empty'; empty.textContent = 'Chưa có trò chơi nào trong loại này.'; document.getElementById('game-grid').appendChild(empty); }
+  empty.hidden = n > 0;
+  try { history.replaceState(null, '', key === 'all' ? location.pathname : '#loai=' + key); } catch (e) {}
+}
+for (const [key, label, icon] of CATS) {
+  const n = key === 'all' ? cards.length : cards.filter(c => catOf(c).includes(key)).length;
+  if (!n) continue;
+  const b = document.createElement('button');
+  b.type = 'button'; b.dataset.key = key;
+  b.innerHTML = `${icon} <span></span> <small>${n}</small>`;
+  b.querySelector('span').textContent = label;
+  b.onclick = () => applyFilter(key);
+  filters.appendChild(b);
+}
+const fromHash = (/^#loai=([a-z-]+)$/.exec(location.hash) || [])[1];
+applyFilter(CATS.some(c => c[0] === fromHash) ? fromHash : 'all');
 </script>
 </body>
 </html>

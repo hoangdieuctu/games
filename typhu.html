@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Cờ Tỷ Phú">
-<meta name="theme-color" content="#dfe8f1">
+<meta name="theme-color" content="#0b3d2e">
 <title>Cờ Tỷ Phú</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23fffdf6'/%3E%3Crect x='3' y='3' width='26' height='26' rx='3' fill='none' stroke='%2323324a' stroke-width='1.5'/%3E%3Crect x='3' y='3' width='8' height='8' fill='%23e74c3c'/%3E%3Crect x='21' y='3' width='8' height='8' fill='%2327ae60'/%3E%3Crect x='3' y='21' width='8' height='8' fill='%23f7d31a'/%3E%3Crect x='21' y='21' width='8' height='8' fill='%231e6fd8'/%3E%3Ctext x='16' y='20' text-anchor='middle' font-family='sans-serif' font-size='11' font-weight='900' fill='%2323324a'%3E%24%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -15,7 +15,7 @@
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
-  --desk1: #e8eff6; --desk2: #cfdceb; --ink: #23324a; --muted: #6b7a90;
+  --desk1: #1b6b4f; --desk2: #06261c; --ink: #23324a; --muted: #6b7a90;
   --paper: #fffdf6; --line: #cfd9e5; --card: #ffffff; --green: #2e9d4f; --red: #e8323c;
   --c0: #e53935; --c1: #1e6fd8; --c2: #f5b700; --c3: #2e9d4f;
 }
@@ -23,7 +23,7 @@ html, body { width: 100%; height: 100%; overflow: hidden; }
 @supports (height: 100dvh) { html, body { height: 100dvh; } }
 body {
   font-family: 'Baloo 2', 'Nunito', system-ui, sans-serif; color: var(--ink);
-  background: radial-gradient(ellipse at 30% 0%, #f7fbff 0%, var(--desk1) 40%, var(--desk2) 100%);
+  background: radial-gradient(ellipse at 50% 42%, #1f7a5a 0%, #11523d 38%, #0b3a2c 68%, var(--desk2) 100%);
   -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none;
   touch-action: manipulation; overscroll-behavior: none;
   display: flex; flex-direction: column;
@@ -34,47 +34,44 @@ button:disabled { opacity: .4; cursor: default; }
 [hidden] { display: none !important; }
 
 /* ── thanh trên ── */
-.top { display: flex; align-items: center; gap: 12px; padding: 10px 16px 4px; max-width: 760px; width: 100%; margin: 0 auto; }
-.back {
-  width: 44px; height: 44px; flex: 0 0 auto; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-  background: rgba(255,255,255,.8); color: var(--ink); text-decoration: none; font-size: 26px; font-weight: 800; line-height: 1;
-  box-shadow: 0 3px 10px rgba(35,50,74,.12);
+.top { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 8px 12px 0; }
+.back, .mute {
+  width: 40px; height: 40px; flex: 0 0 auto; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  background: rgba(0,0,0,.35); color: #fff; text-decoration: none; font-size: 24px; font-weight: 800; line-height: 1;
+  border: 1px solid rgba(255,255,255,.18); box-shadow: 0 3px 10px rgba(0,0,0,.3);
 }
-.top h1 { font-size: 26px; font-weight: 800; letter-spacing: .5px; flex: 1; white-space: nowrap; }
-.top h1 span:nth-child(1) { color: var(--c0); } .top h1 span:nth-child(2) { color: var(--c1); } .top h1 span:nth-child(3) { color: var(--c3); }
-.mute { width: 44px; height: 44px; flex: 0 0 auto; border-radius: 50%; font-size: 20px; background: rgba(255,255,255,.8); box-shadow: 0 3px 10px rgba(35,50,74,.12); }
-.room-tag {
-  background: rgba(255,255,255,.85); border-radius: 999px; padding: 4px 14px; font-weight: 700; font-size: 14px;
-  box-shadow: 0 3px 10px rgba(35,50,74,.1); white-space: nowrap; color: var(--muted);
-}
+.mute { font-size: 18px; }
+.top h1 { font-size: 24px; font-weight: 800; letter-spacing: 1px; white-space: nowrap; text-shadow: 0 2px 0 rgba(0,0,0,.4), 0 0 18px rgba(255,210,63,.35); }
+.top h1 span:nth-child(1) { color: #ff7b72; } .top h1 span:nth-child(2) { color: #ffd23f; } .top h1 span:nth-child(3) { color: #7be495; }
+.room-tag { background: rgba(0,0,0,.35); border: 1px solid rgba(255,255,255,.18); border-radius: 999px; padding: 4px 12px; font-weight: 700; font-size: 13px; white-space: nowrap; color: #fff; }
 
 /* ── bàn cờ ── */
-.board-wrap { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; padding: 0 12px; }
-/* khung bọc đúng bằng bàn cờ để khay xúc xắc luôn nằm chính giữa bàn */
+/* sân khấu toàn màn hình: thanh trên, thẻ người chơi, bàn cờ hình thoi, cụm nút giữa bàn, thanh dưới */
+.stage { --s: 44px; position: relative; flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.board-wrap { position: relative; flex: 1; min-height: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4px 8px; gap: 8px; }
 .board-box { position: relative; flex: 0 0 auto; }
-/* khay xúc xắc nằm chính giữa bàn; khi tung thì bay vào từ phía người chơi (--tx/--ty) */
-.dice-stage { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); pointer-events: none; transition: opacity .25s; }
-.dice-stage.hide { opacity: 0; }
-.dice-stage .dice { pointer-events: auto; will-change: transform; }
-.dice-stage.throw .dice { animation: throwin .75s cubic-bezier(.2, .9, .3, 1.08); }
+/* cụm giữa bàn: dòng trạng thái, nút ĐỔ kèm xúc xắc, nút hành động */
+.mid { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; }
+.dice-stage { transition: opacity .25s; }
+.dice-stage.hide { opacity: 0; pointer-events: none; }
+.dice-stage .cubes { will-change: transform; }
+.dice-stage.throw .cubes { animation: throwin .75s cubic-bezier(.2, .9, .3, 1.08); }
 @keyframes throwin {
   0% { transform: translate(var(--tx, 0px), var(--ty, 0px)) scale(1.7) rotate(-35deg); opacity: .3; }
   55% { transform: translate(0, 0) scale(1.08) rotate(6deg); opacity: 1; }
   100% { transform: none; }
 }
-#board {
-  display: block; width: 100%; height: 100%; background: var(--paper); border-radius: 14px;
-  box-shadow: 0 10px 30px rgba(35,50,74,.18), 0 1px 0 rgba(255,255,255,.9) inset; touch-action: none;
-}
-.sq .bg { fill: #fff; stroke: #b9c6d6; stroke-width: 1.2; }
-.sq.hot .bg { fill: #f3f7fb; }
-.sq-name { font: 800 12px 'Baloo 2', system-ui, sans-serif; text-anchor: middle; dominant-baseline: central; pointer-events: none; fill: var(--ink); }
+#board { display: block; width: 100%; height: 100%; overflow: visible; touch-action: none; }
+.sq .bg { fill: #fffdf6; stroke: #c9d3de; stroke-width: 1; }
+.sq.hot .bg { fill: #fff6cf; }
+.sq .bg, .sq-side-face { transition: fill .2s; }
+.sq-name { font: 800 15px 'Baloo 2', system-ui, sans-serif; text-anchor: middle; dominant-baseline: central; pointer-events: none; fill: var(--ink); letter-spacing: .3px; }
 .sq-side { font-size: 12.5px; }
 .sq-price { font: 700 10px 'Baloo 2', system-ui, sans-serif; text-anchor: middle; dominant-baseline: central; pointer-events: none; fill: var(--muted); }
 .sq-big { font: 800 11.5px 'Baloo 2', system-ui, sans-serif; text-anchor: middle; dominant-baseline: central; pointer-events: none; letter-spacing: .4px; }
 .sq-icon { text-anchor: middle; dominant-baseline: central; pointer-events: none; }
-.center-title { font: 800 44px 'Baloo 2', system-ui, sans-serif; text-anchor: middle; dominant-baseline: central; letter-spacing: 2px; pointer-events: none; }
-.center-sub { font: 700 14px 'Baloo 2', system-ui, sans-serif; text-anchor: middle; dominant-baseline: central; fill: var(--muted); pointer-events: none; }
+.center-title { font: 800 64px 'Baloo 2', system-ui, sans-serif; text-anchor: middle; dominant-baseline: central; letter-spacing: 3px; pointer-events: none; fill: rgba(255,255,255,.22); }
+.center-sub { font: 700 14px 'Baloo 2', system-ui, sans-serif; text-anchor: middle; dominant-baseline: central; fill: rgba(255,255,255,.4); pointer-events: none; }
 .deck-title { font: 800 15px 'Baloo 2', system-ui, sans-serif; text-anchor: middle; dominant-baseline: central; fill: #fff; letter-spacing: 1px; pointer-events: none; }
 .deck-icon { font-size: 34px; text-anchor: middle; dominant-baseline: central; pointer-events: none; }
 .mort { pointer-events: none; }
@@ -82,6 +79,7 @@ button:disabled { opacity: .4; cursor: default; }
 #board.init .token { transition: none; }
 .token .tbody { transform-box: fill-box; transform-origin: center; }
 .token .ring { fill: none; stroke-width: 3; opacity: 0; transform-box: fill-box; transform-origin: center; }
+.token .disc { stroke: #fff; stroke-width: 2; }
 .token.turn .ring { opacity: .9; animation: ring 1.2s ease-in-out 3; }
 @keyframes ring { 0%, 100% { transform: scale(1); opacity: .9; } 50% { transform: scale(1.22); opacity: .3; } }
 .token .face { font-size: 15px; text-anchor: middle; dominant-baseline: central; }
@@ -116,47 +114,69 @@ button:disabled { opacity: .4; cursor: default; }
 .card-text { font: 700 15.5px 'Baloo 2', system-ui, sans-serif; text-anchor: middle; dominant-baseline: central; fill: var(--ink); }
 .card-icon { font-size: 40px; text-anchor: middle; dominant-baseline: central; }
 
-/* ── cột bên ── */
-.shell { flex: 1; min-height: 0; display: flex; flex-direction: column; }
-.side { display: flex; flex-direction: column; gap: 6px; padding: 8px 16px 0; max-width: 760px; width: 100%; margin: 0 auto; }
-.play-row { display: flex; align-items: center; gap: 12px; }
-.players { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 6px; min-width: 0; }
+/* ── thẻ người chơi: 4 góc màn hình (ngang) hoặc hàng trên bàn (dọc) ── */
+.hud { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; padding: 6px 8px 0; }
 .pl {
-  display: flex; flex-direction: column; gap: 3px; min-width: 0;
-  background: rgba(255,255,255,.75); border-radius: 12px; padding: 5px 9px; font-weight: 700; font-size: 14px;
-  border: 2px solid transparent; border-left: 7px solid var(--c); transition: border-color .2s, background .2s; cursor: pointer; text-align: left;
+  position: relative; display: flex; flex-direction: column; gap: 4px; min-width: 0; color: #fff; text-align: left; cursor: pointer;
+  background: linear-gradient(160deg, rgba(30,62,82,.94), rgba(8,24,34,.94)); border: 2px solid rgba(255,255,255,.14); border-radius: 16px; padding: 8px 10px 8px 12px;
+  box-shadow: 0 6px 18px rgba(0,0,0,.35); transition: border-color .2s, box-shadow .2s; font-weight: 700; font-size: 13px;
 }
-.pl-top { display: flex; align-items: center; gap: 6px; min-width: 0; }
-.pl .chip { width: 22px; height: 22px; border-radius: 50%; flex: 0 0 auto; background: var(--c); display: flex; align-items: center; justify-content: center; font-size: 13px; box-shadow: 0 0 0 2px #fff inset; }
-.pl .nm { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.pl .cash { white-space: nowrap; font-weight: 800; color: var(--green); font-size: 14px; }
-.pl .cash.low { color: var(--red); }
-.pl .delta { font-size: 13px; font-weight: 900; padding: 1px 8px; border-radius: 999px; color: #fff; white-space: nowrap; animation: deltafade 2.2s ease-out forwards; }
+.pl::before { content: ''; position: absolute; left: -2px; top: 12px; bottom: 12px; width: 5px; border-radius: 0 4px 4px 0; background: var(--c); }
+.pl.s1 { order: 1; } .pl.s2 { order: 2; } .pl.s3 { order: 3; } .pl.s0 { order: 4; }
+.pl.turn { border-color: var(--c); box-shadow: 0 0 0 3px color-mix(in srgb, var(--c) 35%, transparent), 0 0 28px color-mix(in srgb, var(--c) 60%, transparent), 0 6px 18px rgba(0,0,0,.35); }
+.pl.off { opacity: .6; }
+.pl.out { opacity: .5; } .pl.out .nm { text-decoration: line-through; }
+.pl-top { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.pl .ava { width: 42px; height: 42px; flex: 0 0 auto; border-radius: 50%; background: var(--c); box-shadow: 0 0 0 2px #fff inset, 0 2px 6px rgba(0,0,0,.4); overflow: hidden; }
+.pl .ava svg { width: 100%; height: 100%; display: block; }
+.pl-id { flex: 1; min-width: 0; display: flex; flex-direction: column; line-height: 1.15; }
+.pl .nm { font-weight: 800; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pl .skill { font-size: 11px; font-weight: 600; color: rgba(255,255,255,.6); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pl .rank {
+  flex: 0 0 auto; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 14px;
+  color: #5a3a00; background: radial-gradient(circle at 35% 30%, #fff3b0, #ffd23f 50%, #e0a200); box-shadow: 0 2px 4px rgba(0,0,0,.4);
+}
+.pl .rank.r2 { background: radial-gradient(circle at 35% 30%, #fff, #d9dee5 50%, #9aa5b4); color: #2d3645; }
+.pl .rank.r3 { background: radial-gradient(circle at 35% 30%, #ffd9b3, #d08a4a 50%, #8a5a2b); color: #3b2210; }
+.pl .rank.r4 { background: #3a4a58; color: #cfd9e5; }
+.pl-row { display: flex; align-items: center; justify-content: space-between; gap: 6px; background: rgba(0,0,0,.28); border-radius: 8px; padding: 2px 8px; font-size: 12px; min-height: 22px; }
+.pl-row .lbl { color: rgba(255,255,255,.65); font-weight: 600; white-space: nowrap; } .pl-row .lbl b { font-weight: inherit; }
+.pl .cash { white-space: nowrap; font-weight: 800; color: #7be495; font-size: 14px; }
+.pl .cash.low { color: #ff8a80; }
+.pl .worth { white-space: nowrap; font-weight: 800; color: #ffd23f; font-size: 13px; }
+.pl .delta { font-size: 12px; font-weight: 900; padding: 1px 7px; border-radius: 999px; color: #fff; white-space: nowrap; animation: deltafade 2.2s ease-out forwards; }
 .pl .delta.plus { background: var(--green); } .pl .delta.minus { background: var(--red); }
 @keyframes deltafade { 0% { opacity: 0; transform: translateY(6px) scale(.7); } 12% { opacity: 1; transform: none; } 70% { opacity: 1; } 100% { opacity: 0; transform: translateY(-6px); } }
 .pl .cash.bump { animation: cashbump .5s ease-out; }
 @keyframes cashbump { 30% { transform: scale(1.25); } }
-.pl-props { display: flex; flex-wrap: wrap; gap: 3px; min-height: 10px; }
+.pl-props { display: flex; flex-wrap: wrap; gap: 3px; align-items: center; min-height: 0; }
+.pl-props:empty { display: none; }
 .pl-props i {
   display: inline-block; width: 14px; height: 14px; border-radius: 3px; background: var(--g); cursor: pointer;
-  box-shadow: 0 0 0 1px rgba(35,50,74,.25) inset; position: relative;
+  box-shadow: 0 0 0 1px rgba(255,255,255,.45) inset; position: relative;
 }
 .pl-props i.m { opacity: .35; }
-.pl-props i.H::after { background: #e8323c; }
-.pl .badge { font-size: 11.5px; font-weight: 800; white-space: nowrap; background: #fff4d6; color: #8a5a00; border-radius: 999px; padding: 0 7px; }
-.pl.turn { border-color: var(--c); background: #fff; box-shadow: 0 3px 10px rgba(35,50,74,.12), 0 0 0 3px color-mix(in srgb, var(--c) 30%, transparent); }
-.pl.off { opacity: .55; }
-.pl.out { opacity: .45; text-decoration: line-through; }
-.dice {
-  --s: 46px; flex: 0 0 auto; display: flex; align-items: center; justify-content: center; gap: calc(var(--s) * .34);
-  padding: calc(var(--s) * .3) calc(var(--s) * .4) calc(var(--s) * .42); border-radius: calc(var(--s) * .45); background: transparent;
-  border: 0; transition: transform .1s, filter .3s;
-}
-.dice:not(:disabled):active { transform: scale(.95); }
-.dice:not(:disabled) { animation: nudge 1.4s ease-in-out infinite; filter: drop-shadow(0 0 9px var(--c, #ccd)); }
-@keyframes nudge { 0%, 100% { transform: rotate(0); } 8% { transform: rotate(-5deg); } 16% { transform: rotate(5deg); } 24% { transform: rotate(0); } }
+.pl .badge { font-size: 11px; font-weight: 800; white-space: nowrap; background: rgba(255,210,63,.2); color: #ffd23f; border-radius: 999px; padding: 0 7px; }
+
+/* ── nút ĐỔ: xúc xắc 3D nằm trên nút tròn đỏ ── */
+.dice { flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; gap: calc(var(--s) * .3); padding: calc(var(--s) * .4) calc(var(--s) * .3) 0; transition: transform .1s; }
+.dice:not(:disabled):active .roll-lbl { filter: brightness(1.15); }
 .dice:disabled { opacity: 1; }
-.dice.bonus { filter: drop-shadow(0 0 12px rgba(255,179,0,.9)); }
+.cubes { display: flex; gap: calc(var(--s) * .45); }
+.roll-lbl {
+  width: calc(var(--s) * 1.85); height: calc(var(--s) * 1.85); border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-weight: 900; font-size: calc(var(--s) * .6); letter-spacing: 1px; color: #fff; text-shadow: 0 2px 0 rgba(0,0,0,.35);
+  background: radial-gradient(circle at 35% 28%, #ff9a94 0%, #e53935 45%, #b4232c 100%); border: 3px solid #ffe08a;
+  box-shadow: 0 6px 0 #7a1620, 0 12px 22px rgba(0,0,0,.45), inset 0 3px 6px rgba(255,255,255,.45); transition: filter .3s, box-shadow .2s;
+}
+.dice:disabled .roll-lbl { filter: grayscale(.85) brightness(.6); box-shadow: 0 4px 0 #1b1b1b, 0 8px 16px rgba(0,0,0,.4); }
+.dice:not(:disabled) .roll-lbl { animation: rollpulse 1.4s ease-out infinite; }
+/* nút đứng yên, chỉ có quầng sáng lan ra để báo tới lượt */
+@keyframes rollpulse {
+  0% { box-shadow: 0 6px 0 #7a1620, 0 12px 22px rgba(0,0,0,.45), 0 0 0 0 rgba(255,210,63,.6), inset 0 3px 6px rgba(255,255,255,.45); }
+  100% { box-shadow: 0 6px 0 #7a1620, 0 12px 22px rgba(0,0,0,.45), 0 0 0 16px rgba(255,210,63,0), inset 0 3px 6px rgba(255,255,255,.45); }
+}
+.dice.bonus .roll-lbl { border-color: #fff; background: radial-gradient(circle at 35% 28%, #ffe29a 0%, #f5b700 45%, #c48a00 100%); }
 .die { width: var(--s); height: var(--s); position: relative; perspective: calc(var(--s) * 9); }
 .die::after {
   content: ''; position: absolute; left: 4%; right: 4%; bottom: -16%; height: 20%; border-radius: 50%;
@@ -193,85 +213,99 @@ button:disabled { opacity: .4; cursor: default; }
 }
 .die.hop::after { animation: shade .95s linear; }
 @keyframes shade { 22% { transform: scale(.55); opacity: .45; } 46% { transform: scale(1); opacity: 1; } 60% { transform: scale(.85); } 73% { transform: scale(1); } }
-.status { text-align: center; font-weight: 700; font-size: 16px; height: 64px; line-height: 1.35; display: flex; flex-direction: column; justify-content: center; overflow: hidden; }
-/* khung cao cố định để danh sách nút bên dưới không bị đẩy lên xuống: dòng sự kiện 1 dòng, dòng chính tối đa 2 dòng */
-.status > span { display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden; flex-shrink: 0; }
-.status .ev { color: var(--muted); font-size: 14px; font-weight: 600; -webkit-line-clamp: 1; line-clamp: 1; }
-.status .main { -webkit-line-clamp: 2; line-clamp: 2; }
+/* dải trạng thái: một dòng mỏng ngay dưới thanh trên, chỉ hiện khi có gì để nói */
+.status {
+  align-self: center; max-width: min(92%, 560px); margin: 4px auto 0; padding: 4px 14px; border-radius: 999px;
+  background: rgba(4,24,18,.8); border: 1px solid rgba(255,255,255,.14); color: #fff; text-align: center;
+  font-weight: 700; font-size: 14px; line-height: 1.3; box-shadow: 0 4px 12px rgba(0,0,0,.3);
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden;
+}
+.status:empty { display: none; }
 .dots span { display: inline-block; animation: dot 1.1s infinite; }
 .dots span:nth-child(2) { animation-delay: .15s; } .dots span:nth-child(3) { animation-delay: .3s; }
 @keyframes dot { 0%, 60%, 100% { opacity: .2; } 30% { opacity: 1; } }
 
-.actions { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; min-height: 0; }
-.actions:empty { display: none; }
+.actions { display: flex; gap: 8px; justify-content: center; align-content: flex-start; flex-wrap: wrap; width: 100%; padding: 6px 8px 0; min-height: 54px; }
 .actions button {
-  display: flex; align-items: center; gap: 6px; background: var(--card); border-radius: 14px; padding: 8px 16px; min-height: 44px;
-  font-weight: 800; font-size: 15px; box-shadow: 0 3px 10px rgba(35,50,74,.12); transition: transform .1s; border: 2px solid transparent;
+  display: flex; align-items: center; gap: 6px; background: #fff; color: var(--ink); border-radius: 999px; padding: 8px 16px; min-height: 44px;
+  font-weight: 800; font-size: 15px; box-shadow: 0 4px 0 rgba(0,0,0,.28), 0 8px 16px rgba(0,0,0,.35); transition: transform .1s; border: 2px solid rgba(255,255,255,.7); position: relative;
 }
-.actions button:not(:disabled):active { transform: scale(.95); }
-.actions button.primary { background: var(--green); color: #fff; }
-.actions button { position: relative; }
-.actions button.primary:not(:disabled)::after { content: ''; position: absolute; inset: -2px; border-radius: 16px; border: 3px solid rgba(46,157,79,.45); animation: pulse 1.6s ease-out infinite; pointer-events: none; will-change: transform, opacity; }
+.actions button:not(:disabled):active { transform: translateY(2px); box-shadow: 0 2px 0 rgba(0,0,0,.28), 0 4px 10px rgba(0,0,0,.3); }
+.actions button.primary { background: linear-gradient(180deg, #4fc46f, #2e9d4f); color: #fff; border-color: #a8f0bb; }
+.actions button.primary:not(:disabled)::after { content: ''; position: absolute; inset: -2px; border-radius: 999px; border: 3px solid rgba(123,228,149,.6); animation: pulse 1.6s ease-out infinite; pointer-events: none; will-change: transform, opacity; }
 @keyframes pulse { from { transform: scale(1); opacity: 1; } to { transform: scale(1.12, 1.3); opacity: 0; } }
 .actions button.danger { background: #fdecea; color: #c0392b; }
-.actions button.warn { background: var(--ink); color: #fff; }
+.actions button.warn { background: linear-gradient(180deg, #3b4b5e, #23324a); color: #fff; border-color: #6b7a90; }
+.actions button small { font-weight: 700; opacity: .8; font-size: 12px; }
+.actions button.lv { flex-direction: column; gap: 0; line-height: 1.15; padding: 6px 12px; }
 
-.dock { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; padding: 4px 0 14px; }
+.dock { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; padding: 6px 8px 10px; }
 .dock button {
-  display: flex; align-items: center; gap: 6px; background: var(--card); border-radius: 14px; padding: 8px 16px; min-height: 44px;
-  font-weight: 700; font-size: 15px; box-shadow: 0 3px 10px rgba(35,50,74,.12); transition: transform .1s;
+  display: flex; align-items: center; gap: 6px; background: rgba(0,0,0,.35); color: #fff; border: 1px solid rgba(255,255,255,.18); border-radius: 999px;
+  padding: 6px 14px; min-height: 38px; font-weight: 700; font-size: 14px; box-shadow: 0 3px 10px rgba(0,0,0,.3); transition: transform .1s;
 }
 .dock button:not(:disabled):active { transform: scale(.95); }
-.dock button.primary { background: var(--ink); color: #fff; }
+.dock button.primary { background: linear-gradient(180deg, #ffe08a, #ffd23f); color: #5a3a00; border-color: #fff3b0; }
 
+/* màn dọc: bàn nằm sát trên (khung bọc vừa đúng bàn để nút ĐỔ neo đúng tâm), nút hành động ở khoảng trống dưới bàn */
+@media (orientation: portrait) {
+  .board-wrap { flex: 0 0 auto; }
+  .actions { flex: 0 0 auto; }
+  .dock { margin-top: auto; }
+  .dice { padding-top: calc(var(--s) * .3); }
+}
+/* điện thoại dọc: chỉ hiện thẻ của mình, gọn một dòng (tiền mặt + tài sản); người khác xem bằng cách chạm quân / nhật ký */
+@media (orientation: portrait) and (max-width: 699px) {
+  .hud { display: flex; justify-content: center; gap: 6px; padding: 4px 8px 0; }
+  .hud .pl:not(.me) { display: none; }
+  .pl { flex-direction: row; align-items: center; gap: 8px; padding: 4px 10px 4px 8px; border-radius: 999px; border-width: 1.5px; max-width: 100%; }
+  .pl::before { display: none; }
+  .pl-top { gap: 6px; flex: 0 1 auto; min-width: 0; } .pl .ava { width: 28px; height: 28px; }
+  .pl .nm { font-size: 12px; max-width: 90px; } .pl .rank { width: 18px; height: 18px; font-size: 11px; }
+  .pl-row { background: none; padding: 0; min-height: 0; gap: 4px; font-size: 12px; flex: 0 0 auto; } .pl-row .lbl b { display: none; }
+  .pl .cash { font-size: 13px; } .pl .worth { font-size: 12px; } .pl .delta { font-size: 10px; padding: 0 5px; }
+  .pl-props { display: none; }
+  .stage { --s: 26px !important; }
+  /* nút hành động treo trong sàn giữa bàn, ngay dưới nút ĐỔ (fit() chuyển #actions vào #mid), không làm bàn co lại */
+  .mid .actions { position: absolute; top: 100%; left: 50%; transform: translateX(-50%); width: max-content; max-width: 70vw; min-height: 0; padding: 0; margin-top: 3px; gap: 4px; }
+  .mid .actions button { min-height: 30px; padding: 2px 9px; font-size: 12px; box-shadow: 0 3px 0 rgba(0,0,0,.28), 0 5px 10px rgba(0,0,0,.35); }
+  .mid .actions button small { font-size: 9.5px; }
+  .mid .actions button.lv { padding: 1px 8px; line-height: 1.1; }
+  .top { padding-top: 4px; } .top h1 { font-size: 20px; } .back, .mute { width: 34px; height: 34px; font-size: 21px; } .mute { font-size: 16px; }
+  .status { font-size: 12.5px; }
+  .dock button { min-height: 34px; padding: 4px 11px; font-size: 13px; }
+}
+/* màn ngang: bàn cờ chiếm trọn, thẻ người chơi bốn góc, tiêu đề và thanh dưới đè lên mép */
 @media (orientation: landscape) and (min-width: 600px) {
-  /* màn ngang (iPad xoay ngang): thanh tiêu đề dời lên đầu cột bên để bàn cờ dùng trọn chiều cao */
-  :root { --side-w: clamp(290px, 29vw, 380px); }
-  .top { position: absolute; z-index: 5; top: env(safe-area-inset-top, 0px); right: env(safe-area-inset-right, 0px); width: calc(var(--side-w) + 28px); max-width: none; padding: 10px 14px 0 12px; gap: 8px; }
+  .stage { display: block; }
+  .top { position: absolute; z-index: 6; top: env(safe-area-inset-top, 0px); left: 50%; transform: translateX(-50%); padding: 6px 12px 0; pointer-events: none; }
+  .top > * { pointer-events: auto; }
+  .status { position: absolute; z-index: 6; left: 50%; top: calc(env(safe-area-inset-top, 0px) + 48px); transform: translateX(-50%); margin: 0; max-width: min(44%, 560px); font-size: 13.5px; }
   .top h1 { font-size: 22px; }
-  .shell { flex-direction: row; align-items: stretch; justify-content: center; padding: 10px 12px 10px; }
-  .board-wrap { flex: 1 1 auto; padding: 0 14px 0 0; }
-  /* cột bên cuộn được khi màn hình thấp; ::before/::after co giãn để căn giữa khi còn chỗ */
-  .side { flex: 0 0 var(--side-w); width: var(--side-w); margin: 0; padding: 56px 2px 0; justify-content: flex-start; gap: 8px; overflow-y: auto; overflow-x: hidden; }
-  .side::before, .side::after { content: ''; flex: 1 0 0; }
-  .side > * { flex-shrink: 0; }
-  .play-row { flex-direction: column; }
-  .players { grid-template-columns: 1fr; width: 100%; }
-  .status { font-size: 15px; height: 84px; }
-  .status .ev { -webkit-line-clamp: 2; line-clamp: 2; }
-  .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 0; }
-  .actions:empty { display: none; }
-  .dock { gap: 6px; padding: 0 0 4px; }
-  .dock button { flex: 1 1 28%; justify-content: center; padding: 8px 6px; font-size: 14px; white-space: nowrap; gap: 4px; }
-  .dock button.primary { flex-basis: 100%; }
-  .actions button { justify-content: center; width: 100%; padding: 8px 8px; font-size: 14px; }
-  .actions button:only-child, .actions button:last-child:nth-child(odd) { grid-column: 1 / -1; }
+  .board-wrap { position: absolute; left: 0; right: 0; top: 36px; bottom: 46px; padding: 0 12px; justify-content: center; }
+  /* khung bàn lệch tâm 5px (trên 36 / dưới 46); nút hành động nằm ngay dưới nút ĐỔ (cụm cao ≈ 3.55 × --s) */
+  .actions { position: absolute; z-index: 5; left: 50%; top: calc(50% - 5px + var(--s) * 1.78 + 4px); transform: translateX(-50%); width: max-content; max-width: min(60vw, 480px); min-height: 0; padding: 0; }
+  .hud { position: absolute; inset: 0; z-index: 5; display: block; padding: 0; pointer-events: none; }
+  .pl { position: absolute; width: clamp(168px, 19vw, 236px); pointer-events: auto; }
+  .pl.s1 { left: 10px; top: 8px; } .pl.s2 { right: 10px; top: 8px; } .pl.s3 { left: 10px; bottom: 8px; } .pl.s0 { right: 10px; bottom: 8px; }
+  .dock { position: absolute; left: 50%; bottom: env(safe-area-inset-bottom, 0px); transform: translateX(-50%); z-index: 6; padding: 0 0 6px; flex-wrap: nowrap; }
+  .dock button { padding: 5px 12px; min-height: 34px; font-size: 13.5px; white-space: nowrap; }
 }
-/* màn lớn (iPad ngang): chữ và nút to hơn cho dễ đọc, dễ chạm */
+/* màn ngang thấp (điện thoại): mọi thứ gọn lại */
+@media (orientation: landscape) and (max-height: 500px) {
+  .top h1 { font-size: 18px; } .back, .mute { width: 32px; height: 32px; font-size: 20px; } .mute { font-size: 15px; }
+  .board-wrap { top: 30px; bottom: 38px; }
+  .pl { width: clamp(150px, 20vw, 190px); padding: 5px 8px 5px 10px; gap: 2px; } .pl .ava { width: 32px; height: 32px; } .pl .skill { display: none; }
+  .pl-row { font-size: 11px; min-height: 20px; padding: 1px 7px; } .pl .cash { font-size: 12.5px; } .pl .worth { font-size: 11.5px; } .pl-props { display: none; }
+  .status { font-size: 12px; padding: 2px 10px; top: calc(env(safe-area-inset-top, 0px) + 36px); }
+  .actions button { min-height: 34px; padding: 4px 10px; font-size: 13px; } .actions button small { font-size: 10.5px; }
+  .dock button { min-height: 30px; padding: 3px 10px; font-size: 12.5px; }
+}
+/* iPad ngang: chữ to hơn */
 @media (orientation: landscape) and (min-width: 1000px) and (min-height: 640px) {
-  .pl { font-size: 15.5px; padding: 7px 10px; } .pl .cash { font-size: 16px; } .pl .ava { width: 42px; height: 42px; }
-  .status { font-size: 16.5px; height: 92px; } .status .ev { font-size: 14.5px; }
-  .actions button { font-size: 15.5px; min-height: 48px; } .dock button { font-size: 15px; min-height: 48px; }
-}
-@media (orientation: landscape) and (min-width: 600px) and (max-height: 560px) {
-  .top { padding-top: 6px; } .top h1 { font-size: 20px; } .top .back, .top .mute { width: 38px; height: 38px; }
-  .side { gap: 6px; padding-top: 48px; }
-  .dock, .actions { gap: 5px; } .dock button, .actions button { min-height: 36px; padding: 4px 8px; font-size: 13.5px; }
-  .pl { padding: 2px 8px; gap: 1px; } .pl-props { min-height: 0; } .status { height: 62px; font-size: 14px; }
-}
-/* iPad dọc: 4 thẻ người chơi một hàng cho bàn cờ được to hơn */
-@media (orientation: portrait) and (min-width: 700px) {
-  .side { max-width: 900px; }
-  .players { grid-template-columns: repeat(4, 1fr); }
-  .pl { font-size: 15px; } .pl .cash { font-size: 15px; }
-  .pl-top { flex-wrap: wrap; row-gap: 0; } .pl .nm { white-space: normal; line-height: 1.15; flex-basis: calc(100% - 48px); } .pl .cash { margin-left: 44px; }
-  .actions button, .dock button { font-size: 16px; min-height: 48px; }
-}
-@media (max-width: 420px) {
-  .top h1 { font-size: 22px; }
-  .dock button { padding: 8px 12px; font-size: 14px; }
-  .pl { font-size: 13px; padding: 3px 7px; } .pl .cash { font-size: 13px; }
-  .actions button { padding: 8px 12px; font-size: 14px; }
+  .pl { padding: 10px 12px 10px 14px; } .pl .nm { font-size: 15.5px; } .pl .cash { font-size: 16px; } .pl .worth { font-size: 14px; } .pl-row { font-size: 13px; } .pl .ava { width: 48px; height: 48px; }
+  .status { font-size: 15px; }
+  .actions button { font-size: 15.5px; min-height: 48px; } .dock button { font-size: 14.5px; min-height: 38px; }
 }
 
 /* ── bảng ── */
@@ -398,14 +432,10 @@ button:disabled { opacity: .4; cursor: default; }
 .char-info span { font-size: 13px; color: var(--muted); font-weight: 600; line-height: 1.3; }
 .seat .pick-char { margin-left: auto; font-size: 13px; color: var(--muted); font-weight: 700; display: flex; align-items: center; gap: 6px; }
 .seat .pick-char svg { width: 34px; height: 34px; }
-.pl .ava { width: 38px; height: 38px; flex: 0 0 auto; margin: -4px 0; }
-.pl .ava svg { width: 100%; height: 100%; display: block; }
 .pl .hold { display: inline-flex; gap: 2px; font-size: 11px; }
-.pl .hold span { background: #eef2f7; border-radius: 6px; padding: 0 5px; font-weight: 800; }
+.pl .hold span { background: rgba(255,255,255,.18); border-radius: 6px; padding: 0 5px; font-weight: 800; }
 .pl-props i.t { border-radius: 50%; }
 .pl-props i b { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 9.5px; color: #fff; font-weight: 900; text-shadow: 0 0 2px rgba(0,0,0,.6); }
-.actions button small { font-weight: 700; opacity: .8; font-size: 12px; }
-.actions button.lv { flex-direction: column; gap: 0; line-height: 1.15; padding: 6px 12px; }
 .lv-table td:first-child { white-space: nowrap; }
 .flags { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; margin: 4px 0 8px; }
 .flags span { font-size: 12px; font-weight: 700; background: #fff4d6; color: #8a5a00; border-radius: 999px; padding: 2px 9px; }
@@ -439,13 +469,14 @@ button:disabled { opacity: .4; cursor: default; }
 
 @media (prefers-reduced-motion: reduce) {
   .token { transition: none; }
-  .token .ring, .dice, .die.hop, .die.hop::after, .dots span, .panel, .overlay, .cardpop, .actions button.primary::after, #board.shake, .pick-ring, .pick-hand, .chars button.on { animation: none; }
+  .token .ring, .roll-lbl, .die.hop, .die.hop::after, .dots span, .panel, .overlay, .cardpop, .actions button.primary::after, #board.shake, .pick-ring, .pick-hand, .chars button.on { animation: none; }
   .cube { transition: none; }
 }
 </style>
 </head>
 <body>
 
+<div class="stage" id="stage">
 <header class="top">
   <a class="back" href="index.html" aria-label="Về trang chính">‹</a>
   <h1><span>Cờ</span> <span>Tỷ</span> <span>Phú</span></h1>
@@ -453,40 +484,45 @@ button:disabled { opacity: .4; cursor: default; }
   <button class="mute" id="bMute" aria-label="Bật/tắt âm thanh">🔊</button>
 </header>
 
-<div class="shell">
+<div class="status" id="status"></div>
+
+<!-- thẻ người chơi: màn ngang nằm bốn góc, màn dọc xếp hàng trên bàn -->
+<div class="hud" id="players"></div>
+
 <main class="board-wrap" id="wrap">
   <div class="board-box" id="boardBox">
-  <svg id="board" class="init" viewBox="0 0 720 720" aria-label="Bàn cờ tỷ phú">
-    <g id="gBoard"></g>
-    <g id="gOwn"></g>
-    <g id="gBuild"></g>
+  <!-- bàn cờ vẽ kiểu isometric: lớp phẳng (gBase/gCenter/gBoard/gOwn/gPick) nhận phép chiếu, lớp "đứng" (icon, nhà, quân, hiệu ứng) đặt tại điểm đã chiếu -->
+  <svg id="board" class="init" viewBox="0 0 1060 680" aria-label="Bàn cờ tỷ phú">
+    <g id="gBase"></g>
     <g id="gCenter"></g>
+    <g id="gSides"></g>
+    <g id="gBoard"></g>
+    <g id="gIcons"></g>
+    <g id="gOwn"></g>
+    <g id="gOwnB"></g>
     <g id="gPick"></g>
+    <g id="gPickB"></g>
+    <g id="gBuild"></g>
     <g id="gTokens"></g>
     <g id="gFx"></g>
     <g id="gCard"></g>
   </svg>
-  <div class="dice-stage" id="diceStage">
-    <button class="dice" id="dice" aria-label="Tung xúc xắc"><div class="die"></div><div class="die"></div></button>
   </div>
+  <div class="mid" id="mid">
+    <div class="dice-stage" id="diceStage">
+      <button class="dice" id="dice" aria-label="Tung xúc xắc"><div class="cubes"><div class="die"></div><div class="die"></div></div><span class="roll-lbl">ĐỔ</span></button>
+    </div>
   </div>
 </main>
+<div class="actions" id="actions"></div>
 
-<aside class="side">
-  <div class="play-row">
-    <div class="players" id="players"></div>
-  </div>
-  <div class="status" id="status"></div>
-  <div class="actions" id="actions"></div>
-  <nav class="dock">
-    <button id="bNew" class="primary">＋ Ván mới</button>
-    <button id="bOnline">🌐 Chơi online</button>
-    <button id="bInvite" hidden>🔗 Phòng chơi</button>
-    <button id="bLeave" hidden>✕ Thoát online</button>
-    <button id="bLog">📜 Nhật ký</button>
-    <button id="bRules">📖 Luật</button>
-  </nav>
-</aside>
+<nav class="dock">
+  <button id="bNew" class="primary">＋ Ván mới</button>
+  <button id="bOnline">🌐 Chơi online</button>
+  <button id="bInvite" hidden>🔗 Phòng chơi</button>
+  <button id="bLeave" hidden>✕ Thoát online</button>
+  <button id="bRules">📖 Luật</button>
+</nav>
 </div>
 
 <!-- ván mới (chơi trên máy này) -->
@@ -615,6 +651,22 @@ button:disabled { opacity: .4; cursor: default; }
 // xuống. Góc 94, ô thường 76 × 94. Bốn góc: Bắt Đầu (0), Côn Đảo (8), Đại Nhạc
 // Hội (16), Bến Xe (24).
 const SIZE = 720, CORNER = 94, CW = 76, N = 32;
+// Bàn phẳng 720 × 720 được xoay 45° rồi ép dẹt theo chiều dọc (K) thành hình thoi; Bắt Đầu ở đỉnh dưới,
+// Côn Đảo đỉnh trái, Đại Nhạc Hội đỉnh trên, Bến Xe đỉnh phải. Lớp phẳng (ô, dải màu, chữ) nhận ma trận
+// ISO(dz); lớp "đứng" (quân, nhà, biểu tượng, hiệu ứng) đặt tại proj(x, y). SLAB: ô nổi cao hơn sàn giữa.
+// Hai cách nhìn: 'iso' (hình thoi, K = độ dẹt, màn dọc iPad dựng cao hơn) và 'flat' (bàn vuông nhìn thẳng từ trên,
+// dùng cho điện thoại dọc vì hình thoi bị bó theo chiều rộng). setView() đổi cách nhìn rồi vẽ lại bàn.
+let MODE = 'iso', K = 0.55, VW = 1060, VH = 680, CX = 530, CY = 345;
+const S2 = Math.SQRT1_2, SLAB = 14, TI = 2.5, BANDW = 30, DIAG = SIZE * Math.SQRT2;
+const proj = (x, y, dz = 0) => {
+  const dx = x - SIZE / 2, dy = y - SIZE / 2;
+  return MODE === 'flat' ? [CX + dx, CY + dy + dz] : [CX + (dx - dy) * S2, CY + (dx + dy) * S2 * K + dz];
+};
+const unproj = (X, Y) => {
+  if (MODE === 'flat') return [SIZE / 2 + X - CX, SIZE / 2 + Y - CY];
+  const xp = X - CX, yp = (Y - CY) / K; return [SIZE / 2 + (xp + yp) * S2, SIZE / 2 + (yp - xp) * S2];
+};
+const ISO = (dz = 0) => MODE === 'flat' ? `translate(${CX - SIZE / 2} ${CY - SIZE / 2 + dz})` : `matrix(${S2} ${S2 * K} ${-S2} ${S2 * K} ${CX} ${CY - SIZE * S2 * K + dz})`;
 const $ = id => document.getElementById(id);
 const svgNS = 'http://www.w3.org/2000/svg';
 const COLORS = [
@@ -703,7 +755,8 @@ const CARDS = [
 const HOLD_INFO = { free: ['🎫', 'Vé miễn phí tham quan'], half: ['🏷️', 'Phiếu giảm nửa phí'], shield: ['🛡️', 'Khiên bảo vệ thành phố'], jail: ['🔓', 'Thẻ ra tù'] };
 
 // ── hình học ô ──
-const centerOf = i => { const r = rectOf(i); return [r.x + r.w / 2, r.y + r.h / 2]; };
+const flatCenter = i => { const r = rectOf(i); return [r.x + r.w / 2, r.y + r.h / 2]; };
+const centerOf = i => proj(...flatCenter(i)); // điểm giữa ô trên màn hình (đã chiếu)
 function rectOf(i) {
   if (i === 0) return { x: SIZE - CORNER, y: SIZE - CORNER, w: CORNER, h: CORNER, side: 0 };
   if (i < 8) return { x: SIZE - CORNER - i * CW, y: SIZE - CORNER, w: CW, h: CORNER, side: 0 };
@@ -736,16 +789,16 @@ const SLOT = [[-1, -1], [1, -1], [-1, 1], [1, 1]];
 // ở mép trong, phần còn lại có hàng quân ở trên, tên và giá ở dưới.
 function zones(i) {
   const r = rectOf(i), mx = r.x + r.w / 2;
-  if (r.side === 0) return { icon: [mx, r.y + 16], tok: [mx, r.y + 45], name: [mx, r.y + 69], sub: [mx, r.y + 82], w: r.w, nameMax: CW - 12 };
-  if (r.side === 2) return { icon: [mx, r.y + 78], tok: [mx, r.y + 49], name: [mx, r.y + 13], sub: [mx, r.y + 26], w: r.w, nameMax: CW - 12 };
-  const tx = r.side === 1 ? r.x + 31 : r.x + BAND + 31, ix = r.side === 1 ? r.x + r.w - BAND / 2 : r.x + BAND / 2;
-  return { icon: [ix, r.y + r.h / 2], tok: [tx, r.y + 18], name: [tx, r.y + 44], sub: [tx, r.y + 59], w: CORNER - BAND, nameMax: CORNER - BAND - 12 };
+  if (r.side === 0) return { icon: [mx, r.y + 16], tok: [mx, r.y + 80], name: [mx, r.y + 69], sub: [mx, r.y + 82], w: r.w, nameMax: CW - 12 };
+  if (r.side === 2) return { icon: [mx, r.y + 78], tok: [mx, r.y + 26], name: [mx, r.y + 13], sub: [mx, r.y + 26], w: r.w, nameMax: CW - 12 };
+  const tx = r.side === 1 ? r.x + 26 : r.x + BAND + 36, ix = r.side === 1 ? r.x + r.w - BAND / 2 : r.x + BAND / 2;
+  return { icon: [ix, r.y + r.h / 2], tok: [tx, r.y + 30], name: [tx, r.y + 44], sub: [tx, r.y + 59], w: CORNER - BAND - 8, nameMax: CORNER - BAND - 12 };
 }
 // hàng quân ở ô góc (tính từ mép trên ô góc)
 const CORNER_TOK = { start: 74, island: 76, festival: 76, bus: 76 };
-const TOKEN_SCALE = .78;
+const TOKEN_SCALE = .85;
 // quân đứng trong ô, cùng một hàng; nhiều quân thì dàn ngang, chật thì chồng lên nhau một phần
-function tokenXY(i, s, jailed) {
+function tokenFlat(i, s, jailed) {
   const r = rectOf(i);
   const others = G ? [0, 1, 2, 3].filter(o => o !== s && G.seats[o] && !G.pl[o].out && G.pl[o].pos === i && (G.pl[o].jail > 0) === !!jailed) : [];
   const k = others.filter(o => o < s).length, n = others.length + 1;
@@ -757,6 +810,7 @@ function tokenXY(i, s, jailed) {
   const gap = n > 1 ? Math.min(28, (w - 28) / (n - 1)) : 0;
   return [x + (k - (n - 1) / 2) * gap, y];
 }
+const tokenXY = (i, s, jailed) => proj(...tokenFlat(i, s, jailed)); // vị trí quân trên màn hình
 
 // ── trạng thái ván ──
 const freshHold = () => ({ free: 0, half: 0, shield: 0, jail: 0 });
@@ -973,12 +1027,13 @@ function doRoll(s) {
   finish(s, steps);
 }
 // đi n bước; qua hoặc dừng ở Bắt Đầu thì nhận lương
-function moveBy(s, n, steps) {
+// how: cách đi để hoạt hoạ (mặc định nhảy từng ô; 'bus' = ngồi xe chạy dọc đường)
+function moveBy(s, n, steps, how) {
   const P = G.pl[s], from = P.pos, to = ((from + n) % N + N) % N, passGo = n > 0 && from + n >= N;
   P.pos = to;
   let salary = 0;
   if (passGo) { P.laps++; salary = r10(SALARY * (hasSkill(G, s, 'mc') ? 1.5 : 1)); P.cash += salary; }
-  steps.push({ k: 'move', s, from, to, n, passGo, salary });
+  steps.push({ k: 'move', s, from, to, n, passGo, salary, how });
   if (hasSkill(G, s, 'robber')) rob(s, steps);
   land(s, steps);
 }
@@ -992,7 +1047,7 @@ function rob(s, steps) {
     steps.push({ k: 'rob', s, v, amt });
   }
 }
-const moveTo = (s, to, steps) => moveBy(s, (to - G.pl[s].pos + N) % N, steps);
+const moveTo = (s, to, steps, how) => moveBy(s, (to - G.pl[s].pos + N) % N, steps, how);
 function setPick(s, kind, opts, optional, data) { G.step = 'pick'; G.pick = { kind, opts, optional: !!optional, data: data || null }; }
 function land(s, steps) {
   const P = G.pl[s], i = P.pos, q = SQ[i], p = G.props[i];
@@ -1141,7 +1196,7 @@ function doPick(s, i) {
       if (P.cash < fee) return;
       P.bus = false; P.cash -= fee; G.pick = null; G.step = 'roll'; G.again = false;
       steps.push({ k: 'busGo', s, i, fee });
-      moveTo(s, i, steps);
+      moveTo(s, i, steps, 'bus');
       break;
     }
     case 'festival': case 'festivalFree': {
@@ -1401,6 +1456,8 @@ function el(tag, attrs, parent) {
   return e;
 }
 const txt = (x, y, cls, s, parent, attrs) => { const t = el('text', Object.assign({ x, y, class: cls }, attrs || {}), parent); t.textContent = s; return t; };
+// chữ / biểu tượng đứng thẳng tại điểm (x, y) của bàn phẳng (không bị ép dẹt)
+const bill = (x, y, cls, s, parent, attrs, dz = 0) => { const [X, Y] = proj(x, y, dz); return txt(X, Y, cls, s, parent, attrs); };
 const mix = (hex, to, t) => {
   const a = [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16)), b = to === '#fff' ? [255, 255, 255] : [0, 0, 0];
   return '#' + a.map((v, i) => Math.round(v + (b[i] - v) * t).toString(16).padStart(2, '0')).join('');
@@ -1544,93 +1601,130 @@ function fitNames() {
     try { if (t.getComputedTextLength() > max) { t.setAttribute('textLength', max); t.setAttribute('lengthAdjust', 'spacingAndGlyphs'); } } catch (e) {}
   }
 }
-(function drawBoard() {
-  const g = $('gBoard');
-  el('rect', { x: 0, y: 0, width: SIZE, height: SIZE, rx: 14, fill: '#f6f8fb' }, g);
-  el('rect', { x: CORNER, y: CORNER, width: SIZE - 2 * CORNER, height: SIZE - 2 * CORNER, fill: '#eef3f8', stroke: '#b9c6d6', 'stroke-width': 1.2 }, g);
+// đa giác toạ độ bàn phẳng → chuỗi points đã chiếu ở độ sâu dz
+const projPts = (pts, dz = 0) => pts.map(p => proj(p[0], p[1], dz).map(v => v.toFixed(1)).join(',')).join(' ');
+const rectPts = (r, k = 0) => [[r.x + k, r.y + k], [r.x + r.w - k, r.y + k], [r.x + r.w - k, r.y + r.h - k], [r.x + k, r.y + r.h - k]];
+// mặt bên của khối: cạnh nào của đa giác quay về người xem (đi sang trái trên màn hình) thì kéo xuống độ sâu dz1
+function prismSides(g, pts, dz0, dz1, light, dark, cls) {
+  const P = pts.map(p => proj(p[0], p[1], dz0)), d = dz1 - dz0;
+  for (let k = 0; k < P.length; k++) {
+    const a = P[k], b = P[(k + 1) % P.length];
+    if (b[0] >= a[0]) continue;
+    el('polygon', { points: [a, b, [b[0], b[1] + d], [a[0], a[1] + d]].map(p => p.map(v => v.toFixed(1)).join(',')).join(' '), fill: b[1] > a[1] ? dark : light, class: cls || '' }, g);
+  }
+}
+// khung cục bộ của ô thường: trục x chạy dọc chiều dài ô (94), inward = phía trong bàn là +x hay −x.
+// Chỉ xoay 0° hoặc −90° để sau phép chiếu (xoay thêm 45°) chữ vẫn đọc xuôi (chếch xuống phải hoặc lên phải).
+function local(i) {
+  const r = rectOf(i), cx = r.x + r.w / 2, cy = r.y + r.h / 2;
+  return r.side === 0 ? { cx, cy, rot: -90, inward: 1 } : r.side === 1 ? { cx, cy, rot: 0, inward: 1 } : r.side === 2 ? { cx, cy, rot: -90, inward: -1 } : { cx, cy, rot: 0, inward: -1 };
+}
+let boardBuilt = false, ownKey = '', buildKey = '';
+function setView(mode, k) {
+  MODE = mode; K = k;
+  if (mode === 'flat') { VW = 780; VH = 820; CX = 390; CY = 420; }
+  else { VW = 1060; VH = Math.round(DIAG * K + 120); CX = 530; CY = Math.round(65 + DIAG * K / 2); }
+  $('board').setAttribute('viewBox', `0 0 ${VW} ${VH}`);
+  if (!boardBuilt) return;
+  buildBoard(); fitNames();
+  ownKey = buildKey = '';
+  if (G) paint();
+}
+function buildBoard() {
+  for (const id of ['gBase', 'gCenter', 'gSides', 'gBoard', 'gIcons', 'gOwn', 'gOwnB', 'gPick', 'gPickB']) $(id).innerHTML = '';
+  sqEls.length = 0; fitLater.length = 0;
+  const base = $('gBase'), sides = $('gSides'), g = $('gBoard');
+  g.setAttribute('transform', ISO(0)); $('gOwn').setAttribute('transform', ISO(0)); $('gPick').setAttribute('transform', ISO(0));
+  // đế bàn: khối tối dưới các ô, lộ ra ở khe giữa các ô
+  const full = rectPts({ x: 0, y: 0, w: SIZE, h: SIZE }, -5);
+  prismSides(base, full, SLAB, SLAB + 12, '#0b3f30', '#06281e');
+  el('polygon', { points: projPts(full, SLAB), fill: '#0d4a38' }, base);
+  // mặt bên từng ô, vẽ từ xa tới gần để ô gần đè lên ô xa
+  const order = [...Array(N).keys()].sort((a, b) => centerOf(a)[1] - centerOf(b)[1]);
+  for (const i of order) prismSides(sides, rectPts(rectOf(i), TI), 0, SLAB, '#c9d4df', '#8d9db0', 'sq-side-face');
   for (let i = 0; i < N; i++) {
     const q = SQ[i], r = rectOf(i), sg = el('g', { class: 'sq' }, g);
     sg.dataset.i = i;
-    el('rect', { x: r.x, y: r.y, width: r.w, height: r.h, class: 'bg' }, sg);
+    el('rect', { x: r.x + TI, y: r.y + TI, width: r.w - 2 * TI, height: r.h - 2 * TI, class: 'bg' }, sg);
     sqEls.push(sg);
     if (isCorner(i)) { drawCorner(i, sg); continue; }
-    const tall = r.side === 0 || r.side === 2, z = zones(i);
-    let icon = null, name = '', sub = '', big = null, color = null;
+    const L = local(i), lf = el('g', { transform: `translate(${L.cx} ${L.cy}) rotate(${L.rot})` }, sg), inward = L.inward, half = CORNER / 2, hs = CW / 2;
+    let icon = null, name = '', color = '#23324a', iconSize = 20;
     if (q.t === 'city') {
-      const b = bandOf(i);
-      el('rect', { x: b.x, y: b.y, width: b.w, height: b.h, fill: GROUPS[q.g].color, stroke: '#b9c6d6', 'stroke-width': 1 }, sg);
-      name = q.name; sub = fmt(q.base);
-    } else if (q.t === 'tour') { icon = '🏖️'; name = q.name; sub = fmt(TOUR_PRICE); }
-    else if (q.t === 'chance') { icon = '❓'; big = 'CƠ HỘI'; color = '#e67e22'; }
-    else if (q.t === 'tax') { icon = '💸'; big = 'THUẾ'; sub = '10% tài sản'; color = '#8a5a00'; }
-    else if (q.t === 'casino') { icon = '🎰'; big = 'SÒNG BÀI'; sub = 'đặt ' + fmt(CASINO_BET); color = '#8e44ad'; }
-    // ô không phải thành phố: biểu tượng nằm ở chỗ dải nhà; không có dòng phụ thì tên dời vào giữa hai dòng
-    if (icon) txt(z.icon[0], z.icon[1], 'sq-icon', icon, sg, { style: 'font-size:18px' });
-    const [nx, ny] = sub ? z.name : [z.name[0], (z.name[1] + z.sub[1]) / 2];
-    const nameSize = tall ? (name.length > 9 ? 10.5 : name.length > 8 ? 11.5 : 12.5) : (name.length > 9 ? 9.5 : name.length > 7 ? 10.5 : 12);
-    if (big) fitLater.push([txt(nx, ny, 'sq-big', big, sg, { fill: color, style: big.length > 7 ? 'font-size:10.5px' : '' }), z.nameMax]);
-    if (name) fitLater.push([txt(nx, ny, 'sq-name' + (tall ? '' : ' sq-side'), name, sg, { style: `font-size:${nameSize}px` }), z.nameMax]);
-    if (sub) txt(z.sub[0], z.sub[1], 'sq-price', sub, sg);
+      // dải màu nhóm ở đầu phía trong bàn (chỗ xây nhà)
+      el('rect', { x: inward > 0 ? half - TI - BANDW : -half + TI, y: -hs + TI, width: BANDW, height: CW - 2 * TI, fill: GROUPS[q.g].color, stroke: 'rgba(0,0,0,.18)', 'stroke-width': .8 }, lf);
+      name = q.name;
+    } else if (q.t === 'tour') { icon = '🏖️'; name = q.name; color = '#1e6fd8'; }
+    else if (q.t === 'chance') { icon = '❓'; iconSize = 30; }
+    else if (q.t === 'tax') { icon = '💸'; name = 'Thuế'; color = '#8a5a00'; }
+    else if (q.t === 'casino') { icon = '🎰'; name = 'Sòng Bài'; color = '#8e44ad'; }
+    // ô không phải thành phố: biểu tượng đứng ở chỗ dải nhà (Cơ Hội: biểu tượng to ở giữa ô)
+    if (icon) { const b = bandOf(i), [bx, by] = q.t === 'chance' ? flatCenter(i) : [b.x + b.w / 2, b.y + b.h / 2]; bill(bx, by, 'sq-icon', icon, $('gIcons'), { style: `font-size:${iconSize}px` }); }
+    // tên in hoa, to, mỗi từ một dòng khi có hai từ; chiếm trọn phần 62 px ngoài dải nhà
+    const nx = -inward * (BANDW / 2), max = CORNER - BANDW - 8, words = name.toUpperCase().split(' ');
+    const lines = words.length > 1 && name.length > 6 ? [words.slice(0, Math.ceil(words.length / 2)).join(' '), words.slice(Math.ceil(words.length / 2)).join(' ')] : [name.toUpperCase()];
+    // chế độ phẳng: ô hàng trên / dưới (khung cục bộ xoay −90°) xoay chữ lại nằm ngang, hai dòng xếp dọc theo trục x cục bộ
+    const flip = MODE === 'flat' && L.rot !== 0;
+    lines.forEach((ln, k) => {
+      const off = lines.length > 1 ? (k ? 9 : -9) : 0, lx = flip ? nx - off : nx, ly = flip ? 0 : off;
+      fitLater.push([txt(lx, ly, 'sq-name', ln, lf, { fill: color, style: `font-size:${lines.length > 1 ? 15 : ln.length > 7 ? 13 : 15.5}px`, transform: flip ? `rotate(90 ${lx} ${ly})` : '' }), max]);
+    });
   }
   drawCenter();
-})();
+  boardBuilt = true;
+}
+buildBoard();
 function drawCorner(i, sg) {
-  const r = rectOf(i), cx = r.x + CORNER / 2, q = SQ[i];
-  const bg = f => el('rect', { x: r.x + 1, y: r.y + 1, width: r.w - 2, height: r.h - 2, fill: f }, sg);
+  const r = rectOf(i), cx = r.x + CORNER / 2, q = SQ[i], gi = $('gIcons');
+  const bg = f => el('rect', { x: r.x + TI, y: r.y + TI, width: r.w - 2 * TI, height: r.h - 2 * TI, fill: f }, sg);
   if (q.t === 'start') {
     bg('#fde2e0');
-    txt(cx, r.y + 15, 'sq-big', 'BẮT ĐẦU', sg, { fill: '#c0392b', style: 'font-size:14px' });
-    el('path', { d: `M${r.x + 70} ${r.y + 33} H${r.x + 26} l8 -8 M${r.x + 26} ${r.y + 33} l8 8`, fill: 'none', stroke: '#e53935', 'stroke-width': 4.5, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, sg);
-    txt(cx, r.y + 51, 'sq-price', 'lương ' + fmt(SALARY), sg, { fill: '#c0392b' });
+    txt(cx, r.y + 20, 'sq-big', 'BẮT ĐẦU', sg, { fill: '#c0392b', style: 'font-size:17px' });
+    el('path', { d: `M${r.x + 72} ${r.y + 42} H${r.x + 22} l10 -10 M${r.x + 22} ${r.y + 42} l10 10`, fill: 'none', stroke: '#e53935', 'stroke-width': 5.5, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, sg);
   } else if (q.t === 'island') {
     bg('#e3f1f7');
     // buồng giam canh giữa ô; quân chỉ ghé thăm đứng hàng dưới, ngoài buồng
-    txt(cx, r.y + 10, 'sq-big', 'CÔN ĐẢO', sg, { fill: '#8a5a00', style: 'font-size:11px' });
+    txt(cx, r.y + 11, 'sq-big', 'CÔN ĐẢO', sg, { fill: '#8a5a00', style: 'font-size:13.5px' });
     el('rect', { x: r.x + 14, y: r.y + 19, width: 66, height: 40, rx: 5, fill: '#ffe2a8', stroke: '#8a5a00', 'stroke-width': 2 }, sg);
     for (let k = 1; k < 4; k++) el('line', { x1: r.x + 14 + k * 16.5, y1: r.y + 19, x2: r.x + 14 + k * 16.5, y2: r.y + 59, stroke: '#8a5a00', 'stroke-width': 2, opacity: .45 }, sg);
+    bill(r.x + 82, r.y + 12, 'sq-icon', '🌴', gi, { style: 'font-size:22px' });
   } else if (q.t === 'festival') {
     bg('#f3e6fb');
-    txt(cx, r.y + 19, 'sq-icon', '🎤', sg, { style: 'font-size:22px' });
-    txt(cx, r.y + 40, 'sq-big', 'ĐẠI NHẠC HỘI', sg, { fill: '#8e44ad', style: 'font-size:10.5px' });
-    txt(cx, r.y + 53, 'sq-price', 'lễ hội ' + fmt(FEST_FEE) + ' · phí ×2', sg, { fill: '#8e44ad', style: 'font-size:8.5px' });
+    bill(cx, r.y + 22, 'sq-icon', '🎤', gi, { style: 'font-size:32px' });
+    txt(cx, r.y + 47, 'sq-big', 'NHẠC HỘI', sg, { fill: '#8e44ad', style: 'font-size:15px' });
   } else {
     bg('#e3f7e8');
-    txt(cx, r.y + 19, 'sq-icon', '🚌', sg, { style: 'font-size:22px' });
-    txt(cx, r.y + 40, 'sq-big', 'BẾN XE', sg, { fill: '#1e7a3c', style: 'font-size:13px' });
-    txt(cx, r.y + 53, 'sq-price', 'đi ô bất kỳ · vé ' + fmt(BUS_FEE), sg, { fill: '#1e7a3c', style: 'font-size:8.5px' });
+    bill(cx, r.y + 22, 'sq-icon', '🚌', gi, { style: 'font-size:32px' });
+    txt(cx, r.y + 47, 'sq-big', 'BẾN XE', sg, { fill: '#1e7a3c', style: 'font-size:16px' });
   }
 }
+// sàn giữa bàn: trũng thấp hơn các ô một bậc, nỉ xanh, huy hiệu tròn và bộ thẻ Cơ Hội
 function drawCenter() {
-  const g = $('gCenter'), c = SIZE / 2;
-  const t = txt(c, c - 150, 'center-title', '', g);
-  [['CỜ ', COLORS[0].main], ['TỶ ', COLORS[1].main], ['PHÚ', COLORS[3].main]].forEach(([s, col]) => { const sp = el('tspan', { fill: col }, t); sp.textContent = s; });
-  txt(c, c - 112, 'center-sub', 'Chạm vào ô đất hoặc người chơi để xem chi tiết', g);
-  roundText = txt(c, c - 88, 'center-sub', '', g, { style: 'font-size:16px;font-weight:800', fill: '#23324a' });
-  // khay xúc xắc (HTML) nằm đè lên đây; vẽ một vùng tròn mờ làm sàn cho khay
-  el('circle', { cx: c, cy: c + 10, r: 92, fill: 'rgba(255,255,255,.55)', stroke: 'rgba(35,50,74,.08)', 'stroke-width': 1 }, g);
+  const g = $('gCenter'), c = SIZE / 2, m = CORNER;
+  g.setAttribute('transform', ISO(SLAB));
+  el('rect', { x: m, y: m, width: SIZE - 2 * m, height: SIZE - 2 * m, fill: 'url(#feltGrad)' }, g);
+  el('rect', { x: m + 8, y: m + 8, width: SIZE - 2 * m - 16, height: SIZE - 2 * m - 16, fill: 'none', stroke: 'rgba(255,255,255,.12)', 'stroke-width': 2 }, g);
+  el('circle', { cx: c, cy: c, r: 150, fill: 'rgba(0,0,0,.14)', stroke: 'rgba(255,255,255,.14)', 'stroke-width': 3 }, g);
+  el('circle', { cx: c, cy: c, r: 128, fill: 'none', stroke: 'rgba(255,255,255,.08)', 'stroke-width': 10 }, g);
+  el('circle', { cx: c, cy: c, r: 118, fill: 'none', stroke: 'rgba(255,210,63,.3)', 'stroke-width': 2, 'stroke-dasharray': '14 8' }, g);
+  txt(c, c, 'center-title', 'CỜ TỶ PHÚ', g);
   const deck = (x, y, rot, col, icon, label) => {
     const d = el('g', { transform: `translate(${x} ${y}) rotate(${rot})` }, g);
     for (let k = 2; k >= 0; k--) el('rect', { x: -58 + k * 2, y: -40 + k * 2, width: 116, height: 76, rx: 10, fill: k ? '#fff' : col, stroke: k ? '#cfd9e5' : 'rgba(0,0,0,.15)', 'stroke-width': 1.5 }, d);
-    txt(0, -10, 'deck-icon', icon, d);
-    txt(0, 20, 'deck-title', label, d);
+    txt(0, 24, 'deck-title', label, d);
+    bill(x, y - 8, 'deck-icon', icon, $('gIcons'), null, SLAB);
   };
-  deck(c - 100, c + 120, -10, '#f39c12', '❓', 'CƠ HỘI');
-  txt(c + 100, c + 130, 'center-sub', '⭐ đất vàng: phí ×2', g, { style: 'font-size:13px' });
-  txt(c + 100, c + 150, 'center-sub', '🎉 lễ hội: mỗi lần phí ×2', g, { style: 'font-size:13px' });
-  txt(c + 100, c + 170, 'center-sub', '🏁 dừng đúng Bắt Đầu: nâng cấp', g, { style: 'font-size:13px' });
+  deck(c - 170, c + 140, -8, '#f39c12', '❓', 'CƠ HỘI');
 }
-function renderCenter() {
-  roundText.textContent = G.phase === 'play' || G.phase === 'over' ? `Vòng ${Math.min(G.round, G.maxRound || G.round)}${G.maxRound ? ' / ' + G.maxRound : ''}` : '';
-}
+function renderCenter() {}
 // dải chủ đất, viền màu chủ, sao đất vàng, lễ hội, dịch bệnh / mất điện
 // chỉ vẽ lại khi trạng thái đất thật sự đổi (paint() gọi rất thường xuyên)
-let ownKey = '', buildKey = '';
 function drawOwnership() {
-  const g = $('gOwn');
+  const g = $('gOwn'), gb = $('gOwnB');
   const key = G ? JSON.stringify([G.pl.map(p => p.char), G.gold, PROPS.map(i => { const p = G.props[i]; return [p.owner, p.lv, p.fest, effectOn(G, i, 'plague'), effectOn(G, i, 'blackout')]; })]) : '';
   if (key === ownKey) return;
   ownKey = key;
-  g.innerHTML = '';
+  g.innerHTML = ''; gb.innerHTML = '';
   if (!G) { for (const i of PROPS) sqEls[i].querySelector('.bg').style.fill = ''; return; }
   for (const i of PROPS) {
     const p = G.props[i], r = rectOf(i), q = SQ[i], bg = sqEls[i].querySelector('.bg');
@@ -1640,13 +1734,14 @@ function drawOwnership() {
       const mono = q.t === 'city' && ownsGroup(G, p.owner, q.g);
       bg.style.fill = q.t === 'city' && p.fest ? '#fff1b8' : mono ? `url(#monoGrad${p.owner})` : C.soft;
       el('rect', { x: st.x, y: st.y, width: st.w, height: st.h, fill: C.main }, g);
-      el('rect', { x: r.x + 2, y: r.y + 2, width: r.w - 4, height: r.h - 4, fill: 'none', stroke: C.main, 'stroke-width': 4 }, g);
+      el('rect', { x: r.x + TI + 2, y: r.y + TI + 2, width: r.w - 2 * TI - 4, height: r.h - 2 * TI - 4, fill: 'none', stroke: C.main, 'stroke-width': 4 }, g);
       if (mono) drawMonopoly(g, i, p.owner);
     } else bg.style.fill = '';
     if (q.t === 'city' && G.gold.includes(i)) {
-      // góc phía ngoài cạnh dòng giá (không trùng tên, quân, dải nhà)
-      const z = zones(i), gx = r.side === 1 ? r.x + 12 : r.side === 3 ? r.x + r.w - 12 : r.side === 0 ? r.x + r.w - 11 : r.x + 11;
-      txt(gx, z.sub[1], 'gold-ico', '⭐', g);
+      // góc phía ngoài ô (không trùng tên, quân, dải nhà)
+      const gx = r.side === 1 ? r.x + 12 : r.side === 3 ? r.x + r.w - 12 : r.side === 0 ? r.x + r.w - 12 : r.x + 12;
+      const gy = r.side === 0 ? r.y + r.h - 12 : r.y + 12;
+      bill(gx, gy, 'gold-ico', '⭐', gb);
     }
     if (q.t !== 'city') continue;
     const b = bandOf(i), icons = [];
@@ -1658,25 +1753,25 @@ function drawOwnership() {
       const off = 8, m = icons.length > 1 ? (k ? 6 : -6) : 0;
       const x = b.vert ? b.x + b.w / 2 + m : (r.side === 0 ? b.x + off : b.x + b.w - off);
       const y = b.vert ? (r.side === 1 ? b.y + off : b.y + b.h - off) : b.y + b.h / 2 + m;
-      txt(x, y, 'fx-ico', ic, g, { style: icons.length > 1 ? 'font-size:10.5px' : '' });
+      bill(x, y, 'fx-ico', ic, gb, { style: icons.length > 1 ? 'font-size:10.5px' : '' });
     });
   }
 }
 // đủ nhóm màu (phí ×2): nền chuyển sắc rực màu chủ, quầng sáng thở, vệt sáng chạy quanh viền, sao lấp lánh
 function drawMonopoly(g, i, owner) {
   const r = rectOf(i), b = bandOf(i), C = COLORS[owner], mg = el('g', { class: 'mono' }, g);
-  el('rect', { x: r.x + 3.5, y: r.y + 3.5, width: r.w - 7, height: r.h - 7, rx: 3, fill: 'none', stroke: mix(C.main, '#fff', .55), 'stroke-width': 3, class: 'mono-glow' }, mg);
-  el('rect', { x: r.x + 2, y: r.y + 2, width: r.w - 4, height: r.h - 4, fill: 'none', stroke: '#fff', 'stroke-width': 2, 'stroke-linecap': 'round', class: 'mono-shine' }, mg);
+  el('rect', { x: r.x + TI + 4, y: r.y + TI + 4, width: r.w - 2 * TI - 8, height: r.h - 2 * TI - 8, rx: 3, fill: 'none', stroke: mix(C.main, '#fff', .55), 'stroke-width': 3, class: 'mono-glow' }, mg);
+  el('rect', { x: r.x + TI + 2, y: r.y + TI + 2, width: r.w - 2 * TI - 4, height: r.h - 2 * TI - 4, fill: 'none', stroke: '#fff', 'stroke-width': 2, 'stroke-linecap': 'round', class: 'mono-shine' }, mg);
   el('rect', { x: b.x + 1, y: b.y + 1, width: b.w - 2, height: b.h - 2, fill: 'url(#monoShine)', class: 'mono-glow', style: 'animation-delay:-1s' }, mg);
 }
 // ô đang mở lễ hội: nền vàng (tô ở drawOwnership), viền vàng và nhãn ×N trên dải nhà
 function drawFestival(g, i) {
   const r = rectOf(i), b = bandOf(i), st = ownerStrip(i), fg = el('g', {}, g);
-  el('rect', { x: r.x + 2, y: r.y + 2, width: r.w - 4, height: r.h - 4, rx: 4, fill: 'none', stroke: '#ffd23f', 'stroke-width': 4, class: 'fest-glow', style: 'animation-delay:-.7s' }, fg);
+  el('rect', { x: r.x + TI + 2, y: r.y + TI + 2, width: r.w - 2 * TI - 4, height: r.h - 2 * TI - 4, rx: 4, fill: 'none', stroke: '#ffd23f', 'stroke-width': 4, class: 'fest-glow', style: 'animation-delay:-.7s' }, fg);
   // nhãn lễ hội ở đầu "trước" của dải nhà (đầu kia dành cho dịch bệnh / mất điện), không che chữ
   const px = b.vert ? b.x + b.w / 2 : (r.side === 0 ? b.x + b.w - 12 : b.x + 12);
   const py = b.vert ? (r.side === 1 ? b.y + b.h - 10 : b.y + 10) : b.y + b.h / 2;
-  const pill = el('g', { transform: `translate(${px} ${py})` }, fg);
+  const [PX, PY] = proj(px, py), pill = el('g', { transform: `translate(${PX} ${PY})` }, $('gOwnB'));
   el('rect', { x: -11, y: -8, width: 22, height: 16, rx: 5, fill: '#e8323c', stroke: '#ffd23f', 'stroke-width': 1.5 }, pill);
   txt(0, .5, 'fest-ribbon', `×${festMult(G, i)}`, pill, { style: 'font-size:10px;letter-spacing:0' });
 }
@@ -1685,7 +1780,6 @@ function drawFestival(g, i) {
 function drawBuilding(g, lv, cx, cy, owner, charId) {
   const B = el('g', { transform: `translate(${cx} ${cy})` }, g);
   const main = COLORS[owner].main, lite = mix(main, '#fff', .45), dark = mix(main, '#000', .32), line = mix(main, '#000', .5);
-  el('rect', { x: -14, y: -16, width: 28, height: 30, rx: 5, fill: charOf(charId).bg, stroke: 'rgba(35,50,74,.18)', 'stroke-width': 1 }, B);
   el('ellipse', { cx: 0, cy: 11.5, rx: 12, ry: 3, fill: 'rgba(35,50,74,.18)' }, B); // bóng đổ
   const poly = (pts, fill, st = line, sw = .7) => el('polygon', { points: pts.map(p => p.join(',')).join(' '), fill, stroke: st, 'stroke-width': sw, 'stroke-linejoin': 'round' }, B);
   // khối hộp: góc trước F=(x,y), sâu về trái w, về phải d, cao h
@@ -1748,11 +1842,11 @@ function drawBuild() {
   buildKey = key;
   g.innerHTML = '';
   if (!G) return;
-  for (const i of CITIES) {
+  const order = CITIES.map(i => { const b = bandOf(i); return [i, ...proj(b.x + b.w / 2, b.y + b.h / 2)]; }).sort((a, b) => a[2] - b[2]);
+  for (const [i, bx, by] of order) {
     const p = G.props[i];
     if (!p.lv || p.owner < 0) continue;
-    const b = bandOf(i);
-    drawBuilding(g, p.lv, b.x + b.w / 2, b.y + b.h / 2 + 1, p.owner, G.pl[p.owner].char);
+    drawBuilding(g, p.lv, bx, by - 11, p.owner, G.pl[p.owner].char);
   }
 }
 
@@ -1769,16 +1863,18 @@ $('board').insertBefore(defs, $('board').firstChild);
     const lg = el('linearGradient', { id: 'monoGrad' + s, x1: 0, y1: 0, x2: 1, y2: 1 }, defs);
     [[0, mix(C.main, '#fff', .35)], [.5, mix(C.main, '#fff', .78)], [1, mix(C.main, '#fff', .35)]].forEach(([o, c]) => el('stop', { offset: o, 'stop-color': c }, lg));
   });
+  const fg = el('radialGradient', { id: 'feltGrad', cx: .5, cy: .5, r: .68 }, defs);
+  [[0, '#1f8f68'], [.55, '#156e52'], [1, '#0e5440']].forEach(([o, c]) => el('stop', { offset: o, 'stop-color': c }, fg));
   const sh = el('linearGradient', { id: 'monoShine', x1: 0, y1: 0, x2: 1, y2: 1 }, defs);
   [[0, 0], [.45, 0], [.5, .75], [.55, 0], [1, 0]].forEach(([o, a]) => el('stop', { offset: o, 'stop-color': '#fff', 'stop-opacity': a }, sh));
 })();
 const tokenEls = [0, 1, 2, 3].map(s => {
   const C = COLORS[s], g0 = el('g', { class: 'token' }, $('gTokens')), g = el('g', { transform: `scale(${TOKEN_SCALE})` }, g0);
-  el('ellipse', { cx: 0, cy: 17, rx: 13, ry: 3.5, fill: 'rgba(20,30,50,.3)' }, g);
-  el('circle', { cx: 0, cy: 0, r: 21, class: 'ring', stroke: C.main }, g);
+  el('ellipse', { cx: 0, cy: 2, rx: 16, ry: 6.5, fill: 'rgba(0,0,0,.35)' }, g);
+  el('ellipse', { cx: 0, cy: 0, rx: 20, ry: 9.5, class: 'ring', stroke: C.main }, g);
   const b = el('g', { class: 'tbody' }, g);
-  el('circle', { cx: 0, cy: 0, r: 17, class: 'tbg', fill: '#fff', stroke: C.main, 'stroke-width': 3.5 }, b);
-  el('g', { class: 'face-in', transform: 'translate(0 5) scale(.72)' }, b);
+  el('ellipse', { cx: 0, cy: 0, rx: 13, ry: 6, class: 'disc', fill: C.main }, b);
+  el('g', { class: 'face-in', transform: 'translate(0 -16) scale(.82)' }, b);
   g0.style.display = 'none';
   return g0;
 });
@@ -1787,7 +1883,6 @@ function setTokenFace(s, id) {
   if (g.dataset.id === id) return;
   g.innerHTML = ''; g.dataset.id = id;
   chibiInto(g, charOf(id));
-  tokenEls[s].querySelector('.tbg').setAttribute('fill', charOf(id).bg);
 }
 function placeToken(s, pos, jailed) {
   const [x, y] = tokenXY(pos, s, jailed);
@@ -1822,7 +1917,7 @@ const dice3d = [...document.querySelectorAll('#dice .die')].map((die, i) => {
 // ném xúc xắc vào giữa bàn từ phía quân của người chơi s rồi lăn 3D
 function throwDice(s, d) {
   const stage = $('diceStage'), pos = G && G.pl[s] ? G.pl[s].pos : 0;
-  const [tx, ty] = pos < 8 ? [0, 230] : pos < 16 ? [-230, 0] : pos < 24 ? [0, -230] : [230, 0];
+  const [px, py] = centerOf(pos), tx = Math.round((px - CX) * .6), ty = Math.round((py - CY) * .6);
   stage.style.setProperty('--tx', tx + 'px'); stage.style.setProperty('--ty', ty + 'px');
   stage.classList.remove('throw'); void stage.offsetWidth; stage.classList.add('throw');
   playRollSound();
@@ -1915,11 +2010,14 @@ function playRollSound() {
     if (v > 0.4) thud(t0 + dt, 0.35 * v);
   });
 }
+// mỗi bước một nốt đàn gõ (xylophone), leo dần theo thang ngũ cung Đô trưởng rồi quay lại
+const STEP_NOTES = [523.25, 587.33, 659.25, 783.99, 880, 1046.5, 1174.7, 1318.5];
 function playStep(i) {
   const ctx = ready(); if (!ctx) return;
-  const t = ctx.currentTime + 0.005, hi = i % 2 === 0;
-  tone(ctx, 'triangle', hi ? 520 : 400, t, 0.06, 0.22, hi ? 200 : 160);
-  clack(t, 0.35, hi ? 1700 : 1250, 0.04);
+  const t = ctx.currentTime + 0.005, f = STEP_NOTES[i % STEP_NOTES.length];
+  tone(ctx, 'sine', f, t, 0.16, 0.26);
+  tone(ctx, 'triangle', f * 2, t, 0.07, 0.07);
+  tone(ctx, 'sine', f * 3.01, t, 0.04, 0.04);
 }
 function playCoin(gain, big) {
   const ctx = ready(); if (!ctx) return;
@@ -1942,6 +2040,26 @@ function playWhoosh(len = 0.32) {
   n.connect(f).connect(g).connect(ctx.destination); n.start(t); n.stop(t + len + 0.05);
 }
 function playCard() { playWhoosh(0.3); const ctx = ready(); if (ctx) tone(ctx, 'sine', 880, ctx.currentTime + 0.3, 0.15, 0.08); }
+// tiếng động cơ: âm răng cưa trầm rung nhẹ qua lọc thông thấp, kèm tiếng bánh lăn trên đường (nhiễu lọc dải)
+function playEngine(ms) {
+  const ctx = ready(); if (!ctx) return;
+  const t = ctx.currentTime, len = ms / 1000;
+  const o = ctx.createOscillator(), lp = ctx.createBiquadFilter(), g = ctx.createGain();
+  o.type = 'sawtooth'; o.frequency.setValueAtTime(58, t); o.frequency.linearRampToValueAtTime(74, t + 0.4); o.frequency.setValueAtTime(74, t + len - 0.3); o.frequency.linearRampToValueAtTime(52, t + len);
+  const lfo = ctx.createOscillator(), lg = ctx.createGain(); lfo.frequency.value = 11; lg.gain.value = 5; lfo.connect(lg).connect(o.frequency);
+  lp.type = 'lowpass'; lp.frequency.value = 240; lp.Q.value = 2;
+  g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.16, t + 0.18); g.gain.setValueAtTime(0.16, t + len - 0.3); g.gain.exponentialRampToValueAtTime(0.001, t + len);
+  o.connect(lp).connect(g).connect(ctx.destination); o.start(t); lfo.start(t); o.stop(t + len + 0.05); lfo.stop(t + len + 0.05);
+  const n = ctx.createBufferSource(), bp = ctx.createBiquadFilter(), ng = ctx.createGain();
+  n.buffer = white(ctx); n.loop = true; bp.type = 'bandpass'; bp.frequency.value = 420; bp.Q.value = 0.8;
+  ng.gain.setValueAtTime(0.0001, t); ng.gain.exponentialRampToValueAtTime(0.05, t + 0.2); ng.gain.setValueAtTime(0.05, t + len - 0.3); ng.gain.exponentialRampToValueAtTime(0.001, t + len);
+  n.connect(bp).connect(ng).connect(ctx.destination); n.start(t); n.stop(t + len + 0.05);
+}
+function playBusHorn() {
+  const ctx = ready(); if (!ctx) return;
+  const t = ctx.currentTime;
+  tone(ctx, 'square', 440, t, 0.12, 0.08); tone(ctx, 'square', 440, t + 0.16, 0.2, 0.08);
+}
 function playJail() {
   const ctx = ready(); if (!ctx) return;
   const t = ctx.currentTime + 0.005;
@@ -2039,7 +2157,7 @@ function show(ng, ev) {
 }
 function fx(tag, attrs, ms) { const e = el(tag, attrs, $('gFx')); setTimeout(() => e.remove(), ms); return e; }
 // giữ thông báo trong bàn cờ: quân ở hàng trên (hoặc sát mép) thì đẩy chữ vào trong, không bị cắt mất khúc
-const inX = (x, half) => Math.max(half + 4, Math.min(SIZE - half - 4, x));
+const inX = (x, half) => Math.max(half + 4, Math.min(VW - half - 4, x));
 function floatText(x, y, s, color, ms = 1100, size = 19) {
   x = inX(x, [...s].length * size * .32 + 4); y = Math.max(y, size + 34);
   const t = fx('text', { x, y, class: 'float', fill: color, style: `font-size:${size}px` }, ms);
@@ -2050,7 +2168,7 @@ function floatText(x, y, s, color, ms = 1100, size = 19) {
 function floatMoney(x, y, delta, ms = 1900) {
   const s = (delta >= 0 ? '+' : '−') + fmt(delta), w = s.length * 12 + 18;
   const g = fx('g', { class: 'money' }, ms);
-  const inner = el('g', { transform: `translate(${Math.max(w / 2 + 4, Math.min(SIZE - w / 2 - 4, x))} ${Math.max(58, Math.min(SIZE - 16, y))})` }, g);
+  const inner = el('g', { transform: `translate(${Math.max(w / 2 + 4, Math.min(VW - w / 2 - 4, x))} ${Math.max(58, Math.min(VH - 16, y))})` }, g);
   el('rect', { x: -w / 2, y: -14, width: w, height: 28, rx: 14, fill: delta >= 0 ? '#2e9d4f' : '#e8323c', stroke: '#fff', 'stroke-width': 2.5 }, inner);
   el('text', { x: 0, y: 1 }, inner).textContent = s;
   g.animate([{ transform: 'translateY(10px) scale(.5)', opacity: 0 }, { transform: 'translateY(-10px) scale(1.15)', opacity: 1, offset: .15 }, { transform: 'translateY(-22px) scale(1)', opacity: 1, offset: .6 }, { transform: 'translateY(-50px) scale(.95)', opacity: 0 }], { duration: ms, easing: 'ease-out', fill: 'forwards' });
@@ -2074,8 +2192,8 @@ function pow(x, y, s, color) {
 }
 function shakeBoard() { const b = $('board'); b.classList.remove('shake'); void b.getBoundingClientRect(); b.classList.add('shake'); }
 function flashSquare(i, color, ms = 800) {
-  const r = rectOf(i);
-  fx('rect', { x: r.x, y: r.y, width: r.w, height: r.h, rx: 4, class: 'fx glow', fill: 'none', stroke: color, 'stroke-width': 5 }, ms);
+  const r = rectOf(i), w = fx('g', { transform: ISO(0) }, ms);
+  el('rect', { x: r.x + TI, y: r.y + TI, width: r.w - 2 * TI, height: r.h - 2 * TI, rx: 4, class: 'fx glow', fill: 'none', stroke: color, 'stroke-width': 6 }, w);
 }
 function flyToken(s, from, to, { ms, height, spin = 0 }) {
   const g = tokenEls[s], [x0, y0] = from, [x1, y1] = to, cx = (x0 + x1) / 2, cy = Math.min(y0, y1) - height, frames = [];
@@ -2095,24 +2213,46 @@ function wrapWords(s, max) {
   return out;
 }
 function showCard(card) {
-  const g = $('gCard'), c = SIZE / 2, col = '#f39c12';
+  const g = $('gCard'), c = CX, cy = CY, col = '#f39c12';
   g.innerHTML = '';
   const cg = el('g', { class: 'cardpop' }, g);
   const lines = wrapWords(card.text, 26), h = 136 + lines.length * 20;
-  el('rect', { x: c - 150, y: c - h / 2 - 4, width: 300, height: h + 8, rx: 16, fill: 'rgba(35,50,74,.18)' }, cg);
-  el('rect', { x: c - 148, y: c - h / 2, width: 296, height: h, rx: 14, fill: '#fff', stroke: col, 'stroke-width': 3 }, cg);
-  el('rect', { x: c - 148, y: c - h / 2, width: 296, height: 40, rx: 14, fill: col }, cg);
-  el('rect', { x: c - 148, y: c - h / 2 + 24, width: 296, height: 16, fill: col }, cg);
-  txt(c, c - h / 2 + 20, 'card-head', '❓  CƠ HỘI', cg);
-  txt(c, c - h / 2 + 70, 'card-icon', card.icon, cg);
-  lines.forEach((ln, k) => txt(c, c - h / 2 + 108 + k * 20, 'card-text', ln, cg));
+  el('rect', { x: c - 150, y: cy - h / 2 - 4, width: 300, height: h + 8, rx: 16, fill: 'rgba(0,0,0,.3)' }, cg);
+  el('rect', { x: c - 148, y: cy - h / 2, width: 296, height: h, rx: 14, fill: '#fff', stroke: col, 'stroke-width': 3 }, cg);
+  el('rect', { x: c - 148, y: cy - h / 2, width: 296, height: 40, rx: 14, fill: col }, cg);
+  el('rect', { x: c - 148, y: cy - h / 2 + 24, width: 296, height: 16, fill: col }, cg);
+  txt(c, cy - h / 2 + 20, 'card-head', '❓  CƠ HỘI', cg);
+  txt(c, cy - h / 2 + 70, 'card-icon', card.icon, cg);
+  lines.forEach((ln, k) => txt(c, cy - h / 2 + 108 + k * 20, 'card-text', ln, cg));
   return cg;
 }
 const FLY_MS = 750;
+// xe buýt chạy dọc đường, chậm rãi hơn người đi bộ
+const BUS_STEP_MS = 280;
+const busMs = n => Math.max(BUS_STEP_MS * 2, Math.abs(n) * BUS_STEP_MS);
+async function rideBus(s, from, n, tok) {
+  const g = tokenEls[s], pts = [];
+  for (let k = 0; k <= Math.abs(n); k++) pts.push(tokenXY((from + k * Math.sign(n) + N) % N, s, false));
+  const bus = el('g', { class: 'bus' }, $('gFx'));
+  el('ellipse', { cx: 0, cy: 10, rx: 18, ry: 5, fill: 'rgba(0,0,0,.3)' }, bus);
+  txt(0, -6, 'sq-icon', '🚌', bus, { style: 'font-size:34px' });
+  // quân lên xe: ẩn đi, xe chạy qua từng ô rồi quân xuống xe ở ô đích
+  g.style.opacity = '0';
+  const ms = busMs(n), frames = pts.map((p, k) => ({ transform: `translate(${p[0]}px, ${p[1]}px) translateY(${k % 2 ? -3 : 0}px)`, offset: k / (pts.length - 1) }));
+  playBusHorn(); playEngine(ms);
+  const a = bus.animate(frames, { duration: ms, easing: 'linear', fill: 'forwards' });
+  await new Promise(r => { a.onfinish = a.oncancel = r; setTimeout(r, ms + 50); });
+  bus.remove();
+  if (tok !== animTok) { g.style.opacity = ''; return; }
+  const to = pts[pts.length - 1];
+  placeToken(s, (from + n + N) % N, false); g.style.opacity = '';
+  hopToken(s);
+  fx('circle', { cx: to[0], cy: to[1] + 8, r: 16, fill: 'rgba(120,110,95,.35)', class: 'fx puff' }, 550);
+}
 function stepMs(st) {
   switch (st.k) {
     case 'dice': return 1000;
-    case 'move': return st.fly ? FLY_MS + 150 : Math.abs(st.n) * STEP_MS + (st.passGo ? 300 : 100);
+    case 'move': return st.how === 'bus' ? busMs(st.n) + 350 : st.fly ? FLY_MS + 150 : Math.abs(st.n) * STEP_MS + (st.passGo ? 300 : 100);
     case 'boost': return 600; case 'island': return 800; case 'free': return 450; case 'stay': return 350; case 'triple': return 600; case 'released': return 400;
     case 'busStop': return 600; case 'busGo': return 300; case 'busNoCash': return 300;
     case 'home': return st.can ? 0 : 300; case 'norent': return 350; case 'useFree': return 800; case 'useHalf': return 600;
@@ -2144,6 +2284,12 @@ async function animateStep(st, tok) {
   switch (st.k) {
     case 'dice': throwDice(s, st.d); await sleep(ms); return;
     case 'move': {
+      if (st.how === 'bus') {
+        await rideBus(s, st.from, st.n, tok);
+        if (st.passGo) { const [x, y] = centerOf(0); floatMoney(x, y - 20, st.salary); playCoin(true); }
+        await sleep(350);
+        return;
+      }
       if (st.fly) {
         const from = tokenXY(st.from, s, false), to = tokenXY(st.to, s, false);
         playWhoosh(0.6);
@@ -2306,7 +2452,7 @@ function stepText(st) {
   switch (st.k) {
     case 'dice': return `${w} tung được ${st.d[0]} + ${st.d[1]}${st.dbl ? ' — đôi! 🎉' : ''}`;
     case 'boost': return `🏎️ Tay Đua tăng tốc: ${w} đi ${st.n} bước!`;
-    case 'move': return st.fly ? `${w} tới ${nm(st.to)}${st.passGo ? ', qua Bắt Đầu nhận ' + fmt(st.salary) : ''}` : `${w} đi ${st.n} bước tới ${nm(st.to)}${st.passGo ? ', qua Bắt Đầu nhận ' + fmt(st.salary) : ''}`;
+    case 'move': return st.how === 'bus' ? `🚌 ${w} đi xe tới ${nm(st.to)}${st.passGo ? ', qua Bắt Đầu nhận ' + fmt(st.salary) : ''}` : st.fly ? `${w} tới ${nm(st.to)}${st.passGo ? ', qua Bắt Đầu nhận ' + fmt(st.salary) : ''}` : `${w} đi ${st.n} bước tới ${nm(st.to)}${st.passGo ? ', qua Bắt Đầu nhận ' + fmt(st.salary) : ''}`;
     case 'island': return `🏝️ ${w} bị đưa ra Côn Đảo!`;
     case 'triple': return `${w} tung đôi ba lần liền — ra Côn Đảo!`;
     case 'stay': return st.left > 0 ? `${w} không ra đôi, ở lại Côn Đảo · còn ${st.left} lượt` : `${w} không ra đôi, lượt sau sẽ được thả`;
@@ -2369,7 +2515,8 @@ function paint(skipTokens) {
   if (!skipTokens) viewCash = G.pl.map(p => p.cash);
   for (let s = 0; s < 4; s++) {
     const g = tokenEls[s];
-    g.style.display = inPlay && G.seats[s] && !G.pl[s].out ? '' : 'none';
+    // đang hoạt hoạ: quân vừa phá sản vẫn hiện để đi hết nước, bước 'bankrupt' mới làm mờ rồi ẩn
+    if (!(skipTokens && G.seats[s] && G.pl[s].out)) g.style.display = inPlay && G.seats[s] && !G.pl[s].out ? '' : 'none';
     g.classList.toggle('turn', inPlay && G.phase === 'play' && G.turn === s);
     if (G.seats[s]) setTokenFace(s, G.pl[s].char);
     if (!skipTokens) placeToken(s, G.pl[s].pos, G.pl[s].jail > 0);
@@ -2381,8 +2528,8 @@ function paint(skipTokens) {
 }
 // ô có thể chọn (bến xe, lễ hội, thẻ) nhấp nháy khi tới lượt mình chọn
 function paintPicks() {
-  const g = $('gPick');
-  g.innerHTML = '';
+  const g = $('gPick'), gb = $('gPickB');
+  g.innerHTML = ''; gb.innerHTML = '';
   // đang chọn ô (bến xe, lễ hội, thẻ bài) hoặc đang nợ phải chọn đất của mình để bán
   const me = G.phase === 'play' && canAct(G.turn) && !busy() && !pending;
   const opts = !me ? null : G.step === 'pick' && G.pick ? G.pick.opts : G.step === 'debt' ? PROPS.filter(i => G.props[i].owner === G.turn) : null;
@@ -2391,15 +2538,15 @@ function paintPicks() {
   // làm mờ mọi thứ trừ các ô được chọn (đường evenodd khoét lỗ), viền vàng thở quanh từng ô
   let d = `M0 0 H${SIZE} V${SIZE} H0 Z`;
   for (const i of opts) { const r = rectOf(i); d += ` M${r.x} ${r.y} h${r.w} v${r.h} h${-r.w} Z`; }
-  el('path', { d, fill: 'rgba(230,236,243,.78)', 'fill-rule': 'evenodd', class: 'pick-dim' }, g);
+  el('path', { d, fill: 'rgba(230,236,243,.72)', 'fill-rule': 'evenodd', class: 'pick-dim' }, g);
   opts.forEach((i, k) => {
     const r = rectOf(i);
-    el('rect', { x: r.x + 1.5, y: r.y + 1.5, width: r.w - 3, height: r.h - 3, rx: 5, class: 'pick-ring', style: `animation-delay:${(k % 5) * .12}s` }, g);
+    el('rect', { x: r.x + TI, y: r.y + TI, width: r.w - 2 * TI, height: r.h - 2 * TI, rx: 5, class: 'pick-ring', style: `animation-delay:${(k % 5) * .12}s` }, g);
     if (opts.length > 10) return; // bến xe: quá nhiều ô, chỉ cần viền
     // bàn tay chỉ vào ô từ phía trong bàn
-    const [cx, cy] = centerOf(i);
+    const [cx, cy] = flatCenter(i);
     const hx = r.side === 1 ? r.x + r.w : r.side === 3 ? r.x : cx, hy = r.side === 0 ? r.y : r.side === 2 ? r.y + r.h : cy;
-    const at = el('g', { transform: `translate(${hx} ${hy})` }, g);
+    const [HX, HY] = proj(hx, hy), at = el('g', { transform: `translate(${HX} ${HY})` }, gb);
     const hand = el('g', { class: 'pick-hand', style: `--dx:${r.side === 1 ? '-6px' : r.side === 3 ? '6px' : '0'};--dy:${r.side === 0 ? '6px' : r.side === 2 ? '-6px' : '0'};animation-delay:${(k % 5) * .1}s` }, at);
     el('circle', { cx: 0, cy: 0, r: 14, fill: '#fff', stroke: '#ffb020', 'stroke-width': 2.5 }, hand);
     txt(0, 1, '', r.side === 0 ? '👇' : r.side === 2 ? '👆' : r.side === 1 ? '👈' : '👉', hand);
@@ -2409,37 +2556,41 @@ const groupColor = i => (SQ[i].t === 'city' ? GROUPS[SQ[i].g].color : '#5b8dc9')
 function renderPlayers() {
   const pl = $('players');
   pl.innerHTML = '';
+  // thứ hạng theo tổng tài sản (người phá sản xếp cuối)
+  const live = [0, 1, 2, 3].filter(s => G.seats[s] && !G.pl[s].out).sort((a, b) => netWorth(G, b) - netWorth(G, a));
   for (let s = 0; s < 4; s++) {
     const x = G.seats[s];
     if (!x) continue;
-    const P = G.pl[s], d = document.createElement('div');
-    d.className = 'pl' + (G.phase === 'play' && G.turn === s ? ' turn' : '') + (x.remote && !x.online ? ' off' : '') + (P.out ? ' out' : '');
+    const P = G.pl[s], ch = charOf(P.char), d = document.createElement('div');
+    const mine = net.on ? s === net.seat : x.type === 'human' && !x.remote;
+    d.className = 'pl s' + s + (mine ? ' me' : '') + (G.phase === 'play' && G.turn === s ? ' turn' : '') + (x.remote && !x.online ? ' off' : '') + (P.out ? ' out' : '');
     d.style.setProperty('--c', COLORS[s].main);
     const top = document.createElement('div'); top.className = 'pl-top';
     const ava = document.createElement('span'); ava.className = 'ava'; ava.appendChild(chibiSvg(P.char)); top.appendChild(ava);
-    const cash = busy() && viewCash ? viewCash[s] : P.cash, fxv = cashFx[s], age = fxv ? Date.now() - fxv.t : 1e9;
-    top.insertAdjacentHTML('beforeend', `<span class="nm"></span><span class="cash${cash < 200 ? ' low' : ''}${age < 500 ? ' bump' : ''}">${P.out ? '☠️' : fmt(cash)}</span>`);
-    if (age < 2200 && !P.out) { const dl = document.createElement('span'); dl.className = 'delta ' + (fxv.v >= 0 ? 'plus' : 'minus'); dl.textContent = (fxv.v >= 0 ? '+' : '−') + fmt(fxv.v); dl.style.animationDelay = -age + 'ms'; top.insertBefore(dl, top.querySelector('.cash')); }
-    top.querySelector('.nm').textContent = (x.type === 'bot' ? '🤖 ' : '') + who(s) + (x.remote && !x.online ? ' 📴' : '');
+    const id = document.createElement('div'); id.className = 'pl-id';
+    id.innerHTML = '<span class="nm"></span>';
+    id.querySelector('.nm').textContent = (x.type === 'bot' ? '🤖 ' : '') + who(s) + (x.remote && !x.online ? ' 📴' : '');
+    top.appendChild(id);
+    const rk = live.indexOf(s), rank = document.createElement('span');
+    rank.className = 'rank r' + (rk < 0 ? 4 : rk + 1); rank.textContent = rk < 0 ? '☠️' : rk + 1; rank.title = 'Hạng theo tổng tài sản';
+    top.appendChild(rank);
     d.appendChild(top);
+    const cash = busy() && viewCash ? viewCash[s] : P.cash, fxv = cashFx[s], age = fxv ? Date.now() - fxv.t : 1e9;
+    const row1 = document.createElement('div'); row1.className = 'pl-row';
+    row1.innerHTML = `<span class="lbl">💵 <b>Tiền mặt</b></span><span class="cash${cash < 200 ? ' low' : ''}${age < 500 ? ' bump' : ''}">${P.out ? '☠️' : fmt(cash)}</span>`;
+    if (age < 2200 && !P.out) { const dl = document.createElement('span'); dl.className = 'delta ' + (fxv.v >= 0 ? 'plus' : 'minus'); dl.textContent = (fxv.v >= 0 ? '+' : '−') + fmt(fxv.v); dl.style.animationDelay = -age + 'ms'; row1.insertBefore(dl, row1.querySelector('.cash')); }
+    d.appendChild(row1);
+    const row2 = document.createElement('div'); row2.className = 'pl-row';
+    row2.innerHTML = `<span class="lbl">🏠 <b>Tài sản</b></span><span class="worth">${P.out ? 'phá sản' : fmt(netWorth(G, s))}</span>`;
+    d.appendChild(row2);
     const props = document.createElement('div'); props.className = 'pl-props';
     if (P.jail && !P.out) { const b = document.createElement('span'); b.className = 'badge'; b.textContent = `🏝️ Côn Đảo · còn ${Math.max(1, 4 - P.jail)} lượt`; props.appendChild(b); }
     if (P.bus && !P.out) { const b = document.createElement('span'); b.className = 'badge'; b.textContent = '🚌 lượt sau đi xe'; props.appendChild(b); }
     const hold = document.createElement('span'); hold.className = 'hold';
     for (const k of Object.keys(HOLD_INFO)) if (P.hold[k]) { const h = document.createElement('span'); h.textContent = HOLD_INFO[k][0] + (P.hold[k] > 1 ? P.hold[k] : ''); h.title = HOLD_INFO[k][1]; hold.appendChild(h); }
     if (hold.children.length) props.appendChild(hold);
-    for (const i of PROPS) {
-      const p = G.props[i];
-      if (p.owner !== s) continue;
-      const c = document.createElement('i');
-      c.style.setProperty('--g', groupColor(i));
-      if (SQ[i].t === 'tour') c.className = 't'; else if (p.lv > 1) c.innerHTML = `<b>${p.lv}</b>`;
-      c.title = SQ[i].name + (SQ[i].t === 'city' ? ' · ' + LEVELS[p.lv].name : '');
-      c.onclick = e => { e.stopPropagation(); openProp(i); };
-      props.appendChild(c);
-    }
-    d.appendChild(props);
-    const ch = charOf(P.char);
+    // danh sách ô đất xem trong bảng người chơi (chạm vào thẻ), không liệt kê ở đây cho gọn
+    if (props.children.length) d.appendChild(props);
     d.title = `${x.name} · ${ch.name}: ${ch.skill} · tài sản ${fmt(netWorth(G, s))}`;
     d.onclick = () => openPlayer(s);
     pl.appendChild(d);
@@ -2482,8 +2633,7 @@ function renderStatus() {
     else if (G.step === 'debt') main = `${cap(nm)} cần ${fmt(G.debt.amt)} — chạm vào thành phố của mình để bán`;
   } else if (net.on && net.seat < 0) main = `Bạn đang xem · lượt của ${who(t)}`;
   else main = `${who(t)}${G.seats[t].type === 'human' && seatAuto(t) ? ' (máy đánh thay)' : ''} đang chơi${DOTS}`;
-  st.innerHTML = `<span class="ev"></span><span class="main">${main}</span>`;
-  st.querySelector('.ev').textContent = statusEv;
+  if (main) st.innerHTML = main; else st.textContent = statusEv;
   st.title = st.textContent.trim();
 }
 function btn(label, cls, fn, disabled, sub) {
@@ -2700,7 +2850,6 @@ function renderLog() {
     li.textContent = e.t; ul.appendChild(li);
   }
 }
-$('bLog').onclick = () => { renderLog(); $('logSheet').hidden = false; $('logList').scrollTop = 0; };
 $('bLogOk').onclick = () => { $('logSheet').hidden = true; };
 $('logSheet').onclick = e => { if (e.target === $('logSheet')) $('logSheet').hidden = true; };
 
@@ -2742,7 +2891,7 @@ function charInfoInto(box, id) {
 // ── chạm vào bàn: chọn ô (khi đang chọn) hoặc mở bảng ô đất ──
 function sqAt(e) {
   const r = $('board').getBoundingClientRect();
-  const x = (e.clientX - r.left) / r.width * SIZE, y = (e.clientY - r.top) / r.height * SIZE;
+  const [x, y] = unproj((e.clientX - r.left) / r.width * VW, (e.clientY - r.top) / r.height * VH);
   for (let i = 0; i < N; i++) { const q = rectOf(i); if (x >= q.x && x < q.x + q.w && y >= q.y && y < q.y + q.h) return i; }
   return -1;
 }
@@ -2769,15 +2918,26 @@ document.addEventListener('keydown', e => {
 
 // ── co giãn ──
 function fit() {
-  const w = $('wrap'), shell = w.parentElement, side = shell.querySelector('.side'), cs = getComputedStyle(w);
-  const row = getComputedStyle(shell).flexDirection === 'row';
-  const padX = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
-  const availW = shell.clientWidth - (row ? side.offsetWidth : 0) - padX - 8;
-  const s = Math.max(240, Math.floor(Math.min(availW, w.clientHeight - 4, 1000)));
-  $('boardBox').style.width = $('boardBox').style.height = s + 'px';
-  $('dice').style.setProperty('--s', Math.round(s * 0.085) + 'px');
+  const w = $('wrap'), cs = getComputedStyle(w), stage = $('stage');
+  const landscape = cs.position === 'absolute'; // màn ngang: khung bàn chiếm trọn sân khấu; màn dọc: xếp dọc cùng các phần khác
+  const padX = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight), padY = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom);
+  const aw = w.clientWidth - padX;
+  // điện thoại dọc: khối nút hành động nằm trong bàn (dưới nút ĐỔ) nên không chiếm chiều cao; màn khác nằm dưới bàn
+  const phone = !landscape && aw < 700, act = $('actions'), mid = $('mid');
+  if (phone && act.parentElement !== mid) mid.appendChild(act);
+  else if (!phone && act.parentElement === mid) stage.insertBefore(act, stage.querySelector('.dock'));
+  const others = landscape ? 0 : [stage.querySelector('.top'), $('status'), $('players'), ...(phone ? [] : [act]), stage.querySelector('.dock')].reduce((a, e) => a + e.offsetHeight, 0) + 6;
+  const ah = (landscape ? w.clientHeight : stage.clientHeight - others) - padY;
+  // điện thoại dọc: bàn vuông nhìn thẳng (hình thoi bị bó theo chiều rộng); iPad dọc: hình thoi dựng cao hơn cho ô to hơn
+  const mode = !landscape && aw < 700 ? 'flat' : 'iso';
+  const want = mode === 'flat' ? K : Math.max(0.55, Math.min(0.9, ((ah / Math.max(1, aw)) * 1060 - 120) / DIAG));
+  if (mode !== MODE || Math.abs(want - K) > 0.015) setView(mode, want);
+  const bw = Math.max(280, Math.floor(Math.min(aw, ah * VW / VH)));
+  $('boardBox').style.width = bw + 'px'; $('boardBox').style.height = Math.round(bw * VH / VW) + 'px';
+  stage.style.setProperty('--s', Math.round(Math.max(30, Math.min(54, bw * 0.046))) + 'px');
 }
 window.addEventListener('resize', fit);
+if (window.ResizeObserver) { const ro = new ResizeObserver(() => fit()); for (const id of ['players', 'actions', 'status']) ro.observe($(id)); }
 </script>
 
 <script>
