@@ -157,7 +157,6 @@ button:disabled { opacity: .4; cursor: default; }
 .acts .pass { background: #eef2f7; color: var(--muted); }
 .acts .pass.urge { background: #56657c; color: #fff; }
 .acts .play { background: #e8323c; color: #fff; flex: 1.4; }
-.acts .tip { background: #1e6fd8; color: #fff; }
 .dots span { display: inline-block; animation: dot 1.1s infinite; }
 .dots span:nth-child(2) { animation-delay: .15s; } .dots span:nth-child(3) { animation-delay: .3s; }
 @keyframes dot { 0%, 60%, 100% { opacity: .2; } 30% { opacity: 1; } }
@@ -169,7 +168,10 @@ button:disabled { opacity: .4; cursor: default; }
   box-shadow: 0 12px 30px rgba(0,0,0,.35); animation: pop .3s cubic-bezier(.2,1.4,.5,1);
 }
 .resbox h3 { text-align: center; font-size: 17px; font-weight: 800; margin-bottom: 4px; }
-.rr { display: flex; align-items: center; gap: 8px; padding: 3px 0; font-weight: 700; font-size: 14px; }
+.rr { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 3px 0; font-weight: 700; font-size: 14px; }
+.rr .lf { flex: 0 0 100%; display: flex; padding: 0 0 2px 52px; }
+.rr .lf .card { --cw: 22px; box-shadow: 0 1px 2px rgba(0,0,0,.3); }
+.rr .lf .card + .card { margin-left: -9px; }
 .rr + .rr { border-top: 1px solid #eef2f7; }
 .rr .pl { width: 44px; flex: 0 0 auto; text-align: center; font-size: 12px; font-weight: 800; border-radius: 999px; background: #eef2f7; }
 .rr:first-of-type .pl { background: var(--gold); color: #3a2a00; }
@@ -217,7 +219,7 @@ button:disabled { opacity: .4; cursor: default; }
   .dock button { min-height: 36px; padding: 4px 10px; font-size: 13px; }
   .hand-row { flex-direction: row; align-items: flex-end; gap: 10px; }
   .hand-wrap { flex: 1; min-width: 0; }
-  .acts { flex: 0 0 220px; flex-direction: column; gap: 6px; }
+  .acts { order: 1; flex: 0 0 220px; flex-direction: column; gap: 6px; }
   .acts button { min-height: 36px; font-size: 15px; }
   .hint { min-height: 20px; font-size: 14px; }
   .seat { flex-direction: row; }
@@ -307,12 +309,11 @@ button:disabled { opacity: .4; cursor: default; }
 <section class="bar">
   <div class="hint" id="hint"></div>
   <div class="hand-row">
-    <div class="hand-wrap" id="handWrap"><div class="hand" id="hand"></div></div>
     <div class="acts">
       <button class="pass" id="bPass">Bỏ lượt</button>
-      <button class="tip" id="bTip">Gợi ý</button>
       <button class="play" id="bPlay">Đánh</button>
     </div>
+    <div class="hand-wrap" id="handWrap"><div class="hand" id="hand"></div></div>
   </div>
 </section>
 <nav class="dock">
@@ -749,7 +750,8 @@ function drive(ev) {
   if (!isController() || !G || G.phase !== 'play') return;
   const H = G.hand, wait = animMs(ev);
   if (!H) { driveT = setTimeout(startHand, wait + 400); return; }
-  if (H.stage === 'done') { driveT = setTimeout(startHand, wait + 5500); return; }
+  // còn bài lật ra thì chờ lâu hơn cho mọi người kịp xem
+  if (H.stage === 'done') { driveT = setTimeout(startHand, wait + (H.cards.some(c => c && c.length) ? 8000 : 5500)); return; }
   const s = H.turn;
   if (!seatAuto(s)) return;
   driveT = setTimeout(() => {
@@ -789,27 +791,14 @@ function canPlaySel() {
 function uiPlay() {
   if (!canPlaySel()) return;
   const me = viewerSeat(), { cs } = selCombo();
-  sel.clear(); tipIdx = -1;
+  sel.clear();
   if (net.on && !net.host) sendIntent({ t: 'play', cards: cs }); else doPlay(me, cs);
 }
 function uiPass() {
   const H = V && V.hand;
   if (!myTurn() || !uiReady() || !H.last) return;
-  sel.clear(); tipIdx = -1;
+  sel.clear();
   if (net.on && !net.host) sendIntent({ t: 'pass' }); else doPass(viewerSeat());
-}
-// gợi ý: bấm nhiều lần để xem lần lượt các cách đánh
-let tipIdx = -1, tipKey = '';
-function uiTip() {
-  const H = V && V.hand, me = viewerSeat();
-  if (!myTurn() || !uiReady()) return;
-  const list = rankPlays(H, me).list;
-  const key = H.no + ':' + H.cards[me].length + ':' + (H.last ? H.last.cards.join(',') : '');
-  if (key !== tipKey) { tipKey = key; tipIdx = -1; }
-  if (!list.length) { flashHint('Không có bài nào chặn được, bỏ lượt thôi.'); return; }
-  tipIdx = (tipIdx + 1) % list.length;
-  sel = new Set(list[tipIdx].cards);
-  paintHand(); renderActs();
 }
 </script>
 
@@ -973,7 +962,9 @@ function paint() {
         h += `<div class="rr" style="--c:${SEAT_COLORS[p]}"><span class="pl">${R.toi === p ? 'Trắng' : placeName(i, n)}</span>`
           + `<span class="av">${V.seats[p] && V.seats[p].type === 'bot' ? '🤖' : AVATARS[p]}</span>`
           + `<span class="nm">${esc(who(p))}${nt ? `<br><span class="nt">${esc(nt)}</span>` : ''}</span>`
-          + `<span class="d ${g > 0 ? 'pos' : g < 0 ? 'neg' : ''}">${sgn(g)}</span></div>`;
+          + `<span class="d ${g > 0 ? 'pos' : g < 0 ? 'neg' : ''}">${sgn(g)}</span>`
+          // lật bài còn lại trên tay (người bét, bị cóng, thối heo…)
+          + (H.cards[p] && H.cards[p].length ? `<div class="lf">${H.cards[p].map(c => cardEl(c).outerHTML).join('')}</div>` : '') + '</div>';
       });
       if (V.phase === 'play' && isControllerView()) h += '<div class="next">Ván mới sắp chia…</div>';
       else if (V.phase === 'play') h += '<div class="next">Chờ chia ván mới…</div>';
@@ -1077,7 +1068,6 @@ function renderActs() {
     : `Đánh<br><small>${esc(comboName(k))}</small>`;
   pass.disabled = !(mine && rd && H.last);
   pass.classList.toggle('urge', mine && rd && !!H.last && !legalPlays(H, viewerSeat()).length);
-  $('bTip').disabled = !(mine && rd);
   const showActs = !!H && H.stage === 'play' && viewerSeat() >= 0 && !!H.cards[viewerSeat()] && active(H, viewerSeat());
   document.querySelector('.acts').style.visibility = showActs ? '' : 'hidden';
 }
@@ -1089,7 +1079,6 @@ function setSel(c, on) {
   if (on) sel.add(c); else sel.delete(c);
   const e = $('hand').querySelector(`.card[data-c="${c}"]`);
   if (e) e.classList.toggle('sel', on);
-  tipIdx = -1;
   renderActs();
 }
 $('handWrap').addEventListener('pointerdown', e => {
@@ -1105,7 +1094,6 @@ $('handWrap').addEventListener('pointerup', endDrag);
 $('handWrap').addEventListener('pointercancel', endDrag);
 $('bPlay').onclick = uiPlay;
 $('bPass').onclick = uiPass;
-$('bTip').onclick = uiTip;
 document.addEventListener('keydown', e => {
   if (e.target !== document.body) return;
   if (e.key === 'Enter') { e.preventDefault(); uiPlay(); }
