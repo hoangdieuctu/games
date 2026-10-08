@@ -62,7 +62,12 @@ button:disabled { opacity: .4; cursor: default; }
 .board-box { position: relative; flex: 0 0 auto; }
 /* cụm giữa bàn: dòng trạng thái, nút ĐỔ kèm xúc xắc, nút hành động */
 .mid { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; }
-.dice-stage { transition: opacity .25s; }
+.dice-stage { position: relative; transition: opacity .25s; }
+/* thẻ Chẵn / Lẻ: hai nút kẹp hai bên nút ĐỔ, ngang tâm nút tròn */
+.par-side { position: absolute; bottom: calc(var(--s) * .925); transform: translateY(50%); display: flex; }
+.par-side.l { right: calc(100% + 4px); } .par-side.r { left: calc(100% + 4px); }
+.par-side:empty { display: none; }
+.par-side button { flex-direction: column; gap: 0; line-height: 1.1; padding: 5px 12px; min-height: 0; white-space: nowrap; background: linear-gradient(180deg, #a66bd1, #8e44ad); color: #fff; border-color: #e4c8f5; }
 .dice-stage.hide { opacity: 0; pointer-events: none; }
 .dice-stage .cubes { will-change: transform; }
 .dice-stage.throw .cubes { animation: throwin .75s cubic-bezier(.2, .9, .3, 1.08); }
@@ -163,6 +168,10 @@ button:disabled { opacity: .4; cursor: default; }
 @keyframes moneyup { 0% { opacity: 0; translate: 0 6px; scale: .5; } 15% { opacity: 1; translate: 0 0; scale: 1.2; } 25% { scale: 1; } 70% { opacity: 1; translate: 0 -8px; } 100% { opacity: 0; translate: 0 -22px; } }
 @keyframes moneydown { 0% { opacity: 0; translate: 0 -6px; scale: .5; } 15% { opacity: 1; translate: 0 0; scale: 1.2; } 25% { scale: 1; } 70% { opacity: 1; translate: 0 8px; } 100% { opacity: 0; translate: 0 22px; } }
 @keyframes cashbump { 30% { transform: scale(1.25); } }
+/* tiền của chính mình thay đổi: số to giữa bàn cờ */
+.money-big { position: fixed; z-index: 41; pointer-events: none; transform: translate(-50%, -50%); white-space: nowrap; color: #fff; font: 900 44px 'Baloo 2', system-ui, sans-serif; line-height: 1; padding: 10px 26px; border-radius: 999px; border: 4px solid #fff; box-shadow: 0 8px 24px rgba(0,0,0,.45); animation: moneybig 2.2s ease-out forwards; }
+.money-big.plus { background: var(--green); } .money-big.minus { background: var(--red); }
+@keyframes moneybig { 0% { opacity: 0; scale: .3; } 12% { opacity: 1; scale: 1.15; } 22% { scale: 1; } 75% { opacity: 1; translate: 0 -6px; } 100% { opacity: 0; translate: 0 -30px; } }
 .pl-props { display: flex; flex-wrap: wrap; gap: 3px; align-items: center; min-height: 0; }
 .pl-props:empty { display: none; }
 .pl-props i {
@@ -240,16 +249,17 @@ button:disabled { opacity: .4; cursor: default; }
 @keyframes dot { 0%, 60%, 100% { opacity: .2; } 30% { opacity: 1; } }
 
 .actions { display: flex; gap: 8px; justify-content: center; align-content: flex-start; flex-wrap: wrap; width: 100%; padding: 6px 8px 0; min-height: 54px; }
-.actions button {
+.actions button, .par-side button {
   display: flex; align-items: center; gap: 6px; background: #fff; color: var(--ink); border-radius: 999px; padding: 8px 16px; min-height: 44px;
   font-weight: 800; font-size: 15px; box-shadow: 0 4px 0 rgba(0,0,0,.28), 0 8px 16px rgba(0,0,0,.35); transition: transform .1s; border: 2px solid rgba(255,255,255,.7); position: relative;
 }
-.actions button:not(:disabled):active { transform: translateY(2px); box-shadow: 0 2px 0 rgba(0,0,0,.28), 0 4px 10px rgba(0,0,0,.3); }
+.actions button:not(:disabled):active, .par-side button:not(:disabled):active { transform: translateY(2px); box-shadow: 0 2px 0 rgba(0,0,0,.28), 0 4px 10px rgba(0,0,0,.3); }
 .actions button.primary { background: linear-gradient(180deg, #4fc46f, #2e9d4f); color: #fff; border-color: #a8f0bb; }
 .actions button.primary:not(:disabled)::after { content: ''; position: absolute; inset: -2px; border-radius: 999px; border: 3px solid rgba(123,228,149,.6); animation: pulse 1.6s ease-out infinite; pointer-events: none; will-change: transform, opacity; }
 @keyframes pulse { from { transform: scale(1); opacity: 1; } to { transform: scale(1.12, 1.3); opacity: 0; } }
 .actions button.danger { background: #fdecea; color: #c0392b; }
 .actions button.warn { background: linear-gradient(180deg, #3b4b5e, #23324a); color: #fff; border-color: #6b7a90; }
+.par-side button small { font-weight: 700; opacity: .85; font-size: 11px; }
 .actions button small { font-weight: 700; opacity: .8; font-size: 12px; }
 .actions button.lv { flex-direction: column; gap: 0; line-height: 1.15; padding: 6px 12px; }
 
@@ -439,6 +449,11 @@ button:disabled { opacity: .4; cursor: default; }
 .mono-shine { stroke-dasharray: 10 6; opacity: .9; }
 /* ── lễ hội: quầng vàng thở, sao lấp lánh, cờ đuôi nheo đung đưa ── */
 /* hiệu ứng lễ hội / đủ nhóm màu để tĩnh: animation lặp vô hạn trong SVG làm iPad lag dần khi bàn nhiều nhà */
+/* pháo hoa trên thành phố đang có lễ hội — mỗi lúc chỉ một nơi nên để chạy lặp được */
+.fw { pointer-events: none; }
+.fw-burst { transform-box: fill-box; transform-origin: center; animation: fwburst 1.8s ease-out infinite; }
+.fw-burst.b2 { animation-delay: -.9s; }
+@keyframes fwburst { 0% { transform: scale(.15); opacity: 0; } 15% { opacity: 1; } 70% { opacity: 1; } 100% { transform: scale(1.15); opacity: 0; } }
 .fest-ribbon { font: 900 8px 'Baloo 2', system-ui, sans-serif; text-anchor: middle; dominant-baseline: central; fill: #fff; letter-spacing: .8px; pointer-events: none; }
 /* ── nhân vật chibi ── */
 .chibi { pointer-events: none; }
@@ -499,6 +514,7 @@ button:disabled { opacity: .4; cursor: default; }
 @media (prefers-reduced-motion: reduce) {
   .token { transition: none; }
   .token .ring, .roll-lbl, .die.hop, .die.hop::after, .dots span, .panel, .overlay, .cardpop, .actions button.primary::after, #board.shake, .pick-ring, .pick-hand, .chars button.on, .tour-flag { animation: none; }
+  .fw-burst { animation: none; }
   .cube { transition: none; }
 }
 </style>
@@ -545,6 +561,7 @@ button:disabled { opacity: .4; cursor: default; }
   <div class="mid" id="mid">
     <div class="dice-stage" id="diceStage">
       <button class="dice" id="dice" aria-label="Tung xúc xắc"><div class="cubes"><div class="die"></div><div class="die"></div></div><span class="roll-lbl">ĐỔ</span></button>
+      <div class="par-side l" id="parL"></div><div class="par-side r" id="parR"></div>
     </div>
   </div>
 </main>
@@ -1915,6 +1932,25 @@ function drawFestival(g, i) {
   const [PX, PY] = proj(px, py), pill = el('g', { transform: `translate(${PX} ${PY})` }, $('gOwnB'));
   el('rect', { x: -11, y: -8, width: 22, height: 16, rx: 5, fill: '#e8323c', stroke: '#ffd23f', 'stroke-width': 1.5 }, pill);
   txt(0, .5, 'fest-ribbon', `×${festMult(G, i)}`, pill, { style: 'font-size:10px;letter-spacing:0' });
+  drawFireworks(i);
+}
+// pháo hoa nổ trên ô lễ hội: hai chùm tia nhiều màu nở luân phiên, bàn 3D thì bắn lên trên nóc nhà
+function drawFireworks(i) {
+  const r = rectOf(i), flat = MODE === 'flat';
+  const [X, Y] = proj(r.x + r.w / 2, r.y + r.h / 2, flat ? 0 : -34), fw = el('g', { class: 'fw', transform: `translate(${X} ${Y})` }, $('gOwnB'));
+  const burst = (cx, cy, R, cols, cls) => {
+    const g = el('g', { class: 'fw-burst ' + cls }, fw);
+    for (let k = 0; k < 12; k++) {
+      const a = k * Math.PI / 6, c = cols[k % cols.length], x = cx + Math.cos(a) * R, y = cy + Math.sin(a) * R;
+      el('line', { x1: cx + Math.cos(a) * R * .3, y1: cy + Math.sin(a) * R * .3, x2: x, y2: y, stroke: c, 'stroke-width': 2, 'stroke-linecap': 'round' }, g);
+      el('circle', { cx: x, cy: y, r: 1.8, fill: c }, g);
+    }
+    el('circle', { cx, cy, r: 2.2, fill: '#fff' }, g);
+  };
+  const R = flat ? 11 : 15;
+  if (!flat) el('line', { x1: 0, y1: 26, x2: -4, y2: 6, stroke: 'rgba(255,210,63,.7)', 'stroke-width': 1.5, 'stroke-linecap': 'round', 'stroke-dasharray': '2 3' }, fw);
+  burst(-4, 0, R, ['#ffd23f', '#e8323c', '#ff7ad9'], 'b1');
+  burst(R * .9, -R * .7, R * .7, ['#3fa7ff', '#2ecc71', '#ffd23f'], 'b2');
 }
 // nhà cửa 3D (isometric 2:1): tường và mái lấy màu người chơi sở hữu, nền lô đất
 // tô màu nhân vật; mỗi cấp một khối dáng riêng, có số cấp ở góc
@@ -2317,8 +2353,23 @@ function floatText(x, y, s, color, ms = 1100, size = 19) {
 const MONEY_MS = 1900;
 const moneyLive = [0, 0, 0, 0];
 let moneyLoose = 0;
+// ghế của chính mình (online: ghế mình ngồi; chơi trên máy: ghế "Bạn")
+const isMine = s => (net.on ? s === net.seat : !!(G && G.seats[s] && G.seats[s].me));
+const BIG_MS = 2200;
+let moneyBigLive = 0;
+function bigMoney(delta) {
+  const r = $('boardBox').getBoundingClientRect(), k = moneyBigLive++;
+  const d = document.createElement('div');
+  d.className = 'money-big ' + (delta >= 0 ? 'plus' : 'minus');
+  d.textContent = (delta >= 0 ? '+' : '−') + fmt(delta);
+  d.style.left = (r.left + r.width / 2) + 'px';
+  d.style.top = (r.top + r.height / 2 + k * 64) + 'px';
+  document.body.appendChild(d);
+  setTimeout(() => { d.remove(); moneyBigLive = Math.max(0, moneyBigLive - 1); }, BIG_MS);
+}
 function cardMoney(s, delta) {
   if (!Number.isInteger(s) || s < 0 || !delta) return;
+  if (isMine(s)) bigMoney(delta);
   const card = document.querySelector(`#players .pl.s${s}`), cash = card && card.querySelector('.cash');
   const r = cash && cash.getBoundingClientRect(), loose = !r || !r.width;
   const d = document.createElement('div');
@@ -2534,6 +2585,13 @@ async function animateSteps(ev, tok) {
 const sqName = i => SQ[i].name;
 const colorOf = s => COLORS[s].main;
 const bandPt = i => { const b = bandOf(i); return [b.x + b.w / 2, b.y + b.h / 2]; };
+// qua Bắt Đầu: hiện số tiền lương ngay trên ô Bắt Đầu (và trên thẻ người chơi)
+function passGoFx(s, salary) {
+  const [x, y] = centerOf(START_POS);
+  flashSquare(START_POS, '#2e9d4f');
+  floatText(x, y - 24, `💰 +${fmt(salary)}`, '#2e9d4f', 1600, 22);
+  cardMoney(s, salary); playCoin(true);
+}
 async function animateStep(st, tok) {
   const s = st.s, ms = stepMs(st);
   switch (st.k) {
@@ -2545,7 +2603,7 @@ async function animateStep(st, tok) {
     case 'move': {
       if (st.how === 'bus') {
         await rideBus(s, st.from, st.n, tok);
-        if (st.passGo) { cardMoney(s, st.salary); playCoin(true); }
+        if (st.passGo) passGoFx(s, st.salary);
         await sleep(350);
         return;
       }
@@ -2554,7 +2612,7 @@ async function animateStep(st, tok) {
         playWhoosh(0.6);
         await flyToken(s, from, to, { ms: FLY_MS, height: 160, spin: 360 });
         fx('circle', { cx: to[0], cy: to[1] + 8, r: 16, fill: 'rgba(120,110,95,.35)', class: 'fx puff' }, 550);
-        if (st.passGo) { cardMoney(s, st.salary); playCoin(true); }
+        if (st.passGo) passGoFx(s, st.salary);
         await sleep(150);
         return;
       }
@@ -2564,7 +2622,7 @@ async function animateStep(st, tok) {
         if (tok !== animTok) return;
         pos = ((pos + dir) % N + N) % N;
         placeToken(s, pos, false); hopToken(s); playStep(i);
-        if (pos === 0 && st.passGo) { cardMoney(s, st.salary); playCoin(true); }
+        if (pos === 0 && st.passGo) passGoFx(s, st.salary);
         await sleep(STEP_MS);
       }
       await sleep(st.passGo ? 300 : 100);
@@ -2951,7 +3009,7 @@ function btn(label, cls, fn, disabled, sub) {
 }
 function renderActions() {
   const box = $('actions');
-  box.innerHTML = '';
+  box.innerHTML = ''; $('parL').innerHTML = ''; $('parR').innerHTML = '';
   if (G.phase !== 'play' || busy() || pending) return;
   const t = G.turn, P = G.pl[t];
   if (!canAct(t)) return;
@@ -2973,8 +3031,8 @@ function renderActions() {
     }
   } else if (G.step === 'roll' || G.step === 'jail') {
     if (P.hold.parity > 0) {
-      box.appendChild(btn(`🎲 Chẵn`, '', () => act('roll', { par: 'even' }), false, `dùng thẻ · còn ${P.hold.parity}`));
-      box.appendChild(btn(`🎲 Lẻ`, '', () => act('roll', { par: 'odd' }), false, `dùng thẻ · còn ${P.hold.parity}`));
+      $('parL').appendChild(btn('🎲 Chẵn', '', () => act('roll', { par: 'even' }), false, `còn ${P.hold.parity} thẻ`));
+      $('parR').appendChild(btn('🎲 Lẻ', '', () => act('roll', { par: 'odd' }), false, `còn ${P.hold.parity} thẻ`));
     }
     if (G.step === 'jail') {
       box.appendChild(btn(jailFee(t) ? `💵 Nộp ${fmt(jailFee(t))} rời đảo` : '🛶 Rời đảo miễn phí', '', () => act('jailpay'), P.cash < jailFee(t)));
