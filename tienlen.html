@@ -763,7 +763,7 @@ function animMs(ev) {
   if (!ev) return 0;
   switch (ev.type) {
     case 'deal': return 350 + 13 * 55 + 400 + (ev.toi !== undefined ? 1200 : 0);
-    case 'play': return 480 + (ev.cut ? 900 : 0) + (ev.end ? 700 : 0);
+    case 'play': return 480 + (ev.cut ? 900 : 0) + (ev.end ? 1500 : 0);
     case 'pass': return 260;
     default: return 0;
   }
@@ -938,7 +938,8 @@ function paint() {
   // bài trên bàn
   const pile = $('pile');
   pile.innerHTML = '';
-  if (H && H.stage === 'play' && H.pile.length) {
+  // hết ván vẫn giữ bài trên bàn để thấy nước đánh cuối cùng
+  if (H && H.pile.length) {
     H.pile.forEach((p, i) => {
       const g = document.createElement('div'), age = H.pile.length - 1 - i;
       g.className = 'grp' + (age ? ' old' : '');
@@ -1081,16 +1082,56 @@ function setSel(c, on) {
   if (e) e.classList.toggle('sel', on);
   renderActs();
 }
+// chạm 2 lá rồi tự chọn nốt cả bộ:
+//  - 2 lá cùng số, trên tay có đủ 4 lá → tứ quý
+//  - 2 lá khác số → sảnh từ lá đầu tới lá cuối; nếu trên bàn là heo / hàng (phải chặt)
+//    và đủ đôi thì thành đôi thông 3–4 đôi
+// lá thêm vào mỗi số lấy lá nhỏ nhất (giữ lá lớn để đánh lẻ), ưu tiên lá bắt buộc phải đánh
+function autoFill() {
+  if (sel.size !== 2) return;
+  const H = V && V.hand, me = viewerSeat(), mine = H && me >= 0 && H.cards[me];
+  if (!mine) return;
+  const [a, b] = [...sel].sort(byVal), ra = rk(a), rb = rk(b);
+  const of = r => mine.filter(c => rk(c) === r && !sel.has(c)).sort((x, y) => (y === H.must) - (x === H.must) || x - y);
+  const last = H.last && H.last.k;
+  const ok = cs => { const k = comboOf(cs); return !!k && (!last || beats(k, last)); };
+  let add = null;
+  if (ra === rb) {
+    const g = of(ra);
+    if (g.length === 2) add = g;
+  } else if (rb < HEO) {
+    const span = rb - ra;
+    const needBomb = !!last && (isHeo(last) || isBomb(last));
+    if (needBomb && (span === 2 || span === 3)) {
+      // đôi thông: mỗi số giữa lấy 2 lá, hai đầu lấy thêm 1 lá; số trên cùng thử từ lá nhỏ tới khi chặt được
+      const mid = [];
+      for (let r = ra + 1; r < rb; r++) { const g = of(r); if (g.length < 2) break; mid.push(g[0], g[1]); }
+      const lo = of(ra), hi = of(rb);
+      if (mid.length === (span - 1) * 2 && lo.length && hi.length) {
+        const top = hi.find(c => ok([a, b, lo[0], c, ...mid])) ?? hi[0];
+        add = [lo[0], top, ...mid];
+      }
+    }
+    if (!add && span >= 2) {
+      const mid = [];
+      for (let r = ra + 1; r < rb; r++) { const g = of(r); if (!g.length) return; mid.push(g[0]); }
+      add = mid;
+    }
+  }
+  if (add) for (const c of add) setSel(c, true);
+}
+let tapCard = null;
 $('handWrap').addEventListener('pointerdown', e => {
   const c = cardAt(e);
   if (c === null) return;
   e.preventDefault();
   dragOn = !sel.has(c); setSel(c, dragOn);
+  tapCard = dragOn ? c : null;
   try { $('handWrap').setPointerCapture(e.pointerId); } catch (er) {}
 });
-$('handWrap').addEventListener('pointermove', e => { if (dragOn === null) return; const c = cardAt(e); if (c !== null && sel.has(c) !== dragOn) setSel(c, dragOn); });
-const endDrag = () => { dragOn = null; };
-$('handWrap').addEventListener('pointerup', endDrag);
+$('handWrap').addEventListener('pointermove', e => { if (dragOn === null) return; const c = cardAt(e); if (c !== null && sel.has(c) !== dragOn) { setSel(c, dragOn); tapCard = null; } });
+const endDrag = () => { dragOn = null; tapCard = null; };
+$('handWrap').addEventListener('pointerup', () => { if (tapCard !== null) autoFill(); endDrag(); });
 $('handWrap').addEventListener('pointercancel', endDrag);
 $('bPlay').onclick = uiPlay;
 $('bPass').onclick = uiPass;
