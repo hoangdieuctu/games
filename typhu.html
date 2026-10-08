@@ -63,11 +63,30 @@ button:disabled { opacity: .4; cursor: default; }
 /* cụm giữa bàn: dòng trạng thái, nút ĐỔ kèm xúc xắc, nút hành động */
 .mid { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; }
 .dice-stage { position: relative; transition: opacity .25s; }
-/* thẻ Chẵn / Lẻ: hai nút kẹp hai bên nút ĐỔ, ngang tâm nút tròn */
-.par-side { position: absolute; bottom: calc(var(--s) * .925); transform: translateY(50%); display: flex; }
-.par-side.l { right: calc(100% + 4px); } .par-side.r { left: calc(100% + 4px); }
+/* thanh lực hình vòng cung phía trên cụm nút: nền nâu sẫm, phần lực tô vàng chanh, đầu lực có tia sáng */
+.power-arc { position: absolute; left: 50%; bottom: calc(var(--s) * 1.95); width: calc(var(--s) * 5.9); height: calc(var(--s) * 2.75); transform: translateX(-50%); overflow: visible; pointer-events: none; opacity: 0; transition: opacity .2s; }
+.dice-stage.ready .power-arc { opacity: 1; }
+.power-arc .rim { fill: none; stroke: #1c1410; stroke-width: 15; stroke-linecap: round; }
+.power-arc .bg { fill: none; stroke: #5b3a22; stroke-width: 11; stroke-linecap: round; }
+.power-arc .seg { fill: none; stroke: rgba(0,0,0,.45); stroke-width: 11; stroke-dasharray: .6 32.733; }
+.power-arc .fill { fill: none; stroke: url(#powerGrad); stroke-width: 11; stroke-linecap: round; }
+.power-arc .shine { fill: none; stroke: rgba(255,255,255,.35); stroke-width: 2.5; stroke-linecap: round; }
+.power-arc .spark { fill: #fffbe0; filter: drop-shadow(0 0 4px #ffe066); }
+.power-arc .num { font: 900 15px 'Baloo 2', system-ui, sans-serif; fill: #fff; text-anchor: middle; dominant-baseline: central; paint-order: stroke; stroke: #3a2614; stroke-width: 3.5; }
+.dice { touch-action: none; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+/* Lẻ (trái) / Chẵn (phải): nút tròn xanh ngọc bóng trên đế gỗ, thẻ đếm số lượt còn lại phía trên */
+.par-side { position: absolute; bottom: calc(var(--s) * .65); display: flex; flex-direction: column; align-items: center; }
+.par-side.l { right: calc(100% + var(--s) * .05); } .par-side.r { left: calc(100% + var(--s) * .05); }
 .par-side:empty { display: none; }
-.par-side button { flex-direction: column; gap: 0; line-height: 1.1; padding: 5px 12px; min-height: 0; white-space: nowrap; background: linear-gradient(180deg, #a66bd1, #8e44ad); color: #fff; border-color: #e4c8f5; }
+.par-btn { position: relative; width: calc(var(--s) * 1.55); height: calc(var(--s) * 1.15); border-radius: 50%; padding: 0; border: 2px solid #b7f2ff;
+  background: radial-gradient(ellipse at 50% 30%, #9cecff 0%, #3cc3ec 45%, #1c8fc4 100%); color: #fff;
+  font: 900 calc(var(--s) * .42) 'Baloo 2', system-ui, sans-serif; text-shadow: 0 2px 0 #11618a, 0 0 2px #11618a;
+  box-shadow: inset 0 3px 4px rgba(255,255,255,.55), 0 0 0 calc(var(--s) * .1) #b9732d, 0 calc(var(--s) * .14) 0 calc(var(--s) * .1) #7a4518, 0 calc(var(--s) * .25) 12px rgba(0,0,0,.45);
+  transition: transform .1s, filter .2s; }
+.par-btn:not(:disabled):active { transform: translateY(2px); }
+.par-btn:disabled { filter: grayscale(.8) brightness(.75); }
+.par-cnt { position: relative; margin-bottom: calc(var(--s) * .3); padding: 1px 8px; border-radius: 6px; background: #3b4552; color: #fff; font: 800 calc(var(--s) * .32) 'Baloo 2', system-ui, sans-serif; line-height: 1.35; box-shadow: 0 2px 4px rgba(0,0,0,.35); }
+.par-cnt::after { content: ''; position: absolute; left: 50%; top: 100%; transform: translateX(-50%); border: 5px solid transparent; border-top-color: #3b4552; border-bottom: 0; }
 .dice-stage.hide { opacity: 0; pointer-events: none; }
 .dice-stage .cubes { will-change: transform; }
 .dice-stage.throw .cubes { animation: throwin .75s cubic-bezier(.2, .9, .3, 1.08); }
@@ -188,16 +207,18 @@ button:disabled { opacity: .4; cursor: default; }
 .cubes { display: flex; gap: calc(var(--s) * .45); }
 .roll-lbl {
   width: calc(var(--s) * 1.85); height: calc(var(--s) * 1.85); border-radius: 50%; display: flex; align-items: center; justify-content: center;
-  font-weight: 900; font-size: calc(var(--s) * .6); letter-spacing: 1px; color: #fff; text-shadow: 0 2px 0 rgba(0,0,0,.35);
-  background: radial-gradient(circle at 35% 28%, #ff9a94 0%, #e53935 45%, #b4232c 100%); border: 3px solid #ffe08a;
-  box-shadow: 0 6px 0 #7a1620, 0 12px 22px rgba(0,0,0,.45), inset 0 3px 6px rgba(255,255,255,.45); transition: filter .3s, box-shadow .2s;
+  font-weight: 900; font-size: calc(var(--s) * .62); letter-spacing: 1px; color: #fff; text-shadow: 0 2px 0 #b8402a, 0 0 3px #b8402a;
+  background: radial-gradient(ellipse at 50% 26%, #ffd9cb 0%, #ff8f70 38%, #ee5c3d 74%, #c9432a 100%); border: 3px solid #ffd27a;
+  --base: inset 0 4px 6px rgba(255,255,255,.55), inset 0 -4px 7px rgba(150,40,20,.35), 0 0 0 calc(var(--s) * .13) #e39b3f, 0 calc(var(--s) * .17) 0 calc(var(--s) * .13) #8a4a16, 0 calc(var(--s) * .3) 18px rgba(0,0,0,.45);
+  box-shadow: var(--base); transition: filter .3s, box-shadow .2s, opacity .2s, visibility .2s;
 }
-.dice:disabled .roll-lbl { filter: grayscale(.85) brightness(.6); box-shadow: 0 4px 0 #1b1b1b, 0 8px 16px rgba(0,0,0,.4); }
+/* chưa tới lượt mình tung: ẩn nút ĐỔ (giữ chỗ để xúc xắc không nhảy vị trí) */
+.dice:disabled .roll-lbl { opacity: 0; visibility: hidden; }
 .dice:not(:disabled) .roll-lbl { animation: rollpulse 1.4s ease-out infinite; }
 /* nút đứng yên, chỉ có quầng sáng lan ra để báo tới lượt */
 @keyframes rollpulse {
-  0% { box-shadow: 0 6px 0 #7a1620, 0 12px 22px rgba(0,0,0,.45), 0 0 0 0 rgba(255,210,63,.6), inset 0 3px 6px rgba(255,255,255,.45); }
-  100% { box-shadow: 0 6px 0 #7a1620, 0 12px 22px rgba(0,0,0,.45), 0 0 0 16px rgba(255,210,63,0), inset 0 3px 6px rgba(255,255,255,.45); }
+  0% { box-shadow: var(--base), 0 0 0 calc(var(--s) * .13) rgba(255,210,63,.6); }
+  100% { box-shadow: var(--base), 0 0 0 calc(var(--s) * .13 + 16px) rgba(255,210,63,0); }
 }
 .dice.bonus .roll-lbl { border-color: #fff; background: radial-gradient(circle at 35% 28%, #ffe29a 0%, #f5b700 45%, #c48a00 100%); }
 .die { width: var(--s); height: var(--s); position: relative; perspective: calc(var(--s) * 9); }
@@ -249,17 +270,16 @@ button:disabled { opacity: .4; cursor: default; }
 @keyframes dot { 0%, 60%, 100% { opacity: .2; } 30% { opacity: 1; } }
 
 .actions { display: flex; gap: 8px; justify-content: center; align-content: flex-start; flex-wrap: wrap; width: 100%; padding: 6px 8px 0; min-height: 54px; }
-.actions button, .par-side button {
+.actions button {
   display: flex; align-items: center; gap: 6px; background: #fff; color: var(--ink); border-radius: 999px; padding: 8px 16px; min-height: 44px;
   font-weight: 800; font-size: 15px; box-shadow: 0 4px 0 rgba(0,0,0,.28), 0 8px 16px rgba(0,0,0,.35); transition: transform .1s; border: 2px solid rgba(255,255,255,.7); position: relative;
 }
-.actions button:not(:disabled):active, .par-side button:not(:disabled):active { transform: translateY(2px); box-shadow: 0 2px 0 rgba(0,0,0,.28), 0 4px 10px rgba(0,0,0,.3); }
+.actions button:not(:disabled):active { transform: translateY(2px); box-shadow: 0 2px 0 rgba(0,0,0,.28), 0 4px 10px rgba(0,0,0,.3); }
 .actions button.primary { background: linear-gradient(180deg, #4fc46f, #2e9d4f); color: #fff; border-color: #a8f0bb; }
 .actions button.primary:not(:disabled)::after { content: ''; position: absolute; inset: -2px; border-radius: 999px; border: 3px solid rgba(123,228,149,.6); animation: pulse 1.6s ease-out infinite; pointer-events: none; will-change: transform, opacity; }
 @keyframes pulse { from { transform: scale(1); opacity: 1; } to { transform: scale(1.12, 1.3); opacity: 0; } }
 .actions button.danger { background: #fdecea; color: #c0392b; }
 .actions button.warn { background: linear-gradient(180deg, #3b4b5e, #23324a); color: #fff; border-color: #6b7a90; }
-.par-side button small { font-weight: 700; opacity: .85; font-size: 11px; }
 .actions button small { font-weight: 700; opacity: .8; font-size: 12px; }
 .actions button.lv { flex-direction: column; gap: 0; line-height: 1.15; padding: 6px 12px; }
 
@@ -563,6 +583,15 @@ button:disabled { opacity: .4; cursor: default; }
   <div class="mid" id="mid">
     <div class="dice-stage" id="diceStage">
       <button class="dice" id="dice" aria-label="Tung xúc xắc"><div class="cubes"><div class="die"></div><div class="die"></div></div><span class="roll-lbl">ĐỔ</span></button>
+      <svg class="power-arc" id="powerArc" viewBox="0 0 200 95" aria-hidden="true">
+        <defs><linearGradient id="powerGrad" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#9fd62f"/><stop offset=".55" stop-color="#e3f04a"/><stop offset="1" stop-color="#fff07a"/></linearGradient></defs>
+        <path class="rim" d="M14 88 A 86 80 0 0 1 186 88"/>
+        <path class="bg" d="M14 88 A 86 80 0 0 1 186 88"/>
+        <path class="fill" id="powerFill" d="M14 88 A 86 80 0 0 1 186 88" pathLength="100" stroke-dasharray="0 200" style="display:none"/>
+        <path class="seg" d="M14 88 A 86 80 0 0 1 186 88" pathLength="100"/>
+        <path class="shine" d="M22 82 A 78 72 0 0 1 178 82"/>
+        <g id="powerSpark" style="display:none"><path class="spark" d="M0 -11 L2.6 -2.6 L11 0 L2.6 2.6 L0 11 L-2.6 2.6 L-11 0 L-2.6 -2.6 Z"/><text class="num" id="powerVal" y="-20">2</text></g>
+      </svg>
       <div class="par-side l" id="parL"></div><div class="par-side r" id="parR"></div>
     </div>
   </div>
@@ -676,7 +705,7 @@ button:disabled { opacity: .4; cursor: default; }
       <li>Vào thành phố <b>của người khác</b> phải trả <b>phí tham quan</b> theo cấp nhà, rồi có thể <b>mua lại</b> với giá <b>bằng</b> số tiền chủ đã đầu tư (trừ Biểu tượng và điểm du lịch). <b>Biểu tượng</b> 🗼 cũng không bị ép bán, phá cấp hay đổi.</li>
       <li>Phí tham quan <b>×2</b> khi chủ có đủ nhóm màu, <b>×2</b> cho <b>mỗi lần</b> thành phố hoặc điểm du lịch được mở <b>lễ hội</b> (cộng dồn: 2 lần là ×4; mỗi lúc chỉ một nơi có lễ hội — mở ở nơi khác thì nơi cũ bị lấy lại, phí về như cũ), <b>×2</b> ở 3 <b>ô đất vàng ⭐</b> chọn ngẫu nhiên mỗi ván.</li>
       <li><b>5 điểm du lịch</b> 🏖️ giá $200, phí $80 nhân với số điểm chủ đang có, không mua lại được. Ai gom đủ cả 5 <b>thắng ngay</b>.</li>
-      <li><b>Côn Đảo</b>: kẹt 3 lượt, ra sớm bằng tung đôi, nộp $100 hoặc thẻ ra tù. Tung đôi 3 lần liền cũng vào Côn Đảo. <b>Bến Xe</b>: lượt sau được đi tới ô bất kỳ (vé $40). <b>Đại Nhạc Hội</b>: trả $40 tổ chức lễ hội ở một thành phố hoặc điểm du lịch của mình. <b>Thuế</b>: nộp 10% tổng tài sản. <b>Sòng bài</b>: đặt $100 đoán Chẵn/Lẻ (×2) hoặc Đôi (×6).</li>
+      <li><b>Côn Đảo</b>: kẹt 3 lượt, ra sớm bằng tung đôi, nộp $100 hoặc thẻ ra tù. Tung đôi 3 lần liền cũng vào Côn Đảo. <b>Bến Xe</b>: lượt sau được đi tới ô bất kỳ (vé $40). <b>Đại Nhạc Hội</b>: trả $40 tổ chức lễ hội ở một thành phố hoặc điểm du lịch của mình. <b>Thuế</b>: nộp 10% tổng tài sản. <b>Nút ĐỔ</b>: chạm nhanh để tung ngẫu nhiên, hoặc <b>bấm giữ</b> cho thanh lực chạy rồi thả tay — lực càng cao càng dễ ra tổng điểm lớn. <b>Sòng bài</b>: đặt $100 đoán Chẵn/Lẻ (×2) hoặc Đôi (×6).</li>
       <li><b>Cơ Hội</b>: thẻ có lợi (miễn phí tham quan, giảm 50%, khiên, ra tù, lễ hội miễn phí, thêm thẻ Chẵn/Lẻ) hoặc hại (đổi thành phố, ép bán, phá cấp, dịch bệnh, mất điện, bị đưa đi nơi khác).</li>
       <li>Tung đôi được đi tiếp, trừ khi vào Côn Đảo hay Bến Xe; không còn việc gì thì lượt tự chuyển. Thiếu tiền thì bán thành phố (được nửa vốn); bán hết cũng không đủ thì <b>phá sản</b> ngay, tài sản về tay chủ nợ.</li>
       <li><b>Thắng</b> khi: đối thủ phá sản hết · đủ <b>3 nhóm màu</b> · sở hữu <b>cả một hàng</b> · đủ <b>5 điểm du lịch</b> · xây đủ <b>5 Biểu tượng</b> · hoặc <b>giàu nhất</b> khi hết số vòng. Mỗi nhân vật có một kỹ năng riêng.</li>
@@ -1094,14 +1123,29 @@ const jailFee = s => (hasSkill(G, s, 'tourist') ? 0 : JAIL_FEE);
 const busFee = s => (hasSkill(G, s, 'tourist') ? 0 : BUS_FEE);
 const festFee = s => (hasSkill(G, s, 'diva') ? 0 : FEST_FEE);
 // par: 'even' / 'odd' dùng một thẻ Chẵn/Lẻ, tung lại đến khi tổng đúng chẵn hoặc lẻ
-function doRoll(s, par) {
+// tung theo lực (0..1, giữ nút ĐỔ): tổng điểm nghiêng về 2 + 10 × lực, vẫn còn may rủi
+// (mỗi cặp xúc xắc nặng theo hình chuông quanh tổng mong muốn); không có lực thì tung ngẫu nhiên
+function rollPair(power) {
+  if (typeof power !== 'number' || !(power >= 0 && power <= 1)) return [rand6(), rand6()];
+  const T = 2 + 10 * power, pairs = [];
+  let dw = 0, nw = 0;
+  for (let a = 1; a <= 6; a++) for (let b = 1; b <= 6; b++) { const w = Math.exp(-((a + b - T) ** 2) / (2 * 1.5 * 1.5)); pairs.push([a, b, w]); if (a === b) dw += w; else nw += w; }
+  // giữ tỉ lệ ra đôi như tung thường (1/6), không để lực max / min thành máy ra đôi
+  const k = nw > 0 ? nw / (5 * dw) : 1;
+  let tot = 0;
+  for (const q of pairs) { if (q[0] === q[1]) q[2] *= k; tot += q[2]; }
+  let r = Math.random() * tot;
+  for (const [a, b, w] of pairs) if ((r -= w) <= 0) return [a, b];
+  return [6, 6];
+}
+function doRoll(s, par, power) {
   if (!okTurn(s, ['roll', 'jail'])) return;
   const P = G.pl[s];
   if (par !== 'even' && par !== 'odd') par = null;
   if (par && !(P.hold.parity > 0)) return;
   let d;
   for (let k = 0; k < 200; k++) {
-    d = [rand6(), rand6()];
+    d = rollPair(power);
     if (d[0] !== d[1] && hasSkill(G, s, 'monkey') && Math.random() < 0.25) d[1] = d[0];
     if (!par || ((d[0] + d[1]) % 2 === 0) === (par === 'even')) break;
   }
@@ -1547,7 +1591,7 @@ function act(kind, data) {
   clearTimeout(driveT);
   if (net.on && !net.host) { sendIntent(Object.assign({ t: kind }, data || {})); return; }
   switch (kind) {
-    case 'roll': return doRoll(s, data && data.par);
+    case 'roll': return doRoll(s, data && data.par, data && data.power);
     case 'buy': return doBuy(s, data.lv);
     case 'buyTour': return doBuyTour(s);
     case 'takeover': return doTakeover(s);
@@ -2947,13 +2991,19 @@ function paintPicks() {
 // tới lượt mình tung: đánh số 1–12 ở mép ngoài 12 ô phía trước (số = tổng xúc xắc cần ra để dừng ở ô đó),
 // ô được tô nhạt màu người chơi. Tay Đua tung lần đầu đi gấp đôi nên số đặt cách hai ô một.
 // Bấm tung rồi các số vẫn giữ nguyên (stepsKeep) trong lúc xúc xắc lăn và quân đi, quân tới nơi mới ẩn.
-let stepsShown = null, stepsKeep = null;
+let stepsShown = null, stepsKeep = null, stepsKey = '';
 function paintSteps() {
   const gs = $('gSteps'), tint = $('gStepTint'); // gStepTint đã nhận phép chiếu của bàn
   let v = null;
   if (stepsKeep) v = stepsKeep;
+  else if (pending && stepsShown) v = stepsShown; // khách online vừa bấm tung, đang chờ chủ phòng trả kết quả
   else if (canRoll()) { const t = G.turn, P = G.pl[t]; v = { t, pos: P.pos, mult: !P.jail && P.rolls === 0 && hasSkill(G, t, 'racer') ? 2 : 1 }; }
+  // cùng một dãy số như đang hiện (paint() gọi lại liên tục, lúc bấm tung...) thì giữ nguyên,
+  // vẽ lại sẽ chạy lại hiệu ứng nảy làm dãy số chớp tắt
+  const key = v ? [v.t, v.pos, v.mult, MODE, K].join() : '';
   stepsShown = v;
+  if (key === stepsKey && (key || !gs.firstChild)) return;
+  stepsKey = key;
   gs.innerHTML = ''; tint.innerHTML = '';
   if (!v) return;
   const { t, mult } = v, c = colorOf(t), P = { pos: v.pos };
@@ -3020,6 +3070,7 @@ function renderDice() {
   const dice = $('dice');
   dice.style.setProperty('--c', G.phase === 'play' && COLORS[G.turn] ? COLORS[G.turn].main : '#ccd');
   dice.disabled = !canRoll();
+  $('diceStage').classList.toggle('ready', canRoll());
   const dv = Array.isArray(G.dice) ? G.dice : [6, 1];
   if (!busy()) { setDie(0, dv[0], false); setDie(1, dv[1], false); }
   dice.classList.toggle('bonus', !busy() && G.phase === 'play' && G.step === 'roll' && G.again);
@@ -3085,9 +3136,12 @@ function renderActions() {
       box.appendChild(btn('Thôi', '', () => act('skip')));
     }
   } else if (G.step === 'roll' || G.step === 'jail') {
-    if (P.hold.parity > 0) {
-      $('parL').appendChild(btn('🎲 Chẵn', '', () => act('roll', { par: 'even' }), false, `còn ${P.hold.parity} thẻ`));
-      $('parR').appendChild(btn('🎲 Lẻ', '', () => act('roll', { par: 'odd' }), false, `còn ${P.hold.parity} thẻ`));
+    // Lẻ bên trái, Chẵn bên phải nút ĐỔ; hết thẻ thì nút mờ
+    const n = P.hold.parity || 0;
+    for (const [side, lbl, par] of [['parL', 'Lẻ', 'odd'], ['parR', 'Chẵn', 'even']]) {
+      const c = document.createElement('div'); c.className = 'par-cnt'; c.textContent = `${n}/${PARITY_MAX}`;
+      const b = document.createElement('button'); b.className = 'par-btn'; b.textContent = lbl; b.disabled = n <= 0; b.onclick = () => act('roll', { par });
+      $(side).append(c, b);
     }
     if (G.step === 'jail') {
       box.appendChild(btn(jailFee(t) ? `💵 Nộp ${fmt(jailFee(t))} rời đảo` : '🛶 Rời đảo miễn phí', '', () => act('jailpay'), P.cash < jailFee(t)));
@@ -3352,7 +3406,41 @@ $('board').addEventListener('pointermove', e => {
   $('board').style.cursor = h >= 0 ? 'pointer' : '';
 });
 $('board').addEventListener('pointerleave', () => { if (hotSq >= 0) sqEls[hotSq].classList.remove('hot'); hotSq = -1; });
-$('dice').onclick = () => act('roll');
+// nút ĐỔ: chạm nhanh = tung ngẫu nhiên; bấm giữ = thanh lực chạy lên xuống, thả tay thì tung theo lực
+const POWER_HOLD = 220, POWER_PERIOD = 1400;
+let powerHold = null;
+function powerNow() { const ph = ((performance.now() - powerHold.t0 - POWER_HOLD) % POWER_PERIOD) / POWER_PERIOD; return ph < .5 ? ph * 2 : 2 - ph * 2; }
+function powerFrame() {
+  if (!powerHold) return;
+  if (performance.now() - powerHold.t0 >= POWER_HOLD) {
+    const p = powerNow(), f = $('powerFill'), L = f.getTotalLength(), pt = f.getPointAtLength(p * L);
+    f.style.display = p > .005 ? '' : 'none';
+    f.setAttribute('stroke-dasharray', `${(p * 100).toFixed(2)} 200`);
+    $('powerSpark').style.display = '';
+    $('powerSpark').setAttribute('transform', `translate(${pt.x.toFixed(1)} ${pt.y.toFixed(1)})`);
+    $('powerVal').textContent = Math.round(2 + 10 * p);
+  }
+  powerHold.raf = requestAnimationFrame(powerFrame);
+}
+function powerEnd(fire) {
+  if (!powerHold) return;
+  const held = performance.now() - powerHold.t0 >= POWER_HOLD, p = held ? powerNow() : null;
+  cancelAnimationFrame(powerHold.raf); powerHold = null;
+  $('powerFill').style.display = 'none'; $('powerSpark').style.display = 'none';
+  if (!fire || !canRoll()) return;
+  if (held) act('roll', { power: Math.round(p * 1000) / 1000 }); else act('roll');
+}
+$('dice').addEventListener('pointerdown', e => {
+  if (!canRoll() || powerHold) return;
+  e.preventDefault();
+  try { $('dice').setPointerCapture(e.pointerId); } catch (er) {}
+  powerHold = { t0: performance.now(), raf: 0 };
+  powerFrame();
+});
+$('dice').addEventListener('pointerup', () => powerEnd(true));
+$('dice').addEventListener('pointercancel', () => powerEnd(false));
+$('dice').addEventListener('contextmenu', e => e.preventDefault());
+$('dice').onclick = e => { if (e.detail === 0) act('roll'); }; // bàn phím (Enter / Space)
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape' && pingMode) setPingMode(false);
   if ((e.key === ' ' || e.key === 'Enter') && e.target === document.body) { e.preventDefault(); if (canRoll()) act('roll'); }
@@ -3569,7 +3657,7 @@ function hostMsg(c, d) {
   else if (INTENTS.includes(d.t) && G.phase === 'play' && G.turn === s) {
     const i = Number.isInteger(d.i) ? d.i : -1;
     switch (d.t) {
-      case 'roll': return doRoll(s, d.par); case 'buy': return doBuy(s, d.lv); case 'buyTour': return doBuyTour(s); case 'takeover': return doTakeover(s);
+      case 'roll': return doRoll(s, d.par, d.power); case 'buy': return doBuy(s, d.lv); case 'buyTour': return doBuyTour(s); case 'takeover': return doTakeover(s);
       case 'skip': return doSkip(s); case 'pick': return doPick(s, i); case 'pickSkip': return doPickSkip(s); case 'casino': return doCasino(s, d.choice);
       case 'end': return doEnd(s); case 'pay': return doPayDebt(s); case 'sell': return doSell(s, i); case 'bankrupt': return doBankrupt(s);
       case 'jailpay': return doJailPay(s); case 'jailcard': return doJailCard(s);
