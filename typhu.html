@@ -145,6 +145,8 @@ button:disabled { opacity: .4; cursor: default; }
 .card-head { font: 800 17px 'Baloo 2', system-ui, sans-serif; text-anchor: middle; dominant-baseline: central; fill: #fff; letter-spacing: 1.5px; }
 .card-text { font: 700 15.5px 'Baloo 2', system-ui, sans-serif; text-anchor: middle; dominant-baseline: central; fill: var(--ink); }
 .card-icon { font-size: 40px; text-anchor: middle; dominant-baseline: central; }
+.spy-card { cursor: pointer; }
+.spy-card:hover > g { filter: drop-shadow(0 0 10px #ffd23f); }
 
 /* ── thẻ người chơi: 4 góc màn hình (ngang) hoặc hàng trên bàn (dọc) ── */
 .hud { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; padding: 6px 8px 0; }
@@ -585,6 +587,7 @@ button:disabled { opacity: .4; cursor: default; }
     <g id="gTokens"></g>
     <g id="gFx"></g>
     <g id="gCard"></g>
+    <g id="gSpy"></g>
   </svg>
   </div>
   <div class="mid" id="mid">
@@ -809,7 +812,7 @@ const fmt = n => '$' + Math.round(Math.abs(n)).toLocaleString('vi-VN');
 const LENS = [{ key: 'short', label: 'Ngắn', rounds: 15, time: '20–30 phút' }, { key: 'mid', label: 'Vừa', rounds: 25, time: '40–60 phút' }, { key: 'long', label: 'Dài', rounds: 40, time: 'hơn 1 giờ' }];
 const lenHint = k => { const L = LENS.find(x => x.key === k) || LENS[1]; return `Thắng ngay khi đối thủ phá sản hết, đủ 3 nhóm màu, cả một hàng, 5 điểm du lịch hoặc 5 Biểu tượng. Hết ${L.rounds} vòng thì ai giàu nhất thắng. Khoảng ${L.time}.`; };
 
-// ── nhân vật: mỗi người một kỹ năng (nhóm giảm tiền / tăng tiền / di chuyển) ──
+// ── nhân vật: mỗi người một kỹ năng (nhóm giảm tiền / tăng tiền / di chuyển / phá đối thủ / may mắn) ──
 const CHARS = [
   { id: 'mc', name: 'Siêu MC', skill: 'Lương qua Bắt Đầu +50%', group: 'tăng tiền', skin: '#ffd9b3', hair: '#2b2118', style: 'quiff', acc: 'mic', outfit: '#1e6fd8', bg: '#dbeafe' },
   { id: 'boss', name: 'Ông Trùm', skill: 'Mua và xây nhà rẻ hơn 20%', group: 'giảm tiền', skin: '#f3c9a3', hair: '#6b4a2a', style: 'short', acc: 'glasses', outfit: '#23324a', bg: '#e5e7eb' },
@@ -824,6 +827,9 @@ const CHARS = [
   { id: 'landlord', name: 'Chủ Đất', skill: 'Về ô đất của mình: 25% được ngân hàng trả bằng phí tham quan', group: 'tăng tiền', skin: '#eec39a', hair: '#d1d5db', style: 'bald', acc: 'key', outfit: '#8b5a2b', bg: '#f3e8d8' },
   { id: 'gambler', name: 'Thần Bài', skill: 'Khách vào đất của mình: 25% phải trả phí ×2', group: 'tăng tiền', skin: '#f6d1b0', hair: '#111827', style: 'slick', acc: 'card', outfit: '#f8fafc', bg: '#e0e7ff' },
   { id: 'charmer', name: 'Lãng Tử', skill: 'Vào đất người khác: 25% được miễn phí tham quan', group: 'giảm tiền', skin: '#f6d1b0', hair: '#3b2a1e', style: 'part', acc: 'rose', outfit: '#0f766e', bg: '#ccfbf1' },
+  { id: 'wizard', name: 'Pháp Sư', skill: 'Qua Bắt Đầu: 25% làm mất điện một thành phố đối thủ ngẫu nhiên', group: 'phá đối thủ', skin: '#f3cfae', hair: '#e5e7eb', style: 'wizard', acc: 'staff', outfit: '#4338ca', bg: '#e0e7ff' },
+  { id: 'spy', name: 'Gián Điệp', skill: 'Rút thẻ Cơ Hội được xem 2 thẻ và chọn 1', group: 'may mắn', skin: '#f1c7a0', hair: '#1f1a17', style: 'spy', acc: 'shades', outfit: '#1f2937', bg: '#e2e8f0' },
+  { id: 'banker', name: 'Chủ Ngân Hàng', skill: 'Đầu mỗi lượt nhận lãi 2% tiền mặt đang có', group: 'tăng tiền', skin: '#f6d6bd', hair: '#6b7280', style: 'banker', acc: 'coin', outfit: '#1e3a8a', bg: '#dbeafe' },
   { id: 'chef', name: 'Vua Bếp', skill: 'Bắt đầu ván với thêm $300', group: 'tăng tiền', skin: '#ffd9b3', hair: '#4b3621', style: 'toque', acc: 'spoon', outfit: '#ffffff', bg: '#fff1f2' },
 ];
 const charOf = id => CHARS.find(c => c.id === id) || CHARS[0];
@@ -1024,6 +1030,13 @@ function botPickTarget(G, s, kind, opts) {
   for (const i of opts) { const v = score(i) + Math.random() * 3; if (v > bv) { bv = v; best = i; } }
   return bv < 0 ? -1 : best;
 }
+// điểm của một thẻ Cơ Hội với s (Gián Điệp chọn thẻ cao hơn)
+function botCardScore(G, s, c) {
+  const a = CARDS[c].a, P = G.pl[s];
+  if (a.hold) return a.hold === 'parity' && (P.hold.parity || 0) >= PARITY_MAX ? 0 : { free: 6, half: 4, shield: 3, jail: 2, parity: 2 }[a.hold] || 1;
+  if (a.pick) return pickOpts(s, a.pick).length ? { forceSell: 8, swapMine: 7, destroy: 6, plague: 6, blackout: 5, festivalFree: 5 }[a.pick] || 3 : 0;
+  return { start: 5, bus: 3, festival: 1, festCity: 1, tax: -4, island: -6 }[a.go] || 0;
+}
 function botSellPick(G, s) {
   const mine = PROPS.filter(i => G.props[i].owner === s);
   if (!mine.length) return -1;
@@ -1059,7 +1072,8 @@ function botParity(G, s) {
 // G.step: việc người tới lượt phải làm — 'roll' tung xúc xắc, 'jail' ở Côn
 // Đảo, 'visit' quyết định mua / nâng cấp / mua lại ô vừa đến (G.visit),
 // 'pick' chọn một ô trên bàn (G.pick: bến xe, lễ hội, thẻ bài, nâng cấp),
-// 'casino' đặt cược, 'debt' thiếu tiền, 'end' bấm kết thúc lượt.
+// 'casino' đặt cược, 'debt' thiếu tiền, 'spy' Gián Điệp chọn 1 trong 2 thẻ (G.spy),
+// 'end' bấm kết thúc lượt.
 const store = {
   get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
@@ -1083,7 +1097,7 @@ function freshGame(seats, maxRound) {
   const pool = shuffled(CHARS.length).map(k => CHARS[k].id).filter(id => !used.has(id));
   const chars = seats.map(x => x ? (x.char || pool.shift() || CHARS[0].id) : null);
   const G = { phase: 'play', seats, pl: seats.map((x, s) => ({ pos: 0, cash: START_CASH, jail: 0, bus: false, laps: 0, rolls: 0, hold: freshHold(), out: false, char: chars[s] })),
-    props: freshProps(), turn: 0, dice: 0, doubles: 0, again: false, step: 'roll', visit: null, pick: null, debt: null,
+    props: freshProps(), turn: 0, dice: 0, doubles: 0, again: false, step: 'roll', visit: null, pick: null, debt: null, spy: null,
     gold: shuffled(CITIES.length).slice(0, 3).map(k => CITIES[k]), deck: shuffled(CARDS.length), deckPos: 0, turnNo: 0,
     round: 1, maxRound: maxRound || 0, winner: null, winHow: null, seq: 0 };
   for (let s = 0; s < 4; s++) {
@@ -1183,8 +1197,18 @@ function moveBy(s, n, steps, how) {
   let salary = 0;
   if (passGo) { P.laps++; salary = r10(SALARY * (hasSkill(G, s, 'mc') ? 1.5 : 1)); P.cash += salary; }
   steps.push({ k: 'move', s, from, to, n, passGo, salary, how });
+  if (passGo && hasSkill(G, s, 'wizard') && Math.random() < 0.25) hex(s, steps);
   if (hasSkill(G, s, 'robber')) rob(s, steps);
   land(s, steps);
+}
+// Pháp Sư: làm mất điện một thành phố đối thủ ngẫu nhiên (ưu tiên ô chưa mất điện), khiên vẫn chặn được
+function hex(s, steps) {
+  const all = pickOpts(s, 'blackout'), fresh = all.filter(i => !effectOn(G, i, 'blackout')), opts = fresh.length ? fresh : all;
+  if (!opts.length) return;
+  const i = opts[Math.floor(Math.random() * opts.length)], o = G.props[i].owner;
+  if (shielded(o, i, steps)) return;
+  G.props[i].blackout = G.turnNo + 5 * active(G).length;
+  steps.push({ k: 'blackout', s, i, o, wiz: true });
 }
 // Kẻ Cướp: lấy 10% tiền mặt của từng người đang đứng ở ô vừa tới
 function rob(s, steps) {
@@ -1306,10 +1330,19 @@ function pickOpts(s, kind) {
   }
   return [];
 }
-function drawCard(s, steps) {
+function nextCard() {
   if (G.deck.length !== CARDS.length) { G.deck = shuffled(CARDS.length); G.deckPos = 0; } // ván lưu từ bản ít thẻ hơn
-  const c = G.deck[G.deckPos], P = G.pl[s];
+  const c = G.deck[G.deckPos];
   G.deckPos = (G.deckPos + 1) % CARDS.length;
+  return c;
+}
+function drawCard(s, steps) {
+  // Gián Điệp: lật 2 thẻ, chọn 1 (bước 'spy'), thẻ còn lại bỏ đi
+  if (hasSkill(G, s, 'spy')) { G.step = 'spy'; G.spy = [nextCard(), nextCard()]; steps.push({ k: 'spyDraw', s }); return; }
+  applyCard(s, nextCard(), steps);
+}
+function applyCard(s, c, steps) {
+  const P = G.pl[s];
   steps.push({ k: 'card', s, c });
   const a = CARDS[c].a;
   if (a.hold) {
@@ -1352,7 +1385,7 @@ function checkMonopoly(steps) {
 }
 // không còn gì để làm thì tung tiếp (nếu vừa ra đôi) hoặc chuyển lượt luôn
 function settle(steps) {
-  if (G.phase !== 'play' || ['visit', 'pick', 'casino', 'debt'].includes(G.step)) return;
+  if (G.phase !== 'play' || ['visit', 'pick', 'casino', 'debt', 'spy'].includes(G.step)) return;
   if (G.again) G.step = 'roll'; else nextTurn(steps);
 }
 function doPick(s, i) {
@@ -1476,6 +1509,13 @@ function doCasino(s, choice) {
   G.step = 'roll';
   finish(s, [{ k: 'casino', s, choice, d, win, gain }]);
 }
+function doSpy(s, k) {
+  if (!okTurn(s, ['spy']) || !Array.isArray(G.spy) || (k !== 0 && k !== 1)) return;
+  const c = G.spy[k], steps = [];
+  G.spy = null; G.step = 'roll';
+  applyCard(s, c, steps);
+  finish(s, steps);
+}
 function doPayDebt(s) {
   if (!okTurn(s, ['debt'])) return;
   const D = G.debt, P = G.pl[s];
@@ -1519,6 +1559,8 @@ function nextTurn(steps) {
   }
   G.turn = t;
   const P = G.pl[t];
+  // Chủ Ngân Hàng: đầu lượt nhận lãi 2% tiền mặt
+  if (hasSkill(G, t, 'banker')) { const amt = r10(P.cash * 0.02); if (amt > 0) { P.cash += amt; steps.push({ k: 'interest', s: t, amt }); } }
   if (P.jail) { if (P.jail > 3) { P.jail = 0; G.step = 'roll'; steps.push({ k: 'released', s: t }); } else G.step = 'jail'; }
   else if (P.bus) {
     if (P.cash < busFee(t)) { P.bus = false; G.step = 'roll'; steps.push({ k: 'busNoCash', s: t }); }
@@ -1584,6 +1626,7 @@ function botAct(s) {
       return botWantsTakeover(G, s, i) ? doTakeover(s) : doSkip(s);
     }
     case 'casino': return doCasino(s, Math.random() < 0.5 ? 'even' : 'odd');
+    case 'spy': return doSpy(s, botCardScore(G, s, G.spy[1]) > botCardScore(G, s, G.spy[0]) ? 1 : 0);
     case 'debt': {
       if (P.cash >= G.debt.amt) return doPayDebt(s);
       const i = botSellPick(G, s);
@@ -1610,6 +1653,7 @@ function act(kind, data) {
     case 'pick': return doPick(s, data.i);
     case 'pickSkip': return doPickSkip(s);
     case 'casino': return doCasino(s, data.choice);
+    case 'spy': return doSpy(s, data.k);
     case 'end': return doEnd(s);
     case 'pay': return doPayDebt(s);
     case 'sell': return doSell(s, data.i);
@@ -1798,6 +1842,32 @@ function chibiInto(g, ch) {
       brows(); cheeks(); mouth('grin');
       P('M14 14 L19 -2', 'none', '#15803d', 1.8); P('M16 6 Q12 4 13 1 Q16 3 16 6 Z', '#22c55e', '#15803d', .6);
       Cc(19.5, -4, 4, '#e8323c', '#a3202a'); P('M17.5 -4 Q19.5 -6.5 21.5 -4 Q19.5 -2 17.5 -4', 'none', '#a3202a', .8);
+      break;
+    case 'wizard': // mũ chóp nhọn tím có sao, râu bạc dài, áo choàng chàm, gậy phép đầu ngọc
+      P('M18 16 L22 -14', 'none', '#8b5a2b', 2.6); Cc(22.5, -16.5, 3.6, '#facc15', '#b8860b'); Cc(21.6, -17.4, 1.1, '#fff');
+      body('#4338ca'); P('M-3 7 L0 20 L3 7 Z', '#facc15', '#b8860b', .6);
+      head(); P('M-12 -1 Q-13 12 0 17 Q13 12 12 -1 Q6 4 0 2 Q-6 4 -12 -1 Z', ch.hair, '#9ca3af');
+      P('M-7 .5 Q-3.5 -2 0 .5 Q3.5 -2 7 .5 Q3.5 2.5 0 1.5 Q-3.5 2.5 -7 .5 Z', '#f3f4f6', '#9ca3af', .6);
+      el('ellipse', { cx: 0, cy: -15, rx: 19, ry: 4, fill: '#6d28d9', stroke: '#4c1d95', 'stroke-width': 1 }, g);
+      P('M-12 -16 Q-6 -24 -2 -40 Q4 -34 8 -30 L5 -29 Q9 -22 12 -16 Z', '#7c3aed', '#4c1d95');
+      txt(-1, -24, 'sq-icon', '★', g, { fill: '#facc15', style: 'font-size:8px' }); txt(5, -19, 'sq-icon', '✦', g, { fill: '#fde68a', style: 'font-size:5px' });
+      eyes(); P('M-9 -10.5 L-3 -10', 'none', '#e5e7eb', 2); P('M9 -10.5 L3 -10', 'none', '#e5e7eb', 2);
+      break;
+    case 'spy': // tóc vuốt gọn, kính đen, vest đen, tai nghe, cầm phong bì mật
+      body('#1f2937', true); P('M-2.5 7 L0 18 L2.5 7 Z', '#111827');
+      head(); cap(); P('M-14 -9 Q-13 -24 2 -23 Q12 -22 14 -10 Q6 -17 -4 -16 Q-10 -15 -14 -9 Z', ch.hair, '#000');
+      R(-12, -10, 10.5, 6.5, '#111827', 3, '#000'); R(1.5, -10, 10.5, 6.5, '#111827', 3, '#000'); P('M-1.5 -7.5 L1.5 -7.5', 'none', '#000', 1.6);
+      P('M-10 -8.5 L-6 -8.5 M3.5 -8.5 L7.5 -8.5', 'none', 'rgba(255,255,255,.55)', 1.1);
+      P('M-14.5 -3 Q-17 4 -11 7', 'none', '#6b7280', 1.2); Cc(-11, 7, 1.3, '#6b7280');
+      brows(true); mouth('small');
+      R(13, -1, 13, 9, '#f5e6c8', 1, '#a68a5b'); P('M13 -1 L19.5 4 L26 -1', 'none', '#a68a5b', .9); Cc(19.5, 5, 1.8, '#e8323c');
+      break;
+    case 'banker': // tóc bạc chải lật, kính tròn gọng vàng, vest xanh đậm nơ đỏ, đồng xu vàng
+      body('#1e3a8a', true); P('M-4.5 11.5 L0 13.5 L4.5 11.5 L4.5 16 L0 14.5 L-4.5 16 Z', '#e8323c'); R(6, 10, 5, 3.5, '#fff', 1);
+      head(); cap(); P('M-14 -9 Q-14 -25 3 -23 Q14 -21 14 -9 Q10 -18 -2 -17 Q-10 -15 -14 -9 Z', ch.hair, '#4b5563');
+      eyes(); Cc(-5.5, -6, 4.2, 'none', '#d4a017', 1.4); Cc(5.5, -6, 4.2, 'none', '#d4a017', 1.4); P('M-1.3 -6 L1.3 -6', 'none', '#d4a017', 1.2);
+      brows(); stache('#9ca3af'); mouth();
+      Cc(19, 2, 6.5, '#ffd23f', '#b8860b', 1.4); txt(19, 2.5, 'sq-price', '$', g, { fill: '#8a6a00', style: 'font-size:9px;font-weight:900' });
       break;
     case 'robber': // mũ len đen, mặt nạ che mắt, áo sọc, túi tiền
       body('#2f2f2f'); for (const y of [10, 14, 18]) P(`M-15 ${y} L15 ${y}`, 'none', '#ffffff', 1.6);
@@ -2429,7 +2499,7 @@ function moneyDelta(st) {
     case 'sell': out.push([s, st.amt]); break;
     case 'rob': out.push([s, st.amt], [st.v, -st.amt]); break;
     case 'forceSell': out.push([st.o, st.amt]); break;
-    case 'luck': case 'homePay': out.push([s, st.amt]); break;
+    case 'luck': case 'homePay': case 'interest': out.push([s, st.amt]); break;
     case 'gift': out.push([s, -st.amt], [st.to, st.amt]); break;
   }
   return out;
@@ -2445,7 +2515,7 @@ function show(ng, ev) {
   G = ng; pending = false;
   const tok = ++animTok;
   animating = false;
-  $('gCard').innerHTML = '';
+  $('gCard').innerHTML = ''; $('gSpy').innerHTML = ''; spyKey = '';
   if (ev && ev.type === 'start') {
     statusEv = `Bắt đầu! ${who(G.turn)} đi trước.`;
     viewCash = G.pl.map(p => p.cash - (p.luck || 0)); // tiền nhân đôi đầu ván cộng dần theo hoạt hoạ
@@ -2587,8 +2657,8 @@ function wrapWords(s, max) {
   if (line) out.push(line);
   return out;
 }
-function showCard(card) {
-  const g = $('gCard'), c = CX, cy = CY, col = '#f39c12';
+function showCard(card, g = $('gCard'), c = CX, cy = CY) {
+  const col = '#f39c12';
   g.innerHTML = '';
   const cg = el('g', { class: 'cardpop' }, g);
   const lines = wrapWords(card.text, 26), h = 136 + lines.length * 20;
@@ -2600,6 +2670,24 @@ function showCard(card) {
   txt(c, cy - h / 2 + 70, 'card-icon', card.icon, cg);
   lines.forEach((ln, k) => txt(c, cy - h / 2 + 108 + k * 20, 'card-text', ln, cg));
   return cg;
+}
+// Gián Điệp đang chọn: hai thẻ úp cạnh nhau giữa bàn, người chọn chạm vào thẻ (mọi người cùng thấy)
+let spyKey = '';
+function renderSpy() {
+  const g = $('gSpy'), on = G && G.phase === 'play' && G.step === 'spy' && Array.isArray(G.spy) && !busy();
+  const key = on ? G.turnNo + ':' + G.spy.join(',') + ':' + canAct(G.turn) : '';
+  if (key === spyKey) return;
+  if (spyKey || on) $('diceStage').classList.toggle('hide', on); // xúc xắc giữa bàn che mất thẻ
+  spyKey = key; g.innerHTML = '';
+  if (!on) return;
+  const mine = canAct(G.turn);
+  G.spy.forEach((c, k) => {
+    const wrap = el('g', { transform: `translate(${CX + (k ? 1 : -1) * 136} ${CY - 20}) scale(.86)`, class: mine ? 'spy-card' : '' }, g);
+    const inner = el('g', {}, wrap);
+    showCard(CARDS[c], inner, 0, 0);
+    txt(0, -112, 'card-head', `THẺ ${k + 1}`, inner, { style: 'fill:#fff;font-size:15px', 'paint-order': 'stroke', stroke: '#23324a', 'stroke-width': 4 });
+    if (mine) wrap.addEventListener('click', e => { e.stopPropagation(); playTap(); act('spy', { k }); });
+  });
 }
 const FLY_MS = 750;
 // xe buýt chạy dọc đường, chậm rãi hơn người đi bộ
@@ -2685,8 +2773,8 @@ function stepMs(st) {
     case 'move': return st.how === 'bus' ? busMs(st.n) + 350 : st.fly ? FLY_MS + 150 : Math.abs(st.n) * STEP_MS + (st.passGo ? 300 : 100);
     case 'boost': return 600; case 'island': return 800; case 'free': return 450; case 'stay': return 350; case 'triple': return 600; case 'released': return 400;
     case 'busStop': return 600; case 'busGo': return 300; case 'busNoCash': return 300;
-    case 'home': return st.can ? 0 : 300; case 'homePay': return 1000; case 'rentX2': return 900; case 'norent': return 350; case 'useFree': return 800; case 'charmFree': return 900; case 'useHalf': return 600;
-    case 'pay': return 800; case 'rob': return 1100; case 'debt': return 600; case 'card': return 2700; case 'hold': return 600; case 'nothing': return 400;
+    case 'home': return st.can ? 0 : 300; case 'homePay': return 1000; case 'interest': return 900; case 'rentX2': return 900; case 'norent': return 350; case 'useFree': return 800; case 'charmFree': return 900; case 'useHalf': return 600;
+    case 'pay': return 800; case 'rob': return 1100; case 'debt': return 600; case 'card': return 2700; case 'spyDraw': return 700; case 'hold': return 600; case 'nothing': return 400;
     case 'build': return 850; case 'buyTour': return 750; case 'takeover': return 1000; case 'skip': return 250;
     case 'casinoSkip': return 300; case 'casino': return 1900; case 'noCash': return 1100; case 'festNone': return 300; case 'festival': return 1000;
     case 'pickCity': return 400; case 'pickSkip': return 250; case 'swap': return 1000; case 'forceSell': return 900; case 'destroy': return 900;
@@ -2789,10 +2877,12 @@ async function animateStep(st, tok) {
     }
     case 'charmFree': { const [x, y] = tokenPt(s); floatText(x, y - 18, '🌹 miễn phí', '#0f766e', 1000, 18); flashSquare(st.i, '#0f766e'); playPop(); await sleep(ms); return; }
     case 'useFree': { const [x, y] = tokenPt(s); floatText(x, y - 18, '🎫 miễn phí', '#1e6fd8', 1000, 18); playPop(); await sleep(ms); return; }
+    case 'interest': { const [x, y] = tokenPt(s); floatText(x, y - 24, `🏦 lãi +${fmt(st.amt)}`, '#2e9d4f', 1000, 20); cardMoney(s, st.amt); playCoin(true); await sleep(ms); return; }
     case 'homePay': { const [x, y] = centerOf(st.i); floatText(x, y - 20, `🔑 +${fmt(st.amt)}`, '#2e9d4f', 1000, 20); flashSquare(st.i, '#2e9d4f'); cardMoney(s, st.amt); playCoin(true); await sleep(ms); return; }
     case 'rentX2': { const [x, y] = centerOf(st.i); pow(x, y - 30, '🃏 ×2!', '#e8323c'); flashSquare(st.i, '#e8323c'); playWhoosh(0.3); await sleep(ms); return; }
     case 'useHalf': { const [x, y] = tokenPt(s); floatText(x, y - 18, '🏷️ giảm 50%', '#1e6fd8', 1000, 18); playPop(); await sleep(ms); return; }
     case 'debt': { const [x, y] = tokenPt(s); pow(x, y - 34, 'THIẾU TIỀN!', '#e8323c'); playAlert(); await sleep(ms); return; }
+    case 'spyDraw': { const [x, y] = tokenPt(s); floatText(x, y - 20, '🕵️ ×2', '#23324a', 1000, 22); playCard(); await sleep(ms); return; }
     case 'card': {
       playCard(); $('diceStage').classList.add('hide');
       const card = showCard(CARDS[st.c]);
@@ -2868,7 +2958,7 @@ async function animateStep(st, tok) {
     }
     case 'plague': case 'blackout': {
       const [x, y] = centerOf(st.i);
-      playAlert(); floatText(x, y - 20, st.k === 'plague' ? '☣️' : '🔌', '#23324a', 1000, 26); flashSquare(st.i, '#e8323c');
+      playAlert(); floatText(x, y - 20, st.k === 'plague' ? '☣️' : st.wiz ? '🪄⚡' : '🔌', '#23324a', 1000, 26); flashSquare(st.i, '#e8323c');
       await sleep(400); drawOwnership(); await sleep(ms - 400); return;
     }
     case 'shield': { const [x, y] = centerOf(st.i); pow(x, y - 20, '🛡️', '#1e6fd8'); playPop(); await sleep(ms); return; }
@@ -2935,6 +3025,7 @@ function stepText(st) {
     case 'charmFree': return `🌹 Lãng Tử ${w} được ${who(st.o)} mời vào chơi, khỏi trả ${fmt(st.amt)} ở ${nm(st.i)}`;
     case 'useFree': return `🎫 ${w} dùng vé miễn phí, khỏi trả ${fmt(st.amt)} ở ${nm(st.i)}`;
     case 'rob': return `🦹 ${w} cướp ${fmt(st.amt)} (10%) của ${other(st.v)}!`;
+    case 'interest': return `🏦 Chủ Ngân Hàng ${w} nhận lãi ${fmt(st.amt)}`;
     case 'homePay': return `🔑 ${w} về ${nm(st.i)} của mình, ngân hàng trả ${fmt(st.amt)}`;
     case 'rentX2': return `🃏 Thần Bài ${w} gặp may: ${who(st.payer)} phải trả phí gấp đôi ở ${nm(st.i)}`;
     case 'useHalf': return `🏷️ ${w} dùng phiếu giảm nửa phí ở ${nm(st.i)}`;
@@ -2944,6 +3035,7 @@ function stepText(st) {
       return `${w} trả ${fmt(st.amt)}`;
     }
     case 'debt': return `⚠️ ${w} thiếu tiền! Cần ${fmt(st.amt)}${st.to >= 0 ? ' trả cho ' + other(st.to) : ''}${liquid(G, s) < st.amt && G.pl[s].out ? ' — bán hết cũng không đủ' : ''}`;
+    case 'spyDraw': return `🕵️ Gián Điệp ${w} lật 2 thẻ Cơ Hội, chọn 1`;
     case 'card': return `❓ Cơ Hội: ${CARDS[st.c].text}`;
     case 'hold': return st.full ? `${w} đã có đủ ${PARITY_MAX} ${HOLD_INFO[st.h][1].toLowerCase()} — không nhận thêm` : `${w} nhận ${HOLD_INFO[st.h][0]} ${HOLD_INFO[st.h][1].toLowerCase()}`;
     case 'nothing': return `Thẻ không có tác dụng lúc này`;
@@ -2965,7 +3057,8 @@ function stepText(st) {
     case 'forceSell': return `📉 ${other(st.o)} bị ép bán ${nm(st.i)} (nhận ${fmt(st.amt)})`;
     case 'destroy': return `🧨 ${w} phá ${nm(st.i)} của ${other(st.o)} xuống ${LEVELS[st.lv].name}`;
     case 'plague': return `☣️ ${nm(st.i)} của ${other(st.o)} bị dịch bệnh — không thu phí 5 lượt`;
-    case 'blackout': return `🔌 ${nm(st.i)} của ${other(st.o)} mất điện — phí còn một nửa 5 lượt`;
+    case 'blackout': if (st.wiz) return `🪄 Pháp Sư ${w} yểm bùa: ${nm(st.i)} của ${other(st.o)} mất điện — phí còn một nửa 5 lượt`;
+      return `🔌 ${nm(st.i)} của ${other(st.o)} mất điện — phí còn một nửa 5 lượt`;
     case 'shield': return `🛡️ Khiên của ${w} chặn được thẻ xấu nhắm vào ${nm(st.i)}`;
     case 'sell': return `${w} bán ${nm(st.i)} được ${fmt(st.amt)}`;
     case 'bankrupt': return `☠️ ${w} phá sản!${st.to >= 0 ? ' Tài sản về tay ' + other(st.to) + '.' : ''}`;
@@ -2991,7 +3084,7 @@ function paint(skipTokens) {
     if (G.seats[s]) setTokenFace(s, G.pl[s].char);
     if (!skipTokens) placeToken(s, G.pl[s].pos, G.pl[s].jail > 0);
   }
-  paintPicks();
+  paintPicks(); renderSpy();
   renderPlayers(); renderDice(); renderStatus(); renderActions(); renderButtons(); renderCenter();
   if (!$('propSheet').hidden) renderProp();
   if (!$('plSheet').hidden) renderPlayerSheet();
@@ -3134,6 +3227,7 @@ function renderStatus() {
       main = v.mode === 'buy' ? `Mua ${q.name}? Chọn cấp nhà — xây cao thì thu phí khách càng nhiều` : v.mode === 'upgrade' ? `Nâng cấp ${q.name}? Chọn cấp mới` : v.mode === 'tour' ? `Mua điểm du lịch ${q.name}?` : `Mua lại ${q.name} của ${who(G.props[v.i].owner)} với giá ${fmt(takeoverPrice(G, v.i))}?`;
     }
     else if (G.step === 'pick') main = PICK_TEXT[G.pick.kind] + (G.pick.kind === 'bus' && busFee(t) ? ` (vé ${fmt(busFee(t))})` : G.pick.kind === 'festival' && festFee(t) ? ` (${fmt(festFee(t))})` : '');
+    else if (G.step === 'spy') main = `🕵️ ${cap(nm)} lật được 2 thẻ Cơ Hội — chạm vào thẻ muốn dùng`;
     else if (G.step === 'casino') main = `Đặt ${fmt(CASINO_BET)}: Chẵn hay Lẻ (×2), hay Đôi (×6)?`;
     else if (G.step === 'debt') main = `${cap(nm)} cần ${fmt(G.debt.amt)} — chạm vào thành phố của mình để bán, hoặc chọn phá sản`;
   } else if (net.on && net.seat < 0) main = `Bạn đang xem · lượt của ${who(t)}`;
@@ -3184,6 +3278,8 @@ function renderActions() {
     }
   } else if (G.step === 'pick') {
     if (G.pick.optional) box.appendChild(btn(G.pick.kind === 'bus' ? '🎲 Không đi xe, tung xúc xắc' : 'Bỏ qua', '', () => act('pickSkip')));
+  } else if (G.step === 'spy') {
+    G.spy.forEach((c, k) => box.appendChild(btn(`${CARDS[c].icon} Chọn thẻ ${k + 1}`, k ? '' : 'primary', () => act('spy', { k }))));
   } else if (G.step === 'casino') {
     box.appendChild(btn('Chẵn ×2', '', () => act('casino', { choice: 'even' })));
     box.appendChild(btn('Lẻ ×2', '', () => act('casino', { choice: 'odd' })));
@@ -3662,7 +3758,7 @@ function freeChar(want, seat) {
   return CHARS.map(c => c.id).find(id => !taken.includes(id)) || 'mc';
 }
 const emoHostLast = [0, 0, 0, 0], pingHostLast = [0, 0, 0, 0];
-const INTENTS = ['roll', 'buy', 'buyTour', 'takeover', 'skip', 'pick', 'pickSkip', 'casino', 'end', 'pay', 'sell', 'bankrupt', 'jailpay', 'jailcard'];
+const INTENTS = ['roll', 'buy', 'buyTour', 'takeover', 'skip', 'pick', 'pickSkip', 'casino', 'spy', 'end', 'pay', 'sell', 'bankrupt', 'jailpay', 'jailcard'];
 function hostMsg(c, d) {
   if (!d || typeof d !== 'object') return;
   if (d.t === 'hello') {
@@ -3700,7 +3796,7 @@ function hostMsg(c, d) {
     const i = Number.isInteger(d.i) ? d.i : -1;
     switch (d.t) {
       case 'roll': return doRoll(s, d.par, d.power); case 'buy': return doBuy(s, d.lv); case 'buyTour': return doBuyTour(s); case 'takeover': return doTakeover(s);
-      case 'skip': return doSkip(s); case 'pick': return doPick(s, i); case 'pickSkip': return doPickSkip(s); case 'casino': return doCasino(s, d.choice);
+      case 'skip': return doSkip(s); case 'pick': return doPick(s, i); case 'pickSkip': return doPickSkip(s); case 'casino': return doCasino(s, d.choice); case 'spy': return doSpy(s, d.k);
       case 'end': return doEnd(s); case 'pay': return doPayDebt(s); case 'sell': return doSell(s, i); case 'bankrupt': return doBankrupt(s);
       case 'jailpay': return doJailPay(s); case 'jailcard': return doJailCard(s);
     }
@@ -3767,7 +3863,8 @@ function validState(g) {
     CITIES.every(i => Number.isInteger(g.props[i].lv) && g.props[i].lv >= 0 && g.props[i].lv <= 5) &&
     Number.isInteger(g.turn) && g.turn >= 0 && g.turn < 4 && typeof g.step === 'string' && Array.isArray(g.deck) && Array.isArray(g.gold) &&
     (g.dice === 0 || (Array.isArray(g.dice) && g.dice.length === 2 && g.dice.every(v => Number.isInteger(v) && v >= 1 && v <= 6))) &&
-    (g.step !== 'pick' || (g.pick && Array.isArray(g.pick.opts))) && (g.step !== 'visit' || (g.visit && Number.isInteger(g.visit.i))) && (g.step !== 'debt' || g.debt);
+    (g.step !== 'pick' || (g.pick && Array.isArray(g.pick.opts))) && (g.step !== 'visit' || (g.visit && Number.isInteger(g.visit.i))) && (g.step !== 'debt' || g.debt) &&
+    (g.step !== 'spy' || (Array.isArray(g.spy) && g.spy.length === 2 && g.spy.every(c => Number.isInteger(c) && c >= 0 && c < CARDS.length)));
 }
 function guestMsg(d) {
   if (!d || typeof d !== 'object') return;
