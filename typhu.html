@@ -467,6 +467,11 @@ button:disabled { opacity: .4; cursor: default; }
 .pick-hand text { font-size: 20px; text-anchor: middle; dominant-baseline: central; }
 .lvl-ico { text-anchor: middle; dominant-baseline: central; pointer-events: none; font-size: 15px; }
 .fx-ico { text-anchor: middle; dominant-baseline: central; pointer-events: none; font-size: 13px; }
+.fx-tag { text-anchor: middle; dominant-baseline: central; pointer-events: none; font: 900 13px 'Baloo 2', system-ui, sans-serif; }
+.fx-badge { animation: fxbob 1.8s ease-in-out infinite; filter: drop-shadow(0 2px 3px rgba(0,0,0,.45)); }
+@keyframes fxbob { 50% { transform: translateY(-3px); } }
+.fx-edge { animation: fxedge 1.2s linear infinite; }
+@keyframes fxedge { to { stroke-dashoffset: -24; } }
 .gold-ico { text-anchor: middle; dominant-baseline: central; pointer-events: none; font-size: 12px; }
 /* ── đủ nhóm màu: quầng thở và vệt sáng chạy quanh viền ── */
 .mono { pointer-events: none; }
@@ -537,7 +542,7 @@ button:disabled { opacity: .4; cursor: default; }
 
 @media (prefers-reduced-motion: reduce) {
   .token { transition: none; }
-  .token .ring, .roll-lbl, .die.hop, .die.hop::after, .dots span, .panel, .overlay, .cardpop, .actions button.primary::after, #board.shake, .pick-ring, .pick-hand, .chars button.on, .tour-flag, .tour-warn { animation: none; }
+  .token .ring, .roll-lbl, .die.hop, .die.hop::after, .dots span, .panel, .overlay, .cardpop, .actions button.primary::after, #board.shake, .pick-ring, .pick-hand, .chars button.on, .tour-flag, .tour-warn, .fx-badge, .fx-edge { animation: none; }
   .fw-burst { animation: none; }
   .cube { transition: none; }
 }
@@ -816,9 +821,9 @@ const CHARS = [
   { id: 'tourist', name: 'Du Khách', skill: 'Bến Xe, ra tù miễn phí; điểm du lịch rẻ hơn 30%', group: 'giảm tiền', skin: '#e9b98a', hair: '#1f1a17', style: 'short', acc: 'hat', outfit: '#f39c12', bg: '#ffedd5' },
   { id: 'detective', name: 'Thám Tử', skill: 'Thuế chỉ 5%, có sẵn một khiên chống thẻ xấu', group: 'giảm tiền', skin: '#f3cfae', hair: '#3b3b3b', style: 'fedora', acc: 'monocle', outfit: '#6b4a2a', bg: '#f5efe0' },
   { id: 'robber', name: 'Kẻ Cướp', skill: 'Dừng đúng ô có người đứng sẵn thì cướp 10% tiền của họ', group: 'tăng tiền', skin: '#f1c7a0', hair: '#1f1a17', style: 'beanie', acc: 'mask', outfit: '#2f2f2f', bg: '#e2e8f0' },
-  { id: 'landlord', name: 'Chủ Đất', skill: 'Về ô đất của mình được ngân hàng trả bằng phí tham quan', group: 'tăng tiền', skin: '#eec39a', hair: '#d1d5db', style: 'bald', acc: 'key', outfit: '#8b5a2b', bg: '#f3e8d8' },
-  { id: 'gambler', name: 'Thần Bài', skill: 'Khách vào đất của mình: 50% phải trả phí ×2', group: 'tăng tiền', skin: '#f6d1b0', hair: '#111827', style: 'slick', acc: 'card', outfit: '#f8fafc', bg: '#e0e7ff' },
-  { id: 'charmer', name: 'Lãng Tử', skill: 'Vào đất người khác: 50% được miễn phí tham quan', group: 'giảm tiền', skin: '#f6d1b0', hair: '#3b2a1e', style: 'part', acc: 'rose', outfit: '#0f766e', bg: '#ccfbf1' },
+  { id: 'landlord', name: 'Chủ Đất', skill: 'Về ô đất của mình: 25% được ngân hàng trả bằng phí tham quan', group: 'tăng tiền', skin: '#eec39a', hair: '#d1d5db', style: 'bald', acc: 'key', outfit: '#8b5a2b', bg: '#f3e8d8' },
+  { id: 'gambler', name: 'Thần Bài', skill: 'Khách vào đất của mình: 25% phải trả phí ×2', group: 'tăng tiền', skin: '#f6d1b0', hair: '#111827', style: 'slick', acc: 'card', outfit: '#f8fafc', bg: '#e0e7ff' },
+  { id: 'charmer', name: 'Lãng Tử', skill: 'Vào đất người khác: 25% được miễn phí tham quan', group: 'giảm tiền', skin: '#f6d1b0', hair: '#3b2a1e', style: 'part', acc: 'rose', outfit: '#0f766e', bg: '#ccfbf1' },
   { id: 'chef', name: 'Vua Bếp', skill: 'Bắt đầu ván với thêm $300', group: 'tăng tiền', skin: '#ffd9b3', hair: '#4b3621', style: 'toque', acc: 'spoon', outfit: '#ffffff', bg: '#fff1f2' },
 ];
 const charOf = id => CHARS.find(c => c.id === id) || CHARS[0];
@@ -1244,9 +1249,9 @@ function land(s, steps) {
     }
   }
 }
-// Chủ Đất về ô của mình: ngân hàng trả bằng phí tham quan của ô đó
+// Chủ Đất về ô của mình: 25% được ngân hàng trả bằng phí tham quan của ô đó
 function homePay(s, i, steps) {
-  if (!hasSkill(G, s, 'landlord')) return;
+  if (!hasSkill(G, s, 'landlord') || Math.random() >= 0.25) return;
   const amt = rentBase(G, i);
   if (amt > 0) { G.pl[s].cash += amt; steps.push({ k: 'homePay', s, i, amt }); }
 }
@@ -1255,11 +1260,11 @@ function payRent(s, i, steps) {
   let amt = rentFor(G, i, s);
   const o = G.props[i].owner, H = G.pl[s].hold;
   if (amt <= 0) { steps.push({ k: 'norent', s, i, o }); return; }
-  // Lãng Tử: 50% được miễn phí tham quan
-  if (hasSkill(G, s, 'charmer') && Math.random() < 0.5) { steps.push({ k: 'charmFree', s, i, o, amt }); return; }
+  // Lãng Tử: 25% được miễn phí tham quan
+  if (hasSkill(G, s, 'charmer') && Math.random() < 0.25) { steps.push({ k: 'charmFree', s, i, o, amt }); return; }
   if (H.free > 0 && (amt >= 100 || amt > G.pl[s].cash)) { H.free--; steps.push({ k: 'useFree', s, i, o, amt }); return; }
-  // Thần Bài: 50% khách phải trả gấp đôi
-  if (hasSkill(G, o, 'gambler') && Math.random() < 0.5) { amt *= 2; steps.push({ k: 'rentX2', s: o, i, payer: s }); }
+  // Thần Bài: 25% khách phải trả gấp đôi
+  if (hasSkill(G, o, 'gambler') && Math.random() < 0.25) { amt *= 2; steps.push({ k: 'rentX2', s: o, i, payer: s }); }
   if (H.half > 0 && amt >= 100) { H.half--; amt = r10(amt / 2); steps.push({ k: 'useHalf', s, i }); }
   charge(s, o, amt, 'rent', steps, i);
 }
@@ -1977,18 +1982,28 @@ function drawOwnership() {
     }
     if (p.fest) drawFestival(g, i);
     if (q.t !== 'city') continue;
-    const b = bandOf(i), icons = [];
-    if (effectOn(G, i, 'plague')) icons.push('☣️');
-    if (effectOn(G, i, 'blackout')) icons.push('🔌');
-    // đầu "sau" của dải (xa Bắt Đầu theo chiều đi) dành cho biểu tượng hiệu ứng, xếp ngang hàng nhau
-    icons.forEach((ic, k) => {
-      const off = 8, m = icons.length > 1 ? (k ? 6 : -6) : 0;
-      const x = b.vert ? b.x + b.w / 2 + m : (r.side === 0 ? b.x + off : b.x + b.w - off);
-      const y = b.vert ? (r.side === 1 ? b.y + off : b.y + b.h - off) : b.y + b.h / 2 + m;
-      bill(x, y, 'fx-ico', ic, gb, { style: icons.length > 1 ? 'font-size:10.5px' : '' });
+    const fx = FX.filter(f => effectOn(G, i, f.key));
+    fx.forEach(f => drawEffect(g, i, f));
+    // biển hiệu lơ lửng trên ô: tròn màu riêng + biểu tượng + chữ ngắn, hai hiệu ứng thì xếp chồng
+    fx.forEach((f, k) => {
+      const [X, Y] = proj(...flatCenter(i), MODE === 'flat' ? 0 : -44);
+      const pin = el('g', { transform: `translate(${X} ${Y - k * 29})` }, gb), in_ = el('g', { class: 'fx-badge' }, pin);
+      el('rect', { x: -17, y: -13, width: 34, height: 26, rx: 13, fill: f.bg, stroke: f.ring, 'stroke-width': 2.5 }, in_);
+      txt(-6, 0, 'fx-ico', f.ico, in_, { style: 'font-size:13px' });
+      txt(8, .5, 'fx-tag', f.tag, in_, { fill: f.ring });
     });
   }
   drawTourWarn(g, gb);
+}
+// dịch bệnh: phủ sọc chéo xanh độc + viền xanh đứt; mất điện: phủ tối cả ô + viền vàng đứt (như ô tắt đèn)
+const FX = [
+  { key: 'plague', ico: '☣️', tag: '0', bg: '#14532d', ring: '#4ade80', fill: 'url(#plagueHatch)', line: '#16a34a' },
+  { key: 'blackout', ico: '⚡', tag: '½', bg: '#111827', ring: '#facc15', fill: 'rgba(15,23,42,.5)', line: '#facc15' },
+];
+function drawEffect(g, i, f) {
+  const r = rectOf(i), x = r.x + TI + 2, y = r.y + TI + 2, w = r.w - 2 * TI - 4, h = r.h - 2 * TI - 4;
+  el('rect', { x, y, width: w, height: h, rx: 4, fill: f.fill }, g);
+  el('rect', { x, y, width: w, height: h, rx: 4, fill: 'none', stroke: f.line, 'stroke-width': 4, 'stroke-dasharray': '7 5', class: 'fx-edge' }, g);
 }
 // sắp độc quyền du lịch (còn thiếu 1 điểm là thắng): viền đỏ các điểm của người đó,
 // điểm còn lại cắm biển ⚠️ để mọi người chú ý giành / chặn
@@ -2145,6 +2160,10 @@ $('board').insertBefore(defs, $('board').firstChild);
   });
   const fg = el('radialGradient', { id: 'feltGrad', cx: .5, cy: .5, r: .68 }, defs);
   [[0, '#1f8f68'], [.55, '#156e52'], [1, '#0e5440']].forEach(([o, c]) => el('stop', { offset: o, 'stop-color': c }, fg));
+  // sọc chéo xanh cho ô bị dịch bệnh
+  const ph = el('pattern', { id: 'plagueHatch', width: 10, height: 10, patternUnits: 'userSpaceOnUse', patternTransform: 'rotate(45)' }, defs);
+  el('rect', { width: 10, height: 10, fill: 'rgba(34,197,94,.22)' }, ph);
+  el('rect', { width: 4, height: 10, fill: 'rgba(22,163,74,.55)' }, ph);
   const sh = el('linearGradient', { id: 'monoShine', x1: 0, y1: 0, x2: 1, y2: 1 }, defs);
   [[0, 0], [.45, 0], [.5, .75], [.55, 0], [1, 0]].forEach(([o, a]) => el('stop', { offset: o, 'stop-color': '#fff', 'stop-opacity': a }, sh));
 })();
