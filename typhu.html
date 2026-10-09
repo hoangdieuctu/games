@@ -818,6 +818,7 @@ const CHARS = [
   { id: 'robber', name: 'Kẻ Cướp', skill: 'Dừng đúng ô có người đứng sẵn thì cướp 10% tiền của họ', group: 'tăng tiền', skin: '#f1c7a0', hair: '#1f1a17', style: 'beanie', acc: 'mask', outfit: '#2f2f2f', bg: '#e2e8f0' },
   { id: 'landlord', name: 'Chủ Đất', skill: 'Về ô đất của mình được ngân hàng trả bằng phí tham quan', group: 'tăng tiền', skin: '#eec39a', hair: '#d1d5db', style: 'bald', acc: 'key', outfit: '#8b5a2b', bg: '#f3e8d8' },
   { id: 'gambler', name: 'Thần Bài', skill: 'Khách vào đất của mình: 50% phải trả phí ×2', group: 'tăng tiền', skin: '#f6d1b0', hair: '#111827', style: 'slick', acc: 'card', outfit: '#f8fafc', bg: '#e0e7ff' },
+  { id: 'charmer', name: 'Lãng Tử', skill: 'Vào đất người khác: 50% được miễn phí tham quan', group: 'giảm tiền', skin: '#f6d1b0', hair: '#3b2a1e', style: 'part', acc: 'rose', outfit: '#0f766e', bg: '#ccfbf1' },
   { id: 'chef', name: 'Vua Bếp', skill: 'Bắt đầu ván với thêm $300', group: 'tăng tiền', skin: '#ffd9b3', hair: '#4b3621', style: 'toque', acc: 'spoon', outfit: '#ffffff', bg: '#fff1f2' },
 ];
 const charOf = id => CHARS.find(c => c.id === id) || CHARS[0];
@@ -1254,6 +1255,8 @@ function payRent(s, i, steps) {
   let amt = rentFor(G, i, s);
   const o = G.props[i].owner, H = G.pl[s].hold;
   if (amt <= 0) { steps.push({ k: 'norent', s, i, o }); return; }
+  // Lãng Tử: 50% được miễn phí tham quan
+  if (hasSkill(G, s, 'charmer') && Math.random() < 0.5) { steps.push({ k: 'charmFree', s, i, o, amt }); return; }
   if (H.free > 0 && (amt >= 100 || amt > G.pl[s].cash)) { H.free--; steps.push({ k: 'useFree', s, i, o, amt }); return; }
   // Thần Bài: 50% khách phải trả gấp đôi
   if (hasSkill(G, o, 'gambler') && Math.random() < 0.5) { amt *= 2; steps.push({ k: 'rentX2', s: o, i, payer: s }); }
@@ -1782,6 +1785,14 @@ function chibiInto(g, ch) {
       R(-10, -28, 20, 14, '#ffffff', 2, '#cfd9e5'); el('ellipse', { cx: 0, cy: -28, rx: 14, ry: 8, fill: '#ffffff', stroke: '#cfd9e5', 'stroke-width': 1 }, g); Cc(-7, -31, 5, '#ffffff', '#cfd9e5'); Cc(7, -31, 5, '#ffffff', '#cfd9e5');
       eyes('happy'); cheeks(); P('M-8 .5 Q-5 -3 -1 .5 Q-4 2.5 -8 .5 Z', '#23324a'); P('M8 .5 Q5 -3 1 .5 Q4 2.5 8 .5 Z', '#23324a'); mouth();
       R(14, -2, 3.2, 17, '#9ca3af', 1.5); el('ellipse', { cx: 15.6, cy: -6, rx: 4.2, ry: 5.5, fill: '#d1d5db', stroke: '#6b7280', 'stroke-width': 1 }, g);
+      break;
+    case 'charmer': // tóc rẽ ngôi lượn sóng, khăn quàng đỏ, áo xanh ngọc, nháy mắt, cầm bông hồng
+      body('#0f766e', true); P('M-8 7 Q0 13 8 7 L9 10 Q0 16 -9 10 Z', '#e8323c', '#a3202a'); P('M5 11 L8 19 L11 18 L7 10 Z', '#e8323c', '#a3202a');
+      head(); cap(); P('M-14 -8 Q-15 -24 2 -23 Q13 -22 14 -8 Q11 -16 4 -17 Q0 -12 -9 -14 Q-12 -12 -14 -8 Z', ch.hair, '#000');
+      Cc(-5.5, -6, 2.5, '#23324a'); Cc(-4.6, -7, 1, '#fff'); P('M3 -6 Q5.5 -8.5 8 -6', 'none', '#23324a', 1.9);
+      brows(); cheeks(); mouth('grin');
+      P('M14 14 L19 -2', 'none', '#15803d', 1.8); P('M16 6 Q12 4 13 1 Q16 3 16 6 Z', '#22c55e', '#15803d', .6);
+      Cc(19.5, -4, 4, '#e8323c', '#a3202a'); P('M17.5 -4 Q19.5 -6.5 21.5 -4 Q19.5 -2 17.5 -4', 'none', '#a3202a', .8);
       break;
     case 'robber': // mũ len đen, mặt nạ che mắt, áo sọc, túi tiền
       body('#2f2f2f'); for (const y of [10, 14, 18]) P(`M-15 ${y} L15 ${y}`, 'none', '#ffffff', 1.6);
@@ -2655,7 +2666,7 @@ function stepMs(st) {
     case 'move': return st.how === 'bus' ? busMs(st.n) + 350 : st.fly ? FLY_MS + 150 : Math.abs(st.n) * STEP_MS + (st.passGo ? 300 : 100);
     case 'boost': return 600; case 'island': return 800; case 'free': return 450; case 'stay': return 350; case 'triple': return 600; case 'released': return 400;
     case 'busStop': return 600; case 'busGo': return 300; case 'busNoCash': return 300;
-    case 'home': return st.can ? 0 : 300; case 'homePay': return 1000; case 'rentX2': return 900; case 'norent': return 350; case 'useFree': return 800; case 'useHalf': return 600;
+    case 'home': return st.can ? 0 : 300; case 'homePay': return 1000; case 'rentX2': return 900; case 'norent': return 350; case 'useFree': return 800; case 'charmFree': return 900; case 'useHalf': return 600;
     case 'pay': return 800; case 'rob': return 1100; case 'debt': return 600; case 'card': return 2700; case 'hold': return 600; case 'nothing': return 400;
     case 'build': return 850; case 'buyTour': return 750; case 'takeover': return 1000; case 'skip': return 250;
     case 'casinoSkip': return 300; case 'casino': return 1900; case 'noCash': return 1100; case 'festNone': return 300; case 'festival': return 1000;
@@ -2757,6 +2768,7 @@ async function animateStep(st, tok) {
       setTimeout(() => { cardMoney(s, st.amt); playCoin(true); }, 260);
       await sleep(ms); return;
     }
+    case 'charmFree': { const [x, y] = tokenPt(s); floatText(x, y - 18, '🌹 miễn phí', '#0f766e', 1000, 18); flashSquare(st.i, '#0f766e'); playPop(); await sleep(ms); return; }
     case 'useFree': { const [x, y] = tokenPt(s); floatText(x, y - 18, '🎫 miễn phí', '#1e6fd8', 1000, 18); playPop(); await sleep(ms); return; }
     case 'homePay': { const [x, y] = centerOf(st.i); floatText(x, y - 20, `🔑 +${fmt(st.amt)}`, '#2e9d4f', 1000, 20); flashSquare(st.i, '#2e9d4f'); cardMoney(s, st.amt); playCoin(true); await sleep(ms); return; }
     case 'rentX2': { const [x, y] = centerOf(st.i); pow(x, y - 30, '🃏 ×2!', '#e8323c'); flashSquare(st.i, '#e8323c'); playWhoosh(0.3); await sleep(ms); return; }
@@ -2901,6 +2913,7 @@ function stepText(st) {
     case 'home': return st.can ? `${w} về ${nm(st.i)} của mình — có thể nâng cấp` : `${w} về thăm ${nm(st.i)} của mình`;
     case 'takeoverOffer': return `${w} có thể mua lại ${nm(st.i)} với giá ${fmt(takeoverPrice(G, st.i))}`;
     case 'norent': return `${w} vào ${nm(st.i)} nhưng không mất phí${G.props[st.i] && effectOn(G, st.i, 'plague') ? ' (dịch bệnh)' : ''}`;
+    case 'charmFree': return `🌹 Lãng Tử ${w} được ${who(st.o)} mời vào chơi, khỏi trả ${fmt(st.amt)} ở ${nm(st.i)}`;
     case 'useFree': return `🎫 ${w} dùng vé miễn phí, khỏi trả ${fmt(st.amt)} ở ${nm(st.i)}`;
     case 'rob': return `🦹 ${w} cướp ${fmt(st.amt)} (10%) của ${other(st.v)}!`;
     case 'homePay': return `🔑 ${w} về ${nm(st.i)} của mình, ngân hàng trả ${fmt(st.amt)}`;
