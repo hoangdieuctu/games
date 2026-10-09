@@ -362,6 +362,8 @@ button:disabled { opacity: .4; cursor: default; }
   background: rgba(35,50,74,.35); padding: 16px; -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); animation: fade .2s ease-out;
 }
 @keyframes fade { from { opacity: 0; } }
+/* bảng chọn nhân vật mở từ phòng chờ online (nằm sau trong DOM) nên phải nổi lên trên */
+#charSheet { z-index: 21; }
 .panel {
   background: var(--card); border-radius: 22px; padding: 22px 22px 20px; width: 100%; max-width: 400px; max-height: 100%; overflow-y: auto;
   box-shadow: 0 20px 60px rgba(35,50,74,.3); animation: pop .25s cubic-bezier(.2,1.4,.5,1);
@@ -707,7 +709,7 @@ button:disabled { opacity: .4; cursor: default; }
       <li><b>5 điểm du lịch</b> 🏖️ giá $200, phí $80 nhân với số điểm chủ đang có, không mua lại được. Ai gom đủ cả 5 <b>thắng ngay</b>.</li>
       <li><b>Côn Đảo</b>: kẹt 3 lượt, ra sớm bằng tung đôi, nộp $100 hoặc thẻ ra tù. Tung đôi 3 lần liền cũng vào Côn Đảo. <b>Bến Xe</b>: lượt sau được đi tới ô bất kỳ (vé $40). <b>Đại Nhạc Hội</b>: trả $40 tổ chức lễ hội ở một thành phố hoặc điểm du lịch của mình. <b>Thuế</b>: nộp 10% tổng tài sản. <b>Nút ĐỔ</b>: chạm nhanh để tung ngẫu nhiên, hoặc <b>bấm giữ</b> cho thanh lực chạy rồi thả tay — lực càng cao càng dễ ra tổng điểm lớn. <b>Sòng bài</b>: đặt $100 đoán Chẵn/Lẻ (×2) hoặc Đôi (×6).</li>
       <li><b>Cơ Hội</b>: thẻ có lợi (miễn phí tham quan, giảm 50%, khiên, ra tù, lễ hội miễn phí, thêm thẻ Chẵn/Lẻ) hoặc hại (đổi thành phố, ép bán, phá cấp, dịch bệnh, mất điện, bị đưa đi nơi khác).</li>
-      <li>Tung đôi được đi tiếp, trừ khi vào Côn Đảo hay Bến Xe; không còn việc gì thì lượt tự chuyển. Thiếu tiền thì bán thành phố (được nửa vốn); bán hết cũng không đủ thì <b>phá sản</b> ngay, tài sản về tay chủ nợ.</li>
+      <li>Tung đôi được đi tiếp, trừ khi vào Côn Đảo hay Bến Xe; không còn việc gì thì lượt tự chuyển. Thiếu tiền thì bán thành phố (được nửa vốn); bán hết cũng không đủ thì <b>phá sản</b> ngay, tài sản về tay chủ nợ. Đang thiếu tiền cũng có thể tự chọn <b>phá sản</b> thay vì bán nhà.</li>
       <li><b>Thắng</b> khi: đối thủ phá sản hết · đủ <b>3 nhóm màu</b> · sở hữu <b>cả một hàng</b> · đủ <b>5 điểm du lịch</b> · xây đủ <b>5 Biểu tượng</b> · hoặc <b>giàu nhất</b> khi hết số vòng. Mỗi nhân vật có một kỹ năng riêng.</li>
       <li>Chạm vào thẻ người chơi khác để <b>tặng tiền</b> 🎁; bấm 😊 trên cùng để gửi <b>biểu tượng cảm xúc</b>; bấm 📍 rồi chạm một ô để <b>đánh dấu</b> ô đó nhấp nháy vài giây cho mọi người cùng chú ý.</li>
     </ol>
@@ -1481,7 +1483,8 @@ function doSell(s, i) {
   commit({ type: 'turn', s, steps: [{ k: 'sell', s, i, amt }] });
 }
 function doBankrupt(s) {
-  if (!okTurn(s, ['debt']) || liquid(G, s) >= G.debt.amt) return;
+  // đang nợ thì được chọn phá sản bất cứ lúc nào, kể cả khi bán đất vẫn đủ trả
+  if (!okTurn(s, ['debt'])) return;
   const steps = [];
   liquidate(s, G.debt.to >= 0 ? G.debt.to : -1, steps);
   finish(s, steps);
@@ -3100,7 +3103,7 @@ function renderStatus() {
     }
     else if (G.step === 'pick') main = PICK_TEXT[G.pick.kind] + (G.pick.kind === 'bus' && busFee(t) ? ` (vé ${fmt(busFee(t))})` : G.pick.kind === 'festival' && festFee(t) ? ` (${fmt(festFee(t))})` : '');
     else if (G.step === 'casino') main = `Đặt ${fmt(CASINO_BET)}: Chẵn hay Lẻ (×2), hay Đôi (×6)?`;
-    else if (G.step === 'debt') main = `${cap(nm)} cần ${fmt(G.debt.amt)} — chạm vào thành phố của mình để bán`;
+    else if (G.step === 'debt') main = `${cap(nm)} cần ${fmt(G.debt.amt)} — chạm vào thành phố của mình để bán, hoặc chọn phá sản`;
   } else if (net.on && net.seat < 0) main = `Bạn đang xem · lượt của ${who(t)}`;
   else main = `${who(t)}${G.seats[t].type === 'human' && seatAuto(t) ? ' (máy đánh thay)' : ''} đang chơi${DOTS}`;
   if (pingMode) main = '📍 Chạm vào một ô để đánh dấu cho mọi người cùng thấy';
@@ -3155,6 +3158,12 @@ function renderActions() {
     box.appendChild(btn('Đôi ×6', 'warn', () => act('casino', { choice: 'double' })));
   } else if (G.step === 'debt') {
     box.appendChild(btn(`💸 Trả ${fmt(G.debt.amt)}`, 'primary', () => act('pay'), P.cash < G.debt.amt));
+    // bấm 2 lần để tránh lỡ tay
+    const b = btn('☠️ Phá sản', 'danger', () => {
+      if (!b.dataset.sure) { b.dataset.sure = 1; b.textContent = '☠️ Chắc chắn phá sản?'; return; }
+      act('bankrupt');
+    });
+    box.appendChild(b);
   }
 }
 function renderButtons() {
@@ -3635,6 +3644,7 @@ function hostMsg(c, d) {
       s = JOIN_ORDER.find(k => !G.seats[k]);
       if (s === undefined) { try { c.send({ t: 'full' }); } catch (e) {} net.conns.delete(c); setTimeout(() => c.close(), 500); return; }
       G.seats[s] = { type: 'human', name: name || 'Người chơi ' + (s + 1), cid, online: true, remote: true, char: freeChar(cleanChar(d.char), s) };
+      G.pl[s].char = G.seats[s].char;
     } else s = -1;
     try { c.send({ t: 'welcome', seat: s }); } catch (e) {}
     commit({ type: 'lobby' });
@@ -3720,7 +3730,7 @@ async function joinOnline(code) {
 }
 function validState(g) {
   return g && typeof g === 'object' && Array.isArray(g.seats) && g.seats.length === 4 && Array.isArray(g.pl) && g.pl.length === 4 &&
-    g.pl.every(p => p && Number.isInteger(p.pos) && p.pos >= 0 && p.pos < N && typeof p.cash === 'number' && Number.isInteger(p.jail) && p.hold && typeof p.hold === 'object' && typeof p.char === 'string') &&
+    g.pl.every(p => p && Number.isInteger(p.pos) && p.pos >= 0 && p.pos < N && typeof p.cash === 'number' && Number.isInteger(p.jail) && p.hold && typeof p.hold === 'object' && (typeof p.char === 'string' || p.char === null)) &&
     Array.isArray(g.props) && g.props.length === N && PROPS.every(i => g.props[i] && Number.isInteger(g.props[i].owner) && g.props[i].owner >= -1 && g.props[i].owner < 4) &&
     CITIES.every(i => Number.isInteger(g.props[i].lv) && g.props[i].lv >= 0 && g.props[i].lv <= 5) &&
     Number.isInteger(g.turn) && g.turn >= 0 && g.turn < 4 && typeof g.step === 'string' && Array.isArray(g.deck) && Array.isArray(g.gold) &&
