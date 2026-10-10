@@ -104,6 +104,7 @@ button:disabled { opacity: .4; cursor: default; }
 .sq-price { font: 700 10px 'Baloo 2', system-ui, sans-serif; text-anchor: middle; dominant-baseline: central; pointer-events: none; fill: var(--muted); }
 .sq-big { font: 800 11.5px 'Baloo 2', system-ui, sans-serif; text-anchor: middle; dominant-baseline: central; pointer-events: none; letter-spacing: .4px; }
 .sq-icon { text-anchor: middle; dominant-baseline: central; pointer-events: none; }
+.center-pot { font: 800 30px 'Baloo 2', system-ui, sans-serif; text-anchor: middle; dominant-baseline: central; pointer-events: none; fill: #ffd23f; }
 .center-title { font: 800 64px 'Baloo 2', system-ui, sans-serif; text-anchor: middle; dominant-baseline: central; letter-spacing: 3px; pointer-events: none; fill: rgba(255,255,255,.22); }
 .center-sub { font: 700 14px 'Baloo 2', system-ui, sans-serif; text-anchor: middle; dominant-baseline: central; fill: rgba(255,255,255,.4); pointer-events: none; }
 .deck-title { font: 800 15px 'Baloo 2', system-ui, sans-serif; text-anchor: middle; dominant-baseline: central; fill: #fff; letter-spacing: 1px; pointer-events: none; }
@@ -715,8 +716,8 @@ button:disabled { opacity: .4; cursor: default; }
       <li>Vào thành phố <b>của người khác</b> phải trả <b>phí tham quan</b> theo cấp nhà, rồi có thể <b>mua lại</b> với giá <b>bằng</b> số tiền chủ đã đầu tư (trừ Biểu tượng và điểm du lịch). <b>Biểu tượng</b> 🗼 cũng không bị ép bán, phá cấp hay đổi.</li>
       <li>Phí tham quan <b>×2</b> khi chủ có đủ nhóm màu, <b>×2</b> cho <b>mỗi lần</b> thành phố hoặc điểm du lịch được mở <b>lễ hội</b> (cộng dồn: 2 lần là ×4; mỗi lúc chỉ một nơi có lễ hội — mở ở nơi khác thì nơi cũ bị lấy lại, phí về như cũ), <b>×2</b> ở 3 <b>ô đất vàng ⭐</b> chọn ngẫu nhiên mỗi ván.</li>
       <li><b>5 điểm du lịch</b> 🏖️ giá $200, phí $80 nhân với số điểm chủ đang có, không mua lại được. Ai gom đủ cả 5 <b>thắng ngay</b>.</li>
-      <li><b>Côn Đảo</b>: kẹt 3 lượt, ra sớm bằng tung đôi, nộp $100 hoặc thẻ ra tù. Tung đôi 3 lần liền cũng vào Côn Đảo. <b>Bến Xe</b>: lượt sau được đi tới ô bất kỳ (vé $40). <b>Đại Nhạc Hội</b>: trả $40 tổ chức lễ hội ở một thành phố hoặc điểm du lịch của mình. <b>Thuế</b>: nộp 10% tổng tài sản. <b>Nút ĐỔ</b>: chạm nhanh để tung ngẫu nhiên, hoặc <b>bấm giữ</b> cho thanh lực chạy rồi thả tay — lực càng cao càng dễ ra tổng điểm lớn. <b>Sòng bài</b>: đặt $100 đoán Chẵn/Lẻ (×2) hoặc Đôi (×6).</li>
-      <li><b>Cơ Hội</b>: thẻ có lợi (miễn phí tham quan, giảm 50%, khiên, ra tù, lễ hội miễn phí, thêm thẻ Chẵn/Lẻ) hoặc hại (đổi thành phố, ép bán, phá cấp, dịch bệnh, mất điện, bị đưa đi nơi khác).</li>
+      <li><b>Côn Đảo</b>: kẹt 3 lượt, ra sớm bằng tung đôi, nộp $100 hoặc thẻ ra tù. Tung đôi 3 lần liền cũng vào Côn Đảo. <b>Bến Xe</b>: lượt sau được đi tới ô bất kỳ (vé $40). <b>Đại Nhạc Hội</b>: trả $40 tổ chức lễ hội ở một thành phố hoặc điểm du lịch của mình. <b>Thuế</b>: nộp 10% tổng tài sản, tiền thuế dồn vào <b>Quỹ Thuế</b> — ai rút được thẻ Quỹ Thuế ở ô Cơ Hội sẽ nhận toàn bộ quỹ. <b>Nút ĐỔ</b>: chạm nhanh để tung ngẫu nhiên, hoặc <b>bấm giữ</b> cho thanh lực chạy rồi thả tay — lực càng cao càng dễ ra tổng điểm lớn. <b>Sòng bài</b>: đặt $100 đoán Chẵn/Lẻ (×2) hoặc Đôi (×6).</li>
+      <li><b>Cơ Hội</b>: thẻ có lợi (nhận Quỹ Thuế, miễn phí tham quan, giảm 50%, khiên, ra tù, lễ hội miễn phí, thêm thẻ Chẵn/Lẻ) hoặc hại (đổi thành phố, ép bán, phá cấp, dịch bệnh, mất điện, bị đưa đi nơi khác).</li>
       <li>Tung đôi được đi tiếp, trừ khi vào Côn Đảo hay Bến Xe; không còn việc gì thì lượt tự chuyển. Thiếu tiền thì bán thành phố (được nửa vốn); bán hết cũng không đủ thì <b>phá sản</b> ngay, tài sản về tay chủ nợ. Đang thiếu tiền cũng có thể tự chọn <b>phá sản</b> thay vì bán nhà.</li>
       <li><b>Thắng</b> khi: đối thủ phá sản hết · đủ <b>3 nhóm màu</b> · sở hữu <b>cả một hàng</b> · đủ <b>5 điểm du lịch</b> · xây đủ <b>5 Biểu tượng</b> · hoặc <b>giàu nhất</b> khi hết số vòng. Mỗi nhân vật có một kỹ năng riêng.</li>
       <li>Chạm vào thẻ người chơi khác để <b>tặng tiền</b> 🎁; bấm 😊 trên cùng để gửi <b>biểu tượng cảm xúc</b>; bấm 📍 rồi chạm một ô để <b>đánh dấu</b> ô đó nhấp nháy vài giây cho mọi người cùng chú ý.</li>
@@ -853,6 +854,7 @@ const CARDS = [
   { text: 'Về Bắt Đầu, nhận lương.', a: { go: 'start' }, icon: '🏁' },
   { text: 'Tổ chức lễ hội miễn phí ở một thành phố hoặc điểm du lịch của bạn.', a: { pick: 'festivalFree' }, icon: '🎉' },
   { text: 'Đi đến nơi đang có lễ hội.', a: { go: 'festCity' }, icon: '🎪' },
+  { text: 'Quỹ Thuế: nhận toàn bộ tiền thuế mọi người đã nộp.', a: { pot: true }, icon: '💰' },
   { text: 'Thêm một thẻ Chẵn/Lẻ (giữ tối đa 3): chọn trước tổng xúc xắc ra chẵn hay lẻ.', a: { hold: 'parity' }, icon: '🎲' },
 ];
 const HOLD_INFO = { free: ['🎫', 'Vé miễn phí tham quan'], half: ['🏷️', 'Phiếu giảm nửa phí'], shield: ['🛡️', 'Khiên bảo vệ thành phố'], jail: ['🔓', 'Thẻ ra tù'], parity: ['🎲', 'Thẻ Chẵn/Lẻ'] };
@@ -1034,6 +1036,7 @@ function botPickTarget(G, s, kind, opts) {
 function botCardScore(G, s, c) {
   const a = CARDS[c].a, P = G.pl[s];
   if (a.hold) return a.hold === 'parity' && (P.hold.parity || 0) >= PARITY_MAX ? 0 : { free: 6, half: 4, shield: 3, jail: 2, parity: 2 }[a.hold] || 1;
+  if (a.pot) return (G.pot || 0) / 50;
   if (a.pick) return pickOpts(s, a.pick).length ? { forceSell: 8, swapMine: 7, destroy: 6, plague: 6, blackout: 5, festivalFree: 5 }[a.pick] || 3 : 0;
   return { start: 5, bus: 3, festival: 1, festCity: 1, tax: -4, island: -6 }[a.go] || 0;
 }
@@ -1083,6 +1086,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
 const STEP_MS = 160;
 
 let G = null;
+let potTxt = null; // chữ Quỹ Thuế giữa bàn
 let setup = store.get('typhu.setup', ['you', 'bot', 'bot', 'bot']);
 let localNames = store.get('typhu.names', ['', '', '', '']);
 let setupChars = store.get('typhu.chars', ['mc', '', '', '']);
@@ -1098,7 +1102,7 @@ function freshGame(seats, maxRound) {
   const chars = seats.map(x => x ? (x.char || pool.shift() || CHARS[0].id) : null);
   const G = { phase: 'play', seats, pl: seats.map((x, s) => ({ pos: 0, cash: START_CASH, jail: 0, bus: false, laps: 0, rolls: 0, hold: freshHold(), out: false, char: chars[s] })),
     props: freshProps(), turn: 0, dice: 0, doubles: 0, again: false, step: 'roll', visit: null, pick: null, debt: null, spy: null,
-    gold: shuffled(CITIES.length).slice(0, 3).map(k => CITIES[k]), deck: shuffled(CARDS.length), deckPos: 0, turnNo: 0,
+    gold: shuffled(CITIES.length).slice(0, 3).map(k => CITIES[k]), deck: shuffled(CARDS.length), deckPos: 0, turnNo: 0, pot: 0,
     round: 1, maxRound: maxRound || 0, winner: null, winHow: null, seq: 0 };
   for (let s = 0; s < 4; s++) {
     if (!seats[s]) continue;
@@ -1295,7 +1299,7 @@ function payRent(s, i, steps) {
 // s trả amt cho to (-1 ngân hàng); thiếu thì vào bước nợ
 function charge(s, to, amt, why, steps, i) {
   const P = G.pl[s];
-  if (P.cash >= amt) { P.cash -= amt; if (to >= 0) G.pl[to].cash += amt; steps.push({ k: 'pay', s, to, amt, why, i }); return; }
+  if (P.cash >= amt) { P.cash -= amt; if (to >= 0) G.pl[to].cash += amt; else if (why === 'tax') G.pot = (G.pot || 0) + amt; steps.push({ k: 'pay', s, to, amt, why, i }); return; }
   steps.push({ k: 'debt', s, to, amt, why, i });
   // bán hết đất cũng không đủ thì phá sản ngay, không bắt bán từng ô
   if (liquid(G, s) < amt) { liquidate(s, to >= 0 ? to : -1, steps); return; }
@@ -1355,6 +1359,11 @@ function applyCard(s, c, steps) {
     if (a.go === 'island') { toIsland(s, steps); return; }
     const target = a.go === 'tax' ? TAX_POS : a.go === 'festival' ? FEST_POS : a.go === 'bus' ? BUS_POS : a.go === 'start' ? START_POS : festCity(G);
     if (target < 0) steps.push({ k: 'nothing', s }); else moveTo(s, target, steps);
+  }
+  else if (a.pot) {
+    // thẻ Quỹ Thuế: nhận toàn bộ tiền thuế đã dồn lại
+    const pot = G.pot || 0;
+    if (pot > 0) { P.cash += pot; G.pot = 0; steps.push({ k: 'pot', s, amt: pot }); } else steps.push({ k: 'nothing', s });
   }
   else if (a.pick) { const opts = pickOpts(s, a.pick); if (opts.length) setPick(s, a.pick, opts, false); else steps.push({ k: 'nothing', s }); }
 }
@@ -1520,7 +1529,7 @@ function doPayDebt(s) {
   if (!okTurn(s, ['debt'])) return;
   const D = G.debt, P = G.pl[s];
   if (P.cash < D.amt) return;
-  P.cash -= D.amt; if (D.to >= 0) G.pl[D.to].cash += D.amt;
+  P.cash -= D.amt; if (D.to >= 0) G.pl[D.to].cash += D.amt; else if (D.why === 'tax') G.pot = (G.pot || 0) + D.amt;
   G.debt = null; G.step = 'roll';
   finish(s, [{ k: 'pay', s, to: D.to, amt: D.amt, why: D.why, i: D.i }]);
 }
@@ -2014,6 +2023,7 @@ function drawCenter() {
   el('circle', { cx: c, cy: c, r: 128, fill: 'none', stroke: 'rgba(255,255,255,.08)', 'stroke-width': 10 }, g);
   el('circle', { cx: c, cy: c, r: 118, fill: 'none', stroke: 'rgba(255,210,63,.3)', 'stroke-width': 2, 'stroke-dasharray': '14 8' }, g);
   txt(c, c, 'center-title', 'CỜ TỶ PHÚ', g);
+  potTxt = txt(c, c + 62, 'center-pot', '', g);
   const deck = (x, y, rot, col, icon, label) => {
     const d = el('g', { transform: `translate(${x} ${y}) rotate(${rot})` }, g);
     for (let k = 2; k >= 0; k--) el('rect', { x: -58 + k * 2, y: -40 + k * 2, width: 116, height: 76, rx: 10, fill: k ? '#fff' : col, stroke: k ? '#cfd9e5' : 'rgba(0,0,0,.15)', 'stroke-width': 1.5 }, d);
@@ -2022,7 +2032,11 @@ function drawCenter() {
   };
   deck(c - 170, c + 140, -8, '#f39c12', '❓', 'CƠ HỘI');
 }
-function renderCenter() {}
+function renderCenter() {
+  if (!potTxt) return;
+  const pot = (G && G.pot) || 0;
+  potTxt.textContent = pot > 0 ? `💰 Quỹ Thuế ${fmt(pot)}` : '';
+}
 // dải chủ đất, viền màu chủ, sao đất vàng, lễ hội, dịch bệnh / mất điện
 // chỉ vẽ lại khi trạng thái đất thật sự đổi (paint() gọi rất thường xuyên)
 function drawOwnership() {
@@ -2499,7 +2513,7 @@ function moneyDelta(st) {
     case 'sell': out.push([s, st.amt]); break;
     case 'rob': out.push([s, st.amt], [st.v, -st.amt]); break;
     case 'forceSell': out.push([st.o, st.amt]); break;
-    case 'luck': case 'homePay': case 'interest': out.push([s, st.amt]); break;
+    case 'luck': case 'homePay': case 'interest': case 'pot': out.push([s, st.amt]); break;
     case 'gift': out.push([s, -st.amt], [st.to, st.amt]); break;
   }
   return out;
@@ -2780,7 +2794,7 @@ function stepMs(st) {
     case 'pickCity': return 400; case 'pickSkip': return 250; case 'swap': return 1000; case 'forceSell': return 900; case 'destroy': return 900;
     case 'plague': case 'blackout': return 850; case 'shield': return 850; case 'sell': return 650; case 'bankrupt': return 1000;
     case 'won': case 'timeup': return 900;
-    case 'luck': return 1100; case 'gift': return 1000;
+    case 'luck': return 1100; case 'pot': return 1300; case 'gift': return 1000;
     default: return 0;
   }
 }
@@ -2974,6 +2988,12 @@ async function animateStep(st, tok) {
       drawOwnership(); drawBuild();
       return;
     }
+    case 'pot': {
+      const [x, y] = tokenPt(s);
+      pow(x, y - 34, '💰 QUỸ THUẾ', '#2e9d4f'); cardMoney(s, st.amt); playCoin(true, true);
+      burst(x, y, 12, ['#ffd23f', '#2e9d4f', '#fff'], 50, '$');
+      await sleep(ms); return;
+    }
     case 'luck': {
       const [x, y] = tokenPt(s);
       pow(x, y - 34, '×2 $', '#2e9d4f'); cardMoney(s, st.amt); playCoin(true, true);
@@ -3006,6 +3026,7 @@ function stepText(st) {
   const other = o => (who(o) === 'Bạn' ? 'bạn' : who(o));
   switch (st.k) {
     case 'dice': return `${w} ${st.par ? `dùng thẻ ${st.par === 'even' ? 'Chẵn' : 'Lẻ'}, ` : ''}tung được ${st.d[0]} + ${st.d[1]}${st.dbl ? ' — đôi! 🎉' : ''}`;
+    case 'pot': return `💰 ${w} nhận toàn bộ Quỹ Thuế ${fmt(st.amt)}!`;
     case 'luck': return `🍀 ${w} may mắn được nhân đôi tiền khởi đầu (+${fmt(st.amt)})!`;
     case 'gift': return `🎁 ${w} tặng ${other(st.to)} ${fmt(st.amt)}`;
     case 'boost': return `🏎️ Tay Đua tăng tốc: ${w} đi ${st.n} bước!`;
