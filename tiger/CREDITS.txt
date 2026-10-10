@@ -1,0 +1,126 @@
+Nguồn ảnh và âm thanh dùng trong Bé Yêu Hổ (tiger/index.html).
+Ảnh hổ lấy từ Wikimedia Commons, đã thu nhỏ và nén lại; giữ nguyên giấy phép gốc.
+Ảnh các con vật khác (img/others/) thu nhỏ từ ../animals-img/.
+
+img/face_big.jpg
+  File:Sibirischer tiger de edit02.jpg — S. Taheri, edited by Fir0002 — CC BY-SA 2.5
+  https://commons.wikimedia.org/wiki/File:Sibirischer_tiger_de_edit02.jpg
+img/face_young.jpg
+  File:A tiger cub in Ranthambore National Park, (2016).jpg — Aadishbahulikar18 — CC BY-SA 4.0
+  https://commons.wikimedia.org/wiki/File:A_tiger_cub_in_Ranthambore_National_Park,_(2016).jpg
+img/face_close.jpg
+  File:Roaring tiger.JPG — Arendra37 — CC BY-SA 3.0
+  https://commons.wikimedia.org/wiki/File:Roaring_tiger.JPG
+img/white_lying.jpg
+  File:White Tiger (211753585).jpeg — Lee Elvin — CC BY-SA 3.0
+  https://commons.wikimedia.org/wiki/File:White_Tiger_(211753585).jpeg
+img/white_standing.jpg
+  File:Standing white tiger.jpg — Basile Morin — CC BY-SA 4.0
+  https://commons.wikimedia.org/wiki/File:Standing_white_tiger.jpg
+img/white_water.jpg
+  File:500px photo (188690275).jpeg — Chi King — CC BY 3.0
+  https://commons.wikimedia.org/wiki/File:500px_photo_(188690275).jpeg
+img/swim.jpg
+  File:Panthera tigris altaica (27.08.2012).JPG — Christoph Matthias Siebenborn — CC BY-SA 3.0
+  https://commons.wikimedia.org/wiki/File:Panthera_tigris_altaica_(27.08.2012).JPG
+img/swim2.jpg
+  File:Royal bengal tiger Swimming.jpg — Badal Chandra Sarker — CC BY-SA 4.0
+  https://commons.wikimedia.org/wiki/File:Royal_bengal_tiger_Swimming.jpg
+img/swim_ball.jpg
+  File:Playing with the ball 3.jpg — Photo by Tambako the Jaguar via Free For Commercial Use — CC BY-SA 2.0
+  https://commons.wikimedia.org/wiki/File:Playing_with_the_ball_3.jpg
+img/swim_under.jpg
+  File:Odin diving for food (2759521398).jpg — Jerry — CC BY 2.0
+  https://commons.wikimedia.org/wiki/File:Odin_diving_for_food_(2759521398).jpg
+img/mom_snow.jpg
+  File:Panthera tigris altaica 13 - Buffalo Zoo.jpg — Dave Pape — Public domain
+  https://commons.wikimedia.org/wiki/File:Panthera_tigris_altaica_13_-_Buffalo_Zoo.jpg
+img/mom_cubs.jpg
+  File:Tiger with cub (Kanha National Park).jpg — Davidvraju — CC BY-SA 4.0
+  https://commons.wikimedia.org/wiki/File:Tiger_with_cub_(Kanha_National_Park).jpg
+img/mom_cubs2.jpg
+  File:Tigress with 3 cubs.jpg — Faizeealinator — CC BY-SA 4.0
+  https://commons.wikimedia.org/wiki/File:Tigress_with_3_cubs.jpg
+img/cub_roar.jpg
+  File:Tiger cub growling.jpg — Aadishbahulikar18 — CC BY-SA 4.0
+  https://commons.wikimedia.org/wiki/File:Tiger_cub_growling.jpg
+img/cub_snow.jpg
+  File:Amur Tiger Panthera tigris altaica Cub Walking 1500px.jpg — Photo by and (C)2007 Derek Ramsey (Ram-Man).  Curves adjustment by Lycaon on 08:30, July 20, 2007. — GFDL 1.2
+  https://commons.wikimedia.org/wiki/File:Amur_Tiger_Panthera_tigris_altaica_Cub_Walking_1500px.jpg
+img/cub_drink.jpg
+  File:Durst (219178875).jpeg — Steven Adler — CC0
+  https://commons.wikimedia.org/wiki/File:Durst_(219178875).jpeg
+img/yawn_big.jpg
+  File:The Powerful Yawn of a Bengal Tiger at Ranthambore national park.jpg — Rohit Sharma — CC BY-SA 4.0
+  https://commons.wikimedia.org/wiki/File:The_Powerful_Yawn_of_a_Bengal_Tiger_at_Ranthambore_national_park.jpg
+img/roar.jpg
+  File:Yawning Tiger1.jpg — Radek Kucharski — CC BY 2.0
+  https://commons.wikimedia.org/wiki/File:Yawning_Tiger1.jpg
+img/white_yawn.jpg
+  File:Close-up view of the head of a white tiger, yawning with the tongue out.jpg — Basile Morin — CC BY-SA 4.0
+  https://commons.wikimedia.org/wiki/File:Close-up_view_of_the_head_of_a_white_tiger,_yawning_with_the_tongue_out.jpg
+img/yawn_tongue.jpg
+  File:Tiger (15574210202).jpg — Rolf Dietrich Brecher from Germany — CC BY 2.0
+  https://commons.wikimedia.org/wiki/File:Tiger_(15574210202).jpg
+img/sleep.jpg
+  File:Amur Tiger (8679986359).jpg — John5199 — CC BY 2.0
+  https://commons.wikimedia.org/wiki/File:Amur_Tiger_(8679986359).jpg
+img/sleep_face.jpg
+  File:Sleeping tiger-2.jpg — Alifeyzullah — CC BY-SA 3.0
+  https://commons.wikimedia.org/wiki/File:Sleeping_tiger-2.jpg
+img/sleep_legs.jpg
+  File:Resting Tiger (8033471345).jpg — Tony Hisgett from Birmingham, UK — CC BY 2.0
+  https://commons.wikimedia.org/wiki/File:Resting_Tiger_(8033471345).jpg
+img/drink.jpg
+  File:Drinking tiger (15437835759).jpg — Mathias Appel — CC0
+  https://commons.wikimedia.org/wiki/File:Drinking_tiger_(15437835759).jpg
+img/walk.jpg
+  File:Bengal tiger in Sanjay Dubri Tiger Reserve December 2024 by Tisha Mukherjee 15.jpg — Tisha Mukherjee — CC BY-SA 4.0
+  https://commons.wikimedia.org/wiki/File:Bengal_tiger_in_Sanjay_Dubri_Tiger_Reserve_December_2024_by_Tisha_Mukherjee_15.jpg
+img/walk_grass.jpg
+  File:Bengal tiger walking on the grass.jpg — Joselodos — CC0
+  https://commons.wikimedia.org/wiki/File:Bengal_tiger_walking_on_the_grass.jpg
+img/run.jpg
+  File:Running Tiger (6887515204).jpg — Charles Barilleaux from Cincinnati, Ohio, United States of America — CC BY 2.0
+  https://commons.wikimedia.org/wiki/File:Running_Tiger_(6887515204).jpg
+img/jump.jpg
+  File:Tiger jumping David RaJU.jpg — Davidvraju — CC BY-SA 4.0
+  https://commons.wikimedia.org/wiki/File:Tiger_jumping_David_RaJU.jpg
+img/cub_jump.jpg
+  File:Siberian Tiger Cub Jumping (30371096284).jpg — Mathias Appel — CC0
+  https://commons.wikimedia.org/wiki/File:Siberian_Tiger_Cub_Jumping_(30371096284).jpg
+img/snow_walk.jpg
+  File:Tiger in the snow at the Detroit Zoo March 2008 pic 2.jpg — MJCdetroit — CC BY 3.0
+  https://commons.wikimedia.org/wiki/File:Tiger_in_the_snow_at_the_Detroit_Zoo_March_2008_pic_2.jpg
+img/snow_come.jpg
+  File:2014-03-01 Tiger Running Through Snow.jpg — Eric Kilby — CC BY-SA 2.0
+  https://commons.wikimedia.org/wiki/File:2014-03-01_Tiger_Running_Through_Snow.jpg
+img/play_cub.jpg
+  File:Two Bengal tigers playing in the grass.jpg — Joselodos — CC0
+  https://commons.wikimedia.org/wiki/File:Two_Bengal_tigers_playing_in_the_grass.jpg
+img/play_white.jpg
+  File:Two white tigers playing in the water at Singapore Zoo.jpg — Basile Morin — CC BY-SA 4.0
+  https://commons.wikimedia.org/wiki/File:Two_white_tigers_playing_in_the_water_at_Singapore_Zoo.jpg
+img/splash.jpg
+  File:Tiger Zoo Vienna.jpg — Alexander Leisser — CC BY-SA 4.0
+  https://commons.wikimedia.org/wiki/File:Tiger_Zoo_Vienna.jpg
+img/walk_path.jpg
+  File:Tiger (India) 3.jpg — Davidvraju — CC BY-SA 4.0
+  https://commons.wikimedia.org/wiki/File:Tiger_(India)_3.jpg
+img/sit_snow.jpg
+  File:Siberian Tiger enjoying snow 10.jpg — albinfo — CC BY-SA 4.0
+  https://commons.wikimedia.org/wiki/File:Siberian_Tiger_enjoying_snow_10.jpg
+img/reeds.jpg
+  File:Tigerwater edit2.jpg — Bob Jagendorf — CC BY 2.0
+  https://commons.wikimedia.org/wiki/File:Tigerwater_edit2.jpg
+img/white_sleep.jpg
+  File:500px photo (188690293).jpeg — Chi King — CC BY 3.0
+  https://commons.wikimedia.org/wiki/File:500px_photo_(188690293).jpeg
+img/lick.jpg
+  File:Rama poking his tongue out (2564375128).jpg — [1] — CC BY 2.0
+  https://commons.wikimedia.org/wiki/File:Rama_poking_his_tongue_out_(2564375128).jpg
+
+sounds/roar.mp3
+  Cắt ~3 giây từ "439280 schots angry-tiger.wav" của schots (Freesound) — CC0 1.0,
+  https://commons.wikimedia.org/wiki/File:439280_schots_angry-tiger.wav
+  Lọc trầm, fade, chuẩn hoá âm lượng bằng ffmpeg. Các tiếng còn lại tự tổng hợp bằng Web Audio.

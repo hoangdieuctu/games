@@ -1,0 +1,1266 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#ff8a00">
+<title>Bé Yêu Hổ · Tiger!</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23ff8a00'/%3E%3Ctext x='16' y='23' text-anchor='middle' font-size='20'%3E🐯%3C/text%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --orange: #ff8a00;
+  --orange-d: #e06c00;
+  --ink: #2b1a0e;
+  --cream: #fff6e5;
+  --green: #2fbf71;
+}
+html, body {
+  width: 100%; height: 100%;
+  font-family: 'Nunito', system-ui, sans-serif;
+  color: var(--ink);
+  background: var(--cream);
+  overflow: hidden;
+  touch-action: manipulation;
+  user-select: none; -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+  position: fixed;
+}
+img { -webkit-user-drag: none; user-select: none; pointer-events: none; }
+button { font-family: inherit; border: none; cursor: pointer; color: inherit; }
+.hidden { display: none !important; }
+
+/* Nền vằn hổ nhạt */
+body::before {
+  content: ''; position: fixed; inset: 0; z-index: -1;
+  background:
+    repeating-linear-gradient(115deg, transparent 0 46px, rgba(255,138,0,.07) 46px 60px, transparent 60px 104px),
+    radial-gradient(ellipse at 50% 0%, #fff 0%, var(--cream) 70%);
+}
+
+.screen {
+  position: fixed; inset: 0;
+  display: flex; flex-direction: column;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
+/* ── Thanh trên ── */
+.bar {
+  flex-shrink: 0; display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px;
+}
+.round-btn {
+  width: 64px; height: 64px; border-radius: 50%;
+  background: #fff; font-size: 32px;
+  box-shadow: 0 4px 0 rgba(0,0,0,.12), 0 6px 16px rgba(0,0,0,.08);
+  display: grid; place-items: center; flex-shrink: 0;
+  transition: transform .12s;
+}
+.round-btn:active { transform: scale(.88); }
+.bar-title {
+  flex: 1; text-align: center; font-size: clamp(22px, 5vw, 34px); font-weight: 900;
+  color: var(--orange-d);
+}
+.stars {
+  min-width: 64px; height: 48px; padding: 0 14px; border-radius: 24px;
+  background: #fff; display: flex; align-items: center; justify-content: center; gap: 4px;
+  font-size: 24px; font-weight: 900; color: #c98a00;
+  box-shadow: 0 3px 0 rgba(0,0,0,.1);
+}
+.stars.bump, .pill-btn.bump { animation: bump .5s; }
+@keyframes bump { 40% { transform: scale(1.4); } }
+
+/* ══════════ Trang chủ ══════════ */
+#s-home { align-items: center; overflow-y: auto; overflow-x: hidden; }
+.home-top { width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 10px 14px 0; }
+.back-link {
+  text-decoration: none; color: var(--ink); font-weight: 800; font-size: 15px;
+  background: rgba(255,255,255,.8); padding: 8px 14px; border-radius: 20px;
+}
+.hero { display: flex; align-items: center; gap: clamp(12px, 4vw, 32px); margin: 6px 0 10px; padding: 0 16px; }
+.hero-face {
+  width: clamp(110px, 26vmin, 190px); aspect-ratio: 1; border-radius: 50%;
+  overflow: hidden; border: 6px solid var(--orange);
+  box-shadow: 0 8px 24px rgba(224,108,0,.35);
+  animation: breathe 2.6s ease-in-out infinite;
+  flex-shrink: 0; cursor: pointer;
+}
+.hero-face img { width: 100%; height: 100%; object-fit: cover; }
+.hero-face.roar { animation: roarShake .6s; }
+@keyframes breathe { 50% { transform: scale(1.05); } }
+@keyframes roarShake {
+  0%,100% { transform: scale(1); }
+  20% { transform: scale(1.18) rotate(-6deg); }
+  40% { transform: scale(1.18) rotate(6deg); }
+  60% { transform: scale(1.12) rotate(-4deg); }
+}
+.word {
+  display: flex; font-size: clamp(54px, 15vmin, 120px); font-weight: 900; line-height: 1;
+  cursor: pointer; letter-spacing: 2px;
+}
+.word span {
+  display: inline-block;
+  color: var(--orange);
+  -webkit-text-stroke: 3px var(--ink);
+  paint-order: stroke fill;
+  text-shadow: 0 6px 0 rgba(43,26,14,.2);
+}
+.word span.jump { animation: letterJump .5s; }
+@keyframes letterJump { 40% { transform: translateY(-30%) scale(1.15); color: #ffd23f; } }
+.hero-sub { font-size: clamp(14px, 3vw, 18px); font-weight: 800; color: #8a5a2b; margin-top: 6px; text-align: center; }
+
+.tiles {
+  width: 100%; max-width: 980px; padding: 6px 14px 24px;
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(min(46%, 280px), 1fr)); gap: 14px;
+}
+.tile {
+  position: relative; aspect-ratio: 4/3; border-radius: 26px; overflow: hidden;
+  box-shadow: 0 6px 0 rgba(0,0,0,.15), 0 10px 22px rgba(0,0,0,.12);
+  transition: transform .12s; background: #ddd;
+}
+.tile:active { transform: scale(.94); }
+.tile img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.tile::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,.65) 0%, rgba(0,0,0,0) 55%);
+}
+.tile-emoji {
+  position: absolute; top: 8px; left: 8px; z-index: 1;
+  width: 54px; height: 54px; border-radius: 50%; background: #fff;
+  display: grid; place-items: center; font-size: 30px;
+  box-shadow: 0 3px 8px rgba(0,0,0,.2);
+}
+.tile-label {
+  position: absolute; left: 12px; right: 12px; bottom: 10px; z-index: 1;
+  color: #fff; text-align: left; line-height: 1.1;
+}
+.tile-label b { display: block; font-size: clamp(20px, 4.4vw, 30px); font-weight: 900; }
+.tile-label small { font-size: clamp(13px, 2.6vw, 17px); font-weight: 800; opacity: .9; }
+.parent-tip {
+  max-width: 900px; margin: 0 16px 28px; padding: 12px 16px; border-radius: 16px;
+  background: rgba(255,255,255,.75); font-weight: 700; font-size: 15px; color: #7a5230; line-height: 1.45;
+}
+
+/* ══════════ Xem hổ ══════════ */
+.album-stage { flex: 1; position: relative; overflow: hidden; margin: 0 10px; border-radius: 28px; background: #000; touch-action: none; }
+.album-bg { position: absolute; inset: -40px; background-size: cover; background-position: center; filter: blur(28px) brightness(.7); }
+.album-img {
+  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain;
+  animation: kenburns 9s ease-in-out infinite alternate;
+}
+.album-img.wiggle { animation: wiggle .6s; }
+@keyframes kenburns { from { transform: scale(1); } to { transform: scale(1.08); } }
+@keyframes wiggle { 25% { transform: scale(1.06) rotate(-2deg); } 75% { transform: scale(1.06) rotate(2deg); } }
+.album-img.in-next { animation: slideInR .45s ease-out; }
+.album-img.in-prev { animation: slideInL .45s ease-out; }
+@keyframes slideInR { from { transform: translateX(40%); opacity: 0; } }
+@keyframes slideInL { from { transform: translateX(-40%); opacity: 0; } }
+.caption {
+  position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%);
+  max-width: calc(100% - 150px); padding: 10px 22px; border-radius: 22px;
+  background: rgba(255,255,255,.94); text-align: center;
+  box-shadow: 0 6px 18px rgba(0,0,0,.25);
+}
+.caption .en { font-size: clamp(22px, 5vw, 38px); font-weight: 900; line-height: 1.15; }
+.caption .en b { color: var(--orange-d); }
+.caption .vi { font-size: clamp(13px, 2.8vw, 18px); font-weight: 800; color: #8a6a4a; }
+.nav-btn {
+  position: absolute; top: 50%; transform: translateY(-50%); z-index: 2;
+  width: 72px; height: 72px; border-radius: 50%; font-size: 38px; font-weight: 900;
+  background: rgba(255,255,255,.88); box-shadow: 0 4px 12px rgba(0,0,0,.3);
+}
+.nav-btn:active { transform: translateY(-50%) scale(.88); }
+.nav-btn.prev { left: 10px; } .nav-btn.next { right: 10px; }
+.big-roar {
+  position: absolute; right: 14px; bottom: 14px; z-index: 2;
+  width: 84px; height: 84px; border-radius: 50%; font-size: 46px;
+  background: var(--orange); box-shadow: 0 5px 0 var(--orange-d), 0 8px 16px rgba(0,0,0,.3);
+}
+.big-roar:active { transform: translateY(4px); box-shadow: 0 1px 0 var(--orange-d); }
+.dots { display: flex; justify-content: center; gap: 6px; padding: 10px 0 12px; flex-wrap: wrap; }
+.dots i { width: 10px; height: 10px; border-radius: 50%; background: rgba(224,108,0,.25); }
+.dots i.on { background: var(--orange); transform: scale(1.3); }
+
+/* ══════════ Ú òa ══════════ */
+.peek-wrap { flex: 1; display: flex; align-items: center; justify-content: center; padding: 6px 12px 16px; }
+.peek-stage {
+  position: relative; width: min(100%, calc((100vh - 120px) * 4 / 3)); aspect-ratio: 4/3;
+  border-radius: 30px; overflow: hidden; touch-action: none; background: #2a5a2a;
+  box-shadow: 0 10px 30px rgba(0,0,0,.25);
+}
+.peek-stage > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.peek-stage.revealed > img { animation: peekPop .8s; }
+@keyframes peekPop { 30% { transform: scale(1.12); } }
+.leaf {
+  position: absolute; border-radius: 50% 50% 46% 54% / 55% 45% 55% 45%;
+  background: radial-gradient(circle at 35% 30%, #7fdc5a 0%, #3fae3a 45%, #23802b 100%);
+  box-shadow: inset -6px -8px 0 rgba(0,0,0,.12), 0 3px 6px rgba(0,0,0,.25);
+  display: grid; place-items: center; font-size: clamp(30px, 7vmin, 60px);
+  transition: transform .5s cubic-bezier(.5,-0.4,.7,1), opacity .5s;
+}
+.leaf.gone { opacity: 0; pointer-events: none; }
+.peek-hint {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); z-index: 5;
+  font-size: clamp(60px, 14vmin, 110px); pointer-events: none;
+  animation: tapHint 1.4s ease-in-out infinite;
+}
+@keyframes tapHint { 50% { transform: translate(-50%,-50%) scale(.8); } }
+.boo {
+  position: absolute; left: 50%; top: 14%; transform: translateX(-50%); z-index: 6;
+  font-size: clamp(36px, 9vmin, 76px); font-weight: 900; color: #fff;
+  -webkit-text-stroke: 3px var(--ink); paint-order: stroke fill; white-space: nowrap;
+  animation: booIn .6s cubic-bezier(.3,1.6,.5,1);
+}
+@keyframes booIn { from { transform: translateX(-50%) scale(0); } }
+
+/* ══════════ Hổ đâu? ══════════ */
+.find-q {
+  text-align: center; font-size: clamp(26px, 6vw, 46px); font-weight: 900; padding: 0 12px;
+}
+.find-q b { color: var(--orange-d); }
+.find-grid {
+  flex: 1; display: grid; gap: 14px; padding: 12px 14px 18px;
+  align-content: center; justify-content: center;
+}
+.find-card {
+  position: relative; border-radius: 26px; overflow: hidden; background: #ddd;
+  box-shadow: 0 6px 0 rgba(0,0,0,.15), 0 10px 22px rgba(0,0,0,.12);
+  transition: transform .25s, opacity .4s, filter .4s;
+}
+.find-card img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.find-card:active { transform: scale(.95); }
+.find-card.shake { animation: shake .5s; }
+@keyframes shake { 20%,60% { transform: translateX(-12px) rotate(-2deg); } 40%,80% { transform: translateX(12px) rotate(2deg); } }
+.find-card.win { transform: scale(1.06); box-shadow: 0 0 0 8px #ffd23f, 0 10px 30px rgba(0,0,0,.25); z-index: 2; }
+.find-card.dim { opacity: .25; filter: grayscale(1); }
+.find-card .name {
+  position: absolute; left: 50%; bottom: 10px; transform: translateX(-50%);
+  background: #fff; padding: 4px 16px; border-radius: 16px; font-size: clamp(18px, 4vw, 28px); font-weight: 900;
+  animation: booIn .4s cubic-bezier(.3,1.6,.5,1);
+}
+
+/* ══════════ Nói Tiger ══════════ */
+.say-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 0 12px 16px; min-height: 0; }
+.say-photo {
+  position: relative; flex: 1; min-height: 0; width: 100%; max-width: 900px;
+  border-radius: 30px; overflow: hidden; background: #000;
+  box-shadow: 0 10px 30px rgba(0,0,0,.25);
+}
+.say-photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: opacity .3s; }
+.say-photo.awake img { animation: wakeZoom .9s cubic-bezier(.3,1.5,.5,1); }
+@keyframes wakeZoom { from { transform: scale(.7); } }
+.zzz { position: absolute; right: 18%; top: 14%; pointer-events: none; }
+.zzz span {
+  position: absolute; font-size: clamp(30px, 7vmin, 56px); font-weight: 900; color: #fff;
+  -webkit-text-stroke: 2px #4a3aa0; paint-order: stroke fill; opacity: 0;
+  animation: zzz 3s ease-in infinite;
+}
+.zzz span:nth-child(2) { animation-delay: 1s; } .zzz span:nth-child(3) { animation-delay: 2s; }
+@keyframes zzz { 0% { opacity: 0; transform: translate(0,0) scale(.6); } 30% { opacity: 1; } 100% { opacity: 0; transform: translate(40px,-90px) scale(1.3); } }
+.say-row { display: flex; align-items: center; gap: 18px; flex-shrink: 0; }
+.mic-btn {
+  position: relative; width: 120px; height: 120px; border-radius: 50%;
+  background: var(--orange); color: #fff; font-size: 56px;
+  box-shadow: 0 6px 0 var(--orange-d), 0 10px 20px rgba(0,0,0,.25);
+}
+.mic-btn:active { transform: translateY(4px); box-shadow: 0 2px 0 var(--orange-d); }
+.mic-btn .ring {
+  position: absolute; inset: -10px; border-radius: 50%; border: 8px solid #ffd23f;
+  transform: scale(var(--lvl, 1)); opacity: .9; pointer-events: none; transition: transform .06s;
+}
+.mic-btn.invite { animation: breathe 1.2s ease-in-out infinite; }
+.mic-btn.listening { animation: listenPulse 1.2s ease-in-out infinite; }
+@keyframes listenPulse { 50% { box-shadow: 0 6px 0 var(--orange-d), 0 0 0 16px rgba(255,138,0,.25); } }
+.say-text { font-size: clamp(22px, 5vw, 38px); font-weight: 900; text-align: center; line-height: 1.15; }
+.say-text b { color: var(--orange-d); }
+.say-text small { display: block; font-size: 15px; color: #8a6a4a; font-weight: 800; }
+.pill-btn {
+  padding: 14px 22px; border-radius: 30px; font-size: 20px; font-weight: 900;
+  background: #fff; box-shadow: 0 4px 0 rgba(0,0,0,.12);
+}
+.pill-btn:active { transform: translateY(3px); box-shadow: none; }
+.pill-btn.go { background: var(--green); color: #fff; box-shadow: 0 5px 0 #1f8f52; font-size: 26px; padding: 16px 32px; animation: breathe 1.4s infinite; }
+
+/* ══════════ Cho hổ ăn ══════════ */
+.feed-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 0 12px 12px; gap: 10px; min-height: 0; }
+.feed-photo { flex: 1; min-height: 0; width: 100%; display: flex; align-items: center; justify-content: center; position: relative; }
+.feed-photo img {
+  max-width: 100%; max-height: 100%; border-radius: 28px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.25);
+}
+.feed-photo img.chomp { animation: chomp .4s; }
+.feed-photo img.nope { animation: shake .5s; }
+@keyframes chomp { 30% { transform: scale(1.06, .94); } 60% { transform: scale(.97, 1.04); } }
+.tummy { display: flex; gap: 8px; font-size: 34px; }
+.tummy i { font-style: normal; filter: grayscale(1) opacity(.3); transition: filter .3s, transform .3s; }
+.tummy i.full { filter: none; transform: scale(1.15); }
+.tray { display: flex; gap: clamp(8px, 2vw, 18px); flex-shrink: 0; flex-wrap: wrap; justify-content: center; }
+.food {
+  width: clamp(76px, 15vmin, 104px); height: clamp(76px, 15vmin, 104px); border-radius: 26px;
+  background: #fff; font-size: clamp(44px, 9vmin, 64px);
+  box-shadow: 0 5px 0 rgba(0,0,0,.12), 0 8px 16px rgba(0,0,0,.08);
+  display: grid; place-items: center;
+}
+.food:active { transform: scale(.9); }
+.food.used { visibility: hidden; }
+.flyer { position: fixed; z-index: 50; pointer-events: none; font-size: clamp(44px, 9vmin, 64px); line-height: 1; }
+
+/* ══════════ Bong bóng ══════════ */
+#s-bubbles { background: linear-gradient(#bfe9ff, #e9fbff 60%, #c8f2c0); }
+.bub-stage { position: absolute; inset: 0; overflow: hidden; touch-action: none; }
+.bubble {
+  position: absolute; left: 0; top: 0; border-radius: 50%; overflow: hidden;
+  box-shadow: inset 0 0 0 5px rgba(255,255,255,.75), 0 6px 18px rgba(0,80,140,.25);
+  will-change: transform;
+}
+.bubble img { width: 100%; height: 100%; object-fit: cover; }
+.bubble::after {
+  content: ''; position: absolute; left: 16%; top: 12%; width: 32%; height: 22%; border-radius: 50%;
+  background: rgba(255,255,255,.65); transform: rotate(-30deg);
+}
+.bubble.gold { box-shadow: inset 0 0 0 7px #ffd23f, 0 0 26px #ffd23f; }
+.pop-ring {
+  position: absolute; border-radius: 50%; border: 6px solid rgba(255,255,255,.9); pointer-events: none;
+  animation: popRing .45s ease-out forwards;
+}
+@keyframes popRing { to { transform: scale(1.7); opacity: 0; } }
+.pop-word {
+  position: absolute; font-size: clamp(30px, 7vmin, 52px); font-weight: 900; color: var(--orange);
+  -webkit-text-stroke: 2px var(--ink); paint-order: stroke fill; pointer-events: none;
+  animation: floatUp .9s ease-out forwards;
+}
+@keyframes floatUp { to { transform: translateY(-80px); opacity: 0; } }
+#s-bubbles .bar { position: relative; z-index: 3; }
+.bub-count {
+  position: absolute; left: 50%; bottom: calc(14px + env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 3;
+  background: rgba(255,255,255,.85); border-radius: 22px; padding: 6px 18px; font-size: 26px; font-weight: 900;
+  pointer-events: none;
+}
+
+/* ── Pháo giấy ── */
+#fx { position: fixed; inset: 0; pointer-events: none; z-index: 100; overflow: hidden; }
+.confetti { position: absolute; font-size: 34px; will-change: transform, opacity; }
+
+@media (prefers-reduced-motion: reduce) {
+  .album-img, .hero-face { animation: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════ Trang chủ ══════════ -->
+<section class="screen" id="s-home">
+  <div class="home-top">
+    <a class="back-link" href="../index.html">← Trò chơi khác</a>
+    <div class="stars"><span>⭐</span><span class="star-n">0</span></div>
+  </div>
+  <div class="hero">
+    <div class="hero-face" id="hero-face"><img src="img/sm/face_young.jpg" alt="Hổ"></div>
+    <div>
+      <div class="word" id="hero-word"><span>T</span><span>i</span><span>g</span><span>e</span><span>r</span></div>
+      <div class="hero-sub">Chạm vào bạn hổ nhé! 🐾</div>
+    </div>
+  </div>
+  <div class="tiles">
+    <button class="tile" data-go="album"><img src="img/sm/swim_ball.jpg" alt=""><span class="tile-emoji">📸</span><span class="tile-label"><b>Xem hổ</b><small>Look at the tiger!</small></span></button>
+    <button class="tile" data-go="peek"><img src="img/sm/reeds.jpg" alt=""><span class="tile-emoji">🌿</span><span class="tile-label"><b>Ú òa!</b><small>Peekaboo, tiger!</small></span></button>
+    <button class="tile" data-go="find"><img src="img/sm/face_close.jpg" alt=""><span class="tile-emoji">🔍</span><span class="tile-label"><b>Hổ đâu?</b><small>Where is the tiger?</small></span></button>
+    <button class="tile" data-go="say"><img src="img/sm/sleep_face.jpg" alt=""><span class="tile-emoji">🎤</span><span class="tile-label"><b>Nói “Tiger”!</b><small>Wake up the tiger!</small></span></button>
+    <button class="tile" data-go="feed"><img src="img/sm/yawn_tongue.jpg" alt=""><span class="tile-emoji">🍖</span><span class="tile-label"><b>Cho hổ ăn</b><small>Yum yum, tiger!</small></span></button>
+    <button class="tile" data-go="bubbles"><img src="img/sm/cub_snow.jpg" alt=""><span class="tile-emoji">🫧</span><span class="tile-label"><b>Bong bóng hổ</b><small>Pop! Tiger!</small></span></button>
+  </div>
+  <div class="parent-tip">
+    💡 <b>Mẹo cho bố mẹ:</b> mỗi lần nghe máy đọc <b>“Tiger!”</b>, bố mẹ nhắc lại chậm “Ti‑ger” và chờ bé nói theo.
+    Ở trò <b>Nói “Tiger”</b>, bé chỉ cần nói to là hổ thức dậy — không cần phát âm chuẩn. Nếu micro không dùng được, bấm nút “Bé nói rồi!”.
+    <br><a href="CREDITS.txt" style="color:inherit;font-size:13px;">Nguồn ảnh &amp; âm thanh</a>
+  </div>
+</section>
+
+<!-- ══════════ Xem hổ ══════════ -->
+<section class="screen hidden" id="s-album">
+  <div class="bar">
+    <button class="round-btn" data-home>🏠</button>
+    <div class="bar-title">Xem hổ</div>
+    <div class="stars"><span>⭐</span><span class="star-n">0</span></div>
+  </div>
+  <div class="album-stage" id="album-stage">
+    <div class="album-bg" id="album-bg"></div>
+    <img class="album-img" id="album-img" alt="">
+    <button class="nav-btn prev" id="album-prev">‹</button>
+    <button class="nav-btn next" id="album-next">›</button>
+    <div class="caption"><div class="en" id="album-en"></div><div class="vi" id="album-vi"></div></div>
+    <button class="big-roar" id="album-roar">🐯</button>
+  </div>
+  <div class="dots" id="album-dots"></div>
+</section>
+
+<!-- ══════════ Ú òa ══════════ -->
+<section class="screen hidden" id="s-peek">
+  <div class="bar">
+    <button class="round-btn" data-home>🏠</button>
+    <div class="bar-title">Ú òa! Hổ trốn ở đâu?</div>
+    <div class="stars"><span>⭐</span><span class="star-n">0</span></div>
+  </div>
+  <div class="peek-wrap"><div class="peek-stage" id="peek-stage"></div></div>
+</section>
+
+<!-- ══════════ Hổ đâu? ══════════ -->
+<section class="screen hidden" id="s-find">
+  <div class="bar">
+    <button class="round-btn" data-home>🏠</button>
+    <div class="bar-title">Hổ đâu?</div>
+    <button class="round-btn" id="find-say">🔊</button>
+  </div>
+  <div class="find-q">Where is the <b>tiger</b>? 🐯</div>
+  <div class="find-grid" id="find-grid"></div>
+</section>
+
+<!-- ══════════ Nói Tiger ══════════ -->
+<section class="screen hidden" id="s-say">
+  <div class="bar">
+    <button class="round-btn" data-home>🏠</button>
+    <div class="bar-title">Gọi hổ dậy!</div>
+    <div class="stars"><span>⭐</span><span class="star-n">0</span></div>
+  </div>
+  <div class="say-wrap">
+    <div class="say-photo" id="say-photo">
+      <img id="say-img" alt="">
+      <div class="zzz" id="say-zzz"><span>Z</span><span>z</span><span>z</span></div>
+    </div>
+    <div class="say-text" id="say-text"></div>
+    <div class="say-row">
+      <button class="mic-btn" id="say-mic"><span class="ring"></span>🎤</button>
+      <button class="pill-btn" id="say-manual">👆 Bé nói rồi!</button>
+      <button class="pill-btn go hidden" id="say-next">▶ Lại nào!</button>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ Cho hổ ăn ══════════ -->
+<section class="screen hidden" id="s-feed">
+  <div class="bar">
+    <button class="round-btn" data-home>🏠</button>
+    <div class="bar-title">Cho hổ ăn</div>
+    <div class="stars"><span>⭐</span><span class="star-n">0</span></div>
+  </div>
+  <div class="feed-wrap">
+    <div class="feed-photo"><img id="feed-img" alt=""></div>
+    <div class="tummy" id="feed-tummy"></div>
+    <div class="tray" id="feed-tray"></div>
+    <button class="pill-btn go hidden" id="feed-next">▶ Lại nào!</button>
+  </div>
+</section>
+
+<!-- ══════════ Bong bóng ══════════ -->
+<section class="screen hidden" id="s-bubbles">
+  <div class="bub-stage" id="bub-stage"></div>
+  <div class="bar">
+    <button class="round-btn" data-home>🏠</button>
+    <div class="bar-title">Bong bóng hổ</div>
+    <div class="stars"><span>⭐</span><span class="star-n">0</span></div>
+  </div>
+  <div class="bub-count" id="bub-count">🫧 0</div>
+</section>
+
+<div id="fx"></div>
+
+<script>
+'use strict';
+
+/* ══════════ Dữ liệu ảnh ══════════ */
+const IMG = (n) => `img/${n}.jpg`;
+const SM  = (n) => `img/sm/${n}.jpg`;
+
+// Câu nói ngắn cho từng ảnh — luôn có chữ "tiger" để bé nghe lặp lại.
+const ALBUM = [
+  ['face_big',      'Hello, tiger!',                    'Xin chào bạn hổ!'],
+  ['cub_snow',      'Baby tiger! Walk, walk!',          'Hổ con đi trên tuyết'],
+  ['mom_cubs',      'Mommy tiger and baby tiger.',      'Hổ mẹ và hổ con'],
+  ['swim',          'Tiger can swim! Splash!',          'Hổ biết bơi đó!'],
+  ['swim_ball',     'Tiger plays with a ball!',         'Hổ chơi bóng'],
+  ['white_lying',   'White tiger!',                     'Hổ trắng'],
+  ['yawn_big',      'Big yawn! Aaah, tiger!',           'Hổ ngáp to quá'],
+  ['sleep_face',    'Sleepy tiger. Shhh!',              'Hổ đang ngủ, suỵt!'],
+  ['run',           'Tiger runs! Fast, fast!',          'Hổ chạy nhanh'],
+  ['jump',          'Tiger jumps! Wheee!',              'Hổ nhảy xa'],
+  ['drink',         'Tiger drinks water. Lap, lap!',    'Hổ uống nước'],
+  ['snow_walk',     'Tiger in the snow. Brrr!',         'Hổ đi trong tuyết'],
+  ['roar',          'Tiger says ROAR!',                 'Hổ gầm: Gừm!'],
+  ['mom_snow',      'Mommy tiger loves baby tiger.',    'Hổ mẹ thương hổ con'],
+  ['swim_under',    'White tiger swims under water!',   'Hổ trắng lặn dưới nước'],
+  ['sleep_legs',    'Silly tiger. Legs up!',            'Hổ ngủ giơ chân'],
+  ['play_cub',      'Tigers play together.',            'Hổ mẹ chơi với hổ con'],
+  ['cub_drink',     'Baby tiger drinks water.',         'Hổ con uống nước'],
+  ['splash',        'Splash! Tiger plays in the water.','Hổ nghịch nước'],
+  ['face_young',    'Look at the tiger’s eyes!',        'Mắt hổ đây nè'],
+  ['white_standing','Big white tiger!',                 'Hổ trắng to'],
+  ['cub_jump',      'Baby tiger jumps!',                'Hổ con nhảy'],
+  ['walk_path',     'Tiger walks to you!',              'Hổ đi tới chỗ bé'],
+  ['lick',          'Tiger licks. Slurp!',              'Hổ thè lưỡi'],
+  ['reeds',         'Tiger in the grass.',              'Hổ trốn trong cỏ'],
+  ['white_water',   'White tiger in the water.',        'Hổ trắng ngâm nước'],
+  ['face_close',    'Tiger’s nose! Boop!',              'Mũi hổ nè'],
+  ['mom_cubs2',     'Mommy tiger and three babies!',    'Hổ mẹ và ba hổ con'],
+  ['play_white',    'Two white tigers play!',           'Hai hổ trắng chơi đùa'],
+  ['sit_snow',      'Tiger sits in the snow.',          'Hổ ngồi trên tuyết'],
+];
+
+const PEEK_PHOTOS = ['face_big', 'face_young', 'face_close', 'white_lying', 'walk_path', 'sit_snow',
+  'reeds', 'mom_cubs', 'cub_snow', 'white_standing', 'swim', 'swim_ball', 'cub_roar', 'play_cub'];
+
+const FIND_TIGERS = ['face_big', 'face_young', 'face_close', 'white_lying', 'cub_snow', 'walk_grass',
+  'white_standing', 'snow_come', 'swim', 'cub_roar', 'walk_path', 'mom_cubs'];
+const FIND_OTHERS = [
+  ['cat', 'a cat', 'Meow!'], ['dog', 'a dog', 'Woof woof!'], ['elephant', 'an elephant', ''],
+  ['giraffe', 'a giraffe', ''], ['zebra', 'a zebra', ''], ['monkey', 'a monkey', 'Ooh ooh!'],
+  ['cow', 'a cow', 'Moo!'], ['duck', 'a duck', 'Quack!'], ['rabbit', 'a bunny', ''],
+  ['giant_panda', 'a panda', ''], ['horse', 'a horse', 'Neigh!'], ['sheep', 'a sheep', 'Baa!'],
+  ['chicken', 'a chicken', 'Cluck cluck!'], ['frog', 'a frog', 'Ribbit!'], ['penguin', 'a penguin', ''],
+  ['bear', 'a bear', ''],
+];
+
+// Hổ ngủ → hổ thức (ảnh há miệng).
+const SAY_PAIRS = [['sleep', 'yawn_big'], ['sleep_face', 'roar'], ['white_sleep', 'white_yawn'], ['sleep_legs', 'cub_roar']];
+
+// Ảnh hổ há miệng + toạ độ miệng (tỉ lệ theo ảnh) để thức ăn bay vào.
+const FEED_MOUTHS = [
+  { img: 'yawn_tongue', x: .48, y: .56 },
+  { img: 'yawn_big',    x: .52, y: .58 },
+  { img: 'cub_roar',    x: .52, y: .47 },
+  { img: 'white_yawn',  x: .52, y: .66 },
+];
+const MEATS = ['🍖', '🍗', '🥩', '🐟'];
+const NOT_MEAT = [['🥦', 'broccoli'], ['🍌', 'banana'], ['🥕', 'carrot'], ['🍦', 'ice cream']];
+const FEED_GOAL = 5;
+
+const BUBBLE_PHOTOS = ['face_big', 'face_young', 'face_close', 'white_lying', 'cub_snow', 'cub_roar',
+  'yawn_tongue', 'white_yawn', 'snow_come', 'walk_path', 'white_standing', 'mom_cubs', 'swim', 'lick'];
+
+/* ══════════ Tiện ích ══════════ */
+const $ = (s) => document.querySelector(s);
+const rand = (a) => a[Math.floor(Math.random() * a.length)];
+const shuffle = (a) => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+const highlight = (t) => t.replace(/(tigers?)/gi, '<b>$1</b>');
+function retrigger(el, cls) { el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); }
+// Lấy phần tử tiếp theo trong danh sách xáo trộn, hết thì xáo lại (tránh lặp ảnh liền nhau).
+function deck(list) {
+  let pool = [];
+  return () => { if (!pool.length) pool = shuffle(list); return pool.pop(); };
+}
+
+/* ══════════ Âm thanh (Web Audio) ══════════ */
+const Sfx = {
+  ctx: null,
+  roarSrc: 'sounds/roar.mp3',
+  roarOk: true,
+
+  unlock() {
+    if (!this.ctx) {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (AC) this.ctx = new AC();
+    }
+    if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume();
+  },
+
+  env(node, t0, a, d, peak) {
+    node.gain.setValueAtTime(0.0001, t0);
+    node.gain.exponentialRampToValueAtTime(peak, t0 + a);
+    node.gain.exponentialRampToValueAtTime(0.0001, t0 + a + d);
+  },
+
+  tone(freq, dur, type = 'sine', peak = .3, delay = 0, slideTo) {
+    const c = this.ctx; if (!c) return;
+    const t = c.currentTime + delay;
+    const o = c.createOscillator(), g = c.createGain();
+    o.type = type; o.frequency.setValueAtTime(freq, t);
+    if (slideTo) o.frequency.exponentialRampToValueAtTime(slideTo, t + dur);
+    this.env(g, t, .01, dur, peak);
+    o.connect(g).connect(c.destination);
+    o.start(t); o.stop(t + dur + .05);
+  },
+
+  noise(dur, filterType, freq, peak = .3, delay = 0, q = 1) {
+    const c = this.ctx; if (!c) return;
+    const t = c.currentTime + delay;
+    const buf = c.createBuffer(1, Math.ceil(c.sampleRate * dur), c.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    const s = c.createBufferSource(); s.buffer = buf;
+    const f = c.createBiquadFilter(); f.type = filterType; f.frequency.value = freq; f.Q.value = q;
+    const g = c.createGain(); this.env(g, t, .005, dur, peak);
+    s.connect(f).connect(g).connect(c.destination);
+    s.start(t);
+  },
+
+  pop()    { this.tone(900, .12, 'sine', .35, 0, 220); this.noise(.05, 'highpass', 2500, .2); },
+  rustle() { this.noise(.28, 'bandpass', 3200, .25, 0, .8); this.noise(.2, 'bandpass', 1800, .15, .06, .8); },
+  chomp()  { this.noise(.09, 'lowpass', 900, .5); this.noise(.09, 'lowpass', 700, .45, .16); },
+  boing()  { this.tone(300, .35, 'sine', .3, 0, 120); this.tone(180, .3, 'triangle', .15, .05, 360); },
+  chime()  { [523, 659, 784, 1047].forEach((f, i) => this.tone(f, .35, 'triangle', .22, i * .09)); },
+
+  // Tiếng gầm: ưu tiên tệp ghi âm thật; nếu không có thì tự tổng hợp.
+  roar(vol = .8) {
+    if (this.roarOk) {
+      const a = new Audio(this.roarSrc);
+      a.volume = Math.min(1, vol * .8);
+      a.play().catch(() => { this.roarOk = false; this.synthRoar(vol); });
+      a.onerror = () => { this.roarOk = false; };
+      return;
+    }
+    this.synthRoar(vol);
+  },
+
+  synthRoar(vol) {
+    const c = this.ctx; if (!c) return;
+    const t = c.currentTime, dur = 1.1;
+    const o = c.createOscillator(); o.type = 'sawtooth';
+    o.frequency.setValueAtTime(70, t); o.frequency.linearRampToValueAtTime(130, t + .25); o.frequency.linearRampToValueAtTime(60, t + dur);
+    const lfo = c.createOscillator(), lg = c.createGain(); lfo.frequency.value = 28; lg.gain.value = 25;
+    lfo.connect(lg).connect(o.frequency);
+    const f = c.createBiquadFilter(); f.type = 'lowpass'; f.frequency.setValueAtTime(500, t); f.frequency.linearRampToValueAtTime(1300, t + .25); f.frequency.linearRampToValueAtTime(350, t + dur);
+    const g = c.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(.5 * vol, t + .12); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(f).connect(g).connect(c.destination);
+    o.start(t); lfo.start(t); o.stop(t + dur); lfo.stop(t + dur);
+    this.noise(dur * .9, 'bandpass', 600, .25 * vol, 0, .6);
+  },
+};
+
+/* ══════════ Giọng đọc tiếng Anh ══════════ */
+const Speech = {
+  voice: null, supported: 'speechSynthesis' in window, busyUntil: 0, token: 0,
+
+  load() {
+    if (!this.supported) return;
+    const vs = speechSynthesis.getVoices();
+    if (!vs.length) return;
+    // Cùng thứ tự chọn giọng với game 100 Động Vật (animals.html).
+    this.voice =
+      vs.find((v) => /^google us english/i.test(v.name)) ||
+      vs.find((v) => /^google/i.test(v.name) && /^en/i.test(v.lang)) ||
+      vs.find((v) => /^en[-_]US/i.test(v.lang)) ||
+      vs.find((v) => /^en[-_]GB/i.test(v.lang)) ||
+      vs.find((v) => /^en/i.test(v.lang)) || null;
+  },
+
+  say(text, { onEnd } = {}) {
+    if (!this.supported) { if (onEnd) setTimeout(onEnd, 300); return; }
+    if (!this.voice) this.load();
+    try { speechSynthesis.cancel(); } catch (e) {}
+    // Câu bị ngắt (do câu mới chen vào) không được gọi onEnd của nó.
+    const my = ++this.token;
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = this.voice ? this.voice.lang : 'en-US';
+    if (this.voice) u.voice = this.voice;
+    u.rate = 0.92; u.pitch = 1.05; u.volume = 1;
+    let done = false;
+    const finish = () => {
+      if (done) return; done = true;
+      if (my !== this.token) return;
+      this.busyUntil = 0;
+      if (onEnd) onEnd();
+    };
+    u.onend = u.onerror = finish;
+    this.busyUntil = Date.now() + 900 + text.length * 90;
+    try { speechSynthesis.resume(); } catch (e) {}
+    speechSynthesis.speak(u);
+    // Một số trình duyệt không bắn onend — tự kết thúc khi đã đủ lâu.
+    setTimeout(finish, 1500 + text.length * 110);
+  },
+
+  get speaking() { return Date.now() < this.busyUntil; },
+  cancel() { this.token++; this.busyUntil = 0; if (this.supported) try { speechSynthesis.cancel(); } catch (e) {} },
+};
+if (Speech.supported) {
+  Speech.load();
+  speechSynthesis.onvoiceschanged = () => Speech.load();
+  setTimeout(() => Speech.load(), 500);
+}
+
+/* ══════════ Sao thưởng ══════════ */
+let stars = 0;
+try { stars = parseInt(localStorage.getItem('tiger_stars') || '0', 10) || 0; } catch (e) {}
+function renderStars(bump) {
+  document.querySelectorAll('.star-n').forEach((el) => { el.textContent = stars; });
+  if (bump) document.querySelectorAll('.stars').forEach((el) => retrigger(el, 'bump'));
+}
+function addStar() {
+  stars++;
+  try { localStorage.setItem('tiger_stars', String(stars)); } catch (e) {}
+  renderStars(true);
+}
+renderStars();
+
+/* ══════════ Pháo giấy ══════════ */
+const fx = $('#fx');
+function burst(x, y, n = 18, chars = ['🐯', '⭐', '🧡', '✨', '🎉']) {
+  for (let i = 0; i < n; i++) {
+    const el = document.createElement('div');
+    el.className = 'confetti';
+    el.textContent = rand(chars);
+    el.style.left = x + 'px'; el.style.top = y + 'px';
+    fx.appendChild(el);
+    const ang = Math.random() * Math.PI * 2, dist = 120 + Math.random() * 220;
+    const dx = Math.cos(ang) * dist, dy = Math.sin(ang) * dist - 120;
+    el.animate([
+      { transform: 'translate(-50%,-50%) scale(.4) rotate(0deg)', opacity: 1 },
+      { transform: `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) scale(1.2) rotate(${Math.random() * 540 - 270}deg)`, opacity: 1, offset: .6 },
+      { transform: `translate(calc(-50% + ${dx * 1.1}px), calc(-50% + ${dy + 260}px)) scale(1) rotate(${Math.random() * 720 - 360}deg)`, opacity: 0 },
+    ], { duration: 1300 + Math.random() * 500, easing: 'cubic-bezier(.2,.7,.4,1)' }).onfinish = () => el.remove();
+  }
+}
+function burstAt(el, n, chars) {
+  const r = el.getBoundingClientRect();
+  burst(r.left + r.width / 2, r.top + r.height / 2, n, chars);
+}
+
+/* ══════════ Điều hướng màn hình ══════════ */
+const screens = {};
+let current = null;
+function go(name) {
+  if (current && screens[current].leave) screens[current].leave();
+  Speech.cancel();
+  document.querySelectorAll('.screen').forEach((s) => s.classList.add('hidden'));
+  $('#s-' + name).classList.remove('hidden');
+  current = name;
+  if (screens[name].enter) screens[name].enter();
+}
+
+// Mở khoá âm thanh ở cú chạm đầu tiên (iOS yêu cầu).
+document.addEventListener('pointerdown', () => Sfx.unlock(), { capture: true });
+document.querySelectorAll('[data-home]').forEach((b) => b.addEventListener('click', () => go('home')));
+document.querySelectorAll('[data-go]').forEach((b) => b.addEventListener('click', () => go(b.dataset.go)));
+// Không cho menu chuột phải / nhấn giữ hiện lên khi bé bấm lâu.
+document.addEventListener('contextmenu', (e) => e.preventDefault());
+
+/* ══════════ Trang chủ ══════════ */
+function heroRoar() {
+  Sfx.unlock();
+  retrigger($('#hero-face'), 'roar');
+  Speech.say('Tiger!', { onEnd: () => Sfx.roar(.6) });
+  [...$('#hero-word').children].forEach((s, i) => setTimeout(() => retrigger(s, 'jump'), i * 90));
+}
+$('#hero-face').addEventListener('click', heroRoar);
+$('#hero-word').addEventListener('click', heroRoar);
+screens.home = {};
+
+/* ══════════ Xem hổ ══════════ */
+const album = {
+  i: 0,
+  enter() { this.dotsBuilt || this.buildDots(); this.show(0, null); },
+  buildDots() {
+    $('#album-dots').innerHTML = ALBUM.map(() => '<i></i>').join('');
+    this.dotsBuilt = true;
+  },
+  show(i, dir) {
+    this.i = (i + ALBUM.length) % ALBUM.length;
+    const [img, en, vi] = ALBUM[this.i];
+    const el = $('#album-img');
+    el.src = IMG(img);
+    $('#album-bg').style.backgroundImage = `url(${SM(img)})`;
+    if (dir) retrigger(el, dir > 0 ? 'in-next' : 'in-prev');
+    else el.className = 'album-img';
+    $('#album-en').innerHTML = highlight(en);
+    $('#album-vi').textContent = vi;
+    [...$('#album-dots').children].forEach((d, k) => d.classList.toggle('on', k === this.i));
+    Speech.say(en);
+    // Tải trước ảnh kế tiếp cho mượt.
+    new Image().src = IMG(ALBUM[(this.i + 1) % ALBUM.length][0]);
+  },
+  tap() {
+    const el = $('#album-img');
+    el.className = 'album-img'; retrigger(el, 'wiggle');
+    Speech.say(ALBUM[this.i][1]);
+    burstAt(el, 8, ['🧡', '✨', '🐾']);
+  },
+};
+screens.album = album;
+$('#album-prev').addEventListener('click', (e) => { e.stopPropagation(); album.show(album.i - 1, -1); });
+$('#album-next').addEventListener('click', (e) => { e.stopPropagation(); album.show(album.i + 1, 1); });
+$('#album-roar').addEventListener('click', (e) => {
+  e.stopPropagation();
+  Sfx.roar(.8);
+  burstAt(e.currentTarget, 10, ['🐯', '💥', '✨']);
+});
+(() => {
+  // Vuốt trái/phải để đổi ảnh, chạm để nghe lại.
+  const st = $('#album-stage');
+  let sx = null, sy = 0;
+  st.addEventListener('pointerdown', (e) => { if (e.target.closest('button')) return; sx = e.clientX; sy = e.clientY; });
+  st.addEventListener('pointerup', (e) => {
+    if (sx === null) return;
+    const dx = e.clientX - sx, dy = e.clientY - sy; sx = null;
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) album.show(album.i + (dx < 0 ? 1 : -1), dx < 0 ? 1 : -1);
+    else album.tap();
+  });
+})();
+
+/* ══════════ Ú òa ══════════ */
+const peek = {
+  next: deck(PEEK_PHOTOS),
+  enter() { this.round(true); },
+  leave() { clearTimeout(this.timer); },
+  round(first) {
+    clearTimeout(this.timer);
+    const st = $('#peek-stage');
+    st.className = 'peek-stage';
+    const photo = this.next();
+    st.innerHTML = `<img src="${IMG(photo)}" alt="">`;
+    // Lưới lá to, chồng mép lên nhau để che kín ảnh.
+    const cols = 5, rows = 4;
+    this.left = cols * rows; this.done = false;
+    const leaves = ['🌿', '🍃', '🌱', '🍀', ''];
+    for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
+      const lf = document.createElement('div');
+      lf.className = 'leaf';
+      const w = 100 / cols, h = 100 / rows;
+      lf.style.left = (c * w - w * .3) + '%'; lf.style.top = (r * h - h * .3) + '%';
+      lf.style.width = (w * 1.6) + '%'; lf.style.height = (h * 1.6) + '%';
+      lf.style.transform = `rotate(${Math.random() * 60 - 30}deg)`;
+      lf.style.filter = `hue-rotate(${Math.random() * 40 - 20}deg) brightness(${.9 + Math.random() * .25})`;
+      lf.textContent = rand(leaves);
+      st.appendChild(lf);
+    }
+    const hint = document.createElement('div');
+    hint.className = 'peek-hint'; hint.textContent = '👆';
+    st.appendChild(hint);
+    Speech.say(first ? 'Where is the tiger? Peekaboo!' : 'Where is the tiger?');
+    new Image().src = IMG(PEEK_PHOTOS[0]);
+  },
+  clear(lf) {
+    if (!lf || lf.classList.contains('gone') || this.done) return;
+    const hint = $('#peek-stage .peek-hint'); if (hint) hint.remove();
+    lf.classList.add('gone');
+    const ang = Math.random() * 360;
+    lf.style.transform = `translate(${Math.cos(ang) * 120}%, ${Math.sin(ang) * 120 - 60}%) rotate(${Math.random() * 360}deg) scale(.6)`;
+    Sfx.rustle();
+    this.left--;
+    if (this.left <= 4) this.reveal();
+  },
+  reveal() {
+    this.done = true;
+    const st = $('#peek-stage');
+    st.querySelectorAll('.leaf:not(.gone)').forEach((lf) => {
+      lf.classList.add('gone'); lf.style.transform = 'translateY(-140%) rotate(200deg)';
+    });
+    st.classList.add('revealed');
+    const boo = document.createElement('div');
+    boo.className = 'boo'; boo.textContent = 'Peekaboo! 🐯';
+    st.appendChild(boo);
+    Sfx.chime();
+    Speech.say('Peekaboo! Tiger!', { onEnd: () => Sfx.roar(.6) });
+    burstAt(st, 22);
+    addStar();
+    this.timer = setTimeout(() => { this.waitingNext = true; }, 1600);
+  },
+};
+screens.peek = peek;
+(() => {
+  const st = $('#peek-stage');
+  let down = false;
+  const hit = (e) => {
+    const el = document.elementFromPoint(e.clientX, e.clientY);
+    if (el && el.classList.contains('leaf')) peek.clear(el);
+  };
+  st.addEventListener('pointerdown', (e) => {
+    if (peek.done) {
+      if (peek.waitingNext) { peek.waitingNext = false; peek.round(false); }
+      return;
+    }
+    down = true; hit(e);
+  });
+  // Vuốt qua lá cũng gạt lá đi — bé 2 tuổi rất thích "lau" màn hình.
+  st.addEventListener('pointermove', (e) => { if (down) hit(e); });
+  window.addEventListener('pointerup', () => { down = false; });
+  window.addEventListener('pointercancel', () => { down = false; });
+})();
+
+/* ══════════ Hổ đâu? ══════════ */
+const find = {
+  n: 0,
+  nextTiger: deck(FIND_TIGERS),
+  nextOther: deck(FIND_OTHERS),
+  enter() { this.n = 0; this.round(); },
+  leave() { clearTimeout(this.timer); },
+  round() {
+    clearTimeout(this.timer);
+    this.locked = false;
+    this.n++;
+    const count = this.n <= 3 ? 2 : this.n <= 7 ? 3 : 4;
+    const others = [];
+    while (others.length < count - 1) {
+      const o = this.nextOther();
+      if (!others.includes(o)) others.push(o);
+    }
+    const cards = shuffle([{ tiger: true, img: IMG(this.nextTiger()) }, ...others.map((o) => ({ img: `img/others/${o[0]}.jpg`, o }))]);
+    const g = $('#find-grid');
+    const land = innerWidth > innerHeight;
+    const cols = count === 2 ? (land ? 2 : 1) : count === 3 ? (land ? 3 : 2) : 2;
+    const rows = Math.ceil(count / cols);
+    const availW = innerWidth - 28 - (cols - 1) * 14, availH = innerHeight - 190 - (rows - 1) * 14;
+    const size = Math.max(120, Math.min(availW / cols, availH / rows, 420));
+    g.style.gridTemplateColumns = `repeat(${cols}, ${size}px)`;
+    g.style.gridAutoRows = `${size}px`;
+    g.innerHTML = '';
+    cards.forEach((c) => {
+      const b = document.createElement('button');
+      b.className = 'find-card';
+      b.innerHTML = `<img src="${c.img}" alt="">`;
+      b.addEventListener('click', () => this.pick(b, c));
+      g.appendChild(b);
+    });
+    this.ask();
+  },
+  ask() { Speech.say('Where is the tiger?'); },
+  pick(b, c) {
+    if (this.locked) return;
+    if (c.tiger) {
+      this.locked = true;
+      b.classList.add('win');
+      document.querySelectorAll('.find-card').forEach((x) => { if (x !== b) x.classList.add('dim'); });
+      b.insertAdjacentHTML('beforeend', '<span class="name">Tiger! 🐯</span>');
+      Sfx.chime();
+      Speech.say('Yes! Tiger!', { onEnd: () => Sfx.roar(.55) });
+      burstAt(b, 20);
+      addStar();
+      this.timer = setTimeout(() => this.round(), 3200);
+    } else {
+      retrigger(b, 'shake');
+      Sfx.boing();
+      if (!b.querySelector('.name')) b.insertAdjacentHTML('beforeend', `<span class="name">${c.o[1].replace(/^an? /, '')}</span>`);
+      Speech.say(`That's ${c.o[1]}! ${c.o[2]} Where is the tiger?`);
+    }
+  },
+};
+screens.find = find;
+$('#find-say').addEventListener('click', () => find.ask());
+addEventListener('resize', () => { if (current === 'find' && !find.locked) { find.n--; find.round(); } });
+
+/* ══════════ Nói "Tiger" — đánh thức hổ ══════════ */
+// Micro chỉ bật trong lúc chờ bé nói. Trên iOS, khi micro đang mở thì loa bị nhỏ đi,
+// nên máy đọc câu nhắc xong mới bật micro, và tắt micro ngay khi hổ thức dậy.
+const say = {
+  next: deck(SAY_PAIRS),
+  stream: null, analyser: null, raf: 0,
+  wantMic: false,
+  state: 'idle', // idle | prompt | listen | awake
+  enter() { this.newRound(); },
+  leave() { this.stopMic(); clearTimeout(this.timer); this.state = 'idle'; },
+
+  newRound() {
+    clearTimeout(this.timer);
+    this.pair = this.next();
+    $('#say-img').src = IMG(this.pair[0]);
+    $('#say-photo').classList.remove('awake');
+    $('#say-zzz').classList.remove('hidden');
+    $('#say-next').classList.add('hidden');
+    $('#say-mic').classList.remove('hidden');
+    $('#say-manual').classList.remove('hidden');
+    this.setText();
+    new Image().src = IMG(this.pair[1]);
+    this.prompt();
+  },
+
+  setText() {
+    $('#say-text').innerHTML = this.wantMic
+      ? 'Shhh… hổ đang ngủ.<br>Bé gọi to: “<b>Tiger!</b>” 🎤'
+      : 'Shhh… hổ đang ngủ.<br>Bấm 🎤 rồi gọi: “<b>Tiger!</b>”';
+  },
+
+  prompt() {
+    this.state = 'prompt';
+    this.stopMic();
+    const mic = $('#say-mic');
+    mic.classList.remove('listening', 'invite');
+    Speech.say('Shhh. Tiger is sleeping. Say: Tiger!', {
+      onEnd: () => { this.timer = setTimeout(() => this.listen(), 350); },
+    });
+  },
+
+  async listen() {
+    if (current !== 'say' || this.state !== 'prompt') return;
+    if (!this.wantMic) {
+      // Chưa bật micro → mời bé bấm nút micro (hoặc bố mẹ bấm "Bé nói rồi!").
+      this.state = 'idle';
+      $('#say-mic').classList.add('invite');
+      return;
+    }
+    const ok = await this.micOn();
+    if (current !== 'say' || this.state !== 'prompt') { this.stopMic(); return; }
+    if (!ok) {
+      this.wantMic = false;
+      this.state = 'idle';
+      $('#say-text').innerHTML = 'Không mở được micro 😢<br><small>Bé nói “Tiger!” rồi bố mẹ bấm “Bé nói rồi!” nhé.</small>';
+      retrigger($('#say-manual'), 'bump');
+      return;
+    }
+    this.state = 'listen';
+    this.loud = 0;
+    this.baseline = null; this.calib = [];
+    $('#say-mic').classList.add('listening');
+  },
+
+  async micOn() {
+    if (this.stream) return true;
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return false;
+    try {
+      Sfx.unlock();
+      this.stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: false, autoGainControl: true } });
+      const src = Sfx.ctx.createMediaStreamSource(this.stream);
+      this.analyser = Sfx.ctx.createAnalyser();
+      this.analyser.fftSize = 1024;
+      src.connect(this.analyser);
+      this.buf = new Float32Array(this.analyser.fftSize);
+      cancelAnimationFrame(this.raf);
+      this.loop();
+      return true;
+    } catch (e) {
+      this.stopMic();
+      return false;
+    }
+  },
+
+  stopMic() {
+    cancelAnimationFrame(this.raf);
+    if (this.stream) this.stream.getTracks().forEach((t) => t.stop());
+    this.stream = null; this.analyser = null;
+    $('#say-mic').style.setProperty('--lvl', 1);
+  },
+
+  loop() {
+    this.raf = requestAnimationFrame(() => this.loop());
+    if (!this.analyser) return;
+    this.analyser.getFloatTimeDomainData(this.buf);
+    let sum = 0;
+    for (let i = 0; i < this.buf.length; i++) sum += this.buf[i] * this.buf[i];
+    const rms = Math.sqrt(sum / this.buf.length);
+    $('#say-mic').style.setProperty('--lvl', (1 + Math.min(rms * 8, .9)).toFixed(3));
+    if (this.state !== 'listen') return;
+    // Đo tiếng ồn nền ~0,4 giây đầu, rồi đặt ngưỡng cao hơn nền.
+    if (this.calib.length < 24) { this.calib.push(rms); return; }
+    if (this.baseline === null) {
+      this.baseline = this.calib.reduce((a, b) => a + b, 0) / this.calib.length;
+      this.thr = Math.max(.045, this.baseline * 3);
+    }
+    if (rms > this.thr) { if (++this.loud >= 5) this.wake(); }
+    else this.loud = Math.max(0, this.loud - 1);
+  },
+
+  wake() {
+    if (this.state === 'awake') return;
+    this.state = 'awake';
+    clearTimeout(this.timer);
+    Speech.cancel();
+    this.stopMic();
+    $('#say-mic').classList.remove('listening', 'invite');
+    $('#say-zzz').classList.add('hidden');
+    $('#say-img').src = IMG(this.pair[1]);
+    retrigger($('#say-photo'), 'awake');
+    Sfx.roar(.75);
+    burstAt($('#say-photo'), 26);
+    addStar();
+    $('#say-text').innerHTML = 'Hổ thức dậy rồi! <b>TIGER!</b> 🎉';
+    this.timer = setTimeout(() => {
+      Speech.say('Yes! Tiger! Good job!');
+      $('#say-mic').classList.add('hidden');
+      $('#say-manual').classList.add('hidden');
+      $('#say-next').classList.remove('hidden');
+    }, 1300);
+  },
+};
+screens.say = say;
+$('#say-mic').addEventListener('click', () => {
+  Sfx.unlock();
+  if (say.state === 'awake' || say.state === 'listen') return;
+  say.wantMic = true;
+  say.setText();
+  say.prompt();
+});
+$('#say-manual').addEventListener('click', () => { if (say.state !== 'awake') say.wake(); });
+$('#say-next').addEventListener('click', () => say.newRound());
+$('#say-photo').addEventListener('click', () => { if (say.state === 'idle') say.prompt(); });
+
+/* ══════════ Cho hổ ăn ══════════ */
+const feed = {
+  nextMouth: deck(FEED_MOUTHS),
+  enter() { this.round(); },
+  leave() { clearTimeout(this.timer); },
+  round() {
+    clearTimeout(this.timer);
+    this.mouth = this.nextMouth();
+    this.fed = 0; this.done = false;
+    $('#feed-img').src = IMG(this.mouth.img);
+    $('#feed-next').classList.add('hidden');
+    $('#feed-tray').classList.remove('hidden');
+    $('#feed-tummy').innerHTML = Array.from({ length: FEED_GOAL }, () => '<i>🍖</i>').join('');
+    const tray = $('#feed-tray');
+    tray.innerHTML = '';
+    for (let i = 0; i < 5; i++) tray.appendChild(this.makeFood(i === 2));
+    Speech.say('Tiger is hungry! Feed the tiger!');
+  },
+  makeFood(notMeat) {
+    const b = document.createElement('button');
+    b.className = 'food';
+    const item = notMeat ? rand(NOT_MEAT) : [rand(MEATS), 'meat'];
+    b.textContent = item[0];
+    b.dataset.meat = notMeat ? '' : '1';
+    b.dataset.name = item[1];
+    b.addEventListener('click', () => this.throw(b));
+    return b;
+  },
+  throw(b) {
+    if (this.done || b.classList.contains('used')) return;
+    const img = $('#feed-img');
+    const ir = img.getBoundingClientRect(), br = b.getBoundingClientRect();
+    const tx = ir.left + ir.width * this.mouth.x, ty = ir.top + ir.height * this.mouth.y;
+    const fly = document.createElement('div');
+    fly.className = 'flyer'; fly.textContent = b.textContent;
+    const sx = br.left + br.width / 2, sy = br.top + br.height / 2;
+    fly.style.left = sx + 'px'; fly.style.top = sy + 'px';
+    document.body.appendChild(fly);
+    b.classList.add('used');
+    const meat = !!b.dataset.meat;
+    const dx = tx - sx, dy = ty - sy;
+    Sfx.tone(500, .25, 'sine', .15, 0, 900);
+    fly.animate([
+      { transform: 'translate(-50%,-50%) scale(1) rotate(0)' },
+      { transform: `translate(calc(-50% + ${dx * .5}px), calc(-50% + ${dy * .5 - 120}px)) scale(1.3) rotate(180deg)`, offset: .5 },
+      { transform: `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) scale(${meat ? .3 : 1}) rotate(360deg)` },
+    ], { duration: 650, easing: 'ease-in-out', fill: 'forwards' }).onfinish = () => {
+      if (meat) {
+        fly.remove();
+        this.eat(tx, ty);
+      } else {
+        // Hổ không ăn rau/quả: lắc đầu, món ăn bật ra ngoài.
+        retrigger(img, 'nope');
+        Sfx.boing();
+        Speech.say(`No, no! Tiger doesn't eat ${b.dataset.name}! Tiger eats meat!`);
+        fly.animate([
+          { transform: `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) rotate(0)` },
+          { transform: `translate(calc(-50% + ${dx + (Math.random() < .5 ? -1 : 1) * 400}px), calc(-50% + ${dy - 200}px)) rotate(720deg)`, opacity: 0 },
+        ], { duration: 800, easing: 'ease-out', fill: 'forwards' }).onfinish = () => fly.remove();
+      }
+      // Bày món mới vào khay để bé chơi tiếp không bị hết.
+      if (!this.done) {
+        setTimeout(() => {
+          if (this.done) return;
+          const nb = this.makeFood(Math.random() < .25);
+          b.replaceWith(nb);
+          nb.animate([{ transform: 'scale(0)' }, { transform: 'scale(1)' }], { duration: 300, easing: 'cubic-bezier(.3,1.6,.5,1)' });
+        }, 500);
+      }
+    };
+  },
+  eat(x, y) {
+    const img = $('#feed-img');
+    retrigger(img, 'chomp');
+    Sfx.chomp();
+    burst(x, y, 6, ['😋', '🧡', '✨']);
+    this.fed++;
+    const t = $('#feed-tummy').children[this.fed - 1];
+    if (t) t.classList.add('full');
+    if (this.fed >= FEED_GOAL) return this.full();
+    const lines = ['Yum yum!', 'Tiger likes meat!', 'Chomp chomp!', 'More, please!', 'Yummy, tiger!'];
+    Speech.say(lines[(this.fed - 1) % lines.length]);
+  },
+  full() {
+    this.done = true;
+    $('#feed-tray').classList.add('hidden');
+    Sfx.chime();
+    Speech.say('Tiger is full! Thank you! Night night, tiger.');
+    burstAt($('#feed-img'), 24);
+    addStar();
+    this.timer = setTimeout(() => {
+      $('#feed-img').src = IMG(rand(['sleep', 'sleep_face', 'sleep_legs', 'white_sleep']));
+      $('#feed-next').classList.remove('hidden');
+    }, 1600);
+  },
+};
+screens.feed = feed;
+$('#feed-next').addEventListener('click', () => feed.round());
+
+/* ══════════ Bong bóng hổ ══════════ */
+const bubbles = {
+  list: [], pops: 0, last: 0,
+  nextPhoto: deck(BUBBLE_PHOTOS),
+  enter() {
+    this.pops = 0; this.updateCount();
+    $('#bub-stage').innerHTML = ''; this.list = [];
+    this.spawnT = 0; this.last = performance.now();
+    cancelAnimationFrame(this.raf);
+    this.raf = requestAnimationFrame((t) => this.tick(t));
+    Speech.say('Pop the tiger bubbles!');
+  },
+  leave() { cancelAnimationFrame(this.raf); $('#bub-stage').innerHTML = ''; this.list = []; },
+  updateCount() { $('#bub-count').textContent = '🐯 ' + this.pops; },
+  spawn(gold) {
+    const st = $('#bub-stage');
+    const W = st.clientWidth, H = st.clientHeight;
+    const size = gold ? Math.min(W, H) * .34 : Math.min(W, H) * (.18 + Math.random() * .1);
+    const el = document.createElement('div');
+    el.className = 'bubble' + (gold ? ' gold' : '');
+    el.style.width = el.style.height = size + 'px';
+    el.innerHTML = `<img src="${SM(this.nextPhoto())}" alt="">`;
+    const b = { el, size, gold, x: Math.random() * (W - size), y: H + 10, vy: (gold ? 55 : 70 + Math.random() * 50), phase: Math.random() * 6, amp: 20 + Math.random() * 30, dead: false };
+    b.baseX = b.x;
+    el.addEventListener('pointerdown', (e) => { e.preventDefault(); this.pop(b); });
+    st.appendChild(el);
+    this.list.push(b);
+  },
+  tick(t) {
+    this.raf = requestAnimationFrame((tt) => this.tick(tt));
+    const dt = Math.min(.05, (t - this.last) / 1000); this.last = t;
+    this.spawnT -= dt;
+    if (this.spawnT <= 0 && this.list.length < 7) {
+      // Mỗi 10 bóng vỡ thì thả một bóng vàng to.
+      const gold = this.pops > 0 && this.pops % 10 === 0 && !this.list.some((b) => b.gold) && this.lastGold !== this.pops;
+      if (gold) this.lastGold = this.pops;
+      this.spawn(gold);
+      this.spawnT = .7 + Math.random() * .6;
+    }
+    for (const b of this.list) {
+      b.y -= b.vy * dt; b.phase += dt * 1.6;
+      b.x = b.baseX + Math.sin(b.phase) * b.amp;
+      b.el.style.transform = `translate(${b.x}px, ${b.y}px)`;
+      if (b.y < -b.size - 20) { b.dead = true; b.el.remove(); }
+    }
+    this.list = this.list.filter((b) => !b.dead);
+  },
+  pop(b) {
+    if (b.dead) return;
+    b.dead = true;
+    const st = $('#bub-stage');
+    const cx = b.x + b.size / 2, cy = b.y + b.size / 2;
+    const ring = document.createElement('div');
+    ring.className = 'pop-ring';
+    Object.assign(ring.style, { left: b.x + 'px', top: b.y + 'px', width: b.size + 'px', height: b.size + 'px' });
+    st.appendChild(ring); setTimeout(() => ring.remove(), 500);
+    const w = document.createElement('div');
+    w.className = 'pop-word'; w.textContent = b.gold ? 'ROAR!' : 'Tiger!';
+    w.style.left = (cx - 60) + 'px'; w.style.top = (cy - 30) + 'px';
+    st.appendChild(w); setTimeout(() => w.remove(), 950);
+    b.el.remove();
+    Sfx.pop();
+    this.pops++; this.updateCount();
+    const sr = st.getBoundingClientRect();
+    if (b.gold) {
+      Sfx.roar(.7);
+      burst(sr.left + cx, sr.top + cy, 26);
+      addStar();
+      Speech.say('Roar! Big tiger!');
+    } else {
+      burst(sr.left + cx, sr.top + cy, 5, ['✨', '💧', '🫧']);
+      // Đọc "Tiger!" sau mỗi lần nổ, nhưng không chen ngang khi đang đọc dở.
+      if (!Speech.speaking) Speech.say(this.pops % 5 === 0 ? `${this.pops} tigers!` : 'Tiger!');
+    }
+  },
+};
+screens.bubbles = bubbles;
+
+go('home');
+</script>
+</body>
+</html>
