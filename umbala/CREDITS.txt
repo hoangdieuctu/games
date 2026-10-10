@@ -1,0 +1,194 @@
+Nguồn ảnh dùng trong Úm Ba La (umbala/index.html).
+Ảnh đồ vật, xe cộ, trái cây, đồ ăn, thiên nhiên lấy từ Wikimedia Commons / Wikipedia,
+đã thu nhỏ và nén lại; giữ nguyên giấy phép gốc.
+Ảnh con vật thu nhỏ từ ../animals-img/ (dùng chung với game 100 Động Vật).
+
+img/airplane.jpg
+  File:United A320 N405UA at BOS (33787222465).jpg — G B_NZ — CC BY-SA 2.0
+  https://commons.wikimedia.org/wiki/File:United_A320_N405UA_at_BOS_(33787222465).jpg
+img/ambulance.jpg
+  File:Stockholm, ambulans, 2014, 21.jpg — AleWi — CC BY-SA 4.0
+  https://commons.wikimedia.org/wiki/File:Stockholm,_ambulans,_2014,_21.jpg
+img/apple.jpg
+  File:Pink lady and cross section.jpg — fir0002  flagstaffotos [at] gmail.com 		Canon 20D + Sigma 150mm f/2.8 — GFDL 1.2
+  https://commons.wikimedia.org/wiki/File:Pink_lady_and_cross_section.jpg
+img/ball.jpg
+  File:BeachBall.jpg — User Norvy on en.wikipedia — Copyrighted free use
+  https://commons.wikimedia.org/wiki/File:BeachBall.jpg
+img/balloon.jpg
+  File:InflatableBalloons.jpg — Complete fanatic — Public domain
+  https://commons.wikimedia.org/wiki/File:InflatableBalloons.jpg
+img/banana.jpg
+  File:DFC 4184 Bunches of ripe bananas neatly arranged at a bustling market stall ready for shoppers.jpg — PattayaPatrol — CC BY-SA 4.0
+  https://commons.wikimedia.org/wiki/File:DFC_4184_Bunches_of_ripe_bananas_neatly_arranged_at_a_bustling_market_stall_ready_for_shoppers.jpg
+img/bed.jpg
+  File:44 Made bed with richly decorated pillows and ornate bedspread.jpg — Marek Ślusarczyk (Tupungato) Photo portfolio — CC BY 3.0
+  https://commons.wikimedia.org/wiki/File:44_Made_bed_with_richly_decorated_pillows_and_ornate_bedspread.jpg
+img/bicycle.jpg
+  File:Left side of Flying Pigeon.jpg — 齐健 from Peking, People's Republic of China — CC BY 2.0
+  https://commons.wikimedia.org/wiki/File:Left_side_of_Flying_Pigeon.jpg
+img/boat.jpg
+  File:Herons on a small boat in guliakhali sea beach 19-01-2019.jpg — Shahidul Hasan Roman — CC BY-SA 4.0
+  https://commons.wikimedia.org/wiki/File:Herons_on_a_small_boat_in_guliakhali_sea_beach_19-01-2019.jpg
+img/bread.jpg
+  File:Korb mit Brötchen.JPG — 3268zauber — CC BY-SA 3.0
+  https://commons.wikimedia.org/wiki/File:Korb_mit_Br%C3%B6tchen.JPG
+img/broccoli.jpg
+  File:Broccoli and cross section edit.jpg — Fir0002 — GFDL 1.2
+  https://commons.wikimedia.org/wiki/File:Broccoli_and_cross_section_edit.jpg
+img/bus.jpg
+  File:LTZ1328-19-20241030-160332.jpg — SIA321 — CC BY-SA 4.0
+  https://commons.wikimedia.org/wiki/File:LTZ1328-19-20241030-160332.jpg
+img/cake.jpg
+  File:Tim Tams and Nuts on a Birthday Cake With Candles during her Anniversary.jpg — Brassluff — CC0
+  https://commons.wikimedia.org/wiki/File:Tim_Tams_and_Nuts_on_a_Birthday_Cake_With_Candles_during_her_Anniversary.jpg
+img/car.jpg
+  File:'95 BMW 3-Series Hatchback (Toronto Spring '12 Classic Car Auction).JPG — Bull-Doser at English Wikipedia — Public domain
+  https://commons.wikimedia.org/wiki/File:%2795_BMW_3-Series_Hatchback_(Toronto_Spring_%2712_Classic_Car_Auction).JPG
+img/carrot.jpg
+  File:Vegetable-Carrot-Bundle-wStalks.jpg — Evan-Amos — Public domain
+  https://commons.wikimedia.org/wiki/File:Vegetable-Carrot-Bundle-wStalks.jpg
+img/chair.jpg
+  File:Objectes de la Sala Secà i Muntanya (26584791563).jpg — Museu Valencià d'Etnologia from València, España — CC BY-SA 2.0
+  https://commons.wikimedia.org/wiki/File:Objectes_de_la_Sala_Sec%C3%A0_i_Muntanya_(26584791563).jpg
+img/cherry.jpg
+  File:Cherry season (48216568227).jpg — spurekar — CC BY 2.0
+  https://commons.wikimedia.org/wiki/File:Cherry_season_(48216568227).jpg
+img/clock.jpg
+  File:Classic alarm clock 20180513.jpg — Santeri Viinamäki — CC BY-SA 4.0
+  https://commons.wikimedia.org/wiki/File:Classic_alarm_clock_20180513.jpg
+img/cloud.jpg
+  File:GoldenMedows.jpg — PiccoloNamek — CC BY-SA 3.0
+  https://commons.wikimedia.org/wiki/File:GoldenMedows.jpg
+img/coconut.jpg
+  File:Coconut 4.jpg — HRajib — CC BY-SA 3.0
+  https://commons.wikimedia.org/wiki/File:Coconut_4.jpg
+img/cookie.jpg
+  File:2ChocolateChipCookies.jpg — Jonathunder — GFDL 1.2
+  https://commons.wikimedia.org/wiki/File:2ChocolateChipCookies.jpg
+img/corn.jpg
+  File:Yellow Corn on the Cob (35115370841).jpg — Willis Lam — CC BY-SA 2.0
+  https://commons.wikimedia.org/wiki/File:Yellow_Corn_on_the_Cob_(35115370841).jpg
+img/cup.jpg
+  File:Mug of Tea.JPG — Factorylad — Public domain
+  https://commons.wikimedia.org/wiki/File:Mug_of_Tea.JPG
+img/dragon_fruit.jpg
+  File:Pitaya cross section ed2.jpg — SMasters — CC BY-SA 3.0
+  https://commons.wikimedia.org/wiki/File:Pitaya_cross_section_ed2.jpg
+img/duck_toy.jpg
+  File:Rubber duckies So many ducks.jpg — gaetanlee — CC BY 2.0
+  https://commons.wikimedia.org/wiki/File:Rubber_duckies_So_many_ducks.jpg
+img/egg.jpg
+  File:Huevo frito.jpg — Horacio Cambeiro — CC BY-SA 4.0
+  https://commons.wikimedia.org/wiki/File:Huevo_frito.jpg
+img/excavator.jpg
+  File:Excavator Postiguet Beach 2.jpg — kallerna — CC BY-SA 4.0
+  https://commons.wikimedia.org/wiki/File:Excavator_Postiguet_Beach_2.jpg
+img/fire_truck.jpg
+  File:Dublin Fire Brigade Pump Ladder D32.jpg — William Murphy — CC BY-SA 2.0
+  https://commons.wikimedia.org/wiki/File:Dublin_Fire_Brigade_Pump_Ladder_D32.jpg
+img/flower.jpg
+  File:Sunflower sky backdrop.jpg — Fir0002 — GFDL 1.2
+  https://commons.wikimedia.org/wiki/File:Sunflower_sky_backdrop.jpg
+img/grapes.jpg
+  File:Grapes, Rostov-on-Don, Russia.jpg — Vyacheslav Argenberg — CC BY 4.0
+  https://commons.wikimedia.org/wiki/File:Grapes,_Rostov-on-Don,_Russia.jpg
+img/hat.jpg
+  File:Young Woman in Sun Hat.jpg — Daniel Atun (Becerra Photographer) — CC BY 2.0
+  https://commons.wikimedia.org/wiki/File:Young_Woman_in_Sun_Hat.jpg
+img/helicopter.jpg
+  File:VH-SUF Taking Off.jpg — Fly45yt — CC BY 4.0
+  https://commons.wikimedia.org/wiki/File:VH-SUF_Taking_Off.jpg
+img/ice_cream.jpg
+  File:Vanilla Ice Cream Cone at Camp Manitoulin.jpg — Steven Depolo — CC BY 2.0
+  https://commons.wikimedia.org/wiki/File:Vanilla_Ice_Cream_Cone_at_Camp_Manitoulin.jpg
+img/leaf.jpg
+  File:Lisc lipy.jpg — Krzysztof P. Jasiutowicz — CC BY-SA 3.0
+  https://commons.wikimedia.org/wiki/File:Lisc_lipy.jpg
+img/mango.jpg
+  File:Mangos - single and halved.jpg — Ivar Leidus — CC BY-SA 4.0
+  https://commons.wikimedia.org/wiki/File:Mangos_-_single_and_halved.jpg
+img/milk.jpg
+  File:Glass of Milk (33657535532).jpg — NIAID — CC BY 2.0
+  https://commons.wikimedia.org/wiki/File:Glass_of_Milk_(33657535532).jpg
+img/moon.jpg
+  File:FullMoon2010.jpg — Gregory H. Revera — CC BY-SA 3.0
+  https://commons.wikimedia.org/wiki/File:FullMoon2010.jpg
+img/motorbike.jpg
+  File:Honda Wave 125 S 2007.jpg — Khaosaming — CC BY-SA 3.0
+  https://commons.wikimedia.org/wiki/File:Honda_Wave_125_S_2007.jpg
+img/mountain.jpg
+  File:Everest North Face toward Base Camp Tibet Luca Galuzzi 2006.jpg — Luca Galuzzi (Lucag) — CC BY-SA 2.5
+  https://commons.wikimedia.org/wiki/File:Everest_North_Face_toward_Base_Camp_Tibet_Luca_Galuzzi_2006.jpg
+img/orange.jpg
+  File:Oranges - whole-halved-segment.jpg — Ivar Leidus — CC BY-SA 4.0
+  https://commons.wikimedia.org/wiki/File:Oranges_-_whole-halved-segment.jpg
+img/papaya.jpg
+  File:Papaya half.jpg — OKJaguar — CC BY-SA 4.0
+  https://commons.wikimedia.org/wiki/File:Papaya_half.jpg
+img/pho.jpg
+  File:Bowl of Meatball pho.jpg — SerraKnightz — CC BY 4.0
+  https://commons.wikimedia.org/wiki/File:Bowl_of_Meatball_pho.jpg
+img/pineapple.jpg
+  File:കൈതച്ചക്ക.jpg — Suniltg at Malayalam Wikipedia — CC BY 3.0
+  https://commons.wikimedia.org/wiki/File:%E0%B4%95%E0%B5%88%E0%B4%A4%E0%B4%9A%E0%B5%8D%E0%B4%9A%E0%B4%95%E0%B5%8D%E0%B4%95.jpg
+img/police_car.jpg
+  File:Washington DC Metropolitan Police Department Dodge Charger No. 1605.jpg — Raymond Wambsgans — CC BY 2.0
+  https://commons.wikimedia.org/wiki/File:Washington_DC_Metropolitan_Police_Department_Dodge_Charger_No._1605.jpg
+img/pumpkin.jpg
+  File:FrenchMarketPumpkinsB.jpg — Infrogmation of New Orleans — CC BY-SA 3.0
+  https://commons.wikimedia.org/wiki/File:FrenchMarketPumpkinsB.jpg
+img/rainbow.jpg
+  File:Double-alaskan-rainbow.jpg — Eric Rolph at English Wikipedia — CC BY-SA 2.5
+  https://commons.wikimedia.org/wiki/File:Double-alaskan-rainbow.jpg
+img/rice.jpg
+  File:Meshi 001.jpg — Ocdp — CC0
+  https://commons.wikimedia.org/wiki/File:Meshi_001.jpg
+img/rocket.jpg
+  File:Soyuz TMA-9 launch.jpg — Bill Ingalls — Public domain
+  https://commons.wikimedia.org/wiki/File:Soyuz_TMA-9_launch.jpg
+img/sea.jpg
+  File:Beach at Fort Lauderdale.jpg — Daniel Dudek — CC BY 2.0
+  https://commons.wikimedia.org/wiki/File:Beach_at_Fort_Lauderdale.jpg
+img/shoes.jpg
+  File:Air Jordan 1 Banned.jpg — HI 622 — CC BY-SA 4.0
+  https://commons.wikimedia.org/wiki/File:Air_Jordan_1_Banned.jpg
+img/snow.jpg
+  File:Snowman in Indiana 2014.jpg — GutMaze — CC BY-SA 3.0
+  https://commons.wikimedia.org/wiki/File:Snowman_in_Indiana_2014.jpg
+img/spoon.jpg
+  File:Soup Spoon.jpg — Donovan Govan. — CC BY-SA 3.0
+  https://commons.wikimedia.org/wiki/File:Soup_Spoon.jpg
+img/star.jpg
+  File:Asterias rubens.jpg — Hans Hillewaert — CC BY-SA 4.0
+  https://commons.wikimedia.org/wiki/File:Asterias_rubens.jpg
+img/strawberry.jpg
+  File:Garden strawberry (Fragaria × ananassa) single2.jpg — Ivar Leidus — CC BY-SA 4.0
+  https://commons.wikimedia.org/wiki/File:Garden_strawberry_(Fragaria_%C3%97_ananassa)_single2.jpg
+img/teddy.jpg
+  File:Teddy bear early 1900s - Smithsonian Museum of Natural History.jpg — Smithsonian Museum of Natural History — CC BY-SA 2.0
+  https://commons.wikimedia.org/wiki/File:Teddy_bear_early_1900s_-_Smithsonian_Museum_of_Natural_History.jpg
+img/tomato.jpg
+  File:Tomato je.jpg — Softeis — CC BY-SA 3.0
+  https://commons.wikimedia.org/wiki/File:Tomato_je.jpg
+img/toothbrush.jpg
+  File:Toothbrush 20050716 004.jpg — Jonas Bergsten — Public domain
+  https://commons.wikimedia.org/wiki/File:Toothbrush_20050716_004.jpg
+img/tractor.jpg
+  File:Ford 8N.jpg — Mulad — CC BY 2.0
+  https://commons.wikimedia.org/wiki/File:Ford_8N.jpg
+img/train.jpg
+  File:Поезд на фоне горы Шатрище. Воронежская область.jpg — Алексей Задонский — CC BY-SA 4.0
+  https://commons.wikimedia.org/wiki/File:%D0%9F%D0%BE%D0%B5%D0%B7%D0%B4_%D0%BD%D0%B0_%D1%84%D0%BE%D0%BD%D0%B5_%D0%B3%D0%BE%D1%80%D1%8B_%D0%A8%D0%B0%D1%82%D1%80%D0%B8%D1%89%D0%B5._%D0%92%D0%BE%D1%80%D0%BE%D0%BD%D0%B5%D0%B6%D1%81%D0%BA%D0%B0%D1%8F_%D0%BE%D0%B1%D0%BB%D0%B0%D1%81%D1%82%D1%8C.jpg
+img/tree.jpg
+  File:Usamljeni jasen - panoramio (cropped).jpg — menergo — CC BY-SA 3.0
+  https://commons.wikimedia.org/wiki/File:Usamljeni_jasen_-_panoramio_(cropped).jpg
+img/truck.jpg
+  File:2001 Ford F-250 Super Duty XL regular cab flatbed, front left, 05-17-2025.jpg — MercurySable99 — CC BY-SA 4.0
+  https://commons.wikimedia.org/wiki/File:2001_Ford_F-250_Super_Duty_XL_regular_cab_flatbed,_front_left,_05-17-2025.jpg
+img/umbrella.jpg
+  File:Colorful umbrellas over the Szinva Bridge 01.jpg — Szalax — CC0
+  https://commons.wikimedia.org/wiki/File:Colorful_umbrellas_over_the_Szinva_Bridge_01.jpg
+img/watermelon.jpg
+  File:Watermelon.jpg — USDA photo by Scott Bauer — Public domain
+  https://commons.wikimedia.org/wiki/File:Watermelon.jpg

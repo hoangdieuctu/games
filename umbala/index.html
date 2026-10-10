@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#5b2a9e">
+<title>Úm Ba La!</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%235b2a9e'/%3E%3Ctext x='16' y='23' text-anchor='middle' font-size='20'%3E🎩%3C/text%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --purple: #5b2a9e;
+  --purple-d: #3d1872;
+  --gold: #ffd23f;
+  --pink: #ff5fa2;
+  --ink: #2a1840;
+}
+html, body {
+  width: 100%; height: 100%;
+  font-family: 'Nunito', system-ui, sans-serif;
+  color: var(--ink);
+  background: #f6efff;
+  overflow: hidden;
+  touch-action: manipulation;
+  user-select: none; -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+  position: fixed;
+}
+img { -webkit-user-drag: none; user-select: none; pointer-events: none; }
+button { font-family: inherit; border: none; cursor: pointer; color: inherit; }
+.hidden { display: none !important; }
+
+.screen {
+  position: fixed; inset: 0;
+  display: flex; flex-direction: column;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
+/* ══════════ Trang chủ ══════════ */
+#s-home {
+  align-items: center; overflow-y: auto; overflow-x: hidden;
+  background:
+    radial-gradient(circle at 15% 20%, rgba(255,210,63,.35) 0 2px, transparent 3px) 0 0 / 60px 60px,
+    radial-gradient(circle at 70% 60%, rgba(255,95,162,.3) 0 2px, transparent 3px) 0 0 / 80px 80px,
+    linear-gradient(#efe4ff, #fff6fb);
+}
+.home-top { width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 10px 14px 0; gap: 8px; }
+.back-link {
+  text-decoration: none; color: var(--ink); font-weight: 800; font-size: 15px;
+  background: rgba(255,255,255,.85); padding: 8px 14px; border-radius: 20px; white-space: nowrap;
+}
+.title {
+  display: flex; align-items: center; gap: 12px; margin: 10px 0 2px; cursor: pointer;
+}
+.title .hat { font-size: clamp(64px, 15vmin, 110px); animation: hatBob 2.4s ease-in-out infinite; }
+@keyframes hatBob { 50% { transform: translateY(-8px) rotate(-6deg); } }
+.title h1 {
+  font-size: clamp(46px, 11vmin, 92px); font-weight: 900; line-height: 1;
+  color: var(--gold); -webkit-text-stroke: 3px var(--purple-d); paint-order: stroke fill;
+  text-shadow: 0 6px 0 rgba(61,24,114,.25);
+}
+.subtitle { font-size: clamp(15px, 3vw, 19px); font-weight: 800; color: #7b5aa6; text-align: center; padding: 0 16px; }
+.cats {
+  width: 100%; max-width: 980px; padding: 14px 14px 18px;
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(min(46%, 220px), 1fr)); gap: 14px;
+}
+.cat {
+  position: relative; aspect-ratio: 1; border-radius: 28px; overflow: hidden; background: #ddd;
+  box-shadow: 0 6px 0 rgba(0,0,0,.15), 0 10px 22px rgba(0,0,0,.12);
+  transition: transform .12s;
+}
+.cat:active { transform: scale(.94); }
+.cat img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.cat::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,.65), transparent 55%); }
+.cat .emo {
+  position: absolute; top: 8px; left: 8px; z-index: 1; width: 52px; height: 52px; border-radius: 50%;
+  background: #fff; display: grid; place-items: center; font-size: 30px; box-shadow: 0 3px 8px rgba(0,0,0,.2);
+}
+.cat .lbl { position: absolute; left: 12px; right: 12px; bottom: 10px; z-index: 1; color: #fff; text-align: left; line-height: 1.1; }
+.cat .lbl b { display: block; font-size: clamp(20px, 4.4vw, 28px); font-weight: 900; }
+.cat .lbl small { font-size: 14px; font-weight: 800; opacity: .9; }
+.cat.all { background: linear-gradient(135deg, var(--purple), var(--pink)); }
+.cat.all::after { display: none; }
+.cat.all .big { position: absolute; inset: 0; display: grid; place-items: center; font-size: clamp(70px, 16vmin, 110px); padding-bottom: 30px; }
+.parent-tip {
+  max-width: 900px; margin: 0 16px 28px; padding: 12px 16px; border-radius: 16px;
+  background: rgba(255,255,255,.8); font-weight: 700; font-size: 15px; color: #5e4680; line-height: 1.45;
+}
+.parent-tip a { color: inherit; font-size: 13px; }
+
+/* ══════════ Màn ảo thuật ══════════ */
+#s-play {
+  background: radial-gradient(ellipse at 50% 35%, #7b3fc4 0%, #3d1872 60%, #22093f 100%);
+  color: #fff;
+}
+.stars-bg { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.stars-bg i {
+  position: absolute; width: 4px; height: 4px; border-radius: 50%; background: #fff;
+  animation: twinkle 2s ease-in-out infinite;
+}
+@keyframes twinkle { 50% { opacity: .15; transform: scale(.5); } }
+.bar { position: relative; z-index: 3; flex-shrink: 0; display: flex; align-items: center; gap: 10px; padding: 10px 12px; }
+.round-btn {
+  width: 64px; height: 64px; border-radius: 50%; background: #fff; font-size: 32px; color: var(--ink);
+  box-shadow: 0 4px 0 rgba(0,0,0,.25); display: grid; place-items: center; flex-shrink: 0;
+  transition: transform .12s;
+}
+.round-btn:active { transform: scale(.88); }
+.round-btn.on { background: var(--gold); }
+.round-btn.listening { animation: listenPulse 1.1s ease-in-out infinite; }
+@keyframes listenPulse { 50% { box-shadow: 0 4px 0 rgba(0,0,0,.25), 0 0 0 14px rgba(255,210,63,.35); } }
+.bar-title { flex: 1; text-align: center; font-size: clamp(20px, 4.6vw, 30px); font-weight: 900; color: var(--gold); }
+.count { min-width: 64px; padding: 8px 12px; border-radius: 22px; background: rgba(255,255,255,.18); font-weight: 900; font-size: 18px; text-align: center; }
+
+.stage { position: relative; flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; }
+.waiting {
+  position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 0 14px 8px; cursor: pointer;
+}
+/* Khung ảnh gợi ý (mờ hoặc nhìn trộm một góc) sau chiếc mũ */
+.hint {
+  position: relative; width: min(88vw, 72vh, 720px); aspect-ratio: 4 / 3; flex-shrink: 1; min-height: 0;
+  border-radius: 28px; overflow: hidden; background: #2a1050;
+  border: 6px dashed rgba(255,210,63,.85);
+  box-shadow: 0 0 40px rgba(255,210,63,.35);
+}
+.hint img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.hint.blur img { filter: blur(28px) saturate(1.3); transform: scale(1.15); transition: filter 12s linear; }
+.hint.blur.clearing img { filter: blur(9px) saturate(1.2); }
+.hint.peek img { transition: transform 12s ease-out; }
+.hint .q {
+  position: absolute; right: 12px; top: 6px; font-size: clamp(44px, 10vmin, 80px); font-weight: 900; color: #fff;
+  -webkit-text-stroke: 3px var(--purple-d); paint-order: stroke fill; animation: qBob 1.4s ease-in-out infinite;
+}
+@keyframes qBob { 50% { transform: translateY(-6px) rotate(10deg); } }
+.hint.go { animation: hintGo .4s ease-in forwards; }
+@keyframes hintGo { to { transform: scale(.85); opacity: 0; } }
+.box-wrap { position: relative; margin-top: calc(-1 * clamp(40px, 10vmin, 80px)); z-index: 2; flex-shrink: 0; }
+.box {
+  font-size: clamp(96px, 23vmin, 190px); line-height: 1; cursor: pointer;
+  filter: drop-shadow(0 16px 20px rgba(0,0,0,.45));
+}
+.box.cast { animation: boxShake .18s linear infinite; }
+@keyframes boxShake {
+  0%, 100% { transform: rotate(0); }
+  25% { transform: translateX(-3%) rotate(-8deg); }
+  75% { transform: translateX(3%) rotate(8deg); }
+}
+.box.poof { animation: boxPoof .45s ease-in forwards; }
+@keyframes boxPoof { to { transform: scale(1.6); opacity: 0; } }
+.wand {
+  position: absolute; right: -30%; top: -20%; font-size: clamp(50px, 12vmin, 100px); pointer-events: none;
+  transform-origin: 20% 80%; opacity: 0;
+}
+.wand.wave { opacity: 1; animation: wave .4s ease-in-out infinite alternate; }
+@keyframes wave { from { transform: rotate(-30deg); } to { transform: rotate(25deg); } }
+.tap-hint {
+  flex-shrink: 0; margin-top: 4px;
+  font-size: clamp(22px, 5vw, 34px); font-weight: 900; color: var(--gold); white-space: nowrap;
+  text-shadow: 0 3px 0 rgba(0,0,0,.35); pointer-events: none;
+  animation: hintPulse 1.2s ease-in-out infinite;
+}
+@keyframes hintPulse { 50% { transform: scale(1.08); } }
+
+.reveal {
+  position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 12px; padding: 0 14px 12px;
+}
+.photo {
+  position: relative; max-width: min(92vw, 900px); flex: 0 1 auto; min-height: 0;
+  border-radius: 30px; overflow: hidden; background: #fff;
+  border: 8px solid #fff; box-shadow: 0 0 0 6px var(--gold), 0 20px 50px rgba(0,0,0,.5);
+  animation: photoIn .8s cubic-bezier(.25,1.5,.5,1);
+  cursor: pointer;
+}
+.photo img { display: block; max-width: 100%; max-height: calc(100vh - 290px); max-height: calc(100dvh - 290px); object-fit: contain; }
+.photo.wiggle { animation: wiggle .6s; }
+@keyframes photoIn { from { transform: scale(0) rotate(-20deg); opacity: 0; } }
+@keyframes wiggle { 25% { transform: scale(1.04) rotate(-2deg); } 75% { transform: scale(1.04) rotate(2deg); } }
+.name {
+  background: #fff; color: var(--ink); border-radius: 26px; padding: 8px 26px; text-align: center;
+  box-shadow: 0 6px 0 rgba(0,0,0,.25); cursor: pointer;
+  animation: photoIn .6s .2s cubic-bezier(.25,1.5,.5,1) backwards;
+}
+.name .en { font-size: clamp(32px, 7.5vmin, 60px); font-weight: 900; line-height: 1.1; }
+.again {
+  flex-shrink: 0; padding: 14px 30px; border-radius: 34px; font-size: clamp(22px, 5vw, 32px); font-weight: 900;
+  background: var(--gold); color: var(--purple-d);
+  box-shadow: 0 6px 0 #c99a00, 0 10px 20px rgba(0,0,0,.35);
+  animation: photoIn .5s .5s cubic-bezier(.25,1.5,.5,1) backwards, againPulse 1.4s 1.2s ease-in-out infinite;
+}
+.again:active { transform: translateY(4px); box-shadow: 0 2px 0 #c99a00; }
+@keyframes againPulse { 50% { transform: scale(1.07); } }
+
+#fx { position: fixed; inset: 0; pointer-events: none; z-index: 100; overflow: hidden; }
+.spark { position: absolute; font-size: 34px; will-change: transform, opacity; }
+.cloud {
+  position: absolute; border-radius: 50%; background: radial-gradient(circle, #fff 0%, rgba(255,255,255,.85) 45%, rgba(255,255,255,0) 70%);
+  pointer-events: none;
+}
+.mic-note {
+  position: absolute; left: 50%; top: 4px; transform: translateX(-50%); z-index: 5;
+  background: rgba(255,255,255,.95); color: var(--ink); padding: 8px 16px; border-radius: 16px;
+  font-weight: 800; font-size: 15px; text-align: center; max-width: 92vw;
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════ Trang chủ ══════════ -->
+<section class="screen" id="s-home">
+  <div class="home-top">
+    <a class="back-link" href="../index.html">← Trò chơi khác</a>
+  </div>
+  <div class="title" id="title"><span class="hat">🎩</span><h1>Úm Ba La!</h1></div>
+  <div class="subtitle">Pick a magic hat! ✨</div>
+  <div class="cats" id="cats"></div>
+  <div class="parent-tip">
+    💡 <b>Mẹo cho bố mẹ:</b> trước khi chạm, cùng bé hô thật to <b>“Abracadabra!”</b>.
+    Khi ảnh hiện ra, chỉ vào ảnh, đọc tên chậm rãi rồi chờ bé nói theo. Bật 🎤 trong màn chơi để bé tự hô “Abracadabra!” làm phép.
+    <br><a href="CREDITS.txt">Nguồn ảnh</a>
+  </div>
+</section>
+
+<!-- ══════════ Màn ảo thuật ══════════ -->
+<section class="screen hidden" id="s-play">
+  <div class="stars-bg" id="stars-bg"></div>
+  <div class="bar">
+    <button class="round-btn" id="home-btn">🏠</button>
+    <div class="bar-title" id="play-title"></div>
+    <button class="round-btn" id="mic-btn">🎤</button>
+  </div>
+  <div class="stage" id="stage">
+    <div class="waiting" id="waiting">
+      <div class="hint" id="hint"><img id="hint-img" alt=""><span class="q">?</span></div>
+      <div class="box-wrap"><div class="box" id="box">🎩</div><div class="wand" id="wand">🪄</div></div>
+      <div class="tap-hint" id="tap-hint">👆 Tap here!</div>
+    </div>
+    <div class="reveal hidden" id="reveal">
+      <div class="photo" id="photo"><img id="photo-img" alt=""></div>
+      <div class="name" id="name"><div class="en" id="name-en"></div></div>
+      <button class="again" id="again">🪄 Abracadabra!</button>
+    </div>
+  </div>
+</section>
+
+<div id="fx"></div>
+
+<script>
+'use strict';
+
+/* ══════════ Dữ liệu ══════════ */
+// [tệp ảnh, tên tiếng Anh]
+const CATS = [
+  { id: 'animals', emo: '🐾', en: 'Animals', cover: 'lion', box: '🥚', items: [
+    ['dog', 'Dog'], ['cat', 'Cat'], ['cow', 'Cow'], ['duck', 'Duck'],
+    ['chicken', 'Chicken'], ['horse', 'Horse'], ['sheep', 'Sheep'], ['goat', 'Goat'],
+    ['rabbit', 'Rabbit'], ['elephant', 'Elephant'], ['giraffe', 'Giraffe'], ['zebra', 'Zebra'],
+    ['lion', 'Lion'], ['tiger', 'Tiger'], ['monkey', 'Monkey'], ['bear', 'Bear'],
+    ['giant_panda', 'Panda'], ['frog', 'Frog'], ['goldfish', 'Goldfish'], ['penguin', 'Penguin'],
+    ['butterfly', 'Butterfly'], ['owl', 'Owl'], ['crocodile', 'Crocodile'], ['turtle', 'Turtle'],
+    ['dolphin', 'Dolphin'], ['parrot', 'Parrot'], ['ladybug', 'Ladybug'], ['kangaroo', 'Kangaroo'],
+  ] },
+  { id: 'vehicles', emo: '🚗', en: 'Vehicles', cover: 'fire_truck', box: '🎁', items: [
+    ['car', 'Car'], ['bus', 'Bus'], ['truck', 'Truck'], ['fire_truck', 'Fire truck'],
+    ['ambulance', 'Ambulance'], ['police_car', 'Police car'], ['motorbike', 'Motorbike'],
+    ['bicycle', 'Bicycle'], ['train', 'Train'], ['airplane', 'Airplane'], ['helicopter', 'Helicopter'],
+    ['boat', 'Boat'], ['tractor', 'Tractor'], ['excavator', 'Digger'], ['rocket', 'Rocket'],
+  ] },
+  { id: 'fruits', emo: '🍎', en: 'Fruits', cover: 'strawberry', box: '🧺', items: [
+    ['apple', 'Apple'], ['banana', 'Banana'], ['orange', 'Orange'], ['watermelon', 'Watermelon'],
+    ['grapes', 'Grapes'], ['strawberry', 'Strawberry'], ['mango', 'Mango'], ['pineapple', 'Pineapple'],
+    ['coconut', 'Coconut'], ['dragon_fruit', 'Dragon fruit'], ['papaya', 'Papaya'], ['cherry', 'Cherry'],
+  ] },
+  { id: 'food', emo: '🍰', en: 'Food', cover: 'ice_cream', box: '🎁', items: [
+    ['carrot', 'Carrot'], ['tomato', 'Tomato'], ['corn', 'Corn'], ['broccoli', 'Broccoli'],
+    ['egg', 'Egg'], ['bread', 'Bread'], ['rice', 'Rice'], ['milk', 'Milk'],
+    ['cake', 'Cake'], ['ice_cream', 'Ice cream'], ['pho', 'Noodle soup'], ['cookie', 'Cookie'],
+    ['pumpkin', 'Pumpkin'],
+  ] },
+  { id: 'things', emo: '🧸', en: 'Things', cover: 'teddy', box: '🎩', items: [
+    ['ball', 'Ball'], ['teddy', 'Teddy bear'], ['cup', 'Cup'], ['spoon', 'Spoon'],
+    ['chair', 'Chair'], ['bed', 'Bed'], ['shoes', 'Shoes'], ['hat', 'Hat'],
+    ['clock', 'Clock'], ['toothbrush', 'Toothbrush'], ['umbrella', 'Umbrella'],
+    ['balloon', 'Balloons'], ['duck_toy', 'Rubber duck'],
+  ] },
+  { id: 'nature', emo: '🌈', en: 'Nature', cover: 'rainbow', box: '🎩', items: [
+    ['moon', 'Moon'], ['rainbow', 'Rainbow'], ['flower', 'Sunflower'], ['tree', 'Tree'],
+    ['snow', 'Snowman'], ['sea', 'Beach'], ['mountain', 'Mountain'], ['cloud', 'Clouds'],
+    ['star', 'Starfish'], ['leaf', 'Leaf'],
+  ] },
+];
+const ALL = { id: 'all', emo: '✨', en: 'Everything', box: '🎩', items: CATS.flatMap((c) => c.items) };
+const BOXES = ['🎩', '🎁', '🥚', '🧺', '📦'];
+
+/* ══════════ Tiện ích ══════════ */
+const $ = (s) => document.querySelector(s);
+const rand = (a) => a[Math.floor(Math.random() * a.length)];
+const shuffle = (a) => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const IMG = (k) => `img/${k}.jpg`;
+function retrigger(el, cls) { el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); }
+const store = {
+  get(k, d) { try { const v = localStorage.getItem('umbala_' + k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem('umbala_' + k, JSON.stringify(v)); } catch (e) {} },
+};
+
+/* ══════════ Âm thanh (Web Audio) ══════════ */
+const Sfx = {
+  ctx: null,
+  unlock() {
+    if (!this.ctx) { const AC = window.AudioContext || window.webkitAudioContext; if (AC) this.ctx = new AC(); }
+    if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume();
+  },
+  tone(f, dur, type = 'sine', peak = .2, delay = 0, slide) {
+    const c = this.ctx; if (!c) return;
+    const t = c.currentTime + delay, o = c.createOscillator(), g = c.createGain();
+    o.type = type; o.frequency.setValueAtTime(f, t);
+    if (slide) o.frequency.exponentialRampToValueAtTime(slide, t + dur);
+    g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(peak, t + .02); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+    o.connect(g).connect(c.destination); o.start(t); o.stop(t + dur + .05);
+  },
+  // Tiếng lấp lánh khi đang làm phép.
+  twinkle(n = 10) { for (let i = 0; i < n; i++) this.tone(1200 + Math.random() * 1600, .18, 'triangle', .08, i * .09); },
+  poof() {
+    const c = this.ctx; if (!c) return;
+    const t = c.currentTime, dur = .5;
+    const buf = c.createBuffer(1, c.sampleRate * dur, c.sampleRate), d = buf.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / d.length);
+    const s = c.createBufferSource(); s.buffer = buf;
+    const f = c.createBiquadFilter(); f.type = 'lowpass'; f.frequency.setValueAtTime(3000, t); f.frequency.exponentialRampToValueAtTime(300, t + dur);
+    const g = c.createGain(); g.gain.value = .5;
+    s.connect(f).connect(g).connect(c.destination); s.start(t);
+  },
+  // Giai điệu leng keng lặp lại trong lúc mũ đang rung.
+  musicStart() {
+    this.musicStop();
+    const notes = [784, 988, 1175, 1568, 1175, 988, 880, 1047];
+    let i = 0;
+    const step = () => {
+      this.tone(notes[i % notes.length], .3, 'triangle', .1);
+      if (i % 4 === 0) this.tone(notes[i % notes.length] / 2, .5, 'sine', .07);
+      if (Math.random() < .4) this.tone(1800 + Math.random() * 1200, .15, 'triangle', .04, .1);
+      i++;
+    };
+    step();
+    this.musicTimer = setInterval(step, 230);
+  },
+  musicStop() { clearInterval(this.musicTimer); this.musicTimer = 0; },
+  tada() { [523, 659, 784].forEach((f, i) => this.tone(f, .25, 'triangle', .18, .05 + i * .08)); this.tone(1047, .6, 'triangle', .2, .3); },
+};
+
+/* ══════════ Giọng đọc (chỉ tiếng Anh, giống game 100 Động Vật) ══════════ */
+const Speech = {
+  supported: 'speechSynthesis' in window, voice: null, token: 0, busyUntil: 0,
+  load() {
+    if (!this.supported) return;
+    const vs = speechSynthesis.getVoices();
+    if (!vs.length) return;
+    this.voice =
+      vs.find((v) => /^google us english/i.test(v.name)) ||
+      vs.find((v) => /^google/i.test(v.name) && /^en/i.test(v.lang)) ||
+      vs.find((v) => /^en[-_]US/i.test(v.lang)) ||
+      vs.find((v) => /^en[-_]GB/i.test(v.lang)) ||
+      vs.find((v) => /^en/i.test(v.lang)) || null;
+  },
+  cancel() { this.token++; this.busyUntil = 0; if (this.supported) try { speechSynthesis.cancel(); } catch (e) {} },
+  // onEnd chỉ gọi khi câu này không bị câu mới chen ngang.
+  say(text, onEnd) {
+    this.cancel();
+    const my = this.token;
+    if (!this.supported || !text) { if (onEnd) setTimeout(onEnd, 300); return; }
+    if (!this.voice) this.load();
+    this.busyUntil = Date.now() + 800 + text.length * 100;
+    let done = false;
+    const finish = () => { if (done || my !== this.token) return; done = true; this.busyUntil = 0; if (onEnd) onEnd(); };
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = this.voice ? this.voice.lang : 'en-US';
+    if (this.voice) u.voice = this.voice;
+    u.rate = 0.92; u.pitch = 1.05; u.volume = 1;
+    u.onend = u.onerror = finish;
+    try { speechSynthesis.resume(); } catch (e) {}
+    speechSynthesis.speak(u);
+    // Phòng khi trình duyệt không bắn onend.
+    setTimeout(finish, 1800 + text.length * 120);
+  },
+  get speaking() { return Date.now() < this.busyUntil; },
+};
+if (Speech.supported) {
+  Speech.load();
+  speechSynthesis.onvoiceschanged = () => Speech.load();
+  setTimeout(() => Speech.load(), 600);
+}
+
+const nameText = (it) => it[1] + '!';
+
+/* ══════════ Hiệu ứng ══════════ */
+const fx = $('#fx');
+function sparkle(x, y, n = 20, chars = ['✨', '⭐', '🌟', '💫', '🎉']) {
+  for (let i = 0; i < n; i++) {
+    const el = document.createElement('div');
+    el.className = 'spark'; el.textContent = rand(chars);
+    el.style.left = x + 'px'; el.style.top = y + 'px';
+    fx.appendChild(el);
+    const a = Math.random() * Math.PI * 2, d = 120 + Math.random() * 260;
+    const dx = Math.cos(a) * d, dy = Math.sin(a) * d;
+    el.animate([
+      { transform: 'translate(-50%,-50%) scale(.3)', opacity: 1 },
+      { transform: `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) scale(1.3) rotate(${Math.random() * 400 - 200}deg)`, opacity: 0 },
+    ], { duration: 900 + Math.random() * 600, easing: 'cubic-bezier(.2,.8,.3,1)' }).onfinish = () => el.remove();
+  }
+}
+function smoke(x, y) {
+  for (let i = 0; i < 9; i++) {
+    const el = document.createElement('div');
+    el.className = 'cloud';
+    const s = 120 + Math.random() * 140;
+    Object.assign(el.style, { width: s + 'px', height: s + 'px', left: (x - s / 2) + 'px', top: (y - s / 2) + 'px' });
+    fx.appendChild(el);
+    const a = (i / 9) * Math.PI * 2, d = 60 + Math.random() * 80;
+    el.animate([
+      { transform: 'scale(.3)', opacity: .95 },
+      { transform: `translate(${Math.cos(a) * d}px, ${Math.sin(a) * d}px) scale(1.5)`, opacity: 0 },
+    ], { duration: 800 + Math.random() * 300, easing: 'ease-out' }).onfinish = () => el.remove();
+  }
+}
+
+/* ══════════ Trang chủ ══════════ */
+let seen = store.get('seen', {});
+function renderCats() {
+  const list = [ALL, ...CATS];
+  $('#cats').innerHTML = list.map((c) => {
+    const got = c.items.filter((it) => seen[it[0]]).length;
+    const sub = `${got}/${c.items.length}`;
+    if (c.id === 'all') return `<button class="cat all" data-cat="all"><span class="big">🎩✨</span><span class="lbl"><b>${c.en}</b><small>${sub}</small></span></button>`;
+    return `<button class="cat" data-cat="${c.id}"><img src="${IMG(c.cover)}" alt=""><span class="emo">${c.emo}</span><span class="lbl"><b>${c.en}</b><small>${sub}</small></span></button>`;
+  }).join('');
+  document.querySelectorAll('.cat').forEach((b) => b.addEventListener('click', () => play.start(b.dataset.cat)));
+}
+$('#title').addEventListener('click', () => {
+  Sfx.unlock(); Sfx.twinkle(8);
+  const r = $('#title .hat').getBoundingClientRect();
+  sparkle(r.left + r.width / 2, r.top + r.height / 2, 14);
+});
+function showHome() {
+  play.stop();
+  $('#s-play').classList.add('hidden');
+  $('#s-home').classList.remove('hidden');
+  renderCats();
+}
+
+/* ══════════ Màn ảo thuật ══════════ */
+const play = {
+  cat: null, pool: [], state: 'ready', // ready | cast | shown
+  micOn: false, stream: null, analyser: null, raf: 0,
+
+  start(catId) {
+    Sfx.unlock();
+    this.cat = catId === 'all' ? ALL : CATS.find((c) => c.id === catId);
+    this.pool = [];
+    $('#play-title').textContent = `${this.cat.emo} ${this.cat.en}`;
+    this.renderCount();
+    $('#s-home').classList.add('hidden');
+    $('#s-play').classList.remove('hidden');
+    this.ready();
+    Speech.say('Tap the magic hat!', () => this.listen());
+  },
+
+  stop() {
+    clearTimeout(this.timer);
+    Sfx.musicStop();
+    Speech.cancel();
+    this.stopMic();
+    this.state = 'ready';
+  },
+
+  nextItem() {
+    if (!this.pool.length) {
+      this.pool = shuffle(this.cat.items);
+      // Không lặp lại ngay ảnh vừa xem ở vòng trước.
+      if (this.item && this.pool.length > 1 && this.pool[this.pool.length - 1][0] === this.item[0]) this.pool.unshift(this.pool.pop());
+    }
+    return this.pool.pop();
+  },
+
+  // Mũ rung + nhạc phép thuật chạy liên tục, chờ bé chạm vào mới nổ ra ảnh.
+  ready() {
+    clearTimeout(this.timer);
+    this.state = 'ready';
+    $('#reveal').classList.add('hidden');
+    const box = $('#box');
+    box.textContent = this.cat.id === 'all' ? rand(BOXES) : (Math.random() < .6 ? this.cat.box : rand(BOXES));
+    box.className = 'box cast';
+    $('#wand').classList.add('wave');
+    $('#waiting').classList.remove('hidden');
+    $('#tap-hint').textContent = this.micOn ? '🎤 Say “Abracadabra!”' : '👆 Tap here!';
+    // Khi bật micro thì không phát nhạc, để micro không nghe nhầm nhạc thành tiếng bé hô.
+    if (!this.micOn) Sfx.musicStart();
+    this.item = this.nextItem();
+    this.showHint();
+  },
+
+  // Gợi ý để bé đoán: ảnh mờ rồi rõ dần, hoặc phóng to một góc rồi thu nhỏ dần.
+  showHint() {
+    const hint = $('#hint'), img = $('#hint-img');
+    hint.className = 'hint';
+    img.style.transform = ''; img.style.transformOrigin = '';
+    img.src = IMG(this.item[0]);
+    if (Math.random() < .5) {
+      hint.classList.add('blur');
+    } else {
+      hint.classList.add('peek');
+      img.style.transformOrigin = `${20 + Math.random() * 60}% ${20 + Math.random() * 60}%`;
+      img.style.transform = 'scale(3.2)';
+    }
+    void hint.offsetWidth;
+    // Đợi một nhịp rồi mới cho rõ dần, để hiệu ứng chuyển động chạy được.
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      if (this.state !== 'ready') return;
+      if (hint.classList.contains('blur')) hint.classList.add('clearing');
+      else img.style.transform = 'scale(1.7)';
+    }));
+  },
+
+  // Bé chạm (hoặc hô to khi bật micro) → tắt nhạc, nổ ra ảnh.
+  cast() {
+    if (this.state !== 'ready') return;
+    this.state = 'cast';
+    this.stopListening();
+    Sfx.musicStop();
+    Speech.cancel();
+    this.reveal();
+  },
+
+  reveal() {
+    this.state = 'shown';
+    const box = $('#box');
+    const r = box.getBoundingClientRect();
+    $('#wand').classList.remove('wave');
+    box.className = 'box poof';
+    $('#hint').classList.add('go');
+    Sfx.poof();
+    smoke(r.left + r.width / 2, r.top + r.height / 2);
+    setTimeout(() => {
+      $('#waiting').classList.add('hidden');
+      const it = this.item;
+      $('#photo-img').src = IMG(it[0]);
+      $('#name-en').textContent = it[1];
+      const rv = $('#reveal');
+      rv.classList.remove('hidden');
+      // Chạy lại hiệu ứng bật ra mỗi lần hiện ảnh.
+      ['#photo', '#name', '#again'].forEach((s) => { const el = $(s); el.style.animation = 'none'; void el.offsetWidth; el.style.animation = ''; });
+      Sfx.tada();
+      const pr = $('#photo').getBoundingClientRect();
+      sparkle(pr.left + pr.width / 2, pr.top + pr.height / 2, 26);
+      Speech.say(nameText(it), () => this.listen());
+      if (!seen[it[0]]) { seen[it[0]] = 1; store.set('seen', seen); }
+      this.renderCount();
+    }, 300);
+  },
+
+  renderCount() {
+    $('#count').textContent = `${this.cat.items.filter((x) => seen[x[0]]).length}/${this.cat.items.length}`;
+  },
+
+  repeat() {
+    if (this.state !== 'shown') return;
+    retrigger($('#photo'), 'wiggle');
+    this.stopListening();
+    Speech.say(nameText(this.item), () => this.listen());
+    const pr = $('#photo').getBoundingClientRect();
+    sparkle(pr.left + pr.width / 2, pr.top + pr.height / 3, 8, ['✨', '💛', '⭐']);
+  },
+
+  again() {
+    if (this.state !== 'shown') return;
+    this.ready();
+  },
+
+  /* ── Micro: bé hô to thì làm phép ── */
+  async toggleMic() {
+    Sfx.unlock();
+    if (this.micOn) {
+      this.micOn = false; this.stopMic();
+      $('#mic-btn').classList.remove('on', 'listening');
+      if (this.state === 'ready') Sfx.musicStart();
+      if (this.state === 'ready') $('#tap-hint').textContent = '👆 Tap here!';
+      return;
+    }
+    this.micOn = true;
+    this.stopListening();
+    Sfx.musicStop();
+    $('#mic-btn').classList.add('on');
+    if (this.state === 'ready') $('#tap-hint').textContent = '🎤 Say “Abracadabra!”';
+    // Đọc câu nhắc trước rồi mới mở micro, để micro không nghe nhầm giọng máy.
+    Speech.cancel();
+    this.listen();
+  },
+
+  async listen() {
+    // Nghe khi đang chờ làm phép (mũ) hoặc khi ảnh đang hiện (hô tiếp để sang ảnh mới).
+    if (!this.micOn || this.state === 'cast' || $('#s-play').classList.contains('hidden')) return;
+    if (!this.stream) {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return this.micFail();
+      try {
+        this.stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: false, autoGainControl: true } });
+      } catch (e) { return this.micFail(); }
+      if (!this.micOn || this.state === 'cast') { this.stopMic(); return; }
+      const src = Sfx.ctx.createMediaStreamSource(this.stream);
+      this.analyser = Sfx.ctx.createAnalyser(); this.analyser.fftSize = 1024;
+      src.connect(this.analyser);
+      this.buf = new Float32Array(this.analyser.fftSize);
+    }
+    this.listening = true; this.calib = []; this.thr = null; this.loud = 0;
+    $('#mic-btn').classList.add('listening');
+    cancelAnimationFrame(this.raf);
+    this.loop();
+  },
+
+  loop() {
+    this.raf = requestAnimationFrame(() => this.loop());
+    if (!this.analyser || !this.listening) return;
+    this.analyser.getFloatTimeDomainData(this.buf);
+    let s = 0; for (let i = 0; i < this.buf.length; i++) s += this.buf[i] * this.buf[i];
+    const rms = Math.sqrt(s / this.buf.length);
+    // Đo tiếng ồn nền khoảng 0,4 giây rồi đặt ngưỡng cao hơn nền.
+    if (this.calib.length < 24) { this.calib.push(rms); return; }
+    if (this.thr === null) this.thr = Math.max(.045, 3 * this.calib.reduce((a, b) => a + b, 0) / this.calib.length);
+    if (rms > this.thr) { if (++this.loud >= 5) { if (this.state === 'ready') this.cast(); else this.again(); } } else this.loud = Math.max(0, this.loud - 1);
+  },
+
+  // Tắt micro trong lúc máy nói/phát tiếng — trên iOS loa sẽ to trở lại.
+  stopListening() {
+    this.listening = false;
+    $('#mic-btn').classList.remove('listening');
+    this.stopMic();
+  },
+
+  stopMic() {
+    cancelAnimationFrame(this.raf);
+    if (this.stream) this.stream.getTracks().forEach((t) => t.stop());
+    this.stream = null; this.analyser = null; this.listening = false;
+  },
+
+  micFail() {
+    this.micOn = false;
+    if (this.state === 'ready') Sfx.musicStart();
+    $('#mic-btn').classList.remove('on', 'listening');
+    const n = document.createElement('div');
+    n.className = 'mic-note';
+    n.textContent = 'Không mở được micro 😢 — bé chạm vào mũ để làm phép nhé.';
+    $('#stage').appendChild(n);
+    setTimeout(() => n.remove(), 4000);
+    if (this.state === 'ready') $('#tap-hint').textContent = '👆 Tap here!';
+  },
+};
+
+// Thêm ô đếm số ảnh đã mở vào thanh trên.
+(() => {
+  const c = document.createElement('div');
+  c.className = 'count'; c.id = 'count';
+  $('#mic-btn').before(c);
+})();
+
+$('#waiting').addEventListener('click', () => { Sfx.unlock(); play.cast(); });
+$('#stage').addEventListener('click', (e) => { if (e.target === $('#stage') && play.state === 'ready') play.cast(); });
+$('#photo').addEventListener('click', () => play.repeat());
+$('#name').addEventListener('click', () => play.repeat());
+$('#again').addEventListener('click', () => play.again());
+$('#home-btn').addEventListener('click', showHome);
+$('#mic-btn').addEventListener('click', () => play.toggleMic());
+document.addEventListener('pointerdown', () => Sfx.unlock(), { capture: true });
+document.addEventListener('contextmenu', (e) => e.preventDefault());
+
+// Sao lấp lánh trên nền màn ảo thuật.
+(() => {
+  const bg = $('#stars-bg');
+  for (let i = 0; i < 40; i++) {
+    const s = document.createElement('i');
+    s.style.left = Math.random() * 100 + '%'; s.style.top = Math.random() * 100 + '%';
+    s.style.animationDelay = (Math.random() * 2) + 's';
+    const z = 2 + Math.random() * 4; s.style.width = s.style.height = z + 'px';
+    bg.appendChild(s);
+  }
+})();
+
+renderCats();
+</script>
+</body>
+</html>
