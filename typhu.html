@@ -113,6 +113,8 @@ button:disabled { opacity: .4; cursor: default; }
 .token { transition: transform .14s ease-out; pointer-events: none; }
 #board.init .token { transition: none; }
 .token .tbody { transform-box: fill-box; transform-origin: center; }
+.token .tzoom { transform-origin: 0 0; transition: transform .25s ease-out; }
+.token.turn .tzoom { transform: scale(1.4); }
 .token .ring { fill: none; stroke-width: 3; opacity: 0; transform-box: fill-box; transform-origin: center; }
 .token .disc { stroke: #fff; stroke-width: 2; }
 .token.turn .ring { opacity: .9; animation: ring 1.2s ease-in-out 3; }
@@ -318,7 +320,7 @@ button:disabled { opacity: .4; cursor: default; }
   .hud:has(.pl.me ~ .pl.me) .pl { gap: 5px; padding-right: 8px; }
   .stage { --s: 26px !important; }
   /* nút hành động treo trong sàn giữa bàn, ngay dưới nút ĐỔ (fit() chuyển #actions vào #mid), không làm bàn co lại */
-  .mid .actions { position: absolute; top: 100%; left: 50%; transform: translateX(-50%); width: max-content; max-width: 70vw; min-height: 0; padding: 0; margin-top: 3px; gap: 4px; }
+  .mid .actions { position: absolute; top: 100%; left: 50%; transform: translateX(-50%); width: max-content; max-width: 70vw; min-height: 0; padding: 0; margin-top: 12px; gap: 4px; }
   .mid .actions button { min-height: 30px; padding: 2px 9px; font-size: 12px; box-shadow: 0 3px 0 rgba(0,0,0,.28), 0 5px 10px rgba(0,0,0,.35); }
   .mid .actions button small { font-size: 9.5px; }
   .mid .actions button.lv { padding: 1px 8px; line-height: 1.1; }
@@ -335,7 +337,7 @@ button:disabled { opacity: .4; cursor: default; }
   .top h1 { font-size: 22px; }
   .board-wrap { position: absolute; left: 0; right: 0; top: 36px; bottom: 46px; padding: 0 12px; justify-content: center; }
   /* khung bàn lệch tâm 5px (trên 36 / dưới 46); nút hành động nằm ngay dưới nút ĐỔ (cụm cao ≈ 3.55 × --s) */
-  .actions { position: absolute; z-index: 5; left: 50%; top: calc(50% - 5px + var(--s) * 1.78 + 4px); transform: translateX(-50%); width: max-content; max-width: min(60vw, 480px); min-height: 0; padding: 0; }
+  .actions { position: absolute; z-index: 5; left: 50%; top: calc(50% - 5px + var(--s) * 1.78 + 14px); transform: translateX(-50%); width: max-content; max-width: min(60vw, 480px); min-height: 0; padding: 0; }
   .hud { position: absolute; inset: 0; z-index: 5; display: block; padding: 0; pointer-events: none; }
   .pl { position: absolute; width: clamp(168px, 19vw, 236px); pointer-events: auto; }
   .pl.s1 { left: 10px; top: 8px; } .pl.s2 { right: 10px; top: 8px; } .pl.s3 { left: 10px; bottom: 8px; } .pl.s0 { right: 10px; bottom: 8px; }
@@ -2155,9 +2157,148 @@ function drawFireworks(i) {
   burst(-4, 0, R, ['#ffd23f', '#e8323c', '#ff7ad9'], 'b1');
   burst(R * .9, -R * .7, R * .7, ['#3fa7ff', '#2ecc71', '#ffd23f'], 'b2');
 }
+// Biểu tượng riêng từng thành phố: vẽ nhìn thẳng, chân đứng ở y = 5 (giữa mặt bệ), cao tới khoảng y = -27
+const LANDMARK = {
+  'Cà Mau': ['Mũi Cà Mau', (P, R, Pa, Ci, Ln, water) => {
+    water(); Pa('M-11 -2 L10 -6 L6 4 L-8 4 Z', '#ecf0f1'); Ln(-9, 0, 8, -3.2, '#2e86c1', .9);
+    Ln(-3, -2.5, -3, -22, '#5d6d7e', .9); P([[-3, -22], [6, -19.5], [-3, -17]], '#e8323c', .4); Ci(0, -19.5, .9, '#ffd23f');
+  }],
+  'Đà Lạt': ['Nhà thờ Con Gà', (P, R, Pa, Ci, Ln) => {
+    R(-9, -5, 18, 10, '#f6c28b'); P([[-10, -5], [10, -5], [7, -9], [-7, -9]], '#c0603f');
+    R(-3, -17, 6, 12, '#f6c28b'); P([[-3.5, -17], [3.5, -17], [0, -25]], '#c0603f'); Ln(0, -25, 0, -26); Ci(0, -27, 1.4, '#e8323c', '#3a2a1a', .4);
+    Ci(0, -12, 1.6, '#fff', '#3a2a1a', .4); Pa('M-1.5 5 L-1.5 1 A1.5 1.5 0 0 1 1.5 1 L1.5 5 Z', '#6b3f22'); R(-7, -2, 2, 3, '#fff', .3); R(5, -2, 2, 3, '#fff', .3);
+  }],
+  'Lạng Sơn': ['Hữu Nghị Quan', (P, R, Pa, Ci, Ln) => {
+    R(-11, -6, 22, 11, '#c8b48f'); Ln(-11, -2, -3.5, -2, '#a08c66', .4); Ln(3.5, -2, 11, -2, '#a08c66', .4);
+    Pa('M-3 5 L-3 0 A3 3 0 0 1 3 0 L3 5 Z', '#4a3b2a');
+    R(-8, -13, 16, 7, '#f3e6c9'); for (const x of [-6, -1.5, 3]) R(x, -11, 3, 3, '#3d5a80', .3);
+    P([[-10, -13], [10, -13], [6, -18], [-6, -18]], '#b5452f'); Ln(0, -18, 0, -24); P([[0, -24], [5, -22.5], [0, -21]], '#e8323c', .3);
+  }],
+  'Thái Bình': ['Gác chuông chùa Keo', (P, R, Pa, Ci, Ln, water, eave) => {
+    R(-6, -3, 12, 8, '#a0522d'); R(-1.5, 0, 3, 5, '#4a2c17', .3);
+    R(-4.5, -11, 9, 8, '#a0522d'); Ci(0, -8, 1.3, '#ffd23f', '#3a2a1a', .3); R(-3.2, -18, 6.4, 7, '#a0522d');
+    eave(-3, 10, 3, '#5a3a28'); eave(-11, 8, 3, '#5a3a28'); eave(-18, 6, 3.2, '#5a3a28');
+    Ln(0, -21, 0, -25, '#5a3a28', .8); Ci(0, -25.6, 1, '#ffd23f');
+  }],
+  'Ninh Bình': ['Tràng An', (P, R, Pa, Ci, Ln, water) => {
+    water();
+    Pa('M-12 4 C-12 -6 -9 -14 -6 -14 C-3 -14 -3 -4 -1 4 Z', '#3f7a4c');
+    Pa('M-4 4 C-4 -10 -1 -22 2 -22 C5 -22 6 -10 7 4 Z', '#4f8a5b');
+    Pa('M4 4 C5 -4 8 -10 10 -10 C12 -10 12 -2 12 4 Z', '#5d9c68');
+    Pa('M-6 3 L2 3 L1 4.6 L-5 4.6 Z', '#8b5a2b', '#3a2a1a', .4); Ci(-2, 2, .9, '#e9b98a'); P([[-3.4, 1.6], [-.6, 1.6], [-2, .2]], '#f5d76e', .3);
+  }],
+  'Pleiku': ['Nhà rông', (P, R, Pa, Ci, Ln) => {
+    for (const x of [-6, -2, 2, 6]) Ln(x, -1, x, 5, '#6b4423', .9);
+    R(-8, -2, 16, 2, '#8b5a2b');
+    Pa('M-9 -2 Q-3 -12 -2 -27 L2 -27 Q3 -12 9 -2 Z', '#c8a165');
+    Ln(-5, -6, 5, -6, '#9c7a45', .5); Ln(-3.4, -13, 3.4, -13, '#9c7a45', .5); Ln(-2.4, -20, 2.4, -20, '#9c7a45', .5);
+    P([[0, -12], [1.6, -9.5], [0, -7], [-1.6, -9.5]], '#e8323c', .3);
+  }],
+  'Ninh Thuận': ['Tháp Chàm Po Klong Garai', (P, R, Pa, Ci, Ln) => {
+    R(-7, -6, 14, 11, '#c0603f'); Ln(-4.5, -5, -4.5, 4, '#8a3c2a', .4); Ln(4.5, -5, 4.5, 4, '#8a3c2a', .4);
+    Pa('M-2 5 L-2 0 L0 -2 L2 0 L2 5 Z', '#5a2a1a');
+    R(-5.5, -12, 11, 6, '#b5533c'); R(-4, -17.5, 8, 5.5, '#a94b35'); R(-2.6, -22, 5.2, 4.5, '#9c4430');
+    P([[-2.8, -22], [2.8, -22], [0, -26.5]], '#8a3c2a');
+    for (const [x, y, w] of [[-7, -6, 1.6], [5.4, -6, 1.6], [-5.5, -12, 1.4], [4.1, -12, 1.4]]) P([[x, y], [x + w, y], [x + w / 2, y - 2.6]], '#a94b35', .3);
+  }],
+  'Tây Ninh': ['Toà Thánh Cao Đài', (P, R, Pa, Ci, Ln) => {
+    R(-6, -9, 12, 14, '#fff3cf'); P([[-6.5, -9], [6.5, -9], [0, -14]], '#2e86c1');
+    for (const x of [-11, 6]) {
+      R(x, -16, 5, 21, '#f6d365'); P([[x - .6, -16], [x + 5.6, -16], [x + 2.5, -21]], '#d35400');
+      R(x + 1.5, -12.5, 2, 2.5, '#2e86c1', .3); R(x + 1.5, -6, 2, 2.5, '#2e86c1', .3);
+    }
+    Ci(0, -4, 2.6, '#fff', '#3a2a1a', .5); Ci(0, -4, 1.2, '#2e86c1'); Ci(0, -4, .5, '#111');
+    Pa('M-1.8 5 L-1.8 2 A1.8 1.8 0 0 1 1.8 2 L1.8 5 Z', '#8b5a2b');
+  }],
+  'Hải Phòng': ['Nhà hát lớn', (P, R, Pa, Ci, Ln) => {
+    Ln(-9, 5, -9, -6, '#6b4423', 1.1); Ci(-9, -9, 4.6, '#e74c3c', '#3a2a1a', .4); Ci(-6.5, -11.5, 3.2, '#ff6b4a', '#3a2a1a', .3);
+    R(-5, -10, 16, 14, '#f5deb3'); R(-5, -10, 16, 1.6, '#e8c99a', .3);
+    P([[-1, -10], [9, -10], [4, -15]], '#e8c99a');
+    for (const x of [0, 2.7, 5.3, 8]) Ln(x, -7.5, x, 3, '#c8a97a', .9);
+    R(-4, -7, 3, 3, '#7fb3d5', .3); R(-6, 3, 18, 2, '#dcdcdc', .3);
+  }],
+  'Thanh Hoá': ['Thành nhà Hồ', (P, R, Pa, Ci, Ln) => {
+    R(-12, -11, 24, 16, '#a39e8c');
+    for (const y of [-7, -3, 1]) Ln(-12, y, 12, y, '#7d786a', .4);
+    for (const [x, y] of [[-6, -11], [6, -11], [0, -7], [-9, -7], [9, -7], [-4, -3], [4, -3]]) Ln(x, y, x, y + 4, '#7d786a', .4);
+    for (const [x, r] of [[-7, 2.4], [0, 3], [7, 2.4]]) Pa(`M${x - r} 5 L${x - r} 0 A${r} ${r} 0 0 1 ${x + r} 0 L${x + r} 5 Z`, '#3a3328');
+    Pa('M-12 -11 Q-6 -12.5 0 -11 Q6 -12.5 12 -11', 'none', '#6b8e4e', 1.2);
+  }],
+  'Sa Pa': ['Đỉnh Fansipan', (P, R, Pa, Ci, Ln) => {
+    Pa('M-12 5 L-3 -20 L-1 -18 L1 -23 L12 5 Z', '#5b8c4a');
+    for (const [y, w] of [[1, 9.5], [-3, 8], [-7, 6.6], [-11, 5]]) Pa(`M${-w} ${y} Q0 ${y - 3} ${w} ${y}`, 'none', '#a6d96a', .9);
+    P([[0, -23], [2, -23], [1, -26.5]], '#d0d3d4', .3);
+    Ln(-12, -14, 1, -24, '#555', .4); R(-6.5, -19.5, 2.4, 2.2, '#e8323c', .3);
+    el('ellipse', { cx: 7, cy: -15, rx: 4, ry: 1.6, fill: '#fff', opacity: .9 }, P.B);
+  }],
+  'Hội An': ['Chùa Cầu', (P, R, Pa, Ci, Ln, water, eave) => {
+    water(); R(-10, 1.5, 2, 3, '#7f8c8d', .3); R(8, 1.5, 2, 3, '#7f8c8d', .3);
+    R(-11, -1, 22, 2.5, '#8b5a2b'); R(-10, -7, 20, 6, '#f2c14e');
+    R(-3.5, -13, 7, 6, '#f2c14e'); eave(-7, 11.5, 3, '#8e3b2e'); eave(-13, 6, 3, '#8e3b2e'); Ci(0, -16.8, .9, '#ffd23f');
+    for (const [x, c] of [[-8, '#e74c3c'], [-3, '#f39c12'], [3, '#f39c12'], [8, '#e74c3c']]) { Ln(x, -6.5, x, -5.2, '#3a2a1a', .3); Ci(x, -4, 1.2, c, '#3a2a1a', .3); }
+  }],
+  'Huế': ['Tháp Phước Duyên', (P, R, Pa, Ci, Ln) => {
+    R(-6.5, 3.5, 13, 1.5, '#cfcfcf', .3);
+    for (let k = 0; k < 7; k++) {
+      const bw = 8 - k * .9, h = 3, y0 = 3.5 - k * h;
+      R(-bw / 2, y0 - h, bw, h, '#e9b384'); R(-bw / 2 - 1, y0 - h - .5, bw + 2, 1, '#8e5a3a', .3); R(-.6, y0 - h + .9, 1.2, 1.6, '#6b3f22', 0);
+    }
+    Ln(0, -18, 0, -23, '#8e5a3a', .8); Ci(0, -23.6, 1, '#ffd23f');
+  }],
+  'Đà Nẵng': ['Cầu Rồng', (P, R, Pa, Ci, Ln, water) => {
+    water(); R(-7, 2.8, 1.6, 2, '#7f8c8d', .3); R(5, 2.8, 1.6, 2, '#7f8c8d', .3); R(-12, 1, 24, 1.8, '#95a5a6', .4);
+    const d = 'M-12 1 C-10 -12 -5 -12 -3.5 0 C-2 8 2 -1 3 -6 C4 -12 8 -12 9 -9';
+    Pa(d, 'none', '#b7950b', 3.4); Pa(d, 'none', '#f1c40f', 2.2);
+    Ln(9.5, -11, 11, -13.5, '#b7950b', .7); Ci(9.5, -9.5, 2, '#f1c40f', '#b7950b', .5);
+    Pa('M11.3 -9.6 Q13.5 -11.2 14.5 -9.2 Q13.4 -8 11.3 -8.6 Z', '#ff7f27', '#e8323c', .3);
+  }],
+  'Bình Dương': ['Tháp Becamex', (P, R, Pa, Ci, Ln) => {
+    R(1, -6, 9, 11, '#7fa7c9'); for (const y of [-3, 0, 3]) Ln(1, y, 10, y, '#4f7ea3', .35);
+    P([[-8, 5], [1, 5], [1, -24], [-8, -20]], '#4a90c2');
+    for (let y = -17; y <= 3; y += 4) Ln(-8, y, 1, y, '#2c6a96', .4);
+    Ln(-6.5, -19, -6.5, 4, '#bfe0f5', .6); Ln(-.5, -24, -.5, -27.5, '#5d6d7e', .5);
+  }],
+  'Cần Thơ': ['Cầu Cần Thơ', (P, R, Pa, Ci, Ln, water) => {
+    water();
+    for (const x of [-5, 5]) for (const t of [2.5, 5, 7.5]) { Ln(x, -17 + t * .8, x - t, -.6, '#7f8c8d', .35); Ln(x, -17 + t * .8, x + t, -.6, '#7f8c8d', .35); }
+    Pa('M-12 0 Q0 -2.4 12 0 L12 1.6 Q0 -.8 -12 1.6 Z', '#bdc3c7');
+    for (const x of [-5, 5]) R(x - 1, -20, 2, 24, '#dfe4ea', .4);
+  }],
+  'Hà Nội': ['Chùa Một Cột', (P, R, Pa, Ci, Ln, water, eave) => {
+    el('ellipse', { cx: 0, cy: 3.5, rx: 12, ry: 3, fill: '#5dade2', stroke: '#2e86c1', 'stroke-width': .6 }, P.B);
+    el('ellipse', { cx: -8, cy: 3.6, rx: 2, ry: .8, fill: '#58a55c' }, P.B); Ci(-8, 2.6, 1.1, '#ff8fb1', '#c2185b', .3); Ci(8, 3.2, 1, '#ff8fb1', '#c2185b', .3);
+    R(-1.3, -4, 2.6, 7.5, '#9e9e9e'); P([[-6, -4], [6, -4], [4, -6], [-4, -6]], '#8b5a2b');
+    R(-5, -10, 10, 4, '#a0522d'); for (const x of [-3.5, 1.5]) R(x, -9.2, 2, 2.4, '#f2c14e', .3);
+    eave(-10, 8.5, 4.5, '#5a3a28'); Ci(0, -15.2, 1, '#ffd23f');
+  }],
+  'Sài Gòn': ['Tháp Bitexco', (P, R, Pa, Ci, Ln) => {
+    Pa('M-5 5 C-6 -8 -4 -18 0 -26 C3 -18 5 -8 4 5 Z', '#5dade2');
+    Pa('M0 -26 C3 -18 5 -8 4 5 L0 5 Z', '#2e86c1', 'none');
+    for (const y of [-12, -6, 0]) Ln(-5.2, y, 4.5, y, '#1b4f72', .3);
+    Pa('M1.5 -15.5 L9 -16.5 L9 -15 L1.5 -14 Z', '#95a5a6');
+    el('ellipse', { cx: 7.5, cy: -16.6, rx: 3, ry: 1, fill: '#bdc3c7', stroke: '#3a2a1a', 'stroke-width': .4 }, P.B);
+  }],
+};
+const lvName = (i, lv) => (lv === 5 && LANDMARK[SQ[i].name] ? `${LEVELS[5].name} ${LANDMARK[SQ[i].name][0]}` : LEVELS[lv].name);
+// vẽ biểu tượng của thành phố tên name vào nhóm B; trả về false nếu thành phố chưa có mẫu riêng
+function drawLandmark(B, name) {
+  const lm = LANDMARK[name];
+  if (!lm) return false;
+  const S = '#3a2a1a';
+  const P = (pts, fill, sw = .6, st = S) => el('polygon', { points: pts.map(p => p.join(',')).join(' '), fill, stroke: st, 'stroke-width': sw, 'stroke-linejoin': 'round' }, B);
+  P.B = B;
+  const R = (x, y, w, h, fill, sw = .6) => el('rect', { x, y, width: w, height: h, fill, stroke: sw ? S : 'none', 'stroke-width': sw }, B);
+  const Pa = (d, fill, st = S, sw = .6) => el('path', { d, fill, stroke: st, 'stroke-width': sw, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' }, B);
+  const Ci = (cx, cy, r, fill, st = 'none', sw = .6) => el('circle', { cx, cy, r, fill, stroke: st, 'stroke-width': sw }, B);
+  const Ln = (x1, y1, x2, y2, st = S, sw = .6) => el('line', { x1, y1, x2, y2, stroke: st, 'stroke-width': sw, 'stroke-linecap': 'round' }, B);
+  const water = () => el('ellipse', { cx: 0, cy: 4.5, rx: 12, ry: 2.6, fill: '#5dade2', stroke: '#2e86c1', 'stroke-width': .6 }, B);
+  const eave = (y, w, h, fill) => P([[-w, y - 2.2], [-w * .78, y], [w * .78, y], [w, y - 2.2], [w * .55, y - h], [-w * .55, y - h]], fill); // mái cong vểnh hai đầu
+  lm[1](P, R, Pa, Ci, Ln, water, eave);
+  return true;
+}
 // nhà cửa 3D (isometric 2:1): tường và mái lấy màu người chơi sở hữu, nền lô đất
 // tô màu nhân vật; mỗi cấp một khối dáng riêng, có số cấp ở góc
-function drawBuilding(g, lv, cx, cy, owner, charId) {
+function drawBuilding(g, lv, cx, cy, owner, charId, i) {
   const B = el('g', { transform: `translate(${cx} ${cy})` }, g);
   const main = COLORS[owner].main, lite = mix(main, '#fff', .45), dark = mix(main, '#000', .32), line = mix(main, '#000', .5);
   el('ellipse', { cx: 0, cy: 11.5, rx: 12, ry: 3, fill: 'rgba(35,50,74,.18)' }, B); // bóng đổ
@@ -2203,6 +2344,8 @@ function drawBuilding(g, lv, cx, cy, owner, charId) {
     }
     case 5: {
       el('circle', { cx: 0, cy: -3, r: 14, fill: '#ffd23f', opacity: .3 }, B);
+      // bệ màu chủ, trên dựng công trình biểu tượng của chính thành phố đó
+      if (i !== undefined && LANDMARK[SQ[i].name]) { box(0, 11, 11, 11, 3, main); drawLandmark(B, SQ[i].name); break; }
       const b = box(1, 11, 9, 7, 11, main); grid(b, 9, 7, 2, 2, 2.5, 4.5, true);
       const t = box(0, 11 - 11 - 1.5 + 2.75, 5, 4, 8, main); winL(t, 5, .3, 2, .4, 4, '#ffd23f'); winR(t, 4, .3, 2, .4, 4, '#ffd23f');
       const ax = (t.F[0] + t.Bk[0]) / 2, ay = (t.F[1] + t.Bk[1]) / 2 - 8;
@@ -2226,7 +2369,7 @@ function drawBuild() {
   for (const [i, bx, by] of order) {
     const p = G.props[i];
     if (!p.lv || p.owner < 0) continue;
-    drawBuilding(g, p.lv, bx, by - 11, p.owner, G.pl[p.owner].char);
+    drawBuilding(g, p.lv, bx, by - 11, p.owner, G.pl[p.owner].char, i);
   }
 }
 
@@ -2254,9 +2397,10 @@ $('board').insertBefore(defs, $('board').firstChild);
 })();
 const tokenEls = [0, 1, 2, 3].map(s => {
   const C = COLORS[s], g0 = el('g', { class: 'token' }, $('gTokens')), g = el('g', { transform: `scale(${TOKEN_SCALE})` }, g0);
-  el('ellipse', { cx: 0, cy: 2, rx: 16, ry: 6.5, fill: 'rgba(0,0,0,.35)' }, g);
-  el('ellipse', { cx: 0, cy: 0, rx: 20, ry: 9.5, class: 'ring', stroke: C.main }, g);
-  const b = el('g', { class: 'tbody' }, g);
+  const z = el('g', { class: 'tzoom' }, g); // quân đang tới lượt phóng to quanh chân đế
+  el('ellipse', { cx: 0, cy: 2, rx: 16, ry: 6.5, fill: 'rgba(0,0,0,.35)' }, z);
+  el('ellipse', { cx: 0, cy: 0, rx: 20, ry: 9.5, class: 'ring', stroke: C.main }, z);
+  const b = el('g', { class: 'tbody' }, z);
   el('ellipse', { cx: 0, cy: 0, rx: 13, ry: 6, class: 'disc', fill: C.main }, b);
   el('g', { class: 'face-in', transform: 'translate(0 -16) scale(.82)' }, b);
   g0.style.display = 'none';
@@ -3061,7 +3205,7 @@ function stepText(st) {
     case 'card': return `❓ Cơ Hội: ${CARDS[st.c].text}`;
     case 'hold': return st.full ? `${w} đã có đủ ${PARITY_MAX} ${HOLD_INFO[st.h][1].toLowerCase()} — không nhận thêm` : `${w} nhận ${HOLD_INFO[st.h][0]} ${HOLD_INFO[st.h][1].toLowerCase()}`;
     case 'nothing': return `Thẻ không có tác dụng lúc này`;
-    case 'build': return st.from === 0 ? `🏠 ${w} mua ${nm(st.i)} và xây ${LEVELS[st.to].name} (${fmt(st.cost)})` : `🔨 ${w} nâng ${nm(st.i)} lên ${LEVELS[st.to].name} (${fmt(st.cost)})`;
+    case 'build': return st.from === 0 ? `🏠 ${w} mua ${nm(st.i)} và xây ${lvName(st.i, st.to)} (${fmt(st.cost)})` : `🔨 ${w} nâng ${nm(st.i)} lên ${lvName(st.i, st.to)} (${fmt(st.cost)})`;
     case 'buyTour': return `${tourIcon(st.i)} ${w} mua điểm du lịch ${nm(st.i)} (${fmt(st.cost)}) · đã có ${st.n}/5`;
     case 'takeover': return `💰 ${w} mua lại ${nm(st.i)} từ ${other(st.o)} với giá ${fmt(st.price)}!`;
     case 'noCash': return `💸 ${w} không đủ tiền ${st.mode === 'takeover' ? 'mua lại' : st.mode === 'upgrade' ? 'nâng cấp' : 'mua'} ${nm(st.i)} (cần ${fmt(st.need)}, có ${fmt(G.pl[s].cash)})`;
@@ -3366,7 +3510,7 @@ function renderProp() {
   else {
     const ava = document.createElement('span'); ava.className = 'ava'; ava.style.width = ava.style.height = '26px'; ava.appendChild(chibiSvg(G.pl[p.owner].char)); ava.firstChild.style.width = ava.firstChild.style.height = '26px';
     own.appendChild(ava);
-    const nm = document.createElement('span'); nm.textContent = 'Chủ: ' + who(p.owner) + (q.t === 'city' ? ` · ${LEVELS[p.lv].icon} ${LEVELS[p.lv].name}` : ''); own.appendChild(nm);
+    const nm = document.createElement('span'); nm.textContent = 'Chủ: ' + who(p.owner) + (q.t === 'city' ? ` · ${LEVELS[p.lv].icon} ${lvName(i, p.lv)}` : ''); own.appendChild(nm);
   }
   panel.appendChild(own);
   const flags = document.createElement('div'); flags.className = 'flags';
@@ -3383,7 +3527,7 @@ function renderProp() {
   const row = (a, b, c, cls) => { const tr = document.createElement('tr'); if (cls) tr.className = cls; tr.innerHTML = '<td></td><td></td><td></td>'; tr.children[0].textContent = a; tr.children[1].textContent = b; tr.children[2].textContent = c; tb.appendChild(tr); };
   if (q.t === 'city') {
     row('Cấp nhà', 'Xây', 'Phí tham quan', 'dim');
-    for (let lv = 1; lv <= 5; lv++) row(`${LEVELS[lv].icon} ${LEVELS[lv].name}`, fmt(levelCost(i, lv)), fmt(r10(q.base * LEVELS[lv].rent)), p.lv === lv ? 'now' : '');
+    for (let lv = 1; lv <= 5; lv++) row(`${LEVELS[lv].icon} ${lvName(i, lv)}`, fmt(levelCost(i, lv)), fmt(r10(q.base * LEVELS[lv].rent)), p.lv === lv ? 'now' : '');
     if (p.owner >= 0) { row('Phí hiện tại (đã tính ×2)', '', fmt(rentBase(G, i)), 'now'); if (p.lv < 5) row('Giá mua lại (bằng vốn đã đầu tư)', '', fmt(takeoverPrice(G, i)), 'dim'); }
   } else {
     row('Phí tham quan', '', `${fmt(q.rent)} × số điểm du lịch chủ đang có`, 'dim');
@@ -3463,7 +3607,7 @@ function renderPlayerSheet() {
       const b = document.createElement('button'), q = SQ[i];
       b.innerHTML = '<i></i><span></span><small></small>';
       b.querySelector('i').style.setProperty('--g', groupColor(i));
-      b.querySelector('span').textContent = (q.t === 'tour' ? tourIcon(i) + ' ' : '') + q.name + (q.t === 'city' ? ` · ${LEVELS[G.props[i].lv].icon} ${LEVELS[G.props[i].lv].name}` : '');
+      b.querySelector('span').textContent = (q.t === 'tour' ? tourIcon(i) + ' ' : '') + q.name + (q.t === 'city' ? ` · ${LEVELS[G.props[i].lv].icon} ${lvName(i, G.props[i].lv)}` : '');
       b.querySelector('small').textContent = 'thu ' + fmt(rentBase(G, i));
       b.onclick = () => { $('plSheet').hidden = true; openProp(i); };
       list.appendChild(b);
