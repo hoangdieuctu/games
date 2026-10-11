@@ -2814,7 +2814,7 @@ async function animateSteps(ev, tok) {
 }
 const sqName = i => SQ[i].name;
 const colorOf = s => COLORS[s].main;
-const bandPt = i => { const b = bandOf(i); return [b.x + b.w / 2, b.y + b.h / 2]; };
+const bandPt = i => { const b = bandOf(i); return proj(b.x + b.w / 2, b.y + b.h / 2); }; // giữa dải nhà, đã chiếu ra màn hình
 // qua Bắt Đầu: hiện số tiền lương ngay trên ô Bắt Đầu (và trên thẻ người chơi)
 // (lương cộng vào số dư trên thẻ đúng lúc này, không cộng sẵn từ đầu bước đi)
 function passGoFx(s, salary) {
