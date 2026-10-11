@@ -715,7 +715,7 @@ button:disabled { opacity: .4; cursor: default; }
       <li>Dừng ở <b>thành phố</b> chưa có chủ thì mua và xây ngay: Nhà → Biệt thự → Chung cư → Khách sạn → Biểu tượng. Vòng đầu chỉ xây tới Chung cư; qua Bắt Đầu rồi mới xây Khách sạn; có Khách sạn rồi mới lên Biểu tượng. Về thành phố của mình thì được nâng cấp.</li>
       <li>Vào thành phố <b>của người khác</b> phải trả <b>phí tham quan</b> theo cấp nhà, rồi có thể <b>mua lại</b> với giá <b>bằng</b> số tiền chủ đã đầu tư (trừ Biểu tượng và điểm du lịch). <b>Biểu tượng</b> 🗼 cũng không bị ép bán, phá cấp hay đổi.</li>
       <li>Phí tham quan <b>×2</b> khi chủ có đủ nhóm màu, <b>×2</b> cho <b>mỗi lần</b> thành phố hoặc điểm du lịch được mở <b>lễ hội</b> (cộng dồn: 2 lần là ×4; mỗi lúc chỉ một nơi có lễ hội — mở ở nơi khác thì nơi cũ bị lấy lại, phí về như cũ), <b>×2</b> ở 3 <b>ô đất vàng ⭐</b> chọn ngẫu nhiên mỗi ván.</li>
-      <li><b>5 điểm du lịch</b> 🏖️ giá $200, phí $80 nhân với số điểm chủ đang có, không mua lại được. Ai gom đủ cả 5 <b>thắng ngay</b>.</li>
+      <li><b>5 điểm du lịch</b> 🏖️ càng xa ô Bắt Đầu càng đắt: giá từ $150 (Vũng Tàu) đến $300 (Đồ Sơn), phí tham quan từ $80 đến $320, nhân với số điểm chủ đang có, không mua lại được. Ai gom đủ cả 5 <b>thắng ngay</b>.</li>
       <li><b>Côn Đảo</b>: kẹt 3 lượt, ra sớm bằng tung đôi, nộp $100 hoặc thẻ ra tù. Tung đôi 3 lần liền cũng vào Côn Đảo. <b>Bến Xe</b>: lượt sau được đi tới ô bất kỳ (vé $40). <b>Đại Nhạc Hội</b>: trả $40 tổ chức lễ hội ở một thành phố hoặc điểm du lịch của mình. <b>Thuế</b>: nộp 10% tổng tài sản, tiền thuế dồn vào <b>Quỹ Thuế</b> — ai rút được thẻ Quỹ Thuế ở ô Cơ Hội sẽ nhận toàn bộ quỹ. <b>Nút ĐỔ</b>: chạm nhanh để tung ngẫu nhiên, hoặc <b>bấm giữ</b> cho thanh lực chạy rồi thả tay — lực càng cao càng dễ ra tổng điểm lớn. <b>Sòng bài</b>: đặt $100 đoán Chẵn/Lẻ (×2) hoặc Đôi (×6).</li>
       <li><b>Cơ Hội</b>: thẻ có lợi (nhận Quỹ Thuế, miễn phí tham quan, giảm 50%, khiên, ra tù, lễ hội miễn phí, thêm thẻ Chẵn/Lẻ) hoặc hại (đổi thành phố, ép bán, phá cấp, dịch bệnh, mất điện, bị đưa đi nơi khác).</li>
       <li>Tung đôi được đi tiếp, trừ khi vào Côn Đảo hay Bến Xe; không còn việc gì thì lượt tự chuyển. Thiếu tiền thì bán thành phố (được nửa vốn); bán hết cũng không đủ thì <b>phá sản</b> ngay, tài sản về tay chủ nợ. Đang thiếu tiền cũng có thể tự chọn <b>phá sản</b> thay vì bán nhà.</li>
@@ -780,13 +780,13 @@ const GROUPS = [
   { name: 'Tím', color: '#8e44ad' },
 ];
 const C = (name, g, base) => ({ t: 'city', name, g, base });
-const T = name => ({ t: 'tour', name });
+const T = (name, price, rent) => ({ t: 'tour', name, price, rent });
 const CH = { t: 'chance', name: 'Cơ Hội' };
 const SQ = [
-  { t: 'start', name: 'Bắt Đầu' }, C('Cà Mau', 0, 100), C('Đà Lạt', 0, 100), CH, C('Lạng Sơn', 1, 120), T('Vũng Tàu'), C('Thái Bình', 1, 120), C('Ninh Bình', 1, 140),
-  { t: 'island', name: 'Côn Đảo' }, C('Pleiku', 2, 160), C('Ninh Thuận', 2, 160), T('Hạ Long'), C('Tây Ninh', 3, 180), CH, C('Hải Phòng', 3, 200), T('Nha Trang'),
-  { t: 'festival', name: 'Đại Nhạc Hội' }, C('Thanh Hoá', 4, 220), C('Sa Pa', 4, 240), { t: 'tax', name: 'Thuế' }, C('Hội An', 5, 260), T('Phú Quốc'), C('Huế', 5, 260), C('Đà Nẵng', 5, 280),
-  { t: 'bus', name: 'Bến Xe' }, C('Bình Dương', 6, 300), C('Cần Thơ', 6, 320), CH, T('Đồ Sơn'), { t: 'casino', name: 'Sòng Bài' }, C('Hà Nội', 7, 380), C('Sài Gòn', 7, 400),
+  { t: 'start', name: 'Bắt Đầu' }, C('Cà Mau', 0, 100), C('Đà Lạt', 0, 100), CH, C('Lạng Sơn', 1, 120), T('Vũng Tàu', 150, 80), C('Thái Bình', 1, 120), C('Ninh Bình', 1, 140),
+  { t: 'island', name: 'Côn Đảo' }, C('Pleiku', 2, 160), C('Ninh Thuận', 2, 160), T('Hạ Long', 180, 160), C('Tây Ninh', 3, 180), CH, C('Hải Phòng', 3, 200), T('Nha Trang', 210, 160),
+  { t: 'festival', name: 'Đại Nhạc Hội' }, C('Thanh Hoá', 4, 220), C('Sa Pa', 4, 240), { t: 'tax', name: 'Thuế' }, C('Hội An', 5, 260), T('Phú Quốc', 250, 240), C('Huế', 5, 260), C('Đà Nẵng', 5, 280),
+  { t: 'bus', name: 'Bến Xe' }, C('Bình Dương', 6, 300), C('Cần Thơ', 6, 320), CH, T('Đồ Sơn', 300, 320), { t: 'casino', name: 'Sòng Bài' }, C('Hà Nội', 7, 380), C('Sài Gòn', 7, 400),
 ];
 // năm cấp nhà: chi phí từng bước và phí tham quan tính theo giá gốc của thành phố
 const LEVELS = [null,
@@ -797,7 +797,6 @@ const LEVELS = [null,
   { name: 'Biểu tượng', icon: '🗼', cost: 2, rent: 4.5 },
 ];
 const START_CASH = 2000, SALARY = 300, JAIL_FEE = 100, BUS_FEE = 40, FEST_FEE = 40, CASINO_BET = 100, TAX_RATE = 0.1;
-const TOUR_PRICE = 200, TOUR_RENT = 80;
 const START_POS = 0, ISLAND_POS = 8, FEST_POS = 16, BUS_POS = 24;
 const ALL = SQ.map((q, i) => i);
 const CITIES = ALL.filter(i => SQ[i].t === 'city'), TOURS = ALL.filter(i => SQ[i].t === 'tour'), PROPS = ALL.filter(i => SQ[i].t === 'city' || SQ[i].t === 'tour');
@@ -937,10 +936,11 @@ function levelCost(i, lv, G, s) {
   return r10(c);
 }
 const cumCost = (i, from, to, G, s) => { let v = 0; for (let k = from + 1; k <= to; k++) v += levelCost(i, k, G, s); return v; };
-const invested = (G, i) => (SQ[i].t === 'tour' ? TOUR_PRICE : cumCost(i, 0, G.props[i].lv));
+const invested = (G, i) => (SQ[i].t === 'tour' ? SQ[i].price : cumCost(i, 0, G.props[i].lv));
 const takeoverPrice = (G, i) => invested(G, i); // mua lại đúng bằng số vốn chủ đã bỏ ra
 const sellValue = (G, i) => invested(G, i) / 2;
-const tourPrice = (G, s) => r10(TOUR_PRICE * (hasSkill(G, s, 'tourist') ? 0.7 : 1));
+// điểm du lịch càng xa ô Bắt Đầu càng đắt, phí tham quan càng cao
+const tourPrice = (G, s, i) => r10(SQ[i].price * (hasSkill(G, s, 'tourist') ? 0.7 : 1));
 const ownsGroup = (G, s, g) => GROUP_IDX[g].every(i => G.props[i].owner === s);
 const countOwned = (G, s, list) => list.filter(i => G.props[i].owner === s).length;
 const groupsOwned = (G, s) => GROUPS.filter((g, k) => ownsGroup(G, s, k)).length;
@@ -950,7 +950,7 @@ const effectOn = (G, i, key) => G.props[i][key] > G.turnNo; // dịch bệnh / m
 function rentBase(G, i) {
   const q = SQ[i], p = G.props[i];
   if (p.owner < 0) return 0;
-  if (q.t === 'tour') return TOUR_RENT * countOwned(G, p.owner, TOURS) * (p.fest ? festMult(G, i) : 1);
+  if (q.t === 'tour') return q.rent * countOwned(G, p.owner, TOURS) * (p.fest ? festMult(G, i) : 1);
   if (!p.lv || effectOn(G, i, 'plague')) return 0;
   let r = q.base * LEVELS[p.lv].rent;
   if (ownsGroup(G, p.owner, q.g)) r *= 2;
@@ -1020,7 +1020,7 @@ function botPickTarget(G, s, kind, opts) {
       case 'swapTheirs': case 'forceSell': case 'destroy': case 'plague': case 'blackout': return rentBase(G, i) + invested(G, i) * 0.2 + netWorth(G, p.owner) * 0.05;
       case 'bus': {
         if (i === P.pos || !isProp(i)) return -1;
-        if (q.t === 'tour') return p.owner < 0 && P.cash >= tourPrice(G, s) + 200 ? 50 + 40 * countOwned(G, s, TOURS) : -1;
+        if (q.t === 'tour') return p.owner < 0 && P.cash >= tourPrice(G, s, i) + 200 ? 50 + 40 * countOwned(G, s, TOURS) : -1;
         if (p.owner < 0) return P.cash >= levelCost(i, 1, G, s) + 200 ? 30 + q.base / 10 + (GROUP_IDX[q.g].every(j => j === i || G.props[j].owner === s) ? 80 : 0) : -1;
         if (p.owner === s) return p.lv < maxLevel(G, s, i) && P.cash >= levelCost(i, p.lv + 1, G, s) + 200 ? 20 + q.base / 20 + (ownsGroup(G, s, q.g) ? 30 : 0) : -1;
         return canTakeover(G, s, i) && botWantsTakeover(G, s, i) ? 25 + (GROUP_IDX[q.g].every(j => j === i || G.props[j].owner === s) ? 90 : 0) : -1;
@@ -1251,7 +1251,7 @@ function land(s, steps) {
       break;
     case 'tour':
       if (p.owner < 0) {
-        const need = tourPrice(G, s);
+        const need = tourPrice(G, s, i);
         if (P.cash < need) steps.push({ k: 'noCash', s, i, need, mode: 'tour' });
         else { G.step = 'visit'; G.visit = { i, mode: 'tour' }; steps.push({ k: 'offer', s, i }); }
       }
@@ -1486,7 +1486,7 @@ function doBuy(s, lv) {
 }
 function doBuyTour(s) {
   if (!okTurn(s, ['visit']) || !G.visit || G.visit.mode !== 'tour') return;
-  const i = G.visit.i, P = G.pl[s], cost = tourPrice(G, s);
+  const i = G.visit.i, P = G.pl[s], cost = tourPrice(G, s, i);
   if (G.props[i].owner >= 0 || P.cash < cost) return;
   P.cash -= cost; G.props[i].owner = s;
   G.visit = null; G.step = 'roll';
@@ -1631,7 +1631,7 @@ function botAct(s) {
       const { i, mode } = G.visit, p = G.props[i];
       if (mode === 'buy') { const lv = botBuyLevel(G, s, i, 0); return lv ? doBuy(s, lv) : doSkip(s); }
       if (mode === 'upgrade') { const lv = botBuyLevel(G, s, i, p.lv); return lv > p.lv ? doBuy(s, lv) : doSkip(s); }
-      if (mode === 'tour') return P.cash >= tourPrice(G, s) + 150 ? doBuyTour(s) : doSkip(s);
+      if (mode === 'tour') return P.cash >= tourPrice(G, s, G.visit.i) + 150 ? doBuyTour(s) : doSkip(s);
       return botWantsTakeover(G, s, i) ? doTakeover(s) : doSkip(s);
     }
     case 'casino': return doCasino(s, Math.random() < 0.5 ? 'even' : 'odd');
@@ -3279,7 +3279,7 @@ function renderActions() {
       }
       box.appendChild(btn(v.mode === 'buy' ? 'Không mua' : 'Giữ nguyên', '', () => act('skip')));
     } else if (v.mode === 'tour') {
-      box.appendChild(btn(`${tourIcon(G.visit.i)} Mua · ${fmt(tourPrice(G, t))}`, 'primary', () => act('buyTour'), P.cash < tourPrice(G, t)));
+      box.appendChild(btn(`${tourIcon(G.visit.i)} Mua · ${fmt(tourPrice(G, t, G.visit.i))}`, 'primary', () => act('buyTour'), P.cash < tourPrice(G, t, G.visit.i)));
       box.appendChild(btn('Không mua', '', () => act('skip')));
     } else {
       box.appendChild(btn(`💰 Mua lại · ${fmt(takeoverPrice(G, i))}`, 'primary', () => act('takeover'), P.cash < takeoverPrice(G, i)));
@@ -3357,7 +3357,7 @@ function renderProp() {
   const head = document.createElement('div');
   head.className = 'prop-head' + (light ? ' light' : ''); head.style.background = col;
   head.innerHTML = `<div class="kind"></div><h2></h2>`;
-  head.querySelector('.kind').textContent = q.t === 'city' ? `Nhóm ${GROUPS[q.g].name.toLowerCase()} · giá gốc ${fmt(q.base)}` : `Điểm du lịch · giá ${fmt(TOUR_PRICE)}`;
+  head.querySelector('.kind').textContent = q.t === 'city' ? `Nhóm ${GROUPS[q.g].name.toLowerCase()} · giá gốc ${fmt(q.base)}` : `Điểm du lịch · giá ${fmt(q.price)}`;
   head.querySelector('h2').textContent = (q.t === 'tour' ? tourIcon(i) + ' ' : '') + q.name;
   panel.appendChild(head);
   const own = document.createElement('div'); own.className = 'prop-owner';
@@ -3385,7 +3385,7 @@ function renderProp() {
     for (let lv = 1; lv <= 5; lv++) row(`${LEVELS[lv].icon} ${LEVELS[lv].name}`, fmt(levelCost(i, lv)), fmt(r10(q.base * LEVELS[lv].rent)), p.lv === lv ? 'now' : '');
     if (p.owner >= 0) { row('Phí hiện tại (đã tính ×2)', '', fmt(rentBase(G, i)), 'now'); if (p.lv < 5) row('Giá mua lại (bằng vốn đã đầu tư)', '', fmt(takeoverPrice(G, i)), 'dim'); }
   } else {
-    row('Phí tham quan', '', `${fmt(TOUR_RENT)} × số điểm du lịch chủ đang có`, 'dim');
+    row('Phí tham quan', '', `${fmt(q.rent)} × số điểm du lịch chủ đang có`, 'dim');
     if (p.owner >= 0) row('Phí hiện tại', '', fmt(rentBase(G, i)), 'now');
     row('Không mua lại được · gom đủ 5 điểm là thắng', '', '', 'dim');
   }
