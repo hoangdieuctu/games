@@ -9,6 +9,7 @@
 <meta name="theme-color" content="#dfe8f1">
 <title>Xì Tố</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23177a4d'/%3E%3Crect x='7' y='4' width='18' height='24' rx='3' fill='%23fff'/%3E%3Ctext x='16' y='22' text-anchor='middle' font-size='14' fill='%23d62839'%3E%E2%99%A5%3C/text%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="icon-xito-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&display=swap" rel="stylesheet">
@@ -105,6 +106,8 @@ button:disabled { opacity: .4; cursor: default; }
 .plate .nm { font-size: 13px; font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 82px; }
 .seat.me .plate .nm { max-width: 130px; }
 .plate .ch { font-size: 12px; font-weight: 800; color: #9a7410; white-space: nowrap; }
+.plate .debt { font-size: 10px; font-weight: 800; color: #c0392b; white-space: nowrap; }
+.acts .loan { background: #f5c542; color: #4a3500; }
 .dbtn {
   position: absolute; right: -10px; top: -8px; width: 20px; height: 20px; border-radius: 50%;
   background: #fff; color: var(--ink); font-size: 11px; font-weight: 800; display: grid; place-items: center;
@@ -341,6 +344,7 @@ button:disabled { opacity: .4; cursor: default; }
     <p class="result-msg" id="rMsg"></p>
     <div class="row">
       <button id="bView">Xem bàn</button>
+      <button class="go" id="bLoan" hidden>💰 Vay thêm</button>
       <button class="go" id="bAgain">Chơi lại</button>
     </div>
   </div>
@@ -518,7 +522,7 @@ const myName = () => (store.get('xito.name', '') || '').trim();
 const seatIdx = () => [...Array(NSEAT).keys()];
 
 function freshSession(seats, c) {
-  return { phase: 'play', seats, chips: seats.map(x => (x ? c.start : 0)), cfg: { start: c.start, blind: c.blind },
+  return { phase: 'play', seats, chips: seats.map(x => (x ? c.start : 0)), debt: Array(NSEAT).fill(0), cfg: { start: c.start, blind: c.blind },
     hand: null, handNo: 0, dealer: -1, winner: null, seq: 0 };
 }
 function localSeats() {
@@ -660,6 +664,28 @@ function settle(alive, show) {
   }
   H.stage = 'done'; H.toAct = -1; H.bet.fill(0);
   H.result = { pots: pots.map(p => ({ amt: p.amt, win: p.win })), gains, names, best: bestCards };
+}
+
+// vay thêm một phần vốn khi hết tiền (chỉ lúc không đang cầm bài trong ván)
+function canLoan(W, s) {
+  const H = W && W.hand;
+  return s >= 0 && !!W.seats[s] && W.chips[s] <= 0 && (W.phase === 'play' || W.phase === 'over') &&
+    (!H || !H.cards[s] || H.stage === 'done');
+}
+function loan(s) {
+  if (!G || !canLoan(G, s)) return;
+  const amt = G.cfg.start;
+  G.chips[s] += amt;
+  if (!Array.isArray(G.debt)) G.debt = Array(NSEAT).fill(0);
+  G.debt[s] = (G.debt[s] || 0) + amt;
+  if (G.phase === 'over') { G.phase = 'play'; G.winner = null; G.hand = null; }
+  commit({ type: 'loan', s, amt });
+}
+function uiLoan() {
+  const me = viewerSeat();
+  if (!V || pending || !canLoan(V, me)) return;
+  $('resultSheet').hidden = true;
+  if (net.on && !net.host) sendIntent({ t: 'loan' }); else loan(me);
 }
 
 // màn hình của ghế v: giấu cỗ bài và tẩy của người khác
@@ -857,8 +883,9 @@ function paint() {
     if (cs) cs.forEach(x => { const e = cardEl(x.c); if (H.shown[s]) mark(e); cw.appendChild(e); });
     d.appendChild(cw);
     const chips = V.chips[s] - (H && H.stage === 'done' && !rv && H.result ? H.result.gains[s] : 0);
+    const debt = V.debt && isInt(V.debt[s], 1, 1e9) ? V.debt[s] : 0;
     const plate = document.createElement('div'); plate.className = 'plate';
-    plate.innerHTML = `<span class="av">${X.type === 'bot' ? '🤖' : AVATARS[s]}</span><span class="info"><span class="nm"></span><span class="ch">🪙 ${fmt(chips)}</span></span>`;
+    plate.innerHTML = `<span class="av">${X.type === 'bot' ? '🤖' : AVATARS[s]}</span><span class="info"><span class="nm"></span><span class="ch">🪙 ${fmt(chips)}</span>${debt > 0 ? `<span class="debt">nợ ${fmt(debt)}</span>` : ''}</span>`;
     plate.querySelector('.nm').textContent = s === me ? (X.name === 'Bạn' ? 'Bạn' : X.name + ' (bạn)') : X.name + (X.remote && X.online === false ? ' 📴' : '');
     if (H && H.dealer === s) { const b = document.createElement('span'); b.className = 'dbtn'; b.textContent = 'D'; b.title = 'Nút cái'; plate.appendChild(b); }
     d.appendChild(plate);
@@ -923,6 +950,15 @@ function renderBar() {
   const hint = t => { const d = document.createElement('div'); d.className = 'hint'; d.innerHTML = `<span>${t}</span>`; bar.appendChild(d); };
   if (!V) return;
   if (V.phase === 'lobby') return hint('Đang chờ chủ phòng bắt đầu' + DOTS);
+  if (canLoan(V, me) && (!H || H.stage !== 'done' || revealed())) {
+    hint('💸 Bạn hết tiền rồi. Vay thêm để chơi tiếp nhé!');
+    const acts = document.createElement('div'); acts.className = 'acts';
+    const b = document.createElement('button'); b.className = 'loan';
+    b.innerHTML = `💰 Vay thêm<br><small>${fmt(V.cfg.start)}</small>`;
+    b.disabled = pending; b.onclick = uiLoan;
+    acts.appendChild(b); bar.appendChild(acts);
+    return;
+  }
   if (V.phase === 'over') {
     const w = V.winner;
     return hint(w === me ? '🏆 Bạn thắng cả bàn!' : me >= 0 && V.chips[me] <= 0 ? 'Bạn hết tiền rồi. Bấm Ván mới để chơi lại.' : w >= 0 ? `🏆 ${esc(who(w))} thắng cả bàn!` : 'Hết ván.');
@@ -1105,6 +1141,7 @@ function describe(ev) {
     case 'street': return ['', 'Lật 3 lá chung', 'Lá chung thứ 4', 'Lá chung cuối cùng'][ev.street] || null;
     case 'showdown': return 'Lật tẩy so bài!';
     case 'over': return 'Hết ván!';
+    case 'loan': return Number.isInteger(ev.s) ? `${who(ev.s)} vay thêm ${fmt(ev.amt)}` : null;
     default: return null;
   }
 }
@@ -1125,6 +1162,7 @@ function show(v, ev) {
   if (ev && H && H.stage === 'bet' && H.toAct === me && me >= 0) setTimeout(() => { if (tok === animTok) playTurn(); }, ms);
   if (ev && ev.type === 'over') setTimeout(() => { if (tok === animTok) showResult(); }, 700);
   if (ev && ev.type === 'start') { $('resultSheet').hidden = true; $('lobbySheet').hidden = true; }
+  if (ev && ev.type === 'loan' && V.phase === 'play') $('resultSheet').hidden = true;
   syncLobby();
 }
 function showResult() {
@@ -1134,8 +1172,11 @@ function showResult() {
   $('rEmoji').textContent = w === me ? '🏆' : broke ? '💸' : '🃏';
   $('rTitle').textContent = w === me ? 'Bạn thắng cả bàn!' : broke ? 'Hết tiền rồi!' : `${who(w)} thắng!`;
   $('rMsg').textContent = w === me ? `Bạn gom được ${fmt(V.chips[me])} sau ${V.handNo} ván.`
-    : broke ? `Bạn trụ được ${V.handNo} ván. Làm lại ván mới nhé!` : 'Ván sau cố lên nhé!';
-  if (net.on && !net.host) $('rMsg').textContent += ' Chờ chủ phòng mở ván mới.';
+    : broke ? `Bạn trụ được ${V.handNo} ván. Vay thêm ${fmt(V.cfg.start)} để chơi tiếp, hoặc làm lại ván mới nhé!` : 'Ván sau cố lên nhé!';
+  const debt = me >= 0 && V.debt ? V.debt[me] | 0 : 0;
+  if (w === me && debt > 0) $('rMsg').textContent += ` Trừ ${fmt(debt)} tiền vay còn lãi ${fmt(V.chips[me] - debt)}.`;
+  $('bLoan').hidden = !canLoan(V, me);
+  if (net.on && !net.host && !broke) $('rMsg').textContent += ' Chờ chủ phòng mở ván mới.';
   $('bAgain').hidden = net.on && !net.host;
   $('resultSheet').hidden = false;
 }
@@ -1312,6 +1353,7 @@ function hostMsg(c, d) {
   const s = G.seats.findIndex(x => x && x.cid === net.conns.get(c));
   if (s < 0) return;
   if (d.t === 'act' && typeof d.a === 'string') doAct(s, d.a, d.to);
+  else if (d.t === 'loan') loan(s);
   else if (d.t === 'name' && G.phase === 'lobby') { const nm = cleanName(d.name); if (nm) { G.seats[s].name = nm; commit({ type: 'lobby' }); } }
   else if (d.t === 'bye') { G.seats[s].online = false; commit({ type: 'lobby' }); }
 }
@@ -1462,7 +1504,7 @@ $('lbShare').onclick = () => navigator.share({ title: 'Xì Tố', text: 'Vào ch
 $('lbFill').onchange = () => syncLobby();
 $('lbStart').onclick = hostStart;
 $('lbCancel').onclick = () => { if (G && G.phase === 'lobby') leaveOnline(); else $('lobbySheet').hidden = true; };
-$('lbLeave').onclick = () => leaveOnline();
+$('lbLeave').onclick = () => confirmLeave();
 $('lbClose').onclick = () => { $('lobbySheet').hidden = true; };
 let nameT = 0;
 $('lbName').oninput = () => {
@@ -1529,7 +1571,13 @@ $('bStart').onclick = () => { saveCfg(); $('setupSheet').hidden = true; newLocal
 $('setupSheet').onclick = e => { if (e.target === $('setupSheet') && (net.on || (G && G.hand))) $('setupSheet').hidden = true; };
 $('bOnline').onclick = () => onlineMenu();
 $('bInvite').onclick = () => openLobby();
-$('bLeave').onclick = () => leaveOnline();
+function confirmLeave() {
+  const msg = net.host ? 'Bạn là chủ phòng, thoát ra thì phòng sẽ đóng và mọi người sẽ bị ngắt kết nối.'
+    : 'Bạn sẽ rời bàn chơi online và quay về chơi với máy.';
+  netSheet('🚪', 'Thoát online?', msg, [[{ label: 'Ở lại', fn: hideNetSheet }, { label: 'Thoát', go: true, fn: () => leaveOnline() }]]);
+}
+$('bLeave').onclick = confirmLeave;
+$('bLoan').onclick = uiLoan;
 $('bRules').onclick = () => { $('rulesSheet').hidden = false; };
 $('bRulesOk').onclick = () => { $('rulesSheet').hidden = true; };
 $('rulesSheet').onclick = e => { if (e.target === $('rulesSheet')) $('rulesSheet').hidden = true; };
