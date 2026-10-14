@@ -168,6 +168,40 @@ button:disabled { opacity: .4; cursor: default; }
 .emo-pop button:hover { background: #eef2f7; }
 .emo-pop button:active { transform: scale(.85); }
 @media (max-width: 420px) { .emo-pop { grid-template-columns: repeat(6, 42px); } }
+/* chat nhanh: Enter mở ô nhập, tin nhắn hiện thành bong bóng thoại trên ghế */
+.chat-box {
+  position: fixed; z-index: 26; left: 50%; bottom: 84px; transform: translateX(-50%);
+  width: min(420px, calc(100vw - 32px)); display: flex; gap: 6px; padding: 6px; border-radius: 999px;
+  background: #fff; box-shadow: 0 12px 34px rgba(35,50,74,.28); animation: pop .18s cubic-bezier(.2,1.4,.5,1);
+}
+.chat-box[hidden] { display: none; }
+/* máy có bàn phím: gắn phím Enter lên nút Chat cho người chơi biết nhấn Enter là chat */
+.dock kbd {
+  display: none; padding: 1px 6px; border-radius: 6px; border: 1px solid #cfd8e6; border-bottom-width: 2px;
+  background: #f6f8fb; font: 700 11px system-ui, sans-serif; color: #5b6b85; line-height: 1.4;
+}
+@media (hover: hover) and (pointer: fine) { .dock kbd { display: inline-block; } }
+.chat-box input {
+  flex: 1; min-width: 0; border: 0; outline: 0; background: #f1f4f9; border-radius: 999px; padding: 9px 14px;
+  font: 600 16px 'Baloo 2', system-ui, sans-serif; color: #23324a;
+}
+.chat-box button { border-radius: 999px; padding: 0 16px; background: var(--ink); color: #fff; font: 700 15px 'Baloo 2', system-ui, sans-serif; }
+.emote.say {
+  width: auto; height: auto; max-width: 200px; margin: 0; padding: 6px 12px; border-radius: 14px; border-width: 2px;
+  background: #fff; font: 600 14px/1.35 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; color: #1b2638;
+  text-align: center; overflow-wrap: anywhere; box-shadow: 0 4px 14px rgba(20,30,50,.28);
+  animation: say 3.4s ease-out forwards;
+}
+.emote.say::after { /* đuôi bong bóng chỉ xuống ghế */
+  content: ''; position: absolute; left: 50%; bottom: -7px; width: 10px; height: 10px; margin-left: -6px;
+  background: #fff; border: solid var(--c); border-width: 0 2px 2px 0; transform: rotate(45deg);
+}
+@keyframes say {
+  0% { transform: translateY(6px) scale(.9); opacity: 0; }
+  8% { transform: none; opacity: 1; }
+  88% { opacity: 1; }
+  100% { transform: translateY(-4px); opacity: 0; }
+}
 
 /* ── lá bài ── */
 .card {
@@ -393,9 +427,14 @@ button:disabled { opacity: .4; cursor: default; }
   <button id="bInvite" hidden><i>🔗</i><span>Phòng</span></button>
   <button id="bLeave" hidden><i>✕</i><span>Thoát</span></button>
   <button id="bEmo"><i>😊</i><span>Cảm xúc</span></button>
+  <button id="bChat" title="Nhấn Enter để chat"><i>💬</i><span>Chat</span><kbd>Enter</kbd></button>
   <button id="bRules"><i>📖</i><span>Luật</span></button>
 </nav>
 <div class="emo-pop" id="emoPop" hidden></div>
+<form class="chat-box" id="chatBox" hidden autocomplete="off">
+  <input id="chatIn" maxlength="60" placeholder="Nhập tin nhắn rồi Enter…" enterkeyhint="send" spellcheck="false" aria-label="Tin nhắn">
+  <button type="submit">Gửi</button>
+</form>
 
 <!-- ván mới với máy -->
 <div class="overlay" id="setupSheet" hidden>
@@ -1092,7 +1131,8 @@ function paint() {
   layoutSeats(); // sau renderBar: thanh thao tác cao lên thì bàn thấp xuống
   $('bOnline').hidden = net.on; $('bInvite').hidden = !net.on; $('bLeave').hidden = !net.on;
   $('bNew').hidden = net.on && !net.host;
-  $('bEmo').hidden = emoteSeat() < 0;
+  $('bEmo').hidden = $('bChat').hidden = emoteSeat() < 0;
+  if (emoteSeat() < 0 && !$('chatBox').hidden) closeChat();
   $('roomTag').hidden = !net.on;
   $('roomTag').textContent = net.on ? (net.host ? 'Chủ phòng' : net.seat < 0 ? 'Đang xem' : 'Online') : '';
 }
@@ -1546,6 +1586,7 @@ function hostMsg(c, d) {
   if (d.t === 'act' && typeof d.a === 'string') doAct(s, d.a, d.to);
   else if (d.t === 'loan') loan(s);
   else if (d.t === 'emo') { if (EMOJIS.includes(d.e) && emoteOk(s)) { showEmote(s, d.e); netBroadcast({ t: 'emo', s, e: d.e }); } }
+  else if (d.t === 'chat') { const m = cleanChat(d.m); if (m && emoteOk(s)) { showChat(s, m); netBroadcast({ t: 'chat', s, m }); } }
   else if (d.t === 'name' && G.phase === 'lobby') { const nm = cleanName(d.name); if (nm) { G.seats[s].name = nm; commit({ type: 'lobby' }); } }
   else if (d.t === 'bye') { G.seats[s].online = false; commit({ type: 'lobby' }); }
 }
@@ -1630,6 +1671,7 @@ function guestMsg(d) {
   }
   else if (d.t === 'full') { const c = net.code; net.conn = null; netFail('Phòng đã đủ người', 'Phòng này đã có 6 người chơi rồi.', () => joinOnline(c)); }
   else if (d.t === 'emo' && Number.isInteger(d.s)) showEmote(d.s, d.e);
+  else if (d.t === 'chat' && Number.isInteger(d.s)) showChat(d.s, d.m);
   else if (d.t === 'bye') net.left = true;
 }
 
@@ -1771,7 +1813,11 @@ function exRow(groups) {
 // Online: khách gửi {t:'emo', e} cho chủ phòng, chủ phòng kiểm tra rồi phát
 // {t:'emo', s, e} cho cả phòng (kể cả người gửi). Không nằm trong G vì chỉ
 // thoáng qua, người vào sau không cần thấy.
+// Chat nhanh: nhấn Enter (hoặc nút 💬) để gõ một câu, Enter để gửi. Câu chat
+// hiện thành bong bóng thoại cũng trên ghế đó, đi chung đường {t:'chat', m}.
 const EMOJIS = ['😀', '😂', '😎', '😍', '😮', '😢', '😭', '😡', '🤔', '😏', '🤑', '😱', '👍', '👏', '🔥', '🃏'];
+const CHAT_MAX = 60;
+const cleanChat = v => String(v || '').replace(/\s+/g, ' ').trim().slice(0, CHAT_MAX);
 const emoteEls = Array(NSEAT).fill(null), emoteLast = Array(NSEAT).fill(0);
 const emoteOk = s => { const now = Date.now(); if (now - emoteLast[s] < 1000) return false; emoteLast[s] = now; return true; };
 function emoteSeat() {
@@ -1780,19 +1826,26 @@ function emoteSeat() {
   return s >= 0 && V.seats[s] && V.phase !== 'lobby' ? s : -1;
 }
 function playPop() { const t = sndT(); if (t) { tone(t, 620, 0.18, 0.08, 'sine'); tone(t + 0.06, 1240, 0.14, 0.1, 'sine'); } }
-function showEmote(s, e) {
-  if (!V || !Number.isInteger(s) || s < 0 || s >= NSEAT || !V.seats[s] || !EMOJIS.includes(e)) return;
+function showEmote(s, e) { if (EMOJIS.includes(e)) bubble(s, e, false); }
+function showChat(s, m) { m = cleanChat(m); if (m) bubble(s, m, true); }
+function bubble(s, e, say) {
+  if (!V || !Number.isInteger(s) || s < 0 || s >= NSEAT || !V.seats[s]) return;
   const seat = seatEl(s); if (!seat) return;
   if (emoteEls[s]) emoteEls[s].remove();
   const r = seat.querySelector('.plate').getBoundingClientRect();
   const d = document.createElement('div');
-  d.className = 'emote'; d.textContent = e;
+  d.className = say ? 'emote say' : 'emote'; d.textContent = e;
   d.style.setProperty('--c', SEAT_COLORS[s]);
   d.style.left = r.left + r.width / 2 + 'px';
   d.style.top = Math.max(50, r.top - 46) + 'px';
   document.body.appendChild(d);
+  if (say) { // bong bóng rộng theo chữ: căn giữa trên ghế, không tràn khỏi màn hình
+    const w = d.offsetWidth, h = d.offsetHeight;
+    d.style.left = Math.max(8, Math.min(innerWidth - w - 8, r.left + r.width / 2 - w / 2)) + 'px';
+    d.style.top = Math.max(50, r.top - h - 8) + 'px';
+  }
   emoteEls[s] = d;
-  setTimeout(() => { d.remove(); if (emoteEls[s] === d) emoteEls[s] = null; }, 2800);
+  setTimeout(() => { d.remove(); if (emoteEls[s] === d) emoteEls[s] = null; }, say ? Math.min(6000, 2800 + e.length * 60) : 2800);
   playPop();
 }
 function sendEmote(e) {
@@ -1802,6 +1855,15 @@ function sendEmote(e) {
   if (!emoteOk(s)) return;
   showEmote(s, e);
   if (net.on) netBroadcast({ t: 'emo', s, e });
+}
+function sendChat(m) {
+  const s = emoteSeat();
+  m = cleanChat(m);
+  if (s < 0 || !m) return;
+  if (net.on && !net.host) { if (Date.now() - emoteLast[s] >= 1000) { emoteLast[s] = Date.now(); netSend({ t: 'chat', m }); } return; }
+  if (!emoteOk(s)) return;
+  showChat(s, m);
+  if (net.on) netBroadcast({ t: 'chat', s, m });
 }
 (function buildEmoPop() {
   const pop = $('emoPop');
@@ -1825,6 +1887,27 @@ $('bEmo').onclick = e => {
 };
 document.addEventListener('pointerdown', e => {
   if (!$('emoPop').hidden && !$('emoPop').contains(e.target) && e.target !== $('bEmo')) $('emoPop').hidden = true;
+  if (!$('chatBox').hidden && !$('chatBox').contains(e.target) && !$('bChat').contains(e.target)) closeChat();
+});
+function openChat() {
+  if (emoteSeat() < 0) return;
+  $('emoPop').hidden = true;
+  $('chatBox').hidden = false;
+  $('chatIn').focus();
+}
+function closeChat() { $('chatBox').hidden = true; $('chatIn').value = ''; $('chatIn').blur(); }
+$('bChat').onclick = e => { e.stopPropagation(); $('chatBox').hidden ? openChat() : closeChat(); };
+$('chatBox').onsubmit = e => { e.preventDefault(); sendChat($('chatIn').value); closeChat(); };
+$('chatIn').onkeydown = e => { if (e.key === 'Escape') closeChat(); };
+// Enter ở bất cứ đâu trên bàn (không đang gõ ô khác, không có bảng nào mở) thì mở ô chat
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Enter' || e.isComposing || !$('chatBox').hidden) return;
+  const t = e.target;
+  if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
+  if ([...document.querySelectorAll('.overlay')].some(o => !o.hidden)) return;
+  if (emoteSeat() < 0) return;
+  e.preventDefault();
+  openChat();
 });
 </script>
 
