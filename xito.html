@@ -731,6 +731,13 @@ function firstActor(from) {
 // ── hành động (chỉ bộ điều khiển chạy) ──
 function startHand() {
   if (!G || G.phase !== 'play') return;
+  for (const s of seatIdx()) if (G.seats[s] && G.seats[s].remote && !G.seats[s].online) kickSeat(s);
+  if (net.on && G.seats.filter(Boolean).length < 2) { // bị đá hết, chỉ còn chủ phòng: về phòng chờ đợi bạn khác vào
+    G = Object.assign(freshSession(G.seats, cfg), { phase: 'lobby', chips: Array(NSEAT).fill(0), seq: G.seq });
+    commit({ type: 'lobby' });
+    $('resultSheet').hidden = true; openLobby();
+    return;
+  }
   const parts = seatIdx().filter(s => G.seats[s] && G.chips[s] > 0);
   const me = !net.on ? mySeat() : -1;
   if (parts.length < 2 || (me >= 0 && G.chips[me] <= 0)) {
@@ -908,7 +915,7 @@ function drive(ev) {
       return;
     }
     driveT = setTimeout(() => {
-      const d = G.seats[s].type === 'bot' ? botDecide(G, s) : { a: H.curBet > H.bet[s] ? 'fold' : 'check' };
+      const d = G.seats[s].type === 'bot' ? botDecide(G, s) : { a: 'fold' }; // rớt mạng: úp bỏ, hết ván thì bị đá
       doAct(s, d.a, d.to);
     }, wait + 650 + Math.random() * 750);
   } else if (H.stage === 'done') driveT = setTimeout(startHand, wait + 3600);
@@ -1421,7 +1428,7 @@ function showResult() {
 const PEERJS_URL = 'https://cdn.jsdelivr.net/npm/peerjs@1.5.5/dist/peerjs.min.js';
 const ROOM_PREFIX = 'xito-vibe-';
 const JOIN_ORDER = [3, 2, 4, 1, 5]; // khách đầu tiên ngồi đối diện chủ phòng
-const freshNet = () => ({ on: false, host: false, code: null, peer: null, conn: null, conns: new Map(), seat: -1, timer: 0, left: false });
+const freshNet = () => ({ on: false, host: false, code: null, peer: null, conn: null, conns: new Map(), seat: -1, timer: 0, ping: 0, left: false });
 let net = freshNet();
 function randCode() { return Array.from(crypto.getRandomValues(new Uint8Array(6)), b => 'abcdefghijkmnpqrstuvwxyz23456789'[b % 32]).join(''); }
 const myCid = (() => {
@@ -1494,8 +1501,12 @@ function netFail(title, msg, retry) {
   if (retry) rows[0].push({ label: 'Thử lại', go: true, fn: retry });
   netSheet('😕', title, msg, rows);
 }
+// Đóng tab đột ngột thì WebRTC không báo đóng kết nối, nên khách gửi 'ping' đều đặn;
+// chủ phòng không nghe thấy gì quá PING_LOST ms thì coi như khách đã rớt mạng.
+const PING_EVERY = 3000, PING_LOST = 12000;
+addEventListener('pagehide', () => { if (net.on && !net.host) netSend({ t: 'bye' }); });
 function closeNet() {
-  clearTimeout(net.timer);
+  clearTimeout(net.timer); clearInterval(net.ping);
   const bye = { t: 'bye' };
   if (net.conn) { netSend(bye); try { net.conn.close(); } catch (e) {} }
   for (const c of net.conns.keys()) { try { c.send(bye); c.close(); } catch (e) {} }
@@ -1534,17 +1545,20 @@ async function hostOnline(tries = 0) {
   const peer = n.peer = new Peer(ROOM_PREFIX + n.code, { debug: 0 });
   let opened = false;
   peer.on('open', () => { if (net !== n) return; opened = true; hideNetSheet(); openLobby(); });
+  n.ping = setInterval(() => {
+    for (const c of [...n.conns.keys()]) if (Date.now() - c.seen > PING_LOST) { c.lost(); try { c.close(); } catch (e) {} }
+  }, 2000);
   peer.on('connection', c => {
     if (net !== n) return c.close();
-    c.on('data', d => { if (net === n) hostMsg(c, d); });
-    const lost = () => {
+    c.seen = Date.now();
+    c.on('data', d => { if (net === n) { c.seen = Date.now(); hostMsg(c, d); } });
+    const lost = c.lost = () => {
       if (net !== n || !n.conns.has(c)) return;
       const cid = n.conns.get(c);
       n.conns.delete(c);
       const s = G.seats.findIndex(x => x && x.cid === cid);
       if (s < 0 || [...n.conns.values()].includes(cid)) return;
-      if (G.phase === 'lobby') G.seats[s] = null; else G.seats[s].online = false;
-      commit({ type: 'lobby' });
+      dropSeat(s);
     };
     c.on('close', lost); c.on('error', lost);
   });
@@ -1557,6 +1571,15 @@ async function hostOnline(tries = 0) {
       ? 'Trình duyệt này không hỗ trợ chơi online. Thử Chrome, Safari hoặc Firefox bản mới nhé.'
       : 'Không kết nối được máy chủ tìm bạn. Kiểm tra mạng rồi thử lại nhé.', () => hostOnline());
   });
+}
+// Người rớt mạng (hoặc bấm thoát) bị đá khỏi phòng: ghế trống lại cho người khác vào.
+// Đang dính ván thì để máy úp bỏ hộ, hết ván mới dọn ghế (startHand) để không làm lệch tiền cược.
+function kickSeat(s) { G.seats[s] = null; G.chips[s] = 0; if (G.debt) G.debt[s] = 0; }
+function dropSeat(s) {
+  const H = G.hand;
+  G.seats[s].online = false;
+  if (G.phase === 'lobby' || !H || !H.cards[s]) kickSeat(s); // không có bài trong ván này thì đá luôn
+  commit({ type: 'lobby' });
 }
 function hostMsg(c, d) {
   if (!d || typeof d !== 'object') return;
@@ -1588,7 +1611,7 @@ function hostMsg(c, d) {
   else if (d.t === 'emo') { if (EMOJIS.includes(d.e) && emoteOk(s)) { showEmote(s, d.e); netBroadcast({ t: 'emo', s, e: d.e }); } }
   else if (d.t === 'chat') { const m = cleanChat(d.m); if (m && emoteOk(s)) { showChat(s, m); netBroadcast({ t: 'chat', s, m }); } }
   else if (d.t === 'name' && G.phase === 'lobby') { const nm = cleanName(d.name); if (nm) { G.seats[s].name = nm; commit({ type: 'lobby' }); } }
-  else if (d.t === 'bye') { G.seats[s].online = false; commit({ type: 'lobby' }); }
+  else if (d.t === 'bye') dropSeat(s);
 }
 function hostStart() {
   const fill = $('lbFill').checked;
@@ -1626,6 +1649,8 @@ async function joinOnline(code) {
       clearTimeout(n.timer);
       n.conn = c;
       c.send({ t: 'hello', cid: myCid, name: myName() });
+      clearInterval(n.ping);
+      n.ping = setInterval(() => { if (net === n && n.conn === c) netSend({ t: 'ping' }); }, PING_EVERY);
     });
     c.on('data', d => { if (net === n && n.conn === c) guestMsg(d); });
     const lost = () => {
