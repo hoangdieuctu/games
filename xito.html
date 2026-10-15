@@ -1569,13 +1569,10 @@ function hostMsg(c, d) {
     if (s >= 0) { G.seats[s].online = true; if (name && G.phase === 'lobby') G.seats[s].name = name; }
     else {
       s = JOIN_ORDER.find(k => !G.seats[k]);
-      if (s === undefined) {
-        if (G.phase === 'lobby') { try { c.send({ t: 'full' }); } catch (e) {} net.conns.delete(c); setTimeout(() => c.close(), 500); return; }
-        s = -1; // hết ghế giữa ván: vào xem
-      } else {
-        G.seats[s] = { type: 'human', name: name || 'Người chơi ' + (s + 1), cid, online: true, remote: true };
-        if (G.phase !== 'lobby') G.chips[s] = G.cfg.start; // vào giữa chừng: chơi từ ván sau
-      }
+      // ván đã bắt đầu thì không nhận người mới (người cũ rớt mạng vẫn vào lại được ở trên)
+      const why = G.phase !== 'lobby' ? 'started' : s === undefined ? 'full' : '';
+      if (why) { try { c.send({ t: why }); } catch (e) {} net.conns.delete(c); setTimeout(() => c.close(), 500); return; }
+      G.seats[s] = { type: 'human', name: name || 'Người chơi ' + (s + 1), cid, online: true, remote: true };
     }
     try { c.send({ t: 'welcome', seat: s }); } catch (e) {}
     commit({ type: 'lobby' });
@@ -1670,6 +1667,7 @@ function guestMsg(d) {
     if (first && V.phase === 'over') showResult();
   }
   else if (d.t === 'full') { const c = net.code; net.conn = null; netFail('Phòng đã đủ người', 'Phòng này đã có 6 người chơi rồi.', () => joinOnline(c)); }
+  else if (d.t === 'started') { const c = net.code; net.conn = null; netFail('Ván đã bắt đầu', 'Phòng này đang chơi, không vào thêm được nữa.', () => joinOnline(c)); }
   else if (d.t === 'emo' && Number.isInteger(d.s)) showEmote(d.s, d.e);
   else if (d.t === 'chat' && Number.isInteger(d.s)) showChat(d.s, d.m);
   else if (d.t === 'bye') net.left = true;
@@ -1716,7 +1714,7 @@ function syncLobby(force) {
     const humans = V.seats.filter(x => x && x.type === 'human').length;
     $('lbStart').hidden = !lobby; $('lbCfg').hidden = !lobby;
     $('lbStart').disabled = humans < 2 && !fill;
-    $('lbHint').textContent = !lobby ? 'Ván đang chơi. Người vào sau sẽ được chơi từ ván tiếp theo (nếu còn ghế).'
+    $('lbHint').textContent = !lobby ? 'Ván đang chơi. Không nhận thêm người mới.'
       : humans < 2 && !fill ? 'Cần ít nhất 2 người (hoặc cho máy chơi cùng) để bắt đầu.' : `${humans} người đã sẵn sàng.`;
     $('lbCancel').textContent = lobby ? 'Huỷ phòng' : 'Đóng';
     segInto($('lbStartSeg'), START_OPTS, cfg.start, v => { cfg.start = v; saveCfg(); syncLobby(); });
