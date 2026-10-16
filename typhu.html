@@ -41,6 +41,8 @@ button:disabled { opacity: .4; cursor: default; }
   border: 1px solid rgba(255,255,255,.18); box-shadow: 0 3px 10px rgba(0,0,0,.3);
 }
 .mute { font-size: 18px; }
+.mute.off { opacity: .45; }
+.mute svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
 .top h1 { font-size: 24px; font-weight: 800; letter-spacing: 1px; white-space: nowrap; text-shadow: 0 2px 0 rgba(0,0,0,.4), 0 0 18px rgba(255,210,63,.35); }
 .top h1 span:nth-child(1) { color: #ff7b72; } .top h1 span:nth-child(2) { color: #ffd23f; } .top h1 span:nth-child(3) { color: #7be495; }
 .mute.on { background: #ffd23f; border-color: #fff; box-shadow: 0 0 0 3px rgba(255,210,63,.45), 0 3px 10px rgba(0,0,0,.3); animation: pingbtn 1s ease-in-out infinite; }
@@ -159,7 +161,7 @@ button:disabled { opacity: .4; cursor: default; }
   box-shadow: 0 6px 18px rgba(0,0,0,.35); transition: border-color .2s, box-shadow .2s; font-weight: 700; font-size: 13px;
 }
 .pl::before { content: ''; position: absolute; left: -2px; top: 12px; bottom: 12px; width: 5px; border-radius: 0 4px 4px 0; background: var(--c); }
-.pl.s1 { order: 1; } .pl.s2 { order: 2; } .pl.s3 { order: 3; } .pl.s0 { order: 4; }
+.pl.c1 { order: 1; } .pl.c2 { order: 2; } .pl.c3 { order: 3; } .pl.c0 { order: 4; }
 .pl.turn { border-color: var(--c); box-shadow: 0 0 0 3px color-mix(in srgb, var(--c) 35%, transparent), 0 0 28px color-mix(in srgb, var(--c) 60%, transparent), 0 6px 18px rgba(0,0,0,.35); }
 .pl.off { opacity: .6; }
 .pl.out { opacity: .5; } .pl.out .nm { text-decoration: line-through; }
@@ -342,7 +344,8 @@ button:disabled { opacity: .4; cursor: default; }
   .actions { position: absolute; z-index: 5; left: 50%; top: calc(50% - 5px + var(--s) * 1.78 + 14px); transform: translateX(-50%); width: max-content; max-width: min(60vw, 480px); min-height: 0; padding: 0; }
   .hud { position: absolute; inset: 0; z-index: 5; display: block; padding: 0; pointer-events: none; }
   .pl { position: absolute; width: clamp(168px, 19vw, 236px); pointer-events: auto; }
-  .pl.s1 { left: 10px; top: 8px; } .pl.s2 { right: 10px; top: 8px; } .pl.s3 { left: 10px; bottom: 8px; } .pl.s0 { right: 10px; bottom: 8px; }
+  /* c0 luôn là thẻ của chính mình (góc dưới bên phải), các ghế khác xoay theo */
+  .pl.c1 { left: 10px; top: 8px; } .pl.c2 { right: 10px; top: 8px; } .pl.c3 { left: 10px; bottom: 8px; } .pl.c0 { right: 10px; bottom: 8px; }
   .dock { position: absolute; left: 50%; bottom: env(safe-area-inset-bottom, 0px); transform: translateX(-50%); z-index: 6; padding: 0 0 6px; flex-wrap: nowrap; }
   .dock button { padding: 5px 12px; min-height: 34px; font-size: 13.5px; white-space: nowrap; }
 }
@@ -388,6 +391,12 @@ button:disabled { opacity: .4; cursor: default; }
 .seat .nm.empty { color: var(--muted); font-weight: 600; }
 .seat input.name { flex: 1; min-width: 0; padding: 6px 10px; font-size: 15px; text-align: left; border-width: 2px; }
 .seat.sub { margin-top: 4px; padding-left: 32px; }
+/* bảng chọn màu: chấm tròn, màu người khác đã lấy thì mờ đi */
+.colors { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+.seat.sub .colors { margin-top: 0; }
+.colors button { width: 26px; height: 26px; border-radius: 50%; background: var(--c); box-shadow: 0 0 0 2px #fff, 0 0 0 3px rgba(35,50,74,.15); transition: transform .12s; }
+.colors button.on { box-shadow: 0 0 0 3px #fff, 0 0 0 5px var(--c); transform: scale(1.12); }
+.colors button:disabled { opacity: .2; cursor: default; }
 .seat .tag { font-size: 12px; font-weight: 700; color: var(--muted); background: #eef2f7; border-radius: 999px; padding: 1px 8px; }
 .panel .go { display: block; width: 100%; margin-top: 18px; background: var(--ink); color: #fff; border-radius: 14px; padding: 12px; font-weight: 800; font-size: 18px; }
 .panel .rule { margin-top: 12px; font-size: 13px; color: var(--muted); line-height: 1.45; }
@@ -566,7 +575,9 @@ button:disabled { opacity: .4; cursor: default; }
   <span class="room-tag" id="roomTag" hidden></span>
   <button class="mute" id="bPing" aria-label="Đánh dấu một ô cho mọi người" hidden>📍</button>
   <button class="mute" id="bEmo" aria-label="Biểu tượng cảm xúc" hidden>😊</button>
+  <button class="mute" id="bMusic" aria-label="Bật/tắt nhạc nền">🎵</button>
   <button class="mute" id="bMute" aria-label="Bật/tắt âm thanh">🔊</button>
+  <button class="mute" id="bFull" aria-label="Toàn màn hình" hidden></button>
 </header>
 <div class="emo-pop" id="emoPop" hidden></div>
 
@@ -665,6 +676,7 @@ button:disabled { opacity: .4; cursor: default; }
     <input class="name" id="lbName" maxlength="16" autocomplete="off" spellcheck="false">
     <div class="label">Nhân vật của bạn</div>
     <div class="char-info" id="lbChar" style="cursor:pointer"></div>
+    <div id="lbColorBox"><div class="label">Màu của bạn</div><div class="colors" id="lbColor"></div></div>
     <div id="lbHostCtl">
       <div class="label">Thời lượng ván</div>
       <div class="seg" id="lbLen"></div>
@@ -774,7 +786,28 @@ const COLORS = [
   { name: 'Xanh dương', main: '#1e6fd8', soft: '#dce8fb', mid: '#94b9ee' },
   { name: 'Vàng', main: '#f5b700', soft: '#fff2c6', mid: '#f8d56b' },
   { name: 'Xanh lá', main: '#2e9d4f', soft: '#daf1e1', mid: '#8fd0a2' },
+  { name: 'Tím', main: '#8e44ad', soft: '#efe2f6', mid: '#c9a3dc' },
+  { name: 'Cam', main: '#f57c00', soft: '#fee8d2', mid: '#f9b77a' },
+  { name: 'Hồng', main: '#e0509a', soft: '#fbe2ef', mid: '#efa3c8' },
+  { name: 'Xanh ngọc', main: '#00a3a3', soft: '#d6f2f2', mid: '#7fd1d1' },
 ];
+// màu của ghế s: người chơi tự chọn (seats[s].color), chưa có thì theo thứ tự ghế
+const colIdx = s => { const c = G && G.seats[s] ? G.seats[s].color : null; return Number.isInteger(c) && COLORS[c] ? c : s; };
+const col = s => COLORS[colIdx(s)];
+// chia màu đầu ván: người giữ màu đã chọn (không trùng), máy và người chưa chọn lấy màu còn trống
+function assignColors(seats) {
+  const used = new Set();
+  seats.forEach(x => {
+    if (x && x.type === 'human' && Number.isInteger(x.color) && COLORS[x.color] && !used.has(x.color)) used.add(x.color);
+    else if (x) x.color = null;
+  });
+  seats.forEach((x, k) => {
+    if (!x || x.color !== null) return;
+    x.color = [k, ...COLORS.keys()].find(c => !used.has(c));
+    used.add(x.color);
+    if (x.type === 'bot') x.name = 'Máy ' + COLORS[x.color].name;
+  });
+}
 const GROUPS = [
   { name: 'Xanh da trời', color: '#7cc8ea', light: true },
   { name: 'Xanh nước biển', color: '#1e6fd8' },
@@ -850,8 +883,8 @@ const CARDS = [
   { text: 'Đổi thành phố: lấy một thành phố của đối thủ, đổi bằng một thành phố của bạn.', a: { pick: 'swapMine' }, icon: '🔁' },
   { text: 'Ép bán: buộc đối thủ bán một thành phố cho ngân hàng.', a: { pick: 'forceSell' }, icon: '📉' },
   { text: 'Phá dỡ: hạ một cấp nhà ở thành phố của đối thủ.', a: { pick: 'destroy' }, icon: '🧨' },
-  { text: 'Dịch bệnh: một thành phố của đối thủ không thu được phí trong 5 lượt.', a: { pick: 'plague' }, icon: '☣️' },
-  { text: 'Mất điện: một thành phố của đối thủ chỉ thu nửa phí trong 5 lượt.', a: { pick: 'blackout' }, icon: '🔌' },
+  { text: 'Dịch bệnh: một thành phố của đối thủ không thu được phí trong 5 lượt, hết ngay khi có người ghé vào.', a: { pick: 'plague' }, icon: '☣️' },
+  { text: 'Mất điện: một thành phố của đối thủ chỉ thu nửa phí trong 5 lượt, hết ngay khi có người ghé vào.', a: { pick: 'blackout' }, icon: '🔌' },
   { text: 'Đi đến ô Thuế và nộp thuế.', a: { go: 'tax' }, icon: '💸' },
   { text: 'Đi đến Đại Nhạc Hội.', a: { go: 'festival' }, icon: '🎤' },
   { text: 'Đi đến Bến Xe.', a: { go: 'bus' }, icon: '🚌' },
@@ -1096,12 +1129,15 @@ let potTxt = null; // chữ Quỹ Thuế giữa bàn
 let setup = store.get('typhu.setup', ['you', 'bot', 'bot', 'bot']);
 let localNames = store.get('typhu.names', ['', '', '', '']);
 let setupChars = store.get('typhu.chars', ['mc', '', '', '']);
+let setupColors = (c => (Array.isArray(c) && c.length === 4 && c.every(v => Number.isInteger(v) && COLORS[v]) ? c : [0, 1, 2, 3]))(store.get('typhu.colors', null));
+const myColor = () => setupColors[0];
 let gameLen = store.get('typhu.len', 'mid');
 const nameOf = k => (k === 0 ? (store.get('typhu.name', '') || '').trim() || 'Bạn' : (localNames[k] || '').trim() || 'Người ' + COLORS[k].name);
 const roundsOf = key => (LENS.find(x => x.key === key) || LENS[1]).rounds;
 const TAX_POS = ALL.find(i => SQ[i].t === 'tax');
 
 function freshGame(seats, maxRound) {
+  assignColors(seats);
   // chia nhân vật: ai chưa chọn (máy) thì lấy ngẫu nhiên nhân vật chưa ai dùng
   const used = new Set(seats.filter(x => x && x.char).map(x => x.char));
   const pool = shuffled(CHARS.length).map(k => CHARS[k].id).filter(id => !used.has(id));
@@ -1129,8 +1165,8 @@ function firstTurn(seats) {
   return act[Math.floor(Math.random() * act.length)];
 }
 function seatsFromSetup() {
-  return setup.map((t, k) => t === 'you' ? { type: 'human', name: nameOf(0), me: true, char: store.get('typhu.char', 'mc') }
-    : t === 'human' ? { type: 'human', name: nameOf(k), char: setupChars[k] || null }
+  return setup.map((t, k) => t === 'you' ? { type: 'human', name: nameOf(0), me: true, char: store.get('typhu.char', 'mc'), color: setupColors[0] }
+    : t === 'human' ? { type: 'human', name: nameOf(k), char: setupChars[k] || null, color: setupColors[k] }
     : t === 'bot' ? { type: 'bot', name: 'Máy ' + COLORS[k].name, char: null } : null);
 }
 
@@ -1236,18 +1272,23 @@ function setPick(s, kind, opts, optional, data) { G.step = 'pick'; G.pick = { ki
 function land(s, steps) {
   const P = G.pl[s], i = P.pos, q = SQ[i], p = G.props[i];
   switch (q.t) {
-    case 'city':
+    case 'city': {
+      // dịch bệnh / mất điện: ai ghé vào (kể cả chủ) là hết; khách ghé lần này vẫn được hưởng phí giảm
+      const sick = ['plague', 'blackout'].filter(k => effectOn(G, i, k));
+      const cure = () => { if (!sick.length) return; p.plague = 0; p.blackout = 0; steps.push({ k: 'cure', s, i, o: p.owner, fx: sick }); };
       // không đủ tiền cho lựa chọn rẻ nhất thì báo rồi chuyển lượt luôn, khỏi hiện bảng toàn nút mờ
       if (p.owner < 0) {
         const need = levelCost(i, 1, G, s);
         if (P.cash < need) steps.push({ k: 'noCash', s, i, need, mode: 'buy' });
         else { G.step = 'visit'; G.visit = { i, mode: 'buy' }; steps.push({ k: 'offer', s, i }); }
       } else if (p.owner === s) {
+        cure();
         const can = p.lv < maxLevel(G, s, i), need = can ? levelCost(i, p.lv + 1, G, s) : 0;
         if (can && P.cash < need) { homePay(s, i, steps); if (P.cash < need) steps.push({ k: 'noCash', s, i, need, mode: 'upgrade' }); else { G.step = 'visit'; G.visit = { i, mode: 'upgrade' }; steps.push({ k: 'home', s, i, can }); } }
         else { homePay(s, i, steps); if (can) { G.step = 'visit'; G.visit = { i, mode: 'upgrade' }; } steps.push({ k: 'home', s, i, can }); }
       } else {
         payRent(s, i, steps);
+        cure();
         if (P.out) break; // vừa phá sản vì không trả nổi
         if (G.step !== 'debt' && canTakeover(G, s, i)) {
           const need = takeoverPrice(G, i);
@@ -1256,6 +1297,7 @@ function land(s, steps) {
         }
       }
       break;
+    }
     case 'tour':
       if (p.owner < 0) {
         const need = tourPrice(G, s, i);
@@ -2304,7 +2346,7 @@ function renderCenter() {
 // chỉ vẽ lại khi trạng thái đất thật sự đổi (paint() gọi rất thường xuyên)
 function drawOwnership() {
   const g = $('gOwn'), gb = $('gOwnB');
-  const key = G ? JSON.stringify([G.pl.map(p => p.char), G.gold, PROPS.map(i => { const p = G.props[i]; return [p.owner, p.lv, p.fest, effectOn(G, i, 'plague'), effectOn(G, i, 'blackout')]; })]) : '';
+  const key = G ? JSON.stringify([G.pl.map(p => p.char), [0, 1, 2, 3].map(colIdx), G.gold, PROPS.map(i => { const p = G.props[i]; return [p.owner, p.lv, p.fest, effectOn(G, i, 'plague'), effectOn(G, i, 'blackout')]; })]) : '';
   if (key === ownKey) return;
   ownKey = key;
   g.innerHTML = ''; gb.innerHTML = '';
@@ -2313,9 +2355,9 @@ function drawOwnership() {
     const p = G.props[i], r = rectOf(i), q = SQ[i], bg = sqEls[i].querySelector('.bg');
     if (p.owner >= 0) {
       // nền ô tô màu nhạt của chủ, viền dày màu chủ và dải màu mép ngoài
-      const C = COLORS[p.owner], st = ownerStrip(i);
+      const C = col(p.owner), st = ownerStrip(i);
       const mono = q.t === 'city' && ownsGroup(G, p.owner, q.g);
-      bg.style.fill = p.fest ? '#fff1b8' : mono ? `url(#monoGrad${p.owner})` : C.soft;
+      bg.style.fill = p.fest ? '#fff1b8' : mono ? `url(#monoGrad${colIdx(p.owner)})` : C.soft;
       el('rect', { x: st.x, y: st.y, width: st.w, height: st.h, fill: C.main }, g);
       el('rect', { x: r.x + TI + 2, y: r.y + TI + 2, width: r.w - 2 * TI - 4, height: r.h - 2 * TI - 4, fill: 'none', stroke: C.main, 'stroke-width': 4 }, g);
       if (mono) drawMonopoly(g, i, p.owner);
@@ -2366,7 +2408,7 @@ function drawTourWarn(g, gb) {
 }
 // đủ nhóm màu (phí ×2): nền chuyển sắc rực màu chủ, quầng sáng thở, vệt sáng chạy quanh viền, sao lấp lánh
 function drawMonopoly(g, i, owner) {
-  const r = rectOf(i), b = bandOf(i), C = COLORS[owner], mg = el('g', { class: 'mono' }, g);
+  const r = rectOf(i), b = bandOf(i), C = col(owner), mg = el('g', { class: 'mono' }, g);
   el('rect', { x: r.x + TI + 4, y: r.y + TI + 4, width: r.w - 2 * TI - 8, height: r.h - 2 * TI - 8, rx: 3, fill: 'none', stroke: mix(C.main, '#fff', .55), 'stroke-width': 3, class: 'mono-glow' }, mg);
   el('rect', { x: r.x + TI + 2, y: r.y + TI + 2, width: r.w - 2 * TI - 4, height: r.h - 2 * TI - 4, fill: 'none', stroke: '#fff', 'stroke-width': 2, 'stroke-linecap': 'round', class: 'mono-shine' }, mg);
   el('rect', { x: b.x + 1, y: b.y + 1, width: b.w - 2, height: b.h - 2, fill: 'url(#monoShine)', class: 'mono-glow', style: 'animation-delay:-1s' }, mg);
@@ -2374,7 +2416,7 @@ function drawMonopoly(g, i, owner) {
 // điểm du lịch đã có chủ: dải biểu tượng tô đặc màu chủ, trên đó dựng huy hiệu (biểu tượng riêng từng nơi) viền màu chủ, dưới là phí hiện tại
 // cắm lá cờ phấp phới cùng màu, nhìn từ xa vẫn biết của ai
 function drawTourOwned(g, i, owner) {
-  const b = bandOf(i), C = COLORS[owner];
+  const b = bandOf(i), C = col(owner);
   el('rect', { x: b.x + 1, y: b.y + 1, width: b.w - 2, height: b.h - 2, fill: C.main, stroke: '#fff', 'stroke-width': 1.5 }, g);
   const [X, Y] = proj(b.x + b.w / 2, b.y + b.h / 2), t = el('g', { transform: `translate(${X} ${Y})` }, $('gOwnB'));
   if (MODE !== 'flat') { // bàn phẳng trên điện thoại: cờ dựng đứng sẽ đè lên tên ô bên cạnh nên bỏ
@@ -2421,7 +2463,7 @@ function drawFireworks(i) {
 // tô màu nhân vật; mỗi cấp một khối dáng riêng, có số cấp ở góc
 function drawBuilding(g, lv, cx, cy, owner, charId, i, mine) {
   const B = el('g', { transform: `translate(${cx} ${cy})` }, g);
-  const main = COLORS[owner].main, lite = mix(main, '#fff', .45), dark = mix(main, '#000', .32), line = mix(main, '#000', .5);
+  const main = col(owner).main, lite = mix(main, '#fff', .45), dark = mix(main, '#000', .32), line = mix(main, '#000', .5);
   el('ellipse', { cx: 0, cy: 11.5, rx: 12, ry: 3, fill: 'rgba(35,50,74,.18)' }, B); // bóng đổ
   const poly = (pts, fill, st = line, sw = .7) => el('polygon', { points: pts.map(p => p.join(',')).join(' '), fill, stroke: st, 'stroke-width': sw, 'stroke-linejoin': 'round' }, B);
   // khối hộp: góc trước F=(x,y), sâu về trái w, về phải d, cao h
@@ -2504,7 +2546,7 @@ function drawBuilding(g, lv, cx, cy, owner, charId, i, mine) {
 }
 function drawBuild() {
   const g = $('gBuild');
-  const key = G ? JSON.stringify([G.pl.map(p => p.char), G.seats.map((x, s) => isMine(s)), CITIES.map(i => [G.props[i].owner, G.props[i].lv])]) : '';
+  const key = G ? JSON.stringify([G.pl.map(p => p.char), [0, 1, 2, 3].map(colIdx), G.seats.map((x, s) => isMine(s)), CITIES.map(i => [G.props[i].owner, G.props[i].lv])]) : '';
   if (key === buildKey) return;
   buildKey = key;
   g.innerHTML = '';
@@ -2554,6 +2596,13 @@ const tokenEls = [0, 1, 2, 3].map(s => {
   g0.style.display = 'none';
   return g0;
 });
+// quân lấy màu người chơi đã chọn
+function setTokenColor(s) {
+  const t = tokenEls[s], m = col(s).main;
+  if (t.dataset.c === m) return;
+  t.dataset.c = m;
+  t.querySelector('.ring').setAttribute('stroke', m); t.querySelector('.disc').setAttribute('fill', m);
+}
 function setTokenFace(s, id) {
   const g = tokenEls[s].querySelector('.face-in');
   if (g.dataset.id === id) return;
@@ -2677,6 +2726,51 @@ function tone(ctx, type, f0, t, len, vol, f1) {
   g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.012); g.gain.exponentialRampToValueAtTime(0.001, t + len);
   o.connect(g).connect(ctx.destination); o.start(t); o.stop(t + len + 0.02);
 }
+// ── nhạc nền: giai điệu vui nhộn tự tổng hợp (C–G–Am–F), lặp mãi, nhỏ hơn tiếng hiệu ứng ──
+let musicOn = store.get('typhu.music', true), musicAt = 0, musicK = 0, musicBus = null;
+const MUS_STEP = 60 / 132 / 2; // nốt móc đơn ở 132 bpm
+// giai điệu 8 ô nhịp × 8 móc đơn (số MIDI, 0 = nghỉ)
+const MUS_MEL = [
+  72, 76, 79, 76, 77, 76, 74, 72,  74, 71, 74, 79, 77, 74, 71, 74,
+  76, 72, 76, 81, 79, 76, 72, 76,  77, 76, 74, 72, 74, 0, 72, 0,
+  79, 79, 76, 79, 81, 79, 76, 72,  74, 74, 79, 74, 71, 74, 77, 74,
+  72, 76, 81, 76, 79, 76, 74, 72,  77, 74, 72, 71, 72, 0, 0, 0,
+];
+const MUS_ROOT = [48, 43, 45, 41, 48, 43, 45, 41];
+const midiHz = n => 440 * Math.pow(2, (n - 69) / 12);
+function musNote(ctx, type, f, t, len, vol, cut) {
+  const o = ctx.createOscillator(), g = ctx.createGain();
+  o.type = type; o.frequency.setValueAtTime(f, t);
+  g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.01); g.gain.exponentialRampToValueAtTime(0.0008, t + len);
+  let out = g;
+  if (cut) { const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = cut; g.connect(lp); out = lp; }
+  o.connect(g); out.connect(musicBus); o.start(t); o.stop(t + len + 0.03);
+}
+function musStep(ctx, k, t) {
+  const n = MUS_MEL[k], b = k % 8, root = MUS_ROOT[Math.floor(k / 8)];
+  if (n) musNote(ctx, 'square', midiHz(n), t, MUS_STEP * 0.85, 0.05, 2600);
+  if (b % 2 === 0) musNote(ctx, 'triangle', midiHz(root + [0, 7, 12, 7][b / 2]), t, MUS_STEP * 1.5, 0.16);
+  if (b % 4 === 0) { // trống cái
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.frequency.setValueAtTime(130, t); o.frequency.exponentialRampToValueAtTime(45, t + 0.12);
+    g.gain.setValueAtTime(0.22, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.14);
+    o.connect(g).connect(musicBus); o.start(t); o.stop(t + 0.16);
+  }
+  if (b % 2 === 1) { // chũm chọe nhẹ ở phách lẻ
+    const src = ctx.createBufferSource(), hp = ctx.createBiquadFilter(), g = ctx.createGain();
+    src.buffer = white(ctx); hp.type = 'highpass'; hp.frequency.value = 7000;
+    g.gain.setValueAtTime(0.05, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.04);
+    src.connect(hp).connect(g).connect(musicBus); src.start(t, Math.random() * 0.5); src.stop(t + 0.05);
+  }
+}
+// lập lịch trước ~0.25s mỗi nhịp đồng hồ; tắt nhạc / tắt tiếng / ẩn tab thì ngừng xếp nốt mới
+setInterval(() => {
+  const ctx = musicOn && !document.hidden ? ready() : null;
+  if (!ctx) { musicAt = 0; return; }
+  if (!musicBus) { musicBus = ctx.createGain(); musicBus.gain.value = 0.55; musicBus.connect(ctx.destination); }
+  if (musicAt < ctx.currentTime) { musicAt = ctx.currentTime + 0.06; }
+  while (musicAt < ctx.currentTime + 0.25) { musStep(ctx, musicK, musicAt); musicK = (musicK + 1) % MUS_MEL.length; musicAt += MUS_STEP; }
+}, 80);
 function playRollSound() {
   const ctx = ready(); if (!ctx || playSfx('dice', 0.9)) return;
   const t0 = ctx.currentTime + 0.01;
@@ -2785,7 +2879,12 @@ function playParty() {
 function playPing() { const ctx = ready(); if (!ctx) return; const t = ctx.currentTime + 0.005; tone(ctx, 'sine', 1320, t, 0.12, 0.22); tone(ctx, 'sine', 1760, t + 0.13, 0.2, 0.22); }
 function playPop() { const ctx = ready(); if (!ctx) return; tone(ctx, 'sine', 520, ctx.currentTime + 0.005, 0.12, 0.3, 1250); }
 function playTap() { const ctx = ready(); if (!ctx) return; clack(ctx.currentTime + 0.005, 0.3, 1800, 0.03); }
-function syncMute() { $('bMute').textContent = muted ? '🔇' : '🔊'; }
+function syncMute() { $('bMute').textContent = muted ? '🔇' : '🔊'; $('bMusic').classList.toggle('off', !musicOn || muted); }
+$('bMusic').onclick = () => {
+  musicOn = !musicOn; store.set('typhu.music', musicOn);
+  if (musicOn && muted) { muted = false; store.set('typhu.mute', false); }
+  syncMute(); if (musicOn) audio();
+};
 $('bMute').onclick = () => { muted = !muted; store.set('typhu.mute', muted); syncMute(); if (!muted) audio(); };
 syncMute();
 
@@ -2872,7 +2971,7 @@ function cardMoney(s, delta) {
   const r = cash && cash.getBoundingClientRect(), loose = !r || !r.width;
   const d = document.createElement('div');
   d.textContent = (loose ? who(s) + ' ' : '') + (delta >= 0 ? '+' : '−') + fmt(delta);
-  d.style.setProperty('--c', COLORS[s].main);
+  d.style.setProperty('--c', col(s).main);
   let x, y, down, k;
   if (!loose) { k = moneyLive[s]++; down = r.top + r.height / 2 < innerHeight / 2; x = r.left + r.width / 2; y = r.top + r.height / 2 + (down ? 1 : -1) * k * 30; }
   else { k = moneyLoose++; down = false; const dock = document.querySelector('.dock').getBoundingClientRect(); x = innerWidth / 2; y = dock.top - 22 - k * 34; }
@@ -3085,7 +3184,7 @@ function stepMs(st) {
     case 'build': return 850; case 'buyTour': return 750; case 'takeover': return 1000; case 'skip': return 250;
     case 'casinoSkip': return 300; case 'casino': return 1900; case 'noCash': return 1100; case 'festNone': return 300; case 'festival': return 1000;
     case 'pickCity': return 400; case 'pickSkip': return 250; case 'swap': return 1000; case 'forceSell': return 900; case 'destroy': return 900;
-    case 'plague': case 'blackout': return 850; case 'shield': return 850; case 'sell': return 650; case 'bankrupt': return 1000;
+    case 'plague': case 'blackout': return 850; case 'cure': return 1000; case 'shield': return 850; case 'sell': return 650; case 'bankrupt': return 1000;
     case 'won': case 'timeup': return 900;
     case 'luck': return 1100; case 'pot': return 1300; case 'gift': return 1000;
     default: return 0;
@@ -3105,7 +3204,7 @@ async function animateSteps(ev, tok) {
   if (tok === animTok) { animating = false; stepsKeep = null; paint(); }
 }
 const sqName = i => SQ[i].name;
-const colorOf = s => COLORS[s].main;
+const colorOf = s => col(s).main;
 const bandPt = i => { const b = bandOf(i); return proj(b.x + b.w / 2, b.y + b.h / 2); }; // giữa dải nhà, đã chiếu ra màn hình
 // qua Bắt Đầu: hiện số tiền lương ngay trên ô Bắt Đầu (và trên thẻ người chơi)
 // (lương cộng vào số dư trên thẻ đúng lúc này, không cộng sẵn từ đầu bước đi)
@@ -3268,6 +3367,11 @@ async function animateStep(st, tok) {
       playAlert(); floatText(x, y - 20, st.k === 'plague' ? '☣️' : st.wiz ? '🪄⚡' : '🔌', '#23324a', 1000, 26); flashSquare(st.i, '#e8323c');
       await sleep(400); drawOwnership(); await sleep(ms - 400); return;
     }
+    case 'cure': {
+      const [x, y] = centerOf(st.i);
+      playPop(); pow(x, y - 20, st.fx.includes('plague') ? '✨ HẾT DỊCH' : '💡 CÓ ĐIỆN', '#2e9d4f');
+      await sleep(400); drawOwnership(); await sleep(ms - 400); return;
+    }
     case 'shield': { const [x, y] = centerOf(st.i); pow(x, y - 20, '🛡️', '#1e6fd8'); playPop(); await sleep(ms); return; }
     case 'noCash': { const [x, y] = tokenPt(s); pow(x, y - 36, 'KHÔNG ĐỦ TIỀN', '#e8323c'); playAlert(); await sleep(ms); return; }
     case 'sell': { const [x, y] = centerOf(st.i), [tx, ty] = tokenPt(s); drawOwnership(); drawBuild(); playCoin(true); floatText(x, y - 20, '🏷️ bán', '#e8323c', 1000, 18); cardMoney(s, st.amt); await sleep(ms); return; }
@@ -3373,6 +3477,7 @@ function stepText(st) {
     case 'plague': return `☣️ ${nm(st.i)} của ${other(st.o)} bị dịch bệnh — không thu phí 5 lượt`;
     case 'blackout': if (st.wiz) return `🪄 Pháp Sư ${w} yểm bùa: ${nm(st.i)} của ${other(st.o)} mất điện — phí còn một nửa 5 lượt`;
       return `🔌 ${nm(st.i)} của ${other(st.o)} mất điện — phí còn một nửa 5 lượt`;
+    case 'cure': return `${st.fx.includes('plague') ? '✨' : '💡'} ${w} ghé ${nm(st.i)} — ${st.fx.map(k => (k === 'plague' ? 'hết dịch bệnh' : 'có điện lại')).join(' và ')}, thu phí bình thường`;
     case 'shield': return `🛡️ Khiên của ${w} chặn được thẻ xấu nhắm vào ${nm(st.i)}`;
     case 'sell': return `${w} bán ${nm(st.i)} được ${fmt(st.amt)}`;
     case 'bankrupt': return `☠️ ${w} phá sản!${st.to >= 0 ? ' Tài sản về tay ' + other(st.to) + '.' : ''}`;
@@ -3395,7 +3500,7 @@ function paint(skipTokens) {
     // đang hoạt hoạ: quân vừa phá sản vẫn hiện để đi hết nước, bước 'bankrupt' mới làm mờ rồi ẩn
     if (!(skipTokens && G.seats[s] && G.pl[s].out)) g.style.display = inPlay && G.seats[s] && !G.pl[s].out ? '' : 'none';
     g.classList.toggle('turn', inPlay && G.phase === 'play' && G.turn === s);
-    if (G.seats[s]) setTokenFace(s, G.pl[s].char);
+    if (G.seats[s]) { setTokenFace(s, G.pl[s].char); setTokenColor(s); }
     if (!skipTokens) placeToken(s, G.pl[s].pos, G.pl[s].jail > 0);
   }
   paintPicks(); renderSpy();
@@ -3466,13 +3571,15 @@ function renderPlayers() {
   pl.innerHTML = '';
   // thứ hạng theo tổng tài sản (người phá sản xếp cuối)
   const live = [0, 1, 2, 3].filter(s => G.seats[s] && !G.pl[s].out).sort((a, b) => netWorth(G, b) - netWorth(G, a));
+  // xoay chỗ ngồi để ghế của mình luôn ở góc c0 (dưới bên phải)
+  const base = Math.max(0, [0, 1, 2, 3].findIndex(k => G.seats[k] && isMine(k)));
   for (let s = 0; s < 4; s++) {
     const x = G.seats[s];
     if (!x) continue;
     const P = G.pl[s], ch = charOf(P.char), d = document.createElement('div');
     const mine = net.on ? s === net.seat : x.type === 'human' && !x.remote;
-    d.className = 'pl s' + s + (mine ? ' me' : '') + (G.phase === 'play' && G.turn === s ? ' turn' : '') + (x.remote && !x.online ? ' off' : '') + (P.out ? ' out' : '');
-    d.style.setProperty('--c', COLORS[s].main);
+    d.className = 'pl s' + s + ' c' + ((s - base + 4) % 4) + (mine ? ' me' : '') + (G.phase === 'play' && G.turn === s ? ' turn' : '') + (x.remote && !x.online ? ' off' : '') + (P.out ? ' out' : '');
+    d.style.setProperty('--c', col(s).main);
     const top = document.createElement('div'); top.className = 'pl-top';
     const ava = document.createElement('span'); ava.className = 'ava'; ava.appendChild(chibiSvg(P.char)); top.appendChild(ava);
     const id = document.createElement('div'); id.className = 'pl-id';
@@ -3510,7 +3617,7 @@ function renderPlayers() {
 const canRoll = () => G.phase === 'play' && canAct(G.turn) && (G.step === 'roll' || G.step === 'jail') && !busy() && !pending;
 function renderDice() {
   const dice = $('dice');
-  dice.style.setProperty('--c', G.phase === 'play' && COLORS[G.turn] ? COLORS[G.turn].main : '#ccd');
+  dice.style.setProperty('--c', G.phase === 'play' && G.seats[G.turn] ? col(G.turn).main : '#ccd');
   dice.disabled = !canRoll();
   $('diceStage').classList.toggle('ready', canRoll());
   const dv = Array.isArray(G.dice) ? G.dice : [6, 1];
@@ -3630,7 +3737,7 @@ function showResult() {
   st.innerHTML = '';
   [0, 1, 2, 3].filter(k => G.seats[k]).sort((a, b) => (a === s ? -1 : b === s ? 1 : 0) || (G.pl[a].out - G.pl[b].out) || netWorth(G, b) - netWorth(G, a)).forEach((k, idx) => {
     const d = document.createElement('div');
-    d.className = 'st' + (G.pl[k].out ? ' out' : ''); d.style.setProperty('--c', COLORS[k].main);
+    d.className = 'st' + (G.pl[k].out ? ' out' : ''); d.style.setProperty('--c', col(k).main);
     const ava = document.createElement('span'); ava.className = 'ava'; ava.appendChild(chibiSvg(G.pl[k].char));
     d.innerHTML = `<span>${idx + 1}.</span>`; d.appendChild(ava);
     d.insertAdjacentHTML('beforeend', `<span class="nm"></span><span class="v">${G.pl[k].out ? 'phá sản' : fmt(netWorth(G, k))}</span>`);
@@ -3702,7 +3809,7 @@ function renderPlayerSheet() {
   const s = plOpen, P = G.pl[s], ch = charOf(P.char), panel = $('plPanel');
   if (!G.seats[s]) { $('plSheet').hidden = true; return; }
   panel.innerHTML = '';
-  panel.style.setProperty('--c', COLORS[s].main);
+  panel.style.setProperty('--c', col(s).main);
   const head = document.createElement('div'); head.className = 'pl-head';
   head.appendChild(chibiSvg(P.char));
   const hd = document.createElement('div'); hd.innerHTML = '<h2></h2><div class="skill"></div>';
@@ -3789,7 +3896,7 @@ function renderLog() {
   if (!gameLog.length) { const li = document.createElement('li'); li.textContent = 'Chưa có gì xảy ra.'; ul.appendChild(li); return; }
   for (let k = gameLog.length - 1; k >= 0; k--) {
     const e = gameLog[k], li = document.createElement('li');
-    if (e.turn) li.className = 'turn'; else if (e.s >= 0) li.style.setProperty('--c', COLORS[e.s].main);
+    if (e.turn) li.className = 'turn'; else if (e.s >= 0) li.style.setProperty('--c', col(e.s).main);
     li.textContent = e.t; ul.appendChild(li);
   }
 }
@@ -4027,7 +4134,7 @@ function leaveOnline() {
 async function hostOnline(tries = 0) {
   const n = startNet(true, randCode());
   net.seat = 0;
-  G = Object.assign(freshGame([{ type: 'human', name: myName() || 'Chủ phòng', cid: myCid, online: true, char: myChar() }, null, null, null], roundsOf(gameLen)), { phase: 'lobby' });
+  G = Object.assign(freshGame([{ type: 'human', name: myName() || 'Chủ phòng', cid: myCid, online: true, char: myChar(), color: myColor() }, null, null, null], roundsOf(gameLen)), { phase: 'lobby' });
   statusEv = '';
   paint();
   netSheet('🌐', 'Tạo phòng', `Đang tạo phòng${DOTS}`, [[{ label: 'Huỷ', fn: () => leaveOnline() }]]);
@@ -4065,6 +4172,13 @@ async function hostOnline(tries = 0) {
 }
 const cleanName = v => String(v || '').replace(/\s+/g, ' ').trim().slice(0, 16);
 const cleanChar = v => (CHARS.some(x => x.id === v) ? v : null);
+const cleanColor = v => (Number.isInteger(v) && COLORS[v] ? v : null);
+// màu còn trống trong phòng (không trùng người khác)
+function freeColor(want, seat) {
+  const taken = G.seats.map((x, k) => (x && k !== seat ? x.color : null));
+  if (want !== null && !taken.includes(want)) return want;
+  return [seat, ...COLORS.keys()].find(c => !taken.includes(c));
+}
 // nhân vật còn trống trong phòng (không trùng người khác)
 function freeChar(want, seat) {
   const taken = G.seats.map((x, k) => (x && k !== seat ? x.char : null));
@@ -4085,7 +4199,8 @@ function hostMsg(c, d) {
     else if (G.phase === 'lobby') {
       s = JOIN_ORDER.find(k => !G.seats[k]);
       if (s === undefined) { try { c.send({ t: 'full' }); } catch (e) {} net.conns.delete(c); setTimeout(() => c.close(), 500); return; }
-      G.seats[s] = { type: 'human', name: name || 'Người chơi ' + (s + 1), cid, online: true, remote: true, char: freeChar(cleanChar(d.char), s) };
+      G.seats[s] = { type: 'human', name: name || 'Người chơi ' + (s + 1), cid, online: true, remote: true, char: freeChar(cleanChar(d.char), s), color: null };
+      G.seats[s].color = freeColor(cleanColor(d.color), s);
       G.pl[s].char = G.seats[s].char;
     } else s = -1;
     try { c.send({ t: 'welcome', seat: s }); } catch (e) {}
@@ -4096,6 +4211,7 @@ function hostMsg(c, d) {
   if (s < 0) return;
   if (d.t === 'name' && G.phase === 'lobby') { const nm = cleanName(d.name); if (nm) { G.seats[s].name = nm; commit({ type: 'lobby' }); } }
   else if (d.t === 'char' && G.phase === 'lobby') { const ch = cleanChar(d.c); if (ch && freeChar(ch, s) === ch) { G.seats[s].char = ch; G.pl[s].char = ch; commit({ type: 'lobby' }); } }
+  else if (d.t === 'color' && G.phase === 'lobby') { const c = cleanColor(d.c); if (c !== null && freeColor(c, s) === c) { G.seats[s].color = c; commit({ type: 'lobby' }); } }
   else if (d.t === 'bye') { G.seats[s].online = false; }
   else if (d.t === 'gift') { if (Number.isInteger(d.to) && Number.isInteger(d.amt)) doGift(s, d.to, d.amt); }
   else if (d.t === 'ping') {
@@ -4151,7 +4267,7 @@ async function joinOnline(code) {
       if (net !== n) return c.close();
       clearTimeout(n.timer);
       n.conn = c;
-      c.send({ t: 'hello', cid: myCid, name: myName(), char: myChar() });
+      c.send({ t: 'hello', cid: myCid, name: myName(), char: myChar(), color: myColor() });
     });
     c.on('data', d => { if (net === n && n.conn === c) guestMsg(d); });
     const lost = () => {
@@ -4228,7 +4344,7 @@ function syncLobby(force) {
   const fill = $('lbFill').checked;
   for (let k = 0; k < 4; k++) {
     const x = G.seats[k], row = document.createElement('div');
-    row.className = 'seat'; row.style.setProperty('--c', COLORS[k].main);
+    row.className = 'seat'; row.style.setProperty('--c', x ? col(k).main : '#c5cdd8');
     row.innerHTML = `<span class="chip"></span><span class="nm"></span>`;
     const nm = row.querySelector('.nm');
     if (x) {
@@ -4242,6 +4358,14 @@ function syncLobby(force) {
   const mine = net.seat >= 0 && G.seats[net.seat] ? G.seats[net.seat].char : myChar();
   charInfoInto($('lbChar'), mine);
   $('lbChar').parentElement.querySelectorAll('.label')[2].hidden = $('lbChar').hidden = !(G.phase === 'lobby' && net.seat >= 0);
+  $('lbColorBox').hidden = !(G.phase === 'lobby' && net.seat >= 0);
+  if (!$('lbColorBox').hidden) {
+    const taken = G.seats.map((x, k) => (x && k !== net.seat ? colIdx(k) : null));
+    colorPicker($('lbColor'), colIdx(net.seat), taken, c => {
+      setupColors[0] = c; store.set('typhu.colors', setupColors);
+      if (net.host) { G.seats[0].color = c; commit({ type: 'lobby' }); } else netSend({ t: 'color', c });
+    });
+  }
   if (net.host) {
     const humans = G.seats.filter(x => x && x.type === 'human').length;
     $('lbStart').hidden = G.phase !== 'lobby';
@@ -4294,14 +4418,30 @@ $('lobbySheet').onclick = e => { if (e.target === $('lobbySheet') && G && G.phas
 // ═══════════════════════════ nút & khởi động ═══════════════════════════
 const SEAT_OPTS = [['bot', 'Máy'], ['human', 'Người'], ['off', 'Trống']];
 const seatChar = k => (k === 0 ? myChar() : setupChars[k] || null);
+// dải chấm màu: bấm để chọn, màu ghế khác đang dùng thì khoá
+function colorPicker(box, cur, taken, onPick) {
+  box.innerHTML = '';
+  COLORS.forEach((C, c) => {
+    const b = document.createElement('button');
+    b.style.setProperty('--c', C.main); b.title = C.name; b.setAttribute('aria-label', 'Màu ' + C.name);
+    if (c === cur) b.className = 'on';
+    b.disabled = c !== cur && taken.includes(c);
+    b.onclick = () => { if (c !== cur) onPick(c); };
+    box.appendChild(b);
+  });
+}
 function renderSetup() {
   const box = $('setupSeats');
   box.innerHTML = '';
+  // xem trước màu từng ghế (máy lấy màu còn trống)
+  const preview = seatsFromSetup();
+  assignColors(preview);
+  const humanSeat = j => j === 0 || setup[j] === 'human';
   setup.forEach((t, k) => {
-    const row = document.createElement('div');
-    row.className = 'seat'; row.style.setProperty('--c', COLORS[k].main);
+    const row = document.createElement('div'), C = COLORS[preview[k] ? preview[k].color : k];
+    row.className = 'seat'; row.style.setProperty('--c', C.main);
     row.innerHTML = `<span class="chip"></span><span class="who"></span>`;
-    row.querySelector('.who').textContent = COLORS[k].name;
+    row.querySelector('.who').textContent = C.name;
     if (k === 0) row.appendChild(nameInput(0, 'Tên của bạn'));
     else {
       const seg = document.createElement('div'); seg.className = 'seg';
@@ -4311,7 +4451,7 @@ function renderSetup() {
     box.appendChild(row);
     if (k === 0 || t === 'human') {
       const sub = document.createElement('div'); sub.className = 'seat sub';
-      if (k > 0) sub.appendChild(nameInput(k, 'Tên người chơi ' + COLORS[k].name));
+      if (k > 0) sub.appendChild(nameInput(k, 'Tên người chơi ' + C.name));
       const pc = document.createElement('button'); pc.className = 'pick-char';
       const cur = seatChar(k) || CHARS[k].id;
       pc.appendChild(chibiSvg(cur));
@@ -4325,6 +4465,12 @@ function renderSetup() {
       };
       sub.appendChild(pc);
       box.appendChild(sub);
+      const cs = document.createElement('div'); cs.className = 'seat sub';
+      const pick = document.createElement('div'); pick.className = 'colors';
+      colorPicker(pick, setupColors[k], setup.map((tt, j) => (j !== k && humanSeat(j) ? setupColors[j] : null)), c => {
+        setupColors[k] = c; store.set('typhu.colors', setupColors); renderSetup();
+      });
+      cs.appendChild(pick); box.appendChild(cs);
     }
   });
   renderLenSeg($('suLen')); $('suLenHint').textContent = lenHint(gameLen);
@@ -4345,6 +4491,7 @@ function newLocalGame() {
   clearTimeout(driveT);
   // người chơi chung máy chưa chọn thì lấy nhân vật mặc định theo ghế, tránh trùng
   const seats = seatsFromSetup();
+  // hai người chung máy chọn trùng màu thì người sau đổi sang màu khác (assignColors lo)
   const used = new Set();
   seats.forEach((x, k) => { if (!x || x.type !== 'human') return; if (!x.char || used.has(x.char)) x.char = CHARS.map(c => c.id).find(id => !used.has(id)); used.add(x.char); });
   G = freshGame(seats, roundsOf(gameLen));
@@ -4383,6 +4530,22 @@ $('bLeave').onclick = () => leaveOnline();
   $('rulesCards').innerHTML = CARDS.map(c => `<li>${c.icon} ${c.text}</li>`).join('');
 })();
 $('bRules').onclick = () => { $('rulesSheet').hidden = false; };
+// ⛶ toàn màn hình (trình duyệt không hỗ trợ, như Safari trên iPhone, thì ẩn nút)
+(function fullscreen() {
+  const d = document, root = d.documentElement, b = $('bFull');
+  const req = root.requestFullscreen || root.webkitRequestFullscreen, exit = d.exitFullscreen || d.webkitExitFullscreen;
+  if (!req || !exit) return;
+  const cur = () => d.fullscreenElement || d.webkitFullscreenElement;
+  const ICON_IN = '<svg viewBox="0 0 24 24"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg>';
+  const ICON_OUT = '<svg viewBox="0 0 24 24"><path d="M9 4v5H4M15 4v5h5M20 15h-5v5M4 15h5v5"/></svg>';
+  const sync = () => { const on = !!cur(); b.innerHTML = on ? ICON_OUT : ICON_IN; b.setAttribute('aria-label', on ? 'Thoát toàn màn hình' : 'Toàn màn hình'); setTimeout(fit, 120); };
+  b.onclick = () => {
+    if (cur()) { exit.call(d); return; }
+    try { const r = req.call(root, { navigationUI: 'hide' }); if (r && r.catch) r.catch(() => {}); } catch (e) {}
+  };
+  d.addEventListener('fullscreenchange', sync); d.addEventListener('webkitfullscreenchange', sync);
+  b.hidden = false; sync();
+})();
 $('bPing').onclick = () => { setPingMode(!pingMode); if (pingMode) { $('emoPop').hidden = true; playTap(); } };
 (function emoPanel() {
   const pop = $('emoPop');
