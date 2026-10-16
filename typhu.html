@@ -463,6 +463,8 @@ button:disabled { opacity: .4; cursor: default; }
 @keyframes tourwarn { 50% { transform: scale(1.25); } }
 .tour-flag { transform-box: fill-box; transform-origin: left center; animation: tourflag 1.6s ease-in-out infinite; }
 @keyframes tourflag { 50% { transform: scaleX(.8) skewY(6deg); } }
+.lm-halo { transform-box: fill-box; transform-origin: center; pointer-events: none; animation: lmhalo 1.8s ease-out infinite; }
+@keyframes lmhalo { from { transform: scale(.8); opacity: .9; } to { transform: scale(1.3); opacity: 0; } }
 .step-badge { animation: steppop .3s cubic-bezier(.2, 1.6, .4, 1) both; pointer-events: none; }
 @keyframes steppop { from { transform: scale(0); } to { transform: scale(1); } }
 .step-num { font: 900 14px 'Baloo 2', system-ui, sans-serif; fill: #fff; text-anchor: middle; dominant-baseline: central; }
@@ -2417,7 +2419,7 @@ function drawFireworks(i) {
 }
 // nhà cửa 3D (isometric 2:1): tường và mái lấy màu người chơi sở hữu, nền lô đất
 // tô màu nhân vật; mỗi cấp một khối dáng riêng, có số cấp ở góc
-function drawBuilding(g, lv, cx, cy, owner, charId, i) {
+function drawBuilding(g, lv, cx, cy, owner, charId, i, mine) {
   const B = el('g', { transform: `translate(${cx} ${cy})` }, g);
   const main = COLORS[owner].main, lite = mix(main, '#fff', .45), dark = mix(main, '#000', .32), line = mix(main, '#000', .5);
   el('ellipse', { cx: 0, cy: 11.5, rx: 12, ry: 3, fill: 'rgba(35,50,74,.18)' }, B); // bóng đổ
@@ -2462,16 +2464,31 @@ function drawBuilding(g, lv, cx, cy, owner, charId, i) {
       break;
     }
     case 5: {
-      el('circle', { cx: 0, cy: -3, r: 14, fill: '#ffd23f', opacity: .3 }, B);
+      // quầng sáng màu chủ dưới chân + vòng nhịp thở, nhìn xa vẫn biết của ai
+      el('ellipse', { cx: 0, cy: 6, rx: mine ? 21 : 17, ry: mine ? 10.5 : 8.5, fill: mine ? 'url(#mineGrad)' : main, opacity: .55, stroke: '#fff', 'stroke-width': 1.2 }, B);
+      el('ellipse', { cx: 0, cy: 6, rx: mine ? 21 : 17, ry: mine ? 10.5 : 8.5, fill: 'none', stroke: mine ? 'url(#mineGrad)' : main, 'stroke-width': 3, class: 'lm-halo' }, B);
+      el('circle', { cx: 0, cy: -6, r: 15, fill: lite, opacity: .35 }, B);
       // bệ màu chủ, trên dựng công trình biểu tượng của chính thành phố đó
       if (i !== undefined && LANDMARK[SQ[i].name]) {
         // phóng to quanh chân bệ cho dễ nhận ra từng công trình
         const Z = el('g', { transform: `translate(0 11) scale(${landmarkScale()}) translate(0 -11)` }, B);
         const zb = el('g', {}, Z);
-        const P0 = (pts, fill) => el('polygon', { points: pts.map(p => p.join(',')).join(' '), fill, stroke: line, 'stroke-width': .7, 'stroke-linejoin': 'round' }, zb);
-        const F = [0, 11], L = [-11, 5.5], Rr = [11, 5.5], Bk = [0, 0], up = q => [q[0], q[1] - 3];
-        P0([F, L, up(L), up(F)], main); P0([F, Rr, up(Rr), up(F)], dark); P0([up(F), up(L), up(Bk), up(Rr)], lite);
-        drawLandmark(Z, SQ[i].name); break;
+        const P0 = (pts, fill, st = line) => el('polygon', { points: pts.map(p => p.join(',')).join(' '), fill, stroke: st, 'stroke-width': .7, 'stroke-linejoin': 'round' }, zb);
+        const W = mine ? 16 : 12, H = mine ? 7 : 5, F = [0, 11], L = [-W, 11 - W / 2], Rr = [W, 11 - W / 2], Bk = [0, 11 - W], up = q => [q[0], q[1] - H];
+        if (mine) {
+          // bệ của chính mình: cầu vồng chạy liên tục, mặt phải phủ tối cho có khối, viền trắng sáng
+          P0([F, L, up(L), up(F)], 'url(#mineGrad)', '#fff'); P0([F, Rr, up(Rr), up(F)], 'url(#mineGrad)', '#fff'); P0([up(F), up(L), up(Bk), up(Rr)], 'url(#mineGrad)', '#fff');
+          P0([F, Rr, up(Rr), up(F)], 'rgba(0,0,0,.22)', 'none'); P0([up(F), up(L), up(Bk), up(Rr)], 'rgba(255,255,255,.25)', 'none');
+        } else { P0([F, L, up(L), up(F)], main); P0([F, Rr, up(Rr), up(F)], dark); P0([up(F), up(L), up(Bk), up(Rr)], lite); }
+        el('polyline', { points: [up(L), up(F), up(Rr)].map(p => p.join(',')).join(' '), fill: 'none', stroke: '#fff', 'stroke-width': mine ? 1.4 : 1, 'stroke-linejoin': 'round' }, zb);
+        // cờ màu chủ cắm sau công trình (bàn phẳng trên điện thoại thì bỏ, tránh đè tên ô bên cạnh)
+        if (MODE !== 'flat') el('line', { x1: -10, y1: 4, x2: -10, y2: -34, stroke: '#5a4632', 'stroke-width': 1.6, 'stroke-linecap': 'round' }, B);
+        if (MODE !== 'flat') el('path', { d: 'M-9.5 -34 L6 -28.5 L-9.5 -23 Z', fill: main, stroke: '#fff', 'stroke-width': 1.3, 'stroke-linejoin': 'round', class: 'tour-flag' }, B);
+        drawLandmark(Z, SQ[i].name);
+        // huy hiệu mặt chủ thay cho số cấp
+        el('circle', { cx: 11, cy: 9, r: 7.5, fill: main, stroke: '#fff', 'stroke-width': 1.6 }, B);
+        chibiInto(el('g', { transform: 'translate(11 10.2) scale(.23)' }, B), charOf(charId));
+        return;
       }
       const b = box(1, 11, 9, 7, 11, main); grid(b, 9, 7, 2, 2, 2.5, 4.5, true);
       const t = box(0, 11 - 11 - 1.5 + 2.75, 5, 4, 8, main); winL(t, 5, .3, 2, .4, 4, '#ffd23f'); winR(t, 4, .3, 2, .4, 4, '#ffd23f');
@@ -2487,7 +2504,7 @@ function drawBuilding(g, lv, cx, cy, owner, charId, i) {
 }
 function drawBuild() {
   const g = $('gBuild');
-  const key = G ? JSON.stringify([G.pl.map(p => p.char), CITIES.map(i => [G.props[i].owner, G.props[i].lv])]) : '';
+  const key = G ? JSON.stringify([G.pl.map(p => p.char), G.seats.map((x, s) => isMine(s)), CITIES.map(i => [G.props[i].owner, G.props[i].lv])]) : '';
   if (key === buildKey) return;
   buildKey = key;
   g.innerHTML = '';
@@ -2496,7 +2513,7 @@ function drawBuild() {
   for (const [i, bx, by] of order) {
     const p = G.props[i];
     if (!p.lv || p.owner < 0) continue;
-    drawBuilding(g, p.lv, bx, by - 11, p.owner, G.pl[p.owner].char, i);
+    drawBuilding(g, p.lv, bx, by - 11, p.owner, G.pl[p.owner].char, i, isMine(p.owner));
   }
 }
 
@@ -2519,6 +2536,10 @@ $('board').insertBefore(defs, $('board').firstChild);
   const ph = el('pattern', { id: 'plagueHatch', width: 10, height: 10, patternUnits: 'userSpaceOnUse', patternTransform: 'rotate(45)' }, defs);
   el('rect', { width: 10, height: 10, fill: 'rgba(34,197,94,.22)' }, ph);
   el('rect', { width: 4, height: 10, fill: 'rgba(22,163,74,.55)' }, ph);
+  // bệ Biểu tượng của chính mình: dải cầu vồng trượt liên tục
+  const mg = el('linearGradient', { id: 'mineGrad', x1: 0, y1: 0, x2: .5, y2: 0, spreadMethod: 'repeat' }, defs);
+  ['#ff3b5c', '#ff9f1c', '#ffe03f', '#3ddc84', '#3fa7ff', '#b06cff', '#ff3b5c'].forEach((c, k, a) => el('stop', { offset: k / (a.length - 1), 'stop-color': c }, mg));
+  el('animateTransform', { attributeName: 'gradientTransform', type: 'translate', from: '0 0', to: '.5 0', dur: '2s', repeatCount: 'indefinite' }, mg);
   const sh = el('linearGradient', { id: 'monoShine', x1: 0, y1: 0, x2: 1, y2: 1 }, defs);
   [[0, 0], [.45, 0], [.5, .75], [.55, 0], [1, 0]].forEach(([o, a]) => el('stop', { offset: o, 'stop-color': '#fff', 'stop-opacity': a }, sh));
 })();
