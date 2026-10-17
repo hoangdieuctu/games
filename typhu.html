@@ -857,6 +857,8 @@ const CHARS = [
   { id: 'boss', name: 'Ông Trùm', skill: 'Mua và xây nhà rẻ hơn 20%', group: 'giảm tiền', skin: '#f3c9a3', hair: '#6b4a2a', style: 'short', acc: 'glasses', outfit: '#23324a', bg: '#e5e7eb' },
   { id: 'fairy', name: 'Cô Tiên', skill: 'Phí tham quan phải trả giảm 25%', group: 'giảm tiền', skin: '#ffe3cc', hair: '#f4a6c8', style: 'long', acc: 'wand', outfit: '#e0509a', bg: '#fce7f3' },
   { id: 'racer', name: 'Tay Đua', skill: 'Lần tung đầu tiên đi gấp đôi số nút', group: 'di chuyển', skin: '#f6d1b0', hair: '#e8323c', style: 'cap', acc: 'goggles', outfit: '#e8323c', bg: '#fee2e2' },
+  { id: 'dancer', name: 'Vũ Công', skill: 'Lần tung đầu tiên của ván: 80% đi lùi', group: 'di chuyển', skin: '#f6d1b0', hair: '#1f1a17', style: 'fringe', acc: 'glove', outfit: '#a21caf', bg: '#fae8ff' },
+  { id: 'partier', name: 'Dân Chơi', skill: 'Trả phí tham quan xong: 25% bay tới Đại Nhạc Hội', group: 'di chuyển', skin: '#f3cfae', hair: '#f97316', style: 'party', acc: 'horn', outfit: '#0ea5e9', bg: '#e0f2fe' },
   { id: 'monkey', name: 'Ngộ Không', skill: 'Dễ tung ra đôi hơn (thêm 25%)', group: 'di chuyển', skin: '#f5c89e', hair: '#8b5a2b', style: 'spiky', acc: 'band', outfit: '#f5b700', bg: '#fef3c7' },
   { id: 'diva', name: 'Nàng Thơ', skill: 'Lễ hội miễn phí và mỗi lần ×3 thay vì ×2', group: 'tăng tiền', skin: '#ffe0c7', hair: '#4a2c6b', style: 'bun', acc: 'flower', outfit: '#8e44ad', bg: '#ede9fe' },
   { id: 'rich', name: 'Phú Bà', skill: 'Thu thêm 20% phí tham quan', group: 'tăng tiền', skin: '#f6d6bd', hair: '#d4a017', style: 'wave', acc: 'crown', outfit: '#27ae60', bg: '#d1fae5' },
@@ -1089,7 +1091,7 @@ function botSellPick(G, s) {
 const SUM_WAYS = [0, 0, 1, 2, 3, 4, 5, 6, 5, 4, 3, 2, 1]; // số cách ra tổng 2..12 (trên 36)
 function botParity(G, s) {
   const P = G.pl[s];
-  if (!(P.hold.parity > 0) || (P.rolls === 0 && hasSkill(G, s, 'racer'))) return null;
+  if (!(P.hold.parity > 0) || (P.rolls === 0 && hasSkill(G, s, 'racer')) || (hasSkill(G, s, 'dancer') && !P.danced)) return null;
   const val = sum => {
     const i = (P.pos + sum) % N, q = SQ[i], p = G.props[i];
     if (isProp(i)) {
@@ -1231,6 +1233,8 @@ function doRoll(s, par, power) {
       G.again = dbl;
       let n = d[0] + d[1];
       if (P.rolls === 1 && hasSkill(G, s, 'racer')) { n *= 2; steps.push({ k: 'boost', s, n }); }
+      // Vũ Công: lần tung đầu tiên của ván 80% đi lùi
+      if (hasSkill(G, s, 'dancer') && !P.danced) { P.danced = true; if (Math.random() < 0.8) { n = -n; steps.push({ k: 'reverse', s, n: -n }); } }
       moveBy(s, n, steps);
     }
   }
@@ -1243,7 +1247,7 @@ function moveBy(s, n, steps, how) {
   P.pos = to;
   let salary = 0;
   if (passGo) { P.laps++; salary = r10(SALARY * (hasSkill(G, s, 'mc') ? 1.5 : 1)); P.cash += salary; }
-  steps.push({ k: 'move', s, from, to, n, passGo, salary, how });
+  steps.push({ k: 'move', s, from, to, n, passGo, salary, how, fly: how === 'fly' });
   if (passGo && hasSkill(G, s, 'wizard') && Math.random() < 0.25) hex(s, steps);
   if (hasSkill(G, s, 'robber')) rob(s, steps);
   land(s, steps);
@@ -1290,6 +1294,13 @@ function land(s, steps) {
         payRent(s, i, steps);
         cure();
         if (P.out) break; // vừa phá sản vì không trả nổi
+        // Dân Chơi: vừa trả phí tham quan xong, 25% bay thẳng tới Đại Nhạc Hội
+        const last = steps[steps.length - 1];
+        if (G.step !== 'debt' && last.k === 'pay' && last.why === 'rent' && hasSkill(G, s, 'partier') && Math.random() < 0.25) {
+          steps.push({ k: 'festJump', s });
+          moveTo(s, FEST_POS, steps, 'fly');
+          break;
+        }
         if (G.step !== 'debt' && canTakeover(G, s, i)) {
           const need = takeoverPrice(G, i);
           if (P.cash >= need) { G.step = 'visit'; G.visit = { i, mode: 'takeover' }; steps.push({ k: 'takeoverOffer', s, i }); }
@@ -1936,6 +1947,21 @@ function chibiInto(g, ch) {
       P('M-6 2.2 Q0 4.5 6 1.2', 'none', '#c0392b', 1.6);
       P('M14 4 Q12 -2 17 -4 L21 -4 Q26 -2 24 4 Q26 13 19 14 Q12 13 14 4 Z', '#d6b17a', '#8a6a3a'); P('M15.5 -2 L22.5 -2', 'none', '#8a6a3a', 1.4);
       txt(19, 7, 'sq-price', '$', g, { fill: '#5a3d16', style: 'font-size:8px;font-weight:900' });
+      break;
+    case 'dancer': // tóc mái lệch, áo khoác tím đính kim sa, găng tay trắng một bên, mũi tên lướt lùi
+      body('#a21caf'); for (const [x, y] of [[-10, 12], [-6, 17], [7, 11], [11, 16], [0, 18]]) Cc(x, y, 1.1, '#f5d0fe');
+      P('M-6 7 L0 13 L6 7 Z', '#111827');
+      head(); cap(); P('M-14 -9 Q-12 -25 4 -23 Q14 -21 14 -11 Q8 -15 2 -15 Q-4 -11 -13 -10 Z', ch.hair, '#000');
+      eyes('happy'); brows(); cheeks(); mouth('grin');
+      Cc(-18, 3, 4.2, '#ffffff', '#cbd5e1', 1.2); P('M-20 1 L-22 -2 M-18 0 L-18 -3.5 M-16 1 L-14.5 -2', 'none', '#cbd5e1', 1);
+      P('M25 -14 Q21 -23 15 -19', 'none', '#e879f9', 2.2); P('M15 -23.5 L14.5 -18.5 L19 -18', 'none', '#e879f9', 2.2);
+      break;
+    case 'partier': // nón tiệc sọc, tóc cam xù, áo xanh rắc giấy màu, kèn tiệc
+      body('#0ea5e9'); for (const [x, y, c] of [[-10, 12, '#facc15'], [-5, 17, '#f43f5e'], [6, 11, '#22c55e'], [10, 17, '#facc15'], [1, 15, '#fff']]) R(x, y, 2.4, 2.4, c, .5);
+      head(); cap(); P('M-14 -10 Q-17 -14 -13 -16 M14 -10 Q17 -14 13 -16', 'none', ch.hair, 3);
+      P('M-8 -19 L1 -34 L9 -19 Z', '#facc15', '#b8860b'); P('M-5 -24 L6 -26 M-2.5 -29 L4 -30', 'none', '#e8323c', 2); Cc(1, -34, 2.6, '#f43f5e');
+      eyes(); brows(); cheeks(); mouth('open');
+      P('M4 3 L18 -1 L20 4 Z', '#f43f5e', '#be123c'); P('M20 1.5 Q24 -3 22 -7 Q20 -3 23 1', 'none', '#22c55e', 1.2);
       break;
     default: body(ch.outfit); head(); cap(); eyes(); mouth();
   }
@@ -3199,7 +3225,7 @@ function stepMs(st) {
   switch (st.k) {
     case 'dice': return 1000;
     case 'move': return st.how === 'bus' ? busMs(st.n) + 350 : st.fly ? FLY_MS + 150 : Math.abs(st.n) * STEP_MS + (st.passGo ? 300 : 100);
-    case 'boost': return 600; case 'island': return 800; case 'free': return 450; case 'stay': return 350; case 'triple': return 600; case 'released': return 400;
+    case 'boost': case 'reverse': case 'festJump': return 600; case 'island': return 800; case 'free': return 450; case 'stay': return 350; case 'triple': return 600; case 'released': return 400;
     case 'busStop': return 600; case 'busGo': return 300; case 'busNoCash': return 300;
     case 'home': return st.can ? 0 : 300; case 'homePay': return 1000; case 'interest': return 900; case 'rentX2': return 900; case 'norent': return 350; case 'useFree': return 800; case 'charmFree': return 900; case 'useHalf': return 600;
     case 'pay': return 800; case 'rob': return 1100; case 'debt': return 600; case 'card': return 2700; case 'spyDraw': return 700; case 'hold': return 600; case 'nothing': return 400;
@@ -3273,6 +3299,8 @@ async function animateStep(st, tok) {
       return;
     }
     case 'boost': { const [x, y] = tokenPt(s); pow(x, y - 34, '×2!', '#e8323c'); playWhoosh(0.3); await sleep(ms); return; }
+    case 'reverse': { const [x, y] = tokenPt(s); pow(x, y - 34, '⏪ LÙI!', '#a21caf'); playWhoosh(0.3); await sleep(ms); return; }
+    case 'festJump': { const [x, y] = tokenPt(s); pow(x, y - 34, '🎉 QUẨY!', '#0ea5e9'); playParty(); await sleep(ms); return; }
     case 'island': {
       const from = tokenPt(s), to = tokenXY(ISLAND_POS, s, true);
       playJail();
@@ -3452,7 +3480,9 @@ function stepText(st) {
     case 'luck': return `🍀 ${w} may mắn được nhân đôi tiền khởi đầu (+${fmt(st.amt)})!`;
     case 'gift': return `🎁 ${w} tặng ${other(st.to)} ${fmt(st.amt)}`;
     case 'boost': return `🏎️ Tay Đua tăng tốc: ${w} đi ${st.n} bước!`;
-    case 'move': return st.how === 'bus' ? `🚌 ${w} đi xe tới ${nm(st.to)}${st.passGo ? ', qua Bắt Đầu nhận ' + fmt(st.salary) : ''}` : st.fly ? `${w} tới ${nm(st.to)}${st.passGo ? ', qua Bắt Đầu nhận ' + fmt(st.salary) : ''}` : `${w} đi ${st.n} bước tới ${nm(st.to)}${st.passGo ? ', qua Bắt Đầu nhận ' + fmt(st.salary) : ''}`;
+    case 'reverse': return `💃 Vũ Công lướt lùi: ${w} đi lùi ${st.n} bước!`;
+    case 'festJump': return `🎉 Dân Chơi: ${w} bay thẳng tới Đại Nhạc Hội!`;
+    case 'move': return st.how === 'bus' ? `🚌 ${w} đi xe tới ${nm(st.to)}${st.passGo ? ', qua Bắt Đầu nhận ' + fmt(st.salary) : ''}` : st.fly ? `${w} tới ${nm(st.to)}${st.passGo ? ', qua Bắt Đầu nhận ' + fmt(st.salary) : ''}` : `${w} ${st.n < 0 ? 'lùi ' + -st.n : 'đi ' + st.n} bước tới ${nm(st.to)}${st.passGo ? ', qua Bắt Đầu nhận ' + fmt(st.salary) : ''}`;
     case 'island': return `🏝️ ${w} bị đưa ra Côn Đảo!`;
     case 'triple': return `${w} tung đôi ba lần liền — ra Côn Đảo!`;
     case 'stay': return st.left > 0 ? `${w} không ra đôi, ở lại Côn Đảo · còn ${st.left} lượt` : `${w} không ra đôi, lượt sau sẽ được thả`;
