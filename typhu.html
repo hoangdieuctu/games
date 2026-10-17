@@ -52,7 +52,7 @@ button:disabled { opacity: .4; cursor: default; }
 @keyframes pingblink { from { opacity: 1; } to { opacity: .15; } }
 .ping-pin { animation: pingbob .6s ease-in-out infinite alternate; }
 @keyframes pingbob { to { transform: translateY(-8px); } }
-.emo-pop { position: absolute; z-index: 30; top: 54px; right: 10px; display: grid; grid-template-columns: repeat(6, 40px); gap: 4px; padding: 8px; border-radius: 16px; background: rgba(255,255,255,.96); box-shadow: 0 8px 24px rgba(0,0,0,.4); }
+.emo-pop { position: fixed; z-index: 30; top: 54px; right: 10px; display: grid; grid-template-columns: repeat(6, 40px); gap: 4px; padding: 8px; border-radius: 16px; background: rgba(255,255,255,.96); box-shadow: 0 8px 24px rgba(0,0,0,.4); }
 .emo-pop button { width: 40px; height: 40px; border-radius: 10px; font-size: 25px; line-height: 1; }
 .emo-pop button:hover, .emo-pop button:active { background: #eef3f9; transform: scale(1.12); }
 .room-tag { background: rgba(0,0,0,.35); border: 1px solid rgba(255,255,255,.18); border-radius: 999px; padding: 4px 12px; font-weight: 700; font-size: 13px; white-space: nowrap; color: #fff; }
@@ -868,8 +868,8 @@ const CHARS = [
   { id: 'charmer', name: 'Lãng Tử', skill: 'Vào đất người khác: 25% được miễn phí tham quan', group: 'giảm tiền', skin: '#f6d1b0', hair: '#3b2a1e', style: 'part', acc: 'rose', outfit: '#0f766e', bg: '#ccfbf1' },
   { id: 'wizard', name: 'Pháp Sư', skill: 'Qua Bắt Đầu: 25% làm mất điện một thành phố đối thủ ngẫu nhiên', group: 'phá đối thủ', skin: '#f3cfae', hair: '#e5e7eb', style: 'wizard', acc: 'staff', outfit: '#4338ca', bg: '#e0e7ff' },
   { id: 'spy', name: 'Gián Điệp', skill: 'Rút thẻ Cơ Hội được xem 2 thẻ và chọn 1', group: 'may mắn', skin: '#f1c7a0', hair: '#1f1a17', style: 'spy', acc: 'shades', outfit: '#1f2937', bg: '#e2e8f0' },
-  { id: 'banker', name: 'Chủ Ngân Hàng', skill: 'Đầu mỗi lượt nhận lãi 2% tiền mặt đang có', group: 'tăng tiền', skin: '#f6d6bd', hair: '#6b7280', style: 'banker', acc: 'coin', outfit: '#1e3a8a', bg: '#dbeafe' },
-  { id: 'chef', name: 'Vua Bếp', skill: 'Bắt đầu ván với thêm $300', group: 'tăng tiền', skin: '#ffd9b3', hair: '#4b3621', style: 'toque', acc: 'spoon', outfit: '#ffffff', bg: '#fff1f2' },
+  { id: 'banker', name: 'Chủ Ngân Hàng', skill: 'Đầu mỗi lượt nhận lãi 5% tiền mặt đang có', group: 'tăng tiền', skin: '#f6d6bd', hair: '#6b7280', style: 'banker', acc: 'coin', outfit: '#1e3a8a', bg: '#dbeafe' },
+  { id: 'chef', name: 'Vua Bếp', skill: 'Bắt đầu ván với thêm 50% tiền khởi đầu', group: 'tăng tiền', skin: '#ffd9b3', hair: '#4b3621', style: 'toque', acc: 'spoon', outfit: '#ffffff', bg: '#fff1f2' },
 ];
 const charOf = id => CHARS.find(c => c.id === id) || CHARS[0];
 const hasSkill = (G, s, id) => !!G.seats[s] && G.pl[s].char === id;
@@ -1152,7 +1152,7 @@ function freshGame(seats, maxRound) {
     P.hold.parity = PARITY_MAX;
     // may mắn đầu ván: mỗi nhân vật có 80% được nhân đôi tiền khởi đầu
     if (Math.random() < LUCK_CHANCE) { P.luck = START_CASH; P.cash += START_CASH; }
-    if (chars[s] === 'chef') P.cash += 300;
+    if (chars[s] === 'chef') P.cash += START_CASH / 2;
     if (chars[s] === 'detective') P.hold.shield = 1;
   }
   G.turn = firstTurn(seats);
@@ -1356,14 +1356,15 @@ function charge(s, to, amt, why, steps, i) {
 }
 // phá sản: toàn bộ đất và tiền về tay chủ nợ (hoặc ngân hàng), người chơi rời ván
 function liquidate(s, to, steps) {
-  const P = G.pl[s];
+  const P = G.pl[s], was = [];
   for (const i of PROPS) {
     if (G.props[i].owner !== s) continue;
+    was.push([i, { ...G.props[i] }]);
     if (to >= 0) G.props[i].owner = to; else resetProp(i);
   }
   if (to >= 0) G.pl[to].cash += P.cash;
   P.cash = 0; P.hold = freshHold(); P.out = true; G.debt = null; G.visit = null; G.pick = null; G.again = false; G.step = 'roll';
-  steps.push({ k: 'bankrupt', s, to });
+  steps.push({ k: 'bankrupt', s, to, was });
   const act = active(G);
   if (act.length <= 1) { G.phase = 'over'; G.winner = act[0] ?? s; G.winHow = 'last'; G.turn = G.winner; G.step = 'end'; steps.push({ k: 'won', s: G.winner, how: 'last' }); }
 }
@@ -1618,7 +1619,7 @@ function nextTurn(steps) {
   G.turn = t;
   const P = G.pl[t];
   // Chủ Ngân Hàng: đầu lượt nhận lãi 2% tiền mặt
-  if (hasSkill(G, t, 'banker')) { const amt = r10(P.cash * 0.02); if (amt > 0) { P.cash += amt; steps.push({ k: 'interest', s: t, amt }); } }
+  if (hasSkill(G, t, 'banker')) { const amt = r10(P.cash * 0.05); if (amt > 0) { P.cash += amt; steps.push({ k: 'interest', s: t, amt }); } }
   if (P.jail) { if (P.jail > 3) { P.jail = 0; G.step = 'roll'; steps.push({ k: 'released', s: t }); } else G.step = 'jail'; }
   else if (P.bus) {
     if (P.cash < busFee(t)) { P.bus = false; G.step = 'roll'; steps.push({ k: 'busNoCash', s: t }); }
@@ -2339,20 +2340,20 @@ function drawCenter() {
 }
 function renderCenter() {
   if (!potTxt) return;
-  const pot = (G && G.pot) || 0;
+  const pot = (G && (busy() && viewPot !== null ? viewPot : G.pot)) || 0;
   potTxt.textContent = pot > 0 ? `💰 Quỹ Thuế ${fmt(pot)}` : '';
 }
 // dải chủ đất, viền màu chủ, sao đất vàng, lễ hội, dịch bệnh / mất điện
 // chỉ vẽ lại khi trạng thái đất thật sự đổi (paint() gọi rất thường xuyên)
 function drawOwnership() {
   const g = $('gOwn'), gb = $('gOwnB');
-  const key = G ? JSON.stringify([G.pl.map(p => p.char), [0, 1, 2, 3].map(colIdx), G.gold, PROPS.map(i => { const p = G.props[i]; return [p.owner, p.lv, p.fest, effectOn(G, i, 'plague'), effectOn(G, i, 'blackout')]; })]) : '';
+  const key = G ? JSON.stringify([G.pl.map(p => p.char), [0, 1, 2, 3].map(colIdx), G.gold, PROPS.map(i => { const p = shownProp(i); return [p.owner, p.lv, p.fest, effectOn(G, i, 'plague'), effectOn(G, i, 'blackout')]; })]) : '';
   if (key === ownKey) return;
   ownKey = key;
   g.innerHTML = ''; gb.innerHTML = '';
   if (!G) { for (const i of PROPS) sqEls[i].querySelector('.bg').style.fill = ''; return; }
   for (const i of PROPS) {
-    const p = G.props[i], r = rectOf(i), q = SQ[i], bg = sqEls[i].querySelector('.bg');
+    const p = shownProp(i), r = rectOf(i), q = SQ[i], bg = sqEls[i].querySelector('.bg');
     if (p.owner >= 0) {
       // nền ô tô màu nhạt của chủ, viền dày màu chủ và dải màu mép ngoài
       const C = col(p.owner), st = ownerStrip(i);
@@ -2546,14 +2547,14 @@ function drawBuilding(g, lv, cx, cy, owner, charId, i, mine) {
 }
 function drawBuild() {
   const g = $('gBuild');
-  const key = G ? JSON.stringify([G.pl.map(p => p.char), [0, 1, 2, 3].map(colIdx), G.seats.map((x, s) => isMine(s)), CITIES.map(i => [G.props[i].owner, G.props[i].lv])]) : '';
+  const key = G ? JSON.stringify([G.pl.map(p => p.char), [0, 1, 2, 3].map(colIdx), G.seats.map((x, s) => isMine(s)), CITIES.map(i => [shownProp(i).owner, shownProp(i).lv])]) : '';
   if (key === buildKey) return;
   buildKey = key;
   g.innerHTML = '';
   if (!G) return;
   const order = CITIES.map(i => { const b = bandOf(i); return [i, ...proj(b.x + b.w / 2, b.y + b.h / 2)]; }).sort((a, b) => a[2] - b[2]);
   for (const [i, bx, by] of order) {
-    const p = G.props[i];
+    const p = shownProp(i);
     if (!p.lv || p.owner < 0) continue;
     drawBuilding(g, p.lv, bx, by - 11, p.owner, G.pl[p.owner].char, i, isMine(p.owner));
   }
@@ -2891,6 +2892,26 @@ syncMute();
 // ── hoạt hoạ ──
 let animTok = 0, animating = false, statusEv = '';
 let viewCash = null; // số dư đang hiển thị trong lúc hoạt hoạ (cập nhật theo từng bước)
+// quỹ thuế, ai đã phá sản và đất của người phá sản cũng chỉ đổi khi hoạt hoạ tới bước tương ứng
+let viewPot = null, viewOut = null, viewProps = {};
+const shownOut = s => (busy() && viewOut ? viewOut[s] : G.pl[s].out);
+const shownProp = i => (busy() && viewProps[i]) || G.props[i];
+function shownWorth(s) {
+  if (!busy() || !viewCash) return netWorth(G, s);
+  if (shownOut(s)) return 0;
+  const VG = { ...G, props: G.props.map((p, i) => viewProps[i] || p) };
+  let v = viewCash[s];
+  for (const i of PROPS) if (VG.props[i].owner === s) v += invested(VG, i);
+  return v;
+}
+function initView(steps) {
+  viewPot = G.pot || 0; viewOut = G.pl.map(p => p.out); viewProps = {};
+  for (const st of steps) {
+    if (st.k === 'pay' && st.to < 0 && st.why === 'tax') viewPot -= st.amt;
+    else if (st.k === 'pot') viewPot += st.amt;
+    else if (st.k === 'bankrupt') { viewOut[st.s] = false; for (const [i, p] of st.was || []) viewProps[i] = p; }
+  }
+}
 const cashFx = [null, null, null, null]; // lần đổi số dư gần nhất (để số tiền nảy lên)
 // tiền thay đổi của từng bước: [[ghế, chênh lệch], ...]
 function moneyDelta(st) {
@@ -2914,7 +2935,8 @@ function applyMoney(st) {
   const d = moneyDelta(st);
   if (!d.length || !viewCash) return;
   for (const [s, v] of d) { viewCash[s] += v; cashFx[s] = { v, t: Date.now() }; }
-  renderPlayers();
+  if (viewPot !== null) { if (st.k === 'pay' && st.to < 0 && st.why === 'tax') viewPot += st.amt; else if (st.k === 'pot') viewPot -= st.amt; }
+  renderPlayers(); renderCenter();
 }
 const busy = () => animating;
 function show(ng, ev) {
@@ -2930,7 +2952,7 @@ function show(ng, ev) {
   logSteps(ev);
   const st0 = ev && Array.isArray(ev.steps) && ev.steps[0];
   stepsKeep = st0 && st0.k === 'dice' && stepsShown && stepsShown.t === st0.s && !st0.casino ? stepsShown : null;
-  if (ev && Array.isArray(ev.steps) && ev.steps.length) { if (!viewCash) viewCash = G.pl.map(p => p.cash); animating = true; paint(true); animateSteps(ev, tok); }
+  if (ev && Array.isArray(ev.steps) && ev.steps.length) { if (!viewCash) viewCash = G.pl.map(p => p.cash); initView(ev.steps); animating = true; paint(true); animateSteps(ev, tok); }
   else paint();
   if (ev && ev.won) setTimeout(() => { if (tok === animTok && G.phase === 'over') showResult(); }, animMs(ev) + 600);
   syncLobby();
@@ -3377,6 +3399,9 @@ async function animateStep(st, tok) {
     case 'sell': { const [x, y] = centerOf(st.i), [tx, ty] = tokenPt(s); drawOwnership(); drawBuild(); playCoin(true); floatText(x, y - 20, '🏷️ bán', '#e8323c', 1000, 18); cardMoney(s, st.amt); await sleep(ms); return; }
     case 'bankrupt': {
       const [x, y] = tokenPt(s), g = tokenEls[s];
+      if (viewOut) viewOut[s] = true;
+      for (const [i] of st.was || []) delete viewProps[i];
+      renderPlayers();
       playSad(); pow(x, y - 34, 'PHÁ SẢN', '#e8323c');
       g.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 800 });
       g.style.opacity = '0';
@@ -3570,15 +3595,15 @@ function renderPlayers() {
   const pl = $('players');
   pl.innerHTML = '';
   // thứ hạng theo tổng tài sản (người phá sản xếp cuối)
-  const live = [0, 1, 2, 3].filter(s => G.seats[s] && !G.pl[s].out).sort((a, b) => netWorth(G, b) - netWorth(G, a));
+  const live = [0, 1, 2, 3].filter(s => G.seats[s] && !shownOut(s)).sort((a, b) => shownWorth(b) - shownWorth(a));
   // xoay chỗ ngồi để ghế của mình luôn ở góc c0 (dưới bên phải)
   const base = Math.max(0, [0, 1, 2, 3].findIndex(k => G.seats[k] && isMine(k)));
   for (let s = 0; s < 4; s++) {
     const x = G.seats[s];
     if (!x) continue;
-    const P = G.pl[s], ch = charOf(P.char), d = document.createElement('div');
+    const P = G.pl[s], out = shownOut(s), ch = charOf(P.char), d = document.createElement('div');
     const mine = net.on ? s === net.seat : x.type === 'human' && !x.remote;
-    d.className = 'pl s' + s + ' c' + ((s - base + 4) % 4) + (mine ? ' me' : '') + (G.phase === 'play' && G.turn === s ? ' turn' : '') + (x.remote && !x.online ? ' off' : '') + (P.out ? ' out' : '');
+    d.className = 'pl s' + s + ' c' + ((s - base + 4) % 4) + (mine ? ' me' : '') + (G.phase === 'play' && G.turn === s ? ' turn' : '') + (x.remote && !x.online ? ' off' : '') + (out ? ' out' : '');
     d.style.setProperty('--c', col(s).main);
     const top = document.createElement('div'); top.className = 'pl-top';
     const ava = document.createElement('span'); ava.className = 'ava'; ava.appendChild(chibiSvg(P.char)); top.appendChild(ava);
@@ -3587,7 +3612,7 @@ function renderPlayers() {
     id.querySelector('.nm').textContent = (x.type === 'bot' ? '🤖 ' : '') + who(s) + (x.remote && !x.online ? ' 📴' : '');
     top.appendChild(id);
     // số thẻ Chẵn/Lẻ đang có, luôn hiện cạnh tên
-    if (!P.out) { const pc = document.createElement('span'); pc.className = 'par' + (P.hold.parity ? '' : ' none'); pc.textContent = '🎲' + (P.hold.parity || 0); pc.title = 'Thẻ Chẵn/Lẻ'; top.appendChild(pc); }
+    if (!out) { const pc = document.createElement('span'); pc.className = 'par' + (P.hold.parity ? '' : ' none'); pc.textContent = '🎲' + (P.hold.parity || 0); pc.title = 'Thẻ Chẵn/Lẻ'; top.appendChild(pc); }
     const em = emoFx[s], emAge = em ? Date.now() - em.t : 1e9;
     if (emAge < EMO_MS) { const b = document.createElement('span'); b.className = 'emo-bub'; b.textContent = em.e; b.style.animationDelay = -emAge + 'ms'; top.appendChild(b); }
     const rk = live.indexOf(s), rank = document.createElement('span');
@@ -3596,14 +3621,14 @@ function renderPlayers() {
     d.appendChild(top);
     const cash = busy() && viewCash ? viewCash[s] : P.cash, fxv = cashFx[s], age = fxv ? Date.now() - fxv.t : 1e9;
     const row1 = document.createElement('div'); row1.className = 'pl-row';
-    row1.innerHTML = `<span class="lbl">💵 <b>Tiền mặt</b></span><span class="cash${cash < 200 ? ' low' : ''}${age < 500 ? ' bump' : ''}">${P.out ? '☠️' : fmt(cash)}</span>`;
+    row1.innerHTML = `<span class="lbl">💵 <b>Tiền mặt</b></span><span class="cash${cash < 200 ? ' low' : ''}${age < 500 ? ' bump' : ''}">${out ? '☠️' : fmt(cash)}</span>`;
     d.appendChild(row1);
     const row2 = document.createElement('div'); row2.className = 'pl-row';
-    row2.innerHTML = `<span class="lbl">🏠 <b>Tài sản</b></span><span class="worth">${P.out ? 'phá sản' : fmt(netWorth(G, s))}</span>`;
+    row2.innerHTML = `<span class="lbl">🏠 <b>Tài sản</b></span><span class="worth">${out ? 'phá sản' : fmt(shownWorth(s))}</span>`;
     d.appendChild(row2);
     const props = document.createElement('div'); props.className = 'pl-props';
-    if (P.jail && !P.out) { const b = document.createElement('span'); b.className = 'badge'; b.textContent = `🏝️ Côn Đảo · còn ${Math.max(1, 4 - P.jail)} lượt`; props.appendChild(b); }
-    if (P.bus && !P.out) { const b = document.createElement('span'); b.className = 'badge'; b.textContent = '🚌 lượt sau đi xe'; props.appendChild(b); }
+    if (P.jail && !out) { const b = document.createElement('span'); b.className = 'badge'; b.textContent = `🏝️ Côn Đảo · còn ${Math.max(1, 4 - P.jail)} lượt`; props.appendChild(b); }
+    if (P.bus && !out) { const b = document.createElement('span'); b.className = 'badge'; b.textContent = '🚌 lượt sau đi xe'; props.appendChild(b); }
     const hold = document.createElement('span'); hold.className = 'hold';
     for (const k of Object.keys(HOLD_INFO)) if (P.hold[k] && k !== 'parity') { const h = document.createElement('span'); h.textContent = HOLD_INFO[k][0] + (P.hold[k] > 1 ? P.hold[k] : ''); h.title = HOLD_INFO[k][1]; hold.appendChild(h); }
     if (hold.children.length) props.appendChild(hold);
@@ -4550,7 +4575,14 @@ $('bPing').onclick = () => { setPingMode(!pingMode); if (pingMode) { $('emoPop')
 (function emoPanel() {
   const pop = $('emoPop');
   for (const e of EMOJIS) { const b = document.createElement('button'); b.textContent = e; b.onclick = () => { pop.hidden = true; sendEmote(e); }; pop.appendChild(b); }
-  $('bEmo').onclick = ev => { ev.stopPropagation(); pop.hidden = !pop.hidden; if (!pop.hidden) playTap(); };
+  // mở bảng ngay dưới nút 😊 (canh giữa theo nút, không tràn ra ngoài màn hình)
+  const place = () => {
+    const r = $('bEmo').getBoundingClientRect(), w = pop.offsetWidth, vw = document.documentElement.clientWidth;
+    pop.style.left = Math.max(8, Math.min(vw - w - 8, r.left + r.width / 2 - w / 2)) + 'px';
+    pop.style.top = r.bottom + 8 + 'px'; pop.style.right = 'auto';
+  };
+  $('bEmo').onclick = ev => { ev.stopPropagation(); pop.hidden = !pop.hidden; if (!pop.hidden) { place(); playTap(); } };
+  addEventListener('resize', () => { if (!pop.hidden) place(); });
   document.addEventListener('pointerdown', ev => { if (!pop.hidden && !pop.contains(ev.target) && ev.target !== $('bEmo')) pop.hidden = true; });
 })();
 $('bRulesOk').onclick = () => { $('rulesSheet').hidden = true; };
