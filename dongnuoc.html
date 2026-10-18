@@ -137,14 +137,22 @@ button:disabled { opacity: .4; cursor: default; }
 .cap { position: absolute; top: 6px; left: 0; right: 0; text-align: center; font-size: 15px; font-weight: 800; color: var(--ink2); background: rgba(255,255,255,.7); margin: 0 auto; width: fit-content; padding: 1px 10px; border-radius: 10px; pointer-events: none; }
 .ticks { position: absolute; right: 6px; top: 0; bottom: 0; width: 10px; pointer-events: none; }
 .ticks i { position: absolute; right: 0; width: 8px; height: 2px; background: rgba(60,120,170,.35); border-radius: 2px; }
-.jbtns { display: flex; gap: 6px; width: 100%; }
-.jbtn {
-  flex: 1; height: 44px; border-radius: 14px; font-size: 22px; background: #fff; display: inline-flex; align-items: center; justify-content: center;
-  box-shadow: 0 4px 0 #cfe6f7, 0 6px 12px rgba(29,53,87,.1); transition: transform .1s;
-}
-.jbtn:active:not(:disabled) { transform: translateY(3px); box-shadow: 0 1px 0 #cfe6f7; }
+.jbtn { width: 100%; display: block; border-radius: 14px; transition: transform .1s; line-height: 0; }
+.jbtn svg { width: 100%; height: auto; display: block; overflow: visible; }
+.jbtn:active:not(:disabled) { transform: scale(.94); }
 .jbtn.hint-glow { animation: hintpulse .8s ease-in-out infinite; }
-.jbtn.fill { color: var(--blue); } .jbtn.dump { color: var(--red); }
+.jbtn:disabled { opacity: .45; }
+/* Vòi nước phía trên: tay vặn xoay khi mở */
+.faucet .handle { transform-box: fill-box; transform-origin: center; transition: transform .3s ease-in-out; }
+.jug.filling .faucet .handle { transform: rotate(80deg); }
+/* Van xả phía dưới: bánh xe quay và nước chảy trong ống khi mở */
+.valve .wheel { transform-box: fill-box; transform-origin: center; }
+.jug.draining .valve .wheel { animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.valve .flow { opacity: 0; transition: opacity .2s; stroke-dasharray: 6 8; animation: flow .35s linear infinite; }
+.jug.draining .valve .flow { opacity: 1; }
+.jug.filling .faucet, .jug.draining .valve { opacity: 1 !important; }
+.faucet { margin-bottom: 6px; } .valve { margin-top: 2px; }
 
 .tip { font-size: 16px; font-weight: 700; color: var(--ink2); text-align: center; background: rgba(255,255,255,.75); padding: 8px 18px; border-radius: 16px; min-height: 40px; max-width: 94vw; transition: opacity .2s; }
 .tip.hint { background: #fff4c2; color: #8a5a00; }
@@ -165,7 +173,6 @@ button:disabled { opacity: .4; cursor: default; }
 #stream .splash circle { animation: splash .45s ease-out infinite; transform-box: fill-box; transform-origin: center; }
 #stream .splash circle:nth-child(2) { animation-delay: .15s; } #stream .splash circle:nth-child(3) { animation-delay: .3s; }
 @keyframes splash { 0% { transform: translate(0,0) scale(1); opacity: 1; } 100% { transform: translate(var(--sx), -22px) scale(.3); opacity: 0; } }
-#stream .tap { font-size: 34px; }
 .drops { position: absolute; left: 0; right: 0; height: 60px; pointer-events: none; z-index: 3; }
 .drops i { position: absolute; top: -6px; width: 9px; height: 13px; border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%; background: #39b6f0; animation: dropfall .55s ease-in forwards; }
 @keyframes dropfall { 0% { transform: translateY(0) scale(1); opacity: 1; } 100% { transform: translateY(70px) scale(.6); opacity: 0; } }
@@ -248,7 +255,6 @@ button:disabled { opacity: .4; cursor: default; }
       <path class="s-out" id="s-out" d=""/>
       <path class="s-in" id="s-in" d=""/>
       <g class="splash" id="s-splash"><circle r="3" style="--sx:-14px"/><circle r="2.5" style="--sx:0px"/><circle r="3" style="--sx:14px"/></g>
-      <text class="tap" id="s-tap" text-anchor="middle"></text>
     </svg>
     <div class="tip" id="tip">Chạm vào thùng để chọn, rồi chạm thùng khác để đổ qua.</div>
   </div>
@@ -274,8 +280,8 @@ button:disabled { opacity: .4; cursor: default; }
     <h2>Cách chơi 💧</h2>
     <p>Đong đúng số lít nước mà bạn nhỏ yêu cầu vào một thùng bất kỳ.</p>
     <div class="howto">
-      <div><span class="ic">🚰</span><span>Bấm <b>🚰</b> dưới thùng để đổ <b>đầy</b> thùng từ vòi nước.</span></div>
-      <div><span class="ic">🗑</span><span>Bấm <b>🗑</b> để đổ <b>hết</b> nước trong thùng đi.</span></div>
+      <div><span class="ic">🚰</span><span>Bấm <b>vòi nước</b> phía trên thùng để bơm <b>đầy</b> thùng.</span></div>
+      <div><span class="ic">🔧</span><span>Bấm <b>van xả</b> phía dưới thùng để xả <b>hết</b> nước đi.</span></div>
       <div><span class="ic">👆</span><span>Chạm vào một thùng, rồi chạm thùng khác để <b>đổ nước qua</b>. Nước đổ đến khi thùng nhận đầy hoặc thùng cho cạn.</span></div>
       <div><span class="ic">⭐</span><span>Đong xong càng ít bước thì càng nhiều sao. Bấm <b>💡</b> nếu bí.</span></div>
     </div>
@@ -351,7 +357,7 @@ function startLevel(L, fresh = false) {
   P.cur = S; save();
   selected = -1;
   buildJugs(); render();
-  setTip(L === 1 ? 'Bấm 🚰 để đổ đầy thùng nhé!' : 'Chạm vào thùng để chọn, rồi chạm thùng khác để đổ qua.');
+  setTip(L === 1 ? 'Bấm vòi nước phía trên thùng để bơm đầy nhé!' : 'Chạm vào thùng để chọn, rồi chạm thùng khác để đổ qua.');
   show('game');
 }
 
@@ -362,7 +368,7 @@ function buildJugs() {
   const gap = n >= 4 ? 10 : 18;
   const jw = Math.min(96, Math.floor((vw - 24 - gap * (n - 1)) / n));
   wrap.style.setProperty('--gap', gap + 'px');
-  const maxH = Math.min(260, Math.max(140, window.innerHeight * .34));
+  const maxH = Math.min(240, Math.max(120, window.innerHeight * .30));
   const maxCap = Math.max(...lv.caps);
   lv.caps.forEach((cap, i) => {
     const h = Math.round(70 + (maxH - 70) * cap / maxCap);
@@ -378,10 +384,33 @@ function buildJugs() {
         <div class="cap">${cap} lít</div>
         <div class="amt">0</div>
       </div>
-      <div class="jbtns">
-        <button class="jbtn fill" data-act="fill" data-i="${i}" aria-label="Đổ đầy">🚰</button>
-        <button class="jbtn dump" data-act="empty" data-i="${i}" aria-label="Đổ bỏ">🗑</button>
-      </div>`;
+      <button class="jbtn dump valve" data-act="empty" data-i="${i}" aria-label="Xả hết">
+        <svg viewBox="0 0 100 50" aria-hidden="true">
+          <rect x="43" y="0" width="14" height="36" rx="3" fill="#9fb2c4"/>
+          <path class="flow" d="M50 0V36" stroke="#39b6f0" stroke-width="7" stroke-linecap="round"/>
+          <g class="wheel">
+            <circle cx="50" cy="16" r="11" fill="none" stroke="#ff5c7a" stroke-width="4.5"/>
+            <path d="M50 4V28M38 16H62" stroke="#ff5c7a" stroke-width="4.5" stroke-linecap="round"/>
+            <circle cx="50" cy="16" r="3.5" fill="#ff5c7a"/>
+          </g>
+          <rect x="24" y="37" width="52" height="11" rx="4" fill="#6c7f93"/>
+          <path d="M32 42.5H68" stroke="#2f3f50" stroke-width="3" stroke-dasharray="4 4"/>
+        </svg>
+      </button>`;
+    // Vòi nước gắn phía trên thùng
+    el.insertAdjacentHTML('afterbegin', `
+      <button class="jbtn fill faucet" data-act="fill" data-i="${i}" aria-label="Bơm đầy">
+        <svg viewBox="0 0 100 54" aria-hidden="true">
+          <rect x="44" y="0" width="12" height="24" rx="3" fill="#9fb2c4"/>
+          <rect x="32" y="18" width="36" height="18" rx="7" fill="#b9c9d8"/>
+          <rect x="42" y="33" width="16" height="13" rx="4" fill="#9fb2c4"/>
+          <path d="M44 46H56" stroke="#39b6f0" stroke-width="3" stroke-linecap="round"/>
+          <g class="handle">
+            <rect x="66" y="23" width="22" height="8" rx="4" fill="#ff9f1c"/>
+            <circle cx="84" cy="27" r="8" fill="#ff5c7a"/>
+          </g>
+        </svg>
+      </button>`);
     el.querySelector('.glass').addEventListener('click', () => onJugTap(i));
     wrap.appendChild(el);
   });
@@ -422,7 +451,7 @@ function onJugTap(i) {
   if (S.won || busy) return;
   clearHint();
   if (selected < 0) {
-    if (S.amts[i] === 0) { sndNo(); setTip('Thùng này đang trống. Bấm 🚰 để đổ đầy nhé!'); return; }
+    if (S.amts[i] === 0) { sndNo(); setTip('Thùng này đang trống. Bấm vòi nước phía trên để bơm đầy nhé!'); return; }
     selected = i; sndTap(); setTip('Chạm vào thùng muốn đổ nước sang.'); render(); return;
   }
   if (selected === i) { selected = -1; render(); setTip('Đã bỏ chọn.'); return; }
@@ -455,79 +484,100 @@ function doMove(mv) {
   busy = true; viewAmts = prev; render();
   const els = document.querySelectorAll('#jugs .jug');
   const done = () => { busy = false; viewAmts = null; render(); if (S.won) setTimeout(onWin, 250); };
-  if (mv.type === 'pour') { setTip(`Đổ ${next[mv.j] - prev[mv.j]} lít từ thùng ${caps[mv.i]} lít sang thùng ${caps[mv.j]} lít…`); animPour(els[mv.i], els[mv.j], done); }
-  else if (mv.type === 'fill') { setTip(`Đổ đầy thùng ${caps[mv.i]} lít từ vòi nước…`); animFill(els[mv.i], done); }
-  else { setTip(`Đổ hết thùng ${caps[mv.i]} lít đi.`); animEmpty(els[mv.i], done); }
+  if (mv.type === 'pour') { setTip(`Đổ ${next[mv.j] - prev[mv.j]} lít từ thùng ${caps[mv.i]} lít sang thùng ${caps[mv.j]} lít…`); animPour(els[mv.i], els[mv.j], next[mv.j] - prev[mv.j], done); }
+  else if (mv.type === 'fill') { setTip(`Đổ đầy thùng ${caps[mv.i]} lít từ vòi nước…`); animFill(els[mv.i], next[mv.i] - prev[mv.i], done); }
+  else { setTip(`Đổ hết thùng ${caps[mv.i]} lít đi.`); animEmpty(els[mv.i], prev[mv.i], done); }
 }
 
 // ── Hoạt ảnh ────────────────────────────────────────────────
-const POUR_MS = 600, TILT_MS = 300;
+// Thời gian tỉ lệ với số lít: bơm từ vòi chậm nhất, đổ qua ly nhanh hơn.
+const TILT_MS = 320;
+const msPour = l => Math.min(1600, 450 + 90 * l);
+const msFill = l => Math.min(2400, 700 + 150 * l);
+const msEmpty = l => Math.min(1500, 450 + 90 * l);
+function setWaterSpeed(jugEl, ms) { jugEl.querySelector('.water').style.transitionDuration = ms == null ? '' : `${ms}ms, ${TILT_MS}ms`; }
 function glassBox(jugEl) {
   // Khung của ly khi chưa biến hình (lấy theo .jug vì .jug không bị transform).
-  const jr = jugEl.getBoundingClientRect(), g = jugEl.querySelector('.glass');
-  return { left: jr.left, top: jr.top, width: jr.width, height: g.offsetHeight, bottom: jr.top + g.offsetHeight, cx: jr.left + jr.width / 2 };
+  const jr = jugEl.getBoundingClientRect(), g = jugEl.querySelector('.glass'), top = jr.top + g.offsetTop;
+  return { left: jr.left, top, width: jr.width, height: g.offsetHeight, bottom: top + g.offsetHeight, cx: jr.left + jr.width / 2 };
 }
-function showStream(x1, y1, x2, y2, bend, tap) {
-  const svg = $('stream'), pr = svg.getBoundingClientRect();
-  x1 -= pr.left; y1 -= pr.top; x2 -= pr.left; y2 -= pr.top;
+function surfaceY(jugEl, b) { const i = +jugEl.dataset.i, cap = lvData(S.level).caps[i], a = (viewAmts || S.amts)[i]; return Math.min(b.bottom - 14, Math.max(b.top + 26, b.bottom - b.height * a / cap)); }
+function toLocal(x, y) { const svg = $('stream'); svg.style.display = ''; /* phải hiện trước mới đo được */ const pr = svg.getBoundingClientRect(); return [x - pr.left, y - pr.top]; }
+function showStream(x1, y1, x2, y2, bend) {
+  const svg = $('stream');
+  [x1, y1] = toLocal(x1, y1); [x2, y2] = toLocal(x2, y2);
   const d = `M${x1} ${y1} Q${x1 + bend} ${(y1 + y2) / 2} ${x2} ${y2}`;
   const out = $('s-out'), inn = $('s-in');
-  svg.style.display = '';
+  svg.style.display = ''; out.style.display = ''; inn.style.display = '';
   out.setAttribute('d', d); inn.setAttribute('d', d);
   const len = out.getTotalLength();
   out.style.transition = 'none'; out.style.strokeDasharray = len; out.style.strokeDashoffset = len;
   out.getBoundingClientRect();
-  out.style.transition = 'stroke-dashoffset .18s linear'; out.style.strokeDashoffset = 0;
-  inn.style.opacity = 0; setTimeout(() => { inn.style.opacity = 1; }, 150);
+  out.style.transition = 'stroke-dashoffset .2s linear'; out.style.strokeDashoffset = 0;
+  inn.style.opacity = 0; setTimeout(() => { inn.style.opacity = 1; }, 180);
   const sp = $('s-splash'); sp.setAttribute('transform', `translate(${x2} ${y2})`); sp.style.display = '';
-  const t = $('s-tap');
-  if (tap) { t.textContent = '🚰'; t.setAttribute('x', x1 + 4); t.setAttribute('y', y1 - 4); t.style.display = ''; } else t.style.display = 'none';
+}
+function showSplash(x, y) {
+  const svg = $('stream'); [x, y] = toLocal(x, y);
+  svg.style.display = ''; $('s-out').style.display = 'none'; $('s-in').style.display = 'none';
+  const sp = $('s-splash'); sp.setAttribute('transform', `translate(${x} ${y})`); sp.style.display = '';
 }
 function hideStream() { const svg = $('stream'); if (svg) svg.style.display = 'none'; }
 
-function animPour(srcEl, dstEl, done) {
-  const sg = srcEl.querySelector('.glass');
+function animPour(srcEl, dstEl, liters, done) {
+  const sg = srcEl.querySelector('.glass'), ms = msPour(liters);
   const sb = glassBox(srcEl), db = glassBox(dstEl);
   const sign = db.cx > sb.cx ? 1 : -1;               // đích ở bên phải (+1) hay bên trái (-1)
   const th = 38 * Math.PI / 180, w = sb.width, h = sb.height;
   // Vị trí miệng ly (góc trên gần đích) sau khi xoay quanh giữa đáy ly.
   const spoutX = sign * (w / 2 * Math.cos(th) + h * Math.sin(th));
   const spoutY = -(h * Math.cos(th) - w / 2 * Math.sin(th));
-  const tx = db.cx, ty = db.top + 8;                 // điểm nước rơi vào ly đích
+  const tx = db.cx, ty = surfaceY(dstEl, db);        // điểm nước rơi: mặt nước ly đích
   const spout = { x: tx - sign * 14, y: db.top - 52 };
   const dx = (spout.x - spoutX) - sb.cx, dy = (spout.y - spoutY) - sb.bottom;
   srcEl.classList.add('lift', 'tilt', sign > 0 ? 'tilt-r' : 'tilt-l'); render();
+  setWaterSpeed(srcEl, ms); setWaterSpeed(dstEl, ms);
   sg.style.transformOrigin = '50% 100%';
   sg.style.transition = `transform ${TILT_MS}ms ease-in-out, box-shadow .25s`;
   sg.style.transform = `translate(${dx}px, ${dy}px) rotate(${sign * 38}deg)`;
+  // Dòng nước bắt đầu chảy ngay khi ly vừa nghiêng tới nơi.
   setTimeout(() => {
-    showStream(spout.x, spout.y, tx, ty, sign * 6, false);
+    showStream(spout.x, spout.y, tx, ty, sign * 6);
     dstEl.classList.add('pouring');
-    viewAmts = null; render(); sndPour(POUR_MS / 1000);
+    viewAmts = null; render(); sndPour(ms / 1000);
     setTimeout(() => {
       hideStream(); dstEl.classList.remove('pouring');
       sg.style.transform = ''; srcEl.classList.remove('tilt', 'tilt-r', 'tilt-l');
+      setWaterSpeed(srcEl, null); setWaterSpeed(dstEl, null);
       setTimeout(() => { srcEl.classList.remove('lift'); sg.style.transition = ''; sg.style.transformOrigin = ''; }, TILT_MS);
       done();
-    }, POUR_MS);
-  }, TILT_MS);
+    }, ms);
+  }, TILT_MS * .85);
 }
 
-function animFill(jugEl, done) {
-  const b = glassBox(jugEl);
-  showStream(b.cx, b.top - 62, b.cx, b.top + 8, 0, true);
-  jugEl.classList.add('pouring');
-  viewAmts = null; render(); sndPour(POUR_MS / 1000);
-  setTimeout(() => { hideStream(); jugEl.classList.remove('pouring'); done(); }, POUR_MS);
+function animFill(jugEl, liters, done) {
+  const ms = msFill(liters), b = glassBox(jugEl);
+  const f = jugEl.querySelector('.faucet').getBoundingClientRect();
+  const mouthY = f.top + f.height * (46 / 54);      // miệng vòi trong SVG (y=46/54)
+  jugEl.classList.add('filling');
+  // Vặn tay vòi trước, nước chảy ra sau một nhịp.
+  setTimeout(() => {
+    showStream(b.cx, mouthY, b.cx, surfaceY(jugEl, b), 0);
+    jugEl.classList.add('pouring');
+    setWaterSpeed(jugEl, ms); viewAmts = null; render(); sndPour(ms / 1000);
+    setTimeout(() => {
+      hideStream(); jugEl.classList.remove('pouring', 'filling'); setWaterSpeed(jugEl, null); done();
+    }, ms);
+  }, 260);
 }
 
-function animEmpty(jugEl, done) {
-  const g = jugEl.querySelector('.glass');
-  const drops = document.createElement('div'); drops.className = 'drops';
-  for (let k = 0; k < 6; k++) { const i = document.createElement('i'); i.style.left = (15 + k * 13) + '%'; i.style.animationDelay = (k * 60) + 'ms'; drops.appendChild(i); }
-  drops.style.top = g.offsetHeight + 'px'; jugEl.appendChild(drops);  // gắn ngoài .glass vì .glass cắt tràn
-  viewAmts = null; render(); sndPour(.45);
-  setTimeout(() => { drops.remove(); done(); }, POUR_MS);
+function animEmpty(jugEl, liters, done) {
+  const ms = msEmpty(liters);
+  const v = jugEl.querySelector('.valve').getBoundingClientRect();
+  jugEl.classList.add('draining');
+  showSplash(v.left + v.width / 2, v.top + v.height * (37 / 50));   // tia nước ở rãnh thoát
+  setWaterSpeed(jugEl, ms); viewAmts = null; render(); sndPour(ms / 1000);
+  setTimeout(() => { hideStream(); jugEl.classList.remove('draining'); setWaterSpeed(jugEl, null); done(); }, ms);
 }
 
 function undo() {
