@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#5ec8f5">
+<title>Đong Nước</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%235ec8f5'/%3E%3Crect x='8' y='6' width='16' height='22' rx='4' fill='white' opacity='.9'/%3E%3Crect x='10' y='16' width='12' height='10' rx='2' fill='%231f8fe0'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --sky1: #bdeeff; --sky2: #e9fbff;
+  --ink: #1d3557; --ink2: #4a6b8a;
+  --blue: #1f8fe0; --blue2: #5ec8f5; --water: #39b6f0;
+  --green: #35c46a; --orange: #ff9f1c; --red: #ff5c7a; --yellow: #ffd23f;
+  --card: #ffffff; --shadow: 0 10px 30px rgba(29,53,87,.14);
+}
+html, body { height: 100%; }
+body {
+  font-family: 'Baloo 2', 'Segoe UI', sans-serif;
+  background: linear-gradient(180deg, var(--sky1), var(--sky2) 55%, #d8f5ff);
+  color: var(--ink);
+  -webkit-tap-highlight-color: transparent;
+  user-select: none; -webkit-user-select: none;
+  overflow: hidden;
+  touch-action: manipulation;
+}
+button { font-family: inherit; cursor: pointer; border: 0; background: none; color: inherit; }
+button:disabled { opacity: .4; cursor: default; }
+.screen { position: fixed; inset: 0; display: none; flex-direction: column; overflow: hidden; }
+.screen.on { display: flex; }
+
+/* ── clouds ── */
+.cloud { position: absolute; background: #fff; border-radius: 50px; opacity: .8; animation: drift linear infinite; pointer-events: none; }
+.cloud::before, .cloud::after { content: ''; position: absolute; background: #fff; border-radius: 50%; }
+.cloud::before { width: 55%; height: 170%; left: 12%; top: -70%; }
+.cloud::after { width: 40%; height: 130%; right: 12%; top: -40%; }
+@keyframes drift { from { transform: translateX(-140%); } to { transform: translateX(110vw); } }
+
+/* ── home ── */
+#home { align-items: center; justify-content: center; text-align: center; padding: 24px; gap: 14px; }
+.logo { font-size: clamp(42px, 9vw, 72px); font-weight: 800; color: var(--blue); text-shadow: 0 4px 0 #fff, 0 8px 18px rgba(31,143,224,.3); line-height: 1.05; }
+.logo-sub { font-size: clamp(15px, 3vw, 20px); color: var(--ink2); font-weight: 700; margin-bottom: 10px; }
+.logo-jugs { display: flex; gap: 10px; align-items: flex-end; margin: 6px 0 14px; }
+.big-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  min-width: 240px; padding: 14px 28px; border-radius: 22px;
+  font-size: 22px; font-weight: 800; color: #fff;
+  background: linear-gradient(180deg, #3fb9ff, #1f8fe0);
+  box-shadow: 0 6px 0 #156bb0, 0 12px 24px rgba(31,143,224,.35);
+  transition: transform .1s, box-shadow .1s;
+}
+.big-btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #156bb0, 0 6px 12px rgba(31,143,224,.3); }
+.big-btn.green { background: linear-gradient(180deg, #4fdb86, #2fb862); box-shadow: 0 6px 0 #1f8a47, 0 12px 24px rgba(53,196,106,.35); }
+.big-btn.green:active { box-shadow: 0 2px 0 #1f8a47; }
+.big-btn.ghost { background: #fff; color: var(--blue); box-shadow: 0 6px 0 #cfe6f7, 0 10px 20px rgba(29,53,87,.12); }
+.big-btn.ghost:active { box-shadow: 0 2px 0 #cfe6f7; }
+.link-back { position: absolute; left: 14px; top: 14px; font-weight: 700; color: var(--ink2); text-decoration: none; background: rgba(255,255,255,.75); padding: 8px 14px; border-radius: 14px; z-index: 2; }
+.progress-pill { font-weight: 700; color: var(--ink2); background: rgba(255,255,255,.7); padding: 6px 16px; border-radius: 14px; }
+
+/* ── level select ── */
+#levels { padding: 0; }
+.topbar {
+  display: flex; align-items: center; gap: 10px; padding: calc(10px + env(safe-area-inset-top)) 12px 10px;
+  background: rgba(255,255,255,.65); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 2px 12px rgba(29,53,87,.08); position: relative; z-index: 3;
+}
+.icon-btn {
+  width: 46px; height: 46px; border-radius: 15px; background: #fff; font-size: 22px; display: inline-flex; align-items: center; justify-content: center;
+  box-shadow: 0 3px 0 #d6e6f2, 0 6px 14px rgba(29,53,87,.1); transition: transform .1s; flex: 0 0 auto;
+}
+.icon-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #d6e6f2; }
+.icon-btn.hint-glow { animation: hintpulse .8s ease-in-out infinite; }
+.topbar .title { font-size: 22px; font-weight: 800; flex: 1; text-align: center; }
+.level-grid { flex: 1; overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); gap: 10px; padding: 16px; padding-bottom: 40px; -webkit-overflow-scrolling: touch; }
+.lv-btn {
+  aspect-ratio: 1; border-radius: 18px; background: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  font-size: 22px; font-weight: 800; color: var(--blue); box-shadow: 0 4px 0 #cfe6f7, 0 6px 12px rgba(29,53,87,.08); transition: transform .1s;
+}
+.lv-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #cfe6f7; }
+.lv-btn.locked { background: #e6eef5; color: #9fb3c6; box-shadow: 0 4px 0 #d3dfe9; }
+.lv-btn.current { outline: 4px solid var(--orange); }
+.lv-btn .stars { font-size: 11px; letter-spacing: 1px; color: var(--orange); line-height: 1; height: 12px; }
+.lv-btn .stars .off { color: #d9e3ec; }
+
+/* ── game ── */
+#game { }
+.stat { display: flex; flex-direction: column; align-items: center; min-width: 58px; line-height: 1; }
+.stat small { font-size: 11px; color: var(--ink2); font-weight: 700; text-transform: uppercase; letter-spacing: .5px; }
+.stat b { font-size: 22px; font-weight: 800; }
+.play-area { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: space-evenly; padding: 8px 12px calc(12px + env(safe-area-inset-bottom)); position: relative; z-index: 1; }
+
+.goal {
+  display: flex; align-items: center; gap: 12px; background: #fff; border-radius: 24px; padding: 10px 18px 10px 12px;
+  box-shadow: var(--shadow); max-width: 92vw;
+}
+.goal .face { font-size: 44px; line-height: 1; animation: bob 2.4s ease-in-out infinite; }
+@keyframes bob { 0%,100% { transform: translateY(0) rotate(-4deg);} 50% { transform: translateY(-5px) rotate(4deg);} }
+.goal .say { font-size: 16px; color: var(--ink2); font-weight: 700; line-height: 1.2; }
+.goal .say b { display: block; font-size: 30px; color: var(--blue); line-height: 1.05; }
+.goal.happy .face { animation: jump .5s ease-in-out infinite; }
+@keyframes jump { 0%,100% { transform: translateY(0) scale(1);} 50% { transform: translateY(-14px) scale(1.15);} }
+
+.jugs { display: flex; align-items: flex-end; justify-content: center; gap: var(--gap, 18px); width: 100%; }
+.jug { display: flex; flex-direction: column; align-items: center; gap: 8px; width: var(--jw, 92px); position: relative; }
+.glass {
+  width: 100%; height: var(--h); position: relative; border-radius: 10px 10px 22px 22px;
+  background: linear-gradient(90deg, rgba(255,255,255,.75), rgba(230,247,255,.55) 30%, rgba(255,255,255,.35) 70%, rgba(200,235,255,.7));
+  border: 4px solid #fff; box-shadow: 0 8px 18px rgba(29,53,87,.18), inset 0 0 0 2px rgba(120,190,230,.45);
+  overflow: hidden; transition: transform .25s, box-shadow .25s; cursor: pointer;
+}
+.glass::after { content: ''; position: absolute; left: 10%; top: 6%; width: 10%; height: 55%; background: rgba(255,255,255,.55); border-radius: 10px; pointer-events: none; }
+.jug.sel .glass { transform: translateY(-10px) scale(1.04); box-shadow: 0 0 0 5px var(--orange), 0 14px 24px rgba(255,159,28,.35); }
+.jug.target .glass { box-shadow: 0 0 0 5px var(--green), 0 10px 20px rgba(53,196,106,.35); animation: wiggle .6s ease-in-out infinite; }
+.jug.hint-glow .glass { animation: hintpulse .8s ease-in-out infinite; }
+.jug.win .glass { box-shadow: 0 0 0 6px var(--yellow), 0 0 40px var(--yellow); }
+@keyframes wiggle { 0%,100% { transform: rotate(0);} 25% { transform: rotate(-2deg);} 75% { transform: rotate(2deg);} }
+@keyframes hintpulse { 0%,100% { box-shadow: 0 0 0 4px var(--yellow), 0 0 10px var(--yellow); } 50% { box-shadow: 0 0 0 10px rgba(255,210,63,.3), 0 0 30px var(--yellow); } }
+.water {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 0%;
+  background: linear-gradient(180deg, #6fd4ff, var(--water) 30%, #1a86cf);
+  transition: height .55s cubic-bezier(.4,.1,.3,1);
+}
+.water::before {
+  content: ''; position: absolute; left: -50%; top: -8px; width: 200%; height: 16px;
+  background: radial-gradient(circle at 10px 8px, #8ee0ff 6px, transparent 7px) repeat-x; background-size: 20px 16px;
+  opacity: .9; animation: wave 1.6s linear infinite;
+}
+@keyframes wave { from { transform: translateX(0);} to { transform: translateX(20px);} }
+.jug.pouring .water::after { content: ''; position: absolute; inset: 0; background: radial-gradient(circle, rgba(255,255,255,.45) 2px, transparent 3px) 0 0/14px 14px; animation: bubbles .6s linear infinite; }
+@keyframes bubbles { from { background-position: 0 20px; } to { background-position: 0 -20px; } }
+.amt { position: absolute; left: 0; right: 0; bottom: 8px; text-align: center; font-size: 30px; font-weight: 800; color: #fff; text-shadow: 0 2px 4px rgba(0,60,120,.5); pointer-events: none; transition: bottom .55s; }
+.jug.empty .amt { color: #9fb8cc; text-shadow: none; }
+.cap { position: absolute; top: 6px; left: 0; right: 0; text-align: center; font-size: 15px; font-weight: 800; color: var(--ink2); background: rgba(255,255,255,.7); margin: 0 auto; width: fit-content; padding: 1px 10px; border-radius: 10px; pointer-events: none; }
+.ticks { position: absolute; right: 6px; top: 0; bottom: 0; width: 10px; pointer-events: none; }
+.ticks i { position: absolute; right: 0; width: 8px; height: 2px; background: rgba(60,120,170,.35); border-radius: 2px; }
+.jbtns { display: flex; gap: 6px; width: 100%; }
+.jbtn {
+  flex: 1; height: 44px; border-radius: 14px; font-size: 22px; background: #fff; display: inline-flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 0 #cfe6f7, 0 6px 12px rgba(29,53,87,.1); transition: transform .1s;
+}
+.jbtn:active:not(:disabled) { transform: translateY(3px); box-shadow: 0 1px 0 #cfe6f7; }
+.jbtn.hint-glow { animation: hintpulse .8s ease-in-out infinite; }
+.jbtn.fill { color: var(--blue); } .jbtn.dump { color: var(--red); }
+
+.tip { font-size: 16px; font-weight: 700; color: var(--ink2); text-align: center; background: rgba(255,255,255,.75); padding: 8px 18px; border-radius: 16px; min-height: 40px; max-width: 94vw; transition: opacity .2s; }
+.tip.hint { background: #fff4c2; color: #8a5a00; }
+
+/* ── overlays ── */
+.overlay { position: fixed; inset: 0; background: rgba(29,53,87,.45); display: none; align-items: center; justify-content: center; z-index: 20; padding: 20px; }
+.overlay.on { display: flex; }
+.modal { background: #fff; border-radius: 28px; padding: 26px 24px; max-width: 420px; width: 100%; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,.25); animation: pop .35s cubic-bezier(.3,1.4,.5,1); max-height: 90vh; overflow-y: auto; }
+@keyframes pop { from { transform: scale(.6); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.modal h2 { font-size: 30px; color: var(--blue); margin-bottom: 6px; }
+.modal p { color: var(--ink2); font-weight: 700; font-size: 17px; margin: 6px 0; }
+.modal .btns { display: flex; flex-direction: column; gap: 10px; margin-top: 18px; align-items: center; }
+.win-stars { font-size: 48px; letter-spacing: 4px; margin: 6px 0; color: var(--orange); text-shadow: 0 2px 0 #d98200; }
+.win-stars .off { color: #e3eaf0; }
+.win-stars span { display: inline-block; animation: starin .5s cubic-bezier(.3,1.6,.5,1) backwards; }
+.win-stars span:nth-child(2) { animation-delay: .15s; } .win-stars span:nth-child(3) { animation-delay: .3s; }
+@keyframes starin { from { transform: scale(0) rotate(-90deg); } to { transform: scale(1) rotate(0); } }
+.howto { text-align: left; display: flex; flex-direction: column; gap: 12px; margin-top: 12px; }
+.howto div { display: flex; gap: 12px; align-items: center; font-weight: 700; color: var(--ink); font-size: 16px; line-height: 1.3; }
+.howto .ic { font-size: 30px; width: 44px; text-align: center; flex: 0 0 auto; }
+#confetti { position: fixed; inset: 0; pointer-events: none; z-index: 30; }
+
+@media (max-height: 640px) {
+  .goal .face { font-size: 34px; } .goal .say b { font-size: 24px; } .amt { font-size: 24px; }
+}
+</style>
+</head>
+<body>
+<canvas id="confetti"></canvas>
+
+<!-- ═══ HOME ═══ -->
+<section class="screen on" id="home">
+  <a class="link-back" href="index.html">‹ Về kho trò chơi</a>
+  <div class="cloud" style="width:120px;height:40px;top:12%;animation-duration:48s;"></div>
+  <div class="cloud" style="width:90px;height:30px;top:30%;animation-duration:62s;animation-delay:-20s;"></div>
+  <div class="cloud" style="width:150px;height:46px;top:70%;animation-duration:70s;animation-delay:-40s;opacity:.6"></div>
+  <div class="logo-jugs" aria-hidden="true">
+    <svg width="60" height="80" viewBox="0 0 60 80"><rect x="4" y="4" width="52" height="72" rx="12" fill="#fff" stroke="#9ad9f7" stroke-width="4"/><rect x="8" y="40" width="44" height="32" rx="8" fill="#39b6f0"/></svg>
+    <svg width="60" height="110" viewBox="0 0 60 110"><rect x="4" y="4" width="52" height="102" rx="12" fill="#fff" stroke="#9ad9f7" stroke-width="4"/><rect x="8" y="30" width="44" height="72" rx="8" fill="#39b6f0"/></svg>
+    <svg width="60" height="65" viewBox="0 0 60 65"><rect x="4" y="4" width="52" height="57" rx="12" fill="#fff" stroke="#9ad9f7" stroke-width="4"/></svg>
+  </div>
+  <div class="logo">Đong Nước</div>
+  <div class="logo-sub">Trò chơi suy luận cho bé · 100 vòng</div>
+  <button class="big-btn green" id="btn-continue">▶ Chơi tiếp</button>
+  <button class="big-btn ghost" id="btn-levels">🗺 Chọn vòng</button>
+  <button class="big-btn ghost" id="btn-howto">❓ Cách chơi</button>
+  <div class="progress-pill" id="home-progress"></div>
+</section>
+
+<!-- ═══ LEVEL SELECT ═══ -->
+<section class="screen" id="levels">
+  <div class="topbar">
+    <button class="icon-btn" id="lv-back" aria-label="Quay lại">‹</button>
+    <div class="title">Chọn vòng</div>
+    <div class="stat"><small>Sao</small><b id="lv-stars">0</b></div>
+  </div>
+  <div class="level-grid" id="level-grid"></div>
+</section>
+
+<!-- ═══ GAME ═══ -->
+<section class="screen" id="game">
+  <div class="topbar">
+    <button class="icon-btn" id="g-back" aria-label="Danh sách vòng">‹</button>
+    <div class="stat"><small>Vòng</small><b id="g-level">1</b></div>
+    <div class="stat"><small>Bước</small><b id="g-moves">0</b></div>
+    <div class="stat"><small>Ít nhất</small><b id="g-min">0</b></div>
+    <div style="flex:1"></div>
+    <button class="icon-btn" id="g-undo" aria-label="Hoàn tác">↩</button>
+    <button class="icon-btn" id="g-reset" aria-label="Làm lại">🔄</button>
+    <button class="icon-btn" id="g-hint" aria-label="Gợi ý">💡</button>
+    <button class="icon-btn" id="g-sound" aria-label="Âm thanh">🔊</button>
+  </div>
+  <div class="play-area">
+    <div class="goal" id="goal">
+      <div class="face" id="goal-face">🐰</div>
+      <div class="say">Tớ cần đúng<b id="goal-num">4 lít</b>nước nhé!</div>
+    </div>
+    <div class="jugs" id="jugs"></div>
+    <div class="tip" id="tip">Chạm vào thùng để chọn, rồi chạm thùng khác để đổ qua.</div>
+  </div>
+</section>
+
+<!-- ═══ WIN ═══ -->
+<div class="overlay" id="win">
+  <div class="modal">
+    <h2 id="win-title">Giỏi quá! 🎉</h2>
+    <div class="win-stars" id="win-stars"></div>
+    <p id="win-text"></p>
+    <div class="btns">
+      <button class="big-btn green" id="win-next">Vòng tiếp theo ▶</button>
+      <button class="big-btn ghost" id="win-retry">Chơi lại vòng này</button>
+      <button class="big-btn ghost" id="win-levels">Chọn vòng</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ HOW TO ═══ -->
+<div class="overlay" id="howto">
+  <div class="modal">
+    <h2>Cách chơi 💧</h2>
+    <p>Đong đúng số lít nước mà bạn nhỏ yêu cầu vào một thùng bất kỳ.</p>
+    <div class="howto">
+      <div><span class="ic">🚰</span><span>Bấm <b>🚰</b> dưới thùng để đổ <b>đầy</b> thùng từ vòi nước.</span></div>
+      <div><span class="ic">🗑</span><span>Bấm <b>🗑</b> để đổ <b>hết</b> nước trong thùng đi.</span></div>
+      <div><span class="ic">👆</span><span>Chạm vào một thùng, rồi chạm thùng khác để <b>đổ nước qua</b>. Nước đổ đến khi thùng nhận đầy hoặc thùng cho cạn.</span></div>
+      <div><span class="ic">⭐</span><span>Đong xong càng ít bước thì càng nhiều sao. Bấm <b>💡</b> nếu bí.</span></div>
+    </div>
+    <div class="btns"><button class="big-btn" id="howto-ok">Hiểu rồi!</button></div>
+  </div>
+</div>
+
+<!-- ═══ CONFIRM RESET PROGRESS ═══ -->
+<div class="overlay" id="confirm">
+  <div class="modal">
+    <h2 id="confirm-title">Làm lại vòng này?</h2>
+    <p id="confirm-text">Nước trong các thùng sẽ được đổ hết.</p>
+    <div class="btns">
+      <button class="big-btn" id="confirm-yes">Đồng ý</button>
+      <button class="big-btn ghost" id="confirm-no">Thôi</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─────────────────────────────────────────────────────────────
+// Dữ liệu 100 vòng: caps = dung tích các thùng, target = số lít cần đong,
+// min = số bước ít nhất (tính sẵn bằng BFS, đảm bảo luôn giải được).
+// ─────────────────────────────────────────────────────────────
+const LEVELS = [{"caps":[4,5],"target":4,"min":1},{"caps":[3,4],"target":3,"min":1},{"caps":[2,3],"target":2,"min":1},{"caps":[4,5],"target":1,"min":2},{"caps":[2,5],"target":3,"min":2},{"caps":[3,4],"target":1,"min":2},{"caps":[2,3],"target":1,"min":2},{"caps":[3,5],"target":2,"min":2},{"caps":[3,5],"target":1,"min":4},{"caps":[3,4],"target":2,"min":4},{"caps":[6,7],"target":5,"min":4},{"caps":[2,5],"target":4,"min":4},{"caps":[5,6],"target":4,"min":4},{"caps":[2,7],"target":4,"min":4},{"caps":[6,8],"target":4,"min":4},{"caps":[5,8],"target":2,"min":4},{"caps":[3,7],"target":6,"min":4},{"caps":[4,7],"target":1,"min":4},{"caps":[3,7],"target":1,"min":4},{"caps":[3,8],"target":1,"min":6},{"caps":[4,7,8],"target":2,"min":5},{"caps":[7,9],"target":4,"min":6},{"caps":[8,9],"target":2,"min":6},{"caps":[2,5,7],"target":6,"min":6},{"caps":[8,10],"target":4,"min":6},{"caps":[7,10],"target":6,"min":6},{"caps":[3,5,10],"target":9,"min":6},{"caps":[3,10],"target":9,"min":6},{"caps":[3,10],"target":1,"min":6},{"caps":[2,9,11],"target":8,"min":8},{"caps":[9,11],"target":5,"min":8},{"caps":[7,10],"target":1,"min":8},{"caps":[4,7,11],"target":2,"min":8},{"caps":[4,7],"target":2,"min":8},{"caps":[5,9],"target":6,"min":8},{"caps":[6,11,12],"target":9,"min":8},{"caps":[3,8],"target":7,"min":8},{"caps":[7,9],"target":3,"min":8},{"caps":[5,7,12],"target":1,"min":8},{"caps":[5,9],"target":3,"min":8},{"caps":[2,13],"target":3,"min":10},{"caps":[2,9,13],"target":12,"min":9},{"caps":[8,13],"target":6,"min":10},{"caps":[2,11],"target":1,"min":10},{"caps":[5,9,14],"target":2,"min":10},{"caps":[12,13],"target":3,"min":10},{"caps":[5,7],"target":6,"min":10},{"caps":[5,10,14],"target":12,"min":10},{"caps":[7,11],"target":6,"min":10},{"caps":[10,13],"target":9,"min":10},{"caps":[11,13,15],"target":1,"min":11},{"caps":[13,14,15],"target":8,"min":11},{"caps":[3,10,13],"target":5,"min":11},{"caps":[6,7,13],"target":10,"min":11},{"caps":[5,9,14],"target":12,"min":11},{"caps":[7,9,16],"target":1,"min":12},{"caps":[5,11,16],"target":13,"min":13},{"caps":[7,14,15],"target":11,"min":12},{"caps":[8,15,16],"target":4,"min":13},{"caps":[7,10,17],"target":2,"min":12},{"caps":[15,16,17],"target":8,"min":14},{"caps":[3,13,16],"target":8,"min":14},{"caps":[8,9,17],"target":12,"min":13},{"caps":[2,13,17],"target":16,"min":13},{"caps":[9,17,18],"target":5,"min":13},{"caps":[9,16,18],"target":1,"min":13},{"caps":[9,14,18],"target":16,"min":14},{"caps":[8,9,17],"target":13,"min":15},{"caps":[6,11,17],"target":3,"min":14},{"caps":[13,15,17],"target":16,"min":14},{"caps":[11,15,19],"target":17,"min":14},{"caps":[9,10,19],"target":5,"min":16},{"caps":[2,15,17],"target":16,"min":16},{"caps":[7,10,17],"target":12,"min":15},{"caps":[3,17,20],"target":13,"min":16},{"caps":[6,11,17],"target":14,"min":15},{"caps":[3,17,20],"target":7,"min":17},{"caps":[9,10,19],"target":14,"min":17},{"caps":[8,11,19],"target":4,"min":16},{"caps":[9,17,18],"target":13,"min":16},{"caps":[9,18,20],"target":10,"min":16},{"caps":[2,13,15,17],"target":16,"min":13},{"caps":[7,12,19],"target":13,"min":17},{"caps":[4,13,17,21],"target":19,"min":15},{"caps":[3,17,20],"target":10,"min":18},{"caps":[5,12,17,22],"target":6,"min":14},{"caps":[3,19,22],"target":14,"min":18},{"caps":[4,11,15,19],"target":17,"min":13},{"caps":[2,19,21],"target":18,"min":18},{"caps":[8,13,16,21],"target":17,"min":13},{"caps":[3,19,22],"target":8,"min":19},{"caps":[2,19,21,23],"target":20,"min":18},{"caps":[10,20,23],"target":5,"min":19},{"caps":[5,11,16,21],"target":8,"min":13},{"caps":[11,20,22],"target":21,"min":20},{"caps":[9,11,18,20],"target":19,"min":13},{"caps":[9,13,22],"target":20,"min":19},{"caps":[2,17,19,21],"target":20,"min":17},{"caps":[12,23,24],"target":18,"min":20},{"caps":[7,11,18,25],"target":9,"min":15}];
+const FACES = ['🐰','🐻','🐼','🐨','🦊','🐸','🐷','🐵','🐶','🐱','🦁','🐯','🐮','🐥','🦄','🐙','🐢','🦉','🐧','🦋'];
+const STORE_KEY = 'dongnuoc_v1';
+
+// ── Lưu trữ ─────────────────────────────────────────────────
+let P = { maxLevel: 1, stars: {}, cur: null, sound: true };
+try { const s = JSON.parse(localStorage.getItem(STORE_KEY)); if (s && typeof s === 'object') P = Object.assign(P, s); } catch (e) {}
+function save() { try { localStorage.setItem(STORE_KEY, JSON.stringify(P)); } catch (e) {} }
+
+// ── Âm thanh ────────────────────────────────────────────────
+let actx = null;
+function ac() { if (!actx) { try { actx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} } if (actx && actx.state === 'suspended') actx.resume(); return actx; }
+function tone(f, t, dur, type = 'sine', vol = .18) {
+  const c = ac(); if (!c || !P.sound) return;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type; o.frequency.setValueAtTime(f, c.currentTime + t);
+  g.gain.setValueAtTime(0, c.currentTime + t);
+  g.gain.linearRampToValueAtTime(vol, c.currentTime + t + .02);
+  g.gain.exponentialRampToValueAtTime(.001, c.currentTime + t + dur);
+  o.connect(g).connect(c.destination); o.start(c.currentTime + t); o.stop(c.currentTime + t + dur + .05);
+}
+function sndTap() { tone(660, 0, .08, 'triangle', .12); }
+function sndPour(dur = .5) {
+  const c = ac(); if (!c || !P.sound) return;
+  const n = c.sampleRate * dur, buf = c.createBuffer(1, n, c.sampleRate), d = buf.getChannelData(0);
+  for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / n);
+  const src = c.createBufferSource(); src.buffer = buf;
+  const f = c.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = 900; f.Q.value = .8;
+  const g = c.createGain(); g.gain.value = .25;
+  src.connect(f).connect(g).connect(c.destination); src.start();
+  for (let i = 0; i < 4; i++) tone(500 + Math.random() * 500, i * dur / 4, .1, 'sine', .05);
+}
+function sndNo() { tone(220, 0, .15, 'square', .08); }
+function sndWin() { [523, 659, 784, 1047].forEach((f, i) => tone(f, i * .12, .35, 'triangle', .2)); tone(1319, .5, .6, 'sine', .15); }
+function sndStar(i) { tone(880 + i * 220, 0, .25, 'sine', .15); }
+
+// ── Trạng thái ván chơi ─────────────────────────────────────
+let S = null; // { level, amts, hist, moves, hinted }
+let selected = -1, hintTimer = null;
+const $ = id => document.getElementById(id);
+const lvData = L => LEVELS[L - 1];
+
+function show(id) { document.querySelectorAll('.screen').forEach(s => s.classList.toggle('on', s.id === id)); }
+
+function startLevel(L, fresh = false) {
+  L = Math.max(1, Math.min(LEVELS.length, L));
+  if (!fresh && P.cur && P.cur.level === L && !P.cur.won) S = P.cur;
+  else S = { level: L, amts: lvData(L).caps.map(() => 0), hist: [], moves: 0, hinted: false, won: false };
+  P.cur = S; save();
+  selected = -1;
+  buildJugs(); render();
+  setTip(L === 1 ? 'Bấm 🚰 để đổ đầy thùng nhé!' : 'Chạm vào thùng để chọn, rồi chạm thùng khác để đổ qua.');
+  show('game');
+}
+
+function buildJugs() {
+  const lv = lvData(S.level), n = lv.caps.length, wrap = $('jugs');
+  wrap.innerHTML = '';
+  const vw = Math.min(window.innerWidth, 900);
+  const gap = n >= 4 ? 10 : 18;
+  const jw = Math.min(96, Math.floor((vw - 24 - gap * (n - 1)) / n));
+  wrap.style.setProperty('--gap', gap + 'px');
+  const maxH = Math.min(260, Math.max(140, window.innerHeight * .34));
+  const maxCap = Math.max(...lv.caps);
+  lv.caps.forEach((cap, i) => {
+    const h = Math.round(70 + (maxH - 70) * cap / maxCap);
+    const el = document.createElement('div');
+    el.className = 'jug'; el.dataset.i = i;
+    el.style.setProperty('--jw', jw + 'px');
+    let ticks = '';
+    if (cap <= 12) for (let k = 1; k < cap; k++) ticks += `<i style="bottom:${(k / cap) * 100}%"></i>`;
+    el.innerHTML = `
+      <div class="glass" style="--h:${h}px">
+        <div class="water"></div>
+        <div class="ticks">${ticks}</div>
+        <div class="cap">${cap} lít</div>
+        <div class="amt">0</div>
+      </div>
+      <div class="jbtns">
+        <button class="jbtn fill" data-act="fill" data-i="${i}" aria-label="Đổ đầy">🚰</button>
+        <button class="jbtn dump" data-act="empty" data-i="${i}" aria-label="Đổ bỏ">🗑</button>
+      </div>`;
+    el.querySelector('.glass').addEventListener('click', () => onJugTap(i));
+    wrap.appendChild(el);
+  });
+  wrap.querySelectorAll('.jbtn').forEach(b => b.addEventListener('click', e => {
+    e.stopPropagation();
+    const i = +b.dataset.i;
+    if (b.dataset.act === 'fill') doMove({ type: 'fill', i }); else doMove({ type: 'empty', i });
+  }));
+  const face = FACES[(S.level * 7) % FACES.length];
+  $('goal-face').textContent = face;
+  $('goal-num').textContent = lv.target + ' lít';
+  $('goal').classList.remove('happy');
+}
+
+function render() {
+  const lv = lvData(S.level);
+  $('g-level').textContent = S.level;
+  $('g-moves').textContent = S.moves;
+  $('g-min').textContent = lv.min;
+  $('g-undo').disabled = S.hist.length === 0;
+  document.querySelectorAll('#jugs .jug').forEach((el, i) => {
+    const cap = lv.caps[i], a = S.amts[i];
+    el.querySelector('.water').style.height = (a / cap * 100) + '%';
+    el.querySelector('.amt').textContent = a;
+    el.classList.toggle('empty', a === 0);
+    el.classList.toggle('sel', selected === i);
+    el.classList.toggle('target', selected >= 0 && selected !== i && S.amts[selected] > 0 && a < cap);
+    el.classList.toggle('win', a === lv.target);
+    el.querySelector('.fill').disabled = a === cap;
+    el.querySelector('.dump').disabled = a === 0;
+  });
+}
+
+function setTip(t, hint = false) { const el = $('tip'); el.textContent = t; el.classList.toggle('hint', hint); }
+function clearHint() { document.querySelectorAll('.hint-glow').forEach(e => e.classList.remove('hint-glow')); if (hintTimer) { clearTimeout(hintTimer); hintTimer = null; } }
+
+function onJugTap(i) {
+  if (S.won) return;
+  clearHint();
+  if (selected < 0) {
+    if (S.amts[i] === 0) { sndNo(); setTip('Thùng này đang trống. Bấm 🚰 để đổ đầy nhé!'); return; }
+    selected = i; sndTap(); setTip('Chạm vào thùng muốn đổ nước sang.'); render(); return;
+  }
+  if (selected === i) { selected = -1; render(); setTip('Đã bỏ chọn.'); return; }
+  doMove({ type: 'pour', i: selected, j: i });
+}
+
+function applyMove(amts, caps, mv) {
+  const a = amts.slice();
+  if (mv.type === 'fill') a[mv.i] = caps[mv.i];
+  else if (mv.type === 'empty') a[mv.i] = 0;
+  else { const q = Math.min(a[mv.i], caps[mv.j] - a[mv.j]); a[mv.i] -= q; a[mv.j] += q; }
+  return a;
+}
+
+function doMove(mv) {
+  if (S.won) return;
+  clearHint();
+  const lv = lvData(S.level), caps = lv.caps;
+  const next = applyMove(S.amts, caps, mv);
+  if (next.every((v, k) => v === S.amts[k])) {
+    sndNo();
+    if (mv.type === 'pour') setTip(S.amts[mv.j] === caps[mv.j] ? 'Thùng kia đầy rồi, không đổ thêm được.' : 'Không có gì để đổ.');
+    selected = -1; render(); return;
+  }
+  S.hist.push(S.amts); S.amts = next; S.moves++; selected = -1;
+  P.cur = S; save();
+  sndPour(.5);
+  const els = document.querySelectorAll('#jugs .jug');
+  if (mv.type === 'pour') { els[mv.j].classList.add('pouring'); setTimeout(() => els[mv.j].classList.remove('pouring'), 600); }
+  if (mv.type === 'fill') { els[mv.i].classList.add('pouring'); setTimeout(() => els[mv.i].classList.remove('pouring'), 600); }
+  render();
+  if (mv.type === 'pour') setTip(`Đã đổ ${S.amts[mv.j] - S.hist[S.hist.length - 1][mv.j]} lít từ thùng ${caps[mv.i]} lít sang thùng ${caps[mv.j]} lít.`);
+  else if (mv.type === 'fill') setTip(`Đã đổ đầy thùng ${caps[mv.i]} lít.`);
+  else setTip(`Đã đổ hết thùng ${caps[mv.i]} lít.`);
+  if (S.amts.some(v => v === lv.target)) { S.won = true; P.cur = S; save(); setTimeout(onWin, 650); }
+}
+
+function undo() {
+  clearHint();
+  if (!S.hist.length || S.won) return;
+  S.amts = S.hist.pop(); S.moves++; selected = -1; P.cur = S; save(); sndTap(); render(); setTip('Đã hoàn tác (vẫn tính 1 bước).');
+}
+
+function resetLevel() { clearHint(); startLevel(S.level, true); sndTap(); }
+
+// ── Gợi ý: BFS từ trạng thái hiện tại, trả về nước đi đầu tiên ──
+function findHint(caps, start, target) {
+  const n = caps.length, radix = caps.map(c => c + 1);
+  let total = 1; for (const r of radix) total *= r;
+  const enc = s => { let v = 0; for (let i = n - 1; i >= 0; i--) v = v * radix[i] + s[i]; return v; };
+  const dec = v => { const s = new Array(n); for (let i = 0; i < n; i++) { s[i] = v % radix[i]; v = Math.floor(v / radix[i]); } return s; };
+  const parent = new Int32Array(total).fill(-1), firstMove = new Array(total);
+  const q = new Int32Array(total); let qh = 0, qt = 0;
+  const s0 = enc(start); parent[s0] = s0; q[qt++] = s0;
+  const moves = [];
+  for (let i = 0; i < n; i++) { moves.push({ type: 'fill', i }); moves.push({ type: 'empty', i }); for (let j = 0; j < n; j++) if (i !== j) moves.push({ type: 'pour', i, j }); }
+  while (qh < qt) {
+    const v = q[qh++], st = dec(v);
+    for (const mv of moves) {
+      const ns = applyMove(st, caps, mv); const e = enc(ns);
+      if (parent[e] >= 0) continue;
+      parent[e] = v; firstMove[e] = v === s0 ? mv : firstMove[v]; q[qt++] = e;
+      if (ns.some(x => x === target)) return firstMove[e];
+    }
+  }
+  return null;
+}
+
+function hint() {
+  clearHint();
+  if (S.won) return;
+  const lv = lvData(S.level);
+  const mv = findHint(lv.caps, S.amts, lv.target);
+  if (!mv) { setTip('Không tìm được gợi ý. Thử làm lại vòng nhé!'); return; }
+  S.hinted = true; P.cur = S; save(); sndTap();
+  const els = document.querySelectorAll('#jugs .jug');
+  if (mv.type === 'fill') { els[mv.i].querySelector('.fill').classList.add('hint-glow'); setTip(`💡 Đổ đầy thùng ${lv.caps[mv.i]} lít.`, true); }
+  else if (mv.type === 'empty') { els[mv.i].querySelector('.dump').classList.add('hint-glow'); setTip(`💡 Đổ hết thùng ${lv.caps[mv.i]} lít.`, true); }
+  else { els[mv.i].classList.add('hint-glow'); els[mv.j].classList.add('hint-glow'); setTip(`💡 Đổ nước từ thùng ${lv.caps[mv.i]} lít sang thùng ${lv.caps[mv.j]} lít.`, true); }
+  hintTimer = setTimeout(clearHint, 6000);
+}
+
+// ── Thắng ───────────────────────────────────────────────────
+function starsFor(moves, min, hinted) {
+  let s = moves <= min ? 3 : moves <= min + 2 ? 2 : 1;
+  if (hinted) s = Math.min(s, 2);
+  return s;
+}
+function onWin() {
+  if (!S || $('win').classList.contains('on')) return;
+  S.won = true;
+  const lv = lvData(S.level), st = starsFor(S.moves, lv.min, S.hinted);
+  $('goal').classList.add('happy');
+  P.stars[S.level] = Math.max(P.stars[S.level] || 0, st);
+  P.maxLevel = Math.max(P.maxLevel, Math.min(LEVELS.length, S.level + 1));
+  P.cur = null; save();
+  sndWin(); confetti();
+  const last = S.level === LEVELS.length;
+  $('win-title').textContent = last ? 'Vô địch! 🏆' : ['Giỏi quá! 🎉', 'Tuyệt vời! 🌟', 'Đỉnh của chóp! 🚀', 'Thông minh ghê! 🧠'][S.level % 4];
+  $('win-stars').innerHTML = [1, 2, 3].map(k => `<span class="${k <= st ? '' : 'off'}">★</span>`).join('');
+  [1, 2, 3].forEach(k => { if (k <= st) setTimeout(() => sndStar(k), 300 + k * 150); });
+  $('win-text').textContent = last
+    ? `Bé đã hoàn thành cả 100 vòng! Dùng ${S.moves} bước ở vòng cuối.`
+    : `Đong đúng ${lv.target} lít trong ${S.moves} bước` + (S.moves <= lv.min ? ' – ít nhất có thể!' : ` (ít nhất là ${lv.min}).`);
+  $('win-next').style.display = last ? 'none' : '';
+  setTimeout(() => $('win').classList.add('on'), 400);
+}
+
+// ── Màn chọn vòng ───────────────────────────────────────────
+function buildLevels() {
+  const g = $('level-grid'); g.innerHTML = '';
+  let total = 0;
+  for (let L = 1; L <= LEVELS.length; L++) {
+    const st = P.stars[L] || 0; total += st;
+    const b = document.createElement('button');
+    const locked = L > P.maxLevel;
+    b.className = 'lv-btn' + (locked ? ' locked' : '') + (P.cur && P.cur.level === L ? ' current' : '');
+    b.innerHTML = `<span>${locked ? '🔒' : L}</span><span class="stars">${[1, 2, 3].map(k => `<span class="${k <= st ? '' : 'off'}">★</span>`).join('')}</span>`;
+    if (!locked) b.addEventListener('click', () => { sndTap(); startLevel(L); });
+    g.appendChild(b);
+  }
+  $('lv-stars').textContent = total + '/' + LEVELS.length * 3;
+  show('levels');
+  const cur = g.querySelector('.current'); if (cur) cur.scrollIntoView({ block: 'center' });
+}
+
+function updateHome() {
+  const done = Object.keys(P.stars).length;
+  $('home-progress').textContent = done === 0 ? 'Bắt đầu từ vòng 1' : `Đã qua ${done}/${LEVELS.length} vòng · Vòng hiện tại: ${P.cur ? P.cur.level : P.maxLevel}`;
+  $('btn-continue').textContent = done === 0 && !P.cur ? '▶ Bắt đầu' : '▶ Chơi tiếp';
+}
+
+// ── Pháo giấy ───────────────────────────────────────────────
+function confetti() {
+  const cv = $('confetti'), ctx = cv.getContext('2d');
+  cv.width = innerWidth; cv.height = innerHeight;
+  const cols = ['#ff5c7a', '#ffd23f', '#35c46a', '#1f8fe0', '#b388ff', '#ff9f1c'];
+  const ps = Array.from({ length: 120 }, () => ({ x: Math.random() * cv.width, y: -20 - Math.random() * cv.height * .5, vx: (Math.random() - .5) * 3, vy: 2 + Math.random() * 4, r: 4 + Math.random() * 6, c: cols[Math.random() * cols.length | 0], a: Math.random() * 6, va: (Math.random() - .5) * .3 }));
+  let t0 = performance.now();
+  (function frame(now) {
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    let alive = false;
+    for (const p of ps) { p.x += p.vx; p.y += p.vy; p.a += p.va; if (p.y < cv.height + 20) alive = true; ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.a); ctx.fillStyle = p.c; ctx.fillRect(-p.r, -p.r / 2, p.r * 2, p.r); ctx.restore(); }
+    if (alive && now - t0 < 4000) requestAnimationFrame(frame); else ctx.clearRect(0, 0, cv.width, cv.height);
+  })(t0);
+}
+
+// ── Sự kiện ─────────────────────────────────────────────────
+$('btn-continue').addEventListener('click', () => { sndTap(); const first = !P.cur && P.maxLevel === 1 && !Object.keys(P.stars).length; startLevel(P.cur ? P.cur.level : P.maxLevel); if (first) $('howto').classList.add('on'); });
+$('btn-levels').addEventListener('click', () => { sndTap(); buildLevels(); });
+$('btn-howto').addEventListener('click', () => { sndTap(); $('howto').classList.add('on'); });
+$('howto-ok').addEventListener('click', () => { sndTap(); $('howto').classList.remove('on'); });
+$('lv-back').addEventListener('click', () => { sndTap(); updateHome(); show('home'); });
+$('g-back').addEventListener('click', () => { sndTap(); clearHint(); buildLevels(); });
+$('g-undo').addEventListener('click', undo);
+$('g-reset').addEventListener('click', () => { if (S.moves === 0) return; sndTap(); $('confirm').classList.add('on'); });
+$('confirm-yes').addEventListener('click', () => { $('confirm').classList.remove('on'); resetLevel(); });
+$('confirm-no').addEventListener('click', () => { sndTap(); $('confirm').classList.remove('on'); });
+$('g-hint').addEventListener('click', hint);
+function syncSound() { $('g-sound').textContent = P.sound ? '🔊' : '🔇'; }
+$('g-sound').addEventListener('click', () => { P.sound = !P.sound; save(); syncSound(); sndTap(); });
+$('win-next').addEventListener('click', () => { $('win').classList.remove('on'); sndTap(); startLevel(S.level + 1, true); });
+$('win-retry').addEventListener('click', () => { $('win').classList.remove('on'); sndTap(); startLevel(S.level, true); });
+$('win-levels').addEventListener('click', () => { $('win').classList.remove('on'); sndTap(); buildLevels(); });
+window.addEventListener('resize', () => { if (S && $('game').classList.contains('on')) { buildJugs(); render(); } });
+
+syncSound(); updateHome();
+</script>
+</body>
+</html>
