@@ -161,10 +161,11 @@ button:disabled { opacity: .4; cursor: default; }
 .jug.lift { z-index: 10; }
 .jug.lift .glass { box-shadow: 0 18px 30px rgba(29,53,87,.3), inset 0 0 0 2px rgba(120,190,230,.45); }
 #stream { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 11; overflow: visible; }
-/* Mặt nước giữ ngang khi ly nghiêng: phóng to lớp nước rồi xoay ngược quanh điểm giữa mặt nước. */
-.jug.tilt .water { left: -150%; right: -150%; bottom: -150%; transform-origin: 50% 0; }
-.jug.tilt-r .water { transform: rotate(-38deg); }
-.jug.tilt-l .water { transform: rotate(38deg); }
+/* Khi ly nghiêng: lớp nước được phóng to và xoay ngược quanh góc miệng ly (nơi nước tràn ra),
+   nên mặt nước luôn nằm ngang và luôn chạm đúng miệng ly. Góc xoay đặt inline theo từng khung hình. */
+.jug.tilt .water { left: -150%; right: -150%; bottom: -150%; transition: none; }
+.jug.tilt-r .water { transform-origin: 62.5% 0; }   /* góc trên bên phải của ly */
+.jug.tilt-l .water { transform-origin: 37.5% 0; }   /* góc trên bên trái của ly */
 .jug.tilt .amt { opacity: 0; }
 #stream .s-out { fill: none; stroke: #39b6f0; stroke-width: 10; stroke-linecap: round; opacity: .95; }
 #stream .s-in { fill: none; stroke: #c9f0ff; stroke-width: 3; stroke-linecap: round; stroke-dasharray: 6 12; animation: flow .35s linear infinite; }
@@ -514,8 +515,14 @@ function showStream(x1, y1, x2, y2, bend) {
   out.style.transition = 'none'; out.style.strokeDasharray = len; out.style.strokeDashoffset = len;
   out.getBoundingClientRect();
   out.style.transition = 'stroke-dashoffset .2s linear'; out.style.strokeDashoffset = 0;
-  inn.style.opacity = 0; setTimeout(() => { inn.style.opacity = 1; }, 180);
+  inn.style.opacity = 0; setTimeout(() => { inn.style.opacity = 1; out.style.transition = 'none'; out.style.strokeDasharray = 'none'; }, 220);
   const sp = $('s-splash'); sp.setAttribute('transform', `translate(${x2} ${y2})`); sp.style.display = '';
+}
+function moveStream(x1, y1, x2, y2, bend) {
+  [x1, y1] = toLocal(x1, y1); [x2, y2] = toLocal(x2, y2);
+  const d = `M${x1} ${y1} Q${x1 + bend} ${(y1 + y2) / 2} ${x2} ${y2}`;
+  $('s-out').setAttribute('d', d); $('s-in').setAttribute('d', d);
+  $('s-splash').setAttribute('transform', `translate(${x2} ${y2})`);
 }
 function showSplash(x, y) {
   const svg = $('stream'); [x, y] = toLocal(x, y);
@@ -524,35 +531,84 @@ function showSplash(x, y) {
 }
 function hideStream() { const svg = $('stream'); if (svg) svg.style.display = 'none'; }
 
+// Góc nghiêng (radian) để mặt nước chạm đúng miệng ly khi trong ly còn tỉ lệ f (0..1) nước.
+// Xấp xỉ 2D: ly là hình chữ nhật rộng w cao h, mặt nước là đường ngang đi qua góc miệng ly.
+function tiltAngle(f, w, h) {
+  if (f <= 0) return 88 * Math.PI / 180;
+  const tan = f >= .5 ? 2 * h * (1 - f) / w   // mặt nước cắt cả hai thành ly
+                      : h / (2 * w * f);       // nước ít: tam giác ở góc miệng ly
+  return Math.min(Math.atan(tan), 88 * Math.PI / 180);
+}
+const ease = t => t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+
 function animPour(srcEl, dstEl, liters, done) {
-  const sg = srcEl.querySelector('.glass'), ms = msPour(liters);
+  const lv = lvData(S.level), caps = lv.caps;
+  const si = +srcEl.dataset.i, di = +dstEl.dataset.i;
+  const a0 = viewAmts[si], a1 = S.amts[si], b0 = viewAmts[di];
+  const sg = srcEl.querySelector('.glass'), sw = srcEl.querySelector('.water'), dw = dstEl.querySelector('.water'), dstAmt = dstEl.querySelector('.amt');
+  const ms = msPour(liters);
   const sb = glassBox(srcEl), db = glassBox(dstEl);
   const sign = db.cx > sb.cx ? 1 : -1;               // đích ở bên phải (+1) hay bên trái (-1)
-  const th = 38 * Math.PI / 180, w = sb.width, h = sb.height;
-  // Vị trí miệng ly (góc trên gần đích) sau khi xoay quanh giữa đáy ly.
-  const spoutX = sign * (w / 2 * Math.cos(th) + h * Math.sin(th));
-  const spoutY = -(h * Math.cos(th) - w / 2 * Math.sin(th));
-  const tx = db.cx, ty = surfaceY(dstEl, db);        // điểm nước rơi: mặt nước ly đích
-  const spout = { x: tx - sign * 14, y: db.top - 52 };
-  const dx = (spout.x - spoutX) - sb.cx, dy = (spout.y - spoutY) - sb.bottom;
-  srcEl.classList.add('lift', 'tilt', sign > 0 ? 'tilt-r' : 'tilt-l'); render();
-  setWaterSpeed(srcEl, ms); setWaterSpeed(dstEl, ms);
+  const w = sb.width, h = sb.height;
+  const th0 = tiltAngle(a0 / caps[si], w, h), th1 = tiltAngle(a1 / caps[si], w, h);
+  // Miệng ly được giữ cố định ngay trên mép ly đích; ly xoay quanh miệng của nó.
+  const lip = { x: db.cx - sign * db.width * .32, y: db.top - 24 };   // lệch sang một bên để không chảy xuyên qua vòi nước
+  const glassTransform = th => {
+    const spoutX = sign * (w / 2 * Math.cos(th) + h * Math.sin(th));
+    const spoutY = -(h * Math.cos(th) - w / 2 * Math.sin(th));
+    const dx = (lip.x - spoutX) - sb.cx, dy = (lip.y - spoutY) - sb.bottom;
+    return `translate(${dx}px, ${dy}px) rotate(${sign * th * 180 / Math.PI}deg)`;
+  };
+  const waterRot = th => `rotate(${-sign * th * 180 / Math.PI}deg)`;
+  const dstSurface = amt => Math.min(db.bottom - 14, Math.max(db.top + 26, db.bottom - db.height * amt / caps[di]));
+  const deg = th => th * 180 / Math.PI;
+
+  // Giai đoạn 1: nhấc ly lên, nghiêng tới góc mà nước vừa chạm miệng.
+  srcEl.classList.add('lift', 'tilt', sign > 0 ? 'tilt-r' : 'tilt-l');
+  const t1 = 300 + deg(th0) * 3;
   sg.style.transformOrigin = '50% 100%';
-  sg.style.transition = `transform ${TILT_MS}ms ease-in-out, box-shadow .25s`;
-  sg.style.transform = `translate(${dx}px, ${dy}px) rotate(${sign * 38}deg)`;
-  // Dòng nước bắt đầu chảy ngay khi ly vừa nghiêng tới nơi.
+  sg.style.transition = `transform ${t1}ms ease-in-out, box-shadow .25s`;
+  sg.style.transform = glassTransform(th0);
+  sw.style.transition = `height ${t1}ms ease-in-out, transform ${t1}ms ease-in-out`;
+  sw.style.height = 'calc(100% + 150%)';            // mặt nước nâng lên tới miệng ly
+  sw.style.transform = waterRot(th0);
+  dw.style.transition = 'none';
+
   setTimeout(() => {
-    showStream(spout.x, spout.y, tx, ty, sign * 6);
-    dstEl.classList.add('pouring');
-    viewAmts = null; render(); sndPour(ms / 1000);
+    // Giai đoạn 2: nước chảy; ly nghiêng dần thêm khi vơi, ly đích dâng lên.
+    sg.style.transition = 'box-shadow .25s'; sw.style.transition = 'none';
+    showStream(lip.x, lip.y, lip.x, dstSurface(b0), sign * 12);
+    dstEl.classList.add('pouring'); sndPour(ms / 1000);
+    const start = performance.now();
+    (function frame(now) {
+      const k = ease(Math.min(1, (now - start) / ms));
+      const a = a0 + (a1 - a0) * k, th = th0 + (th1 - th0) * k;
+      sg.style.transform = glassTransform(th);
+      sw.style.transform = waterRot(th);
+      const bAmt = b0 + (a0 - a);
+      dw.style.height = (bAmt / caps[di] * 100) + '%';
+      dstEl.classList.toggle('empty', bAmt < .5); dstAmt.textContent = Math.round(bAmt);
+      moveStream(lip.x, lip.y, lip.x, dstSurface(bAmt), sign * 12);
+      if (k < 1) requestAnimationFrame(frame); else finish();
+    })(start);
+  }, t1);
+
+  function finish() {
+    // Giai đoạn 3: ngừng chảy, đưa ly về chỗ, mặt nước hạ xuống mức còn lại.
+    hideStream(); dstEl.classList.remove('pouring'); dw.style.transition = '';
+    const t3 = 300 + deg(th1) * 3;
+    sg.style.transition = `transform ${t3}ms ease-in-out, box-shadow .25s`;
+    sg.style.transform = '';
+    sw.style.transition = `height ${t3}ms ease-in-out, transform ${t3}ms ease-in-out`;
+    sw.style.height = `calc(${a1 / caps[si] * 100}% + 150%)`;
+    sw.style.transform = 'rotate(0deg)';
     setTimeout(() => {
-      hideStream(); dstEl.classList.remove('pouring');
-      sg.style.transform = ''; srcEl.classList.remove('tilt', 'tilt-r', 'tilt-l');
-      setWaterSpeed(srcEl, null); setWaterSpeed(dstEl, null);
-      setTimeout(() => { srcEl.classList.remove('lift'); sg.style.transition = ''; sg.style.transformOrigin = ''; }, TILT_MS);
+      srcEl.classList.remove('lift', 'tilt', 'tilt-r', 'tilt-l');
+      sg.style.transition = ''; sg.style.transformOrigin = '';
+      sw.style.transition = ''; sw.style.transform = '';
       done();
-    }, ms);
-  }, TILT_MS * .85);
+    }, t3);
+  }
 }
 
 function animFill(jugEl, liters, done) {
