@@ -55,6 +55,8 @@ button:disabled { opacity: .4; cursor: default; }
 .emo-pop { position: fixed; z-index: 30; top: 54px; right: 10px; display: grid; grid-template-columns: repeat(6, 40px); gap: 4px; padding: 8px; border-radius: 16px; background: rgba(255,255,255,.96); box-shadow: 0 8px 24px rgba(0,0,0,.4); }
 .emo-pop button { width: 40px; height: 40px; border-radius: 10px; font-size: 25px; line-height: 1; }
 .emo-pop button:hover, .emo-pop button:active { background: #eef3f9; transform: scale(1.12); }
+.round-tag { background: rgba(0,0,0,.35); border: 1px solid rgba(255,210,63,.45); border-radius: 999px; padding: 4px 12px; font-weight: 800; font-size: 14px; white-space: nowrap; color: #ffd23f; }
+.round-tag b { color: #fff; }
 .room-tag { background: rgba(0,0,0,.35); border: 1px solid rgba(255,255,255,.18); border-radius: 999px; padding: 4px 12px; font-weight: 700; font-size: 13px; white-space: nowrap; color: #fff; }
 
 /* ── bàn cờ ── */
@@ -121,6 +123,11 @@ button:disabled { opacity: .4; cursor: default; }
 .token .disc { stroke: #fff; stroke-width: 2; }
 .token.turn .ring { opacity: .9; animation: ring 1.2s ease-in-out 3; }
 @keyframes ring { 0%, 100% { transform: scale(1); opacity: .9; } 50% { transform: scale(1.22); opacity: .3; } }
+/* mũi tên vàng trên đầu quân của mình: nảy nhẹ, chạm đáy thì hơi bẹp lại cho mềm */
+.token .me-arrow { display: none; }
+.token.mine .me-arrow { display: inline; filter: drop-shadow(0 0 4px rgba(255,200,40,.7)) drop-shadow(0 2px 2px rgba(0,0,0,.35)); }
+.token .me-bob { transform-box: fill-box; transform-origin: 50% 100%; animation: mebob 1.2s ease-in-out infinite; }
+@keyframes mebob { 0%, 100% { transform: translateY(-4px); } 45% { transform: translateY(2px) scale(1, 1); } 55% { transform: translateY(2px) scale(1.07, .9); } }
 .token .face { font-size: 15px; text-anchor: middle; dominant-baseline: central; }
 .token.jailed .face { opacity: .75; }
 .float { font: 900 19px 'Baloo 2', system-ui, sans-serif; text-anchor: middle; dominant-baseline: central; paint-order: stroke; stroke: #fff; stroke-width: 4; pointer-events: none; }
@@ -561,7 +568,7 @@ button:disabled { opacity: .4; cursor: default; }
 
 @media (prefers-reduced-motion: reduce) {
   .token { transition: none; }
-  .token .ring, .roll-lbl, .die.hop, .die.hop::after, .dots span, .panel, .overlay, .cardpop, .actions button.primary::after, #board.shake, .pick-ring, .pick-hand, .chars button.on, .tour-flag, .tour-warn, .fx-badge, .fx-edge { animation: none; }
+  .token .ring, .token .me-bob, .roll-lbl, .die.hop, .die.hop::after, .dots span, .panel, .overlay, .cardpop, .actions button.primary::after, #board.shake, .pick-ring, .pick-hand, .chars button.on, .tour-flag, .tour-warn, .fx-badge, .fx-edge { animation: none; }
   .fw-burst { animation: none; }
   .cube { transition: none; }
 }
@@ -573,6 +580,7 @@ button:disabled { opacity: .4; cursor: default; }
 <header class="top">
   <a class="back" href="index.html" aria-label="Về trang chính">‹</a>
   <h1><span>Cờ</span> <span>Tỷ</span> <span>Phú</span></h1>
+  <span class="round-tag" id="roundTag" hidden></span>
   <span class="room-tag" id="roomTag" hidden></span>
   <button class="mute" id="bPing" aria-label="Đánh dấu một ô cho mọi người" hidden>📍</button>
   <button class="mute" id="bEmo" aria-label="Biểu tượng cảm xúc" hidden>😊</button>
@@ -645,6 +653,9 @@ button:disabled { opacity: .4; cursor: default; }
     <div class="label">Thời lượng ván</div>
     <div class="seg" id="suLen"></div>
     <p class="rule" id="suLenHint"></p>
+    <div class="label">Tiền khởi đầu</div>
+    <div class="seg" id="suCash"></div>
+    <p class="rule" id="suCashHint"></p>
     <button class="go" id="bStart">Bắt đầu</button>
     <p class="rule center">"Người" là một người khác ngồi chơi chung máy này. Muốn chơi với bạn ở xa thì bấm 🌐 Chơi online.</p>
   </div>
@@ -681,6 +692,8 @@ button:disabled { opacity: .4; cursor: default; }
     <div id="lbHostCtl">
       <div class="label">Thời lượng ván</div>
       <div class="seg" id="lbLen"></div>
+      <div class="label">Tiền khởi đầu</div>
+      <div class="seg" id="lbCash"></div>
       <label class="check"><input type="checkbox" id="lbFill"> Cho máy chơi các ghế còn trống</label>
       <div class="row"><button id="lbCancel">Huỷ phòng</button><button class="go" id="lbStart">Bắt đầu</button></div>
       <p class="rule center" id="lbHint"></p>
@@ -903,6 +916,8 @@ const CARDS = [
 ];
 const HOLD_INFO = { free: ['🎫', 'Vé miễn phí tham quan'], half: ['🏷️', 'Phiếu giảm nửa phí'], shield: ['🛡️', 'Khiên bảo vệ thành phố'], jail: ['🔓', 'Thẻ ra tù'], parity: ['🎲', 'Thẻ Chẵn/Lẻ'] };
 const PARITY_MAX = 3, LUCK_CHANCE = 0.8, LANDMARK_WIN = 5, GIFTS = [50, 100, 200, 500];
+// tiền khởi đầu: mặc định, gấp đôi cho mọi người, hoặc mỗi người 80% được nhân đôi
+const CASHES = [{ key: 'base', label: 'Mặc định', hint: `Mọi người bắt đầu với ${fmt(START_CASH)}.` }, { key: 'double', label: 'Gấp đôi', hint: `Mọi người bắt đầu với ${fmt(START_CASH * 2)}.` }, { key: 'luck', label: 'Ngẫu nhiên', hint: `Mọi người bắt đầu với ${fmt(START_CASH)}, mỗi người có ${LUCK_CHANCE * 100}% may mắn được nhân đôi.` }];
 const EMOJIS = ['😀', '😂', '😎', '😍', '😭', '😡', '😱', '🤑', '👍', '👏', '🙏', '🔥'];
 
 // ── hình học ô ──
@@ -1139,11 +1154,12 @@ let setupChars = store.get('typhu.chars', ['mc', '', '', '']);
 let setupColors = (c => (Array.isArray(c) && c.length === 4 && c.every(v => Number.isInteger(v) && COLORS[v]) ? c : [0, 1, 2, 3]))(store.get('typhu.colors', null));
 const myColor = () => setupColors[0];
 let gameLen = store.get('typhu.len', 'mid');
+let cashMode = store.get('typhu.cash', 'luck');
 const nameOf = k => (k === 0 ? (store.get('typhu.name', '') || '').trim() || 'Bạn' : (localNames[k] || '').trim() || 'Người ' + COLORS[k].name);
 const roundsOf = key => (LENS.find(x => x.key === key) || LENS[1]).rounds;
 const TAX_POS = ALL.find(i => SQ[i].t === 'tax');
 
-function freshGame(seats, maxRound) {
+function freshGame(seats, maxRound, cash = 'luck') {
   assignColors(seats);
   // chia nhân vật: ai chưa chọn (máy) thì lấy ngẫu nhiên nhân vật chưa ai dùng
   const used = new Set(seats.filter(x => x && x.char).map(x => x.char));
@@ -1157,9 +1173,10 @@ function freshGame(seats, maxRound) {
     if (!seats[s]) continue;
     const P = G.pl[s];
     P.hold.parity = PARITY_MAX;
+    if (cash === 'double') P.cash = START_CASH * 2;
     // may mắn đầu ván: mỗi nhân vật có 80% được nhân đôi tiền khởi đầu
-    if (Math.random() < LUCK_CHANCE) { P.luck = START_CASH; P.cash += START_CASH; }
-    if (chars[s] === 'chef') P.cash += START_CASH * 0.3;
+    else if (cash === 'luck' && Math.random() < LUCK_CHANCE) { P.luck = START_CASH; P.cash += START_CASH; }
+    if (chars[s] === 'chef') P.cash += (cash === 'double' ? START_CASH * 2 : START_CASH) * 0.3;
     if (chars[s] === 'detective') P.hold.shield = 1;
   }
   G.turn = firstTurn(seats);
@@ -2421,6 +2438,10 @@ function renderCenter() {
   if (!potTxt) return;
   const pot = (G && (busy() && viewPot !== null ? viewPot : G.pot)) || 0;
   potTxt.textContent = pot > 0 ? `💰 Quỹ Thuế ${fmt(pot)}` : '';
+  // số vòng hiện tại trên thanh trên cùng
+  const rt = $('roundTag'), on = !!G && G.phase !== 'lobby';
+  rt.hidden = !on;
+  if (on) rt.innerHTML = `Vòng <b>${Math.min(G.round, G.maxRound || G.round)}</b>${G.maxRound ? ' / ' + G.maxRound : ''}`;
 }
 // dải chủ đất, viền màu chủ, sao đất vàng, lễ hội, dịch bệnh / mất điện
 // chỉ vẽ lại khi trạng thái đất thật sự đổi (paint() gọi rất thường xuyên)
@@ -2662,6 +2683,10 @@ $('board').insertBefore(defs, $('board').firstChild);
   const mg = el('linearGradient', { id: 'mineGrad', x1: 0, y1: 0, x2: .5, y2: 0, spreadMethod: 'repeat' }, defs);
   ['#ff3b5c', '#ff9f1c', '#ffe03f', '#3ddc84', '#3fa7ff', '#b06cff', '#ff3b5c'].forEach((c, k, a) => el('stop', { offset: k / (a.length - 1), 'stop-color': c }, mg));
   el('animateTransform', { attributeName: 'gradientTransform', type: 'translate', from: '0 0', to: '.5 0', dur: '2s', repeatCount: 'indefinite' }, mg);
+  const ma = el('linearGradient', { id: 'meArrow', x1: 0, y1: 0, x2: 0, y2: 1 }, defs);
+  [[0, '#ffe36e'], [.55, '#ffbe1a'], [1, '#f39208']].forEach(([o, c]) => el('stop', { offset: o, 'stop-color': c }, ma));
+  const md = el('linearGradient', { id: 'meArrowSide', x1: 0, y1: 0, x2: 0, y2: 1 }, defs);
+  [[0, '#d9820a'], [1, '#a85a05']].forEach(([o, c]) => el('stop', { offset: o, 'stop-color': c }, md));
   const sh = el('linearGradient', { id: 'monoShine', x1: 0, y1: 0, x2: 1, y2: 1 }, defs);
   [[0, 0], [.45, 0], [.5, .75], [.55, 0], [1, 0]].forEach(([o, a]) => el('stop', { offset: o, 'stop-color': '#fff', 'stop-opacity': a }, sh));
 })();
@@ -2673,6 +2698,16 @@ const tokenEls = [0, 1, 2, 3].map(s => {
   const b = el('g', { class: 'tbody' }, z);
   el('ellipse', { cx: 0, cy: 0, rx: 13, ry: 6, class: 'disc', fill: C.main }, b);
   el('g', { class: 'face-in', transform: 'translate(0 -16) scale(.82)' }, b);
+  // mũi tên tròn trĩnh chỉ xuống, kiểu nhãn dán: viền trắng dày bao ngoài, lớp sẫm bên dưới làm độ dày,
+  // mặt vàng chuyển sắc từ trên xuống, vệt bóng trên thân và cạnh trái mũi
+  const arrow = 'M-2 -11 L-2 -20 A2 2 0 0 1 2 -20 L2 -11 L3.75 -11 Q5.25 -11 4.3 -8.5 L.9 -1.3 Q0 .5 -.9 -1.3 L-4.3 -8.5 Q-5.25 -11 -3.75 -11 Z';
+  const sp = el('g', { class: 'me-bob' }, el('g', { class: 'me-arrow', transform: 'translate(0 -52) scale(1.5)' }, b));
+  const D = 1.3; // độ dày
+  el('path', { d: arrow, transform: `translate(0 ${D / 2})`, fill: '#fff', stroke: '#fff', 'stroke-width': 2.2 + D, 'stroke-linejoin': 'round' }, sp);
+  el('path', { d: arrow, transform: `translate(0 ${D})`, fill: 'url(#meArrowSide)', stroke: '#8a4705', 'stroke-width': .8, 'stroke-linejoin': 'round' }, sp);
+  el('path', { d: arrow, fill: 'url(#meArrow)', stroke: '#e08a06', 'stroke-width': .8, 'stroke-linejoin': 'round' }, sp);
+  el('path', { d: 'M-1 -12.6 L-1 -20 A1 1 0 0 1 1 -20 L1 -12.6 Z', fill: '#fff', opacity: .5 }, sp); // vệt bóng thân
+  el('path', { d: 'M-3.4 -9 L-2 -6.4', stroke: '#fff', 'stroke-width': .9, 'stroke-linecap': 'round', fill: 'none', opacity: .7 }, sp); // vệt bóng mũi
   g0.style.display = 'none';
   return g0;
 });
@@ -3617,6 +3652,7 @@ function paint(skipTokens) {
     // đang hoạt hoạ: quân vừa phá sản vẫn hiện để đi hết nước, bước 'bankrupt' mới làm mờ rồi ẩn
     if (!(skipTokens && G.seats[s] && G.pl[s].out)) g.style.display = inPlay && G.seats[s] && !G.pl[s].out ? '' : 'none';
     g.classList.toggle('turn', inPlay && G.phase === 'play' && G.turn === s);
+    g.classList.toggle('mine', inPlay && isMine(s));
     if (G.seats[s]) { setTokenFace(s, G.pl[s].char); setTokenColor(s); }
     if (!skipTokens) placeToken(s, G.pl[s].pos, G.pl[s].jail > 0);
   }
@@ -4252,7 +4288,7 @@ function leaveOnline() {
 async function hostOnline(tries = 0) {
   const n = startNet(true, randCode());
   net.seat = 0;
-  G = Object.assign(freshGame([{ type: 'human', name: myName() || 'Chủ phòng', cid: myCid, online: true, char: myChar(), color: myColor() }, null, null, null], roundsOf(gameLen)), { phase: 'lobby' });
+  G = Object.assign(freshGame([{ type: 'human', name: myName() || 'Chủ phòng', cid: myCid, online: true, char: myChar(), color: myColor() }, null, null, null], roundsOf(gameLen), cashMode), { phase: 'lobby' });
   statusEv = '';
   paint();
   netSheet('🌐', 'Tạo phòng', `Đang tạo phòng${DOTS}`, [[{ label: 'Huỷ', fn: () => leaveOnline() }]]);
@@ -4354,12 +4390,12 @@ function hostStart() {
   const fill = $('lbFill').checked;
   const seats = G.seats.map((x, k) => x ? Object.assign({}, x) : fill ? { type: 'bot', name: 'Máy ' + COLORS[k].name, char: null } : null);
   if (seats.filter(Boolean).length < 2) return;
-  Object.assign(G, freshGame(seats, roundsOf(gameLen)), { seq: G.seq });
+  Object.assign(G, freshGame(seats, roundsOf(gameLen), cashMode), { seq: G.seq });
   $('lobbySheet').hidden = true;
   commit({ type: 'start', steps: startSteps(G) });
 }
 function hostRestart() {
-  Object.assign(G, freshGame(G.seats, roundsOf(gameLen)), { seq: G.seq });
+  Object.assign(G, freshGame(G.seats, roundsOf(gameLen), cashMode), { seq: G.seq });
   commit({ type: 'start', steps: startSteps(G) });
 }
 
@@ -4437,6 +4473,11 @@ function renderLenSeg(box) {
   box.innerHTML = '';
   for (const L of LENS) box.appendChild(btn(L.label + ` · ${L.rounds} vòng`, gameLen === L.key ? 'on' : '', () => { gameLen = L.key; store.set('typhu.len', gameLen); renderLenSeg(box); if (box.id === 'suLen') $('suLenHint').textContent = lenHint(gameLen); }));
 }
+function renderCashSeg(box) {
+  box.innerHTML = '';
+  for (const C of CASHES) box.appendChild(btn(C.label, cashMode === C.key ? 'on' : '', () => { cashMode = C.key; store.set('typhu.cash', cashMode); renderCashSeg(box); if (box.id === 'suCash') $('suCashHint').textContent = C.hint; }));
+}
+const cashHint = k => (CASHES.find(x => x.key === k) || CASHES[2]).hint;
 function openLobby() {
   if (!net.on) return;
   $('lbHostBox').hidden = !net.host; $('lbHostCtl').hidden = !net.host; $('lbGuestCtl').hidden = net.host;
@@ -4445,7 +4486,7 @@ function openLobby() {
     $('lbCodeTxt').textContent = showCode(net.code);
     $('lbNote').hidden = location.protocol !== 'file:';
     $('lbShare').hidden = !navigator.share;
-    renderLenSeg($('lbLen'));
+    renderLenSeg($('lbLen')); renderCashSeg($('lbCash'));
   }
   $('lbName').value = myName();
   $('lbName').placeholder = net.host ? 'Chủ phòng' : 'Người chơi';
@@ -4488,7 +4529,7 @@ function syncLobby(force) {
     const humans = G.seats.filter(x => x && x.type === 'human').length;
     $('lbStart').hidden = G.phase !== 'lobby';
     $('lbFill').parentElement.hidden = G.phase !== 'lobby';
-    $('lbLen').hidden = G.phase !== 'lobby'; $('lbLen').previousElementSibling.hidden = G.phase !== 'lobby';
+    for (const id of ['lbLen', 'lbCash']) { $(id).hidden = G.phase !== 'lobby'; $(id).previousElementSibling.hidden = G.phase !== 'lobby'; }
     $('lbStart').disabled = humans < 2;
     $('lbHint').textContent = G.phase !== 'lobby' ? 'Ván đang chơi. Người vào sau sẽ được xem.' : humans < 2 ? 'Cần ít nhất 2 người để bắt đầu.' : `${humans} người đã sẵn sàng.`;
     $('lbCancel').textContent = G.phase === 'lobby' ? 'Huỷ phòng' : 'Đóng';
@@ -4592,6 +4633,7 @@ function renderSetup() {
     }
   });
   renderLenSeg($('suLen')); $('suLenHint').textContent = lenHint(gameLen);
+  renderCashSeg($('suCash')); $('suCashHint').textContent = cashHint(cashMode);
   $('bStart').disabled = setup.filter(t => t !== 'off').length < 2;
 }
 function nameInput(k, placeholder) {
@@ -4612,7 +4654,7 @@ function newLocalGame() {
   // hai người chung máy chọn trùng màu thì người sau đổi sang màu khác (assignColors lo)
   const used = new Set();
   seats.forEach((x, k) => { if (!x || x.type !== 'human') return; if (!x.char || used.has(x.char)) x.char = CHARS.map(c => c.id).find(id => !used.has(id)); used.add(x.char); });
-  G = freshGame(seats, roundsOf(gameLen));
+  G = freshGame(seats, roundsOf(gameLen), cashMode);
   statusEv = '';
   commit({ type: 'start', steps: startSteps(G) });
 }
@@ -4690,7 +4732,7 @@ const roomInHash = () => { const m = /^#room=([a-z0-9]{4,16})$/.exec(location.ha
 window.addEventListener('hashchange', () => { const c = roomInHash(); if (c && c !== net.code) joinOnline(c); });
 try { if (localStorage.getItem('typhu.game') && !validState(JSON.parse(localStorage.getItem('typhu.game')))) localStorage.removeItem('typhu.game'); } catch (e) {} // ván lưu của bản luật cũ
 if (roomInHash()) joinOnline(roomInHash());
-else if (!store.get('typhu.setup', null)) { G = freshGame(seatsFromSetup(), roundsOf(gameLen)); show(G, null); renderSetup(); $('setupSheet').hidden = false; }
+else if (!store.get('typhu.setup', null)) { G = freshGame(seatsFromSetup(), roundsOf(gameLen), cashMode); show(G, null); renderSetup(); $('setupSheet').hidden = false; }
 else resumeLocal();
 requestAnimationFrame(() => requestAnimationFrame(() => $('board').classList.remove('init')));
 </script>
