@@ -1,0 +1,1434 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Hải Chiến">
+<meta name="theme-color" content="#bfe6ff">
+<title>Hải Chiến</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231b78bf'/%3E%3Cpath d='M5 18C5 15 7 14 10 14H24C27 14 29 16 30 18C29 20 27 22 24 22H10C7 22 5 21 5 18Z' fill='%23c9d3dd' stroke='%231f2a36'/%3E%3Ccircle cx='12' cy='18' r='2.5' fill='%2346586d'/%3E%3Crect x='16' y='15.5' width='5' height='5' rx='1.5' fill='%23fff'/%3E%3Ccircle cx='24' cy='9' r='4' fill='%23ff7a1a'/%3E%3Ccircle cx='24' cy='9' r='2' fill='%23ffe066'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --ink: #1d3049; --muted: #6b7a90; --line: #c9d9ea; --card: #ffffff;
+  --gold: #ffc93c; --red: #ef4444; --sea: #1b78bf; --deep: #0f4f8c;
+}
+html, body { width: 100%; height: 100%; overflow: hidden; }
+body {
+  font-family: 'Baloo 2', 'Nunito', system-ui, sans-serif; color: var(--ink);
+  background:
+    radial-gradient(ellipse 60% 40% at 15% 0%, rgba(255,255,255,.75), transparent 70%),
+    linear-gradient(180deg, #d8f0ff 0%, #b4e0fb 45%, #86c8f0 100%);
+  -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none;
+  touch-action: manipulation; overscroll-behavior: none;
+  display: flex; flex-direction: column;
+  padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
+}
+button { font: inherit; color: inherit; cursor: pointer; border: 0; background: none; }
+button:disabled { opacity: .4; cursor: default; }
+[hidden] { display: none !important; }
+
+/* ── thanh trên ── */
+.top { display: flex; align-items: center; gap: 10px; padding: 10px 16px 4px; width: 100%; }
+.back, .icon {
+  width: 44px; height: 44px; flex: 0 0 auto; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(255,255,255,.85); color: var(--ink); text-decoration: none;
+  font-size: 26px; font-weight: 800; line-height: 1; box-shadow: 0 3px 10px rgba(15,79,140,.15);
+}
+.icon { font-size: 20px; }
+.top h1 { font-size: 26px; font-weight: 800; letter-spacing: .5px; flex: 1; white-space: nowrap; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.top h1 span:first-child { color: var(--sea); } .top h1 span:last-child { color: #e8562a; }
+.score {
+  display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,.88); border-radius: 999px; padding: 4px 14px;
+  box-shadow: 0 3px 10px rgba(15,79,140,.12); font-weight: 700; font-size: 15px; white-space: nowrap;
+}
+.score b { font-size: 20px; min-width: 14px; text-align: center; }
+.score .me b { color: var(--sea); } .score .bot b { color: #e8562a; }
+.score .sep { color: var(--muted); }
+
+/* ── dòng trạng thái ── */
+.status { display: flex; justify-content: center; padding: 2px 16px 6px; min-height: 44px; }
+.status .pill {
+  display: inline-flex; align-items: center; gap: 8px; padding: 5px 18px; border-radius: 999px;
+  background: rgba(255,255,255,.9); font-weight: 700; font-size: 16.5px; text-align: center; line-height: 1.25;
+  box-shadow: 0 3px 10px rgba(15,79,140,.12); transition: background .25s, color .25s;
+}
+.status .pill.me { background: var(--gold); color: #4a3100; }
+.status .pill.opp { background: #ffe1db; color: #9a2a16; }
+.status .pill.win { background: #2e9d4f; color: #fff; }
+.status .pill.lose { background: var(--ink); color: #fff; }
+.dots span { display: inline-block; animation: dot 1.1s infinite; }
+.dots span:nth-child(2) { animation-delay: .15s; } .dots span:nth-child(3) { animation-delay: .3s; }
+@keyframes dot { 0%, 60%, 100% { opacity: .2; } 30% { opacity: 1; } }
+
+/* ── sân chơi ── */
+.stage { flex: 1; min-height: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 0 8px; position: relative; }
+body.wide .stage { flex-direction: row; gap: 22px; }
+body.place #sideOpp { display: none; }
+body:not(.place) #tray { display: none; }
+.side { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.bhead { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; height: 28px; padding: 0 4px; }
+.tag { font-weight: 800; font-size: 15px; white-space: nowrap; color: var(--ink); display: flex; align-items: center; gap: 6px; }
+.tag .who { font-size: 12px; font-weight: 700; color: var(--muted); }
+.fleet { display: flex; gap: 6px; align-items: center; min-width: 0; }
+.fleet .fs { display: flex; gap: 2px; padding: 3px; border-radius: 6px; background: rgba(255,255,255,.6); position: relative; }
+.fleet .fs i { width: 7px; height: 9px; border-radius: 2px; background: #8aa0b8; }
+.fleet .fs i.h { background: #ff6a2a; }
+.fleet .fs.sunk { background: rgba(239,68,68,.18); }
+.fleet .fs.sunk i { background: var(--red); opacity: .55; }
+.fleet .fs.sunk::after { content: ''; position: absolute; left: 1px; right: 1px; top: 50%; border-top: 2px solid #9a1b1b; transform: rotate(-8deg); }
+
+/* ── bàn ── */
+.board {
+  --c: 32px;
+  display: grid; grid-template-columns: calc(var(--c) * .6) auto; grid-template-rows: calc(var(--c) * .6) auto;
+  padding: 6px; border-radius: calc(var(--c) * .35 + 6px);
+  background: rgba(255,255,255,.78); box-shadow: 0 10px 30px rgba(15,79,140,.22);
+  transition: box-shadow .3s;
+}
+body.myturn #bOpp { box-shadow: 0 0 0 4px var(--gold), 0 10px 34px rgba(255,170,0,.35); }
+body.oppturn #bMe { box-shadow: 0 0 0 4px #ff8a6b, 0 10px 34px rgba(232,86,42,.3); }
+.lab { display: grid; font-weight: 800; color: #4c6e94; font-size: calc(var(--c) * .34); line-height: 1; }
+.lab span { display: flex; align-items: center; justify-content: center; }
+.lab.lt { grid-area: 1 / 2; grid-template-columns: repeat(10, var(--c)); }
+.lab.ll { grid-area: 2 / 1; grid-template-rows: repeat(10, var(--c)); }
+.sea {
+  grid-area: 2 / 2; position: relative; width: calc(var(--c) * 10); height: calc(var(--c) * 10);
+  border-radius: calc(var(--c) * .3); overflow: hidden; touch-action: none;
+  background: radial-gradient(120% 90% at 30% 8%, #45b1ec 0%, #1d7cc4 45%, #0f4f8c 100%);
+  box-shadow: inset 0 0 0 2px rgba(255,255,255,.18), inset 0 8px 26px rgba(0,30,70,.35);
+}
+.sea::before, .sea::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='40'%3E%3Cpath d='M0 20 Q10 13 20 20 T40 20' fill='none' stroke='white' stroke-opacity='.16' stroke-width='2'/%3E%3Cpath d='M40 38 Q50 31 60 38 T80 38' fill='none' stroke='white' stroke-opacity='.1' stroke-width='2'/%3E%3C/svg%3E");
+  animation: waves 9s linear infinite;
+}
+.sea::after { background-size: 120px 60px; opacity: .7; animation-duration: 14s; animation-direction: reverse; }
+@keyframes waves { to { background-position: 80px 40px; } }
+.grid { position: absolute; inset: 0; display: grid; grid-template-columns: repeat(10, var(--c)); grid-template-rows: repeat(10, var(--c)); z-index: 1; }
+.cell { position: relative; border-right: 1px solid rgba(255,255,255,.13); border-bottom: 1px solid rgba(255,255,255,.13); }
+.cell:nth-child(10n) { border-right: 0; } .cell:nth-child(n+91) { border-bottom: 0; }
+.radar {
+  position: absolute; left: 50%; top: 50%; width: 150%; aspect-ratio: 1; margin: -75% 0 0 -75%; border-radius: 50%; pointer-events: none; z-index: 1;
+  background: conic-gradient(from 0deg, transparent 0deg, rgba(140,255,220,.0) 300deg, rgba(140,255,220,.22) 358deg, rgba(200,255,240,.5) 360deg);
+  animation: spin 3.6s linear infinite; opacity: 0; transition: opacity .4s;
+}
+body.myturn #bOpp .radar { opacity: 1; }
+@keyframes spin { to { transform: rotate(360deg); } }
+body.myturn #bOpp .cell:not(.shot) { cursor: crosshair; }
+body.myturn #bOpp .cell:not(.shot):hover { background: rgba(255,255,255,.14); }
+body.myturn #bOpp .cell:not(.shot):hover::after {
+  content: ''; position: absolute; inset: 8%; pointer-events: none;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40' fill='none' stroke='%23ffd23f' stroke-width='3' stroke-linecap='round'%3E%3Ccircle cx='20' cy='20' r='12'/%3E%3Cpath d='M20 2v8M20 30v8M2 20h8M30 20h8'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+.ships, .marks, .fx { position: absolute; inset: 0; pointer-events: none; }
+.ships { z-index: 2; } .marks { z-index: 3; } .fx { z-index: 4; }
+body.place #bMe .ships { pointer-events: auto; }
+body.place #bMe .ships .ship { cursor: grab; }
+
+/* ── tàu ── */
+.ship {
+  position: absolute; left: calc(var(--x) * var(--c)); top: calc(var(--y) * var(--c));
+  width: calc(var(--l) * var(--c)); height: var(--c);
+  transform-origin: calc(var(--c) / 2) calc(var(--c) / 2);
+}
+.ship.v { transform: rotate(90deg); }
+.ship svg { width: 100%; height: 100%; display: block; overflow: visible; filter: drop-shadow(0 2px 2px rgba(0,25,60,.45)); }
+.ships .ship svg { animation: bob 3.2s ease-in-out infinite; }
+.ships .ship:nth-child(2n) svg { animation-delay: -1.4s; }
+@keyframes bob { 50% { transform: translateY(-3%) rotate(.4deg); } }
+.ship.sunk svg { animation: sinkin .9s ease-out both; filter: grayscale(.85) brightness(.5) sepia(.35) drop-shadow(0 2px 2px rgba(0,0,0,.4)); opacity: .92; }
+@keyframes sinkin { from { opacity: 0; transform: scale(1.12); } }
+.ship.reveal svg { opacity: .55; animation: none; filter: saturate(.6); }
+.ship.preview { opacity: .5; pointer-events: none; }
+.ship.preview.bad svg, .ship.ghost.bad svg { filter: drop-shadow(0 0 4px #ff3b30) drop-shadow(0 0 2px #ff3b30); }
+.ship.ghost { position: fixed; z-index: 60; pointer-events: none; }
+.ship.ghost svg { filter: drop-shadow(0 8px 10px rgba(0,25,60,.45)); }
+.ship.ghost.ok svg { filter: drop-shadow(0 0 4px #6dff9e) drop-shadow(0 6px 8px rgba(0,25,60,.35)); }
+.ship.wiggle { animation: wiggle .35s; }
+@keyframes wiggle { 25% { translate: -4px 0; } 75% { translate: 4px 0; } }
+
+/* ── dấu bắn ── */
+.mark { position: absolute; left: calc(var(--x) * var(--c)); top: calc(var(--y) * var(--c)); width: var(--c); height: var(--c); }
+.miss::before {
+  content: ''; position: absolute; inset: 37%; border-radius: 50%; background: #f4fbff;
+  box-shadow: 0 0 0 calc(var(--c) * .07) rgba(255,255,255,.28);
+}
+.miss.new::before { animation: popin .35s cubic-bezier(.2,1.6,.5,1); }
+@keyframes popin { from { transform: scale(0); } }
+.hit .scorch { position: absolute; inset: 14%; border-radius: 50%; background: radial-gradient(circle, #2b130b 0 28%, rgba(60,25,10,.65) 50%, transparent 72%); }
+.hit .fl {
+  position: absolute; left: 29%; top: 10%; width: 42%; height: 64%;
+  border-radius: 50% 50% 50% 50% / 62% 62% 38% 38%;
+  background: radial-gradient(ellipse at 50% 76%, #fff8c8 0 14%, #ffd23f 30%, #ff7a1a 56%, rgba(255,60,20,0) 76%);
+  transform-origin: 50% 90%; animation: flick .42s ease-in-out infinite alternate;
+}
+.hit .f2 { left: 44%; top: 26%; width: 30%; height: 46%; animation-duration: .31s; animation-delay: -.17s; }
+.hit .sm {
+  position: absolute; left: 34%; top: 4%; width: 32%; height: 32%; border-radius: 50%;
+  background: rgba(60,62,72,.5); filter: blur(2px); animation: smoke 2.4s ease-out infinite;
+}
+.hit.new .scorch { animation: grow .3s ease-out; }
+.hit.new .fl { animation: flick .42s ease-in-out infinite alternate, grow .3s ease-out; }
+.hit.new .f2 { animation-duration: .31s, .3s; }
+@keyframes grow { from { scale: .2; } }
+@keyframes flick { from { transform: scale(1, 1) rotate(-5deg); } to { transform: scale(.84, 1.12) rotate(5deg); } }
+@keyframes smoke { from { transform: translateY(0) scale(.6); opacity: .75; } to { transform: translateY(calc(var(--c) * -.9)) scale(1.7); opacity: 0; } }
+#bOpp .hit.in-sunk .fl, #bMe .hit.in-sunk .fl { scale: .7; }
+
+/* ── hiệu ứng ── */
+.fx > * { position: absolute; left: calc(var(--x) * var(--c)); top: calc(var(--y) * var(--c)); width: var(--c); height: var(--c); }
+.fx-aim .ring { position: absolute; inset: -12%; border: 3px solid #ff3b30; border-radius: 50%; animation: aim .48s ease-in forwards; box-shadow: 0 0 10px rgba(255,59,48,.6); }
+.fx-aim .ring::before, .fx-aim .ring::after { content: ''; position: absolute; background: #ff3b30; }
+.fx-aim .ring::before { left: 50%; top: -20%; bottom: -20%; width: 2px; margin-left: -1px; }
+.fx-aim .ring::after { top: 50%; left: -20%; right: -20%; height: 2px; margin-top: -1px; }
+.fx-aim .shell { position: absolute; left: 40%; top: 40%; width: 20%; height: 20%; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #9aa, #222 70%); animation: drop .48s ease-in forwards; }
+@keyframes aim { from { transform: scale(2.6) rotate(-60deg); opacity: 0; } 35% { opacity: 1; } to { transform: scale(.75); opacity: 1; } }
+@keyframes drop { from { transform: translateY(calc(var(--c) * -3.2)) scale(2.4); opacity: 0; } 25% { opacity: 1; } to { transform: none; } }
+.fx-boom .b { position: absolute; inset: -60%; border-radius: 50%; background: radial-gradient(circle, #fff 0 10%, #ffe066 22%, #ff8a1f 42%, rgba(230,60,20,.55) 58%, transparent 70%); animation: boom .6s ease-out forwards; }
+.fx-boom .s { position: absolute; left: 45%; top: 45%; width: 10%; height: 10%; border-radius: 50%; background: #ffd23f; box-shadow: 0 0 6px #ff7a1a; animation: spark .6s ease-out forwards; }
+@keyframes boom { from { transform: scale(.15); opacity: 1; } 60% { opacity: .9; } to { transform: scale(1.15); opacity: 0; } }
+@keyframes spark { to { transform: rotate(var(--a)) translateX(calc(var(--c) * 1.1)) scale(.3); opacity: 0; } }
+.fx-splash i { position: absolute; inset: 20%; border-radius: 50%; border: 2px solid rgba(255,255,255,.85); animation: ring .7s ease-out forwards; }
+.fx-splash i:nth-child(2) { animation-delay: .12s; } .fx-splash i:nth-child(3) { animation-delay: .24s; }
+.fx-splash b { position: absolute; left: 46%; top: 46%; width: 9%; height: 9%; border-radius: 50%; background: #e9f7ff; animation: droplet .6s ease-out forwards; }
+@keyframes ring { from { transform: scale(.2); opacity: 1; } to { transform: scale(1.6); opacity: 0; } }
+@keyframes droplet { 50% { transform: translate(var(--dx), calc(var(--c) * -.55)); } to { transform: translate(calc(var(--dx) * 1.6), 0); opacity: 0; } }
+.fx-say { display: flex; align-items: center; justify-content: center; }
+.fx-say span {
+  white-space: nowrap; font-weight: 800; font-size: max(13px, calc(var(--c) * .42)); color: #fff;
+  text-shadow: 0 2px 0 rgba(0,0,0,.35), 0 0 8px rgba(0,0,0,.35); animation: rise 1s ease-out forwards;
+}
+.fx-say.hit span { color: #ffd23f; } .fx-say.sunk span { color: #ff6a4a; font-size: max(15px, calc(var(--c) * .5)); }
+@keyframes rise { from { transform: translateY(0) scale(.6); opacity: 0; } 20% { transform: translateY(calc(var(--c) * -.4)) scale(1.1); opacity: 1; } to { transform: translateY(calc(var(--c) * -1.1)); opacity: 0; } }
+.board.shake { animation: shake .5s; }
+@keyframes shake { 15% { translate: -6px 2px; } 30% { translate: 5px -3px; } 45% { translate: -4px 2px; } 60% { translate: 3px -1px; } 80% { translate: -1px 1px; } }
+.toast {
+  position: absolute; left: 50%; top: 4px; z-index: 30; translate: -50% 0; pointer-events: none;
+  padding: 8px 22px; border-radius: 999px; font-weight: 800; font-size: 19px; white-space: nowrap;
+  background: linear-gradient(180deg, #ff6a3d, #e23d1f); color: #fff; box-shadow: 0 8px 24px rgba(160,30,10,.35);
+  animation: toast 2s ease-out forwards;
+}
+.toast.mine { background: linear-gradient(180deg, #34475f, #1d3049); box-shadow: 0 8px 24px rgba(15,30,60,.35); }
+@keyframes toast { from { transform: scale(.4); opacity: 0; } 12% { transform: scale(1.08); opacity: 1; } 20% { transform: none; } 82% { opacity: 1; } to { opacity: 0; transform: translateY(-10px); } }
+
+/* ── bến tàu (xếp hạm đội) ── */
+.tray {
+  --yc: 30px;
+  width: 280px; background: rgba(255,255,255,.88); border-radius: 22px; padding: 16px;
+  box-shadow: 0 10px 30px rgba(15,79,140,.18); display: flex; flex-direction: column; gap: 10px;
+}
+.tray h3 { font-size: 20px; font-weight: 800; }
+.tray .hint { font-size: 13.5px; color: var(--muted); font-weight: 600; line-height: 1.35; margin-top: -8px; }
+.yard { display: flex; flex-direction: column; gap: 6px; }
+.yard-ship {
+  display: flex; align-items: center; gap: 10px; padding: 6px 8px; border-radius: 12px; text-align: left;
+  background: #eef5fc; touch-action: none; cursor: grab; transition: background .15s, opacity .15s, box-shadow .15s;
+}
+.yard-ship .art { flex: 0 0 auto; width: calc(var(--l) * var(--yc)); height: var(--yc); }
+.yard-ship .art svg { width: 100%; height: 100%; display: block; overflow: visible; filter: drop-shadow(0 2px 2px rgba(0,25,60,.3)); }
+.yard-ship .yn { font-weight: 700; font-size: 14px; line-height: 1.1; }
+.yard-ship .yn small { display: block; font-size: 12px; color: var(--muted); font-weight: 600; }
+.yard-ship.sel { background: #fff3c4; box-shadow: 0 0 0 2px var(--gold); }
+.yard-ship.placed { opacity: .45; }
+.yard-ship.placed .yn::after { content: ' ✓'; color: #2e9d4f; }
+.tray-btns { display: flex; gap: 8px; }
+.tray-btns button { flex: 1; border-radius: 12px; padding: 8px 6px; font-weight: 700; font-size: 15px; background: #eef2f7; white-space: nowrap; }
+.tray-row { display: flex; flex-direction: column; gap: 10px; }
+.tray .ready {
+  border-radius: 14px; padding: 11px; font-weight: 800; font-size: 18px; color: #fff;
+  background: linear-gradient(180deg, #2a8ad6, #1764a8); box-shadow: 0 4px 0 #0f4f8c, 0 8px 18px rgba(15,79,140,.3);
+  transition: transform .1s;
+}
+.tray .ready:not(:disabled):active { transform: translateY(2px); box-shadow: 0 2px 0 #0f4f8c; }
+.tray .ready.waiting { background: #eef2f7; color: var(--ink); box-shadow: none; font-size: 16px; }
+body:not(.wide) .tray { width: 100%; max-width: 520px; padding: 10px 12px; gap: 8px; border-radius: 18px; --yc: 22px; }
+body:not(.wide) .tray h3, body:not(.wide) .tray .hint { display: none; }
+body:not(.wide) .yard { flex-direction: row; flex-wrap: wrap; justify-content: center; gap: 6px; }
+body:not(.wide) .yard-ship { flex-direction: column; gap: 2px; padding: 5px 7px; }
+body:not(.wide) .yard-ship .yn { display: none; }
+body:not(.wide) .yard-ship { padding: 6px 8px; }
+body:not(.wide) .tray-btns button { font-size: 14px; padding: 8px 4px; }
+body:not(.wide) .tray-row { flex-direction: row; gap: 8px; }
+body:not(.wide) .tray-row .tray-btns { flex: 1.2; }
+body:not(.wide) .tray-row .ready { flex: 1; font-size: 16px; padding: 8px; }
+
+/* ── thanh dưới ── */
+.dock { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; padding: 8px 16px 12px; }
+.dock button {
+  display: flex; align-items: center; gap: 6px; background: var(--card); border-radius: 14px; padding: 8px 16px; min-height: 44px;
+  font-weight: 700; font-size: 16px; box-shadow: 0 3px 10px rgba(15,79,140,.14); transition: transform .1s;
+}
+.dock button:not(:disabled):active { transform: scale(.95); }
+.dock button.primary { background: var(--ink); color: #fff; }
+.dock .lvl { color: #b9c7d8; font-weight: 600; font-size: 14px; }
+
+/* ── bảng chọn / kết quả ── */
+.overlay {
+  position: fixed; inset: 0; z-index: 80; display: flex; align-items: center; justify-content: center;
+  background: rgba(15,40,70,.4); padding: 16px; -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px);
+  animation: fade .2s ease-out;
+}
+@keyframes fade { from { opacity: 0; } }
+.panel {
+  background: var(--card); border-radius: 22px; padding: 22px 22px 20px; width: 100%; max-width: 390px; max-height: 100%; overflow: auto;
+  box-shadow: 0 20px 60px rgba(15,40,70,.35); animation: pop .25s cubic-bezier(.2,1.4,.5,1);
+}
+@keyframes pop { from { transform: scale(.9); opacity: 0; } }
+.panel h2 { font-size: 24px; font-weight: 800; text-align: center; margin-bottom: 14px; }
+.panel .label { font-size: 14px; font-weight: 700; color: var(--muted); margin: 12px 0 6px; }
+.seg { display: flex; background: #eef2f7; border-radius: 14px; padding: 4px; gap: 4px; }
+.seg button { flex: 1; border-radius: 10px; padding: 8px 4px; font-weight: 700; font-size: 16px; color: var(--muted); line-height: 1.15; }
+.seg button small { display: block; font-size: 11.5px; font-weight: 600; opacity: .8; }
+.seg button.on { background: #fff; color: var(--ink); box-shadow: 0 2px 6px rgba(15,40,70,.15); }
+.panel .go { display: block; width: 100%; margin-top: 20px; background: var(--ink); color: #fff; border-radius: 14px; padding: 12px; font-weight: 800; font-size: 18px; }
+.panel .rule { margin-top: 12px; font-size: 13px; color: var(--muted); text-align: center; line-height: 1.4; }
+.result-emoji { font-size: 60px; text-align: center; line-height: 1.1; }
+.result-msg { text-align: center; color: var(--muted); font-weight: 600; margin-top: -6px; }
+.rstats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 14px; }
+.rstats div { background: #eef5fc; border-radius: 12px; padding: 6px 4px; text-align: center; font-size: 12px; font-weight: 700; color: var(--muted); }
+.rstats b { display: block; font-size: 22px; color: var(--ink); line-height: 1.2; }
+.row { display: flex; gap: 10px; margin-top: 18px; }
+.row button { flex: 1; border-radius: 14px; padding: 11px; font-weight: 800; font-size: 16px; background: #eef2f7; }
+.row button.go { margin: 0; }
+.row + .row { margin-top: 10px; }
+.link {
+  display: block; width: 100%; margin-top: 16px; padding: 11px 12px; border-radius: 12px; border: 2px dashed var(--line); background: #f5f8fc; color: var(--ink);
+  font: 600 14px/1.3 system-ui, sans-serif; text-align: center; outline: none; user-select: all; -webkit-user-select: all;
+}
+.panel .note { margin-top: 10px; font-size: 13px; color: #c0392b; text-align: center; line-height: 1.4; }
+.room-code { display: block; width: 100%; margin-top: 14px; padding: 8px 12px 6px; border-radius: 14px; border: 2px dashed var(--line); background: #f5f8fc; color: var(--ink); text-align: center; }
+.room-code b { display: block; font: 800 34px/1.1 'Baloo 2', system-ui, sans-serif; letter-spacing: .18em; padding-left: .18em; }
+.room-code small { display: block; font-size: 12px; font-weight: 700; color: var(--muted); }
+.code-in {
+  display: block; width: 100%; margin-top: 8px; padding: 8px 12px; border-radius: 12px; border: 2px solid var(--line); background: #f5f8fc; color: var(--ink);
+  outline: none; text-align: center; font: 800 24px/1.2 'Baloo 2', system-ui, sans-serif; letter-spacing: .15em; text-transform: uppercase;
+}
+.code-in:focus { border-color: #9fb6d2; background: #fff; }
+.code-in::placeholder { font-size: 16px; font-weight: 600; letter-spacing: normal; text-transform: none; color: var(--muted); }
+.or { display: flex; align-items: center; gap: 10px; margin-top: 18px; font-size: 13px; font-weight: 700; color: var(--muted); }
+.or::before, .or::after { content: ''; flex: 1; border-top: 1px solid var(--line); }
+
+@media (max-width: 420px) {
+  .top { gap: 8px; padding: 8px 12px 2px; }
+  .top h1 { font-size: 22px; }
+  .score { padding: 3px 10px; font-size: 13px; }
+  .status .pill { font-size: 15px; padding: 4px 14px; }
+  .dock { gap: 8px; padding: 6px 10px 10px; }
+  .dock button { padding: 6px 12px; font-size: 15px; min-height: 40px; }
+  .dock .lvl { display: none; }
+  .tag { font-size: 13.5px; } .tag .who { display: none; }
+  .fleet { gap: 4px; } .fleet .fs i { width: 5px; height: 8px; }
+}
+@media (max-height: 520px) {
+  .top { padding-top: 4px; padding-bottom: 0; } .status { min-height: 36px; padding-bottom: 2px; }
+  .dock { padding-top: 4px; padding-bottom: 6px; } .dock button { min-height: 38px; padding: 5px 12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sea::before, .sea::after, .ships .ship svg, .radar, .hit .fl, .hit .sm, .dots span { animation: none; }
+  .panel, .overlay, .board.shake { animation: none; }
+}
+</style>
+</head>
+<body class="place">
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <linearGradient id="gHull" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a7b7c8"/><stop offset=".5" stop-color="#6f8298"/><stop offset="1" stop-color="#43556a"/></linearGradient>
+  <linearGradient id="gDeck" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d3dce6"/><stop offset="1" stop-color="#a2b1c1"/></linearGradient>
+  <linearGradient id="gTur" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#93a5b8"/><stop offset="1" stop-color="#55667a"/></linearGradient>
+  <linearGradient id="gBr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f6f8fb"/><stop offset="1" stop-color="#c3cfdb"/></linearGradient>
+  <linearGradient id="gSub" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#62758a"/><stop offset=".55" stop-color="#36465a"/><stop offset="1" stop-color="#1f2a36"/></linearGradient>
+</defs></svg>
+
+<header class="top">
+  <a class="back" href="index.html" aria-label="Về trang chính">‹</a>
+  <h1><span>Hải</span> <span>Chiến</span></h1>
+  <div class="score">
+    <span class="me">Bạn <b id="sWin">0</b></span><span class="sep">–</span><span class="bot"><b id="sLose">0</b> <span id="sOpp">Máy</span></span>
+  </div>
+  <button class="icon" id="bSound" aria-label="Bật/tắt âm thanh">🔊</button>
+</header>
+
+<div class="status"><div class="pill" id="status"></div></div>
+
+<main class="stage" id="stage">
+  <section class="side" id="sideOpp">
+    <div class="bhead"><span class="tag">🎯 Biển địch <span class="who" id="oppWho"></span></span><div class="fleet" id="fleetOpp"></div></div>
+    <div class="board" id="bOpp"></div>
+  </section>
+  <section class="side" id="sideMe">
+    <div class="bhead"><span class="tag">⚓ Hạm đội của bạn</span><div class="fleet" id="fleetMe"></div></div>
+    <div class="board" id="bMe"></div>
+  </section>
+  <section class="tray" id="tray">
+    <h3>Xếp hạm đội</h3>
+    <p class="hint">Kéo tàu vào biển. Chạm vào tàu đã đặt để xoay (hoặc bấm phím R khi đang kéo).</p>
+    <div class="yard" id="yard"></div>
+    <div class="tray-row">
+      <div class="tray-btns">
+        <button id="bRand">🎲 Ngẫu nhiên</button>
+        <button id="bRot">↻ Ngang</button>
+        <button id="bClear" aria-label="Xếp lại">🧹</button>
+      </div>
+      <button class="ready" id="bReady">⚓ Sẵn sàng!</button>
+    </div>
+  </section>
+</main>
+
+<nav class="dock">
+  <button id="bNew" class="primary">＋ Ván mới <span class="lvl" id="lvlTag"></span></button>
+  <button id="bOnline">🌐 Chơi online</button>
+  <button id="bInvite" hidden>🔗 Mời bạn</button>
+  <button id="bLeave" hidden>✕ Thoát online</button>
+</nav>
+
+<!-- chọn ván mới -->
+<div class="overlay" id="newSheet" hidden>
+  <div class="panel">
+    <h2>Ván mới</h2>
+    <div class="label">Độ khó của máy</div>
+    <div class="seg" id="segLevel">
+      <button data-v="0">Dễ<small>bắn hú hoạ</small></button>
+      <button data-v="1">Vừa<small>biết truy đuổi</small></button>
+      <button data-v="2">Khó<small>tính xác suất</small></button>
+    </div>
+    <div class="label">Bắn trúng thì sao?</div>
+    <div class="seg" id="segBonus">
+      <button data-v="1">Được bắn tiếp</button>
+      <button data-v="0">Đổi lượt</button>
+    </div>
+    <div class="label">Ai bắn trước?</div>
+    <div class="seg" id="segFirst">
+      <button data-v="me">Bạn</button>
+      <button data-v="ai">Máy</button>
+      <button data-v="rand">Ngẫu nhiên</button>
+    </div>
+    <button class="go" id="bStart">Xếp hạm đội</button>
+    <p class="rule">Mỗi bên có 5 tàu: tàu sân bay (5 ô), thiết giáp hạm (4), tuần dương hạm (3), tàu ngầm (3) và khu trục hạm (2). Ai đánh chìm hết hạm đội đối phương trước là thắng.</p>
+  </div>
+</div>
+
+<!-- kết quả -->
+<div class="overlay" id="resultSheet" hidden>
+  <div class="panel">
+    <div class="result-emoji" id="rEmoji"></div>
+    <h2 id="rTitle"></h2>
+    <p class="result-msg" id="rMsg"></p>
+    <div class="rstats" id="rStats"></div>
+    <div class="row">
+      <button id="bView">Xem biển</button>
+      <button class="go" id="bAgain">Chơi lại</button>
+    </div>
+  </div>
+</div>
+
+<!-- chơi online -->
+<div class="overlay" id="netSheet" hidden>
+  <div class="panel" id="netPanel"></div>
+</div>
+
+<script>
+// ═══════════════════════════ dữ liệu ═══════════════════════════
+const N = 10, NN = N * N;
+const $ = id => document.getElementById(id);
+const SHIPS = [
+  { name: 'Tàu sân bay', len: 5 },
+  { name: 'Thiết giáp hạm', len: 4 },
+  { name: 'Tuần dương hạm', len: 3 },
+  { name: 'Tàu ngầm', len: 3 },
+  { name: 'Khu trục hạm', len: 2 },
+];
+const LEVELS = ['Dễ', 'Vừa', 'Khó'];
+const COLS = 'ABCDEFGHIJ';
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
+};
+let settings = Object.assign({ level: 1, bonus: 1, first: 'me' }, store.get('battleship.settings', {}));
+let stats = store.get('battleship.stats', { 0: { w: 0, l: 0 }, 1: { w: 0, l: 0 }, 2: { w: 0, l: 0 } });
+
+const rnd = n => Math.random() * n | 0;
+const pick = a => a[rnd(a.length)];
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const wait = ms => new Promise(r => setTimeout(r, reduced ? Math.min(ms, 120) : ms));
+const el = (cls, html = '') => { const e = document.createElement('div'); e.className = cls; if (html) e.innerHTML = html; return e; };
+
+// một con tàu: { k: số thứ tự trong SHIPS, r, c: ô đầu (mũi phía phải/dưới), v: nằm dọc }
+const cellsOf = s => Array.from({ length: SHIPS[s.k].len }, (_, j) => (s.r + (s.v ? j : 0)) * N + s.c + (s.v ? 0 : j));
+function occupancy(fleet, skip = -1) {
+  const o = new Int8Array(NN);
+  for (const s of fleet) if (s && s.k !== skip) for (const i of cellsOf(s)) o[i] = s.k + 1;
+  return o;
+}
+function inBounds(s) {
+  const L = SHIPS[s.k].len;
+  return s.r >= 0 && s.c >= 0 && (s.v ? s.r + L <= N && s.c < N : s.c + L <= N && s.r < N);
+}
+const fits = (fleet, s) => { if (!inBounds(s)) return false; const o = occupancy(fleet, s.k); return cellsOf(s).every(i => !o[i]); };
+
+// xếp ngẫu nhiên; spread = các tàu không chạm nhau (kể cả chéo)
+function randomFleet(spread = true) {
+  for (let t = 0; t < 100; t++) {
+    const fleet = [], block = new Uint8Array(NN);
+    for (let k = 0; k < SHIPS.length; k++) {
+      for (let a = 0; a < 400; a++) {
+        const L = SHIPS[k].len, v = Math.random() < .5;
+        const s = { k, v, r: rnd(v ? N - L + 1 : N), c: rnd(v ? N : N - L + 1) };
+        const cs = cellsOf(s);
+        if (cs.some(i => block[i])) continue;
+        fleet.push(s);
+        for (const i of cs) {
+          if (!spread) { block[i] = 1; continue; }
+          const r = i / N | 0, c = i % N;
+          for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++)
+            if (r + dr >= 0 && r + dr < N && c + dc >= 0 && c + dc < N) block[(r + dr) * N + c + dc] = 1;
+        }
+        break;
+      }
+      if (fleet.length !== k + 1) break;
+    }
+    if (fleet.length === SHIPS.length) return fleet;
+  }
+  return randomFleet(false);
+}
+
+// bắn vào ô i của một hạm đội; grid ghi 1 = trượt, 2 = trúng
+function resolve(fleet, grid, i) {
+  const k = occupancy(fleet)[i] - 1;
+  grid[i] = k >= 0 ? 2 : 1;
+  if (k < 0) return { hit: false, sunk: null, all: false };
+  const s = fleet[k], sunk = cellsOf(s).every(j => grid[j] === 2);
+  return { hit: true, sunk: sunk ? { k: s.k, r: s.r, c: s.c, v: s.v } : null, all: sunk && fleet.every(f => cellsOf(f).every(j => grid[j] === 2)) };
+}
+
+// ═══════════════════════════ hình tàu ═══════════════════════════
+// vẽ nằm ngang, mũi bên phải; khung 100 đơn vị mỗi ô
+function shipSvg(k) {
+  const W = SHIPS[k].len * 100;
+  const hull = `M8 50C8 30 16 21 34 19L${W - 90} 17C${W - 40} 19 ${W - 12} 34 ${W - 4} 50C${W - 12} 66 ${W - 40} 81 ${W - 90} 83L34 81C16 79 8 70 8 50Z`;
+  const deck = `M22 50C22 37 27 31 40 30L${W - 92} 29C${W - 52} 31 ${W - 30} 40 ${W - 22} 50C${W - 30} 60 ${W - 52} 69 ${W - 92} 71L40 70C27 69 22 63 22 50Z`;
+  const tur = x => `<g transform="translate(${x} 50)"><rect x="4" y="-9" width="32" height="6" rx="2" fill="#26313d"/><rect x="4" y="3" width="32" height="6" rx="2" fill="#26313d"/><circle r="15" fill="url(#gTur)" stroke="#26313d" stroke-width="3"/><circle cx="-3" cy="-4" r="4" fill="#fff" opacity=".35"/></g>`;
+  const bridge = (x, w) => `<rect x="${x}" y="32" width="${w}" height="36" rx="9" fill="url(#gBr)" stroke="#26313d" stroke-width="3"/><rect x="${x + w - 15}" y="38" width="8" height="24" rx="3" fill="#2f5a84"/><circle cx="${x + w / 2 - 6}" cy="50" r="7" fill="#3c4b5c"/>`;
+  const plane = (x, y) => `<g transform="translate(${x} ${y})" fill="#e6ecf2"><path d="M16 0L-10 -3L-14 0L-10 3Z"/><path d="M3 0L-3 -15L-8 -15L-5 0L-8 15L-3 15Z"/><path d="M-10 0L-15 -7L-18 -7L-15 0L-18 7L-15 7Z"/></g>`;
+  const base = `<path d="${hull}" fill="url(#gHull)" stroke="#1f2a36" stroke-width="3"/>`;
+  let body;
+  if (k === 0) {
+    body = base + `<path d="M24 25L${W - 85} 21L${W - 24} 41L${W - 24} 59L${W - 85} 79L24 75Z" fill="#46525f"/>`
+      + `<path d="M44 50H${W - 50}" stroke="#f3f6f9" stroke-width="3" stroke-dasharray="16 11"/>`
+      + `<path d="M40 70L${W - 190} 30" stroke="#ffd23f" stroke-width="2.5" opacity=".75"/>`
+      + plane(95, 36) + plane(175, 64) + plane(255, 36)
+      + `<rect x="${W - 210}" y="13" width="70" height="22" rx="6" fill="url(#gBr)" stroke="#26313d" stroke-width="3"/><circle cx="${W - 175}" cy="24" r="5" fill="#3c4b5c"/>`;
+  } else if (k === 3) {
+    body = `<path d="M22 50L4 34L11 50L4 66Z" fill="#1a232d"/>`
+      + `<path d="M14 50C14 36 34 30 70 30L${W - 70} 31C${W - 26} 33 ${W - 6} 42 ${W - 6} 50C${W - 6} 58 ${W - 26} 67 ${W - 70} 69L70 70C34 70 14 64 14 50Z" fill="url(#gSub)" stroke="#121a22" stroke-width="3"/>`
+      + `<path d="M70 39H${W - 80}" stroke="#a3b4c6" stroke-width="3" opacity=".45" stroke-linecap="round"/>`
+      + `<rect x="140" y="39" width="60" height="22" rx="11" fill="#18212a" stroke="#0d1218" stroke-width="2"/><path d="M155 39V27M185 39V31" stroke="#18212a" stroke-width="5" stroke-linecap="round"/>`
+      + `<circle cx="95" cy="50" r="5" fill="#18212a"/><circle cx="${W - 60}" cy="50" r="5" fill="#18212a"/>`;
+  } else {
+    body = base + `<path d="${deck}" fill="url(#gDeck)"/>`;
+    if (k === 1) body += tur(70) + tur(150) + bridge(196, 62) + tur(300);
+    if (k === 2) body += tur(70) + bridge(116, 52) + tur(210);
+    if (k === 4) body += bridge(36, 44) + tur(122);
+  }
+  return `<svg viewBox="0 0 ${W} 100" preserveAspectRatio="none" aria-hidden="true">${body}</svg>`;
+}
+const SHIP_SVG = SHIPS.map((_, k) => shipSvg(k));
+
+// ═══════════════════════════ âm thanh ═══════════════════════════
+const sfx = (() => {
+  let ac = null, noise = null, on = store.get('battleship.sound', true);
+  function ctx() {
+    if (!on) return null;
+    if (!ac) {
+      try { ac = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return null; }
+      noise = ac.createBuffer(1, ac.sampleRate * 2, ac.sampleRate);
+      const d = noise.getChannelData(0);
+      for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    }
+    if (ac.state === 'suspended') ac.resume();
+    return ac;
+  }
+  function env(a, t, dur, g) {
+    const v = a.createGain();
+    v.gain.setValueAtTime(.0001, t); v.gain.exponentialRampToValueAtTime(g, t + .012); v.gain.exponentialRampToValueAtTime(.0001, t + dur);
+    v.connect(a.destination); return v;
+  }
+  function nz(a, t, dur, type, f0, f1, g, q = 1) {
+    const s = a.createBufferSource(), f = a.createBiquadFilter();
+    s.buffer = noise; f.type = type; f.Q.value = q;
+    f.frequency.setValueAtTime(f0, t); f.frequency.exponentialRampToValueAtTime(f1, t + dur);
+    s.connect(f).connect(env(a, t, dur, g)); s.start(t); s.stop(t + dur + .05);
+  }
+  function tone(a, t, dur, type, f0, f1, g) {
+    const o = a.createOscillator();
+    o.type = type; o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(f1, t + dur);
+    o.connect(env(a, t, dur, g)); o.start(t); o.stop(t + dur + .05);
+  }
+  const play = fn => () => { const a = ctx(); if (a) fn(a, a.currentTime); };
+  return {
+    get on() { return on; },
+    toggle() { on = !on; store.set('battleship.sound', on); return on; },
+    unlock() { ctx(); },
+    fire: play((a, t) => { tone(a, t, .2, 'sine', 170, 55, .4); nz(a, t, .14, 'highpass', 2500, 700, .14); nz(a, t + .08, .38, 'bandpass', 2400, 500, .05, 6); }),
+    splash: play((a, t) => { nz(a, t, .5, 'lowpass', 2600, 280, .38); nz(a, t + .04, .3, 'bandpass', 1100, 420, .22, 2); }),
+    boom: play((a, t) => { nz(a, t, .8, 'lowpass', 2000, 110, .75); tone(a, t, .55, 'sine', 120, 34, .6); }),
+    sink: play((a, t) => { nz(a, t, .8, 'lowpass', 2000, 110, .75); tone(a, t, .55, 'sine', 120, 34, .6); nz(a, t + .2, 1.6, 'lowpass', 600, 60, .45); tone(a, t + .15, 1.3, 'sine', 75, 26, .45); }),
+    place: play((a, t) => { tone(a, t, .09, 'triangle', 480, 720, .16); }),
+    bad: play((a, t) => { tone(a, t, .14, 'square', 190, 120, .06); }),
+    win: play((a, t) => { [523, 659, 784, 1047, 1319].forEach((f, i) => tone(a, t + i * .12, .35, 'triangle', f, f, .22)); }),
+    lose: play((a, t) => { [392, 330, 262, 196].forEach((f, i) => tone(a, t + i * .2, .45, 'triangle', f, f * .97, .2)); }),
+  };
+})();
+const buzz = ms => { try { navigator.vibrate && navigator.vibrate(ms); } catch (e) {} };
+
+// ═══════════════════════════ bàn ═══════════════════════════
+function makeBoard(root) {
+  const top = el('lab lt'), left = el('lab ll'), sea = el('sea'), grid = el('grid');
+  const lab = t => Object.assign(document.createElement('span'), { textContent: t });
+  for (let j = 0; j < N; j++) { top.appendChild(lab(COLS[j])); left.appendChild(lab(String(j + 1))); }
+  const cells = [];
+  for (let i = 0; i < NN; i++) { const c = el('cell'); c.dataset.i = i; cells.push(c); grid.appendChild(c); }
+  const ships = el('ships'), marks = el('marks'), fx = el('fx');
+  sea.append(grid, el('radar'), ships, marks, fx);
+  root.append(el('corner'), top, left, sea);
+  return { root, sea, cells, ships, marks, fx, c: 32 };
+}
+const Bme = makeBoard($('bMe')), Bopp = makeBoard($('bOpp'));
+const posVars = (e, i) => { e.style.setProperty('--x', i % N); e.style.setProperty('--y', i / N | 0); return e; };
+
+function shipEl(s, cls = '') {
+  const e = el('ship ' + cls + (s.v ? ' v' : ''), SHIP_SVG[s.k]);
+  e.style.setProperty('--x', s.c); e.style.setProperty('--y', s.r); e.style.setProperty('--l', SHIPS[s.k].len);
+  e.dataset.k = s.k;
+  return e;
+}
+function addMark(B, i, hit, fresh, inSunk) {
+  const m = posVars(el('mark ' + (hit ? 'hit' : 'miss') + (fresh ? ' new' : '') + (inSunk ? ' in-sunk' : '')), i);
+  if (hit) {
+    m.innerHTML = '<i class="scorch"></i><i class="fl"></i><i class="fl f2"></i><i class="sm"></i>';
+    m.querySelector('.sm').style.animationDelay = -Math.random() * 2.4 + 's';
+  }
+  B.marks.appendChild(m);
+  B.cells[i].classList.add('shot');
+}
+function fxAt(B, i, cls, ms, html = '') {
+  const e = posVars(el(cls, html), i);
+  B.fx.appendChild(e);
+  setTimeout(() => e.remove(), reduced ? Math.min(ms, 300) : ms);
+  return e;
+}
+async function aim(B, i) {
+  fxAt(B, i, 'fx-aim', 520, '<i class="ring"></i><i class="shell"></i>');
+  sfx.fire();
+  await wait(470);
+}
+function boom(B, i) {
+  let h = '<i class="b"></i>';
+  for (let a = 0; a < 360; a += 45) h += `<i class="s" style="--a:${a + rnd(30)}deg"></i>`;
+  fxAt(B, i, 'fx-boom', 700, h);
+}
+function splash(B, i) {
+  let h = '<i></i><i></i><i></i>';
+  for (const dx of [-14, -5, 6, 15]) h += `<b style="--dx:${dx}px"></b>`;
+  fxAt(B, i, 'fx-splash', 900, h);
+}
+function say(B, i, text, cls) { fxAt(B, i, 'fx-say ' + cls, 1000, `<span>${text}</span>`); }
+function shake(B) { B.root.classList.remove('shake'); void B.root.offsetWidth; B.root.classList.add('shake'); }
+function toast(text, mine) {
+  const t = el('toast' + (mine ? ' mine' : ''), text);
+  $('stage').appendChild(t);
+  setTimeout(() => t.remove(), 2000);
+}
+
+// ═══════════════════════════ trạng thái ván ═══════════════════════════
+// phase: place (xếp tàu) · wait (đã sẵn sàng, chờ đối thủ) · play · over
+const G = {
+  id: 0, phase: 'place', turn: null, busy: false, bonus: !!settings.bonus,
+  fleet: Array(SHIPS.length).fill(null), // hạm đội của mình
+  enemy: null,                           // hạm đội máy (chỉ khi chơi với máy)
+  mine: new Uint8Array(NN),              // các phát đối thủ bắn vào mình
+  theirs: new Uint8Array(NN),            // các phát mình bắn vào đối thủ
+  mySunk: [], oppSunk: [], reveal: null,
+  sel: 0, placeV: false, ready: false, oppReady: false,
+  shots: { me: 0, meHit: 0, opp: 0, oppHit: 0 }, streak: 0,
+};
+let aiTimer = 0, wiggleK = -1;
+const allPlaced = () => G.fleet.every(Boolean);
+const oppName = () => (net.on ? 'Đối thủ' : 'Máy');
+
+function newRound() {
+  G.id++; clearTimeout(aiTimer);
+  G.phase = 'place'; G.turn = null; G.busy = false;
+  G.mine.fill(0); G.theirs.fill(0);
+  G.mySunk = []; G.oppSunk = []; G.reveal = null; G.enemy = null;
+  G.ready = false; G.oppReady = false; G.streak = 0;
+  G.shots = { me: 0, meHit: 0, opp: 0, oppHit: 0 };
+  G.sel = G.fleet.findIndex(s => !s);
+  $('resultSheet').hidden = true;
+  renderAll();
+}
+
+function startBattle(first) {
+  G.phase = 'play'; G.turn = first; G.busy = false; G.sel = -1;
+  renderAll();
+  if (first === 'opp' && !net.on) aiTurn();
+}
+
+// ── mình bắn ──
+let resWaiter = null;
+async function fire(i) {
+  if (G.phase !== 'play' || G.turn !== 'me' || G.busy || G.theirs[i]) return;
+  if (net.on && !net.conn) return;
+  G.busy = true; const id = G.id;
+  setStatus();
+  let resP;
+  if (net.on) { resP = new Promise(ok => { resWaiter = { i, ok }; }); netSend({ t: 'shot', i }); }
+  else resP = Promise.resolve(resolve(G.enemy, G.theirs, i));
+  const [res] = await Promise.all([resP, aim(Bopp, i)]);
+  if (id !== G.id) return;
+  G.theirs[i] = res.hit ? 2 : 1;
+  G.shots.me++; if (res.hit) G.shots.meHit++;
+  showShot(Bopp, i, res, false);
+  if (res.all) return endGame(true);
+  if (!res.hit || !G.bonus) { G.turn = 'opp'; G.streak = 0; } else G.streak++;
+  G.busy = false;
+  setStatus();
+  if (G.turn === 'opp' && !net.on) aiTurn();
+}
+
+// ── đối thủ bắn vào mình ──
+async function incoming(i) {
+  if (G.phase !== 'play' || G.turn !== 'opp' || G.busy || G.mine[i]) return;
+  G.busy = true; const id = G.id;
+  const res = resolve(G.fleet, G.mine, i);
+  if (net.on) netSend({ t: 'res', i, hit: res.hit, sunk: res.sunk, all: res.all });
+  setStatus();
+  await aim(Bme, i);
+  if (id !== G.id) return;
+  G.shots.opp++; if (res.hit) G.shots.oppHit++;
+  showShot(Bme, i, res, true);
+  if (res.all) return endGame(false);
+  if (!res.hit || !G.bonus) { G.turn = 'me'; G.streak = 0; }
+  G.busy = false;
+  setStatus();
+  if (G.turn === 'opp' && !net.on) aiTurn();
+}
+
+function showShot(B, i, res, onMe) {
+  if (res.hit) { boom(B, i); sfx.boom(); if (onMe) buzz(res.sunk ? [60, 40, 120] : 50); }
+  else { splash(B, i); sfx.splash(); }
+  addMark(B, i, res.hit, true);
+  if (res.sunk) {
+    (onMe ? G.mySunk : G.oppSunk).push(res.sunk);
+    say(B, i, 'Chìm!', 'sunk');
+    shake(B);
+    setTimeout(() => sfx.sink(), 120);
+    toast(onMe ? `🌊 ${oppName()} đã đánh chìm ${SHIPS[res.sunk.k].name.toLowerCase()} của bạn` : `💥 Đánh chìm ${SHIPS[res.sunk.k].name}!`, onMe);
+    renderShips(B);
+    renderMarks(B);
+  } else say(B, i, res.hit ? 'Trúng!' : 'Trượt', res.hit ? 'hit' : 'miss');
+  renderFleets();
+}
+
+function endGame(win) {
+  G.phase = 'over'; G.turn = null; G.busy = false;
+  clearTimeout(aiTimer);
+  if (net.on) { net.score[win ? 'w' : 'l']++; netSend({ t: 'reveal', fleet: G.fleet }); }
+  else {
+    G.reveal = G.enemy;
+    const s = stats[settings.level]; s[win ? 'w' : 'l']++;
+    store.set('battleship.stats', stats);
+  }
+  renderAll();
+  const id = G.id;
+  setTimeout(() => {
+    if (id !== G.id) return;
+    win ? sfx.win() : sfx.lose();
+    const sh = G.shots, acc = sh.me ? Math.round(sh.meHit / sh.me * 100) : 0;
+    const left = SHIPS.length - G.mySunk.length;
+    $('rEmoji').textContent = win ? '🏆' : '🌊';
+    $('rTitle').textContent = win ? 'Chiến thắng!' : 'Thua mất rồi!';
+    $('rMsg').textContent = win
+      ? (left === SHIPS.length ? 'Toàn thắng, không mất một con tàu nào!' : `Hạm đội ${oppName().toLowerCase()} đã nằm dưới đáy biển.`)
+      : `${oppName()} đã đánh chìm cả hạm đội của bạn.`;
+    $('rStats').innerHTML = `<div><b>${sh.me}</b>phát bắn</div><div><b>${acc}%</b>chính xác</div><div><b>${left}/${SHIPS.length}</b>tàu còn lại</div>`;
+    $('resultSheet').hidden = false;
+  }, reduced ? 300 : 1400);
+}
+
+// ═══════════════════════════ máy bắn ═══════════════════════════
+function aiTurn() {
+  clearTimeout(aiTimer);
+  if (G.phase !== 'play' || G.turn !== 'opp' || net.on) return;
+  const id = G.id;
+  aiTimer = setTimeout(() => { if (id === G.id) incoming(aiPick(settings.level)); }, 650 + rnd(500));
+}
+const nbrs = i => { const r = i / N | 0, c = i % N, o = []; if (r > 0) o.push(i - N); if (r < N - 1) o.push(i + N); if (c > 0) o.push(i - 1); if (c < N - 1) o.push(i + 1); return o; };
+function aiPick(level) {
+  const g = G.mine;
+  const sunkSet = new Set(G.mySunk.flatMap(cellsOf));
+  const open = [], hits = [];
+  for (let i = 0; i < NN; i++) { if (!g[i]) open.push(i); else if (g[i] === 2 && !sunkSet.has(i)) hits.push(i); }
+  const left = SHIPS.map((S, k) => k).filter(k => !G.mySunk.some(s => s.k === k)).map(k => SHIPS[k].len);
+  const around = () => hits.flatMap(nbrs).filter(i => !g[i]);
+
+  if (level === 0) {
+    if (hits.length && Math.random() < .55) { const c = around(); if (c.length) return pick(c); }
+    return pick(open);
+  }
+  if (level === 1) {
+    if (hits.length) {
+      // hai phát trúng thẳng hàng → bắn nối dài hai đầu
+      const cand = new Set();
+      for (const h of hits) for (const d of [1, N]) {
+        const fwd = j => (d === 1 ? (j % N === N - 1 ? -1 : j + 1) : (j + N < NN ? j + N : -1));
+        const bwd = j => (d === 1 ? (j % N === 0 ? -1 : j - 1) : (j - N >= 0 ? j - N : -1));
+        const f = fwd(h), b = bwd(h);
+        const isHit = j => j >= 0 && g[j] === 2 && !sunkSet.has(j);
+        if (!isHit(f) && !isHit(b)) continue;
+        for (const step of [fwd, bwd]) {
+          let j = h;
+          while (j >= 0 && g[j] === 2) j = step(j);
+          if (j >= 0 && !g[j]) cand.add(j);
+        }
+      }
+      if (cand.size) return pick([...cand]);
+      const c = around(); if (c.length) return pick(c);
+    }
+    const m = Math.min(...left);
+    const par = open.filter(i => ((i / N | 0) + i % N) % m === 0);
+    return pick(par.length ? par : open);
+  }
+  // khó: đếm mọi cách đặt tàu còn có thể → bắn ô có mật độ cao nhất
+  const heat = new Float64Array(NN);
+  for (const L of left) for (const v of [false, true]) {
+    for (let r = 0; r < (v ? N - L + 1 : N); r++) for (let c = 0; c < (v ? N : N - L + 1); c++) {
+      let h = 0, bad = false;
+      for (let j = 0; j < L; j++) {
+        const i = (r + (v ? j : 0)) * N + c + (v ? 0 : j);
+        if (g[i] === 1 || sunkSet.has(i)) { bad = true; break; }
+        if (g[i] === 2) h++;
+      }
+      if (bad || (hits.length && !h)) continue;
+      const w = h ? Math.pow(12, h) : 1;
+      for (let j = 0; j < L; j++) { const i = (r + (v ? j : 0)) * N + c + (v ? 0 : j); if (!g[i]) heat[i] += w; }
+    }
+  }
+  let best = -1, cands = [];
+  for (const i of open) {
+    const w = heat[i] * (1 + Math.random() * .08);
+    if (w > best) { best = w; cands = [i]; } else if (w === best) cands.push(i);
+  }
+  return best > 0 ? pick(cands) : pick(open);
+}
+
+// ═══════════════════════════ vẽ ═══════════════════════════
+function renderShips(B) {
+  B.ships.innerHTML = '';
+  if (B === Bme) {
+    setTimeout(() => { wiggleK = -1; });
+    for (const s of G.fleet) if (s && !(drag && drag.moved && drag.k === s.k)) {
+      const sunk = G.mySunk.some(x => x.k === s.k);
+      B.ships.appendChild(shipEl(s, sunk ? 'sunk' : s.k === wiggleK ? 'wiggle' : ''));
+    }
+  } else {
+    for (const s of G.oppSunk) B.ships.appendChild(shipEl(s, 'sunk'));
+    if (G.reveal && G.phase === 'over') for (const s of G.reveal) if (!G.oppSunk.some(x => x.k === s.k)) B.ships.appendChild(shipEl(s, 'reveal'));
+  }
+}
+function renderMarks(B) {
+  B.marks.innerHTML = '';
+  const grid = B === Bme ? G.mine : G.theirs;
+  const sunkSet = new Set((B === Bme ? G.mySunk : G.oppSunk).flatMap(cellsOf));
+  for (let i = 0; i < NN; i++) {
+    B.cells[i].classList.toggle('shot', !!grid[i]);
+    if (grid[i]) addMark(B, i, grid[i] === 2, false, sunkSet.has(i));
+  }
+}
+function renderFleets() {
+  const pips = (k, hitN, sunk) => `<span class="fs${sunk ? ' sunk' : ''}" title="${SHIPS[k].name}">${Array.from({ length: SHIPS[k].len }, (_, j) => `<i${j < hitN ? ' class="h"' : ''}></i>`).join('')}</span>`;
+  $('fleetMe').innerHTML = SHIPS.map((S, k) => {
+    const s = G.fleet[k], h = s ? cellsOf(s).filter(i => G.mine[i] === 2).length : 0;
+    return pips(k, h, G.mySunk.some(x => x.k === k));
+  }).join('');
+  $('fleetOpp').innerHTML = SHIPS.map((S, k) => { const sunk = G.oppSunk.some(x => x.k === k); return pips(k, sunk ? S.len : 0, sunk); }).join('');
+}
+function renderYard() {
+  $('yard').innerHTML = SHIPS.map((S, k) =>
+    `<button class="yard-ship${G.fleet[k] ? ' placed' : ''}${G.sel === k ? ' sel' : ''}" data-k="${k}"><span class="art" style="--l:${S.len}">${SHIP_SVG[k]}</span><span class="yn">${S.name}<small>${S.len} ô</small></span></button>`).join('');
+  $('bRot').textContent = G.placeV ? '↕ Dọc' : '↻ Ngang';
+  const lock = G.phase !== 'place';
+  for (const b of [$('bRand'), $('bRot'), $('bClear')]) b.disabled = lock;
+  const r = $('bReady');
+  r.classList.toggle('waiting', G.phase === 'wait');
+  r.disabled = G.phase === 'place' && !allPlaced();
+  r.textContent = G.phase === 'wait' ? '✋ Sửa lại hạm đội' : '⚓ Sẵn sàng!';
+}
+function renderAll() {
+  document.body.classList.toggle('place', G.phase === 'place' || G.phase === 'wait');
+  renderShips(Bme); renderShips(Bopp);
+  renderMarks(Bme); renderMarks(Bopp);
+  renderFleets(); renderYard(); setStatus(); setScore(); fit();
+}
+
+const DOTS = '<span class="dots"><span>.</span><span>.</span><span>.</span></span>';
+function setStatus() {
+  const s = $('status');
+  let html, cls = '';
+  const b = document.body;
+  b.classList.toggle('myturn', G.phase === 'play' && G.turn === 'me' && !G.busy);
+  b.classList.toggle('oppturn', G.phase === 'play' && G.turn === 'opp');
+  if (G.phase === 'place') {
+    if (net.on && net.host && !net.conn) html = `Đang chờ bạn vào phòng${DOTS} cứ xếp tàu trước nhé`;
+    else if (allPlaced()) html = G.oppReady ? 'Đối thủ đã sẵn sàng — bấm <b>Sẵn sàng!</b>' : 'Hạm đội đã xếp xong — bấm <b>Sẵn sàng!</b>';
+    else html = '🚢 Kéo tàu vào biển · chạm tàu để xoay';
+  } else if (G.phase === 'wait') {
+    html = net.conn ? `⏳ Đang chờ đối thủ xếp tàu${DOTS}` : `⏳ Đang chờ bạn vào phòng${DOTS}`;
+  } else if (G.phase === 'play') {
+    if (G.turn === 'me') { cls = 'me'; html = G.busy ? '💣 Khai hoả!' : G.streak ? '🔥 Trúng rồi! Bắn tiếp nào' : '🎯 Lượt của bạn — chọn ô trên biển địch'; }
+    else { cls = 'opp'; html = net.on && !net.conn ? 'Mất kết nối với đối thủ' : `${oppName()} đang ngắm bắn${DOTS}`; }
+  } else {
+    const win = G.oppSunk.length === SHIPS.length;
+    cls = win ? 'win' : 'lose';
+    html = win ? '🏆 Bạn đã thắng!' : '🌊 Hạm đội của bạn đã chìm';
+  }
+  s.className = 'pill ' + cls;
+  s.innerHTML = html;
+  $('oppWho').textContent = net.on ? '' : '· máy ' + LEVELS[settings.level].toLowerCase();
+}
+function setScore() {
+  const sc = net.on ? net.score : stats[settings.level];
+  $('sWin').textContent = sc.w; $('sLose').textContent = sc.l;
+  $('sOpp').textContent = oppName();
+  $('lvlTag').textContent = net.on ? '' : LEVELS[settings.level];
+  $('bOnline').hidden = net.on;
+  $('bInvite').hidden = !(net.on && net.host);
+  $('bLeave').hidden = !net.on;
+}
+
+// ── co giãn theo màn hình ──
+function fit() {
+  const st = $('stage'), W = st.clientWidth - 16, H = st.clientHeight - 6;
+  const wide = W > H * 1.2 && W >= 560;
+  document.body.classList.toggle('wide', wide);
+  const K = 10.6, HEAD = 34, PAD = 12, MAX = 54;
+  let cMe, cOpp;
+  if (G.phase === 'place' || G.phase === 'wait') {
+    if (wide) cMe = Math.min((W - 280 - 22 - PAD) / K, (H - HEAD - PAD) / K);
+    else cMe = Math.min((W - PAD) / K, (H - HEAD - PAD - $('tray').offsetHeight - 10) / K);
+    cOpp = cMe;
+  } else if (wide) {
+    cMe = cOpp = Math.min((W - 22 - 2 * PAD) / (2 * K), (H - HEAD - PAD) / K);
+  } else {
+    // điện thoại dọc: biển địch to, bàn mình nhỏ bên dưới (ít nhất bằng nửa)
+    cOpp = Math.min((W - PAD) / K, (H - 2 * (HEAD + PAD) - 10) / (K * 1.5));
+    cMe = Math.min(cOpp * .75, (H - (K * cOpp + HEAD + PAD) - HEAD - PAD - 10) / K);
+  }
+  for (const [B, c] of [[Bme, cMe], [Bopp, cOpp]]) {
+    B.c = Math.max(12, Math.floor(Math.min(MAX, c)));
+    B.root.style.setProperty('--c', B.c + 'px');
+    // tiêu đề + dải tàu cần chừng 330px, bàn nhỏ hơn thì để tiêu đề rộng hơn bàn
+    B.root.parentElement.style.width = Math.max(B.c * K + PAD, Math.min(W, 330)) + 'px';
+  }
+}
+new ResizeObserver(() => fit()).observe($('stage'));
+
+// ═══════════════════════════ xếp tàu ═══════════════════════════
+let drag = null, lastDragEnd = 0, preview = null;
+const nextUnplaced = () => G.fleet.findIndex(s => !s);
+const canEdit = () => G.phase === 'place';
+
+function cellAt(x, y) {
+  const r = Bme.sea.getBoundingClientRect();
+  if (x < r.left || x >= r.right || y < r.top || y >= r.bottom) return null;
+  return { r: clamp(Math.floor((y - r.top) / Bme.c), 0, N - 1), c: clamp(Math.floor((x - r.left) / Bme.c), 0, N - 1), rect: r };
+}
+// đặt tàu sao cho đoạn thứ off nằm ở ô (r, c); kéo gọn vào trong biển
+function anchorAt(k, v, off, r, c) {
+  const L = SHIPS[k].len;
+  const s = { k, v, r: r - (v ? off : 0), c: c - (v ? 0 : off) };
+  s.r = clamp(s.r, 0, v ? N - L : N - 1); s.c = clamp(s.c, 0, v ? N - 1 : N - L);
+  return s;
+}
+
+function startDrag(e, k, src, item) {
+  if (!canEdit() || e.button > 0) return;
+  e.preventDefault();
+  sfx.unlock();
+  const from = G.fleet[k], L = SHIPS[k].len;
+  let off, v = from ? from.v : G.placeV;
+  if (src === 'board') {
+    const at = cellAt(e.clientX, e.clientY);
+    off = at ? clamp(v ? at.r - from.r : at.c - from.c, 0, L - 1) : 0;
+  } else {
+    const art = item.querySelector('.art').getBoundingClientRect();
+    off = clamp(Math.floor((e.clientX - art.left) / (art.width / L)), 0, L - 1);
+    if (v) off = L >> 1;
+  }
+  drag = { k, v, off, src, from, x: e.clientX, y: e.clientY, x0: e.clientX, y0: e.clientY, moved: false, ghost: null, snap: null, ok: false };
+  hidePreview();
+}
+function moveDrag(x, y) {
+  drag.x = x; drag.y = y;
+  if (!drag.moved) {
+    if (Math.hypot(x - drag.x0, y - drag.y0) < 6) return;
+    drag.moved = true;
+    drag.ghost = shipEl({ k: drag.k, r: 0, c: 0, v: drag.v }, 'ghost');
+    document.body.appendChild(drag.ghost);
+    renderShips(Bme);
+  }
+  const { k, v, off, ghost } = drag, c = Bme.c;
+  ghost.style.setProperty('--c', c + 'px');
+  ghost.classList.toggle('v', v);
+  const at = cellAt(x, y);
+  let left, top;
+  if (at) {
+    const s = drag.snap = anchorAt(k, v, off, at.r, at.c);
+    drag.ok = fits(G.fleet, s);
+    left = at.rect.left + s.c * c; top = at.rect.top + s.r * c;
+  } else {
+    drag.snap = null; drag.ok = false;
+    left = x - (v ? .5 : off + .5) * c; top = y - (v ? off + .5 : .5) * c;
+  }
+  ghost.classList.toggle('ok', !!at && drag.ok);
+  ghost.classList.toggle('bad', !!at && !drag.ok);
+  ghost.style.left = left + 'px'; ghost.style.top = top + 'px';
+}
+function endDrag(cancel) {
+  const d = drag; drag = null;
+  if (!d) return;
+  if (d.ghost) d.ghost.remove();
+  if (!d.moved) {
+    if (d.src === 'board' && !cancel) { rotateShip(d.k); G.sel = d.k; }
+    else if (!cancel) G.sel = d.k;
+  } else {
+    lastDragEnd = performance.now();
+    if (!cancel && d.snap && d.ok) { G.fleet[d.k] = d.snap; sfx.place(); G.sel = nextUnplaced(); }
+    else if (d.snap) sfx.bad();
+  }
+  renderShips(Bme); renderYard(); setStatus();
+}
+function rotateShip(k) {
+  const s = G.fleet[k];
+  if (!s) return;
+  const L = SHIPS[k].len, v = !s.v;
+  // xoay quanh ô đầu; chạm mép hay vướng tàu khác thì thử lùi dần
+  for (let back = 0; back < L; back++) {
+    const t = { k, v, r: s.r - (v ? back : 0), c: s.c - (v ? 0 : back) };
+    if (fits(G.fleet, t)) { G.fleet[k] = t; sfx.place(); return; }
+  }
+  sfx.bad();
+  wiggleK = k;
+}
+function showPreview(x, y) {
+  const k = G.sel, at = cellAt(x, y);
+  if (!canEdit() || k < 0 || G.fleet[k] || !at) return hidePreview();
+  const s = anchorAt(k, G.placeV, 0, at.r, at.c);
+  if (preview) preview.remove();
+  preview = shipEl(s, 'preview' + (fits(G.fleet, s) ? '' : ' bad'));
+  Bme.fx.appendChild(preview);
+}
+function hidePreview() { if (preview) { preview.remove(); preview = null; } }
+
+$('yard').addEventListener('pointerdown', e => {
+  const b = e.target.closest('.yard-ship');
+  if (b) startDrag(e, +b.dataset.k, 'yard', b);
+});
+Bme.ships.addEventListener('pointerdown', e => {
+  const s = e.target.closest('.ship');
+  if (s) startDrag(e, +s.dataset.k, 'board');
+});
+addEventListener('pointermove', e => {
+  if (drag) moveDrag(e.clientX, e.clientY);
+  else if (e.pointerType === 'mouse') showPreview(e.clientX, e.clientY);
+});
+addEventListener('pointerup', () => endDrag(false));
+addEventListener('pointercancel', () => endDrag(true));
+addEventListener('keydown', e => {
+  if (e.key !== 'r' && e.key !== 'R') return;
+  if (!$('newSheet').hidden || !$('netSheet').hidden) return;
+  if (drag && drag.moved) { drag.v = !drag.v; moveDrag(drag.x, drag.y); }
+  else rotBtn();
+});
+Bme.sea.addEventListener('click', e => {
+  // chạm vào ô trống để đặt tàu đang chọn
+  if (!canEdit() || performance.now() - lastDragEnd < 300) return;
+  const cell = e.target.closest('.cell'), k = G.sel;
+  if (!cell || k < 0 || G.fleet[k]) return;
+  const i = +cell.dataset.i, s = anchorAt(k, G.placeV, 0, i / N | 0, i % N);
+  if (!fits(G.fleet, s)) { sfx.bad(); shake(Bme); return; }
+  G.fleet[k] = s; sfx.place(); G.sel = nextUnplaced();
+  hidePreview(); renderShips(Bme); renderYard(); setStatus();
+});
+Bme.sea.addEventListener('pointerleave', hidePreview);
+
+function rotBtn() {
+  if (!canEdit()) return;
+  if (G.sel >= 0 && G.fleet[G.sel]) { rotateShip(G.sel); renderShips(Bme); }
+  else { G.placeV = !G.placeV; }
+  renderYard();
+}
+$('bRot').onclick = rotBtn;
+$('bRand').onclick = () => { if (!canEdit()) return; sfx.unlock(); G.fleet = randomFleet(Math.random() < .7); G.sel = -1; sfx.place(); renderShips(Bme); renderYard(); setStatus(); };
+$('bClear').onclick = () => { if (!canEdit()) return; G.fleet = Array(SHIPS.length).fill(null); G.sel = 0; renderShips(Bme); renderYard(); setStatus(); };
+$('bReady').onclick = () => {
+  sfx.unlock();
+  if (G.phase === 'wait') { // sửa lại
+    G.phase = 'place'; G.ready = false;
+    if (net.on) netSend({ t: 'unready' });
+    renderAll(); return;
+  }
+  if (G.phase !== 'place' || !allPlaced()) return;
+  if (!net.on) {
+    G.enemy = randomFleet(Math.random() < .6);
+    const f = settings.first;
+    startBattle(f === 'ai' ? 'opp' : f === 'rand' ? (Math.random() < .5 ? 'me' : 'opp') : 'me');
+    return;
+  }
+  G.phase = 'wait'; G.ready = true;
+  netSend({ t: 'ready' });
+  renderAll();
+  if (net.host && G.oppReady && net.conn) netStart();
+};
+Bopp.sea.addEventListener('click', e => {
+  const cell = e.target.closest('.cell');
+  if (cell) { sfx.unlock(); fire(+cell.dataset.i); }
+});
+
+// ═══════════════════════════ chơi online ═══════════════════════════
+// Chủ phòng mở một Peer có mã ngẫu nhiên rồi gửi mã (hoặc link #room=<mã>); máy kia nhập mã
+// hay mở link là nối vào. Server công cộng của PeerJS chỉ giúp hai bên tìm nhau, các phát
+// bắn sau đó gửi thẳng giữa hai máy. Mỗi bên giữ bí mật hạm đội của mình và tự trả lời
+// trúng/trượt; hết ván hai bên mới gửi nhau vị trí tàu còn lại để xem.
+//
+// Tin nhắn: hello khách → chủ · cfg {bonus, score, ready} chủ → khách · ready / unready ·
+// start {hostFirst} chủ → khách · shot {i} · res {i, hit, sunk, all} · reveal {fleet} ·
+// again khách → chủ · reset {bonus} chủ → khách · full, bye.
+const PEERJS_URL = 'https://cdn.jsdelivr.net/npm/peerjs@1.5.5/dist/peerjs.min.js';
+const ROOM_PREFIX = 'haichien-vibe-';
+const freshNet = () => ({ on: false, host: false, code: null, peer: null, conn: null, round: 0,
+  score: { w: 0, l: 0 }, sheetClosable: false, timer: 0, left: false });
+let net = freshNet();
+
+function loadPeerJs() {
+  if (window.Peer) return Promise.resolve();
+  return new Promise((ok, bad) => {
+    const s = document.createElement('script');
+    s.src = PEERJS_URL; s.onload = ok; s.onerror = () => { s.remove(); bad(new Error('peerjs')); };
+    document.head.appendChild(s);
+  });
+}
+const randCode = () => Array.from(crypto.getRandomValues(new Uint8Array(6)), b => 'abcdefghijkmnpqrstuvwxyz23456789'[b % 32]).join('');
+const inviteUrl = () => location.href.split('#')[0] + '#room=' + net.code;
+const showCode = c => String(c || '').toUpperCase();
+function parseCode(s) {
+  s = String(s || '').trim();
+  const m = /room=([a-z0-9]+)/i.exec(s);
+  s = (m ? m[1] : s).toLowerCase().replace(/[^a-z0-9]/g, '').replace(/1/g, 'i');
+  return /^[a-z0-9]{4,16}$/.test(s) ? s : null;
+}
+function netSend(msg) { if (net.conn && net.conn.open) try { net.conn.send(msg); } catch (e) {} }
+
+function netSheet(emoji, title, msg, { link = false, rows = [], closable = false, note = '' } = {}) {
+  const p = $('netPanel');
+  p.innerHTML = `<div class="result-emoji">${emoji}</div><h2>${title}</h2><p class="result-msg">${msg}</p>`;
+  if (link) {
+    const b = document.createElement('button');
+    b.className = 'room-code';
+    b.innerHTML = `<b>${showCode(net.code)}</b><small>Mã phòng · bấm để copy</small>`;
+    b.onclick = async () => {
+      try { await navigator.clipboard.writeText(showCode(net.code)); } catch (e) {}
+      b.lastChild.textContent = '✓ Đã copy mã';
+      setTimeout(() => { b.lastChild.textContent = 'Mã phòng · bấm để copy'; }, 1600);
+    };
+    p.appendChild(b);
+    const i = document.createElement('input');
+    i.className = 'link'; i.id = 'oLink'; i.readOnly = true; i.value = inviteUrl();
+    i.onclick = () => i.select();
+    p.appendChild(i);
+  }
+  if (note) { const n = document.createElement('p'); n.className = 'note'; n.textContent = note; p.appendChild(n); }
+  for (const r of rows) {
+    if (r instanceof Node) { p.appendChild(r); continue; }
+    const row = document.createElement('div'); row.className = 'row';
+    for (const b of r) {
+      const e = document.createElement('button');
+      e.textContent = b.label; if (b.go) e.className = 'go';
+      e.onclick = () => b.fn(e);
+      row.appendChild(e);
+    }
+    p.appendChild(row);
+  }
+  net.sheetClosable = closable;
+  $('resultSheet').hidden = true; $('newSheet').hidden = true;
+  $('netSheet').hidden = false;
+}
+const hideNetSheet = () => { $('netSheet').hidden = true; };
+
+async function copyInvite(btn) {
+  const url = inviteUrl();
+  try { await navigator.clipboard.writeText(url); }
+  catch (e) { const i = $('oLink'); if (i) { i.select(); try { document.execCommand('copy'); } catch (e2) {} } }
+  btn.textContent = '✓ Đã copy';
+  setTimeout(() => { btn.textContent = 'Copy link'; }, 1600);
+}
+function showInvite() {
+  if (!net.on || !net.host || !net.code) return;
+  const first = [{ label: 'Copy link', go: true, fn: copyInvite }];
+  if (navigator.share) first.push({ label: 'Chia sẻ', fn: () => navigator.share({ title: 'Hải Chiến', text: 'Vào chơi bắn tàu với mình nhé!', url: inviteUrl() }).catch(() => {}) });
+  netSheet('🔗', 'Mời bạn chơi', net.conn ? 'Đối thủ đang ở trong phòng.' : `Gửi mã phòng hoặc link cho bạn. Bạn ấy bấm 🌐 Chơi online rồi nhập mã, hoặc mở link là vào chơi ngay. Đang chờ${DOTS}`, {
+    link: true, closable: true,
+    note: location.protocol === 'file:' ? 'Bạn đang mở file trên máy nên link này chỉ dùng được trên máy này. Hãy gửi mã phòng cho bạn nhé.' : '',
+    rows: [first, [{ label: 'Để sau', fn: hideNetSheet }, { label: 'Huỷ phòng', fn: () => leaveOnline() }]],
+  });
+}
+function onlineMenu(val = '') {
+  const box = document.createElement('div');
+  box.innerHTML = '<div class="or">hoặc vào phòng của bạn bè</div>'
+    + '<input class="code-in" id="oCode" maxlength="60" placeholder="Nhập mã phòng" autocomplete="off" autocapitalize="characters" spellcheck="false" enterkeyhint="go">'
+    + '<p class="note" id="oCodeErr" hidden>Mã phòng chưa đúng. Mã gồm 6 chữ và số, ví dụ K7P2QX.</p>';
+  const go = () => {
+    const c = parseCode($('oCode').value);
+    if (!c) { $('oCodeErr').hidden = false; $('oCode').focus(); return; }
+    history.replaceState(null, '', location.pathname + location.search + '#room=' + c);
+    joinOnline(c);
+  };
+  netSheet('🌐', 'Chơi online', 'Tạo phòng mới rồi gửi mã cho bạn, hoặc nhập mã bạn gửi để vào đấu hải chiến cùng nhau.', {
+    closable: true,
+    rows: [
+      [{ label: 'Tạo phòng mới', go: true, fn: () => hostOnline() }],
+      box,
+      [{ label: 'Huỷ', fn: hideNetSheet }, { label: 'Vào phòng', go: true, fn: go }],
+    ],
+  });
+  const i = $('oCode');
+  i.value = val;
+  i.onkeydown = e => { if (e.key === 'Enter') go(); };
+  i.oninput = () => { $('oCodeErr').hidden = true; };
+}
+function netFail(title, msg, retry) {
+  const rows = [[{ label: 'Chơi với máy', fn: () => leaveOnline() }]];
+  if (retry) rows[0].push({ label: 'Thử lại', go: true, fn: retry });
+  netSheet('😕', title, msg, { rows });
+}
+
+function startNet(host, code) {
+  closeNet();
+  net = freshNet(); net.on = true; net.host = host; net.code = code;
+  G.bonus = !!settings.bonus;
+  newRound();
+  return net;
+}
+function closeNet() {
+  clearTimeout(net.timer);
+  if (net.conn) { netSend({ t: 'bye' }); try { net.conn.close(); } catch (e) {} }
+  if (net.peer) try { net.peer.destroy(); } catch (e) {}
+}
+function leaveOnline() {
+  closeNet();
+  net = freshNet();
+  if (location.hash) history.replaceState(null, '', location.pathname + location.search);
+  hideNetSheet();
+  G.bonus = !!settings.bonus;
+  newRound();
+}
+
+async function hostOnline(tries = 0) {
+  const n = startNet(true, randCode());
+  netSheet('🌐', 'Chơi với bạn', `Đang tạo phòng${DOTS}`, { rows: [[{ label: 'Huỷ', fn: () => leaveOnline() }]] });
+  try { await loadPeerJs(); } catch (e) {
+    if (net === n) netFail('Không tải được', 'Không tải được phần chơi online. Kiểm tra mạng rồi thử lại nhé.', () => hostOnline());
+    return;
+  }
+  if (net !== n) return;
+  const peer = n.peer = new Peer(ROOM_PREFIX + n.code, { debug: 0 });
+  let opened = false;
+  peer.on('open', () => { if (net !== n) return; opened = true; setStatus(); showInvite(); });
+  peer.on('connection', c => {
+    if (net !== n) return c.close();
+    if (n.conn) {
+      c.on('open', () => { try { c.send({ t: 'full' }); } catch (e) {} setTimeout(() => c.close(), 500); });
+      return;
+    }
+    bindConn(n, c);
+  });
+  peer.on('disconnected', () => { setTimeout(() => { if (net === n && !peer.destroyed && peer.disconnected) peer.reconnect(); }, 1500); });
+  peer.on('error', err => {
+    if (net !== n) return;
+    if (err.type === 'unavailable-id' && tries < 3) return hostOnline(tries + 1);
+    if (opened) return;
+    netFail('Không tạo được phòng', err.type === 'browser-incompatible'
+      ? 'Trình duyệt này không hỗ trợ chơi online. Thử Chrome, Safari hoặc Firefox bản mới nhé.'
+      : 'Không kết nối được máy chủ tìm bạn. Kiểm tra mạng rồi thử lại nhé.', () => hostOnline());
+  });
+}
+
+async function joinOnline(code) {
+  const n = startNet(false, code);
+  netSheet('🌐', 'Vào phòng', `Đang kết nối với bạn${DOTS}`, { rows: [[{ label: 'Huỷ', fn: () => leaveOnline() }]] });
+  const retry = () => joinOnline(code);
+  try { await loadPeerJs(); } catch (e) {
+    if (net === n) netFail('Không tải được', 'Không tải được phần chơi online. Kiểm tra mạng rồi thử lại nhé.', retry);
+    return;
+  }
+  if (net !== n) return;
+  const peer = n.peer = new Peer({ debug: 0 });
+  n.timer = setTimeout(() => {
+    if (net === n && !n.conn) netFail('Không nối được', 'Không nối được với máy bạn kia. Có thể mạng của một trong hai bên chặn kết nối trực tiếp — thử đổi sang wifi khác hoặc 4G nhé.', retry);
+  }, 20000);
+  peer.on('open', () => { if (net === n) bindConn(n, peer.connect(ROOM_PREFIX + code, { reliable: true })); });
+  peer.on('error', err => {
+    if (net !== n || n.conn) return;
+    clearTimeout(n.timer);
+    if (err.type === 'peer-unavailable') netSheet('😕', 'Không tìm thấy phòng', `Không có phòng nào mang mã <b>${showCode(code)}</b>. Kiểm tra lại mã, hoặc có thể bạn kia đã thoát.`,
+      { rows: [[{ label: 'Chơi với máy', fn: () => leaveOnline() }, { label: 'Nhập lại mã', go: true, fn: () => { leaveOnline(); onlineMenu(showCode(code)); } }]] });
+    else netFail('Không vào được phòng', 'Không kết nối được máy chủ tìm bạn. Kiểm tra mạng rồi thử lại nhé.', retry);
+  });
+}
+
+function bindConn(n, c) {
+  c.on('open', () => {
+    if (net !== n) return c.close();
+    clearTimeout(n.timer);
+    n.conn = c;
+    if (!n.host) c.send({ t: 'hello' });
+  });
+  c.on('data', d => { if (net === n && n.conn === c) onNetMsg(d); });
+  const lost = () => {
+    if (net !== n || n.conn !== c) return;
+    n.conn = null; G.oppReady = false;
+    if (n.host) { setStatus(); toast('👋 Đối thủ đã rời phòng', true); }
+    else { setStatus(); netFail('Mất kết nối', n.left ? 'Đối thủ đã thoát khỏi phòng.' : 'Mất kết nối với đối thủ. Có thể bạn ấy đã tắt game hoặc mạng bị ngắt.', () => joinOnline(n.code)); }
+    n.left = false;
+  };
+  c.on('close', lost);
+  c.on('error', lost);
+}
+
+function netStart() {
+  const hostFirst = net.round % 2 === 0; // đổi lượt bắn trước mỗi ván
+  netSend({ t: 'start', hostFirst });
+  startBattle(hostFirst ? 'me' : 'opp');
+}
+function netNewRound() {
+  if (!net.host) return netSend({ t: 'again' });
+  net.round++;
+  netSend({ t: 'reset', bonus: G.bonus });
+  newRound();
+}
+const validShip = (s, k) => s && typeof s === 'object' && Number.isInteger(s.k) && s.k >= 0 && s.k < SHIPS.length && (k === undefined || s.k === k)
+  && Number.isInteger(s.r) && Number.isInteger(s.c) && typeof s.v === 'boolean' && inBounds(s);
+const validCell = i => Number.isInteger(i) && i >= 0 && i < NN;
+
+function onNetMsg(d) {
+  if (!d || typeof d !== 'object') return;
+  switch (d.t) {
+    case 'hello':
+      if (!net.host) return;
+      hideNetSheet();
+      if (G.phase === 'play' || G.phase === 'over') newRound();
+      netSend({ t: 'cfg', bonus: G.bonus, score: net.score, ready: G.ready });
+      toast('👋 Đối thủ đã vào phòng', true);
+      setStatus();
+      break;
+    case 'cfg': {
+      if (net.host) return;
+      const sc = d.score || {};
+      net.score = { w: sc.l | 0, l: sc.w | 0 };
+      G.bonus = !!d.bonus;
+      newRound();
+      G.oppReady = !!d.ready;
+      hideNetSheet(); setStatus();
+      toast('👋 Đã vào phòng', true);
+      break;
+    }
+    case 'ready':
+      G.oppReady = true; setStatus();
+      if (net.host && G.ready) netStart();
+      break;
+    case 'unready': G.oppReady = false; setStatus(); break;
+    case 'start':
+      if (net.host || !G.ready) return;
+      startBattle(d.hostFirst ? 'opp' : 'me');
+      break;
+    case 'shot':
+      if (!validCell(d.i)) return;
+      if (G.busy) { setTimeout(() => onNetMsg(d), 150); return; }
+      incoming(d.i);
+      break;
+    case 'res':
+      if (!resWaiter || resWaiter.i !== d.i) return;
+      if (d.sunk && !validShip(d.sunk)) return;
+      resWaiter.ok({ hit: !!d.hit, sunk: d.sunk || null, all: !!d.all }); resWaiter = null;
+      break;
+    case 'reveal':
+      if (!Array.isArray(d.fleet) || d.fleet.length !== SHIPS.length || !d.fleet.every((s, k) => validShip(s, k))) return;
+      G.reveal = d.fleet; // có thể tới trước khi bên này kịp hiện phát bắn cuối
+      if (G.phase === 'over') renderShips(Bopp);
+      break;
+    case 'again': if (net.host) netNewRound(); break;
+    case 'reset': if (!net.host) { G.bonus = !!d.bonus; newRound(); } break;
+    case 'full':
+      if (!net.host) { const c = net.code; net.conn = null; netFail('Phòng đã đủ người', 'Phòng này đã có hai người chơi rồi.', () => joinOnline(c)); }
+      break;
+    case 'bye': net.left = true; break;
+  }
+}
+
+// ═══════════════════════════ nút ═══════════════════════════
+// bảng ván mới sửa trên bản nháp, bấm Xếp hạm đội mới áp dụng (đóng ngang thì ván đang chơi giữ nguyên)
+let draft = { ...settings };
+function syncSeg() {
+  for (const b of $('segLevel').children) b.classList.toggle('on', +b.dataset.v === draft.level);
+  for (const b of $('segBonus').children) b.classList.toggle('on', +b.dataset.v === draft.bonus);
+  for (const b of $('segFirst').children) b.classList.toggle('on', b.dataset.v === draft.first);
+}
+const segPick = (id, key, num) => { $(id).onclick = e => { const b = e.target.closest('button'); if (b) { draft[key] = num ? +b.dataset.v : b.dataset.v; syncSeg(); } }; };
+segPick('segLevel', 'level', true); segPick('segBonus', 'bonus', true); segPick('segFirst', 'first', false);
+
+let newArmed = 0;
+$('bNew').onclick = () => {
+  sfx.unlock();
+  if (!net.on) { draft = { ...settings }; syncSeg(); $('newSheet').hidden = false; return; }
+  if (!net.conn) return;
+  // đang giữa trận thì bấm hai lần mới tính, tránh lỡ tay xoá trận của cả hai
+  if (G.phase === 'play' && !newArmed) {
+    $('bNew').firstChild.textContent = 'Bấm lần nữa để chơi lại ';
+    newArmed = setTimeout(() => { newArmed = 0; $('bNew').firstChild.textContent = '＋ Ván mới '; }, 2500);
+    return;
+  }
+  clearTimeout(newArmed); newArmed = 0; $('bNew').firstChild.textContent = '＋ Ván mới ';
+  netNewRound();
+};
+$('newSheet').onclick = e => { if (e.target === $('newSheet')) $('newSheet').hidden = true; };
+$('bStart').onclick = () => {
+  settings = { ...draft };
+  store.set('battleship.settings', settings);
+  G.bonus = !!settings.bonus;
+  $('newSheet').hidden = true;
+  newRound();
+};
+$('bView').onclick = () => { $('resultSheet').hidden = true; };
+$('bAgain').onclick = () => { $('resultSheet').hidden = true; if (net.on) netNewRound(); else newRound(); };
+$('bOnline').onclick = () => onlineMenu();
+$('bInvite').onclick = () => showInvite();
+$('bLeave').onclick = () => leaveOnline();
+$('netSheet').onclick = e => { if (e.target === $('netSheet') && net.sheetClosable) $('netSheet').hidden = true; };
+const syncSound = () => { $('bSound').textContent = sfx.on ? '🔊' : '🔇'; };
+$('bSound').onclick = () => { sfx.toggle(); syncSound(); sfx.place(); };
+syncSound();
+
+// ── khởi động ──
+newRound();
+const room = parseCode((/room=([a-z0-9]+)/i.exec(location.hash) || [])[1]);
+if (room) joinOnline(room);
+</script>
+</body>
