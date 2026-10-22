@@ -750,7 +750,7 @@ button:disabled { opacity: .4; cursor: default; }
       <li><b>5 điểm du lịch</b> 🏖️ càng xa ô Bắt Đầu càng đắt: giá từ $150 (Vũng Tàu) đến $300 (Đồ Sơn), phí tham quan từ $80 đến $320, nhân với số điểm chủ đang có, không mua lại được. Ai gom đủ cả 5 <b>thắng ngay</b>.</li>
       <li><b>Côn Đảo</b>: kẹt 3 lượt, ra sớm bằng tung đôi (vẫn được tung tiếp như tung đôi thường), nộp $100 hoặc thẻ ra tù. Tung đôi 3 lần liền cũng vào Côn Đảo. <b>Bến Xe</b>: lượt sau được đi tới ô bất kỳ (vé $40). <b>Đại Nhạc Hội</b>: trả $40 tổ chức lễ hội ở một thành phố hoặc điểm du lịch của mình. <b>Thuế</b>: nộp 10% tổng tài sản, tiền thuế dồn vào <b>Quỹ Thuế</b> — ai rút được thẻ Quỹ Thuế ở ô Cơ Hội sẽ nhận toàn bộ quỹ. <b>Nút ĐỔ</b>: chạm nhanh để tung ngẫu nhiên, hoặc <b>bấm giữ</b> cho thanh lực chạy rồi thả tay — lực càng cao càng dễ ra tổng điểm lớn. <b>Sòng bài</b>: đặt $100 đoán Chẵn/Lẻ (×2) hoặc Đôi (×6).</li>
       <li><b>Cơ Hội</b>: thẻ có lợi (nhận Quỹ Thuế, miễn phí tham quan, giảm 50%, khiên, ra tù, lễ hội miễn phí, thêm thẻ Chẵn/Lẻ) hoặc hại (đổi thành phố, ép bán, phá cấp, dịch bệnh, mất điện, bị đưa đi nơi khác).</li>
-      <li>Tung đôi được đi tiếp, trừ khi vào Côn Đảo hay Bến Xe; không còn việc gì thì lượt tự chuyển. Thiếu tiền thì bán thành phố (được nửa vốn); bán hết cũng không đủ thì <b>phá sản</b> ngay, tài sản về tay chủ nợ. Đang thiếu tiền cũng có thể tự chọn <b>phá sản</b> thay vì bán nhà.</li>
+      <li>Tung đôi được đi tiếp, trừ khi vào Côn Đảo hay Bến Xe; không còn việc gì thì lượt tự chuyển. Thiếu tiền thì bán thành phố (được nửa vốn); bán hết cũng không đủ thì <b>phá sản</b> ngay: ngân hàng mua lại toàn bộ đất (nửa vốn), tiền thu được cùng tiền mặt trả cho chủ nợ. Đang thiếu tiền cũng có thể tự chọn <b>phá sản</b> thay vì bán nhà.</li>
       <li><b>Thắng</b> khi: đối thủ phá sản hết · đủ <b>3 nhóm màu</b> · sở hữu <b>cả một hàng</b> · đủ <b>5 điểm du lịch</b> · xây đủ <b>5 Biểu tượng</b> · hoặc <b>giàu nhất</b> khi hết số vòng. Mỗi nhân vật có một kỹ năng riêng.</li>
       <li>Chạm vào thẻ người chơi khác để <b>tặng tiền</b> 🎁; bấm 😊 trên cùng để gửi <b>biểu tượng cảm xúc</b>; bấm 📍 rồi chạm một ô để <b>đánh dấu</b> ô đó nhấp nháy vài giây cho mọi người cùng chú ý.</li>
     </ol>
@@ -1412,17 +1412,19 @@ function charge(s, to, amt, why, steps, i) {
   if (liquid(G, s) < amt) { liquidate(s, to >= 0 ? to : -1, steps); return; }
   G.step = 'debt'; G.debt = { to, amt, why, i };
 }
-// phá sản: toàn bộ đất và tiền về tay chủ nợ (hoặc ngân hàng), người chơi rời ván
+// phá sản: toàn bộ đất bán lại cho ngân hàng (nửa vốn), tiền thu được cùng tiền mặt trả cho chủ nợ (nợ ngân hàng thì mất), người chơi rời ván
 function liquidate(s, to, steps) {
-  const P = G.pl[s], was = [];
+  const P = G.pl[s], was = [], cash = P.cash;
+  let sold = 0;
   for (const i of PROPS) {
     if (G.props[i].owner !== s) continue;
     was.push([i, { ...G.props[i] }]);
-    if (to >= 0) G.props[i].owner = to; else resetProp(i);
+    sold += sellValue(G, i); resetProp(i);
   }
-  if (to >= 0) G.pl[to].cash += P.cash;
+  const paid = to >= 0 ? cash + sold : 0;
+  if (to >= 0) G.pl[to].cash += paid;
   P.cash = 0; P.hold = freshHold(); P.out = true; G.debt = null; G.visit = null; G.pick = null; G.again = false; G.step = 'roll';
-  steps.push({ k: 'bankrupt', s, to, was });
+  steps.push({ k: 'bankrupt', s, to, was, cash, sold, paid });
   const act = active(G);
   if (act.length <= 1) { G.phase = 'over'; G.winner = act[0] ?? s; G.winHow = 'last'; G.turn = G.winner; G.step = 'end'; steps.push({ k: 'won', s: G.winner, how: 'last' }); }
 }
@@ -3038,6 +3040,7 @@ function moneyDelta(st) {
     case 'festival': case 'busGo': if (st.fee) out.push([s, -st.fee]); break;
     case 'free': if (st.how === 'pay' && st.fee) out.push([s, -st.fee]); break;
     case 'sell': out.push([s, st.amt]); break;
+    case 'bankrupt': if (st.cash !== undefined) out.push([s, -st.cash]); if (st.paid) out.push([st.to, st.paid]); break;
     case 'rob': out.push([s, st.amt], [st.v, -st.amt]); break;
     case 'forceSell': out.push([st.o, st.amt]); break;
     case 'luck': case 'homePay': case 'interest': case 'pot': case 'bonus': out.push([s, st.amt]); break;
@@ -3525,6 +3528,7 @@ async function animateStep(st, tok) {
       for (const [i] of st.was || []) delete viewProps[i];
       renderPlayers();
       playSad(); pow(x, y - 34, 'PHÁ SẢN', '#e8323c');
+      if (st.paid) { playCoin(true); cardMoney(st.to, st.paid); }
       g.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 800 });
       g.style.opacity = '0';
       await sleep(ms);
@@ -3632,7 +3636,9 @@ function stepText(st) {
     case 'cure': return `${st.fx.includes('plague') ? '✨' : '💡'} ${w} ghé ${nm(st.i)} — ${st.fx.map(k => (k === 'plague' ? 'hết dịch bệnh' : 'có điện lại')).join(' và ')}, thu phí bình thường`;
     case 'shield': return `🛡️ Khiên của ${w} chặn được thẻ xấu nhắm vào ${nm(st.i)}`;
     case 'sell': return `${w} bán ${nm(st.i)} được ${fmt(st.amt)}`;
-    case 'bankrupt': return `☠️ ${w} phá sản!${st.to >= 0 ? ' Tài sản về tay ' + other(st.to) + '.' : ''}`;
+    case 'bankrupt':
+      if (st.sold === undefined) return `☠️ ${w} phá sản!${st.to >= 0 ? ' Tài sản về tay ' + other(st.to) + '.' : ''}`; // ván lưu từ bản cũ
+      return `☠️ ${w} phá sản!${st.was.length ? ` Ngân hàng mua lại ${st.was.length} ô với giá ${fmt(st.sold)}.` : ''}${st.paid ? ` ${other(st.to)} nhận ${fmt(st.paid)}.` : ''}`;
     case 'won': return `🏆 ${w} ${HOW_TEXT[st.how]} — thắng!`;
     case 'timeup': return `⏰ Hết vòng! ${w} giàu nhất với ${fmt(st.v)} — thắng!`;
     default: return null;

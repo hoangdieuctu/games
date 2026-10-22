@@ -1,0 +1,1191 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Exploding Kittens">
+<meta name="theme-color" content="#0b1020">
+<title>Exploding Kittens — Mèo Nổ</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230b1020'/%3E%3Ccircle cx='16' cy='18' r='9' fill='%23ff4d6d'/%3E%3Cpath d='M9 12l2-7 4 4zM23 12l-2-7-4 4z' fill='%23ff4d6d'/%3E%3Ccircle cx='12.5' cy='17' r='1.8' fill='%230b1020'/%3E%3Ccircle cx='19.5' cy='17' r='1.8' fill='%230b1020'/%3E%3Cpath d='M16 7c1-3 3-3 4-5' stroke='%23ffd166' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800;900&family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg0: #0b1020; --bg1: #141a33; --glass: rgba(255,255,255,.06); --glass2: rgba(255,255,255,.1); --line: rgba(255,255,255,.12);
+  --txt: #eef2ff; --muted: #9aa3c7; --pri: #ff4d6d; --pri2: #ff8a5b; --ok: #22c55e; --warn: #fbbf24;
+  --cw: 86px; --r: 16px;
+}
+html, body { width: 100%; height: 100%; overflow: hidden; }
+body {
+  font-family: 'Be Vietnam Pro', system-ui, sans-serif; color: var(--txt);
+  background: radial-gradient(1200px 600px at 20% -10%, #2a2f6a 0%, transparent 60%), radial-gradient(900px 500px at 110% 110%, #4a1d3f 0%, transparent 60%), linear-gradient(180deg, var(--bg0), var(--bg1));
+  -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none; touch-action: manipulation; overscroll-behavior: none;
+  display: grid; grid-template-columns: 100%; grid-template-rows: auto auto minmax(0, 1fr) auto auto auto;
+  grid-template-areas: "top" "opps" "table" "hint" "hand" "bar";
+  padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
+}
+h1, h2, h3, .ttl, .btn { font-family: 'Outfit', 'Be Vietnam Pro', sans-serif; }
+button { font: inherit; color: inherit; cursor: pointer; border: 0; background: none; }
+button:disabled { opacity: .35; cursor: default; }
+[hidden] { display: none !important; }
+::-webkit-scrollbar { display: none; }
+
+/* ── top ── */
+.top { grid-area: top; display: flex; align-items: center; gap: 8px; padding: 10px 14px 6px; max-width: 1000px; width: 100%; margin: 0 auto; }
+.ib { width: 40px; height: 40px; flex: 0 0 auto; border-radius: 12px; display: grid; place-items: center; background: var(--glass); border: 1px solid var(--line); color: var(--txt); text-decoration: none; font-size: 18px; font-weight: 700; backdrop-filter: blur(10px); transition: background .15s; }
+.ib:hover { background: var(--glass2); }
+.top h1 { font-size: 20px; font-weight: 800; letter-spacing: .3px; flex: 1; white-space: nowrap; min-width: 0; line-height: 1.1; overflow: hidden; text-overflow: ellipsis; }
+.top h1 small { overflow: hidden; text-overflow: ellipsis; }
+@media (max-width: 480px) { .top h1 { font-size: 17px; } .top { gap: 6px; } .ib { width: 36px; height: 36px; font-size: 16px; } }
+.top h1 b { color: var(--pri); }
+.top h1 small { display: block; font-family: 'Be Vietnam Pro'; font-size: 11px; color: var(--muted); font-weight: 500; letter-spacing: 0; }
+
+/* ── opponents ── */
+.opps { grid-area: opps; display: flex; justify-content: center; align-items: flex-start; gap: 10px; padding: 8px 10px 4px; flex-wrap: wrap; }
+.opp { position: relative; display: flex; flex-direction: column; align-items: center; gap: 3px; width: 92px; padding: 8px 6px 7px; background: var(--glass); border: 1px solid var(--line); border-radius: var(--r); backdrop-filter: blur(10px); transition: transform .25s, box-shadow .25s, opacity .3s; }
+.opp .av { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; font-size: 24px; background: linear-gradient(135deg, #2a3160, #1b2046); border: 2px solid var(--line); position: relative; }
+.opp.turn { transform: translateY(-3px); box-shadow: 0 0 0 2px var(--pri), 0 12px 30px rgba(255,77,109,.25); background: rgba(255,77,109,.08); }
+.opp.turn .av { border-color: var(--pri); animation: ring 1.4s ease-in-out infinite; }
+@keyframes ring { 50% { box-shadow: 0 0 0 6px rgba(255,77,109,.25); } }
+.opp.dead { opacity: .45; } .opp.dead .av { filter: grayscale(1); }
+.opp.hit { animation: hit .45s ease-out; }
+@keyframes hit { 15% { transform: translate(-5px, 2px) rotate(-3deg); } 40% { transform: translate(5px, -3px) rotate(3deg); } 70% { transform: translate(-3px, 1px); } }
+.opp .nm { font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.opp .ct { font-size: 11px; color: var(--muted); font-weight: 500; }
+.opp .ct b { color: var(--txt); font-weight: 700; }
+.opp .tl { position: absolute; top: -8px; right: -6px; background: var(--pri); color: #fff; font-size: 11px; font-weight: 800; border-radius: 999px; padding: 1px 7px; box-shadow: 0 4px 12px rgba(255,77,109,.5); }
+.opp .bub { position: absolute; top: -30px; left: 50%; transform: translateX(-50%) translateY(6px); white-space: nowrap; background: #fff; color: #111; border-radius: 10px; padding: 3px 9px; font-size: 12px; font-weight: 600; pointer-events: none; opacity: 0; transition: opacity .2s, transform .2s; z-index: 3; box-shadow: 0 6px 18px rgba(0,0,0,.4); }
+.opp .bub.on { opacity: 1; transform: translateX(-50%) translateY(0); }
+.opp .bub::after { content: ''; position: absolute; left: 50%; bottom: -5px; width: 10px; height: 10px; background: #fff; transform: translateX(-50%) rotate(45deg); }
+
+/* ── table ── */
+.table-wrap { grid-area: table; min-height: 0; display: flex; justify-content: center; padding: 8px 12px 4px; }
+#table { position: relative; width: 100%; max-width: 820px; height: 100%; min-height: 150px; border-radius: 28px; background: var(--glass); border: 1px solid var(--line); backdrop-filter: blur(12px); display: grid; grid-template-columns: 1fr auto auto 1fr; grid-template-rows: 1fr; gap: 6px 16px; align-items: center; padding: 12px 14px 42px; overflow: hidden; }
+#table::before { content: ''; position: absolute; inset: 0; background: radial-gradient(500px 220px at 50% 50%, rgba(255,77,109,.12), transparent 70%); pointer-events: none; }
+#table.shake { animation: shake .5s ease-out; }
+@keyframes shake { 15% { transform: translate(-7px, 3px); } 30% { transform: translate(6px, -5px); } 45% { transform: translate(-5px, -2px); } 60% { transform: translate(4px, 3px); } 80% { transform: translate(-1px, 1px); } }
+.pile { display: flex; flex-direction: column; align-items: center; gap: 6px; position: relative; z-index: 1; }
+.pile .lbl { font-size: 10px; font-weight: 700; color: var(--muted); letter-spacing: 1.2px; text-transform: uppercase; }
+#deck { grid-column: 2; } #disc { grid-column: 3; }
+.deckbox { position: relative; width: var(--cw); height: calc(var(--cw) * 1.45); cursor: pointer; }
+.deckbox .bk { position: absolute; inset: 0; border-radius: 14px; background: linear-gradient(145deg, #2b3270, #171b3a); border: 1px solid rgba(255,255,255,.18); display: grid; place-items: center; box-shadow: 0 10px 25px rgba(0,0,0,.35); }
+.deckbox .bk:nth-child(1) { transform: translate(6px, 6px); opacity: .6; } .deckbox .bk:nth-child(2) { transform: translate(3px, 3px); opacity: .8; }
+.deckbox .bk:last-child::before { content: ''; position: absolute; inset: 8px; border-radius: 10px; border: 1.5px dashed rgba(255,255,255,.2); }
+.deckbox .bk:last-child svg { width: 60%; }
+.deckbox.hot .bk:last-child { box-shadow: 0 0 0 2px var(--pri), 0 0 30px rgba(255,77,109,.6); }
+.deckbox.hot { animation: bob 1.2s ease-in-out infinite; }
+@keyframes bob { 50% { transform: translateY(-5px); } }
+.deckbox .cnt { position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%); background: #fff; color: #111; border-radius: 999px; font-size: 11px; font-weight: 700; padding: 2px 9px; white-space: nowrap; box-shadow: 0 4px 12px rgba(0,0,0,.4); }
+.discbox { width: var(--cw); height: calc(var(--cw) * 1.45); border-radius: 14px; border: 1.5px dashed rgba(255,255,255,.2); display: grid; place-items: center; position: relative; }
+.discbox .card { position: absolute; inset: -1px; width: auto; height: auto; }
+.discbox .card.under { transform: rotate(-7deg) translateX(-4px); opacity: .6; }
+.discbox .card.top { transform: rotate(4deg); }
+#known { grid-column: 1; justify-self: end; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; z-index: 1; }
+.chip { background: var(--glass2); border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px; font-size: 11px; font-weight: 600; white-space: nowrap; backdrop-filter: blur(8px); }
+.chip.red { background: rgba(255,77,109,.25); border-color: rgba(255,77,109,.6); }
+.chip.org { background: rgba(255,107,0,.25); border-color: rgba(255,107,0,.6); }
+.chip.hd { font-size: 10px; color: var(--muted); background: none; border: 0; padding: 0 4px; }
+#info { grid-column: 4; justify-self: start; display: flex; flex-direction: column; gap: 4px; align-items: flex-start; z-index: 1; }
+#toast { position: absolute; left: 50%; bottom: 8px; transform: translateX(-50%) translateY(10px); max-width: calc(100% - 24px); font-size: 12.5px; font-weight: 600; background: rgba(255,255,255,.14); border: 1px solid var(--line); border-radius: 999px; padding: 5px 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; opacity: 0; transition: opacity .25s, transform .25s; z-index: 2; pointer-events: none; backdrop-filter: blur(8px); }
+#toast.on { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ── card ── */
+.card { --c: #999; width: var(--cw); height: calc(var(--cw) * 1.45); flex: 0 0 auto; border-radius: 14px; background: linear-gradient(180deg, #1c2246, #11152d); border: 1px solid rgba(255,255,255,.14); position: relative; display: flex; flex-direction: column; align-items: center; box-shadow: 0 8px 20px rgba(0,0,0,.35); overflow: hidden; transition: transform .18s, box-shadow .18s; cursor: pointer; }
+.card::before { content: ''; position: absolute; inset: 0; background: radial-gradient(120% 70% at 50% 0%, color-mix(in srgb, var(--c) 45%, transparent), transparent 60%); pointer-events: none; }
+.card .art { width: 100%; height: 56%; flex: 0 0 auto; display: grid; place-items: center; position: relative; }
+.card .art svg { width: 86%; height: 92%; filter: drop-shadow(0 4px 6px rgba(0,0,0,.4)); }
+.card .ttl { font-size: 10.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .3px; text-align: center; padding: 0 4px; line-height: 1.1; color: #fff; overflow-wrap: anywhere; max-width: 100%; }
+.card .ttl.long { font-size: 8px; letter-spacing: 0; padding: 0 2px; }
+.card .sub { font-size: 9px; color: var(--c); font-weight: 700; margin-top: 1px; text-align: center; }
+.card .info { position: absolute; top: 5px; left: 5px; width: 18px; height: 18px; border-radius: 50%; background: rgba(255,255,255,.18); border: 1px solid rgba(255,255,255,.3); color: #fff; font-size: 11px; font-weight: 800; display: grid; place-items: center; z-index: 3; font-family: 'Outfit'; transition: background .15s, transform .15s; }
+.card .info:hover { background: var(--c); transform: scale(1.15); }
+.card.small .info, .card.fly .info, .discbox .card.under .info { display: none; }
+.card::after { content: ''; position: absolute; left: 10px; right: 10px; bottom: 5px; height: 2px; border-radius: 2px; background: var(--c); opacity: .7; }
+.card.sel { transform: translateY(-18px) scale(1.04); box-shadow: 0 0 0 2px var(--c), 0 16px 30px rgba(0,0,0,.5), 0 0 24px color-mix(in srgb, var(--c) 60%, transparent); z-index: 2; }
+@keyframes pop { from { transform: translateY(40px) scale(.6); opacity: 0; } }
+.card.small { --cw: 68px; } .card.small .ttl { font-size: 8.5px; } .card.small .ttl.long { font-size: 7.2px; }
+.card.big { --cw: 130px; } .card.big .ttl { font-size: 13px; } .card.big .ttl.long { font-size: 11px; } .card.big .sub { font-size: 11px; }
+.card.fly { position: fixed; z-index: 50; pointer-events: none; transition: transform .55s cubic-bezier(.3,.9,.3,1), opacity .5s; margin: 0; }
+
+/* ── hand ── */
+.hand-wrap { grid-area: hand; display: flex; flex-direction: column; align-items: center; }
+.hand-title { font-size: 11px; font-weight: 600; color: var(--muted); padding-top: 4px; letter-spacing: .5px; }
+.hand { display: flex; flex-direction: column; gap: 14px; width: 100%; max-width: 1000px; padding: 22px 0 12px; }
+.hand .hrow { display: flex; overflow-x: auto; overflow-y: hidden; padding: 20px 16px 0; margin-top: -20px; gap: 8px; width: 100%; -webkit-overflow-scrolling: touch; scroll-padding: 0 16px; }
+.hand .hrow > .card:first-child { margin-left: auto; } .hand .hrow > .card:last-child { margin-right: auto; }
+.hand .hrow.tight { gap: 0; } .hand .hrow.tight .card + .card { margin-left: calc(-1 * var(--ov, 26px)); }
+.hand .card.sel { z-index: 3; }
+.hand.off .card { cursor: default; } .hand.off .card:not(.sel) { filter: saturate(.6) brightness(.8); }
+.hand .card.playable:not(.sel):hover { transform: translateY(-8px); }
+
+/* ── bar ── */
+#hint { grid-area: hint; justify-self: center; font-size: 13px; font-weight: 600; color: var(--muted); text-align: center; min-height: 20px; margin: 6px 16px 0; padding: 4px 16px; border-radius: 999px; max-width: calc(100% - 32px); line-height: 1.35; transition: background .2s, color .2s; }
+.bar { grid-area: bar; display: flex; align-items: center; justify-content: center; gap: 10px; padding: 6px 14px 14px; max-width: 1000px; width: 100%; margin: 0 auto; }
+.btn { border-radius: 999px; padding: 12px 22px; font-weight: 800; font-size: 15px; background: var(--glass2); border: 1px solid var(--line); color: var(--txt); backdrop-filter: blur(10px); transition: transform .1s, box-shadow .15s, background .15s; white-space: nowrap; letter-spacing: .2px; }
+.btn:active:not(:disabled) { transform: scale(.97); }
+.btn.pri { background: linear-gradient(135deg, var(--pri), var(--pri2)); border: 0; color: #fff; flex: 1; max-width: 280px; box-shadow: 0 8px 24px rgba(255,77,109,.4); }
+.btn.pri:disabled { box-shadow: none; }
+.btn.grn { background: linear-gradient(135deg, #22c55e, #86efac); color: #052e16; border: 0; }
+.btn.sm { padding: 9px 16px; font-size: 13px; }
+
+/* ── nope ── */
+#nopebar { position: fixed; left: 50%; top: 40%; transform: translate(-50%, -50%); z-index: 20; width: min(92vw, 440px); background: rgba(10,12,30,.92); border: 1px solid rgba(255,77,109,.5); color: #fff; border-radius: 20px; padding: 12px 14px; display: flex; align-items: center; gap: 12px; box-shadow: 0 16px 40px rgba(0,0,0,.6), 0 0 30px rgba(255,77,109,.25); backdrop-filter: blur(14px); animation: pop .25s ease-out; }
+#nopebar .ring { width: 46px; height: 46px; flex: 0 0 auto; border-radius: 50%; display: grid; place-items: center; font-size: 20px; background: conic-gradient(var(--pri) var(--p, 100%), rgba(255,255,255,.1) 0); position: relative; }
+#nopebar .ring::after { content: ''; position: absolute; inset: 4px; border-radius: 50%; background: #0f1330; }
+#nopebar .ring span { position: relative; z-index: 1; }
+#nopebar .nt { font-size: 13px; font-weight: 500; flex: 1; line-height: 1.3; }
+#nopebar .nt b { color: var(--pri); }
+#nopebar .nb { display: flex; flex-direction: column; gap: 6px; flex: 0 0 auto; }
+#nopebar .btn { background: linear-gradient(135deg, var(--pri), #c2185b); border: 0; padding: 10px 16px; box-shadow: 0 6px 18px rgba(255,77,109,.45); }
+#nopebar .btn.pass { background: var(--glass2); border: 1px solid var(--line); box-shadow: none; padding: 7px 16px; font-size: 13px; font-weight: 700; }
+
+/* ── dialogs ── */
+.ov { position: fixed; inset: 0; background: rgba(5,7,20,.7); z-index: 30; display: flex; align-items: center; justify-content: center; padding: 16px; animation: fade .2s; backdrop-filter: blur(6px); }
+@keyframes fade { from { opacity: 0; } }
+.dlg { background: linear-gradient(180deg, #1a2048, #11152d); border: 1px solid var(--line); border-radius: 24px; padding: 22px 18px 18px; width: min(94vw, 500px); max-height: 92vh; overflow: auto; box-shadow: 0 30px 80px rgba(0,0,0,.6); text-align: center; animation: pop .3s cubic-bezier(.2,1.4,.4,1); }
+.dlg.wide { width: min(96vw, 760px); }
+.dlg h2 { font-size: 24px; font-weight: 800; margin-bottom: 4px; line-height: 1.1; }
+.dlg h2 b { color: var(--pri); }
+.dlg h3 { font-size: 15px; font-weight: 700; margin: 14px 0 6px; text-align: left; color: var(--warn); }
+.dlg p { font-size: 13px; color: var(--muted); font-weight: 500; margin-bottom: 10px; line-height: 1.4; }
+.dlg .row { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 12px; }
+.dlg .cards { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin: 8px 0; }
+.dlg .cards .card:hover { transform: translateY(-4px); }
+.dlg .cards .card.sel { transform: translateY(-8px); }
+.dlg .cards .card .num { position: absolute; top: 6px; left: 6px; width: 20px; height: 20px; border-radius: 50%; background: var(--pri); color: #fff; font-size: 11px; font-weight: 800; display: grid; place-items: center; z-index: 2; }
+.dlg .tgt { display: flex; flex-direction: column; align-items: center; gap: 3px; background: var(--glass2); border: 1px solid var(--line); border-radius: 16px; padding: 10px 12px; min-width: 100px; transition: background .15s, transform .1s; }
+.dlg .tgt:hover { background: rgba(255,255,255,.16); } .dlg .tgt:active { transform: scale(.97); }
+.dlg .tgt .av { font-size: 30px; } .dlg .tgt .nm { font-size: 13px; font-weight: 700; } .dlg .tgt .ct { font-size: 11px; color: var(--muted); }
+.dlg input[type=range] { width: 100%; margin: 10px 0 4px; accent-color: var(--pri); }
+.dlg .pos { font-size: 17px; font-weight: 700; }
+.dlg input[type=text] { font: inherit; font-weight: 600; border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; width: 100%; text-align: center; background: rgba(0,0,0,.25); color: var(--txt); outline: none; }
+.dlg input[type=text]:focus { border-color: var(--pri); }
+.dlg .lab { font-size: 11px; color: var(--muted); font-weight: 600; letter-spacing: 1px; text-transform: uppercase; margin: 14px 0 6px; }
+.dlg .opt { display: flex; gap: 6px; justify-content: center; }
+.dlg .opt button { min-width: 46px; height: 42px; padding: 0 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--glass); font-weight: 700; font-size: 15px; color: var(--txt); }
+.dlg .opt button.on { background: linear-gradient(135deg, var(--pri), var(--pri2)); border-color: transparent; color: #fff; }
+.dlg .sw { display: flex; align-items: center; justify-content: space-between; gap: 10px; background: var(--glass); border: 1px solid var(--line); border-radius: 14px; padding: 10px 12px; margin-top: 8px; text-align: left; }
+.dlg .sw .t { font-size: 13px; font-weight: 700; } .dlg .sw .d { font-size: 11px; color: var(--muted); }
+.dlg .sw .tog { width: 46px; height: 26px; border-radius: 999px; background: rgba(255,255,255,.15); position: relative; flex: 0 0 auto; transition: background .2s; }
+.dlg .sw .tog::after { content: ''; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: #fff; transition: transform .2s; }
+.dlg .sw .tog.on { background: var(--ok); } .dlg .sw .tog.on::after { transform: translateX(20px); }
+.dlg .rules { text-align: left; font-size: 13px; line-height: 1.45; color: #d7dcf5; }
+.dlg .rules li { margin: 4px 0 4px 18px; }
+.dlg .rules b { color: var(--warn); }
+.dlg .rank { text-align: left; margin: 10px auto; max-width: 320px; }
+.dlg .rank div { display: flex; align-items: center; gap: 10px; padding: 6px 12px; border-radius: 12px; font-weight: 600; }
+.dlg .rank div:first-child { background: linear-gradient(135deg, rgba(251,191,36,.3), rgba(251,191,36,.1)); border: 1px solid rgba(251,191,36,.5); }
+.dlg .stats { font-size: 12px; color: var(--muted); font-weight: 600; }
+.cinfo { display: flex; gap: 16px; align-items: center; text-align: left; }
+.cinfo .card { cursor: default; flex: 0 0 auto; }
+.cinfo .en { font-family: 'Outfit'; font-weight: 900; font-size: 20px; text-transform: uppercase; line-height: 1.05; }
+.cinfo .vi { font-size: 14px; font-weight: 700; color: var(--warn); margin-top: 2px; }
+.cinfo .ds { font-size: 13.5px; color: #d7dcf5; line-height: 1.45; margin-top: 8px; }
+.cinfo .tip { font-size: 12px; color: var(--muted); line-height: 1.4; margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--line); }
+.cinfo .n { display: inline-block; margin-top: 8px; font-size: 11px; font-weight: 700; background: var(--glass2); border: 1px solid var(--line); border-radius: 999px; padding: 2px 10px; }
+/* ── trang thư viện bài ── */
+body.cards { display: block; overflow: auto; }
+.page { max-width: 1040px; margin: 0 auto; padding: 16px 16px 60px; }
+.page .ph { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
+.page h1 { font-size: 26px; font-weight: 900; flex: 1; } .page h1 b { color: var(--pri); }
+.page .lead { color: var(--muted); font-size: 13.5px; line-height: 1.5; margin-bottom: 18px; }
+.page h2 { font-size: 18px; font-weight: 800; margin: 26px 0 4px; display: flex; align-items: center; gap: 10px; }
+.page h2 small { font-size: 12px; color: var(--muted); font-weight: 500; }
+.page .sec-d { color: var(--muted); font-size: 13px; margin-bottom: 12px; line-height: 1.45; }
+.cgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; }
+.cgrid .g { display: flex; gap: 14px; align-items: flex-start; background: var(--glass); border: 1px solid var(--line); border-radius: 18px; padding: 12px; backdrop-filter: blur(10px); }
+.cgrid .g .card { cursor: default; flex: 0 0 auto; }
+.cgrid .g .en { font-family: 'Outfit'; font-weight: 900; font-size: 15px; text-transform: uppercase; line-height: 1.1; }
+.cgrid .g .vi { font-size: 13px; font-weight: 700; color: var(--warn); }
+.cgrid .g .ds { font-size: 12.5px; color: #d7dcf5; line-height: 1.45; margin-top: 6px; }
+.cgrid .g .tip { font-size: 11.5px; color: var(--muted); line-height: 1.4; margin-top: 6px; }
+.cgrid .g .n { display: inline-block; margin-top: 6px; font-size: 10.5px; font-weight: 700; background: var(--glass2); border: 1px solid var(--line); border-radius: 999px; padding: 2px 9px; }
+.page .steps { background: var(--glass); border: 1px solid var(--line); border-radius: 18px; padding: 14px 16px 14px 32px; font-size: 13.5px; line-height: 1.5; color: #d7dcf5; }
+.page .steps li { margin: 4px 0; } .page .steps b { color: var(--warn); }
+@media (max-width: 480px) { .cgrid { grid-template-columns: 1fr; } .cinfo { flex-direction: column; text-align: center; } .cinfo .tip { text-align: left; } }
+#boom { position: fixed; inset: 0; z-index: 25; display: grid; place-items: center; pointer-events: none; background: radial-gradient(circle, rgba(255,120,40,.85) 0%, rgba(255,77,109,.5) 40%, transparent 70%); animation: boom .9s ease-out forwards; }
+#boom span { font-family: 'Outfit'; font-size: clamp(60px, 18vw, 150px); font-weight: 900; color: #fff; text-shadow: 0 0 40px #ff4d6d, 0 6px 0 #7f1d1d; animation: pop .5s cubic-bezier(.2,1.6,.4,1); }
+@keyframes boom { 0% { opacity: 0; } 15% { opacity: 1; } 100% { opacity: 0; } }
+.stamp { position: fixed; left: 50%; top: 45%; z-index: 26; transform: translate(-50%, -50%) rotate(-12deg); font-family: 'Outfit'; font-size: clamp(50px, 14vw, 120px); font-weight: 900; color: var(--pri); border: 6px solid var(--pri); border-radius: 18px; padding: 0 20px; pointer-events: none; animation: stamp .9s ease-out forwards; text-shadow: 0 0 20px rgba(255,77,109,.7); }
+@keyframes stamp { 0% { opacity: 0; transform: translate(-50%, -50%) rotate(-12deg) scale(2.2); } 20% { opacity: 1; transform: translate(-50%, -50%) rotate(-12deg) scale(1); } 75% { opacity: 1; } 100% { opacity: 0; } }
+
+.turnsplash { position: fixed; inset: 0; display: grid; place-items: center; z-index: 24; pointer-events: none; animation: splash 1.4s ease-out forwards; }
+.turnsplash div { background: linear-gradient(135deg, var(--pri), var(--pri2)); color: #fff; font-family: 'Outfit'; font-size: clamp(28px, 7vw, 56px); font-weight: 900; letter-spacing: 1px; padding: 14px 40px; border-radius: 999px; box-shadow: 0 20px 60px rgba(255,77,109,.55), 0 0 0 6px rgba(255,255,255,.15); animation: pop .45s cubic-bezier(.2,1.6,.4,1); text-align: center; }
+.turnsplash div small { display: block; font-family: 'Be Vietnam Pro'; font-size: 14px; font-weight: 600; letter-spacing: 0; opacity: .95; margin-top: 2px; }
+@keyframes splash { 0%, 65% { opacity: 1; } 100% { opacity: 0; } }
+body.myturn .hand-wrap { background: linear-gradient(180deg, rgba(255,77,109,.12), transparent 70%); border-top: 2px solid var(--pri); box-shadow: 0 -10px 40px rgba(255,77,109,.2); margin-top: 6px; }
+body.myturn .hand-title { color: var(--pri); font-size: 15px; font-weight: 800; letter-spacing: 1px; animation: blink 1.6s ease-in-out infinite; }
+@keyframes blink { 50% { opacity: .55; } }
+body.myturn #hint { color: #fff; font-size: 15px; font-weight: 700; background: linear-gradient(135deg, rgba(255,77,109,.35), rgba(255,138,91,.25)); border: 1px solid rgba(255,77,109,.6); box-shadow: 0 6px 20px rgba(255,77,109,.25); }
+@media (max-height: 760px) { :root { --cw: 72px; } .opp { width: 78px; padding: 6px 4px; } .opp .av { width: 36px; height: 36px; font-size: 20px; } .hand { padding-top: 18px; } }
+@media (min-width: 760px) { :root { --cw: 100px; } .opp { width: 116px; } .opp .av { width: 52px; height: 52px; font-size: 28px; } .card .ttl { font-size: 12px; } .card .sub { font-size: 10px; } }
+</style>
+</head>
+<body>
+
+<div class="top">
+  <a class="ib" href="index.html" aria-label="Về trang chủ">‹</a>
+  <h1><b>Exploding</b> Kittens<small id="sub">Mèo Nổ</small></h1>
+  <a class="ib" id="cardsBtn" href="meono.html?cards" title="Thư viện lá bài">🃏</a>
+  <button class="ib" id="rulesBtn" title="Luật chơi">?</button>
+  <button class="ib" id="newBtn" title="Ván mới">↻</button>
+  <button class="ib" id="muteBtn" title="Âm thanh">🔊</button>
+</div>
+
+<div class="opps" id="opps"></div>
+
+<div class="table-wrap">
+  <div id="table">
+    <div id="known"></div>
+    <div class="pile" id="deck">
+      <div class="lbl">Draw pile</div>
+      <div class="deckbox" id="deckbox"><div class="bk"></div><div class="bk"></div><div class="bk" id="deckface"></div><div class="cnt" id="deckcnt">0</div></div>
+    </div>
+    <div class="pile" id="disc">
+      <div class="lbl">Discard</div>
+      <div class="discbox" id="discbox"></div>
+    </div>
+    <div id="info"></div>
+    <div id="toast"></div>
+  </div>
+</div>
+
+<div id="hint"></div>
+<div class="hand-wrap">
+  <div class="hand-title" id="handTitle">Bài của bạn</div>
+  <div class="hand" id="hand"></div>
+</div>
+
+<div class="bar">
+  <button class="btn" id="playBtn" disabled>Đánh bài</button>
+  <button class="btn pri" id="drawBtn" disabled>Rút bài</button>
+</div>
+
+<script>
+// ═══════════════════════════ tiện ích ═══════════════════════════
+const $ = s => document.querySelector(s);
+let SPEED = 1;
+const sleep = ms => new Promise(r => setTimeout(r, ms * SPEED));
+const rnd = n => Math.floor(Math.random() * n);
+const pick = a => a[rnd(a.length)];
+const chance = p => Math.random() < p;
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
+};
+function shuffleArr(a) { for (let i = a.length - 1; i > 0; i--) { const j = rnd(i + 1); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+// ═══════════════════════════ định nghĩa lá bài ═══════════════════════════
+const CATDESC = 'Lá mèo không có tác dụng riêng. Đánh 2 lá mèo giống nhau để cướp 1 lá ngẫu nhiên của người khác; 3 lá giống nhau để gọi tên 1 loại bài và đòi đích danh.';
+const TIPS = {
+  ek: 'Số lượng trong bộ luôn bằng số người chơi trừ 1, nên tới cuối ván chắc chắn còn Mèo Nổ. Theo dõi số lá còn lại để biết rủi ro mỗi lần rút.',
+  defuse: 'Sau khi gỡ, hãy đặt Mèo Nổ lên trên cùng để người kế tiếp rút trúng ngay — trừ khi bạn đang bị Attack và phải rút tiếp.',
+  attack: 'Đang bị Attack mà đánh Attack tiếp thì người kế phải chịu 4 lượt. Dùng khi biết Mèo Nổ đang ở trên cùng.',
+  skip: 'Chỉ bỏ qua 1 lượt: nếu đang bị Attack (2 lượt) bạn vẫn phải chơi lượt còn lại.',
+  future: 'Nếu thấy Mèo Nổ ở lá đầu, hãy đánh Skip, Attack hoặc Shuffle trước khi rút.',
+  shuffle: 'Dùng khi nghi ngờ người trước vừa giấu Mèo Nổ lên trên cùng cho bạn.',
+  favor: 'Người bị xin tự chọn lá đưa nên thường chỉ nhận được lá ít giá trị. Muốn lấy đúng Defuse hãy dùng bộ ba mèo.',
+  nope: 'Có thể Nope lại một lá Nope để hành động có hiệu lực trở lại. Giữ lại để chặn Attack hoặc bộ ba đòi Defuse của bạn.',
+  cat: 'Đánh 5 lá khác loại bất kỳ (kể cả bài hành động) để lấy 1 lá tuỳ chọn từ chồng bài bỏ — ví dụ lấy lại Defuse.',
+  feral: 'Có thể ghép với 1 lá mèo khác thành đôi, hoặc với 2 lá mèo giống nhau thành bộ ba. Hai Feral Cat cũng là một đôi.',
+  bottom: 'Rất hữu ích khi biết Mèo Nổ đang nằm trên cùng. Cẩn thận nếu Imploding Kitten đang nằm ở đáy.',
+  reverse: 'Với 2 người, Reverse giống hệt Skip. Với 3 người trở lên, người vừa đi trước bạn sẽ phải rút tiếp.',
+  alter: 'Mạnh hơn See the Future: đẩy Mèo Nổ xuống lá thứ 3 rồi rút lá an toàn, hoặc kéo nó lên trên và đánh Skip để hại người kế.',
+  targeted: 'Chọn đúng người sắp hết Defuse hoặc đang bị dồn, lượt chơi sẽ tiếp tục từ người đó.',
+  implode: 'Thay cho 1 Exploding Kitten. Khi nó nằm ngửa, mọi người đều biết vị trí nên hãy dùng Skip, Attack, Draw From the Bottom để tránh.',
+};
+const TYPES = {
+  ek:       { en: 'Exploding Kitten', vi: 'Mèo Nổ', desc: 'Rút trúng là nổ và bị loại, trừ khi bạn có Defuse', color: '#ff4d6d', n: 0 },
+  defuse:   { en: 'Defuse', vi: 'Gỡ bom', desc: 'Gỡ Mèo Nổ vừa rút, rồi bí mật giấu nó lại vào bộ bài', color: '#22c55e', n: 6 },
+  attack:   { en: 'Attack', vi: 'Tấn công', desc: 'Kết thúc lượt không rút bài; người kế phải chơi 2 lượt', color: '#f97316', n: 4 },
+  skip:     { en: 'Skip', vi: 'Bỏ qua', desc: 'Kết thúc lượt mà không cần rút bài', color: '#38bdf8', n: 4 },
+  future:   { en: 'See the Future', vi: 'Tiên tri', desc: 'Xem lén 3 lá trên cùng của bộ bài', color: '#a78bfa', n: 5 },
+  shuffle:  { en: 'Shuffle', vi: 'Xáo bài', desc: 'Xáo trộn lại toàn bộ bộ bài rút', color: '#2dd4bf', n: 4 },
+  favor:    { en: 'Favor', vi: 'Xin bài', desc: 'Người bị chọn phải đưa bạn 1 lá do họ tự chọn', color: '#f472b6', n: 4 },
+  nope:     { en: 'Nope', vi: 'Chặn', desc: 'Huỷ hành động vừa đánh của bất kỳ ai. Không chặn được Mèo Nổ và Defuse', color: '#94a3b8', n: 5 },
+  cat1:     { en: 'Taco Cat', vi: 'Mèo Taco', desc: CATDESC, color: '#fbbf24', n: 4, cat: true },
+  cat2:     { en: 'Rainbow-Ralphing Cat', vi: 'Mèo Cầu Vồng', desc: CATDESC, color: '#e879f9', n: 4, cat: true },
+  cat3:     { en: 'Beard Cat', vi: 'Mèo Râu', desc: CATDESC, color: '#d97706', n: 4, cat: true },
+  cat4:     { en: 'Cattermelon', vi: 'Mèo Dưa Hấu', desc: CATDESC, color: '#4ade80', n: 4, cat: true },
+  cat5:     { en: 'Hairy Potato Cat', vi: 'Mèo Khoai Tây', desc: CATDESC, color: '#d6a86b', n: 4, cat: true },
+  feral:    { en: 'Feral Cat', vi: 'Mèo Hoang', desc: 'Mèo bách biến: ghép được với bất kỳ lá mèo nào để tạo đôi / bộ ba', color: '#fde68a', n: 4, cat: true, feral: true, exp: true },
+  bottom:   { en: 'Draw From the Bottom', vi: 'Rút đáy', desc: 'Kết thúc lượt bằng cách rút lá dưới cùng thay vì trên cùng', color: '#60a5fa', n: 4, exp: true },
+  reverse:  { en: 'Reverse', vi: 'Đảo chiều', desc: 'Đảo chiều chơi và kết thúc lượt mà không rút bài', color: '#fb7185', n: 4, exp: true },
+  alter:    { en: 'Alter the Future', vi: 'Đổi tương lai', desc: 'Xem 3 lá trên cùng và sắp xếp lại thứ tự tuỳ ý', color: '#c084fc', n: 4, exp: true },
+  targeted: { en: 'Targeted Attack', vi: 'Tấn công đích danh', desc: 'Như Attack nhưng bạn chọn ai phải chơi 2 lượt', color: '#ef4444', n: 3, exp: true },
+  implode:  { en: 'Imploding Kitten', vi: 'Mèo Nổ Ngược', desc: 'Rút lần đầu (đang úp): đặt lại NGỬA vào bộ bài ở vị trí tuỳ chọn, ai cũng thấy. Ai rút nó lần thứ hai sẽ nổ ngay, Defuse cũng vô dụng', color: '#ff6b00', n: 0, exp: true },
+};
+const ORDER = ['defuse', 'nope', 'attack', 'targeted', 'skip', 'reverse', 'bottom', 'future', 'alter', 'shuffle', 'favor', 'cat1', 'cat2', 'cat3', 'cat4', 'cat5', 'feral', 'ek', 'implode'];
+const SINGLES = ['attack', 'skip', 'future', 'shuffle', 'favor', 'bottom', 'reverse', 'alter', 'targeted'];
+const BOTS = [{ name: 'Mèo Mướp', av: '😺' }, { name: 'Mèo Mun', av: '🐈‍⬛' }, { name: 'Mèo Vàng', av: '😸' }, { name: 'Mèo Tam Thể', av: '😻' }];
+let cardId = 0;
+const mk = t => ({ id: ++cardId, t });
+const nameOf = t => `${TYPES[t].en}`;
+const isKitten = t => t === 'ek' || t === 'implode';
+const tipOf = t => TIPS[t] || (TYPES[t].cat ? TIPS.cat : '');
+const countOf = t => t === 'ek' ? 'Số lượng = số người chơi − 1' : t === 'implode' ? '1 lá, thay 1 Exploding Kitten' : `${TYPES[t].n} lá trong bộ`;
+
+// ═══════════════════════════ hình minh hoạ mèo (SVG) ═══════════════════════════
+const FUR = { cat1: '#f59e0b', cat2: '#f8fafc', cat3: '#9ca3af', cat4: '#4ade80', cat5: '#c98b4a', feral: '#fde68a', ek: '#f1f5f9', implode: '#c7d2fe' };
+function catHead(t, eyes = 'normal', fur) {
+  fur = fur || FUR[t] || '#f1f5f9';
+  const S = 'stroke="#111827" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"';
+  let E = '';
+  if (eyes === 'normal') E = `<ellipse cx="39" cy="53" rx="5" ry="6" fill="#fff"/><ellipse cx="61" cy="53" rx="5" ry="6" fill="#fff"/><circle cx="40" cy="54" r="3" fill="#111827"/><circle cx="62" cy="54" r="3" fill="#111827"/><circle cx="41" cy="52.5" r="1" fill="#fff"/><circle cx="63" cy="52.5" r="1" fill="#fff"/>`;
+  else if (eyes === 'angry') E = `<ellipse cx="39" cy="54" rx="5" ry="5" fill="#fff"/><ellipse cx="61" cy="54" rx="5" ry="5" fill="#fff"/><circle cx="40" cy="55" r="3" fill="#111827"/><circle cx="60" cy="55" r="3" fill="#111827"/><path d="M32 46l12 5M68 46l-12 5" ${S}/>`;
+  else if (eyes === 'happy') E = `<path d="M34 54q5-6 10 0M56 54q5-6 10 0" fill="none" ${S}/>`;
+  else if (eyes === 'star') E = `<path d="M39 46l2 5 5 .5-4 3.5 1.5 5-4.5-3-4.5 3 1.5-5-4-3.5 5-.5z" fill="#fde047" stroke="#111827" stroke-width="1.5"/><path d="M61 46l2 5 5 .5-4 3.5 1.5 5-4.5-3-4.5 3 1.5-5-4-3.5 5-.5z" fill="#fde047" stroke="#111827" stroke-width="1.5"/>`;
+  else if (eyes === 'scared') E = `<circle cx="39" cy="53" r="6.5" fill="#fff" stroke="#111827" stroke-width="1.5"/><circle cx="61" cy="53" r="6.5" fill="#fff" stroke="#111827" stroke-width="1.5"/><circle cx="39" cy="54" r="2" fill="#111827"/><circle cx="61" cy="54" r="2" fill="#111827"/>`;
+  else if (eyes === 'shades') E = `<path d="M30 50h40" ${S}/><path d="M31 50q0 9 9 9t9-9zM51 50q0 9 9 9t9-9z" fill="#111827"/>`;
+  else if (eyes === 'dizzy') E = `<path d="M35 49l8 8M43 49l-8 8M57 49l8 8M65 49l-8 8" ${S}/>`;
+  const mouth = eyes === 'happy' || eyes === 'star' ? `<path d="M44 64q6 6 12 0" fill="none" ${S}/>` : eyes === 'scared' ? `<ellipse cx="50" cy="66" rx="4" ry="5" fill="#111827"/>` : `<path d="M46 64q4 3 4-1 0 4 4 1" fill="none" ${S}/>`;
+  return `<g>
+    <path d="M26 46L20 14l25 17z" fill="${fur}" ${S}/><path d="M74 46l6-32-25 17z" fill="${fur}" ${S}/>
+    <path d="M28 40l-4-18 15 12z" fill="#fda4af"/><path d="M72 40l4-18-15 12z" fill="#fda4af"/>
+    <ellipse cx="50" cy="56" rx="31" ry="27" fill="${fur}" ${S}/>
+    ${t === 'cat1' ? '<path d="M38 32q6 4 12 0M28 44q4 2 8 0M64 44q4 2 8 0" fill="none" stroke="#b45309" stroke-width="3" stroke-linecap="round"/>' : ''}
+    ${t === 'cat4' ? '<path d="M36 36q4 10 0 20M50 32q3 12 0 24M64 36q-4 10 0 20" fill="none" stroke="#166534" stroke-width="3" stroke-linecap="round"/>' : ''}
+    ${t === 'cat5' ? '<path d="M26 56l-6-3M26 62l-6 2M74 56l6-3M74 62l6 2M44 30l-2-6M56 30l2-6" stroke="#5b3a1a" stroke-width="2" stroke-linecap="round"/><circle cx="34" cy="68" r="2" fill="#8b5a2b"/><circle cx="66" cy="70" r="2" fill="#8b5a2b"/>' : ''}
+    ${E}
+    <path d="M50 59l-3 3h6z" fill="#f472b6" stroke="#111827" stroke-width="1.5" stroke-linejoin="round"/>
+    ${mouth}
+    <path d="M18 58h14M18 64l14-2M68 58h14M68 62l14 2" ${S} stroke-width="1.8"/>
+  </g>`;
+}
+function art(t) {
+  const c = TYPES[t].color;
+  const S = 'stroke="#111827" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"';
+  let bg = '', fg = '', head;
+  switch (t) {
+    case 'ek':
+      bg = `<circle cx="50" cy="74" r="25" fill="#111827" stroke="#374151" stroke-width="2"/><ellipse cx="41" cy="66" rx="7" ry="4" fill="#fff" opacity=".18"/><rect x="44" y="44" width="12" height="8" rx="2" fill="#4b5563"/><path d="M50 44q2-10 12-12" fill="none" stroke="#9ca3af" stroke-width="3" stroke-linecap="round"/><path d="M62 32c5-7 11-3 8 4-3 6-10 3-8-4z" fill="#fb923c"/><circle cx="64" cy="32" r="2.5" fill="#fde047"/><path d="M72 22l4-6M76 32l7-1M70 40l5 5" stroke="#fde047" stroke-width="2" stroke-linecap="round"/>`;
+      head = catHead(t, 'scared'); fg = `<g transform="translate(0,-2) scale(.62) translate(15,8)">${head}</g>`; return `<svg viewBox="0 0 100 100">${bg}${fg}</svg>`;
+    case 'defuse':
+      bg = `<rect x="68" y="40" width="16" height="40" rx="6" fill="#ef4444" ${S}/><rect x="70" y="34" width="12" height="8" rx="2" fill="#111827"/><path d="M76 34v-6q0-6-8-6" fill="none" stroke="#111827" stroke-width="3" stroke-linecap="round"/><path d="M60 26q-8 0-8 6" fill="none" stroke="#111827" stroke-width="3"/><rect x="71" y="50" width="10" height="14" rx="2" fill="#fff"/>`;
+      return `<svg viewBox="0 0 100 100"><g transform="translate(-6,4) scale(.9)">${catHead(t, 'happy')}</g>${bg}</svg>`;
+    case 'attack':
+      bg = `<g ${S}><path d="M18 86L64 24" stroke-width="6" stroke="#9ca3af"/><path d="M82 86L36 24" stroke-width="6" stroke="#9ca3af"/><path d="M18 86L64 24M82 86L36 24" stroke-width="3" stroke="#e5e7eb"/><rect x="12" y="78" width="14" height="14" rx="3" fill="#7c2d12" transform="rotate(-45 19 85)"/><rect x="74" y="78" width="14" height="14" rx="3" fill="#7c2d12" transform="rotate(45 81 85)"/></g>`;
+      return `<svg viewBox="0 0 100 100">${bg}<g transform="translate(0,2) scale(.86) translate(8,0)">${catHead(t, 'angry')}</g></svg>`;
+    case 'targeted':
+      bg = `<circle cx="50" cy="54" r="40" fill="none" stroke="#ef4444" stroke-width="3" stroke-dasharray="14 8"/><path d="M50 8v18M50 82v18M4 54h18M78 54h18" stroke="#ef4444" stroke-width="4" stroke-linecap="round"/>`;
+      return `<svg viewBox="0 0 100 100">${bg}<g transform="scale(.78) translate(14,10)">${catHead(t, 'scared')}</g><circle cx="50" cy="54" r="5" fill="none" stroke="#ef4444" stroke-width="3"/></svg>`;
+    case 'skip':
+      bg = `<path d="M4 40h22M0 52h18M6 64h22" stroke="#38bdf8" stroke-width="4" stroke-linecap="round" opacity=".9"/>`;
+      return `<svg viewBox="0 0 100 100">${bg}<g transform="translate(14,2) scale(.9)">${catHead(t, 'shades')}</g></svg>`;
+    case 'reverse':
+      bg = `<path d="M20 60a30 30 0 0 1 52-24" fill="none" stroke="#fb7185" stroke-width="5" stroke-linecap="round"/><path d="M72 22l2 16-16-2z" fill="#fb7185"/><path d="M80 48a30 30 0 0 1-52 24" fill="none" stroke="#fb7185" stroke-width="5" stroke-linecap="round"/><path d="M28 86l-2-16 16 2z" fill="#fb7185"/>`;
+      return `<svg viewBox="0 0 100 100">${bg}<g transform="scale(.6) translate(33,26)">${catHead(t, 'normal')}</g></svg>`;
+    case 'bottom':
+      return `<svg viewBox="0 0 100 100"><rect x="14" y="8" width="72" height="18" rx="5" fill="#1e3a8a" stroke="#60a5fa" stroke-width="2"/><rect x="14" y="30" width="72" height="18" rx="5" fill="#1e3a8a" stroke="#60a5fa" stroke-width="2" opacity=".7"/><g transform="translate(100,100) rotate(180) scale(.72) translate(20,8)">${catHead(t, 'dizzy')}</g><path d="M14 94h72" stroke="#60a5fa" stroke-width="4" stroke-linecap="round"/><path d="M92 60v30l-8-8M92 90l8-8" fill="none" stroke="#60a5fa" stroke-width="3" stroke-linecap="round"/></svg>`;
+    case 'future':
+      bg = `<circle cx="50" cy="74" r="20" fill="#312e81" stroke="#a78bfa" stroke-width="2.5"/><ellipse cx="44" cy="68" rx="6" ry="4" fill="#fff" opacity=".5"/><rect x="34" y="88" width="32" height="8" rx="3" fill="#4c1d95"/><path d="M14 30l3 7 7 3-7 3-3 7-3-7-7-3 7-3zM84 18l2 5 5 2-5 2-2 5-2-5-5-2 5-2z" fill="#fde047"/>`;
+      return `<svg viewBox="0 0 100 100">${bg}<g transform="scale(.66) translate(26,2)">${catHead(t, 'star')}</g></svg>`;
+    case 'alter':
+      bg = `<circle cx="50" cy="74" r="20" fill="#3b0764" stroke="#c084fc" stroke-width="2.5"/><path d="M38 74h24M56 68l6 6-6 6" fill="none" stroke="#f0abfc" stroke-width="3" stroke-linecap="round"/><path d="M40 80l-6-6 6-6" fill="none" stroke="#f0abfc" stroke-width="3" stroke-linecap="round"/><path d="M12 24l3 7 7 3-7 3-3 7-3-7-7-3 7-3zM86 14l2 5 5 2-5 2-2 5-2-5-5-2 5-2z" fill="#fde047"/>`;
+      return `<svg viewBox="0 0 100 100">${bg}<g transform="scale(.66) translate(26,2)">${catHead(t, 'star')}</g></svg>`;
+    case 'shuffle':
+      bg = `<g ${S}><rect x="6" y="40" width="26" height="36" rx="4" fill="#0f766e" transform="rotate(-20 19 58)"/><rect x="68" y="40" width="26" height="36" rx="4" fill="#0f766e" transform="rotate(20 81 58)"/><rect x="37" y="60" width="26" height="36" rx="4" fill="#14b8a6"/></g>`;
+      return `<svg viewBox="0 0 100 100">${bg}<g transform="scale(.7) translate(21,0)">${catHead(t, 'dizzy')}</g></svg>`;
+    case 'favor':
+      bg = `<path d="M78 70c-10-8-16 6-4 12l4 3 4-3c12-6 6-20-4-12z" fill="#f472b6" ${S}/><path d="M16 64q0-12 10-12t10 12v12H16z" fill="#f1f5f9" ${S}/><path d="M20 56v-6M26 54v-8M32 56v-6" ${S}/>`;
+      return `<svg viewBox="0 0 100 100"><g transform="scale(.78) translate(14,4)">${catHead(t, 'happy')}</g>${bg}</svg>`;
+    case 'nope':
+      bg = `<circle cx="74" cy="74" r="20" fill="#fff" stroke="#ef4444" stroke-width="5"/><path d="M60 60l28 28" stroke="#ef4444" stroke-width="5" stroke-linecap="round"/><path d="M8 66q0-12 10-12t10 12v12H8z" fill="#f1f5f9" ${S}/><path d="M12 58v-7M18 56v-9M24 58v-7" ${S}/>`;
+      return `<svg viewBox="0 0 100 100"><g transform="scale(.78) translate(10,2)">${catHead(t, 'angry')}</g>${bg}</svg>`;
+    case 'cat1':
+      bg = `<path d="M14 80q36-30 72 0q-36 18-72 0z" fill="#fbbf24" ${S}/><path d="M22 78q28-16 56 0" fill="none" stroke="#65a30d" stroke-width="5" stroke-linecap="round"/><path d="M26 76q24-10 48 0" fill="none" stroke="#ef4444" stroke-width="4" stroke-linecap="round"/>`;
+      return `<svg viewBox="0 0 100 100"><g transform="scale(.78) translate(14,-2)">${catHead(t, 'happy')}</g>${bg}</svg>`;
+    case 'cat2':
+      bg = `<path d="M8 96a42 42 0 0 1 84 0" fill="none" stroke="#ef4444" stroke-width="6"/><path d="M15 96a35 35 0 0 1 70 0" fill="none" stroke="#f59e0b" stroke-width="6"/><path d="M22 96a28 28 0 0 1 56 0" fill="none" stroke="#fde047" stroke-width="6"/><path d="M29 96a21 21 0 0 1 42 0" fill="none" stroke="#4ade80" stroke-width="6"/><path d="M36 96a14 14 0 0 1 28 0" fill="none" stroke="#60a5fa" stroke-width="6"/>`;
+      return `<svg viewBox="0 0 100 100">${bg}<g transform="scale(.72) translate(19,-2)">${catHead(t, 'star')}</g></svg>`;
+    case 'cat3':
+      bg = `<path d="M26 66q0 30 24 32t24-32q-10 12-24 10-14 2-24-10z" fill="#7c2d12" ${S}/><path d="M34 76q2 8 6 10M66 76q-2 8-6 10M50 78v14" fill="none" stroke="#431407" stroke-width="2"/>`;
+      return `<svg viewBox="0 0 100 100"><g transform="scale(.8) translate(12,0)">${catHead(t, 'normal')}</g>${bg}</svg>`;
+    case 'cat4':
+      bg = `<path d="M8 72q42 36 84 0z" fill="#ef4444" ${S}/><path d="M8 72q42 36 84 0" fill="none" stroke="#166534" stroke-width="7"/><circle cx="36" cy="80" r="2.2" fill="#111827"/><circle cx="50" cy="86" r="2.2" fill="#111827"/><circle cx="64" cy="80" r="2.2" fill="#111827"/>`;
+      return `<svg viewBox="0 0 100 100"><g transform="scale(.78) translate(14,-4)">${catHead(t, 'happy')}</g>${bg}</svg>`;
+    case 'cat5':
+      return `<svg viewBox="0 0 100 100"><ellipse cx="50" cy="60" rx="42" ry="32" fill="#c98b4a" ${S}/><g transform="scale(.82) translate(11,4)">${catHead(t, 'normal')}</g></svg>`;
+    case 'feral':
+      bg = `<path d="M20 22l-8-10M80 22l8-10M14 44l-10-2M86 44l10-2M16 70l-8 6M84 70l8 6" stroke="#ca8a04" stroke-width="3" stroke-linecap="round"/><text x="78" y="30" font-family="Outfit,sans-serif" font-weight="900" font-size="26" fill="#111827">?</text>`;
+      return `<svg viewBox="0 0 100 100">${bg}<g transform="scale(.82) translate(11,4)">${catHead(t, 'angry')}</g></svg>`;
+    case 'implode':
+      bg = `<circle cx="50" cy="52" r="46" fill="#1e1b4b"/><path d="M50 52m-40 0a40 40 0 1 1 40 40a30 30 0 1 1-30-30a20 20 0 1 1 20 20a10 10 0 1 1-10-10" fill="none" stroke="#ff6b00" stroke-width="4" stroke-linecap="round"/>`;
+      return `<svg viewBox="0 0 100 100">${bg}<g transform="scale(.6) translate(33,24)">${catHead(t, 'dizzy')}</g></svg>`;
+  }
+  return `<svg viewBox="0 0 100 100">${catHead(t)}</svg>`;
+}
+
+// ═══════════════════════════ trạng thái ═══════════════════════════
+let G = null, GEN = 0, locked = true, sel = new Set(), stats = store.get('ek.stats', { games: 0, wins: 0 });
+const cur = () => G.players[G.cur];
+const me = () => G.players[0];
+const alive = () => G.players.filter(p => p.alive);
+const has = (p, t) => p.hand.some(c => c.t === t);
+const count = (p, t) => p.hand.filter(c => c.t === t).length;
+const kittensInDeck = () => G.deck.filter(c => isKitten(c.t)).length;
+const implodePos = () => { const i = G.deck.findIndex(c => c.t === 'implode' && c.up); return i < 0 ? -1 : G.deck.length - 1 - i; };
+function takeFromHand(p, t, n = 1) { const out = []; for (let i = p.hand.length - 1; i >= 0 && out.length < n; i--) if (p.hand[i].t === t) out.push(p.hand.splice(i, 1)[0]); return out; }
+function removeCards(p, cards) { for (const c of cards) { const i = p.hand.findIndex(x => x.id === c.id); if (i >= 0) p.hand.splice(i, 1); } }
+function nextAlive(i) { let j = i; const n = G.players.length; do { j = (j + G.dir + n) % n; } while (!G.players[j].alive && j !== i); return j; }
+function sortHand(p) { if (p.bot) p.hand.sort((a, b) => ORDER.indexOf(a.t) - ORDER.indexOf(b.t) || a.id - b.id); }
+function sortDeal(p) { p.hand.sort((a, b) => ORDER.indexOf(a.t) - ORDER.indexOf(b.t) || a.id - b.id); }
+
+function newGame(opt) {
+  const players = [{ name: opt.name || 'Bạn', av: '🙂', bot: false, hand: [], alive: true, mem: [] }];
+  for (let i = 0; i < opt.bots; i++) players.push({ ...BOTS[i], bot: true, hand: [], alive: true, mem: [] });
+  const n = players.length;
+  let deck = [];
+  for (const t in TYPES) { const T = TYPES[t]; if (isKitten(t) || t === 'defuse') continue; if (T.exp && !opt.exp) continue; for (let i = 0; i < T.n; i++) deck.push(mk(t)); }
+  shuffleArr(deck);
+  for (const p of players) { for (let i = 0; i < opt.hand; i++) p.hand.push(deck.pop()); p.hand.push(mk('defuse')); sortDeal(p); }
+  const extraDef = n <= 3 ? 2 : 6 - n;
+  for (let i = 0; i < extraDef; i++) deck.push(mk('defuse'));
+  const nEK = opt.exp ? n - 2 : n - 1;
+  for (let i = 0; i < nEK; i++) deck.push(mk('ek'));
+  if (opt.exp) deck.push({ ...mk('implode'), up: false });
+  shuffleArr(deck);
+  GEN++; hideNopeBar(); document.body.classList.remove('myturn');
+  G = { players, deck, discard: [], cur: rnd(n), turnsLeft: 1, pendingAttack: 0, dir: 1, over: false, elim: [], round: (G ? G.round : 0) + 1, gen: GEN, opt };
+  sel.clear();
+  $('#sub').textContent = `Mèo Nổ · ván ${G.round}${opt.exp ? ' · bản mở rộng' : ''}`;
+  log(`Ván mới: ${n} người, ${nEK} Exploding Kitten${opt.exp ? ' + 1 Imploding Kitten' : ''} trong bộ bài. ${cur().name} đi trước!`);
+  render();
+  queueTurn();
+}
+
+// ═══════════════════════════ hiển thị ═══════════════════════════
+function cardEl(c, cls = '') {
+  const T = TYPES[c.t];
+  const el = document.createElement('div');
+  el.className = `card t-${c.t} ${cls}`; el.style.setProperty('--c', T.color);
+  el.dataset.id = c.id;
+  el.innerHTML = `<div class="art">${art(c.t)}</div><div class="ttl${T.en.length > 10 ? ' long' : ''}">${T.en}</div><div class="sub">${T.vi}</div><div class="info" title="Giải thích">i</div>`;
+  el.querySelector('.info').addEventListener('click', e => { e.stopPropagation(); showCardInfo(c.t); });
+  return el;
+}
+function render() {
+  if (!G) return;
+  const opps = $('#opps'); opps.innerHTML = '';
+  G.players.forEach((p, i) => {
+    if (i === 0) return;
+    const d = document.createElement('div');
+    d.className = 'opp' + (G.cur === i && !G.over ? ' turn' : '') + (p.alive ? '' : ' dead');
+    d.dataset.i = i;
+    d.innerHTML = `<div class="av">${p.alive ? p.av : '💀'}</div><div class="nm">${esc(p.name)}</div><div class="ct"><b>${p.hand.length}</b> lá</div>` +
+      (G.cur === i && G.turnsLeft > 1 && !G.over ? `<div class="tl">×${G.turnsLeft}</div>` : '') + `<div class="bub"></div>`;
+    opps.appendChild(d);
+  });
+  $('#deckcnt').textContent = `${G.deck.length} lá`;
+  if (!$('#deckface').innerHTML) $('#deckface').innerHTML = art('ek').replace('scared', 'normal');
+  const db = $('#discbox'); db.innerHTML = '';
+  const n = G.discard.length;
+  if (n > 1) db.appendChild(cardEl(G.discard[n - 2], 'under'));
+  if (n > 0) { const top = cardEl(G.discard[n - 1], 'top'); top.addEventListener('click', () => showCardInfo(G.discard[n - 1].t)); db.appendChild(top); }
+  const k = kittensInDeck(), risk = G.deck.length ? Math.round(100 * k / G.deck.length) : 0;
+  const ip = implodePos();
+  $('#info').innerHTML = `<div class="chip">${k} kitten / ${G.deck.length} lá</div><div class="chip${risk >= 34 ? ' red' : ''}">Rủi ro ${risk}%</div>` +
+    (ip >= 0 ? `<div class="chip org">Imploding ngửa ở lá #${ip + 1}</div>` : '') +
+    (G.players.length > 2 && G.dir < 0 ? `<div class="chip">Chiều đảo</div>` : '') +
+    (G.cur === 0 && G.turnsLeft > 1 && !G.over ? `<div class="chip red">Bạn còn ${G.turnsLeft} lượt</div>` : '');
+  const kn = $('#known'); kn.innerHTML = '';
+  const mem = me().mem.slice(0, 3);
+  if (mem.some(Boolean)) kn.innerHTML = '<div class="chip hd">Bạn đã thấy</div>' + mem.map((t, i) => t ? `<div class="chip${isKitten(t) ? ' red' : ''}">#${i + 1} ${nameOf(t)}</div>` : '').join('');
+  const hand = $('#hand'); hand.innerHTML = '';
+  const p = me();
+  const cw = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--cw')) || 86;
+  const avail = hand.clientWidth - 32, hn = p.hand.length;
+  const perRow = Math.max(1, Math.floor((avail + 8) / (cw + 8)));
+  const rows = hn > perRow ? 2 : 1, perR = Math.ceil(hn / rows);
+  const tight = perR * (cw + 8) - 8 > avail;
+  if (tight && perR > 1) hand.style.setProperty('--ov', `${Math.min(Math.ceil((perR * cw - avail) / (perR - 1)), Math.round(cw * .55))}px`);
+  const myTurn = G.cur === 0 && !locked && !G.over && p.alive;
+  hand.classList.toggle('off', !myTurn);
+  const rowEls = []; for (let r = 0; r < rows; r++) { const d = document.createElement('div'); d.className = 'hrow' + (tight ? ' tight' : ''); hand.appendChild(d); rowEls.push(d); }
+  p.hand.forEach((c, i) => {
+    const el = cardEl(c);
+    if (sel.has(c.id)) el.classList.add('sel');
+    if (myTurn && c.t !== 'defuse' && c.t !== 'nope') el.classList.add('playable');
+    el.addEventListener('click', () => toggleSel(c));
+    rowEls[Math.floor(i / perR)].appendChild(el);
+  });
+  $('#handTitle').textContent = !p.alive ? 'BẠN ĐÃ NỔ — XEM MÁY ĐẤU TIẾP' : myTurn ? `LƯỢT CỦA BẠN · ${p.hand.length} LÁ` : `BÀI CỦA BẠN · ${p.hand.length} LÁ`;
+  $('#deckbox').classList.toggle('hot', myTurn);
+  updateButtons();
+}
+function updateButtons() {
+  const myTurn = G && G.cur === 0 && !locked && !G.over && me().alive;
+  $('#drawBtn').disabled = !myTurn;
+  const combo = myTurn ? comboOf([...sel].map(id => me().hand.find(c => c.id === id)).filter(Boolean)) : null;
+  $('#playBtn').disabled = !combo;
+  $('#playBtn').textContent = combo ? `Đánh ${comboLabel(combo)}` : 'Đánh bài';
+}
+function hint(s) { $('#hint').textContent = s || ''; }
+let toastT = 0;
+function log(s) { const t = $('#toast'); if (!t) return; t.textContent = s; t.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('on'), 3000 * SPEED + 400); }
+function bubble(i, s, ms = 1500) { const el = document.querySelector(`.opp[data-i="${i}"] .bub`); if (!el) return; el.textContent = s; el.classList.add('on'); setTimeout(() => el.classList.remove('on'), ms * SPEED); }
+function oppEl(i) { return document.querySelector(`.opp[data-i="${i}"] .av`); }
+function fly(fromEl, toEl, t) {
+  if (!fromEl || !toEl || SPEED === 0) return;
+  const a = fromEl.getBoundingClientRect(), b = toEl.getBoundingClientRect();
+  const el = cardEl(mk(t), 'fly small'); const cw = 68, ch = cw * 1.45;
+  el.style.left = `${a.left + a.width / 2 - cw / 2}px`; el.style.top = `${a.top + a.height / 2 - ch / 2}px`;
+  document.body.appendChild(el);
+  requestAnimationFrame(() => { el.style.transform = `translate(${b.left + b.width / 2 - (a.left + a.width / 2)}px, ${b.top + b.height / 2 - (a.top + a.height / 2)}px) scale(.8) rotate(8deg)`; el.style.opacity = '.2'; });
+  setTimeout(() => el.remove(), 600);
+}
+function turnSplash(txt, sub) { if (SPEED === 0) return; const s = document.createElement('div'); s.className = 'turnsplash'; s.innerHTML = `<div>${txt}<small>${sub || ''}</small></div>`; document.body.appendChild(s); setTimeout(() => s.remove(), 1450); }
+function stamp(txt) { const s = document.createElement('div'); s.className = 'stamp'; s.textContent = txt; document.body.appendChild(s); setTimeout(() => s.remove(), 950); }
+function toggleSel(c) {
+  if (!(G.cur === 0 && !locked && !G.over && me().alive)) { showCardInfo(c.t); return; }
+  if (c.t === 'defuse') { hint('Defuse tự động dùng khi bạn rút trúng Exploding Kitten.'); playClick(); return; }
+  if (c.t === 'nope') { hint('Nope dùng để chặn khi người khác đánh bài — nút sẽ hiện lên lúc đó.'); playClick(); return; }
+  if (sel.has(c.id)) sel.delete(c.id); else sel.add(c.id);
+  playClick(); render();
+  const combo = comboOf([...sel].map(id => me().hand.find(x => x.id === id)));
+  if (sel.size && !combo) hint(sel.size === 1 ? 'Chọn thêm mèo giống nhau (hoặc Feral Cat) để tạo đôi / bộ ba, hoặc 5 lá khác loại.' : 'Tổ hợp chưa hợp lệ: 1 lá hành động · 2–3 mèo giống nhau · 5 lá khác loại.');
+  else if (combo) hint(comboHint(combo));
+  else hint('Lượt của bạn: chọn bài để đánh, hoặc rút 1 lá để kết thúc lượt.');
+}
+
+// ═══════════════════════════ tổ hợp ═══════════════════════════
+function catMatch(cards) {
+  if (!cards.every(c => TYPES[c.t].cat)) return null;
+  const real = cards.filter(c => !TYPES[c.t].feral).map(c => c.t);
+  if (new Set(real).size > 1) return null;
+  return real[0] || 'feral';
+}
+function comboOf(cards) {
+  if (!cards.length) return null;
+  const ts = cards.map(c => c.t);
+  if (ts.length === 1 && SINGLES.includes(ts[0])) return { kind: 'single', type: ts[0], cards };
+  const m = catMatch(cards);
+  if (ts.length === 2 && m) return { kind: 'pair', type: m, cards };
+  if (ts.length === 3 && m) return { kind: 'triple', type: m, cards };
+  if (ts.length === 5 && new Set(ts).size === 5) return { kind: 'five', cards };
+  return null;
+}
+function comboLabel(a) {
+  if (a.kind === 'single') return nameOf(a.type);
+  if (a.kind === 'pair') return `đôi ${TYPES[a.type].vi} (cướp bài)`;
+  if (a.kind === 'triple') return `bộ ba ${TYPES[a.type].vi} (đòi bài)`;
+  return '5 lá khác loại';
+}
+function comboHint(a) {
+  if (a.kind === 'single') return `${nameOf(a.type)}: ${TYPES[a.type].desc}.`;
+  if (a.kind === 'pair') return 'Đôi mèo: cướp 1 lá ngẫu nhiên của một người bạn chọn.';
+  if (a.kind === 'triple') return 'Bộ ba mèo: gọi tên 1 loại bài, người bị chọn phải đưa nếu có.';
+  return '5 lá khác loại: lấy bất kỳ lá nào trong chồng bài bỏ.';
+}
+function describe(a) {
+  const P = G.players;
+  if (a.kind === 'single') {
+    if (a.type === 'favor') return `Favor → xin bài ${P[a.target].name}`;
+    if (a.type === 'targeted') return `Targeted Attack → nhắm ${P[a.target].name}`;
+    return nameOf(a.type);
+  }
+  if (a.kind === 'pair') return `đôi ${TYPES[a.type].en} → cướp bài ${P[a.target].name}`;
+  if (a.kind === 'triple') return `bộ ba ${TYPES[a.type].en} → đòi ${nameOf(a.want)} của ${P[a.target].name}`;
+  if (a.kind === 'five') return `5 lá khác loại → lấy ${nameOf(a.pick.t)} từ bài bỏ`;
+  return '';
+}
+
+// ═══════════════════════════ luồng lượt chơi ═══════════════════════════
+function queueTurn() { setTimeout(startTurn, 60); }
+async function startTurn() {
+  if (!G || G.over) return;
+  if (!cur().alive) { advance(); return queueTurn(); }
+  const p = cur(), g = GEN;
+  document.body.classList.toggle('myturn', !p.bot);
+  if (p.bot) {
+    locked = true; render(); hint(`Lượt của ${p.name}…`);
+    await sleep(650);
+    if (g !== GEN) return;
+    await botTurn(p);
+  } else {
+    locked = false; sel.clear(); render();
+    if (!G.splashed) { G.splashed = true; turnSplash(G.turnsLeft > 1 ? `LƯỢT CỦA BẠN ×${G.turnsLeft}` : 'LƯỢT CỦA BẠN!', G.turnsLeft > 1 ? `Bị Attack: phải chơi ${G.turnsLeft} lượt liên tiếp` : 'Đánh bài hoặc rút 1 lá'); playTurn(); }
+    hint(G.turnsLeft > 1 ? `Bị Attack: phải chơi ${G.turnsLeft} lượt! Đánh bài hoặc rút 1 lá.` : 'Chọn bài để đánh, hoặc rút 1 lá để kết thúc lượt');
+  }
+}
+function advance() { G.cur = nextAlive(G.cur); G.turnsLeft = G.pendingAttack || 1; G.pendingAttack = 0; G.splashed = false; }
+function consumeTurn() { if (!cur().alive) advance(); else { G.turnsLeft--; if (G.turnsLeft <= 0) advance(); } queueTurn(); }
+function checkOver() { const a = alive(); if (a.length <= 1) { G.over = true; locked = true; document.body.classList.remove('myturn'); render(); hint(''); setTimeout(() => showGameOver(a[0]), 700 * SPEED); return true; } return false; }
+
+async function explode(p, c) {
+  const g = GEN; boom(); await sleep(600); if (g !== GEN) return;
+  p.alive = false; G.elim.push(p);
+  G.discard.push(...p.hand, c); p.hand = [];
+  log(`${p.name} NỔ TUNG và bị loại!`);
+  render(); await sleep(700); if (g !== GEN) return;
+  checkOver();
+}
+async function drawCard(p, fromBottom = false) {
+  if (!G.deck.length) { log('Bộ bài đã hết!'); return; }
+  const c = fromBottom ? G.deck.shift() : G.deck.pop(), g = GEN;
+  if (!fromBottom) for (const q of G.players) q.mem.shift();
+  const idx = G.players.indexOf(p);
+  playDeal();
+  fly($('#deckbox'), idx === 0 ? $('#hand') : oppEl(idx), isKitten(c.t) ? c.t : 'ek');
+  if (c.t === 'implode') {
+    $('#table').classList.remove('shake'); void $('#table').offsetWidth; $('#table').classList.add('shake');
+    if (c.up) {
+      log(`${p.name} rút trúng IMPLODING KITTEN đang ngửa — Defuse cũng vô dụng!`);
+      if (idx !== 0) bubble(idx, 'Toang!');
+      playFuse(); await sleep(900); if (g !== GEN) return;
+      await explode(p, c); return;
+    }
+    log(`${p.name} rút trúng IMPLODING KITTEN (úp). Phải đặt lại NGỬA vào bộ bài.`);
+    if (idx !== 0) bubble(idx, 'Hú hồn!');
+    playFuse(); await sleep(900); if (g !== GEN) return;
+    c.up = true;
+    let pos = p.bot ? botInsertPos(p) : await chooseInsert(c);
+    if (g !== GEN) return;
+    G.deck.splice(G.deck.length - pos, 0, c);
+    for (const q of G.players) { while (q.mem.length < pos) q.mem.push(null); q.mem.splice(pos, 0, 'implode'); }
+    log(`${p.name} đặt Imploding Kitten ngửa ở vị trí #${pos + 1}. Ai cũng thấy!`);
+    render(); return;
+  }
+  if (c.t === 'ek') {
+    if (idx !== 0) bubble(idx, 'Mèo Nổ!!');
+    $('#table').classList.remove('shake'); void $('#table').offsetWidth; $('#table').classList.add('shake');
+    log(`${p.name} rút trúng EXPLODING KITTEN!`);
+    playFuse(); await sleep(900); if (g !== GEN) return;
+    if (has(p, 'defuse')) {
+      const d = takeFromHand(p, 'defuse')[0]; G.discard.push(d); playDefuse();
+      fly(idx === 0 ? $('#hand') : oppEl(idx), $('#discbox'), 'defuse');
+      const left = count(p, 'defuse');
+      log(idx === 0 ? `Bạn dùng 1 Defuse${left ? `, còn ${left} lá` : ', hết Defuse!'}` : `${p.name} dùng Defuse!`);
+      if (idx !== 0) bubble(idx, 'Hú vía!');
+      render();
+      let pos;
+      if (p.bot) { await sleep(700); pos = botInsertPos(p); } else pos = await chooseInsert(c);
+      if (g !== GEN) return;
+      G.deck.splice(G.deck.length - pos, 0, c);
+      for (const q of G.players) {
+        if (q === p) { while (q.mem.length < pos) q.mem.push(null); q.mem.splice(pos, 0, 'ek'); }
+        else q.mem = q.mem.map((t, i) => t === 'implode' && i < pos ? t : null).filter((t, i, arr) => arr.slice(i).some(Boolean));
+      }
+      log(`${p.name} bí mật giấu Exploding Kitten lại vào bộ bài.`);
+      render();
+    } else await explode(p, c);
+  } else {
+    p.hand.push(c); sortHand(p);
+    if (idx === 0) {
+      render();
+      const el = document.querySelector(`#hand .card[data-id="${c.id}"]`); if (el) el.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
+      log(`Bạn rút được ${nameOf(c.t)} (${TYPES[c.t].vi})${fromBottom ? ' từ đáy' : ''}.`);
+    } else { log(`${p.name} rút 1 lá${fromBottom ? ' từ đáy' : ''}.`); render(); }
+  }
+}
+function boom() { const b = document.createElement('div'); b.id = 'boom'; b.innerHTML = '<span>BOOM!</span>'; document.body.appendChild(b); playBoom(); setTimeout(() => b.remove(), 950); }
+
+async function playAction(a) {
+  const p = G.players[a.actor];
+  removeCards(p, a.cards); G.discard.push(...a.cards);
+  playCard();
+  if (a.actor === 0) fly($('#hand'), $('#discbox'), a.cards[0].t); else fly(oppEl(a.actor), $('#discbox'), a.cards[0].t);
+  const txt = describe(a);
+  log(`${p.name} đánh ${txt}`);
+  if (a.actor !== 0) bubble(a.actor, txt, 1800);
+  render();
+  const g = GEN, noped = await nopeWindow(a);
+  if (g !== GEN) return { endTurn: true };
+  if (noped) { log(`${txt} bị Nope, không có tác dụng.`); render(); await sleep(400); return { endTurn: false, noped: true }; }
+  return await resolve(a);
+}
+function doAttack(targetIdx) {
+  const t = G.turnsLeft === 1 ? 2 : G.turnsLeft + 2;
+  G.turnsLeft = 0;
+  if (targetIdx == null) { G.pendingAttack = t; advance(); } else { G.cur = targetIdx; G.turnsLeft = t; G.pendingAttack = 0; G.splashed = false; }
+  log(`${cur().name} phải chơi ${G.turnsLeft} lượt liên tiếp!`);
+}
+async function resolve(a) {
+  const P = G.players, p = P[a.actor], g = GEN;
+  if (a.kind === 'single') {
+    switch (a.type) {
+      case 'attack': doAttack(null); render(); await sleep(500); return { endTurn: true };
+      case 'targeted': doAttack(a.target); render(); await sleep(500); return { endTurn: true };
+      case 'skip': G.turnsLeft--; if (G.turnsLeft <= 0) advance(); else log(`${p.name} còn ${G.turnsLeft} lượt nữa.`); render(); await sleep(300); return { endTurn: true };
+      case 'reverse':
+        G.dir *= -1; log(P.length > 2 ? `Chiều chơi đảo ngược!` : `Reverse với 2 người = Skip.`);
+        G.turnsLeft--; if (G.turnsLeft <= 0) advance(); render(); await sleep(300); return { endTurn: true };
+      case 'bottom':
+        await drawCard(p, true); if (g !== GEN) return { endTurn: true };
+        if (!G.over) consumeTurn(); return { endTurn: true, consumed: true };
+      case 'future': {
+        const top = G.deck.slice(-3).reverse().map(c => c.t);
+        p.mem = top.slice();
+        if (!p.bot) await showFuture(top, false); else { await sleep(600); bubble(a.actor, isKitten(top[0]) ? '😱' : '😏'); }
+        if (g !== GEN) return { endTurn: true };
+        render(); return { endTurn: false };
+      }
+      case 'alter': {
+        const n = Math.min(3, G.deck.length), topCards = G.deck.slice(-n).reverse();
+        let order;
+        if (!p.bot) order = await showFuture(topCards.map(c => c.t), true); else { await sleep(600); order = botAlter(topCards); bubble(a.actor, '🔮'); }
+        if (g !== GEN) return { endTurn: true };
+        const arranged = order.map(i => topCards[i]);
+        G.deck.splice(G.deck.length - n, n, ...arranged.slice().reverse());
+        p.mem = arranged.map(c => c.t);
+        for (const q of P) if (q !== p) q.mem = q.mem.map((t, i) => i < n && t !== 'implode' ? null : t);
+        for (const q of P) { for (let i = 0; i < n; i++) if (arranged[i].t === 'implode') { while (q.mem.length < n) q.mem.push(null); q.mem[i] = 'implode'; } }
+        render(); return { endTurn: false };
+      }
+      case 'shuffle':
+        shuffleArr(G.deck); for (const q of P) q.mem = [];
+        { const ip = implodePos(); if (ip >= 0) for (const q of P) { while (q.mem.length <= ip) q.mem.push(null); q.mem[ip] = 'implode'; } }
+        playShuffle(); render(); await sleep(500); return { endTurn: false };
+      case 'favor': {
+        const t = P[a.target];
+        if (!t.hand.length) { log(`${t.name} không còn bài để đưa.`); return { endTurn: false }; }
+        let c;
+        if (t.bot) { await sleep(600); c = botGiveCard(t); } else c = await chooseGive(p);
+        if (g !== GEN) return { endTurn: true };
+        removeCards(t, [c]); p.hand.push(c); sortHand(p);
+        fly(a.target === 0 ? $('#hand') : oppEl(a.target), a.actor === 0 ? $('#hand') : oppEl(a.actor), c.t);
+        log(a.actor === 0 ? `Bạn nhận ${nameOf(c.t)} từ ${t.name}.` : (a.target === 0 ? `Bạn đưa ${nameOf(c.t)} cho ${p.name}.` : `${t.name} đưa 1 lá cho ${p.name}.`));
+        playDeal(); render(); return { endTurn: false };
+      }
+    }
+  }
+  if (a.kind === 'pair') {
+    const t = P[a.target];
+    if (!t.hand.length) { log(`${t.name} không còn bài.`); return { endTurn: false }; }
+    const c = t.hand.splice(rnd(t.hand.length), 1)[0]; p.hand.push(c); sortHand(p);
+    fly(a.target === 0 ? $('#hand') : oppEl(a.target), a.actor === 0 ? $('#hand') : oppEl(a.actor), c.t);
+    log(a.actor === 0 ? `Bạn cướp được ${nameOf(c.t)} của ${t.name}!` : (a.target === 0 ? `${p.name} cướp mất ${nameOf(c.t)} của bạn!` : `${p.name} cướp 1 lá của ${t.name}.`));
+    playSteal(); render(); return { endTurn: false };
+  }
+  if (a.kind === 'triple') {
+    const t = P[a.target], c = takeFromHand(t, a.want)[0];
+    if (c) { p.hand.push(c); sortHand(p); log(`${p.name} lấy được ${nameOf(c.t)} từ ${t.name}!`); playSteal(); fly(a.target === 0 ? $('#hand') : oppEl(a.target), a.actor === 0 ? $('#hand') : oppEl(a.actor), c.t); }
+    else log(`${t.name} không có ${nameOf(a.want)}. Hụt!`);
+    render(); return { endTurn: false };
+  }
+  if (a.kind === 'five') {
+    const i = G.discard.findIndex(c => c.id === a.pick.id);
+    if (i >= 0) { const c = G.discard.splice(i, 1)[0]; p.hand.push(c); sortHand(p); log(`${p.name} lấy ${nameOf(c.t)} từ bài bỏ.`); playSteal(); }
+    render(); return { endTurn: false };
+  }
+  return { endTurn: false };
+}
+
+// ── cửa sổ Nope ──
+async function nopeWindow(a) {
+  let last = a.actor, n = 0; const g = GEN;
+  while (true) {
+    const who = await waitNope(a, last, n);
+    if (g !== GEN) return true;
+    if (who < 0) break;
+    const q = G.players[who];
+    const c = takeFromHand(q, 'nope')[0]; G.discard.push(c);
+    n++; last = who;
+    playNope(); stamp('NOPE!');
+    log(n % 2 ? `${q.name} NOPE!` : `${q.name} Nope lại! Hành động có hiệu lực trở lại.`);
+    if (who !== 0) bubble(who, 'NOPE!');
+    render();
+    await sleep(600);
+    if (g !== GEN) return true;
+  }
+  return n % 2 === 1;
+}
+function waitNope(a, last, n) {
+  return new Promise(res => {
+    const timers = []; let done = false;
+    const finish = v => { if (done) return; done = true; timers.forEach(clearTimeout); hideNopeBar(); res(v); };
+    let humanOk = false, maxD = 0;
+    G.players.forEach((p, i) => {
+      if (!p.alive || i === last || !has(p, 'nope')) return;
+      if (!p.bot) { humanOk = true; return; }
+      if (botWantsNope(p, i, a, n)) { const d = (700 + rnd(1100)) * SPEED; maxD = Math.max(maxD, d); timers.push(setTimeout(() => finish(i), d)); }
+    });
+    const botWin = maxD ? maxD + 150 * SPEED : 350 * SPEED, t0 = Date.now();
+    const win = humanOk ? 5000 : botWin;
+    let endT = setTimeout(() => finish(-1), win); timers.push(endT);
+    if (humanOk) showNopeBar(a, n, win, () => finish(0), () => {
+      hideNopeBar(); clearTimeout(endT);
+      endT = setTimeout(() => finish(-1), Math.max(0, t0 + botWin - Date.now())); timers.push(endT);
+    });
+  });
+}
+function showNopeBar(a, n, ms, onNope, onPass) {
+  hideNopeBar();
+  const p = G.players[a.actor];
+  const bar = document.createElement('div'); bar.id = 'nopebar';
+  const txt = n % 2 ? `Nope đang chặn ${a.actor === 0 ? 'bài của <b>bạn</b>' : 'bài của <b>' + esc(p.name) + '</b>'}. Nope lại?` : `<b>${esc(p.name)}</b> đánh ${esc(describe(a))}. Chặn không?`;
+  bar.innerHTML = `<div class="ring"><span>🚫</span></div><div class="nt">${txt}</div><div class="nb"><button class="btn">NOPE!</button><button class="btn pass">Không</button></div>`;
+  document.body.appendChild(bar);
+  const tr = $('#table').getBoundingClientRect(); bar.style.top = `${tr.top + tr.height / 2}px`;
+  const ring = bar.querySelector('.ring'), t0 = performance.now();
+  const tick = () => { if (!bar.isConnected) return; const k = Math.max(0, 1 - (performance.now() - t0) / ms); ring.style.setProperty('--p', `${k * 100}%`); requestAnimationFrame(tick); };
+  tick();
+  bar.querySelector('.btn:not(.pass)').addEventListener('click', onNope);
+  bar.querySelector('.pass').addEventListener('click', () => { playClick(); onPass && onPass(); });
+}
+function hideNopeBar() { const b = $('#nopebar'); if (b) b.remove(); }
+
+// ═══════════════════════════ người chơi ═══════════════════════════
+async function humanDraw() {
+  if (locked || G.cur !== 0 || G.over) return;
+  locked = true; sel.clear(); render(); hint('');
+  const g = GEN;
+  await drawCard(me());
+  if (g === GEN && !G.over) consumeTurn();
+}
+async function humanPlay() {
+  if (locked || G.cur !== 0 || G.over) return;
+  const cards = [...sel].map(id => me().hand.find(c => c.id === id)).filter(Boolean);
+  const a = comboOf(cards); if (!a) return;
+  a.actor = 0;
+  locked = true; render();
+  const g0 = GEN;
+  const others = alive().filter(p => p !== me());
+  const cancel = () => { locked = false; render(); hint('Đã huỷ. Chọn bài khác hoặc rút.'); };
+  if (a.kind === 'single' && a.type === 'targeted') {
+    const t = others.length === 1 ? others[0] : await chooseTarget(others, a); if (!t) return cancel();
+    a.target = G.players.indexOf(t);
+  }
+  if ((a.kind === 'single' && a.type === 'favor') || a.kind === 'pair' || a.kind === 'triple') {
+    const withCards = others.filter(p => p.hand.length);
+    if (!withCards.length) { hint('Không ai còn bài để lấy.'); locked = false; render(); return; }
+    const t = withCards.length === 1 ? withCards[0] : await chooseTarget(withCards, a); if (!t) return cancel();
+    a.target = G.players.indexOf(t);
+    if (a.kind === 'triple') { a.want = await chooseType(); if (!a.want) return cancel(); }
+  }
+  if (a.kind === 'five') {
+    const pool = G.discard.filter(c => !isKitten(c.t));
+    if (!pool.length) { hint('Chồng bài bỏ chưa có gì để lấy.'); locked = false; render(); return; }
+    a.pick = await chooseDiscard(pool); if (!a.pick) return cancel();
+  }
+  if (g0 !== GEN) return;
+  sel.clear();
+  const g = GEN, r = await playAction(a);
+  if (g !== GEN || G.over) return;
+  if (r.consumed) return;
+  if (r.endTurn) queueTurn();
+  else { locked = false; render(); hint('Vẫn là lượt của bạn: đánh tiếp hoặc rút 1 lá để kết thúc'); }
+}
+$('#drawBtn').addEventListener('click', humanDraw);
+$('#deckbox').addEventListener('click', humanDraw);
+$('#playBtn').addEventListener('click', humanPlay);
+
+// ═══════════════════════════ hộp thoại ═══════════════════════════
+function dialog(html, wide) { const ov = document.createElement('div'); ov.className = 'ov'; ov.innerHTML = `<div class="dlg${wide ? ' wide' : ''}">${html}</div>`; document.body.appendChild(ov); return ov; }
+function chooseTarget(list, a) {
+  return new Promise(res => {
+    const ov = dialog(`<h2>${esc(comboLabel(a))}</h2><p>Chọn người bị nhắm tới</p><div class="row" id="tg"></div><div class="row"><button class="btn sm" id="cx">Huỷ</button></div>`);
+    const tg = ov.querySelector('#tg');
+    for (const p of list) {
+      const b = document.createElement('button'); b.className = 'tgt';
+      b.innerHTML = `<div class="av">${p.av}</div><div class="nm">${esc(p.name)}</div><div class="ct">${p.hand.length} lá</div>`;
+      b.addEventListener('click', () => { ov.remove(); playClick(); res(p); });
+      tg.appendChild(b);
+    }
+    ov.querySelector('#cx').addEventListener('click', () => { ov.remove(); res(null); });
+  });
+}
+function chooseType() {
+  return new Promise(res => {
+    const ov = dialog(`<h2>Đòi lá gì?</h2><p>Nếu người đó có, họ phải đưa bạn</p><div class="cards" id="cs"></div><div class="row"><button class="btn sm" id="cx">Huỷ</button></div>`, true);
+    const cs = ov.querySelector('#cs');
+    for (const t of ORDER) { if (isKitten(t) || (TYPES[t].exp && !G.opt.exp)) continue; const el = cardEl(mk(t), 'small'); el.addEventListener('click', () => { ov.remove(); playClick(); res(t); }); cs.appendChild(el); }
+    ov.querySelector('#cx').addEventListener('click', () => { ov.remove(); res(null); });
+  });
+}
+function chooseDiscard(pool) {
+  return new Promise(res => {
+    const seen = new Map(); for (const c of pool) if (!seen.has(c.t)) seen.set(c.t, c);
+    const ov = dialog(`<h2>Lấy lá nào từ bài bỏ?</h2><div class="cards" id="cs"></div><div class="row"><button class="btn sm" id="cx">Huỷ</button></div>`, true);
+    const cs = ov.querySelector('#cs');
+    for (const c of [...seen.values()].sort((a, b) => ORDER.indexOf(a.t) - ORDER.indexOf(b.t))) { const el = cardEl(c, 'small'); el.addEventListener('click', () => { ov.remove(); playClick(); res(c); }); cs.appendChild(el); }
+    ov.querySelector('#cx').addEventListener('click', () => { ov.remove(); res(null); });
+  });
+}
+function chooseGive(to) {
+  return new Promise(res => {
+    const ov = dialog(`<h2>${esc(to.name)} xin bài (Favor)</h2><p>Bạn phải đưa 1 lá bất kỳ — chọn lá ít giá trị nhất</p><div class="cards" id="cs"></div>`, true);
+    const cs = ov.querySelector('#cs');
+    for (const c of me().hand) { const el = cardEl(c, 'small'); el.addEventListener('click', () => { ov.remove(); playClick(); res(c); }); cs.appendChild(el); }
+  });
+}
+function showFuture(top, rearrange) {
+  return new Promise(res => {
+    const ov = dialog(`<h2>${rearrange ? 'Alter the Future' : 'See the Future'}</h2><p>${rearrange ? 'Chạm các lá theo thứ tự bạn muốn chúng được rút (1 = trên cùng)' : '3 lá trên cùng, từ trái sang phải là lá sắp rút'}</p><div class="cards" id="cs"></div><div class="row"><button class="btn sm" id="rs" ${rearrange ? '' : 'hidden'}>Chọn lại</button><button class="btn pri" id="ok" ${rearrange ? 'disabled' : ''}>${rearrange ? 'Xác nhận' : 'Đã rõ'}</button></div>`, true);
+    const cs = ov.querySelector('#cs'); let order = [];
+    const draw = () => {
+      cs.innerHTML = '';
+      top.forEach((t, i) => {
+        const el = cardEl(mk(t), ''); el.style.cursor = rearrange ? 'pointer' : 'default';
+        const k = order.indexOf(i);
+        const num = document.createElement('div'); num.className = 'num'; num.textContent = rearrange ? (k >= 0 ? k + 1 : '') : i + 1; if (!rearrange || k >= 0) el.appendChild(num);
+        if (rearrange) el.addEventListener('click', () => { if (order.includes(i)) return; order.push(i); playClick(); draw(); ov.querySelector('#ok').disabled = order.length !== top.length; });
+        cs.appendChild(el);
+      });
+      if (!top.length) cs.innerHTML = '<p>Bộ bài trống.</p>';
+    };
+    draw();
+    ov.querySelector('#rs').addEventListener('click', () => { order = []; draw(); ov.querySelector('#ok').disabled = true; });
+    ov.querySelector('#ok').addEventListener('click', () => { ov.remove(); res(rearrange ? order : null); });
+  });
+}
+function chooseInsert(c) {
+  return new Promise(res => {
+    const n = G.deck.length, imp = c.t === 'implode';
+    const ov = dialog(`<h2>${imp ? 'Imploding Kitten' : 'Defuse thành công!'}</h2><p>${imp ? `Đặt Imploding Kitten NGỬA lại vào bộ bài ${n} lá. Mọi người đều thấy vị trí này.` : `Bí mật giấu Exploding Kitten vào đâu trong ${n} lá? (0 = trên cùng, người sau sẽ rút trúng ngay)`}</p>
+      <div class="pos" id="pos"></div><input type="range" id="rg" min="0" max="${n}" value="0">
+      <div class="row"><button class="btn sm" data-v="0">Trên cùng</button><button class="btn sm" data-v="r">Ngẫu nhiên</button><button class="btn sm" data-v="${n}">Dưới cùng</button></div>
+      <div class="row"><button class="btn pri grn" id="ok">Đặt vào đây</button></div>`);
+    const rg = ov.querySelector('#rg'), pos = ov.querySelector('#pos');
+    const upd = () => { const v = +rg.value; pos.textContent = v === 0 ? 'Trên cùng (lá kế tiếp)' : v >= n ? 'Dưới cùng' : `Lá thứ ${v + 1} từ trên xuống`; };
+    rg.addEventListener('input', upd); upd();
+    ov.querySelectorAll('[data-v]').forEach(b => b.addEventListener('click', () => { rg.value = b.dataset.v === 'r' ? rnd(n + 1) : +b.dataset.v; upd(); playClick(); }));
+    ov.querySelector('#ok').addEventListener('click', () => { ov.remove(); res(+rg.value); });
+  });
+}
+function showGameOver(w) {
+  stats.games++; if (w && !w.bot) stats.wins++; store.set('ek.stats', stats);
+  const rank = [w, ...G.elim.slice().reverse()].filter(Boolean);
+  const medals = ['🏆', '🥈', '🥉', '4️⃣', '5️⃣'];
+  const ov = dialog(`<h2>${w && !w.bot ? '<b>BẠN THẮNG!</b>' : `Bạn đã nổ<br><b>${w ? esc(w.name) : '?'}</b> sống sót`}</h2>
+    <div class="rank">${rank.map((p, i) => `<div><span>${medals[i] || ''}</span><span>${p.av}</span><span>${esc(p.name)}</span></div>`).join('')}</div>
+    <div class="stats">Thắng ${stats.wins}/${stats.games} ván</div>
+    <div class="row"><button class="btn pri" id="again">Chơi ván mới</button><button class="btn sm" id="setup">Thiết lập</button></div>`);
+  if (w && !w.bot) playWin(); else playLose();
+  ov.querySelector('#again').addEventListener('click', () => { ov.remove(); newGame(G.opt); });
+  ov.querySelector('#setup').addEventListener('click', () => { ov.remove(); showSetup(); });
+}
+function showSetup() {
+  const o = Object.assign({ bots: 2, name: 'Bạn', hand: 4, exp: false }, store.get('ek.setup', {}));
+  const ov = dialog(`<h2><b>Exploding</b> Kittens</h2><p>Mèo Nổ — rút bài, đừng rút trúng mèo. Người cuối cùng sống sót thắng!</p>
+    <div class="lab">Tên của bạn</div><input type="text" id="nm" maxlength="12" placeholder="Tên của bạn" value="${esc(o.name)}">
+    <div class="lab">Số máy chơi cùng</div><div class="opt" id="optb">${[1, 2, 3, 4].map(n => `<button data-n="${n}" class="${n === o.bots ? 'on' : ''}">${n}</button>`).join('')}</div>
+    <div class="lab">Số lá chia mỗi người</div><div class="opt" id="opth"><button data-n="4" class="${o.hand === 4 ? 'on' : ''}">4 lá (bản gốc)</button><button data-n="7" class="${o.hand === 7 ? 'on' : ''}">7 lá (bản mới)</button></div>
+    <div class="sw" id="sw"><div><div class="t">Bản mở rộng Imploding Kittens</div><div class="d">Thêm Feral Cat, Draw From the Bottom, Reverse, Alter the Future, Targeted Attack và Imploding Kitten</div></div><div class="tog${o.exp ? ' on' : ''}" id="tog"></div></div>
+    <div class="row"><button class="btn pri" id="go">Bắt đầu</button><button class="btn sm" id="rl">Luật chơi</button><a class="btn sm" href="meono.html?cards" style="text-decoration:none">Lá bài</a></div>
+    ${stats.games ? `<div class="stats" style="margin-top:10px">Thắng ${stats.wins}/${stats.games} ván</div>` : ''}`);
+  let bots = o.bots, hand = o.hand, exp = o.exp;
+  ov.querySelectorAll('#optb button').forEach(b => b.addEventListener('click', () => { bots = +b.dataset.n; ov.querySelectorAll('#optb button').forEach(x => x.classList.toggle('on', x === b)); playClick(); }));
+  ov.querySelectorAll('#opth button').forEach(b => b.addEventListener('click', () => { hand = +b.dataset.n; ov.querySelectorAll('#opth button').forEach(x => x.classList.toggle('on', x === b)); playClick(); }));
+  ov.querySelector('#sw').addEventListener('click', () => { exp = !exp; ov.querySelector('#tog').classList.toggle('on', exp); playClick(); });
+  ov.querySelector('#go').addEventListener('click', () => {
+    const name = ov.querySelector('#nm').value.trim() || 'Bạn';
+    const opt = { bots, name, hand, exp }; store.set('ek.setup', opt); ov.remove(); newGame(opt);
+  });
+  ov.querySelector('#rl').addEventListener('click', showRules);
+}
+function showCardInfo(t) {
+  const T = TYPES[t];
+  const ov = dialog(`<div class="cinfo">${cardEl(mk(t), 'big').outerHTML}<div><div class="en">${T.en}</div><div class="vi">${T.vi}</div><div class="ds">${T.desc}.</div>${tipOf(t) ? `<div class="tip">${tipOf(t)}</div>` : ''}<span class="n">${countOf(t)}</span></div></div><div class="row"><button class="btn pri" id="ok">Đóng</button><a class="btn sm" href="meono.html?cards" style="text-decoration:none">Xem tất cả lá bài</a></div>`);
+  ov.querySelector('.cinfo .card .info').remove();
+  ov.querySelector('#ok').addEventListener('click', () => ov.remove());
+  ov.addEventListener('click', e => { if (e.target === ov) ov.remove(); });
+}
+function renderGalleryPage() {
+  document.body.className = 'cards';
+  const grp = exp => Object.keys(TYPES).filter(t => !!TYPES[t].exp === exp).map(t => { const T = TYPES[t]; const el = cardEl(mk(t), ''); el.querySelector('.info').remove(); return `<div class="g">${el.outerHTML}<div><div class="en">${T.en}</div><div class="vi">${T.vi}</div><div class="ds">${T.desc}.</div>${tipOf(t) ? `<div class="tip">${tipOf(t)}</div>` : ''}<span class="n">${countOf(t)}</span></div></div>`; }).join('');
+  document.body.innerHTML = `<div class="page">
+    <div class="ph"><a class="ib" href="meono.html" aria-label="Về game">‹</a><h1><b>Exploding Kittens</b> — toàn bộ lá bài</h1><a class="ib" href="index.html" title="Trang chủ">⌂</a></div>
+    <p class="lead">Mèo Nổ là trò rút bài may rủi kiểu "cò quay Nga": mỗi lượt bạn đánh bao nhiêu lá tuỳ ý rồi rút 1 lá. Rút trúng Exploding Kitten mà không có Defuse là bị loại. Người cuối cùng sống sót thắng. Dưới đây là tất cả lá bài, tên tiếng Anh kèm giải thích tiếng Việt.</p>
+    <h2>Cách chơi tóm tắt</h2>
+    <ol class="steps">
+      <li><b>Chuẩn bị:</b> mỗi người nhận 1 Defuse + 4 lá (bản gốc) hoặc 7 lá (bản mới). Trộn số Exploding Kitten = số người − 1 và các Defuse còn dư vào bộ bài.</li>
+      <li><b>Lượt chơi:</b> đánh bài hành động hoặc combo mèo (không bắt buộc), sau đó rút 1 lá từ trên cùng để kết thúc lượt. Skip, Attack, Reverse, Draw From the Bottom kết thúc lượt theo cách riêng.</li>
+      <li><b>Nope:</b> bất kỳ ai cũng có thể chặn một lá vừa đánh, kể cả ngoài lượt. Chỉ Exploding Kitten và Defuse không chặn được.</li>
+      <li><b>Combo mèo:</b> 2 mèo giống nhau = cướp 1 lá ngẫu nhiên · 3 mèo giống nhau = đòi đích danh · 5 lá khác loại = lấy 1 lá từ bài bỏ.</li>
+      <li><b>Thắng:</b> là người cuối cùng chưa nổ.</li>
+    </ol>
+    <h2>Bộ cơ bản <small>56 lá · 2–5 người</small></h2>
+    <div class="sec-d">Gồm 4 Exploding Kitten, 6 Defuse, 8 loại bài hành động và 5 loại mèo (mỗi loại 4 lá).</div>
+    <div class="cgrid">${grp(false)}</div>
+    <h2>Bản mở rộng Imploding Kittens <small>bật trong phần thiết lập</small></h2>
+    <div class="sec-d">Thay 1 Exploding Kitten bằng Imploding Kitten và thêm 19 lá mới. Máy chơi cùng cũng biết dùng các lá này.</div>
+    <div class="cgrid">${grp(true)}</div>
+  </div>`;
+}
+function showRules() {
+  const ov = dialog(`<h2>Luật chơi</h2>
+    <div><ul class="rules">
+      <li><b>Chuẩn bị:</b> mỗi người nhận <b>1 Defuse</b> + 4 lá (bản gốc) hoặc 7 lá (bản mới). Số Exploding Kitten trong bộ = số người − 1, Defuse còn lại trộn vào bộ bài.</li>
+      <li><b>Lượt chơi:</b> đánh <b>bao nhiêu lá tuỳ ý</b> (hoặc không đánh), rồi <b>rút 1 lá</b> để kết thúc lượt.</li>
+      <li>Rút trúng <b>Exploding Kitten</b> là bị loại — trừ khi có <b>Defuse</b>: khi đó bạn bí mật giấu Mèo Nổ lại vào bộ bài ở vị trí tuỳ chọn (đặt lên trên cùng để hại người kế!).</li>
+      <li><b>Attack</b> ép người kế chơi 2 lượt; đang bị Attack mà Attack tiếp thì người kế chịu 4 lượt. <b>Skip</b> chỉ bỏ qua 1 lượt.</li>
+      <li><b>Nope</b> chặn hành động vừa đánh của bất kỳ ai, dùng được ngoài lượt; có thể Nope lại Nope. Không chặn được Exploding Kitten và Defuse.</li>
+      <li><b>Combo mèo:</b> 2 mèo giống nhau → cướp 1 lá ngẫu nhiên; 3 mèo giống nhau → đòi đích danh 1 loại bài; 5 lá khác loại → lấy 1 lá bất kỳ từ chồng bài bỏ. Feral Cat thay thế bất kỳ mèo nào.</li>
+      <li><b>Chiến thắng:</b> người cuối cùng còn sống sót.</li>
+      <li><b>Mẹo:</b> dùng See the Future rồi Skip/Attack khi thấy Mèo Nổ trên cùng; Shuffle khi nghi ngờ người trước vừa đặt Mèo Nổ lên trên; theo dõi số lá còn lại để tính rủi ro.</li>
+    </ul></div>
+    <div class="row"><button class="btn pri" id="ok">Đã hiểu</button><a class="btn sm" href="meono.html?cards" style="text-decoration:none">Xem toàn bộ lá bài</a></div>`, true);
+  ov.querySelector('#ok').addEventListener('click', () => ov.remove());
+}
+$('#rulesBtn').addEventListener('click', showRules);
+$('#newBtn').addEventListener('click', () => {
+  if (G && !G.over) {
+    const ov = dialog(`<h2>Bỏ ván này?</h2><div class="row"><button class="btn pri" id="y">Bỏ, chơi ván mới</button><button class="btn sm" id="n">Chơi tiếp</button></div>`);
+    ov.querySelector('#y').addEventListener('click', () => { ov.remove(); G.over = true; GEN++; hideNopeBar(); document.querySelectorAll('.ov').forEach(o => o.remove()); showSetup(); });
+    ov.querySelector('#n').addEventListener('click', () => ov.remove());
+  } else showSetup();
+});
+
+// ═══════════════════════════ máy chơi ═══════════════════════════
+async function botTurn(p) {
+  let guard = 0; const g = GEN;
+  while (!G.over && cur() === p && guard++ < 8) {
+    const a = botDecide(p);
+    if (!a) break;
+    a.actor = G.players.indexOf(p);
+    await sleep(500 + rnd(500));
+    if (g !== GEN) return;
+    const r = await playAction(a);
+    if (g !== GEN || G.over) return;
+    if (r.consumed) return;
+    if (cur() !== p || r.endTurn) { queueTurn(); return; }
+    await sleep(350);
+  }
+  if (G.over || cur() !== p) return;
+  await sleep(500);
+  if (g !== GEN) return;
+  await drawCard(p);
+  if (g === GEN && !G.over) consumeTurn();
+}
+function botDecide(p) {
+  const i = G.players.indexOf(p), hasD = has(p, 'defuse');
+  const risk = G.deck.length ? kittensInDeck() / G.deck.length : 0;
+  const ip = implodePos();
+  const top = ip === 0 ? 'implode' : p.mem[0];
+  const topDanger = isKitten(top), topSafe = top && !isKitten(top);
+  const bottomDanger = ip >= 0 && ip === G.deck.length - 1;
+  const single = t => has(p, t) ? { kind: 'single', type: t, cards: p.hand.filter(c => c.t === t).slice(0, 1) } : null;
+  const others = alive().filter(q => q !== p && q.hand.length);
+  const target = () => { const best = others.slice().sort((a, b) => b.hand.length - a.hand.length); return G.players.indexOf(chance(.7) ? best[0] : pick(others)); };
+  const cats = {}; for (const c of p.hand) if (TYPES[c.t].cat && !TYPES[c.t].feral) (cats[c.t] = cats[c.t] || []).push(c);
+  const ferals = p.hand.filter(c => c.t === 'feral');
+  const groups = Object.values(cats).sort((a, b) => b.length - a.length);
+  const mkCombo = n => { for (const gr of groups) { if (gr.length + ferals.length >= n) return gr.slice(0, n).concat(ferals.slice(0, Math.max(0, n - gr.length))); } return ferals.length >= n ? ferals.slice(0, n) : null; };
+  const triple = mkCombo(3), pair = mkCombo(2);
+  const want = () => { for (const t of ['defuse', 'attack', 'skip', 'nope', 'future']) if (!has(p, t) || t === 'defuse') return t; return 'shuffle'; };
+  const atk = () => { if (has(p, 'attack')) return single('attack'); if (has(p, 'targeted') && others.length) return { ...single('targeted'), target: target() }; return null; };
+  const escapeTurn = () => { const a = atk(); if (a) return a; if (has(p, 'skip')) return single('skip'); if (has(p, 'reverse') && alive().length > 2) return single('reverse'); if (has(p, 'bottom') && !bottomDanger) return single('bottom'); if (has(p, 'shuffle') && top !== 'implode') return single('shuffle'); return null; };
+
+  if (topDanger) {
+    const e = escapeTurn(); if (e) return e;
+    if (top === 'implode' && has(p, 'alter')) return single('alter');
+    if (top === 'implode' && has(p, 'shuffle')) return single('shuffle');
+    if (!hasD && triple && others.length) return { kind: 'triple', type: catMatch(triple), cards: triple, target: target(), want: 'defuse' };
+    if (!hasD && has(p, 'favor') && others.length) return { ...single('favor'), target: target() };
+    if (!hasD && pair && others.length) return { kind: 'pair', type: catMatch(pair), cards: pair, target: target() };
+    return null;
+  }
+  if (!top && risk > 0.1 && chance(.85)) { if (has(p, 'future')) return single('future'); if (has(p, 'alter')) return single('alter'); }
+  const danger = !topSafe && (risk >= 0.3 || (!hasD && risk > 0.15));
+  if (danger) {
+    const a = atk(); if (a && chance(.8)) return a;
+    if (has(p, 'skip') && chance(.75)) return single('skip');
+    if (has(p, 'bottom') && !bottomDanger && chance(.6)) return single('bottom');
+    if (has(p, 'reverse') && alive().length > 2 && chance(.5)) return single('reverse');
+    if (!hasD && has(p, 'shuffle') && chance(.4)) return single('shuffle');
+  }
+  if (G.turnsLeft > 1 && !topSafe) {
+    const a = atk(); if (a && chance(.7)) return a;
+    if (has(p, 'skip') && chance(.5)) return single('skip');
+  }
+  if (others.length) {
+    if (triple && chance(hasD ? .45 : .8)) return { kind: 'triple', type: catMatch(triple), cards: triple, target: target(), want: want() };
+    if (pair && chance(hasD ? .3 : .6)) return { kind: 'pair', type: catMatch(pair), cards: pair, target: target() };
+    if (has(p, 'favor') && chance(hasD ? .25 : .55)) return { ...single('favor'), target: target() };
+    if (!topSafe && chance(.18)) { const a = atk(); if (a) return a; }
+  }
+  const uniq = new Map(); for (const c of p.hand) if (!uniq.has(c.t)) uniq.set(c.t, c);
+  if (uniq.size >= 5 && p.hand.length >= 8 && G.discard.some(c => c.t === 'defuse') && !hasD && chance(.7)) {
+    const pickC = G.discard.find(c => c.t === 'defuse');
+    const cards = [...uniq.values()].filter(c => c.t !== 'defuse' && c.t !== 'nope').slice(0, 5);
+    if (cards.length === 5) return { kind: 'five', cards, pick: pickC };
+  }
+  return null;
+}
+function botInsertPos(p) {
+  const n = G.deck.length;
+  if (G.turnsLeft > 1) return Math.min(n, 2 + rnd(Math.max(1, n - 2)));
+  const r = Math.random();
+  if (r < .55) return 0;
+  if (r < .75) return Math.min(n, 1);
+  return rnd(n + 1);
+}
+function botAlter(cards) {
+  const idx = cards.map((c, i) => i);
+  return idx.sort((a, b) => (isKitten(cards[a].t) ? 1 : 0) - (isKitten(cards[b].t) ? 1 : 0));
+}
+function botGiveCard(p) {
+  const pri = ['cat1', 'cat2', 'cat3', 'cat4', 'cat5', 'feral', 'shuffle', 'favor', 'future', 'alter', 'reverse', 'skip', 'bottom', 'attack', 'targeted', 'nope', 'defuse'];
+  const singles = pri.filter(t => count(p, t) === 1 && TYPES[t].cat);
+  const t = singles[0] || pri.find(t => has(p, t));
+  return p.hand.find(c => c.t === t) || p.hand[0];
+}
+function botWantsNope(p, i, a, n) {
+  const next = nextAlive(a.actor), mine = a.actor === i;
+  const top = implodePos() === 0 ? 'implode' : p.mem[0];
+  let want = 0;
+  if (n % 2 === 0) {
+    if (mine) return false;
+    if (a.kind === 'single' && a.type === 'attack' && next === i) want = .7;
+    else if (a.kind === 'single' && a.type === 'targeted' && a.target === i) want = .8;
+    else if (a.kind === 'single' && a.type === 'favor' && a.target === i) want = .6;
+    else if ((a.kind === 'pair' || a.kind === 'triple') && a.target === i) want = a.kind === 'triple' && a.want === 'defuse' ? .85 : .55;
+    else if (a.kind === 'single' && ['skip', 'reverse', 'bottom'].includes(a.type) && isKitten(top)) want = next === i ? .3 : .55;
+    else if (a.kind === 'single' && (a.type === 'shuffle' || a.type === 'alter') && p.mem.length) want = .35;
+    else if (a.kind === 'five' && a.pick && a.pick.t === 'defuse') want = .4;
+    else want = .05;
+  } else {
+    if (mine) want = .6;
+    else if (a.kind === 'single' && (a.type === 'attack' || a.type === 'targeted') && next !== i && a.target !== i) want = .15;
+    else want = .03;
+  }
+  if (count(p, 'nope') > 1) want += .1;
+  return chance(want);
+}
+
+// ═══════════════════════════ âm thanh (tự tổng hợp) ═══════════════════════════
+let actx = null, muted = store.get('ek.mute', false), noiseBuf = null;
+function audio() { if (!actx) { try { actx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return null; } } if (actx.state === 'suspended') actx.resume().catch(() => {}); return actx; }
+const unlockAudio = () => { if (!muted && (!actx || actx.state !== 'running')) audio(); };
+document.addEventListener('pointerdown', unlockAudio, true);
+document.addEventListener('keydown', unlockAudio, true);
+function sndT() { if (muted || SPEED === 0) return 0; const ctx = audio(); return ctx && ctx.state === 'running' ? ctx.currentTime + 0.005 : 0; }
+function nburst(t, vol, freq, q, len, type = 'bandpass') {
+  if (!noiseBuf) { noiseBuf = actx.createBuffer(1, actx.sampleRate, actx.sampleRate); const d = noiseBuf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; }
+  const src = actx.createBufferSource(), f = actx.createBiquadFilter(), g = actx.createGain();
+  src.buffer = noiseBuf; f.type = type; f.frequency.value = freq; f.Q.value = q;
+  g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.008); g.gain.exponentialRampToValueAtTime(0.001, t + len);
+  src.connect(f).connect(g).connect(actx.destination); src.start(t); src.stop(t + len + 0.02);
+}
+function tone(t, freq, vol, len, type = 'sine', to) {
+  const o = actx.createOscillator(), g = actx.createGain();
+  o.type = type; o.frequency.setValueAtTime(freq, t); if (to) o.frequency.exponentialRampToValueAtTime(to, t + len);
+  g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.005); g.gain.exponentialRampToValueAtTime(0.001, t + len);
+  o.connect(g).connect(actx.destination); o.start(t); o.stop(t + len + 0.02);
+}
+function playDeal() { const t = sndT(); if (t) { nburst(t, 0.25, 2400, 0.8, 0.07); nburst(t + 0.04, 0.1, 900, 1, 0.05); } }
+function playCard() { const t = sndT(); if (t) { nburst(t, 0.3, 1800, 1, 0.06); tone(t, 520, 0.08, 0.08, 'triangle', 700); } }
+function playClick() { const t = sndT(); if (t) tone(t, 900, 0.06, 0.04, 'square'); }
+function playNope() { const t = sndT(); if (t) { tone(t, 220, 0.25, 0.18, 'sawtooth', 160); tone(t + 0.05, 180, 0.2, 0.2, 'square', 120); } }
+function playSteal() { const t = sndT(); if (t) { tone(t, 600, 0.12, 0.08, 'triangle', 900); tone(t + 0.09, 900, 0.12, 0.1, 'triangle', 1300); } }
+function playShuffle() { const t = sndT(); if (t) for (let i = 0; i < 6; i++) nburst(t + i * 0.06, 0.18, 1500 + rnd(800), 1, 0.05); }
+function playDefuse() { const t = sndT(); if (t) { nburst(t, 0.3, 4000, 0.5, 0.45, 'highpass'); tone(t + 0.1, 500, 0.12, 0.3, 'sine', 900); } }
+function playFuse() { const t = sndT(); if (t) { for (let i = 0; i < 7; i++) tone(t + i * 0.12, 1200 + i * 150, 0.07, 0.06, 'square'); nburst(t, 0.15, 6000, 0.7, 0.8, 'highpass'); } }
+function playBoom() { const t = sndT(); if (t) { nburst(t, 0.9, 120, 0.5, 0.9, 'lowpass'); nburst(t, 0.5, 900, 0.6, 0.5); tone(t, 90, 0.5, 0.7, 'sine', 30); } }
+function playTurn() { const t = sndT(); if (t) { tone(t, 660, 0.14, 0.09, 'triangle'); tone(t + 0.1, 990, 0.14, 0.14, 'triangle'); } }
+function playWin() { const t = sndT(); if (t) [523, 659, 784, 1047].forEach((f, i) => tone(t + i * 0.12, f, 0.18, 0.25, 'triangle')); }
+function playLose() { const t = sndT(); if (t) [392, 330, 262].forEach((f, i) => tone(t + i * 0.2, f, 0.18, 0.3, 'sawtooth')); }
+function updMute() { $('#muteBtn').textContent = muted ? '🔇' : '🔊'; }
+$('#muteBtn').addEventListener('click', () => { muted = !muted; store.set('ek.mute', muted); updMute(); if (!muted) { audio(); playClick(); } });
+updMute();
+
+if (/[?&]cards/.test(location.search)) renderGalleryPage(); else showSetup();
+</script>
+</body>
+</html>
