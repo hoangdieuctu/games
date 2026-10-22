@@ -120,7 +120,10 @@ button:disabled { opacity: .4; cursor: default; }
 .sq-price { font: 700 10px 'Baloo 2', system-ui, sans-serif; text-anchor: middle; dominant-baseline: central; pointer-events: none; fill: var(--muted); }
 .sq-big { font: 800 11.5px 'Baloo 2', system-ui, sans-serif; text-anchor: middle; dominant-baseline: central; pointer-events: none; letter-spacing: .4px; }
 .sq-icon { text-anchor: middle; dominant-baseline: central; pointer-events: none; }
-.center-pot { font: 800 30px 'Baloo 2', system-ui, sans-serif; text-anchor: middle; dominant-baseline: central; pointer-events: none; fill: #ffd23f; }
+.pot-box { pointer-events: none; }
+.pot-body { transform-box: fill-box; transform-origin: 50% 100%; }
+.pot-amt { font: 800 12px 'Baloo 2', system-ui, sans-serif; text-anchor: middle; dominant-baseline: central; fill: #ffd23f; letter-spacing: .3px; }
+.pot-box.empty .pot-amt { fill: rgba(255,255,255,.6); }
 .center-title { font: 800 64px 'Baloo 2', system-ui, sans-serif; text-anchor: middle; dominant-baseline: central; letter-spacing: 3px; pointer-events: none; fill: rgba(255,255,255,.22); }
 .center-sub { font: 700 14px 'Baloo 2', system-ui, sans-serif; text-anchor: middle; dominant-baseline: central; fill: rgba(255,255,255,.4); pointer-events: none; }
 .deck-title { font: 800 15px 'Baloo 2', system-ui, sans-serif; text-anchor: middle; dominant-baseline: central; fill: #fff; letter-spacing: 1px; pointer-events: none; }
@@ -1157,7 +1160,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
 const STEP_MS = 160;
 
 let G = null;
-let potTxt = null; // chữ Quỹ Thuế giữa bàn
+let potBox = null; // hòm Quỹ Thuế giữa bàn: { g, amt, coins }
 let setup = store.get('typhu.setup', ['you', 'bot', 'bot', 'bot']);
 let localNames = store.get('typhu.names', ['', '', '', '']);
 let setupChars = store.get('typhu.chars', ['mc', '', '', '']);
@@ -2454,6 +2457,32 @@ function drawCorner(i, sg) {
     if (flat) bill(cx, Y + 32, 'sq-icon', '🚌', gi, { style: 'font-size:28px' });
   }
 }
+// hòm Quỹ Thuế dựng đứng giữa bàn: hòm gỗ viền vàng, khe bỏ tiền trên nắp, đống xu chất trên nóc theo số tiền, nhãn số tiền giữa mặt trước
+function drawPotBox(x, y) {
+  const [X, Y] = proj(x, y, SLAB), root = el('g', { transform: `translate(${X} ${Y})`, class: 'pot-box' }, $('gIcons'));
+  const g = el('g', { class: 'pot-body' }, root);
+  const R = (x, y, w, h, a) => el('rect', { x, y, width: w, height: h, ...a }, g);
+  el('ellipse', { cx: 0, cy: 2, rx: 46, ry: 11, fill: 'rgba(0,0,0,.3)' }, g);
+  // đống xu trên nóc: 3 mức, hiện dần khi quỹ lớn lên
+  const coins = [[], [], []];
+  const coin = (cx, cy, lvl) => { const c = el('g', { class: 'pot-coin' }, g); el('ellipse', { cx, cy: cy + 2, rx: 8, ry: 3.4, fill: '#b8860b' }, c); el('ellipse', { cx, cy, rx: 8, ry: 3.4, fill: '#ffd23f', stroke: '#b8860b', 'stroke-width': 1 }, c); coins[lvl].push(c); };
+  for (const [cx, cy, l] of [[-18, -52, 0], [-6, -54, 0], [8, -53, 0], [20, -51, 1], [-12, -57, 1], [2, -58, 1], [14, -57, 2], [-4, -62, 2], [8, -63, 2], [-20, -56, 2]]) coin(cx, cy, l);
+  // thân hòm: mặt trước, mặt bên tối, nắp
+  el('path', { d: 'M38 -8 L46 -14 L46 -50 L38 -44 Z', fill: '#6b3f1d', stroke: '#3d220e', 'stroke-width': 1.5, 'stroke-linejoin': 'round' }, g);
+  el('path', { d: 'M-38 -44 L-30 -50 L46 -50 L38 -44 Z', fill: '#b5743a', stroke: '#3d220e', 'stroke-width': 1.5, 'stroke-linejoin': 'round' }, g);
+  el('path', { d: 'M-14 -47.5 L18 -47.5', stroke: '#2a1608', 'stroke-width': 3, 'stroke-linecap': 'round' }, g); // khe bỏ tiền
+  R(-38, -44, 76, 40, { rx: 3, fill: '#8b5a2b', stroke: '#3d220e', 'stroke-width': 1.5 });
+  for (const yy of [-34, -22]) el('path', { d: `M-37 ${yy} L37 ${yy}`, stroke: 'rgba(0,0,0,.18)', 'stroke-width': 1 }, g); // vân gỗ
+  // nẹp vàng hai bên và viền trên
+  for (const xx of [-38, 30]) R(xx, -44, 8, 40, { fill: '#e8b730', stroke: '#9a6b00', 'stroke-width': 1 });
+  R(-38, -46, 76, 5, { rx: 1.5, fill: '#ffd23f', stroke: '#9a6b00', 'stroke-width': 1 });
+  for (const [xx, yy] of [[-34, -40], [34, -40], [-34, -9], [34, -9]]) el('circle', { cx: xx, cy: yy, r: 1.4, fill: '#9a6b00' }, g);
+  // nhãn số tiền giữa mặt trước hòm, nằm gọn giữa hai nẹp vàng
+  const plate = el('g', { transform: 'translate(0 -25)' }, g);
+  el('rect', { x: -28, y: -9, width: 56, height: 18, rx: 9, fill: '#1f6f3a', stroke: '#ffd23f', 'stroke-width': 2 }, plate);
+  const amt = txt(0, 1, 'pot-amt', '', plate);
+  return { g: root, body: g, amt, coins };
+}
 // sàn giữa bàn: trũng thấp hơn các ô một bậc, nỉ xanh, huy hiệu tròn và bộ thẻ Cơ Hội
 function drawCenter() {
   const g = $('gCenter'), c = SIZE / 2, m = CORNER;
@@ -2464,7 +2493,7 @@ function drawCenter() {
   el('circle', { cx: c, cy: c, r: 128, fill: 'none', stroke: 'rgba(255,255,255,.08)', 'stroke-width': 10 }, g);
   el('circle', { cx: c, cy: c, r: 118, fill: 'none', stroke: 'rgba(255,210,63,.3)', 'stroke-width': 2, 'stroke-dasharray': '14 8' }, g);
   txt(c, c, 'center-title', 'CỜ TỶ PHÚ', g);
-  potTxt = txt(c, c + 62, 'center-pot', '', g);
+  potBox = drawPotBox(c + 140, c - 170); // góc đối diện bộ thẻ Cơ Hội, chừa giữa bàn cho xúc xắc
   const deck = (x, y, rot, col, icon, label) => {
     const d = el('g', { transform: `translate(${x} ${y}) rotate(${rot})` }, g);
     for (let k = 2; k >= 0; k--) el('rect', { x: -58 + k * 2, y: -40 + k * 2, width: 116, height: 76, rx: 10, fill: k ? '#fff' : col, stroke: k ? '#cfd9e5' : 'rgba(0,0,0,.15)', 'stroke-width': 1.5 }, d);
@@ -2474,9 +2503,12 @@ function drawCenter() {
   deck(c - 170, c + 140, -8, '#f39c12', '❓', 'CƠ HỘI');
 }
 function renderCenter() {
-  if (!potTxt) return;
+  if (!potBox) return;
   const pot = (G && (busy() && viewPot !== null ? viewPot : G.pot)) || 0;
-  potTxt.textContent = pot > 0 ? `💰 Quỹ Thuế ${fmt(pot)}` : '';
+  potBox.amt.textContent = fmt(pot);
+  potBox.g.classList.toggle('empty', pot <= 0);
+  const lvl = pot <= 0 ? 0 : pot < 500 ? 1 : pot < 1500 ? 2 : 3;
+  potBox.coins.forEach((cs, k) => cs.forEach(c => { c.style.display = k < lvl ? '' : 'none'; }));
   // số vòng hiện tại trên thanh trên cùng
   const rt = $('roundTag'), on = !!G && G.phase !== 'lobby';
   rt.hidden = !on;
@@ -3212,6 +3244,18 @@ function cardMoney(s, delta) {
   d.style.left = Math.max(w / 2 + 6, Math.min(innerWidth - w / 2 - 6, x)) + 'px';
   setTimeout(() => { d.remove(); if (loose) moneyLoose = Math.max(0, moneyLoose - 1); else moneyLive[s] = Math.max(0, moneyLive[s] - 1); }, MONEY_MS);
 }
+// xu bay giữa quân và hòm Quỹ Thuế (vào: nộp thuế, ra: nhận quỹ), hòm nảy lên khi xu rơi vào
+function coinsToPot(x, y, into) {
+  if (!potBox) return;
+  const m = potBox.g.getAttribute('transform').match(/translate\(([-\d.]+) ([-\d.]+)\)/), px = +m[1], py = +m[2] - 50;
+  for (let k = 0; k < 5; k++) {
+    const c = fx('text', { x: 0, y: 0, class: 'sq-icon', style: 'font-size:16px' }, 900); c.textContent = '🪙';
+    const [ax, ay, bx, by] = into ? [x, y - 20, px, py] : [px, py, x, y - 20];
+    c.animate([{ transform: `translate(${ax}px, ${ay}px) scale(.8)`, opacity: 0 }, { transform: `translate(${(ax + bx) / 2}px, ${Math.min(ay, by) - 70}px) scale(1.15)`, opacity: 1, offset: .5 }, { transform: `translate(${bx}px, ${by}px) scale(.7)`, opacity: .9 }],
+      { duration: 650, delay: k * 50, easing: 'ease-in-out', fill: 'both' });
+  }
+  potBox.body.animate([{ transform: 'none' }, { transform: 'scale(1.12, .9)', offset: .3 }, { transform: 'scale(.95, 1.08) translateY(-4px)', offset: .6 }, { transform: 'none' }], { duration: 420, delay: into ? 650 : 0 });
+}
 function burst(x, y, n, colors, dist, ch = '★') {
   for (let i = 0; i < n; i++) {
     const a = (i / n) * Math.PI * 2 + Math.random() * 0.4, d = dist * (0.7 + Math.random() * 0.5);
@@ -3360,13 +3404,15 @@ async function rideBus(s, from, n, tok, onStart) {
   const bus = el('g', { class: 'bus' }, $('gFx'));
   el('ellipse', { cx: 0, cy: 10, rx: 18, ry: 5, fill: 'rgba(0,0,0,.3)' }, bus);
   const body = el('g', {}, bus);
-  // nhân vật ngồi trong xe, ló đầu lên trên nóc; vẽ trước để thân xe che nửa dưới, lật và nhún theo xe
-  if (G.pl[s] && G.pl[s].char) chibiInto(el('g', { transform: 'translate(-3 -20) scale(.46)' }, body), charOf(G.pl[s].char));
+  // quân lên xe: chuyển hẳn quân vào trong xe (sau thân xe nên xe che phần chân), ló đầu và vai lên trên nóc,
+  // chạy, nhún và quay đầu cùng xe; tới ô đích mới xuống xe
+  const home = g.parentNode, next = g.nextSibling;
+  const seat = el('g', { transform: 'translate(-2 -6)' }, body);
+  seat.appendChild(g); g.style.transition = 'none'; g.style.transform = 'none';
   txt(0, -6, 'sq-icon', '🚌', body, { style: 'font-size:34px' });
-  // quân lên xe: ẩn đi, xe chạy qua từng ô cùng nhân vật rồi quân xuống xe ở ô đích
+  const getOff = () => { home.insertBefore(g, next && next.parentNode === home ? next : null); g.style.transition = ''; };
   const [sx, sy] = tokenXY(from, s, false);
   for (let k = 0; k < 4; k++) exhaust(sx + (Math.random() - .5) * 16, sy + 6, bus);
-  g.style.opacity = '0';
   const ms = busMs(n);
   playBusHorn(); playEngine(ms);
   let face = seg.length && seg[0][0] > 0 ? -1 : 1, ang = 0, lastPuff = 0;
@@ -3399,11 +3445,11 @@ async function rideBus(s, from, n, tok, onStart) {
     requestAnimationFrame(frame);
   });
   if (!passed && tok === animTok) onStart();
+  const end = tokenXY(to, s, false);
+  getOff(); placeToken(s, to, false);
   bus.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 250, fill: 'forwards' });
   setTimeout(() => bus.remove(), 260);
-  if (tok !== animTok) { g.style.opacity = ''; return; }
-  const end = tokenXY(to, s, false);
-  placeToken(s, to, false); g.style.opacity = '';
+  if (tok !== animTok) return;
   hopToken(s);
   fx('circle', { cx: end[0], cy: end[1] + 8, r: 16, fill: 'rgba(120,110,95,.35)', class: 'fx puff' }, 550);
 }
@@ -3508,6 +3554,7 @@ async function animateStep(st, tok) {
     case 'pay': {
       const [x, y] = tokenPt(s);
       cardMoney(s, -(st.amt)); playCoin(false, st.amt >= 300);
+      if (st.to < 0 && st.why === 'tax') coinsToPot(x, y, true);
       if (st.to >= 0) { setTimeout(() => { cardMoney(st.to, st.amt); playCoin(true, st.amt >= 300); }, 220); }
       await sleep(ms); return;
     }
@@ -3634,6 +3681,7 @@ async function animateStep(st, tok) {
     }
     case 'pot': {
       const [x, y] = tokenPt(s);
+      coinsToPot(x, y, false);
       pow(x, y - 34, '💰 QUỸ THUẾ', '#2e9d4f'); cardMoney(s, st.amt); playCoin(true, true);
       burst(x, y, 12, ['#ffd23f', '#2e9d4f', '#fff'], 50, '$');
       await sleep(ms); return;
