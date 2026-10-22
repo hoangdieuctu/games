@@ -902,13 +902,13 @@ function setStatus() {
   }
   s.className = 'pill ' + cls;
   s.innerHTML = html;
-  $('oppWho').textContent = net.on ? '' : '· máy ' + LEVELS[settings.level].toLowerCase();
+  $('oppWho').textContent = net.on ? (G.bonus ? '· trúng được bắn tiếp' : '· trúng là đổi lượt') : '· máy ' + LEVELS[settings.level].toLowerCase();
 }
 function setScore() {
   const sc = net.on ? net.score : stats[settings.level];
   $('sWin').textContent = sc.w; $('sLose').textContent = sc.l;
   $('sOpp').textContent = oppName();
-  $('lvlTag').textContent = net.on ? '' : LEVELS[settings.level];
+  $('lvlTag').textContent = net.on ? (G.bonus ? 'Bắn tiếp' : 'Đổi lượt') : LEVELS[settings.level];
   $('bOnline').hidden = net.on;
   $('bInvite').hidden = !(net.on && net.host);
   $('bLeave').hidden = !net.on;
@@ -1190,6 +1190,30 @@ function showInvite() {
     rows: [first, [{ label: 'Để sau', fn: hideNetSheet }, { label: 'Huỷ phòng', fn: () => leaveOnline() }]],
   });
 }
+// chọn luật bắn trúng ngay trong bảng online (chủ phòng quyết định, máy khách nhận theo)
+function bonusSeg(val, pick) {
+  const box = document.createElement('div');
+  box.innerHTML = '<div class="label">Bắn trúng thì sao?</div><div class="seg"><button data-v="1">Được bắn tiếp</button><button data-v="0">Đổi lượt</button></div>';
+  const seg = box.lastChild;
+  const sync = () => { for (const b of seg.children) b.classList.toggle('on', +b.dataset.v === val); };
+  seg.onclick = e => { const b = e.target.closest('button'); if (b) { val = +b.dataset.v; sync(); pick(val); } };
+  sync();
+  return box;
+}
+function saveBonus(v) { settings = { ...settings, bonus: v }; store.set('battleship.settings', settings); }
+function hostMenu() {
+  let bonus = +G.bonus;
+  const mid = G.phase === 'play';
+  netSheet('⚓', 'Ván mới', mid ? 'Trận đang đánh dở sẽ bị huỷ, hai bên xếp lại hạm đội.' : 'Chọn luật cho ván tiếp theo. Đối thủ sẽ chơi theo luật bạn chọn.', {
+    closable: true,
+    rows: [
+      bonusSeg(bonus, v => { bonus = v; }),
+      [{ label: 'Huỷ', fn: hideNetSheet }, { label: mid ? 'Huỷ trận, chơi lại' : 'Bắt đầu ván mới', go: true, fn: () => {
+        hideNetSheet(); saveBonus(bonus); G.bonus = !!bonus; netNewRound();
+      } }],
+    ],
+  });
+}
 function onlineMenu(val = '') {
   const box = document.createElement('div');
   box.innerHTML = '<div class="or">hoặc vào phòng của bạn bè</div>'
@@ -1204,6 +1228,7 @@ function onlineMenu(val = '') {
   netSheet('🌐', 'Chơi online', 'Tạo phòng mới rồi gửi mã cho bạn, hoặc nhập mã bạn gửi để vào đấu hải chiến cùng nhau.', {
     closable: true,
     rows: [
+      bonusSeg(+!!settings.bonus, saveBonus),
       [{ label: 'Tạo phòng mới', go: true, fn: () => hostOnline() }],
       box,
       [{ label: 'Huỷ', fn: hideNetSheet }, { label: 'Vào phòng', go: true, fn: go }],
@@ -1347,7 +1372,7 @@ function onNetMsg(d) {
       newRound();
       G.oppReady = !!d.ready;
       hideNetSheet(); setStatus();
-      toast('👋 Đã vào phòng', true);
+      toast(G.bonus ? '👋 Đã vào phòng · trúng được bắn tiếp' : '👋 Đã vào phòng · trúng là đổi lượt', true);
       break;
     }
     case 'ready':
@@ -1375,7 +1400,11 @@ function onNetMsg(d) {
       if (G.phase === 'over') renderShips(Bopp);
       break;
     case 'again': if (net.host) netNewRound(); break;
-    case 'reset': if (!net.host) { G.bonus = !!d.bonus; newRound(); } break;
+    case 'reset':
+      if (net.host) return;
+      if (G.bonus !== !!d.bonus) toast(d.bonus ? '🔥 Ván này: bắn trúng được bắn tiếp' : '🔁 Ván này: bắn trúng vẫn đổi lượt', true);
+      G.bonus = !!d.bonus; newRound();
+      break;
     case 'full':
       if (!net.host) { const c = net.code; net.conn = null; netFail('Phòng đã đủ người', 'Phòng này đã có hai người chơi rồi.', () => joinOnline(c)); }
       break;
@@ -1398,6 +1427,7 @@ let newArmed = 0;
 $('bNew').onclick = () => {
   sfx.unlock();
   if (!net.on) { draft = { ...settings }; syncSeg(); $('newSheet').hidden = false; return; }
+  if (net.host) return hostMenu();
   if (!net.conn) return;
   // đang giữa trận thì bấm hai lần mới tính, tránh lỡ tay xoá trận của cả hai
   if (G.phase === 'play' && !newArmed) {
