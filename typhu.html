@@ -128,7 +128,7 @@ button:disabled { opacity: .4; cursor: default; }
 .mort { pointer-events: none; }
 .token { transition: transform .14s ease-out; pointer-events: none; }
 #board.init .token { transition: none; }
-.token .tbody { transform-box: fill-box; transform-origin: center; }
+.token .tbody, .token .tspin { transform-box: fill-box; transform-origin: center; }
 .token .tzoom { transform-origin: 0 0; transition: transform .25s ease-out; }
 .token.turn .tzoom { transform: scale(1.4); }
 .token .ring { fill: none; stroke-width: 3; opacity: 0; transform-box: fill-box; transform-origin: center; }
@@ -2723,7 +2723,7 @@ const tokenEls = [0, 1, 2, 3].map(s => {
   el('ellipse', { cx: 0, cy: 0, rx: 20, ry: 9.5, class: 'ring', stroke: C.main }, z);
   const b = el('g', { class: 'tbody' }, z);
   el('ellipse', { cx: 0, cy: 0, rx: 13, ry: 6, class: 'disc', fill: C.main }, b);
-  el('g', { class: 'face-in', transform: 'translate(0 -22) scale(.72)' }, b); // nhân vật đủ tay chân, chân đứng trên đế
+  el('g', { class: 'face-in', transform: 'translate(0 -22) scale(.72)' }, el('g', { class: 'tspin' }, b)); // tspin: xoay riêng nhân vật, mũi tên đứng yên // nhân vật đủ tay chân, chân đứng trên đế
   // mũi tên tròn trĩnh chỉ xuống, kiểu nhãn dán: viền trắng dày bao ngoài, lớp sẫm bên dưới làm độ dày,
   // mặt vàng chuyển sắc từ trên xuống, vệt bóng trên thân và cạnh trái mũi
   const arrow = 'M-2 -11 L-2 -20 A2 2 0 0 1 2 -20 L2 -11 L3.75 -11 Q5.25 -11 4.3 -8.5 L.9 -1.3 Q0 .5 -.9 -1.3 L-4.3 -8.5 Q-5.25 -11 -3.75 -11 Z';
@@ -3220,10 +3220,12 @@ function flyToken(s, from, to, { ms, height, spin = 0 }) {
   const g = tokenEls[s], [x0, y0] = from, [x1, y1] = to, cx = (x0 + x1) / 2, cy = Math.min(y0, y1) - height, frames = [];
   for (let i = 0; i <= 16; i++) {
     const t = i / 16, u = 1 - t;
-    frames.push({ transform: `translate(${u * u * x0 + 2 * u * t * cx + t * t * x1}px, ${u * u * y0 + 2 * u * t * cy + t * t * y1}px) rotate(${spin * t}deg) scale(${1 + 0.4 * Math.sin(Math.PI * t)})` });
+    frames.push({ transform: `translate(${u * u * x0 + 2 * u * t * cx + t * t * x1}px, ${u * u * y0 + 2 * u * t * cy + t * t * y1}px) scale(${1 + 0.4 * Math.sin(Math.PI * t)})` });
   }
   g.style.transition = 'none';
   const a = g.animate(frames, { duration: ms, easing: 'ease-in-out' });
+  // chỉ nhân vật xoay vòng, mũi tên đánh dấu quân của mình vẫn đứng thẳng
+  if (spin) g.querySelector('.tspin').animate([{ transform: 'rotate(0)' }, { transform: `rotate(${spin}deg)` }], { duration: ms, easing: 'ease-in-out' });
   g.style.transform = `translate(${x1}px, ${y1}px)`;
   return new Promise(r => { const done = () => { void g.getBoundingClientRect(); g.style.transition = ''; r(); }; a.onfinish = a.oncancel = done; setTimeout(done, ms + 50); });
 }
