@@ -1845,12 +1845,15 @@ const mix = (hex, to, t) => {
 };
 
 // ── nhân vật chibi: đầu to, mỗi người một tạo hình riêng (mũ, tóc, trang phục, đạo cụ); khung -24..24 ──
-function chibiInto(g, ch) {
+// chỗ tay phải cầm đồ vật của từng nhân vật (bản đủ tay chân); không có thì tay buông xuôi
+const CHIBI_HAND = { mc: [15.5, 10], fairy: [14.5, 3.5], detective: [22.5, 5.5], landlord: [17.5, 7], gambler: [16, 3.5], chef: [15.6, 11], charmer: [15.5, 9], wizard: [19.5, 5], spy: [15, 6], banker: [14.5, 6.5], robber: [16.5, 11] };
+function chibiInto(g, ch, full = false) {
   const P = (d, f, st, sw = 1) => el('path', { d, fill: f, stroke: st || (f === 'none' ? 'none' : mix(f === '#ffffff' ? '#cccccc' : f, '#000', .3)), 'stroke-width': sw, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' }, g);
   const R = (x, y, w, h, f, rx = 0, st = 'none', sw = 1) => el('rect', { x, y, width: w, height: h, rx, fill: f, stroke: st, 'stroke-width': sw }, g);
   const Cc = (cx, cy, r, f, st = 'none', sw = 1) => el('circle', { cx, cy, r, fill: f, stroke: st, 'stroke-width': sw }, g);
   const skinD = mix(ch.skin, '#000', .25), hairD = mix(ch.hair, '#000', .35);
-  const body = (f, collar) => { P('M-16 20 Q-16 8 -7 7 L7 7 Q16 8 16 20 Z', f); if (collar) P('M-6 7 L0 15 L6 7 Z', '#ffffff', '#cccccc'); };
+  let torso = ch.outfit;
+  const body = (f, collar) => { torso = f; P('M-16 20 Q-16 8 -7 7 L7 7 Q16 8 16 20 Z', f); if (collar) P('M-6 7 L0 15 L6 7 Z', '#ffffff', '#cccccc'); };
   const head = () => { Cc(-14, -5, 3.2, ch.skin, skinD); Cc(14, -5, 3.2, ch.skin, skinD); Cc(0, -6, 14, ch.skin, skinD); };
   const eyes = (type = 'dot') => {
     if (type === 'happy') { P('M-8.5 -5.5 Q-5.5 -10 -2.5 -5.5', 'none', '#23324a', 1.9); P('M2.5 -5.5 Q5.5 -10 8.5 -5.5', 'none', '#23324a', 1.9); return; }
@@ -1868,6 +1871,8 @@ function chibiInto(g, ch) {
   };
   const cap = f => P('M-14 -8 Q-14 -22 0 -22 Q14 -22 14 -8 Q10 -12 0 -13 Q-10 -12 -14 -8 Z', f || ch.hair);
   const stache = f => P('M-7 .5 Q-3.5 -2.5 0 .5 Q3.5 -2.5 7 .5 Q3.5 3 0 1.2 Q-3.5 3 -7 .5 Z', f, mix(f, '#000', .3), .6);
+  // bản đủ tay chân: chân vẽ trước (nằm sau thân), tô màu theo áo sau khi biết màu áo
+  const legs = full ? el('g', {}, g) : null;
   switch (ch.id) {
     case 'mc': // vest xanh, nơ đỏ, tóc vuốt ngược, cầm mic
       body('#1e3a8a', true); P('M-4.5 11.5 L0 13.5 L4.5 11.5 L4.5 16 L0 14.5 L-4.5 16 Z', '#e8323c');
@@ -2040,6 +2045,22 @@ function chibiInto(g, ch) {
       break;
     default: body(ch.outfit); head(); cap(); eyes(); mouth();
   }
+  if (!full) return;
+  const pants = mix(torso, '#000', .45), sleeve = mix(torso, '#000', .1), shoe = '#3b2a20';
+  for (const x of [-5, 5]) {
+    el('path', { d: `M${x - 3.2} 18 L${x - 3} 28 L${x + 3} 28 L${x + 3.2} 18 Z`, fill: pants, stroke: mix(pants, '#000', .3), 'stroke-width': .8, 'stroke-linejoin': 'round' }, legs);
+    el('ellipse', { cx: x + (x < 0 ? -1 : 1), cy: 29, rx: 4.6, ry: 2.6, fill: shoe, stroke: '#1f150f', 'stroke-width': .7 }, legs);
+  }
+  // tay: ống tay áo cùng màu áo, bàn tay màu da; tay phải với tới đồ đang cầm
+  const arm = (sx, sy, hx, hy) => {
+    const ex = (sx + hx) / 2 + (sx < 0 ? -2.5 : 2.5), ey = (sy + hy) / 2 + 1.5;
+    P(`M${sx} ${sy} Q${ex} ${ey} ${hx} ${hy}`, 'none', mix(sleeve, '#000', .3), 6.4);
+    P(`M${sx} ${sy} Q${ex} ${ey} ${hx} ${hy}`, 'none', sleeve, 4.8);
+    Cc(hx, hy, 2.6, ch.skin, skinD, .8);
+  };
+  const [rx, ry] = CHIBI_HAND[ch.id] || [17.5, 19];
+  arm(-11.5, 9.5, -17.5, 19);
+  arm(11.5, 9.5, rx, ry);
 }
 // thẻ <svg> nhỏ cho HTML (bảng người chơi, chọn nhân vật); withBg: thêm vòng nền màu riêng
 // dựng một lần rồi nhân bản: bảng người chơi vẽ lại sau mỗi lần đổi tiền nên dựng mới mỗi lần rất tốn
@@ -2702,11 +2723,11 @@ const tokenEls = [0, 1, 2, 3].map(s => {
   el('ellipse', { cx: 0, cy: 0, rx: 20, ry: 9.5, class: 'ring', stroke: C.main }, z);
   const b = el('g', { class: 'tbody' }, z);
   el('ellipse', { cx: 0, cy: 0, rx: 13, ry: 6, class: 'disc', fill: C.main }, b);
-  el('g', { class: 'face-in', transform: 'translate(0 -16) scale(.82)' }, b);
+  el('g', { class: 'face-in', transform: 'translate(0 -22) scale(.72)' }, b); // nhân vật đủ tay chân, chân đứng trên đế
   // mũi tên tròn trĩnh chỉ xuống, kiểu nhãn dán: viền trắng dày bao ngoài, lớp sẫm bên dưới làm độ dày,
   // mặt vàng chuyển sắc từ trên xuống, vệt bóng trên thân và cạnh trái mũi
   const arrow = 'M-2 -11 L-2 -20 A2 2 0 0 1 2 -20 L2 -11 L3.75 -11 Q5.25 -11 4.3 -8.5 L.9 -1.3 Q0 .5 -.9 -1.3 L-4.3 -8.5 Q-5.25 -11 -3.75 -11 Z';
-  const sp = el('g', { class: 'me-bob' }, el('g', { class: 'me-arrow', transform: 'translate(0 -52) scale(1.5)' }, b));
+  const sp = el('g', { class: 'me-bob' }, el('g', { class: 'me-arrow', transform: 'translate(0 -56) scale(1.5)' }, b));
   const D = 1.3; // độ dày
   el('path', { d: arrow, transform: `translate(0 ${D / 2})`, fill: '#fff', stroke: '#fff', 'stroke-width': 2.2 + D, 'stroke-linejoin': 'round' }, sp);
   el('path', { d: arrow, transform: `translate(0 ${D})`, fill: 'url(#meArrowSide)', stroke: '#8a4705', 'stroke-width': .8, 'stroke-linejoin': 'round' }, sp);
@@ -2727,7 +2748,7 @@ function setTokenFace(s, id) {
   const g = tokenEls[s].querySelector('.face-in');
   if (g.dataset.id === id) return;
   g.innerHTML = ''; g.dataset.id = id;
-  chibiInto(g, charOf(id));
+  chibiInto(g, charOf(id), true);
 }
 function placeToken(s, pos, jailed) {
   const [x, y] = tokenXY(pos, s, jailed);
@@ -3319,8 +3340,10 @@ async function rideBus(s, from, n, tok, onStart) {
   const bus = el('g', { class: 'bus' }, $('gFx'));
   el('ellipse', { cx: 0, cy: 10, rx: 18, ry: 5, fill: 'rgba(0,0,0,.3)' }, bus);
   const body = el('g', {}, bus);
+  // nhân vật ngồi trong xe, ló đầu lên trên nóc; vẽ trước để thân xe che nửa dưới, lật và nhún theo xe
+  if (G.pl[s] && G.pl[s].char) chibiInto(el('g', { transform: 'translate(-3 -20) scale(.46)' }, body), charOf(G.pl[s].char));
   txt(0, -6, 'sq-icon', '🚌', body, { style: 'font-size:34px' });
-  // quân lên xe: ẩn đi, xe chạy qua từng ô rồi quân xuống xe ở ô đích
+  // quân lên xe: ẩn đi, xe chạy qua từng ô cùng nhân vật rồi quân xuống xe ở ô đích
   const [sx, sy] = tokenXY(from, s, false);
   for (let k = 0; k < 4; k++) exhaust(sx + (Math.random() - .5) * 16, sy + 6, bus);
   g.style.opacity = '0';
