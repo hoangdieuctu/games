@@ -139,6 +139,9 @@ button:disabled { opacity: .4; cursor: default; }
 .token .me-arrow { display: none; }
 .token.mine .me-arrow { display: inline; filter: drop-shadow(0 0 4px rgba(255,200,40,.7)) drop-shadow(0 2px 2px rgba(0,0,0,.35)); }
 .token .me-bob { transform-box: fill-box; transform-origin: 50% 100%; animation: mebob 1.2s ease-in-out infinite; }
+.token.turn .me-bulb { fill: url(#meBulbOn); stroke: #15803d; }
+.token.turn .me-ray { stroke: #4ade3b; }
+.token.mine.turn .me-arrow { filter: drop-shadow(0 0 5px rgba(74,222,59,.85)) drop-shadow(0 2px 2px rgba(0,0,0,.35)); }
 .token .me-rays { animation: merays 1.2s ease-in-out infinite; }
 @keyframes merays { 0%, 100% { opacity: .35; } 50% { opacity: 1; } }
 @keyframes mebob { 0%, 100% { transform: translateY(-4px); } 45% { transform: translateY(2px) scale(1, 1); } 55% { transform: translateY(2px) scale(1.07, .9); } }
@@ -752,7 +755,7 @@ button:disabled { opacity: .4; cursor: default; }
       <li>Dừng ở <b>thành phố</b> chưa có chủ thì mua và xây ngay: Nhà → Biệt thự → Chung cư → Khách sạn → Biểu tượng. Vòng đầu chỉ xây tới Chung cư; qua Bắt Đầu rồi mới xây Khách sạn; có Khách sạn rồi mới lên Biểu tượng. Về thành phố của mình thì được nâng cấp.</li>
       <li>Vào thành phố <b>của người khác</b> phải trả <b>phí tham quan</b> theo cấp nhà, rồi có thể <b>mua lại</b> với giá <b>bằng</b> số tiền chủ đã đầu tư (trừ Biểu tượng và điểm du lịch). <b>Biểu tượng</b> 🗼 cũng không bị ép bán, phá cấp hay đổi.</li>
       <li>Phí tham quan <b>×2</b> khi chủ có đủ nhóm màu, <b>×2</b> cho <b>mỗi lần</b> thành phố hoặc điểm du lịch được mở <b>lễ hội</b> (cộng dồn: 2 lần là ×4; mỗi lúc chỉ một nơi có lễ hội — mở ở nơi khác thì nơi cũ bị lấy lại, phí về như cũ), <b>×2</b> ở 3 <b>ô đất vàng ⭐</b> chọn ngẫu nhiên mỗi ván.</li>
-      <li><b>5 điểm du lịch</b> 🏖️ càng xa ô Bắt Đầu càng đắt: giá từ $150 (Vũng Tàu) đến $300 (Đồ Sơn), phí tham quan từ $80 đến $320, nhân với số điểm chủ đang có, không mua lại được. Ai gom đủ cả 5 <b>thắng ngay</b>.</li>
+      <li><b>5 điểm du lịch</b> 🏖️ càng xa ô Bắt Đầu càng đắt: giá từ $150 (Vũng Tàu) đến $300 (Đồ Sơn), phí tham quan từ $80 đến $320, nhân với số điểm chủ đang có, <b>mỗi lượt có người ghé</b> (kể cả chủ) phí tăng thêm <b>50%</b> phí gốc, không mua lại được. Ai gom đủ cả 5 <b>thắng ngay</b>.</li>
       <li><b>Côn Đảo</b>: kẹt 3 lượt, ra sớm bằng tung đôi (vẫn được tung tiếp như tung đôi thường), nộp $100 hoặc thẻ ra tù. Tung đôi 3 lần liền cũng vào Côn Đảo. <b>Bến Xe</b>: lượt sau được đi tới ô bất kỳ (vé $40). <b>Đại Nhạc Hội</b>: trả $40 tổ chức lễ hội ở một thành phố hoặc điểm du lịch của mình. <b>Thuế</b>: nộp 10% tổng tài sản, tiền thuế dồn vào <b>Quỹ Thuế</b> — ai rút được thẻ Quỹ Thuế ở ô Cơ Hội sẽ nhận toàn bộ quỹ. <b>Nút ĐỔ</b>: chạm nhanh để tung ngẫu nhiên, hoặc <b>bấm giữ</b> cho thanh lực chạy rồi thả tay — lực càng cao càng dễ ra tổng điểm lớn. <b>Sòng bài</b>: đặt $100 đoán Chẵn/Lẻ (×2) hoặc Đôi (×6).</li>
       <li><b>Cơ Hội</b>: thẻ có lợi (nhận Quỹ Thuế, miễn phí tham quan, giảm 50%, khiên, ra tù, lễ hội miễn phí, thêm thẻ Chẵn/Lẻ) hoặc hại (đổi thành phố, ép bán, phá cấp, dịch bệnh, mất điện, bị đưa đi nơi khác).</li>
       <li>Tung đôi được đi tiếp, trừ khi vào Côn Đảo hay Bến Xe; không còn việc gì thì lượt tự chuyển. Thiếu tiền thì bán thành phố (được nửa vốn); bán hết cũng không đủ thì <b>phá sản</b> ngay: ngân hàng mua lại toàn bộ đất (nửa vốn), tiền thu được cùng tiền mặt trả cho chủ nợ. Đang thiếu tiền cũng có thể tự chọn <b>phá sản</b> thay vì bán nhà.</li>
@@ -1012,10 +1015,12 @@ const groupsOwned = (G, s) => GROUPS.filter((g, k) => ownsGroup(G, s, k)).length
 const landmarks = (G, s) => CITIES.filter(i => G.props[i].owner === s && G.props[i].lv === 5).length;
 const effectOn = (G, i, key) => G.props[i][key] > G.turnNo; // dịch bệnh / mất điện còn hiệu lực
 // phí tham quan cơ bản của ô i (chưa tính kỹ năng của người trả)
+const TOUR_UP = 0.5;
 function rentBase(G, i) {
   const q = SQ[i], p = G.props[i];
   if (p.owner < 0) return 0;
-  if (q.t === 'tour') return q.rent * countOwned(G, p.owner, TOURS) * (p.fest ? festMult(G, i) : 1);
+  // điểm du lịch: mỗi lượt khách ghé (kể cả chủ) phí tăng thêm 50% phí gốc
+  if (q.t === 'tour') return r10(q.rent * countOwned(G, p.owner, TOURS) * (1 + TOUR_UP * (p.visits || 0)) * (p.fest ? festMult(G, i) : 1));
   if (!p.lv || effectOn(G, i, 'plague')) return 0;
   let r = q.base * LEVELS[p.lv].rent;
   if (ownsGroup(G, p.owner, q.g)) r *= 2;
@@ -1367,8 +1372,12 @@ function land(s, steps) {
         if (P.cash < need) steps.push({ k: 'noCash', s, i, need, mode: 'tour' });
         else { G.step = 'visit'; G.visit = { i, mode: 'tour' }; steps.push({ k: 'offer', s, i }); }
       }
-      else if (p.owner !== s) payRent(s, i, steps);
-      else { homePay(s, i, steps); steps.push({ k: 'home', s, i, can: false }); }
+      else {
+        if (p.owner !== s) payRent(s, i, steps);
+        else { homePay(s, i, steps); steps.push({ k: 'home', s, i, can: false }); }
+        // có người ghé (kể cả chủ) thì phí lần sau tăng; người trả phí phá sản thì đất vẫn của chủ nên vẫn tính
+        if (p.owner >= 0) { p.visits = (p.visits || 0) + 1; steps.push({ k: 'tourUp', s, i, v: p.visits, amt: rentBase(G, i) }); }
+      }
       break;
     case 'chance': drawCard(s, steps); break;
     case 'tax': { const amt = r10(netWorth(G, s) * (hasSkill(G, s, 'detective') ? 0.05 : TAX_RATE)); if (amt > 0) charge(s, -1, amt, 'tax', steps); break; }
@@ -1417,19 +1426,21 @@ function charge(s, to, amt, why, steps, i) {
   if (liquid(G, s) < amt) { liquidate(s, to >= 0 ? to : -1, steps); return; }
   G.step = 'debt'; G.debt = { to, amt, why, i };
 }
-// phá sản: toàn bộ đất bán lại cho ngân hàng (nửa vốn), tiền thu được cùng tiền mặt trả cho chủ nợ (nợ ngân hàng thì mất), người chơi rời ván
+// phá sản: bán từng ô đất cho ngân hàng (nửa vốn, mỗi ô một bước để hoạt hoạ lần lượt),
+// tiền thu được cùng tiền mặt trả cho chủ nợ (nợ ngân hàng thì mất), người chơi rời ván
 function liquidate(s, to, steps) {
-  const P = G.pl[s], was = [], cash = P.cash;
-  let sold = 0;
+  const P = G.pl[s];
+  let sold = 0, n = 0;
   for (const i of PROPS) {
     if (G.props[i].owner !== s) continue;
-    was.push([i, { ...G.props[i] }]);
-    sold += sellValue(G, i); resetProp(i);
+    const amt = sellValue(G, i);
+    steps.push({ k: 'sell', s, i, amt, auto: true, was: { ...G.props[i] } });
+    P.cash += amt; sold += amt; n++; resetProp(i);
   }
-  const paid = to >= 0 ? cash + sold : 0;
+  const cash = P.cash, paid = to >= 0 ? cash : 0;
   if (to >= 0) G.pl[to].cash += paid;
   P.cash = 0; P.hold = freshHold(); P.out = true; G.debt = null; G.visit = null; G.pick = null; G.again = false; G.step = 'roll';
-  steps.push({ k: 'bankrupt', s, to, was, cash, sold, paid });
+  steps.push({ k: 'bankrupt', s, to, was: [], n, cash, sold, paid });
   const act = active(G);
   if (act.length <= 1) { G.phase = 'over'; G.winner = act[0] ?? s; G.winHow = 'last'; G.turn = G.winner; G.step = 'end'; steps.push({ k: 'won', s: G.winner, how: 'last' }); }
 }
@@ -1490,7 +1501,7 @@ function shielded(o, i, steps) {
 function resetProp(i) {
   const p = G.props[i];
   p.owner = -1;
-  p.fest = 0;
+  p.fest = 0; p.visits = 0;
   if (SQ[i].t === 'city') { p.lv = 0; p.plague = 0; p.blackout = 0; }
 }
 // sau mỗi thay đổi: ai đạt độc quyền thì thắng ngay, không thì chốt bước tiếp theo
@@ -2475,7 +2486,7 @@ function renderCenter() {
 // chỉ vẽ lại khi trạng thái đất thật sự đổi (paint() gọi rất thường xuyên)
 function drawOwnership() {
   const g = $('gOwn'), gb = $('gOwnB');
-  const key = G ? JSON.stringify([G.pl.map(p => p.char), [0, 1, 2, 3].map(colIdx), G.gold, PROPS.map(i => { const p = shownProp(i); return [p.owner, p.lv, p.fest, effectOn(G, i, 'plague'), effectOn(G, i, 'blackout')]; })]) : '';
+  const key = G ? JSON.stringify([G.pl.map(p => p.char), [0, 1, 2, 3].map(colIdx), G.gold, PROPS.map(i => { const p = shownProp(i); return [p.owner, p.lv, p.fest, p.visits, effectOn(G, i, 'plague'), effectOn(G, i, 'blackout')]; })]) : '';
   if (key === ownKey) return;
   ownKey = key;
   g.innerHTML = ''; gb.innerHTML = '';
@@ -2554,7 +2565,7 @@ function drawTourOwned(g, i, owner) {
   }
   el('circle', { cx: 0, cy: -2, r: 14, fill: '#fff', stroke: C.main, 'stroke-width': 3.5 }, t);
   txt(0, -2, 'sq-icon', tourIcon(i), t, { style: 'font-size:17px' });
-  // phí hiện tại (tăng theo số điểm chủ đang có)
+  // phí hiện tại (tăng theo số điểm chủ đang có và số lượt khách đã ghé)
   el('rect', { x: -18, y: 9, width: 36, height: 14, rx: 7, fill: C.main, stroke: '#fff', 'stroke-width': 1.5 }, t);
   txt(0, 16.5, 'fest-ribbon', fmt(rentBase(G, i)), t, { style: 'font-size:10px;letter-spacing:0' });
 }
@@ -2713,6 +2724,8 @@ $('board').insertBefore(defs, $('board').firstChild);
   el('animateTransform', { attributeName: 'gradientTransform', type: 'translate', from: '0 0', to: '.5 0', dur: '2s', repeatCount: 'indefinite' }, mg);
   const ma = el('linearGradient', { id: 'meArrow', x1: 0, y1: 0, x2: 0, y2: 1 }, defs);
   [[0, '#ffe36e'], [.55, '#ffbe1a'], [1, '#f39208']].forEach(([o, c]) => el('stop', { offset: o, 'stop-color': c }, ma));
+  const mo = el('linearGradient', { id: 'meBulbOn', x1: 0, y1: 0, x2: 0, y2: 1 }, defs); // bóng đèn xanh khi tới lượt mình
+  [[0, '#b6f7a8'], [.55, '#4ade3b'], [1, '#16a34a']].forEach(([o, c]) => el('stop', { offset: o, 'stop-color': c }, mo));
   const sh = el('linearGradient', { id: 'monoShine', x1: 0, y1: 0, x2: 1, y2: 1 }, defs);
   [[0, 0], [.45, 0], [.5, .75], [.55, 0], [1, 0]].forEach(([o, a]) => el('stop', { offset: o, 'stop-color': '#fff', 'stop-opacity': a }, sh));
 })();
@@ -2730,12 +2743,12 @@ const tokenEls = [0, 1, 2, 3].map(s => {
   const rays = el('g', { class: 'me-rays' }, sp);
   for (const a of [-150, -120, -90, -60, -30]) {
     const r = a * Math.PI / 180, c = Math.cos(r), n = Math.sin(r);
-    el('path', { d: `M${(c * 9.5).toFixed(2)} ${(-14 + n * 9.5).toFixed(2)} L${(c * 12.5).toFixed(2)} ${(-14 + n * 12.5).toFixed(2)}`, stroke: '#ffd23f', 'stroke-width': 1.6, 'stroke-linecap': 'round' }, rays);
+    el('path', { d: `M${(c * 9.5).toFixed(2)} ${(-14 + n * 9.5).toFixed(2)} L${(c * 12.5).toFixed(2)} ${(-14 + n * 12.5).toFixed(2)}`, class: 'me-ray', stroke: '#ffd23f', 'stroke-width': 1.6, 'stroke-linecap': 'round' }, rays);
   }
   el('path', { d: bulb + ' M-3.4 -5.6 L3.4 -5.6 L3.4 -1.6 Q0 .6 -3.4 -1.6 Z', fill: '#fff', stroke: '#fff', 'stroke-width': 3, 'stroke-linejoin': 'round' }, sp);
   el('path', { d: 'M-3.2 -5.8 L3.2 -5.8 L3.2 -2 Q0 0 -3.2 -2 Z', fill: '#9ca3af', stroke: '#4b5563', 'stroke-width': .7, 'stroke-linejoin': 'round' }, sp); // đui đèn
   el('path', { d: 'M-3.2 -4.4 L3.2 -3.6 M-3.2 -2.9 L3.2 -2.1', stroke: '#4b5563', 'stroke-width': .6, fill: 'none' }, sp);
-  el('path', { d: bulb, fill: 'url(#meArrow)', stroke: '#e08a06', 'stroke-width': .8, 'stroke-linejoin': 'round' }, sp);
+  el('path', { d: bulb, class: 'me-bulb', fill: 'url(#meArrow)', stroke: '#e08a06', 'stroke-width': .8, 'stroke-linejoin': 'round' }, sp);
   el('path', { d: 'M-1.6 -6 L-1.6 -9.5 L0 -11 L1.6 -9.5 L1.6 -6', stroke: '#c2410c', 'stroke-width': .7, fill: 'none', 'stroke-linejoin': 'round' }, sp); // dây tóc
   el('path', { d: 'M-4.2 -15 A4.6 4.6 0 0 1 -1 -18.8', stroke: '#fff', 'stroke-width': 1.3, 'stroke-linecap': 'round', fill: 'none', opacity: .8 }, sp); // vệt bóng
   g0.style.display = 'none';
@@ -3103,6 +3116,7 @@ function initView(steps) {
     if (st.k === 'pay' && st.to < 0 && st.why === 'tax') viewPot -= st.amt;
     else if (st.k === 'pot') viewPot += st.amt;
     else if (st.k === 'bankrupt') { viewOut[st.s] = false; for (const [i, p] of st.was || []) viewProps[i] = p; }
+    else if (st.k === 'sell' && st.was) viewProps[st.i] = st.was;
   }
 }
 const cashFx = [null, null, null, null]; // lần đổi số dư gần nhất (để số tiền nảy lên)
@@ -3404,7 +3418,7 @@ function stepMs(st) {
     case 'build': return 850; case 'buyTour': return 750; case 'takeover': case 'hack': return 1000; case 'skip': return 250;
     case 'casinoSkip': return 300; case 'casino': return 1900; case 'noCash': return 1100; case 'festNone': return 300; case 'festival': return 1000;
     case 'pickCity': return 400; case 'pickSkip': return 250; case 'swap': return 1000; case 'forceSell': return 900; case 'destroy': return 900;
-    case 'plague': case 'blackout': return 850; case 'cure': return 1000; case 'shield': return 850; case 'sell': return 650; case 'bankrupt': return 1000;
+    case 'plague': case 'blackout': return 850; case 'cure': return 1000; case 'shield': return 850; case 'sell': return st.auto ? 500 : 650; case 'tourUp': return 700; case 'bankrupt': return 1000;
     case 'won': case 'timeup': return 900;
     case 'luck': return 1100; case 'pot': return 1300; case 'gift': return 1000;
     default: return 0;
@@ -3602,7 +3616,8 @@ async function animateStep(st, tok) {
     }
     case 'shield': { const [x, y] = centerOf(st.i); pow(x, y - 20, '🛡️', '#1e6fd8'); playPop(); await sleep(ms); return; }
     case 'noCash': { const [x, y] = tokenPt(s); pow(x, y - 36, 'KHÔNG ĐỦ TIỀN', '#e8323c'); playAlert(); await sleep(ms); return; }
-    case 'sell': { const [x, y] = centerOf(st.i), [tx, ty] = tokenPt(s); drawOwnership(); drawBuild(); playCoin(true); floatText(x, y - 20, '🏷️ bán', '#e8323c', 1000, 18); cardMoney(s, st.amt); await sleep(ms); return; }
+    case 'tourUp': { const [x, y] = centerOf(st.i); drawOwnership(); flashSquare(st.i, '#2e9d4f'); playPop(); floatText(x, y - 22, `📈 +${TOUR_UP * 100}%`, '#2e9d4f', 1000, 18); await sleep(ms); return; }
+    case 'sell': { const [x, y] = centerOf(st.i), [tx, ty] = tokenPt(s); delete viewProps[st.i]; drawOwnership(); drawBuild(); playCoin(true); floatText(x, y - 20, '🏷️ bán', '#e8323c', 1000, 18); cardMoney(s, st.amt); await sleep(ms); return; }
     case 'bankrupt': {
       const [x, y] = tokenPt(s), g = tokenEls[s];
       if (viewOut) viewOut[s] = true;
@@ -3716,10 +3731,11 @@ function stepText(st) {
       return `🔌 ${nm(st.i)} của ${other(st.o)} mất điện — phí còn một nửa 5 lượt`;
     case 'cure': return `${st.fx.includes('plague') ? '✨' : '💡'} ${w} ghé ${nm(st.i)} — ${st.fx.map(k => (k === 'plague' ? 'hết dịch bệnh' : 'có điện lại')).join(' và ')}, thu phí bình thường`;
     case 'shield': return `🛡️ Khiên của ${w} chặn được thẻ xấu nhắm vào ${nm(st.i)}`;
-    case 'sell': return `${w} bán ${nm(st.i)} được ${fmt(st.amt)}`;
+    case 'tourUp': return `📈 Phí tham quan ${nm(st.i)} tăng lên ${fmt(st.amt)} (+${Math.round(TOUR_UP * 100 * st.v)}%)`;
+    case 'sell': return st.auto ? `🏦 Ngân hàng mua lại ${nm(st.i)} của ${w} giá ${fmt(st.amt)}` : `${w} bán ${nm(st.i)} được ${fmt(st.amt)}`;
     case 'bankrupt':
       if (st.sold === undefined) return `☠️ ${w} phá sản!${st.to >= 0 ? ' Tài sản về tay ' + other(st.to) + '.' : ''}`; // ván lưu từ bản cũ
-      return `☠️ ${w} phá sản!${st.was.length ? ` Ngân hàng mua lại ${st.was.length} ô với giá ${fmt(st.sold)}.` : ''}${st.paid ? ` ${other(st.to)} nhận ${fmt(st.paid)}.` : ''}`;
+      return `☠️ ${w} phá sản!${(st.n ?? st.was.length) ? ` Ngân hàng mua lại ${st.n ?? st.was.length} ô với giá ${fmt(st.sold)}.` : ''}${st.paid ? ` ${other(st.to)} nhận ${fmt(st.paid)}.` : ''}`;
     case 'won': return `🏆 ${w} ${HOW_TEXT[st.how]} — thắng!`;
     case 'timeup': return `⏰ Hết vòng! ${w} giàu nhất với ${fmt(st.v)} — thắng!`;
     default: return null;
@@ -4026,6 +4042,8 @@ function renderProp() {
     if (p.owner >= 0) { row('Phí hiện tại (đã tính ×2)', '', fmt(rentBase(G, i)), 'now'); if (p.lv < 5) row('Giá mua lại (bằng vốn đã đầu tư)', '', fmt(takeoverPrice(G, i)), 'dim'); }
   } else {
     row('Phí tham quan', '', `${fmt(q.rent)} × số điểm du lịch chủ đang có`, 'dim');
+    row('Mỗi lượt có người ghé', '', `+${TOUR_UP * 100}% phí gốc`, 'dim');
+    if (p.owner >= 0 && p.visits) row('Đã có khách ghé', '', `${p.visits} lượt (+${Math.round(TOUR_UP * 100 * p.visits)}%)`, 'dim');
     if (p.owner >= 0) row('Phí hiện tại', '', fmt(rentBase(G, i)), 'now');
     row('Không mua lại được · gom đủ 5 điểm là thắng', '', '', 'dim');
   }
