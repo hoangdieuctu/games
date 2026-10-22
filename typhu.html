@@ -139,6 +139,8 @@ button:disabled { opacity: .4; cursor: default; }
 .token .me-arrow { display: none; }
 .token.mine .me-arrow { display: inline; filter: drop-shadow(0 0 4px rgba(255,200,40,.7)) drop-shadow(0 2px 2px rgba(0,0,0,.35)); }
 .token .me-bob { transform-box: fill-box; transform-origin: 50% 100%; animation: mebob 1.2s ease-in-out infinite; }
+.token .me-rays { animation: merays 1.2s ease-in-out infinite; }
+@keyframes merays { 0%, 100% { opacity: .35; } 50% { opacity: 1; } }
 @keyframes mebob { 0%, 100% { transform: translateY(-4px); } 45% { transform: translateY(2px) scale(1, 1); } 55% { transform: translateY(2px) scale(1.07, .9); } }
 .token .face { font-size: 15px; text-anchor: middle; dominant-baseline: central; }
 .token.jailed .face { opacity: .75; }
@@ -571,7 +573,7 @@ button:disabled { opacity: .4; cursor: default; }
 
 @media (prefers-reduced-motion: reduce) {
   .token { transition: none; }
-  .token .ring, .token .me-bob, .roll-lbl, .roll-sum, .roll-sum::before, .dots span, .panel, .overlay, .cardpop, .actions button.primary::after, #board.shake, .pick-ring, .pick-hand, .chars button.on, .tour-flag, .tour-warn, .fx-badge, .fx-edge { animation: none; }
+  .token .ring, .token .me-bob, .token .me-rays, .roll-lbl, .roll-sum, .roll-sum::before, .dots span, .panel, .overlay, .cardpop, .actions button.primary::after, #board.shake, .pick-ring, .pick-hand, .chars button.on, .tour-flag, .tour-warn, .fx-badge, .fx-edge { animation: none; }
   .fw-burst { animation: none; }
   .cube { transition: none; }
 }
@@ -2711,8 +2713,6 @@ $('board').insertBefore(defs, $('board').firstChild);
   el('animateTransform', { attributeName: 'gradientTransform', type: 'translate', from: '0 0', to: '.5 0', dur: '2s', repeatCount: 'indefinite' }, mg);
   const ma = el('linearGradient', { id: 'meArrow', x1: 0, y1: 0, x2: 0, y2: 1 }, defs);
   [[0, '#ffe36e'], [.55, '#ffbe1a'], [1, '#f39208']].forEach(([o, c]) => el('stop', { offset: o, 'stop-color': c }, ma));
-  const md = el('linearGradient', { id: 'meArrowSide', x1: 0, y1: 0, x2: 0, y2: 1 }, defs);
-  [[0, '#d9820a'], [1, '#a85a05']].forEach(([o, c]) => el('stop', { offset: o, 'stop-color': c }, md));
   const sh = el('linearGradient', { id: 'monoShine', x1: 0, y1: 0, x2: 1, y2: 1 }, defs);
   [[0, 0], [.45, 0], [.5, .75], [.55, 0], [1, 0]].forEach(([o, a]) => el('stop', { offset: o, 'stop-color': '#fff', 'stop-opacity': a }, sh));
 })();
@@ -2724,16 +2724,20 @@ const tokenEls = [0, 1, 2, 3].map(s => {
   const b = el('g', { class: 'tbody' }, z);
   el('ellipse', { cx: 0, cy: 0, rx: 13, ry: 6, class: 'disc', fill: C.main }, b);
   el('g', { class: 'face-in', transform: 'translate(0 -22) scale(.72)' }, el('g', { class: 'tspin' }, b)); // tspin: xoay riêng nhân vật, mũi tên đứng yên // nhân vật đủ tay chân, chân đứng trên đế
-  // mũi tên tròn trĩnh chỉ xuống, kiểu nhãn dán: viền trắng dày bao ngoài, lớp sẫm bên dưới làm độ dày,
-  // mặt vàng chuyển sắc từ trên xuống, vệt bóng trên thân và cạnh trái mũi
-  const arrow = 'M-2 -11 L-2 -20 A2 2 0 0 1 2 -20 L2 -11 L3.75 -11 Q5.25 -11 4.3 -8.5 L.9 -1.3 Q0 .5 -.9 -1.3 L-4.3 -8.5 Q-5.25 -11 -3.75 -11 Z';
-  const sp = el('g', { class: 'me-bob' }, el('g', { class: 'me-arrow', transform: 'translate(0 -56) scale(1.5)' }, b));
-  const D = 1.3; // độ dày
-  el('path', { d: arrow, transform: `translate(0 ${D / 2})`, fill: '#fff', stroke: '#fff', 'stroke-width': 2.2 + D, 'stroke-linejoin': 'round' }, sp);
-  el('path', { d: arrow, transform: `translate(0 ${D})`, fill: 'url(#meArrowSide)', stroke: '#8a4705', 'stroke-width': .8, 'stroke-linejoin': 'round' }, sp);
-  el('path', { d: arrow, fill: 'url(#meArrow)', stroke: '#e08a06', 'stroke-width': .8, 'stroke-linejoin': 'round' }, sp);
-  el('path', { d: 'M-1 -12.6 L-1 -20 A1 1 0 0 1 1 -20 L1 -12.6 Z', fill: '#fff', opacity: .5 }, sp); // vệt bóng thân
-  el('path', { d: 'M-3.4 -9 L-2 -6.4', stroke: '#fff', 'stroke-width': .9, 'stroke-linecap': 'round', fill: 'none', opacity: .7 }, sp); // vệt bóng mũi
+  // bóng đèn sáng trên đầu đánh dấu quân của mình, kiểu nhãn dán: viền trắng dày bao ngoài, bóng vàng chuyển sắc, đui đèn xám, tia sáng nhấp nháy
+  const sp = el('g', { class: 'me-bob' }, el('g', { class: 'me-arrow', transform: 'translate(0 -56) scale(1.125)' }, b));
+  const bulb = 'M0 -21 A7 7 0 0 1 4.4 -8.6 Q3 -7.4 3 -5.6 L-3 -5.6 Q-3 -7.4 -4.4 -8.6 A7 7 0 0 1 0 -21 Z';
+  const rays = el('g', { class: 'me-rays' }, sp);
+  for (const a of [-150, -120, -90, -60, -30]) {
+    const r = a * Math.PI / 180, c = Math.cos(r), n = Math.sin(r);
+    el('path', { d: `M${(c * 9.5).toFixed(2)} ${(-14 + n * 9.5).toFixed(2)} L${(c * 12.5).toFixed(2)} ${(-14 + n * 12.5).toFixed(2)}`, stroke: '#ffd23f', 'stroke-width': 1.6, 'stroke-linecap': 'round' }, rays);
+  }
+  el('path', { d: bulb + ' M-3.4 -5.6 L3.4 -5.6 L3.4 -1.6 Q0 .6 -3.4 -1.6 Z', fill: '#fff', stroke: '#fff', 'stroke-width': 3, 'stroke-linejoin': 'round' }, sp);
+  el('path', { d: 'M-3.2 -5.8 L3.2 -5.8 L3.2 -2 Q0 0 -3.2 -2 Z', fill: '#9ca3af', stroke: '#4b5563', 'stroke-width': .7, 'stroke-linejoin': 'round' }, sp); // đui đèn
+  el('path', { d: 'M-3.2 -4.4 L3.2 -3.6 M-3.2 -2.9 L3.2 -2.1', stroke: '#4b5563', 'stroke-width': .6, fill: 'none' }, sp);
+  el('path', { d: bulb, fill: 'url(#meArrow)', stroke: '#e08a06', 'stroke-width': .8, 'stroke-linejoin': 'round' }, sp);
+  el('path', { d: 'M-1.6 -6 L-1.6 -9.5 L0 -11 L1.6 -9.5 L1.6 -6', stroke: '#c2410c', 'stroke-width': .7, fill: 'none', 'stroke-linejoin': 'round' }, sp); // dây tóc
+  el('path', { d: 'M-4.2 -15 A4.6 4.6 0 0 1 -1 -18.8', stroke: '#fff', 'stroke-width': 1.3, 'stroke-linecap': 'round', fill: 'none', opacity: .8 }, sp); // vệt bóng
   g0.style.display = 'none';
   return g0;
 });
