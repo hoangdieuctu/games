@@ -92,12 +92,24 @@ button:disabled { opacity: .4; cursor: default; }
 .par-cnt { position: relative; margin-bottom: calc(var(--s) * .3); padding: 1px 8px; border-radius: 6px; background: #3b4552; color: #fff; font: 800 calc(var(--s) * .32) 'Baloo 2', system-ui, sans-serif; line-height: 1.35; box-shadow: 0 2px 4px rgba(0,0,0,.35); }
 .par-cnt::after { content: ''; position: absolute; left: 50%; top: 100%; transform: translateX(-50%); border: 5px solid transparent; border-top-color: #3b4552; border-bottom: 0; }
 .dice-stage.hide { opacity: 0; pointer-events: none; }
-.dice-stage .cubes { will-change: transform; }
-.dice-stage.throw .cubes { animation: throwin .75s cubic-bezier(.2, .9, .3, 1.08); }
-@keyframes throwin {
-  0% { transform: translate(var(--tx, 0px), var(--ty, 0px)) scale(1.7) rotate(-35deg); opacity: .3; }
-  55% { transform: translate(0, 0) scale(1.08) rotate(6deg); opacity: 1; }
-  100% { transform: none; }
+/* tổng số nút bật lên phía trên hai viên xúc xắc khi vừa dừng: số trong huy hiệu tròn màu người tung, viền trắng, tia sáng xoay phía sau */
+.roll-sum { position: absolute; left: 50%; top: calc(var(--s) * -.3); width: calc(var(--s) * 1.6); height: calc(var(--s) * 1.6); transform: translate(-50%, -100%); pointer-events: none; z-index: 3; animation: rollsum 1.5s ease-out forwards; }
+.roll-sum::before { content: ''; position: absolute; inset: -55%; border-radius: 50%;
+  background: repeating-conic-gradient(from 0deg, rgba(255,226,102,.9) 0 10deg, rgba(255,226,102,0) 10deg 30deg);
+  -webkit-mask: radial-gradient(circle, #000 30%, transparent 70%); mask: radial-gradient(circle, #000 30%, transparent 70%); animation: sumrays 1.5s linear; }
+.roll-sum b { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; border-radius: 50%;
+  font: 900 calc(var(--s) * 1.05) / 1 'Baloo 2', system-ui, sans-serif; color: #fff; text-shadow: 0 calc(var(--s) * .05) 0 rgba(0,0,0,.35);
+  background: radial-gradient(circle at 35% 28%, rgba(255,255,255,.55), transparent 55%), var(--c, #e8323c);
+  border: calc(var(--s) * .1) solid #fff; box-shadow: 0 0 0 calc(var(--s) * .07) #ffd23f, 0 0 calc(var(--s) * .5) rgba(255,210,63,.9), 0 calc(var(--s) * .1) calc(var(--s) * .2) rgba(0,0,0,.35); }
+.roll-sum.dbl b { border-color: #ffe066; box-shadow: 0 0 0 calc(var(--s) * .07) #f5a300, 0 0 calc(var(--s) * .7) #ffd23f, 0 calc(var(--s) * .1) calc(var(--s) * .2) rgba(0,0,0,.35); }
+.roll-sum small { position: absolute; left: 50%; top: 100%; transform: translate(-50%, -30%); white-space: nowrap; font: 900 calc(var(--s) * .32) 'Baloo 2', system-ui, sans-serif; color: #6b3a00; background: linear-gradient(#ffe066, #f5a300); border-radius: 999px; padding: 0 calc(var(--s) * .22); box-shadow: 0 2px 4px rgba(0,0,0,.3); }
+@keyframes sumrays { from { transform: rotate(0) scale(.6); } 20% { transform: rotate(40deg) scale(1.1); } to { transform: rotate(160deg) scale(1); } }
+@keyframes rollsum {
+  0% { transform: translate(-50%, -60%) scale(.2); opacity: 0; }
+  14% { transform: translate(-50%, -100%) scale(1.25); opacity: 1; }
+  24% { transform: translate(-50%, -100%) scale(.95); }
+  32%, 75% { transform: translate(-50%, -100%) scale(1); opacity: 1; }
+  100% { transform: translate(-50%, -150%) scale(1); opacity: 0; }
 }
 #board { display: block; width: 100%; height: 100%; overflow: visible; touch-action: none; }
 .sq .bg { fill: #fffdf6; stroke: #c9d3de; stroke-width: 1; }
@@ -239,7 +251,10 @@ button:disabled { opacity: .4; cursor: default; }
 .die::after {
   content: ''; position: absolute; left: 4%; right: 4%; bottom: -16%; height: 20%; border-radius: 50%;
   background: radial-gradient(ellipse, rgba(0,0,0,.3), transparent 70%); z-index: -1;
+  /* bóng nằm yên trên mặt bàn: viên xúc xắc nảy lên cao --h px thì bóng kéo xuống lại, nhỏ và nhạt dần */
+  transform: translateY(calc(var(--h, 0) * 1px)) scale(calc(1 - min(var(--h, 0), 120) / 200)); opacity: calc(1 - min(var(--h, 0), 120) / 160);
 }
+.die { will-change: transform; }
 .cube { position: absolute; inset: 0; transform-style: preserve-3d; transition: transform .95s cubic-bezier(.18,.8,.3,1); }
 .cube.snap { transition: none; }
 .face, .core { position: absolute; inset: 0; }
@@ -248,6 +263,7 @@ button:disabled { opacity: .4; cursor: default; }
   box-shadow: inset 0 0 0 1px rgba(0,0,0,.06), inset -2px -3px 6px rgba(0,0,0,.12), inset 2px 2px 4px rgba(255,255,255,.95);
   display: grid; grid-template: repeat(3, 1fr) / repeat(3, 1fr); padding: 12%; backface-visibility: hidden;
 }
+.face.side { filter: brightness(.8); transition: filter .6s; }
 .core { background: #cfd3d9; border-radius: 10%; }
 .core.c2 { transform: rotateY(90deg); } .core.c3 { transform: rotateX(90deg); }
 .pip {
@@ -258,19 +274,6 @@ button:disabled { opacity: .4; cursor: default; }
 .f1 { transform: translateZ(calc(var(--s) / 2)); } .f6 { transform: rotateY(180deg) translateZ(calc(var(--s) / 2)); }
 .f2 { transform: rotateY(90deg) translateZ(calc(var(--s) / 2)); } .f5 { transform: rotateY(-90deg) translateZ(calc(var(--s) / 2)); }
 .f3 { transform: rotateX(90deg) translateZ(calc(var(--s) / 2)); } .f4 { transform: rotateX(-90deg) translateZ(calc(var(--s) / 2)); }
-.die.hop { animation: hop .95s linear; }
-.die:nth-child(2).hop { animation-duration: 1s; }
-@keyframes hop {
-  0% { transform: translate(0, 0) rotate(0); animation-timing-function: ease-out; }
-  22% { transform: translate(-6%, -70%) rotate(-14deg); animation-timing-function: ease-in; }
-  46% { transform: translate(0, 0) rotate(4deg); animation-timing-function: ease-out; }
-  60% { transform: translate(3%, -22%) rotate(0); animation-timing-function: ease-in; }
-  73% { transform: translate(0, 0); animation-timing-function: ease-out; }
-  82% { transform: translate(0, -6%); animation-timing-function: ease-in; }
-  90%, 100% { transform: translate(0, 0); }
-}
-.die.hop::after { animation: shade .95s linear; }
-@keyframes shade { 22% { transform: scale(.55); opacity: .45; } 46% { transform: scale(1); opacity: 1; } 60% { transform: scale(.85); } 73% { transform: scale(1); } }
 /* dải trạng thái: một dòng mỏng ngay dưới thanh trên, chỉ hiện khi có gì để nói */
 .status {
   align-self: center; max-width: min(92%, 560px); margin: 4px auto 0; padding: 4px 14px; border-radius: 999px;
@@ -568,7 +571,7 @@ button:disabled { opacity: .4; cursor: default; }
 
 @media (prefers-reduced-motion: reduce) {
   .token { transition: none; }
-  .token .ring, .token .me-bob, .roll-lbl, .die.hop, .die.hop::after, .dots span, .panel, .overlay, .cardpop, .actions button.primary::after, #board.shake, .pick-ring, .pick-hand, .chars button.on, .tour-flag, .tour-warn, .fx-badge, .fx-edge { animation: none; }
+  .token .ring, .token .me-bob, .roll-lbl, .roll-sum, .roll-sum::before, .dots span, .panel, .overlay, .cardpop, .actions button.primary::after, #board.shake, .pick-ring, .pick-hand, .chars button.on, .tour-flag, .tour-warn, .fx-badge, .fx-edge { animation: none; }
   .fw-burst { animation: none; }
   .cube { transition: none; }
 }
@@ -2737,7 +2740,8 @@ const tokenPt = s => tokenXY(G.pl[s].pos, s, G.pl[s].jail > 0);
 // ── xúc xắc 3D ──
 const PIP_CELLS = { 1: [4], 2: [2, 6], 3: [2, 4, 6], 4: [0, 2, 6, 8], 5: [0, 2, 4, 6, 8], 6: [0, 2, 3, 5, 6, 8] };
 const FACE_ROT = { 1: [0, 0], 6: [0, 180], 2: [0, -90], 5: [0, 90], 3: [-90, 0], 4: [90, 0] };
-const TILT = [[-24, 26, -6], [-20, -22, 5]];
+// nhìn từ trên xuống: mặt kết quả là mặt trên (ngửa lên 35° về phía người xem), hơi xoay quanh trục đứng để lộ hai mặt bên
+const TILT = [[35, 22], [33, -18]];
 const dice3d = [...document.querySelectorAll('#dice .die')].map((die, i) => {
   const cube = document.createElement('div');
   cube.className = 'cube';
@@ -2754,32 +2758,80 @@ const dice3d = [...document.querySelectorAll('#dice .die')].map((die, i) => {
     cube.appendChild(f);
   }
   die.appendChild(cube);
-  return { die, cube, x: 0, y: 0, v: 0, tilt: TILT[i] };
+  return { die, cube, x: 0, y: 0, v: 0, tilt: TILT[i], raf: 0 };
 });
-// ném xúc xắc vào giữa bàn từ phía quân của người chơi s rồi lăn 3D
+const THROW_MS = 1500;
+// ném xúc xắc từ chỗ quân của người chơi s ra giữa bàn: mỗi viên bay theo đường riêng, nảy thấp dần, lăn lộn chậm dần rồi trượt dừng
 function throwDice(s, d) {
-  const stage = $('diceStage'), pos = G && G.pl[s] ? G.pl[s].pos : 0;
-  const [px, py] = centerOf(pos), tx = Math.round((px - CX) * .6), ty = Math.round((py - CY) * .6);
-  stage.style.setProperty('--tx', tx + 'px'); stage.style.setProperty('--ty', ty + 'px');
-  stage.classList.remove('throw'); void stage.offsetWidth; stage.classList.add('throw');
+  const pos = G && G.pl[s] ? G.pl[s].pos : 0, [px, py] = centerOf(pos);
+  const k = $('boardBox').clientWidth / VW, sz = dice3d[0].die.offsetWidth || 44;
   playRollSound();
-  d.forEach((v, i) => setDie(i, v, true));
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) { d.forEach((v, i) => setDie(i, v, true)); return; }
+  d.forEach((v, i) => {
+    const D = dice3d[i], side = i ? 1 : -1;
+    // điểm xuất phát lệch nhau một chút để hai viên không bay chồng lên nhau
+    const sx = (px - CX) * k * .85 + side * sz * .5, sy = (py - CY) * k * .85 + (Math.random() - .5) * sz * .6;
+    const delay = i * 70, T = THROW_MS - 250 - delay;
+    // các nhịp nảy: mỗi lần chạm bàn mất bớt độ cao, nhịp sau ngắn hơn
+    const H = sz * (1.9 + Math.random() * .4), hops = [[.34, H], [.24, H * .34], [.15, H * .11], [.09, H * .03]];
+    const spin = side * (200 + Math.random() * 160);
+    cancelAnimationFrame(D.raf);
+    D.cube.style.transitionDuration = T + 'ms';
+    const t0 = performance.now() + delay;
+    const frame = now => {
+      const u = Math.max(0, Math.min(1, (now - t0) / T));
+      // trượt trên bàn có ma sát: nhanh lúc đầu, chậm dần về chỗ
+      const g = 1 - Math.pow(1 - u, 2.4);
+      let h = 0, a = 0;
+      for (const [len, top] of hops) {
+        if (u - a < len) { const q = (u - a) / len; h = 4 * top * q * (1 - q); break; }
+        a += len;
+      }
+      const x = sx * (1 - g), y = sy * (1 - g), r = spin * (1 - g), sc = 1 + h / sz * .18;
+      D.die.style.transform = `translate(${x.toFixed(1)}px, ${(y - h).toFixed(1)}px) rotate(${r.toFixed(1)}deg) scale(${sc.toFixed(3)})`;
+      D.die.style.setProperty('--h', h.toFixed(1));
+      if (u < 1) D.raf = requestAnimationFrame(frame);
+      else { D.die.style.transform = ''; D.die.style.setProperty('--h', 0); }
+    };
+    D.die.style.transform = `translate(${sx.toFixed(1)}px, ${sy.toFixed(1)}px) rotate(${spin}deg)`;
+    D.raf = requestAnimationFrame(frame);
+    setDie(i, v, true);
+  });
+  showRollSum(s, d, THROW_MS - 250);
+}
+// hiện tổng số nút khi hai viên đã dừng hẳn (đôi thì kèm nhãn ĐÔI)
+let rollSumTimer = 0;
+function showRollSum(s, d, wait) {
+  clearTimeout(rollSumTimer);
+  const old = $('diceStage').querySelector('.roll-sum'); if (old) old.remove();
+  const tok = animTok;
+  rollSumTimer = setTimeout(() => {
+    if (tok !== animTok) return;
+    const dbl = d[0] === d[1], e = document.createElement('div');
+    e.className = 'roll-sum' + (dbl ? ' dbl' : '');
+    e.style.setProperty('--c', G && G.seats[s] ? col(s).main : '#e8323c');
+    e.innerHTML = `<b>${d[0] + d[1]}</b>${dbl ? '<small>ĐÔI!</small>' : ''}`;
+    $('diceStage').appendChild(e);
+    playPop();
+    setTimeout(() => e.remove(), 1500);
+  }, wait);
 }
 function setDie(i, v, roll) {
   const D = dice3d[i];
   if (!roll && D.v === v) return;
   const [fx, fy] = FACE_ROT[v];
   if (roll) {
-    const turns = () => 2 + Math.floor(Math.random() * 2);
+    const turns = () => 4 + Math.floor(Math.random() * 3);
     D.x = fx + 360 * (Math.ceil((D.x - fx) / 360) + turns());
     D.y = fy + 360 * (Math.ceil((D.y - fy) / 360) + turns());
   } else { D.x = fx; D.y = fy; }
   D.v = v;
-  const [tx, ty, tz] = D.tilt;
+  const [tx, tz] = D.tilt;
+  // mặt trên sáng, các mặt bên tối hơn như có đèn chiếu từ trên
+  D.cube.querySelectorAll('.face').forEach((f, k) => f.classList.toggle('side', k + 1 !== v));
   if (!roll) D.cube.classList.add('snap');
-  D.cube.style.transform = `rotateZ(${tz}deg) rotateX(${tx}deg) rotateY(${ty}deg) rotateX(${D.x}deg) rotateY(${D.y}deg)`;
+  D.cube.style.transform = `rotateX(${tx}deg) rotateZ(${tz}deg) rotateX(${D.x}deg) rotateY(${D.y}deg)`;
   if (!roll) { void D.cube.offsetWidth; D.cube.classList.remove('snap'); }
-  else { D.die.classList.remove('hop'); void D.die.offsetWidth; D.die.classList.add('hop'); }
 }
 
 // ── âm thanh: tiếng xúc xắc là bản ghi trong sounds/ (CC0), còn lại tự tổng hợp bằng Web Audio ──
@@ -3314,7 +3366,7 @@ async function rideBus(s, from, n, tok, onStart) {
 }
 function stepMs(st) {
   switch (st.k) {
-    case 'dice': return 1000;
+    case 'dice': return THROW_MS + 300; // chờ thêm chút để kịp thấy tổng số nút
     case 'move': return st.how === 'bus' ? busMs(st.n) + 350 : st.fly ? FLY_MS + 150 : Math.abs(st.n) * STEP_MS + (st.passGo ? 300 : 100);
     case 'boost': case 'reverse': case 'festJump': return 600; case 'island': return 800; case 'free': return 450; case 'stay': return 350; case 'triple': return 600; case 'released': return 400;
     case 'busStop': return 600; case 'busGo': return 300; case 'busNoCash': return 300;
