@@ -255,7 +255,7 @@ button:disabled { opacity: .4; cursor: default; }
   100% { box-shadow: var(--base), 0 0 0 calc(var(--s) * .13 + 16px) rgba(255,210,63,0); }
 }
 .dice.bonus .roll-lbl { border-color: #fff; background: radial-gradient(circle at 35% 28%, #ffe29a 0%, #f5b700 45%, #c48a00 100%); }
-.die { width: var(--s); height: var(--s); position: relative; perspective: calc(var(--s) * 9); }
+.die { width: var(--s); height: var(--s); position: relative; }
 .die::after {
   content: ''; position: absolute; left: 4%; right: 4%; bottom: -16%; height: 20%; border-radius: 50%;
   background: radial-gradient(ellipse, rgba(0,0,0,.3), transparent 70%); z-index: -1;
@@ -263,25 +263,7 @@ button:disabled { opacity: .4; cursor: default; }
   transform: translateY(calc(var(--h, 0) * 1px)) scale(calc(1 - min(var(--h, 0), 120) / 200)); opacity: calc(1 - min(var(--h, 0), 120) / 160);
 }
 .die { will-change: transform; }
-.cube { position: absolute; inset: 0; transform-style: preserve-3d; transition: transform .95s cubic-bezier(.18,.8,.3,1); }
-.cube.snap { transition: none; }
-.face, .core { position: absolute; inset: 0; }
-.face {
-  border-radius: 18%; background: linear-gradient(145deg, #ffffff 0%, #f2f3f5 50%, #d6d9de 100%);
-  box-shadow: inset 0 0 0 1px rgba(0,0,0,.06), inset -2px -3px 6px rgba(0,0,0,.12), inset 2px 2px 4px rgba(255,255,255,.95);
-  display: grid; grid-template: repeat(3, 1fr) / repeat(3, 1fr); padding: 12%; backface-visibility: hidden;
-}
-.face.side { filter: brightness(.8); transition: filter .6s; }
-.core { background: #cfd3d9; border-radius: 10%; }
-.core.c2 { transform: rotateY(90deg); } .core.c3 { transform: rotateX(90deg); }
-.pip {
-  width: 78%; height: 78%; place-self: center; border-radius: 50%;
-  background: radial-gradient(circle at 36% 30%, #8a8a8a 0 8%, #222 34%, #000 72%);
-  box-shadow: inset 0 -1px 1px rgba(255,255,255,.3), 0 1px 0 rgba(255,255,255,.7);
-}
-.f1 { transform: translateZ(calc(var(--s) / 2)); } .f6 { transform: rotateY(180deg) translateZ(calc(var(--s) / 2)); }
-.f2 { transform: rotateY(90deg) translateZ(calc(var(--s) / 2)); } .f5 { transform: rotateY(-90deg) translateZ(calc(var(--s) / 2)); }
-.f3 { transform: rotateX(90deg) translateZ(calc(var(--s) / 2)); } .f4 { transform: rotateX(-90deg) translateZ(calc(var(--s) / 2)); }
+.die canvas { position: absolute; left: -30%; top: -30%; width: 160%; height: 160%; pointer-events: none; }
 /* dải trạng thái: một dòng mỏng ngay dưới thanh trên, chỉ hiện khi có gì để nói */
 .status {
   align-self: center; max-width: min(92%, 560px); margin: 4px auto 0; padding: 4px 14px; border-radius: 999px;
@@ -580,7 +562,6 @@ button:disabled { opacity: .4; cursor: default; }
   .token { transition: none; }
   .token .ring, .token .me-core, .token .me-wave, .roll-lbl, .roll-sum, .roll-sum::before, .dots span, .panel, .overlay, .cardpop, .actions button.primary::after, #board.shake, .pick-ring, .pick-hand, .chars button.on, .tour-flag, .tour-warn, .fx-badge, .fx-edge { animation: none; }
   .fw-burst { animation: none; }
-  .cube { transition: none; }
 }
 </style>
 </head>
@@ -2794,24 +2775,123 @@ const PIP_CELLS = { 1: [4], 2: [2, 6], 3: [2, 4, 6], 4: [0, 2, 6, 8], 5: [0, 2, 
 const FACE_ROT = { 1: [0, 0], 6: [0, 180], 2: [0, -90], 5: [0, 90], 3: [-90, 0], 4: [90, 0] };
 // nhìn từ trên xuống: mặt kết quả là mặt trên (ngửa lên 35° về phía người xem), hơi xoay quanh trục đứng để lộ hai mặt bên
 const TILT = [[35, 22], [33, -18]];
-const dice3d = [...document.querySelectorAll('#dice .die')].map((die, i) => {
-  const cube = document.createElement('div');
-  cube.className = 'cube';
-  cube.innerHTML = '<div class="core"></div><div class="core c2"></div><div class="core c3"></div>';
+// xúc xắc vẽ bằng WebGL: dò tia (ray-march) một khối lập phương bo tròn, chấm là các hốc cầu lõm vào mặt,
+// chiếu sáng mềm (mặt trên trắng, mặt bên xanh xám) như xúc xắc hoạt hình
+const DIE_R = .22, PIP_SR = .13, PIP_DEPTH = .05, PIP_GAP = .255, DIE_VIEW = .8; // canvas phủ ±0.8 cạnh quanh tâm
+const DIE_FACE_TF = { 1: '', 6: 'rotateY(180deg) ', 2: 'rotateY(90deg) ', 5: 'rotateY(-90deg) ', 3: 'rotateX(90deg) ', 4: 'rotateX(-90deg) ' };
+// tâm các hốc chấm trong toạ độ của khối (cạnh = 1, trục y hướng lên)
+const DIE_PIPS = (() => {
+  const out = [];
   for (let v = 1; v <= 6; v++) {
-    const f = document.createElement('div');
-    f.className = 'face f' + v;
-    for (let k = 0; k < 9; k++) {
-      if (!PIP_CELLS[v].includes(k)) continue;
-      const c = document.createElement('span');
-      c.className = 'pip'; c.style.gridArea = `${(k / 3 | 0) + 1} / ${k % 3 + 1}`;
-      f.appendChild(c);
+    const F = new DOMMatrix(DIE_FACE_TF[v] + 'translateZ(.5px)'), o = F.transformPoint({ x: 0, y: 0, z: 0 });
+    const u = F.transformPoint({ x: 1, y: 0, z: 0 }), w = F.transformPoint({ x: 0, y: 1, z: 0 }), push = (PIP_SR - PIP_DEPTH) * 2;
+    for (const k of PIP_CELLS[v]) {
+      const px = (k % 3 - 1) * PIP_GAP, py = ((k / 3 | 0) - 1) * PIP_GAP;
+      const p = ['x', 'y', 'z'].map(a => o[a] + (u[a] - o[a]) * px + (w[a] - o[a]) * py + o[a] * push);
+      out.push(p[0], -p[1], p[2]);
     }
-    cube.appendChild(f);
   }
-  die.appendChild(cube);
-  return { die, cube, x: 0, y: 0, v: 0, tilt: TILT[i], raf: 0 };
+  return new Float32Array(out);
+})();
+const DIE_VS = 'attribute vec2 p; varying vec2 q; void main() { q = p; gl_Position = vec4(p, 0., 1.); }';
+const DIE_FS = `precision highp float;
+varying vec2 q;
+uniform mat3 uRi;
+uniform vec3 uPip[21];
+uniform vec3 uPipCol;
+uniform float uPix;
+const float RB = ${DIE_R.toFixed(3)}, SR = ${PIP_SR.toFixed(3)};
+float body(vec3 p) { vec3 a = abs(p) - vec3(.5 - RB); return length(max(a, 0.)) + min(max(a.x, max(a.y, a.z)), 0.) - RB; }
+float map(vec3 p) {
+  float d = body(p);
+  for (int i = 0; i < 21; i++) d = max(d, SR - length(p - uPip[i]));
+  return d;
+}
+vec3 nrm(vec3 p) { vec2 e = vec2(.0015, 0.); return normalize(vec3(map(p + e.xyy) - map(p - e.xyy), map(p + e.yxy) - map(p - e.yxy), map(p + e.yyx) - map(p - e.yyx))); }
+void main() {
+  vec3 eye = vec3(0., 0., 9.), tgt = vec3(q * ${DIE_VIEW.toFixed(2)}, 0.);
+  vec3 ro = uRi * eye, rd = uRi * normalize(tgt - eye);
+  float b = dot(ro, rd), c = dot(ro, ro) - .81, h = b * b - c;
+  if (h < 0.) { gl_FragColor = vec4(0.); return; }
+  float t = -b - sqrt(h), tEnd = -b + sqrt(h), md = 1e3, d = 0.;
+  for (int i = 0; i < 90; i++) {
+    d = map(ro + rd * t); md = min(md, d);
+    if (d < .0004 || t > tEnd) break;
+    t += d;
+  }
+  float a = d < .0004 ? 1. : 1. - smoothstep(0., uPix, md);
+  if (a <= 0.) { gl_FragColor = vec4(0.); return; }
+  vec3 p = ro + rd * t, n = nrm(p), v = -rd;
+  vec3 L = normalize(uRi * vec3(-.45, .8, .5)), up = uRi * vec3(0., 1., 0.);
+  float pd = 1e3;
+  for (int i = 0; i < 21; i++) pd = min(pd, length(p - uPip[i]) - SR);
+  float pip = 1. - smoothstep(.002, .008, pd); // điểm nằm trên mặt cầu của hốc (pd ≈ 0) là chấm
+  vec3 amb = mix(vec3(.62, .69, .83), vec3(1.), dot(n, up) * .5 + .5);
+  float dif = max(dot(n, L), 0.), spe = pow(max(dot(reflect(-L, n), v), 0.), 24.), rim = pow(1. - max(dot(n, v), 0.), 3.) * .1;
+  vec3 bodyCol = vec3(.99, .995, 1.) * (amb * .82 + dif * .26) + spe * .3 + rim;
+  vec3 pipCol = uPipCol * (.55 + .7 * dif) + spe * .12; // hốc chấm: màu đậm, sáng/tối theo độ lõm
+  vec3 col = min(mix(bodyCol, pipCol, pip), vec3(1.));
+  gl_FragColor = vec4(col * a, a);
+}`;
+function dieGL(cv) {
+  const gl = cv.getContext('webgl', { premultipliedAlpha: true, alpha: true, antialias: false });
+  if (!gl) return null;
+  const sh = (type, src) => { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); return s; };
+  const pr = gl.createProgram();
+  gl.attachShader(pr, sh(gl.VERTEX_SHADER, DIE_VS)); gl.attachShader(pr, sh(gl.FRAGMENT_SHADER, DIE_FS)); gl.linkProgram(pr);
+  if (!gl.getProgramParameter(pr, gl.LINK_STATUS)) return null;
+  gl.useProgram(pr);
+  gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+  const ap = gl.getAttribLocation(pr, 'p'); gl.enableVertexAttribArray(ap); gl.vertexAttribPointer(ap, 2, gl.FLOAT, false, 0, 0);
+  gl.uniform3fv(gl.getUniformLocation(pr, 'uPip'), DIE_PIPS);
+  return { gl, uRi: gl.getUniformLocation(pr, 'uRi'), uPix: gl.getUniformLocation(pr, 'uPix'), uPipCol: gl.getUniformLocation(pr, 'uPipCol') };
+}
+const DIE_PIP_COL = [[.07, .11, .36], [.07, .11, .36]];
+const dice3d = [...document.querySelectorAll('#dice .die')].map((die, i) => {
+  const cv = document.createElement('canvas');
+  die.appendChild(cv);
+  const D = { die, cv, ctx: dieGL(cv), x: 0, y: 0, cx: 0, cy: 0, fx: 0, fy: 0, t0: 0, dur: 950, raf: 0, spin: 0, v: 0, tilt: TILT[i], pipCol: DIE_PIP_COL[i] };
+  new ResizeObserver(() => drawDie(D)).observe(die);
+  return D;
 });
+function drawDie(D) {
+  const px = Math.max(16, Math.round(D.die.clientWidth * 2 * DIE_VIEW * Math.min(devicePixelRatio || 1, 2.5)));
+  if (D.cv.width !== px) D.cv.width = D.cv.height = px;
+  const [tx, tz] = D.tilt, m = new DOMMatrix(`rotateX(${tx}deg) rotateZ(${tz}deg) rotateX(${D.cx}deg) rotateY(${D.cy}deg)`);
+  if (!D.ctx) { // không có WebGL: vẽ phẳng mặt đang ngửa
+    const g = D.cv.getContext('2d'), s = px / (2 * DIE_VIEW), c = px / 2;
+    g.clearRect(0, 0, px, px); g.fillStyle = '#f4f6fb'; g.beginPath(); g.roundRect(c - s / 2, c - s / 2, s, s, s * .22); g.fill();
+    g.fillStyle = '#17246b';
+    for (const k of PIP_CELLS[D.v || 1]) { g.beginPath(); g.arc(c + (k % 3 - 1) * s * PIP_GAP, c + ((k / 3 | 0) - 1) * s * PIP_GAP, s * .085, 0, 7); g.fill(); }
+    return;
+  }
+  const { gl, uRi, uPix, uPipCol } = D.ctx;
+  gl.viewport(0, 0, px, px);
+  // ma trận xoay CSS (trục y hướng xuống) đổi sang trục y hướng lên, rồi lấy nghịch đảo (= chuyển vị) để đưa tia về toạ độ khối
+  gl.uniformMatrix3fv(uRi, false, [m.m11, -m.m21, m.m31, -m.m12, m.m22, -m.m32, m.m13, -m.m23, m.m33]);
+  gl.uniform1f(uPix, 2 * DIE_VIEW / px * 1.2);
+  gl.uniform3fv(uPipCol, D.pipCol);
+  gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT);
+  gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+}
+// xoay mượt từ góc đang hiện tới góc đích theo đường cong cubic-bezier(.18,.8,.3,1)
+function dieEase(x) {
+  const bz = (t, a, b) => 3 * a * t * (1 - t) * (1 - t) + 3 * b * t * t * (1 - t) + t * t * t;
+  let lo = 0, hi = 1;
+  for (let k = 0; k < 20; k++) { const m = (lo + hi) / 2; if (bz(m, .18, .3) < x) lo = m; else hi = m; }
+  return bz((lo + hi) / 2, .8, 1);
+}
+function spinDie(D) {
+  cancelAnimationFrame(D.spin);
+  const step = now => {
+    const u = Math.min(1, (now - D.t0) / D.dur), e = dieEase(u);
+    D.cx = D.fx + (D.x - D.fx) * e; D.cy = D.fy + (D.y - D.fy) * e;
+    drawDie(D);
+    if (u < 1) D.spin = requestAnimationFrame(step);
+  };
+  D.spin = requestAnimationFrame(step);
+}
 const THROW_MS = 1500;
 // ném xúc xắc từ chỗ quân của người chơi s ra giữa bàn: mỗi viên bay theo đường riêng, nảy thấp dần, lăn lộn chậm dần rồi trượt dừng
 function throwDice(s, d) {
@@ -2828,7 +2908,7 @@ function throwDice(s, d) {
     const H = sz * (1.9 + Math.random() * .4), hops = [[.34, H], [.24, H * .34], [.15, H * .11], [.09, H * .03]];
     const spin = side * (200 + Math.random() * 160);
     cancelAnimationFrame(D.raf);
-    D.cube.style.transitionDuration = T + 'ms';
+    D.dur = T;
     const t0 = performance.now() + delay;
     const frame = now => {
       const u = Math.max(0, Math.min(1, (now - t0) / T));
@@ -2878,12 +2958,8 @@ function setDie(i, v, roll) {
     D.y = fy + 360 * (Math.ceil((D.y - fy) / 360) + turns());
   } else { D.x = fx; D.y = fy; }
   D.v = v;
-  const [tx, tz] = D.tilt;
-  // mặt trên sáng, các mặt bên tối hơn như có đèn chiếu từ trên
-  D.cube.querySelectorAll('.face').forEach((f, k) => f.classList.toggle('side', k + 1 !== v));
-  if (!roll) D.cube.classList.add('snap');
-  D.cube.style.transform = `rotateX(${tx}deg) rotateZ(${tz}deg) rotateX(${D.x}deg) rotateY(${D.y}deg)`;
-  if (!roll) { void D.cube.offsetWidth; D.cube.classList.remove('snap'); }
+  if (roll && !matchMedia('(prefers-reduced-motion: reduce)').matches) { D.fx = D.cx; D.fy = D.cy; D.t0 = performance.now(); spinDie(D); }
+  else { cancelAnimationFrame(D.spin); D.cx = D.x; D.cy = D.y; drawDie(D); }
 }
 
 // ── âm thanh: tiếng xúc xắc là bản ghi trong sounds/ (CC0), còn lại tự tổng hợp bằng Web Audio ──
