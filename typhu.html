@@ -47,7 +47,6 @@ button:disabled { opacity: .4; cursor: default; }
 .top h1 span:nth-child(1) { color: #ff7b72; } .top h1 span:nth-child(2) { color: #ffd23f; } .top h1 span:nth-child(3) { color: #7be495; }
 .mute.on { background: #ffd23f; border-color: #fff; box-shadow: 0 0 0 3px rgba(255,210,63,.45), 0 3px 10px rgba(0,0,0,.3); animation: pingbtn 1s ease-in-out infinite; }
 @keyframes pingbtn { 50% { transform: scale(1.1); } }
-#board.pinging { cursor: crosshair !important; }
 .ping-ring { animation: pingblink .4s ease-in-out infinite alternate; }
 @keyframes pingblink { from { opacity: 1; } to { opacity: .15; } }
 .ping-pin { animation: pingbob .6s ease-in-out infinite alternate; }
@@ -132,22 +131,23 @@ button:disabled { opacity: .4; cursor: default; }
 .token { transition: transform .14s ease-out; pointer-events: none; }
 #board.init .token { transition: none; }
 .token .tbody, .token .tspin { transform-box: fill-box; transform-origin: center; }
-.token .tzoom { transform-origin: 0 0; transition: transform .25s ease-out; }
-.token.turn .tzoom { transform: scale(1.4); }
+.token .tzoom { transform-origin: 0 0; transition: transform .25s ease-out, opacity .25s ease-out; }
+.token.turn .tzoom { transform: scale(1.8); }
+.token.dim .tzoom { opacity: .8; } /* quân không tới lượt mờ đi */
 .token .ring { fill: none; stroke-width: 3; opacity: 0; transform-box: fill-box; transform-origin: center; }
 .token .disc { stroke: #fff; stroke-width: 2; }
 .token.turn .ring { opacity: .9; animation: ring 1.2s ease-in-out 3; }
 @keyframes ring { 0%, 100% { transform: scale(1); opacity: .9; } 50% { transform: scale(1.22); opacity: .3; } }
-/* mũi tên vàng trên đầu quân của mình: nảy nhẹ, chạm đáy thì hơi bẹp lại cho mềm */
-.token .me-arrow { display: none; }
-.token.mine .me-arrow { display: inline; filter: drop-shadow(0 0 4px rgba(255,200,40,.7)) drop-shadow(0 2px 2px rgba(0,0,0,.35)); }
-.token .me-bob { transform-box: fill-box; transform-origin: 50% 100%; animation: mebob 1.2s ease-in-out infinite; }
-.token.turn .me-bulb { fill: url(#meBulbOn); stroke: #15803d; }
-.token.turn .me-ray { stroke: #4ade3b; }
-.token.mine.turn .me-arrow { filter: drop-shadow(0 0 5px rgba(74,222,59,.85)) drop-shadow(0 2px 2px rgba(0,0,0,.35)); }
-.token .me-rays { animation: merays 1.2s ease-in-out infinite; }
-@keyframes merays { 0%, 100% { opacity: .35; } 50% { opacity: 1; } }
-@keyframes mebob { 0%, 100% { transform: translateY(-4px); } 45% { transform: translateY(2px) scale(1, 1); } 55% { transform: translateY(2px) scale(1.07, .9); } }
+/* chấm tròn nhấp nháy trên đầu quân của mình: nằm ngoài lớp phóng to / làm mờ nên luôn rõ, tới lượt thì nâng lên theo quân to ra */
+.token .me-dot { display: none; transform: translateY(-66px); transition: transform .25s ease-out; }
+.token.mine .me-dot { display: inline; }
+.token.turn .me-dot { transform: translateY(-119px); }
+.token .me-core { fill: #ffd23f; stroke: #fff; stroke-width: 2.5; filter: drop-shadow(0 0 4px rgba(255,200,40,.9)) drop-shadow(0 1px 2px rgba(0,0,0,.4)); transform-box: fill-box; transform-origin: center; animation: meblink 1s ease-in-out infinite; }
+.token .me-wave { fill: none; stroke: #ffd23f; stroke-width: 2; transform-box: fill-box; transform-origin: center; animation: mewave 1s ease-out infinite; }
+.token.turn .me-core { fill: #4ade3b; filter: drop-shadow(0 0 5px rgba(74,222,59,.95)) drop-shadow(0 1px 2px rgba(0,0,0,.4)); }
+.token.turn .me-wave { stroke: #4ade3b; }
+@keyframes meblink { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: .35; transform: scale(.75); } }
+@keyframes mewave { 0% { opacity: .9; transform: scale(1); } 100% { opacity: 0; transform: scale(2.4); } }
 .token .face { font-size: 15px; text-anchor: middle; dominant-baseline: central; }
 .token.jailed .face { opacity: .75; }
 .float { font: 900 19px 'Baloo 2', system-ui, sans-serif; text-anchor: middle; dominant-baseline: central; paint-order: stroke; stroke: #fff; stroke-width: 4; pointer-events: none; }
@@ -482,6 +482,7 @@ button:disabled { opacity: .4; cursor: default; }
 .prop-actions button { flex: 1 1 45%; border-radius: 12px; padding: 10px 8px; font-weight: 800; font-size: 14px; background: #eef2f7; min-height: 44px; }
 .prop-actions button.ok { background: var(--green); color: #fff; }
 .prop-actions button.warn { background: #fff4d6; color: #8a5a00; }
+.prop-desc { font-size: 14.5px; font-weight: 600; line-height: 1.45; margin: 4px 2px 0; }
 .prop-close { display: block; width: 100%; margin-top: 12px; border-radius: 12px; padding: 10px; font-weight: 800; background: #eef2f7; }
 
 
@@ -538,8 +539,6 @@ button:disabled { opacity: .4; cursor: default; }
 .seat .pick-char svg { width: 34px; height: 34px; }
 .pl .par { flex: 0 0 auto; font-size: 12px; font-weight: 900; line-height: 20px; padding: 0 6px; border-radius: 999px; white-space: nowrap; background: rgba(142,68,173,.6); border: 1px solid rgba(255,255,255,.25); }
 .pl .par.none { opacity: .4; }
-.pl .emo-bub { position: absolute; z-index: 2; left: 18px; top: -18px; font-size: 28px; line-height: 1; pointer-events: none; filter: drop-shadow(0 2px 3px rgba(0,0,0,.45)); animation: emobub 2.6s ease-out forwards; }
-@keyframes emobub { 0% { transform: scale(.2); opacity: 0; } 8% { transform: scale(1.25); opacity: 1; } 14% { transform: scale(1); } 85% { opacity: 1; transform: translateY(-4px); } 100% { opacity: 0; transform: translateY(-12px); } }
 .gift-row { display: flex; gap: 6px; flex-wrap: wrap; }
 .gift-row button { flex: 1; min-width: 60px; padding: 7px 4px; border-radius: 10px; font-weight: 800; font-size: 15px; background: color-mix(in srgb, var(--c) 12%, #fff); border: 2px solid var(--c); }
 .pl .hold { display: inline-flex; gap: 2px; font-size: 11px; }
@@ -579,7 +578,7 @@ button:disabled { opacity: .4; cursor: default; }
 
 @media (prefers-reduced-motion: reduce) {
   .token { transition: none; }
-  .token .ring, .token .me-bob, .token .me-rays, .roll-lbl, .roll-sum, .roll-sum::before, .dots span, .panel, .overlay, .cardpop, .actions button.primary::after, #board.shake, .pick-ring, .pick-hand, .chars button.on, .tour-flag, .tour-warn, .fx-badge, .fx-edge { animation: none; }
+  .token .ring, .token .me-core, .token .me-wave, .roll-lbl, .roll-sum, .roll-sum::before, .dots span, .panel, .overlay, .cardpop, .actions button.primary::after, #board.shake, .pick-ring, .pick-hand, .chars button.on, .tour-flag, .tour-warn, .fx-badge, .fx-edge { animation: none; }
   .fw-burst { animation: none; }
   .cube { transition: none; }
 }
@@ -593,7 +592,6 @@ button:disabled { opacity: .4; cursor: default; }
   <h1><span>Cờ</span> <span>Tỷ</span> <span>Phú</span></h1>
   <span class="round-tag" id="roundTag" hidden></span>
   <span class="room-tag" id="roomTag" hidden></span>
-  <button class="mute" id="bPing" aria-label="Đánh dấu một ô cho mọi người" hidden>📍</button>
   <button class="mute" id="bEmo" aria-label="Biểu tượng cảm xúc" hidden>😊</button>
   <button class="mute" id="bMusic" aria-label="Bật/tắt nhạc nền">🎵</button>
   <button class="mute" id="bMute" aria-label="Bật/tắt âm thanh">🔊</button>
@@ -1813,16 +1811,10 @@ function giftTo(to, amt) {
   if (net.on && !net.host) { sendIntent({ t: 'gift', to, amt }); return; }
   doGift(me, to, amt);
 }
-let pingMode = false, pingLast = 0;
-function setPingMode(on) {
-  pingMode = !!on && localMe() >= 0;
-  $('bPing').classList.toggle('on', pingMode);
-  $('board').classList.toggle('pinging', pingMode);
-  if (G) renderStatus();
-}
+let pingLast = 0;
+// gợi ý điểm đến: đánh dấu một ô cho mọi người cùng thấy (mở từ bảng ô đất)
 function sendPing(i) {
   const me = localMe();
-  setPingMode(false);
   if (me < 0 || Date.now() - pingLast < 1000) return;
   pingLast = Date.now();
   showPing(me, i);
@@ -2754,10 +2746,6 @@ $('board').insertBefore(defs, $('board').firstChild);
   const mg = el('linearGradient', { id: 'mineGrad', x1: 0, y1: 0, x2: .5, y2: 0, spreadMethod: 'repeat' }, defs);
   ['#ff3b5c', '#ff9f1c', '#ffe03f', '#3ddc84', '#3fa7ff', '#b06cff', '#ff3b5c'].forEach((c, k, a) => el('stop', { offset: k / (a.length - 1), 'stop-color': c }, mg));
   el('animateTransform', { attributeName: 'gradientTransform', type: 'translate', from: '0 0', to: '.5 0', dur: '2s', repeatCount: 'indefinite' }, mg);
-  const ma = el('linearGradient', { id: 'meArrow', x1: 0, y1: 0, x2: 0, y2: 1 }, defs);
-  [[0, '#ffe36e'], [.55, '#ffbe1a'], [1, '#f39208']].forEach(([o, c]) => el('stop', { offset: o, 'stop-color': c }, ma));
-  const mo = el('linearGradient', { id: 'meBulbOn', x1: 0, y1: 0, x2: 0, y2: 1 }, defs); // bóng đèn xanh khi tới lượt mình
-  [[0, '#b6f7a8'], [.55, '#4ade3b'], [1, '#16a34a']].forEach(([o, c]) => el('stop', { offset: o, 'stop-color': c }, mo));
   const sh = el('linearGradient', { id: 'monoShine', x1: 0, y1: 0, x2: 1, y2: 1 }, defs);
   [[0, 0], [.45, 0], [.5, .75], [.55, 0], [1, 0]].forEach(([o, a]) => el('stop', { offset: o, 'stop-color': '#fff', 'stop-opacity': a }, sh));
 })();
@@ -2769,20 +2757,10 @@ const tokenEls = [0, 1, 2, 3].map(s => {
   const b = el('g', { class: 'tbody' }, z);
   el('ellipse', { cx: 0, cy: 0, rx: 13, ry: 6, class: 'disc', fill: C.main }, b);
   el('g', { class: 'face-in', transform: 'translate(0 -22) scale(.72)' }, el('g', { class: 'tspin' }, b)); // tspin: xoay riêng nhân vật, mũi tên đứng yên // nhân vật đủ tay chân, chân đứng trên đế
-  // bóng đèn sáng trên đầu đánh dấu quân của mình, kiểu nhãn dán: viền trắng dày bao ngoài, bóng vàng chuyển sắc, đui đèn xám, tia sáng nhấp nháy
-  const sp = el('g', { class: 'me-bob' }, el('g', { class: 'me-arrow', transform: 'translate(0 -56) scale(1.125)' }, b));
-  const bulb = 'M0 -21 A7 7 0 0 1 4.4 -8.6 Q3 -7.4 3 -5.6 L-3 -5.6 Q-3 -7.4 -4.4 -8.6 A7 7 0 0 1 0 -21 Z';
-  const rays = el('g', { class: 'me-rays' }, sp);
-  for (const a of [-150, -120, -90, -60, -30]) {
-    const r = a * Math.PI / 180, c = Math.cos(r), n = Math.sin(r);
-    el('path', { d: `M${(c * 9.5).toFixed(2)} ${(-14 + n * 9.5).toFixed(2)} L${(c * 12.5).toFixed(2)} ${(-14 + n * 12.5).toFixed(2)}`, class: 'me-ray', stroke: '#ffd23f', 'stroke-width': 1.6, 'stroke-linecap': 'round' }, rays);
-  }
-  el('path', { d: bulb + ' M-3.4 -5.6 L3.4 -5.6 L3.4 -1.6 Q0 .6 -3.4 -1.6 Z', fill: '#fff', stroke: '#fff', 'stroke-width': 3, 'stroke-linejoin': 'round' }, sp);
-  el('path', { d: 'M-3.2 -5.8 L3.2 -5.8 L3.2 -2 Q0 0 -3.2 -2 Z', fill: '#9ca3af', stroke: '#4b5563', 'stroke-width': .7, 'stroke-linejoin': 'round' }, sp); // đui đèn
-  el('path', { d: 'M-3.2 -4.4 L3.2 -3.6 M-3.2 -2.9 L3.2 -2.1', stroke: '#4b5563', 'stroke-width': .6, fill: 'none' }, sp);
-  el('path', { d: bulb, class: 'me-bulb', fill: 'url(#meArrow)', stroke: '#e08a06', 'stroke-width': .8, 'stroke-linejoin': 'round' }, sp);
-  el('path', { d: 'M-1.6 -6 L-1.6 -9.5 L0 -11 L1.6 -9.5 L1.6 -6', stroke: '#c2410c', 'stroke-width': .7, fill: 'none', 'stroke-linejoin': 'round' }, sp); // dây tóc
-  el('path', { d: 'M-4.2 -15 A4.6 4.6 0 0 1 -1 -18.8', stroke: '#fff', 'stroke-width': 1.3, 'stroke-linecap': 'round', fill: 'none', opacity: .8 }, sp); // vệt bóng
+  // chấm tròn nhấp nháy đánh dấu quân của mình (ngoài tzoom: không bị mờ khi chưa tới lượt)
+  const dot = el('g', { class: 'me-dot' }, g);
+  el('circle', { cx: 0, cy: 0, r: 7, class: 'me-wave' }, dot);
+  el('circle', { cx: 0, cy: 0, r: 7, class: 'me-core' }, dot);
   g0.style.display = 'none';
   return g0;
 });
@@ -2805,7 +2783,11 @@ function placeToken(s, pos, jailed) {
   tokenEls[s].style.opacity = '';
 }
 function hopToken(s) { tokenEls[s].querySelector('.tbody').animate([{ transform: 'none' }, { transform: 'translateY(-7px) scale(1.1)', offset: .45 }, { transform: 'none' }], { duration: 140, easing: 'ease-out' }); }
-const tokenPt = s => tokenXY(G.pl[s].pos, s, G.pl[s].jail > 0);
+// đang hoạt hoạ thì lấy chỗ quân đang hiện trên bàn (G đã là trạng thái cuối, vd. thẻ cơ hội đưa tới ô thuế)
+const tokenPt = s => {
+  const m = animating && tokenEls[s] && /translate\(([-\d.]+)px, ([-\d.]+)px\)/.exec(tokenEls[s].style.transform);
+  return m ? [+m[1], +m[2]] : tokenXY(G.pl[s].pos, s, G.pl[s].jail > 0);
+};
 
 // ── xúc xắc 3D ──
 const PIP_CELLS = { 1: [4], 2: [2, 6], 3: [2, 4, 6], 4: [0, 2, 6, 8], 5: [0, 2, 4, 6, 8], 6: [0, 2, 3, 5, 6, 8] };
@@ -3192,11 +3174,14 @@ function show(ng, ev) {
   logSteps(ev);
   const st0 = ev && Array.isArray(ev.steps) && ev.steps[0];
   stepsKeep = st0 && st0.k === 'dice' && stepsShown && stepsShown.t === st0.s && !st0.casino ? stepsShown : null;
-  if (ev && Array.isArray(ev.steps) && ev.steps.length) { if (!viewCash) viewCash = G.pl.map(p => p.cash); initView(ev.steps); animating = true; paint(true); animateSteps(ev, tok); }
+  if (ev && Array.isArray(ev.steps) && ev.steps.length) { if (!viewCash) viewCash = G.pl.map(p => p.cash); initView(ev.steps); viewTurn = Number.isInteger(st0.s) ? st0.s : -1; animating = true; paint(true); animateSteps(ev, tok); }
   else paint();
   if (ev && ev.won) setTimeout(() => { if (tok === animTok && G.phase === 'over') showResult(); }, animMs(ev) + 600);
   syncLobby();
 }
+// đang hoạt hoạ thì vẫn coi là lượt của người đang đi, quân tới nơi rồi mới chuyển sang người kế
+let viewTurn = -1;
+const shownTurn = () => (animating && viewTurn >= 0 ? viewTurn : G.turn);
 function fx(tag, attrs, ms) { const e = el(tag, attrs, $('gFx')); setTimeout(() => e.remove(), ms); return e; }
 // giữ thông báo trong bàn cờ: quân ở hàng trên (hoặc sát mép) thì đẩy chữ vào trong, không bị cắt mất khúc
 const inX = (x, half) => Math.max(half + 4, Math.min(VW - half - 4, x));
@@ -3292,21 +3277,19 @@ function flyToken(s, from, to, { ms, height, spin = 0 }) {
   return new Promise(r => { const done = () => { void g.getBoundingClientRect(); g.style.transition = ''; r(); }; a.onfinish = a.oncancel = done; setTimeout(done, ms + 50); });
 }
 // biểu tượng cảm xúc: bong bóng trên đầu quân và cạnh thẻ người chơi (không thuộc trạng thái ván)
-const EMO_MS = 2600;
-const emoFx = [null, null, null, null];
+const EMO_MS = 5000;
+const emoEls = [null, null, null, null]; // bong bóng đang hiện của từng người (gửi cái mới thì thay cái cũ)
 function showEmote(s, e) {
   if (!G || !G.seats[s] || !EMOJIS.includes(e)) return;
-  emoFx[s] = { e, t: Date.now() };
-  renderPlayers();
-  setTimeout(() => { if (G && emoFx[s] && Date.now() - emoFx[s].t >= EMO_MS) renderPlayers(); }, EMO_MS + 50);
   playPop();
   if (G.pl[s].out || G.phase === 'lobby') return;
-  const [x, y] = tokenPt(s), g = fx('g', { class: 'fx' }, EMO_MS), c = colorOf(s);
-  const inner = el('g', { transform: `translate(${inX(x, 26)} ${Math.max(40, y - 62)})` }, g);
-  el('path', { d: 'M-7 15 L0 31 L7 15 Z', fill: '#fff', stroke: c, 'stroke-width': 3, 'stroke-linejoin': 'round' }, inner);
-  el('circle', { cx: 0, cy: 0, r: 22, fill: '#fff', stroke: c, 'stroke-width': 3 }, inner);
-  el('rect', { x: -6, y: 14, width: 12, height: 6, fill: '#fff' }, inner);
-  txt(0, 1, 'sq-icon', e, inner, { style: 'font-size:27px' });
+  if (emoEls[s]) emoEls[s].remove();
+  const [x, y] = tokenPt(s), g = emoEls[s] = fx('g', { class: 'fx' }, EMO_MS), c = colorOf(s);
+  const inner = el('g', { transform: `translate(${inX(x, 36)} ${Math.max(52, y - 82)})` }, g);
+  el('path', { d: 'M-10 22 L0 44 L10 22 Z', fill: '#fff', stroke: c, 'stroke-width': 3.5, 'stroke-linejoin': 'round' }, inner);
+  el('circle', { cx: 0, cy: 0, r: 32, fill: '#fff', stroke: c, 'stroke-width': 3.5 }, inner);
+  el('rect', { x: -9, y: 20, width: 18, height: 8, fill: '#fff' }, inner);
+  txt(0, 1, 'sq-icon', e, inner, { style: 'font-size:40px' });
   g.animate([{ transform: 'scale(.2)', opacity: 0 }, { transform: 'scale(1.15)', opacity: 1, offset: .1 }, { transform: 'scale(1)', opacity: 1, offset: .16 }, { transform: 'translateY(-6px)', opacity: 1, offset: .85 }, { transform: 'translateY(-16px)', opacity: 0 }], { duration: EMO_MS, easing: 'ease-out', fill: 'forwards' });
 }
 // đánh dấu ô: viền màu người đánh dấu nhấp nháy, sóng lan ra và ghim 📍 nhún trên ô trong vài giây
@@ -3802,7 +3785,8 @@ function paint(skipTokens) {
     const g = tokenEls[s];
     // đang hoạt hoạ: quân vừa phá sản vẫn hiện để đi hết nước, bước 'bankrupt' mới làm mờ rồi ẩn
     if (!(skipTokens && G.seats[s] && G.pl[s].out)) g.style.display = inPlay && G.seats[s] && !G.pl[s].out ? '' : 'none';
-    g.classList.toggle('turn', inPlay && G.phase === 'play' && G.turn === s);
+    g.classList.toggle('turn', inPlay && G.phase === 'play' && shownTurn() === s);
+    g.classList.toggle('dim', inPlay && G.phase === 'play' && shownTurn() !== s);
     g.classList.toggle('mine', inPlay && isMine(s));
     if (G.seats[s]) { setTokenFace(s, G.pl[s].char); setTokenColor(s); }
     if (!skipTokens) placeToken(s, G.pl[s].pos, G.pl[s].jail > 0);
@@ -3882,7 +3866,7 @@ function renderPlayers() {
     if (!x) continue;
     const P = G.pl[s], out = shownOut(s), ch = charOf(P.char), d = document.createElement('div');
     const mine = net.on ? s === net.seat : x.type === 'human' && !x.remote;
-    d.className = 'pl s' + s + ' c' + ((s - base + 4) % 4) + (mine ? ' me' : '') + (G.phase === 'play' && G.turn === s ? ' turn' : '') + (x.remote && !x.online ? ' off' : '') + (out ? ' out' : '');
+    d.className = 'pl s' + s + ' c' + ((s - base + 4) % 4) + (mine ? ' me' : '') + (G.phase === 'play' && shownTurn() === s ? ' turn' : '') + (x.remote && !x.online ? ' off' : '') + (out ? ' out' : '');
     d.style.setProperty('--c', col(s).main);
     const top = document.createElement('div'); top.className = 'pl-top';
     const ava = document.createElement('span'); ava.className = 'ava'; ava.appendChild(chibiSvg(P.char)); top.appendChild(ava);
@@ -3892,8 +3876,6 @@ function renderPlayers() {
     top.appendChild(id);
     // số thẻ Chẵn/Lẻ đang có, luôn hiện cạnh tên
     if (!out) { const pc = document.createElement('span'); pc.className = 'par' + (P.hold.parity ? '' : ' none'); pc.textContent = '🎲' + (P.hold.parity || 0); pc.title = 'Thẻ Chẵn/Lẻ'; top.appendChild(pc); }
-    const em = emoFx[s], emAge = em ? Date.now() - em.t : 1e9;
-    if (emAge < EMO_MS) { const b = document.createElement('span'); b.className = 'emo-bub'; b.textContent = em.e; b.style.animationDelay = -emAge + 'ms'; top.appendChild(b); }
     const rk = live.indexOf(s), rank = document.createElement('span');
     rank.className = 'rank r' + (rk < 0 ? 4 : rk + 1); rank.textContent = rk < 0 ? '☠️' : rk + 1; rank.title = 'Hạng theo tổng tài sản';
     top.appendChild(rank);
@@ -3957,7 +3939,6 @@ function renderStatus() {
     else if (G.step === 'debt') main = `${cap(nm)} cần ${fmt(G.debt.amt)} — chạm vào thành phố của mình để bán, hoặc chọn phá sản`;
   } else if (net.on && net.seat < 0) main = `Bạn đang xem · lượt của ${who(t)}`;
   else main = `${who(t)}${G.seats[t].type === 'human' && seatAuto(t) ? ' (máy đánh thay)' : ''} đang chơi${DOTS}`;
-  if (pingMode) main = '📍 Chạm vào một ô để đánh dấu cho mọi người cùng thấy';
   if (main) st.innerHTML = main; else st.textContent = statusEv;
   st.title = st.textContent.trim();
 }
@@ -4024,8 +4005,7 @@ function renderButtons() {
   $('bNew').hidden = net.on && !net.host;
   $('bOnline').hidden = net.on; $('bInvite').hidden = !net.on; $('bLeave').hidden = !net.on;
   $('roomTag').hidden = !net.on;
-  $('bEmo').hidden = $('bPing').hidden = !(G.phase === 'play' && localMe() >= 0);
-  if ($('bPing').hidden && pingMode) setPingMode(false);
+  $('bEmo').hidden = !(G.phase === 'play' && localMe() >= 0);
   if ($('bEmo').hidden) $('emoPop').hidden = true;
   $('roomTag').textContent = net.on ? (host ? 'Chủ phòng' : net.seat < 0 ? 'Đang xem' : 'Online') : '';
 }
@@ -4054,10 +4034,31 @@ function showResult() {
 
 // ── bảng ô đất ──
 let propOpen = -1;
-function openProp(i) { if (!G || !isProp(i)) return; propOpen = i; renderProp(); $('propSheet').hidden = false; playTap(); }
+// ô đặc biệt: biểu tượng, màu đầu bảng và mô tả ngắn
+const SPECIAL = {
+  start: { icon: '🏁', color: '#2e9d4f', desc: () => `Qua ô này nhận ${fmt(SALARY)}; dừng đúng ô (từ vòng 2) còn được nâng cấp một thành phố.` },
+  chance: { icon: '❓', color: '#e67e22', desc: () => 'Rút một thẻ cơ hội: có lợi (Quỹ Thuế, miễn phí tham quan, giảm 50%, khiên, ra tù…) hoặc hại (đổi thành phố, ép bán, phá cấp, dịch bệnh, bị đưa đi nơi khác…).' },
+  island: { icon: '🏝️', color: '#23324a', desc: () => `Kẹt 3 lượt. Ra sớm bằng tung đôi, nộp ${fmt(JAIL_FEE)} hoặc dùng thẻ ra tù.` },
+  festival: { icon: '🎤', color: '#0ea5e9', desc: () => `Trả ${fmt(FEST_FEE)} mở lễ hội ở một thành phố hoặc điểm du lịch của mình: phí tham quan ×2 mỗi lần mở.` },
+  tax: { icon: '💸', color: '#8a5a00', desc: () => `Nộp ${TAX_RATE * 100}% tổng tài sản vào Quỹ Thuế (đang có ${fmt(G.pot || 0)}).` },
+  bus: { icon: '🚌', color: '#1e7a3c', desc: () => `Lượt sau được đi tới ô bất kỳ (vé ${fmt(BUS_FEE)}).` },
+  casino: { icon: '🎰', color: '#8e44ad', desc: () => `Đặt ${fmt(CASINO_BET)} đoán Chẵn/Lẻ (×2) hoặc Đôi (×6).` },
+};
+function openProp(i) { if (!G || !SQ[i]) return; propOpen = i; renderProp(); $('propSheet').hidden = false; playTap(); }
 function renderProp() {
   const i = propOpen, q = SQ[i], p = G.props[i], panel = $('propPanel'), col = groupColor(i), light = q.t === 'city' && GROUPS[q.g].light;
   panel.innerHTML = '';
+  if (!isProp(i)) {
+    const sp = SPECIAL[q.t] || { icon: '', color: '#23324a', desc: () => '' };
+    const head = document.createElement('div');
+    head.className = 'prop-head'; head.style.background = sp.color;
+    head.innerHTML = '<div class="kind">Ô đặc biệt</div><h2></h2>';
+    head.querySelector('h2').textContent = (sp.icon ? sp.icon + ' ' : '') + q.name;
+    panel.appendChild(head);
+    const d = document.createElement('p'); d.className = 'prop-desc'; d.textContent = sp.desc(); panel.appendChild(d);
+    propFoot(i, panel);
+    return;
+  }
   const head = document.createElement('div');
   head.className = 'prop-head' + (light ? ' light' : ''); head.style.background = col;
   head.innerHTML = `<div class="kind"></div><h2></h2>`;
@@ -4100,6 +4101,15 @@ function renderProp() {
   if (G.phase === 'play' && canAct(s) && p.owner === s && G.step === 'debt' && !busy() && !pending) {
     const acts = document.createElement('div'); acts.className = 'prop-actions';
     acts.appendChild(btn(`🏷️ Bán · +${fmt(sellValue(G, i))}`, 'warn', () => { $('propSheet').hidden = true; act('sell', { i }); }));
+    panel.appendChild(acts);
+  }
+  propFoot(i, panel);
+}
+// cuối bảng ô: nút gợi ý điểm đến (khi đang chơi) và nút đóng
+function propFoot(i, panel) {
+  if (G.phase === 'play' && localMe() >= 0) {
+    const acts = document.createElement('div'); acts.className = 'prop-actions';
+    acts.appendChild(btn('📍 Gợi ý điểm đến', '', () => { $('propSheet').hidden = true; sendPing(i); }));
     panel.appendChild(acts);
   }
   const close = document.createElement('button'); close.className = 'prop-close'; close.textContent = 'Đóng';
@@ -4256,15 +4266,14 @@ let hotSq = -1;
 $('board').addEventListener('click', e => {
   const i = sqAt(e);
   if (i < 0 || !G || G.phase === 'lobby') return;
-  if (pingMode) { sendPing(i); return; }
   if (G.phase === 'play' && G.step === 'pick' && G.pick && canAct(G.turn) && !busy() && !pending) {
     if (G.pick.opts.includes(i)) { act('pick', { i }); return; }
   }
-  if (isProp(i)) openProp(i);
+  openProp(i);
 });
 $('board').addEventListener('pointermove', e => {
   if (e.pointerType !== 'mouse') return;
-  const i = sqAt(e), h = i >= 0 && (isProp(i) || sqEls[i].classList.contains('pick')) ? i : -1;
+  const i = sqAt(e), h = i;
   if (h === hotSq) return;
   if (hotSq >= 0) sqEls[hotSq].classList.remove('hot');
   hotSq = h; if (h >= 0) sqEls[h].classList.add('hot');
@@ -4307,7 +4316,6 @@ $('dice').addEventListener('pointercancel', () => powerEnd(false));
 $('dice').addEventListener('contextmenu', e => e.preventDefault());
 $('dice').onclick = e => { if (e.detail === 0) act('roll'); }; // bàn phím (Enter / Space)
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape' && pingMode) setPingMode(false);
   if ((e.key === ' ' || e.key === 'Enter') && e.target === document.body) { e.preventDefault(); if (canRoll()) act('roll'); }
 });
 
@@ -4859,7 +4867,6 @@ $('bRules').onclick = () => { $('rulesSheet').hidden = false; };
   d.addEventListener('fullscreenchange', sync); d.addEventListener('webkitfullscreenchange', sync);
   b.hidden = false; sync();
 })();
-$('bPing').onclick = () => { setPingMode(!pingMode); if (pingMode) { $('emoPop').hidden = true; playTap(); } };
 (function emoPanel() {
   const pop = $('emoPop');
   for (const e of EMOJIS) { const b = document.createElement('button'); b.textContent = e; b.onclick = () => { pop.hidden = true; sendEmote(e); }; pop.appendChild(b); }
