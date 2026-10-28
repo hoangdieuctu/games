@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Cờ Tỷ Phú 6">
 <meta name="theme-color" content="#0b3d2e">
-<title>Cờ Tỷ Phú Mở Rộng · 6 người</title>
+<title>Cờ Tỷ Phú Lục Giác · 6 người</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23fffdf6'/%3E%3Crect x='3' y='3' width='26' height='26' rx='3' fill='none' stroke='%2323324a' stroke-width='1.5'/%3E%3Crect x='3' y='3' width='8' height='8' fill='%23e74c3c'/%3E%3Crect x='21' y='3' width='8' height='8' fill='%2327ae60'/%3E%3Crect x='3' y='21' width='8' height='8' fill='%23f7d31a'/%3E%3Crect x='21' y='21' width='8' height='8' fill='%231e6fd8'/%3E%3Ctext x='16' y='20' text-anchor='middle' font-family='sans-serif' font-size='11' font-weight='900' fill='%2323324a'%3E%24%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -593,7 +593,7 @@ button:disabled { opacity: .4; cursor: default; }
 <main class="board-wrap" id="wrap">
   <div class="board-box" id="boardBox">
   <!-- bàn cờ vẽ kiểu isometric: lớp phẳng (gBase/gCenter/gBoard/gOwn/gPick) nhận phép chiếu, lớp "đứng" (icon, nhà, quân, hiệu ứng) đặt tại điểm đã chiếu -->
-  <svg id="board" class="init" viewBox="0 0 1060 680" aria-label="Bàn cờ tỷ phú">
+  <svg id="board" class="init" viewBox="0 0 1260 845" aria-label="Bàn cờ tỷ phú lục giác">
     <g id="gBase"></g>
     <g id="gCenter"></g>
     <g id="gSides"></g>
@@ -738,7 +738,7 @@ button:disabled { opacity: .4; cursor: default; }
   <div class="panel wide">
     <h2>Luật chơi</h2>
     <ol class="rules">
-      <li>Mỗi người bắt đầu với <b>$2.000</b> — mỗi nhân vật có <b>80%</b> may mắn được <b>nhân đôi</b> thành $4.000 — và <b>3 thẻ Chẵn/Lẻ</b> 🎲 (giữ tối đa 3): trước khi tung, dùng một thẻ để chắc chắn tổng ra chẵn hoặc lẻ. Lần lượt tung <b>hai xúc xắc</b> đi vòng quanh <b>40 ô</b> (bản mở rộng, tối đa <b>6 người</b> chơi). Qua <b>Bắt Đầu</b> nhận <b>$300</b>; dừng đúng Bắt Đầu (từ vòng 2) còn được nâng cấp một thành phố.</li>
+      <li>Mỗi người bắt đầu với <b>$3.000</b> — mỗi nhân vật có <b>80%</b> may mắn được <b>nhân đôi</b> thành $6.000 — và <b>3 thẻ Chẵn/Lẻ</b> 🎲 (giữ tối đa 3): trước khi tung, dùng một thẻ để chắc chắn tổng ra chẵn hoặc lẻ. Lần lượt tung <b>hai xúc xắc</b> đi vòng quanh <b>42 ô</b> trên <b>bàn lục giác 6 góc</b> (bản mở rộng, tối đa <b>6 người</b> chơi). Sáu góc: Bắt Đầu, Côn Đảo, Đại Nhạc Hội, Bến Xe, Thuế, Sòng Bài. Qua <b>Bắt Đầu</b> nhận <b>$300</b>; dừng đúng Bắt Đầu (từ vòng 2) còn được nâng cấp một thành phố.</li>
       <li>Dừng ở <b>thành phố</b> chưa có chủ thì mua và xây ngay: Nhà → Biệt thự → Chung cư → Khách sạn → Biểu tượng. Vòng đầu chỉ xây tới Chung cư; qua Bắt Đầu rồi mới xây Khách sạn; có Khách sạn rồi mới lên Biểu tượng. Về thành phố của mình thì được nâng cấp.</li>
       <li>Vào thành phố <b>của người khác</b> phải trả <b>phí tham quan</b> theo cấp nhà, rồi có thể <b>mua lại</b> với giá <b>bằng</b> số tiền chủ đã đầu tư (trừ Biểu tượng và điểm du lịch). <b>Biểu tượng</b> 🗼 cũng không bị ép bán, phá cấp hay đổi.</li>
       <li>Phí tham quan <b>×2</b> khi chủ có đủ nhóm màu, <b>×2</b> cho <b>mỗi lần</b> thành phố hoặc điểm du lịch được mở <b>lễ hội</b> (cộng dồn: 2 lần là ×4; mỗi lúc chỉ một nơi có lễ hội — mở ở nơi khác thì nơi cũ bị lấy lại, phí về như cũ), <b>×2</b> ở 4 <b>ô đất vàng ⭐</b> chọn ngẫu nhiên mỗi ván.</li>
@@ -746,7 +746,7 @@ button:disabled { opacity: .4; cursor: default; }
       <li><b>Côn Đảo</b>: kẹt 3 lượt, ra sớm bằng tung đôi (vẫn được tung tiếp như tung đôi thường), nộp $100 hoặc thẻ ra tù. Tung đôi 3 lần liền cũng vào Côn Đảo. <b>Bến Xe</b>: lượt sau được đi tới ô bất kỳ (vé $40). <b>Đại Nhạc Hội</b>: trả $40 tổ chức lễ hội ở một thành phố hoặc điểm du lịch của mình. <b>Thuế</b>: nộp 10% tổng tài sản, tiền thuế dồn vào <b>Quỹ Thuế</b> — ai rút được thẻ Quỹ Thuế ở ô Cơ Hội sẽ nhận toàn bộ quỹ. <b>Nút ĐỔ</b>: chạm nhanh để tung ngẫu nhiên, hoặc <b>bấm giữ</b> cho thanh lực chạy rồi thả tay — lực càng cao càng dễ ra tổng điểm lớn. <b>Sòng bài</b>: đặt $100 đoán Chẵn/Lẻ (×2) hoặc Đôi (×6).</li>
       <li><b>Cơ Hội</b>: thẻ có lợi (nhận Quỹ Thuế, miễn phí tham quan, giảm 50%, khiên, ra tù, lễ hội miễn phí, thêm thẻ Chẵn/Lẻ) hoặc hại (đổi thành phố, ép bán, phá cấp, dịch bệnh, mất điện, bị đưa đi nơi khác).</li>
       <li>Tung đôi được đi tiếp, trừ khi vào Côn Đảo hay Bến Xe; không còn việc gì thì lượt tự chuyển. Thiếu tiền thì bán thành phố (được nửa vốn); bán hết cũng không đủ thì <b>phá sản</b> ngay: ngân hàng mua lại toàn bộ đất (nửa vốn), tiền thu được cùng tiền mặt trả cho chủ nợ. Đang thiếu tiền cũng có thể tự chọn <b>phá sản</b> thay vì bán nhà.</li>
-      <li><b>Thắng</b> khi: đối thủ phá sản hết · đủ <b>3 nhóm màu</b> · sở hữu <b>cả một hàng</b> · đủ <b>6 điểm du lịch</b> · xây đủ <b>5 Biểu tượng</b> · hoặc <b>giàu nhất</b> khi hết số vòng. Mỗi nhân vật có một kỹ năng riêng.</li>
+      <li><b>Thắng</b> khi: đối thủ phá sản hết · đủ <b>3 nhóm màu</b> · sở hữu <b>cả một cạnh bàn</b> (4 thành phố + 1 điểm du lịch) · đủ <b>6 điểm du lịch</b> · xây đủ <b>5 Biểu tượng</b> · hoặc <b>giàu nhất</b> khi hết số vòng. Mỗi nhân vật có một kỹ năng riêng.</li>
       <li>Chạm vào thẻ người chơi khác để <b>tặng tiền</b> 🎁; bấm 😊 trên cùng để gửi <b>biểu tượng cảm xúc</b>; bấm 📍 rồi chạm một ô để <b>đánh dấu</b> ô đó nhấp nháy vài giây cho mọi người cùng chú ý.</li>
     </ol>
     <div class="rules-more">
@@ -767,29 +767,45 @@ button:disabled { opacity: .4; cursor: default; }
 
 <script>
 // ═══════════════════════════ bàn cờ & luật (kiểu Cờ Tỷ Phú ZingPlay) ═══════════════════════════
-// BẢN MỞ RỘNG: bàn 11 × 11 ô, 40 ô quanh viền, tối đa 6 người chơi (NS ghế).
-// Ô 0 (Bắt Đầu) ở góc dưới phải, đi ngược chiều
-// kim đồng hồ: hàng dưới sang trái, cột trái lên, hàng trên sang phải, cột phải
-// xuống. Góc 94, ô thường 76 × 94. Mỗi cạnh PER ô (kể cả góc). Bốn góc: Bắt Đầu (0),
-// Côn Đảo (10), Đại Nhạc Hội (20), Bến Xe (30).
+// BẢN MỞ RỘNG: bàn LỤC GIÁC 6 góc, 42 ô, tối đa 6 người chơi (NS ghế).
+// Ô 0 (Bắt Đầu) ở đỉnh dưới, đi theo chiều: dưới → trái dưới → trái trên → đỉnh trên → phải trên → phải dưới.
+// Mỗi cạnh PER = 7 ô (ô góc + 6 ô thường 76 × 94). Sáu góc: Bắt Đầu (0), Côn Đảo (7), Đại Nhạc Hội (14),
+// Bến Xe (21), Thuế (28), Sòng Bài (35). Ô góc là tấm đệm lục giác (bán kính PAD_R), hình vẽ ô góc phóng CSCALE.
 const NS = 6, SEATS = [0, 1, 2, 3, 4, 5];
-const PER = 10, CORNER = 94, CW = 76, N = PER * 4, SIZE = 2 * CORNER + (PER - 1) * CW;
-// Bàn phẳng 720 × 720 được xoay 45° rồi ép dẹt theo chiều dọc (K) thành hình thoi; Bắt Đầu ở đỉnh dưới,
-// Côn Đảo đỉnh trái, Đại Nhạc Hội đỉnh trên, Bến Xe đỉnh phải. Lớp phẳng (ô, dải màu, chữ) nhận ma trận
-// ISO(dz); lớp "đứng" (quân, nhà, biểu tượng, hiệu ứng) đặt tại proj(x, y). SLAB: ô nổi cao hơn sàn giữa.
-// Hai cách nhìn: 'iso' (hình thoi, K = độ dẹt, màn dọc iPad dựng cao hơn) và 'flat' (bàn vuông nhìn thẳng từ trên,
-// dùng cho điện thoại dọc vì hình thoi bị bó theo chiều rộng). setView() đổi cách nhìn rồi vẽ lại bàn.
-let MODE = 'iso', K = 0.55, VW = 1280, VH = 798, CX = 640, CY = 404;
-const S2 = Math.SQRT1_2, SLAB = 14, TI = 2.5, BANDW = 30, DIAG = SIZE * Math.SQRT2;
-const proj = (x, y, dz = 0) => {
-  const dx = x - SIZE / 2, dy = y - SIZE / 2;
-  return MODE === 'flat' ? [CX + dx, CY + dy + dz] : [CX + (dx - dy) * S2, CY + (dx + dy) * S2 * K + dz];
-};
-const unproj = (X, Y) => {
-  if (MODE === 'flat') return [SIZE / 2 + X - CX, SIZE / 2 + Y - CY];
-  const xp = X - CX, yp = (Y - CY) / K; return [SIZE / 2 + (xp + yp) * S2, SIZE / 2 + (yp - xp) * S2];
-};
-const ISO = (dz = 0) => MODE === 'flat' ? `translate(${CX - SIZE / 2} ${CY - SIZE / 2 + dz})` : `matrix(${S2} ${S2 * K} ${-S2} ${S2 * K} ${CX} ${CY - SIZE * S2 * K + dz})`;
+const PER = 7, CORNER = 94, CW = 76, N = PER * 6, PAD_R = 62, CSCALE = 1.12;
+const RAD = Math.PI / 180, COS30 = Math.cos(30 * RAD);
+// đường giữa các ô (đi qua tâm sáu ô góc) là lục giác bán kính RM; cạnh bắt đầu sát mép phẳng của tấm đệm (cách đỉnh PAD_R·cos30)
+const RM = 2 * PAD_R * COS30 + (PER - 1) * CW;
+const BH = Math.round(2 * (RM + PAD_R + 6)), BW = Math.round(BH * COS30), SIZE = BH; // khung bàn (cao × rộng), tâm bàn ở SIZE/2
+// Mỗi ô có khung riêng: tâm (cx, cy) trên bàn phẳng và góc xoay rot (độ). Trong khung riêng, ô là chữ nhật thẳng trục
+// với mép ngoài bàn ở +y (như hàng dưới của bàn vuông cũ) nên toàn bộ cách vẽ ô "side 0" dùng lại được.
+const VERT = k => 90 + 60 * k; // góc (độ, màn hình y xuống) của đỉnh k
+const FRAMES = Array.from({ length: N }, (_, i) => {
+  const k = Math.floor(i / PER), j = i % PER, a = VERT(k) * RAD, c = SIZE / 2;
+  const vx = c + RM * Math.cos(a), vy = c + RM * Math.sin(a);
+  if (j === 0) return { cx: vx, cy: vy, rot: VERT(k) - 90 };
+  const u = (VERT(k) + 120) * RAD, d = PAD_R * COS30 + (j - 0.5) * CW;
+  return { cx: vx + Math.cos(u) * d, cy: vy + Math.sin(u) * d, rot: VERT(k) - 60 };
+});
+const frameOf = i => FRAMES[i];
+const TF = i => { const f = FRAMES[i]; return `translate(${f.cx.toFixed(2)} ${f.cy.toFixed(2)}) rotate(${f.rot})`; };
+// điểm trong khung ô → toạ độ bàn phẳng, và ngược lại
+const toB = (i, x, y) => { const f = FRAMES[i], a = f.rot * RAD, c = Math.cos(a), sn = Math.sin(a); return [f.cx + x * c - y * sn, f.cy + x * sn + y * c]; };
+const fromB = (i, X, Y) => { const f = FRAMES[i], a = -f.rot * RAD, c = Math.cos(a), sn = Math.sin(a), dx = X - f.cx, dy = Y - f.cy; return [dx * c - dy * sn, dx * sn + dy * c]; };
+// tấm đệm ô góc (khung riêng): lục giác dẹt, hai cạnh tiếp giáp hai dãy ô được nới rộng bằng bề ngang ô (94)
+const PAD_PTS = (() => {
+  const R = PAD_R, h = R * COS30, e = CORNER / 2 - R / 2;
+  return [[R + e * .5, e * COS30], [R / 2, h], [-R / 2, h], [-R - e * .5, e * COS30], [-R / 2 + e * .5, -h - e * COS30], [R / 2 - e * .5, -h - e * COS30]];
+})();
+const hexPts = (r, a0 = 90) => Array.from({ length: 6 }, (_, k) => [SIZE / 2 + r * Math.cos((a0 + 60 * k) * RAD), SIZE / 2 + r * Math.sin((a0 + 60 * k) * RAD)]);
+// Bàn phẳng được ép dẹt theo chiều dọc (K) thành mặt bàn nhìn nghiêng; 'flat' (điện thoại dọc) nhìn thẳng từ trên (K = 1).
+// Lớp phẳng (ô, dải màu, chữ) nhận ma trận ISO(dz); lớp "đứng" (quân, nhà, biểu tượng, hiệu ứng) đặt tại proj(x, y).
+let MODE = 'iso', K = 0.55, VW = 1260, VH = 845, CX = 630, CY = 413;
+const SLAB = 14, TI = 2.5, BANDW = 30;
+const KY = () => (MODE === 'flat' ? 1 : K);
+const proj = (x, y, dz = 0) => [CX + x - SIZE / 2, CY + (y - SIZE / 2) * KY() + dz];
+const unproj = (X, Y) => [SIZE / 2 + X - CX, SIZE / 2 + (Y - CY) / KY()];
+const ISO = (dz = 0) => `matrix(1 0 0 ${KY()} ${CX - SIZE / 2} ${CY - SIZE / 2 * KY() + dz})`;
 const $ = id => document.getElementById(id);
 const svgNS = 'http://www.w3.org/2000/svg';
 const COLORS = [
@@ -832,13 +848,18 @@ const GROUPS = [
 const C = (name, g, base) => ({ t: 'city', name, g, base });
 const T = (name, price, rent) => ({ t: 'tour', name, price, rent });
 const CH = { t: 'chance', name: 'Cơ Hội' };
-// 40 ô: 24 thành phố (8 nhóm màu × 3), 6 điểm du lịch, 4 Cơ Hội, Thuế, Sòng Bài và 4 góc
-const SQ = [
-  { t: 'start', name: 'Bắt Đầu' }, C('Cà Mau', 0, 100), C('Bạc Liêu', 0, 100), CH, C('Đà Lạt', 0, 120), T('Vũng Tàu', 150, 80), C('Lạng Sơn', 1, 140), C('Thái Bình', 1, 140), C('Ninh Bình', 1, 160), T('Sầm Sơn', 180, 120),
-  { t: 'island', name: 'Côn Đảo' }, C('Pleiku', 2, 160), C('Ninh Thuận', 2, 160), CH, C('Buôn Ma Thuột', 2, 180), T('Hạ Long', 210, 160), C('Tây Ninh', 3, 180), C('Vinh', 3, 200), { t: 'tax', name: 'Thuế' }, C('Hải Dương', 3, 200),
-  { t: 'festival', name: 'Đại Nhạc Hội' }, C('Thanh Hoá', 4, 220), C('Sa Pa', 4, 240), T('Nha Trang', 240, 200), C('Quy Nhơn', 4, 240), CH, C('Hội An', 5, 260), C('Huế', 5, 260), C('Đà Nẵng', 5, 280), T('Phú Quốc', 270, 260),
-  { t: 'bus', name: 'Bến Xe' }, C('Bình Dương', 6, 300), C('Cần Thơ', 6, 320), CH, T('Đồ Sơn', 300, 320), C('Biên Hoà', 6, 320), { t: 'casino', name: 'Sòng Bài' }, C('Hải Phòng', 7, 360), C('Hà Nội', 7, 380), C('Sài Gòn', 7, 400),
-];
+// 42 ô lục giác: 6 ô góc, mỗi cạnh 6 ô thường (4 thành phố, 1 Cơ Hội, 1 điểm du lịch) → 24 thành phố (8 nhóm × 3), 6 điểm du lịch, 6 Cơ Hội
+const CORNERS = [{ t: 'start', name: 'Bắt Đầu' }, { t: 'island', name: 'Côn Đảo' }, { t: 'festival', name: 'Đại Nhạc Hội' }, { t: 'bus', name: 'Bến Xe' }, { t: 'tax', name: 'Thuế' }, { t: 'casino', name: 'Sòng Bài' }];
+const CITY_LIST = [['Cà Mau', 100], ['Bạc Liêu', 100], ['Đà Lạt', 120], ['Lạng Sơn', 140], ['Thái Bình', 140], ['Ninh Bình', 160], ['Pleiku', 160], ['Ninh Thuận', 160], ['Buôn Ma Thuột', 180],
+  ['Tây Ninh', 180], ['Vinh', 200], ['Hải Dương', 200], ['Thanh Hoá', 220], ['Sa Pa', 240], ['Quy Nhơn', 240], ['Hội An', 260], ['Huế', 260], ['Đà Nẵng', 280],
+  ['Bình Dương', 300], ['Cần Thơ', 320], ['Biên Hoà', 320], ['Hải Phòng', 360], ['Hà Nội', 380], ['Sài Gòn', 400]];
+const TOUR_LIST = [['Vũng Tàu', 150, 80], ['Sầm Sơn', 180, 120], ['Hạ Long', 210, 160], ['Nha Trang', 240, 200], ['Phú Quốc', 270, 260], ['Đồ Sơn', 300, 320]];
+const SIDE_PATTERN = ['C', 'C', 'CH', 'C', 'T', 'C'];
+const SQ = (() => {
+  const out = []; let ci = 0, ti = 0;
+  for (let k = 0; k < 6; k++) { out.push(CORNERS[k]); for (const t of SIDE_PATTERN) out.push(t === 'C' ? C(CITY_LIST[ci][0], Math.floor(ci / 3), CITY_LIST[ci++][1]) : t === 'T' ? T(...TOUR_LIST[ti++]) : CH); }
+  return out;
+})();
 // năm cấp nhà: chi phí từng bước và phí tham quan tính theo giá gốc của thành phố
 const LEVELS = [null,
   { name: 'Nhà', icon: '🏠', cost: 1, rent: 0.35 },
@@ -847,7 +868,7 @@ const LEVELS = [null,
   { name: 'Khách sạn', icon: '🏨', cost: 1.2, rent: 2.6 },
   { name: 'Biểu tượng', icon: '🗼', cost: 2, rent: 4.5 },
 ];
-const START_CASH = 2000, SALARY = 300, JAIL_FEE = 100, BUS_FEE = 40, FEST_FEE = 40, CASINO_BET = 100, TAX_RATE = 0.1;
+const START_CASH = 3000, SALARY = 300, JAIL_FEE = 100, BUS_FEE = 40, FEST_FEE = 40, CASINO_BET = 100, TAX_RATE = 0.1;
 const START_POS = 0, ISLAND_POS = PER, FEST_POS = 2 * PER, BUS_POS = 3 * PER;
 const ALL = SQ.map((q, i) => i);
 const CITIES = ALL.filter(i => SQ[i].t === 'city'), TOURS = ALL.filter(i => SQ[i].t === 'tour'), PROPS = ALL.filter(i => SQ[i].t === 'city' || SQ[i].t === 'tour');
@@ -857,11 +878,11 @@ const tourIcon = i => TOUR_ICON[SQ[i].name] || '🏖️';
 const isProp = i => SQ[i].t === 'city' || SQ[i].t === 'tour';
 const GROUP_IDX = GROUPS.map((g, k) => CITIES.filter(i => SQ[i].g === k));
 // bốn hàng (cạnh bàn), chỉ tính ô đất
-const SIDES = Array.from({ length: 4 }, (_, sd) => PROPS.filter(i => i > sd * PER && i < (sd + 1) * PER));
+const SIDES = Array.from({ length: 6 }, (_, sd) => PROPS.filter(i => i > sd * PER && i < (sd + 1) * PER));
 const r10 = v => Math.round(v / 10) * 10;
 const fmt = n => '$' + Math.round(Math.abs(n)).toLocaleString('vi-VN');
 const LENS = [{ key: 'short', label: 'Ngắn', rounds: 12, time: '25–35 phút' }, { key: 'mid', label: 'Vừa', rounds: 20, time: '45–70 phút' }, { key: 'long', label: 'Dài', rounds: 30, time: 'hơn 1 giờ' }];
-const lenHint = k => { const L = LENS.find(x => x.key === k) || LENS[1]; return `Thắng ngay khi đối thủ phá sản hết, đủ 3 nhóm màu, cả một hàng, 6 điểm du lịch hoặc 5 Biểu tượng. Hết ${L.rounds} vòng thì ai giàu nhất thắng. Khoảng ${L.time}.`; };
+const lenHint = k => { const L = LENS.find(x => x.key === k) || LENS[1]; return `Thắng ngay khi đối thủ phá sản hết, đủ 3 nhóm màu, cả một cạnh bàn, 6 điểm du lịch hoặc 5 Biểu tượng. Hết ${L.rounds} vòng thì ai giàu nhất thắng. Khoảng ${L.time}.`; };
 
 // ── nhân vật: mỗi người một kỹ năng (nhóm giảm tiền / tăng tiền / di chuyển / phá đối thủ / may mắn) ──
 const CHARS = [
@@ -919,16 +940,17 @@ const CASHES = [{ key: 'base', label: 'Mặc định', hint: `Mọi người b�
 const EMOJIS = ['😀', '😂', '😎', '😍', '😭', '😡', '😱', '🤑', '👍', '👏', '🙏', '🔥'];
 
 // ── hình học ô ──
-const flatCenter = i => { const r = rectOf(i); return [r.x + r.w / 2, r.y + r.h / 2]; };
+const flatCenter = i => { const f = FRAMES[i]; return [f.cx, f.cy]; };
 const centerOf = i => proj(...flatCenter(i)); // điểm giữa ô trên màn hình (đã chiếu)
-function rectOf(i) {
-  const side = Math.floor(i / PER), k = i % PER, L = SIZE - CORNER;
-  if (side === 0) return k === 0 ? { x: L, y: L, w: CORNER, h: CORNER, side: 0 } : { x: L - k * CW, y: L, w: CW, h: CORNER, side: 0 };
-  if (side === 1) return k === 0 ? { x: 0, y: L, w: CORNER, h: CORNER, side: 1 } : { x: 0, y: L - k * CW, w: CORNER, h: CW, side: 1 };
-  if (side === 2) return k === 0 ? { x: 0, y: 0, w: CORNER, h: CORNER, side: 2 } : { x: CORNER + (k - 1) * CW, y: 0, w: CW, h: CORNER, side: 2 };
-  return k === 0 ? { x: L, y: 0, w: CORNER, h: CORNER, side: 3 } : { x: L, y: CORNER + (k - 1) * CW, w: CORNER, h: CW, side: 3 };
-}
 const isCorner = i => i % PER === 0;
+// chữ nhật ô TRONG KHUNG RIÊNG (tâm ở gốc, mép ngoài bàn ở +y). Ô góc: hình vuông 94 (vẽ phóng CSCALE, cắt theo tấm đệm)
+function rectOf(i) {
+  const w = isCorner(i) ? CORNER : CW;
+  return { x: -w / 2, y: -CORNER / 2, w, h: CORNER, side: 0 };
+}
+// đa giác mép ô trên bàn phẳng (để vẽ mặt bên, khoét lỗ làm mờ); ô góc lấy tấm đệm
+const tilePts = (i, k = 0) => (isCorner(i) ? PAD_PTS : rectPts(rectOf(i), k)).map(p => toB(i, p[0], p[1]));
+const tileG = (parent, i, attrs) => el('g', Object.assign({ transform: TF(i) }, attrs || {}), parent);
 const BAND = 32;
 function bandOf(i) {
   const r = rectOf(i);
@@ -955,7 +977,7 @@ function zones(i) {
   return { icon: [ix, r.y + r.h / 2], tok: [tx, r.y + 30], name: [tx, r.y + 44], sub: [tx, r.y + 59], w: CORNER - BAND - 8, nameMax: CORNER - BAND - 12 };
 }
 // hàng quân ở ô góc (tính từ mép trên ô góc)
-const CORNER_TOK = { start: 74, island: 76, festival: 76, bus: 76 };
+const CORNER_TOK = { start: 74, island: 76, festival: 76, bus: 76, tax: 76, casino: 76 };
 const TOKEN_SCALE = .85;
 // quân đứng trong ô, cùng một hàng; nhiều quân thì dàn ngang, chật thì chồng lên nhau một phần
 function tokenFlat(i, s, jailed) {
@@ -964,15 +986,15 @@ function tokenFlat(i, s, jailed) {
   const k = others.filter(o => o < s).length, n = others.length + 1;
   // trong buồng giam: 1–2 quân một hàng giữa buồng, nhiều hơn thì xếp hai hàng (tối đa 3 quân một hàng)
   if (i === ISLAND_POS && jailed) {
-    if (n <= 2) return [r.x + 47 + (n === 2 ? (k ? 13 : -13) : 0), r.y + 39];
+    if (n <= 2) return toB(i, (n === 2 ? (k ? 13 : -13) : 0) * CSCALE, (39 - 47) * CSCALE);
     const cols = Math.ceil(n / 2), row = Math.floor(k / cols), ck = k % cols;
-    return [r.x + 47 + (ck - (cols - 1) / 2) * 20, r.y + 39 + (row ? 9 : -9)];
+    return toB(i, (ck - (cols - 1) / 2) * 20 * CSCALE, (39 - 47 + (row ? 9 : -9)) * CSCALE);
   }
   let x, y, w;
-  if (isCorner(i)) { x = r.x + r.w / 2; y = r.y + CORNER_TOK[SQ[i].t]; w = r.w; }
+  if (isCorner(i)) { x = 0; y = (CORNER_TOK[SQ[i].t] - 47) * CSCALE; w = r.w * CSCALE; }
   else { const z = zones(i); [x, y] = z.tok; w = z.w; }
   const gap = n > 1 ? Math.min(28, (w - 28) / (n - 1)) : 0;
-  return [x + (k - (n - 1) / 2) * gap, y];
+  return toB(i, x + (k - (n - 1) / 2) * gap, y);
 }
 const tokenXY = (i, s, jailed) => proj(...tokenFlat(i, s, jailed)); // vị trí quân trên màn hình
 
@@ -2099,15 +2121,17 @@ function prismSides(g, pts, dz0, dz1, light, dark, cls) {
 }
 // khung cục bộ của ô thường: trục x chạy dọc chiều dài ô (94), inward = phía trong bàn là +x hay −x.
 // Chỉ xoay 0° hoặc −90° để sau phép chiếu (xoay thêm 45°) chữ vẫn đọc xuôi (chếch xuống phải hoặc lên phải).
+// (khung chữ nằm trong khung riêng của ô: xoay −90° hoặc +90° tuỳ cạnh để sau khi cộng góc xoay của ô, chữ không bị lộn ngược)
 function local(i) {
-  const r = rectOf(i), cx = r.x + r.w / 2, cy = r.y + r.h / 2;
-  return r.side === 0 ? { cx, cy, rot: -90, inward: 1 } : r.side === 1 ? { cx, cy, rot: 0, inward: 1 } : r.side === 2 ? { cx, cy, rot: -90, inward: -1 } : { cx, cy, rot: 0, inward: -1 };
+  const norm = a => ((a % 360) + 540) % 360 - 180;
+  const a = norm(FRAMES[i].rot - 90);
+  return a > -90 && a <= 90 ? { cx: 0, cy: 0, rot: -90, inward: 1 } : { cx: 0, cy: 0, rot: 90, inward: -1 };
 }
 let boardBuilt = false, ownKey = '', buildKey = '';
 function setView(mode, k) {
   MODE = mode; K = k;
-  if (mode === 'flat') { VW = SIZE + 60; VH = SIZE + 100; CX = VW / 2; CY = 60 + SIZE / 2; }
-  else { VW = 1280; VH = Math.round(DIAG * K + 120); CX = 640; CY = Math.round(65 + DIAG * K / 2); }
+  if (mode === 'flat') { VW = BW + 60; VH = BH + 100; CX = VW / 2; CY = 60 + BH / 2; }
+  else { VW = 1260; VH = Math.round(BH * K + 150); CX = 630; CY = Math.round(65 + BH * K / 2); } // chừa 85 dưới cho ô Bắt Đầu không bị thanh nút che
   $('board').setAttribute('viewBox', `0 0 ${VW} ${VH}`);
   if (!boardBuilt) return;
   buildBoard(); fitNames();
@@ -2322,12 +2346,36 @@ const CORNER_3D = {
     Ln(15, 0, 15, -30, '#5d6d7e', 1);
     R(9, -40, 16, 10, '#1e7a3c', .6); T(17, -36.8, 'BẾN', '#fff', 4.6); T(17, -32.4, 'XE', '#fff', 4.6);
   } },
+  tax: { at: [34, 34], draw: ({ P, R, Pa, Ci, Ln, T }) => {
+    el('ellipse', { cx: 0, cy: 0, rx: 19, ry: 3.5, fill: 'rgba(0,0,0,.22)' }, P.B);
+    // ngân khố: bậc thềm, bốn cột, mái tam giác, biển THUẾ, đồng xu trên nóc
+    R(-19, -4, 38, 4, '#c9b37a', .6); R(-17, -7, 34, 3, '#d8c48f', .6);
+    for (const x of [-14, -5.5, 3, 11.5]) { R(x, -25, 3.5, 18, '#f5e6c8', .6); R(x - .8, -26, 5.1, 1.6, '#d8c48f', .4); }
+    R(-16, -22, 32, 10, '#8a5a00', 0); Pa('M-13 -21 H13', 'none', '#ffd23f', .8);
+    R(-17, -29, 34, 4, '#e8c97a', .6); P([[-19, -29], [19, -29], [0, -40]], '#d4a017');
+    T(0, -32.3, 'THUẾ', '#5a3a00', 5.6);
+    Ci(0, -44, 4, '#ffd23f', '#b8860b', .7); T(0, -43.8, '$', '#b8860b', 5.2);
+  } },
+  casino: { at: [34, 34], draw: ({ P, R, Pa, Ci, Ln, T }) => {
+    el('ellipse', { cx: 0, cy: 0, rx: 17, ry: 3.5, fill: 'rgba(0,0,0,.3)' }, P.B);
+    // máy đánh bạc: thân tím, màn hình ba số 7, cần gạt đỏ, biển đèn
+    R(-12, -30, 24, 30, '#8e44ad', .7); R(-12, -30, 24, 4, '#6d28d9', 0);
+    R(-9.5, -26, 19, 10, '#111827', .6);
+    for (const x of [-7, -1, 5]) { R(x, -24.5, 3.6, 7, '#fff', .3); T(x + 1.8, -20.6, '7', '#e8323c', 5.6); }
+    R(-9, -13, 18, 5, '#2d1b2e', .4); for (const x of [-7, -2, 3]) R(x, -12, 3, 3, '#ffd23f', 0);
+    R(-5, -5, 10, 3, '#2d1b2e', .4);
+    Ln(14, -24, 14, -10, '#9ca3af', 1.4); Ci(14, -25.5, 2.6, '#e8323c', '#a3202a', .5);
+    R(-15, -39, 30, 8, '#ffd23f', .7); T(0, -34.8, 'SÒNG BÀI', '#8e1b3a', 5.2);
+    for (let k = 0; k < 7; k++) Ci(-13.5 + k * 4.5, -40.2, .9, k % 2 ? '#ff6fa3' : '#fff');
+  } },
 };
 // dựng công trình ô góc i (bàn 3D); công trình đứng ở góc phía sau ô để không che quân
 function drawCorner3D(i) {
   const def = CORNER_3D[SQ[i].t];
   if (!def) return;
-  const r = rectOf(i), [X, Y] = proj(r.x + def.at[0], r.y + def.at[1]);
+  // ba chỗ có thể đặt (hai bên hông hoặc mép trong), lấy chỗ nằm cao nhất trên màn hình (xa người xem) để không che quân
+  const spots = [[-36, -6], [36, -6], [0, -26]].map(([x, y]) => toB(i, x * CSCALE, y * CSCALE));
+  const [X, Y] = proj(...spots.reduce((a, b) => (b[1] < a[1] ? b : a)));
   const B = el('g', { transform: `translate(${X} ${Y}) scale(1.55)`, class: 'corner3d' }, $('gIcons'));
   const k = shapeKit(B); k.P.B = B;
   def.draw(k);
@@ -2338,19 +2386,20 @@ function buildBoard() {
   const base = $('gBase'), sides = $('gSides'), g = $('gBoard');
   g.setAttribute('transform', ISO(0)); $('gOwn').setAttribute('transform', ISO(0)); $('gPick').setAttribute('transform', ISO(0)); $('gStepTint').setAttribute('transform', ISO(0));
   // đế bàn: khối tối dưới các ô, lộ ra ở khe giữa các ô
-  const full = rectPts({ x: 0, y: 0, w: SIZE, h: SIZE }, -5);
+  const full = hexPts(RM + PAD_R + 6);
   prismSides(base, full, SLAB, SLAB + 12, '#0b3f30', '#06281e');
   el('polygon', { points: projPts(full, SLAB), fill: '#0d4a38' }, base);
   // mặt bên từng ô, vẽ từ xa tới gần để ô gần đè lên ô xa
   const order = [...Array(N).keys()].sort((a, b) => centerOf(a)[1] - centerOf(b)[1]);
-  for (const i of order) prismSides(sides, rectPts(rectOf(i), TI), 0, SLAB, '#c9d4df', '#8d9db0', 'sq-side-face');
+  for (const i of order) prismSides(sides, tilePts(i, TI), 0, SLAB, '#c9d4df', '#8d9db0', 'sq-side-face');
   for (let i = 0; i < N; i++) {
-    const q = SQ[i], r = rectOf(i), sg = el('g', { class: 'sq' }, g);
+    const q = SQ[i], r = rectOf(i), sg = tileG(g, i, { class: 'sq' });
     sg.dataset.i = i;
-    el('rect', { x: r.x + TI, y: r.y + TI, width: r.w - 2 * TI, height: r.h - 2 * TI, class: 'bg' }, sg);
+    if (isCorner(i)) el('polygon', { points: PAD_PTS.map(p => p.join(',')).join(' '), class: 'bg' }, sg);
+    else el('rect', { x: r.x + TI, y: r.y + TI, width: r.w - 2 * TI, height: r.h - 2 * TI, class: 'bg' }, sg);
     sqEls.push(sg);
     if (isCorner(i)) { drawCorner(i, sg); continue; }
-    const L = local(i), lf = el('g', { transform: `translate(${L.cx} ${L.cy}) rotate(${L.rot})` }, sg), inward = L.inward, half = CORNER / 2, hs = CW / 2;
+    const L = local(i), lf = el('g', { transform: `rotate(${L.rot})` }, sg), inward = L.inward, half = CORNER / 2, hs = CW / 2;
     let icon = null, name = '', color = '#23324a', iconSize = 20;
     if (q.t === 'city') {
       // dải màu nhóm ở đầu phía trong bàn (chỗ xây nhà)
@@ -2361,12 +2410,12 @@ function buildBoard() {
     else if (q.t === 'tax') { icon = '💸'; name = 'Thuế'; color = '#8a5a00'; }
     else if (q.t === 'casino') { icon = '🎰'; name = 'Sòng Bài'; color = '#8e44ad'; }
     // ô không phải thành phố: biểu tượng đứng ở chỗ dải nhà (Cơ Hội: biểu tượng to ở giữa ô)
-    if (icon) { const b = bandOf(i), [bx, by] = q.t === 'chance' ? flatCenter(i) : [b.x + b.w / 2, b.y + b.h / 2]; bill(bx, by, 'sq-icon', icon, $('gIcons'), { style: `font-size:${iconSize}px` }); }
+    if (icon) { const b = bandOf(i), [bx, by] = q.t === 'chance' ? flatCenter(i) : toB(i, b.x + b.w / 2, b.y + b.h / 2); bill(bx, by, 'sq-icon', icon, $('gIcons'), { style: `font-size:${iconSize}px` }); }
     // tên in hoa, to, mỗi từ một dòng khi có hai từ; chiếm trọn phần 62 px ngoài dải nhà
     const nx = -inward * (BANDW / 2), max = CORNER - BANDW - 8, words = name.toUpperCase().split(' ');
     const lines = words.length > 1 && name.length > 6 ? [words.slice(0, Math.ceil(words.length / 2)).join(' '), words.slice(Math.ceil(words.length / 2)).join(' ')] : [name.toUpperCase()];
     // chế độ phẳng: ô hàng trên / dưới (khung cục bộ xoay −90°) xoay chữ lại nằm ngang, hai dòng xếp dọc theo trục x cục bộ
-    const flip = MODE === 'flat' && L.rot !== 0;
+    const flip = false; // bàn lục giác: chữ luôn chạy dọc ô
     lines.forEach((ln, k) => {
       const off = lines.length > 1 ? (k ? 9 : -9) : 0, lx = flip ? nx - off : nx, ly = flip ? 0 : off;
       fitLater.push([txt(lx, ly, 'sq-name', ln, lf, { fill: color, style: `font-size:${lines.length > 1 ? 15 : ln.length > 7 ? 13 : 15.5}px`, transform: flip ? `rotate(90 ${lx} ${ly})` : '' }), max]);
@@ -2376,9 +2425,14 @@ function buildBoard() {
   boardBuilt = true;
 }
 buildBoard();
-function drawCorner(i, sg) {
+function drawCorner(i, sg0) {
+  // hình vẽ ô góc thiết kế cho ô vuông 94: phóng CSCALE cho vừa tấm đệm lục giác, cắt theo mép đệm
+  sg0.setAttribute('clip-path', 'url(#padClip)');
+  const sg = el('g', { transform: `scale(${CSCALE})` }, sg0);
   const r = rectOf(i), cx = r.x + CORNER / 2, X = r.x, Y = r.y, q = SQ[i], gi = $('gIcons');
-  const bg = f => el('rect', { x: X + TI, y: Y + TI, width: r.w - 2 * TI, height: r.h - 2 * TI, fill: f }, sg);
+  const bg = f => el('polygon', { points: PAD_PTS.map(p => p.join(',')).join(' '), fill: f, transform: `scale(${1 / CSCALE})` }, sg);
+  // biểu tượng / chữ đứng (lớp gIcons) đặt theo toạ độ bàn phẳng
+  const billC = (x, y, cls, s, parent, attrs) => bill(...toB(i, (x - cx) * CSCALE, (y - cx - Y + X) * CSCALE), cls, s, parent, attrs);
   const poly = (pts, attrs) => el('polygon', Object.assign({ points: pts.map(([a, b]) => `${X + a},${Y + b}`).join(' ') }, attrs), sg);
   const rect = (x, y, w, h, attrs) => el('rect', Object.assign({ x: X + x, y: Y + y, width: w, height: h }, attrs), sg);
   // quân đứng ở hàng y ≈ 74–76 (CORNER_TOK), nên hình vẽ dồn lên phần trên ô
@@ -2408,7 +2462,7 @@ function drawCorner(i, sg) {
     rect(14, 20, 66, 38, { rx: 4, fill: '#f1e4c3', stroke: '#5d6d7e', 'stroke-width': 2.5 });
     rect(14, 20, 66, 5, { fill: '#5d6d7e' });
     for (let k = 1; k < 6; k++) el('line', { x1: X + 14 + k * 11, y1: Y + 25, x2: X + 14 + k * 11, y2: Y + 58, stroke: '#5d6d7e', 'stroke-width': 2, opacity: .5 }, sg);
-    if (flat) bill(X + 82, Y + 12, 'sq-icon', '🌴', gi, { style: 'font-size:22px' });
+    if (flat) billC(X + 82, Y + 12, 'sq-icon', '🌴', gi, { style: 'font-size:22px' });
   } else if (q.t === 'festival') {
     bg('#2d1b4e');
     // hai đèn sân khấu chiếu chéo
@@ -2420,9 +2474,9 @@ function drawCorner(i, sg) {
     for (let k = 0; k < 9; k++) el('circle', { cx: X + 11 + k * 9, cy: Y + 60, r: 1.4, fill: k % 2 ? '#ff6fa3' : '#ffd23f' }, sg);
     txt(X + 15, Y + 30, 'sq-icon', '♪', sg, { fill: '#ff6fa3', style: 'font-size:15px;font-weight:900' });
     txt(X + 80, Y + 34, 'sq-icon', '♫', sg, { fill: '#ffd23f', style: 'font-size:15px;font-weight:900' });
-    if (flat) bill(cx, Y + 24, 'sq-icon', '🎤', gi, { style: 'font-size:28px' });
+    if (flat) billC(cx, Y + 24, 'sq-icon', '🎤', gi, { style: 'font-size:28px' });
     if (flat) txt(cx, Y + 47, 'sq-big', 'NHẠC HỘI', sg, { fill: '#ffd23f', stroke: '#2d1b4e', 'stroke-width': 3, 'paint-order': 'stroke', style: 'font-size:15px' });
-  } else {
+  } else if (q.t === 'bus') {
     bg('#dff3e4');
     // mái chờ xe: hai cột, ghế, biển tên làm mái
     if (flat) {
@@ -2435,7 +2489,31 @@ function drawCorner(i, sg) {
     rect(TI, 51, r.w - 2 * TI, 3, { fill: '#bdc3c7' });
     rect(TI, 54, r.w - 2 * TI, r.h - 54 - TI, { fill: '#5d6d7e' });
     for (let k = 0; k < 6; k++) rect(5 + k * 15.5, 86, 9, 2, { fill: '#fff', opacity: .85 });
-    if (flat) bill(cx, Y + 32, 'sq-icon', '🚌', gi, { style: 'font-size:28px' });
+    if (flat) billC(cx, Y + 32, 'sq-icon', '🚌', gi, { style: 'font-size:28px' });
+  } else if (q.t === 'tax') {
+    bg('#fdf3d0');
+    // sàn ngân khố: gạch vàng nhạt, dải xu
+    for (let k = 0; k < 5; k++) for (let w = 0; w < 2; w++) rect(8 + k * 16, 56 + w * 10, 14, 8, { rx: 2, fill: (k + w) % 2 ? '#f6e2a8' : '#fbefcf', stroke: '#e8c97a', 'stroke-width': .6 });
+    for (const px of [16, 47, 78]) { el('circle', { cx: X + px, cy: Y + 46, r: 5, fill: '#ffd23f', stroke: '#b8860b', 'stroke-width': 1 }, sg); txt(X + px, Y + 46.3, 'sq-big', '$', sg, { fill: '#b8860b', style: 'font-size:7px' }); }
+    if (flat) {
+      rect(12, 3, 70, 15, { rx: 4, fill: '#8a5a00', stroke: '#fff', 'stroke-width': 1.5 });
+      txt(cx, Y + 11, 'sq-big', 'THUẾ', sg, { fill: '#fff', style: 'font-size:12.5px' });
+      billC(cx, Y + 30, 'sq-icon', '💸', gi, { style: 'font-size:26px' });
+    }
+  } else {
+    bg('#2d1b2e');
+    // thảm sòng bài: viền vàng, chấm đèn, quân xúc xắc và phỉnh
+    rect(TI, 64, r.w - 2 * TI, r.h - 64 - TI, { fill: '#3d2340' });
+    rect(6, 56, 82, 8, { rx: 2, fill: '#8e1b3a', stroke: '#ffd23f', 'stroke-width': 1 });
+    for (let k = 0; k < 9; k++) el('circle', { cx: X + 11 + k * 9, cy: Y + 60, r: 1.4, fill: k % 2 ? '#ffd23f' : '#ff6fa3' }, sg);
+    for (const [px, py, c] of [[14, 40, '#e8323c'], [24, 44, '#1e6fd8'], [80, 42, '#2e9d4f']]) { el('circle', { cx: X + px, cy: Y + py, r: 6, fill: c, stroke: '#fff', 'stroke-width': 1.5, 'stroke-dasharray': '3 2' }, sg); }
+    rect(38, 30, 12, 12, { rx: 3, fill: '#fff', stroke: '#23324a', 'stroke-width': 1 }); for (const [dx, dy] of [[3, 3], [9, 9], [6, 6]]) el('circle', { cx: X + 38 + dx, cy: Y + 30 + dy, r: 1.3, fill: '#23324a' }, sg);
+    rect(54, 34, 12, 12, { rx: 3, fill: '#fff', stroke: '#23324a', 'stroke-width': 1 }); for (const [dx, dy] of [[3, 3], [9, 3], [3, 9], [9, 9]]) el('circle', { cx: X + 54 + dx, cy: Y + 34 + dy, r: 1.3, fill: '#e8323c' }, sg);
+    if (flat) {
+      rect(12, 3, 70, 15, { rx: 4, fill: '#8e44ad', stroke: '#ffd23f', 'stroke-width': 1.5 });
+      txt(cx, Y + 11, 'sq-big', 'SÒNG BÀI', sg, { fill: '#ffd23f', style: 'font-size:12.5px' });
+      billC(cx, Y + 24, 'sq-icon', '🎰', gi, { style: 'font-size:22px' });
+    }
   }
 }
 // hòm Quỹ Thuế dựng đứng giữa bàn: hòm gỗ viền vàng, khe bỏ tiền trên nắp, đống xu chất trên nóc theo số tiền, nhãn số tiền giữa mặt trước
@@ -2468,13 +2546,14 @@ function drawPotBox(x, y) {
 function drawCenter() {
   const g = $('gCenter'), c = SIZE / 2, m = CORNER;
   g.setAttribute('transform', ISO(SLAB));
-  el('rect', { x: m, y: m, width: SIZE - 2 * m, height: SIZE - 2 * m, fill: 'url(#feltGrad)' }, g);
-  el('rect', { x: m + 8, y: m + 8, width: SIZE - 2 * m - 16, height: SIZE - 2 * m - 16, fill: 'none', stroke: 'rgba(255,255,255,.12)', 'stroke-width': 2 }, g);
+  const inner = RM * COS30 - CORNER / 2 - 4; // trung đoạn lục giác sàn giữa (sát mép trong các ô)
+  el('polygon', { points: hexPts(inner / COS30).map(p => p.join(',')).join(' '), fill: 'url(#feltGrad)' }, g);
+  el('polygon', { points: hexPts((inner - 8) / COS30).map(p => p.join(',')).join(' '), fill: 'none', stroke: 'rgba(255,255,255,.12)', 'stroke-width': 2 }, g);
   el('circle', { cx: c, cy: c, r: 170, fill: 'rgba(0,0,0,.14)', stroke: 'rgba(255,255,255,.14)', 'stroke-width': 3 }, g);
   el('circle', { cx: c, cy: c, r: 146, fill: 'none', stroke: 'rgba(255,255,255,.08)', 'stroke-width': 10 }, g);
   el('circle', { cx: c, cy: c, r: 136, fill: 'none', stroke: 'rgba(255,210,63,.3)', 'stroke-width': 2, 'stroke-dasharray': '14 8' }, g);
   txt(c, c - 14, 'center-title', 'CỜ TỶ PHÚ', g);
-  txt(c, c + 34, 'center-sub', 'MỞ RỘNG · 6 NGƯỜI', g);
+  txt(c, c + 34, 'center-sub', 'LỤC GIÁC · 6 NGƯỜI', g);
   potBox = drawPotBox(c + 175, c - 205); // góc đối diện bộ thẻ Cơ Hội, chừa giữa bàn cho xúc xắc
   const deck = (x, y, rot, col, icon, label) => {
     const d = el('g', { transform: `translate(${x} ${y}) rotate(${rot})` }, g);
@@ -2507,27 +2586,25 @@ function drawOwnership() {
   g.innerHTML = ''; gb.innerHTML = '';
   if (!G) { for (const i of PROPS) sqEls[i].querySelector('.bg').style.fill = ''; return; }
   for (const i of PROPS) {
-    const p = shownProp(i), r = rectOf(i), q = SQ[i], bg = sqEls[i].querySelector('.bg');
+    const p = shownProp(i), r = rectOf(i), q = SQ[i], bg = sqEls[i].querySelector('.bg'), tg = tileG(g, i);
     if (p.owner >= 0) {
       // nền ô tô màu nhạt của chủ, viền dày màu chủ và dải màu mép ngoài
       const C = col(p.owner), st = ownerStrip(i);
       const mono = q.t === 'city' && ownsGroup(G, p.owner, q.g);
       bg.style.fill = p.fest ? '#fff1b8' : mono ? `url(#monoGrad${colIdx(p.owner)})` : C.soft;
-      el('rect', { x: st.x, y: st.y, width: st.w, height: st.h, fill: C.main }, g);
-      el('rect', { x: r.x + TI + 2, y: r.y + TI + 2, width: r.w - 2 * TI - 4, height: r.h - 2 * TI - 4, fill: 'none', stroke: C.main, 'stroke-width': 4 }, g);
-      if (mono) drawMonopoly(g, i, p.owner);
-      if (q.t === 'tour') drawTourOwned(g, i, p.owner);
+      el('rect', { x: st.x, y: st.y, width: st.w, height: st.h, fill: C.main }, tg);
+      el('rect', { x: r.x + TI + 2, y: r.y + TI + 2, width: r.w - 2 * TI - 4, height: r.h - 2 * TI - 4, fill: 'none', stroke: C.main, 'stroke-width': 4 }, tg);
+      if (mono) drawMonopoly(tg, i, p.owner);
+      if (q.t === 'tour') drawTourOwned(tg, i, p.owner);
     } else bg.style.fill = '';
     if (q.t === 'city' && G.gold.includes(i)) {
       // góc phía ngoài ô (không trùng tên, quân, dải nhà)
-      const gx = r.side === 1 ? r.x + 12 : r.side === 3 ? r.x + r.w - 12 : r.side === 0 ? r.x + r.w - 12 : r.x + 12;
-      const gy = r.side === 0 ? r.y + r.h - 12 : r.y + 12;
-      bill(gx, gy, 'gold-ico', '⭐', gb);
+      bill(...toB(i, r.x + r.w - 12, r.y + r.h - 12), 'gold-ico', '⭐', gb);
     }
-    if (p.fest) drawFestival(g, i);
+    if (p.fest) drawFestival(tg, i);
     if (q.t !== 'city') continue;
     const fx = FX.filter(f => effectOn(G, i, f.key));
-    fx.forEach(f => drawEffect(g, i, f));
+    fx.forEach(f => drawEffect(tg, i, f));
     // biển hiệu lơ lửng trên ô: tròn màu riêng + biểu tượng + chữ ngắn, hai hiệu ứng thì xếp chồng
     fx.forEach((f, k) => {
       const [X, Y] = proj(...flatCenter(i), MODE === 'flat' ? 0 : -44);
@@ -2557,7 +2634,7 @@ function drawTourWarn(g, gb) {
     if (!G.seats[s] || countOwned(G, s, TOURS) !== TOURS.length - 1) continue;
     for (const i of TOURS) {
       const r = rectOf(i), own = G.props[i].owner === s;
-      el('rect', { x: r.x + TI + 2, y: r.y + TI + 2, width: r.w - 2 * TI - 4, height: r.h - 2 * TI - 4, rx: 4, fill: own ? 'none' : 'rgba(232,50,60,.15)', stroke: '#e8323c', 'stroke-width': 4, 'stroke-dasharray': own ? '8 5' : '' }, g);
+      el('rect', { x: r.x + TI + 2, y: r.y + TI + 2, width: r.w - 2 * TI - 4, height: r.h - 2 * TI - 4, rx: 4, fill: own ? 'none' : 'rgba(232,50,60,.15)', stroke: '#e8323c', 'stroke-width': 4, 'stroke-dasharray': own ? '8 5' : '' }, tileG(g, i));
       if (!own) { const [x, y] = flatCenter(i); bill(x, y, 'tour-warn', '⚠️', gb, {}, MODE === 'flat' ? 0 : -30); }
     }
   }
@@ -2575,7 +2652,7 @@ function drawTourOwned(g, i, owner) {
   const G = viewG(); // đang hoạt hoạ: vẽ theo trạng thái đang hiển thị
   const b = bandOf(i), C = col(owner);
   el('rect', { x: b.x + 1, y: b.y + 1, width: b.w - 2, height: b.h - 2, fill: C.main, stroke: '#fff', 'stroke-width': 1.5 }, g);
-  const [X, Y] = proj(b.x + b.w / 2, b.y + b.h / 2), t = el('g', { transform: `translate(${X} ${Y})` }, $('gOwnB'));
+  const [X, Y] = proj(...toB(i, b.x + b.w / 2, b.y + b.h / 2)), t = el('g', { transform: `translate(${X} ${Y})` }, $('gOwnB'));
   if (MODE !== 'flat') { // bàn phẳng trên điện thoại: cờ dựng đứng sẽ đè lên tên ô bên cạnh nên bỏ
     el('line', { x1: 7, y1: -10, x2: 7, y2: -38, stroke: '#5a4632', 'stroke-width': 2, 'stroke-linecap': 'round' }, t);
     el('path', { d: 'M8 -38 L26 -32 L8 -25 Z', fill: C.main, stroke: '#fff', 'stroke-width': 1.5, 'stroke-linejoin': 'round', class: 'tour-flag' }, t);
@@ -2592,9 +2669,8 @@ function drawFestival(g, i) {
   const r = rectOf(i), b = bandOf(i), st = ownerStrip(i), fg = el('g', {}, g);
   el('rect', { x: r.x + TI + 2, y: r.y + TI + 2, width: r.w - 2 * TI - 4, height: r.h - 2 * TI - 4, rx: 4, fill: 'none', stroke: '#ffd23f', 'stroke-width': 4, class: 'fest-glow', style: 'animation-delay:-.7s' }, fg);
   // nhãn lễ hội ở đầu "trước" của dải nhà (đầu kia dành cho dịch bệnh / mất điện), không che chữ
-  const px = b.vert ? b.x + b.w / 2 : (r.side === 0 ? b.x + b.w - 12 : b.x + 12);
-  const py = b.vert ? (r.side === 1 ? b.y + b.h - 10 : b.y + 10) : b.y + b.h / 2;
-  const [PX, PY] = proj(px, py), pill = el('g', { transform: `translate(${PX} ${PY})` }, $('gOwnB'));
+  const px = b.x + b.w - 12, py = b.y + b.h / 2;
+  const [PX, PY] = proj(...toB(i, px, py)), pill = el('g', { transform: `translate(${PX} ${PY})` }, $('gOwnB'));
   el('rect', { x: -11, y: -8, width: 22, height: 16, rx: 5, fill: '#e8323c', stroke: '#ffd23f', 'stroke-width': 1.5 }, pill);
   txt(0, .5, 'fest-ribbon', `×${festMult(G, i)}`, pill, { style: 'font-size:10px;letter-spacing:0' });
   drawFireworks(i);
@@ -2602,7 +2678,7 @@ function drawFestival(g, i) {
 // pháo hoa nổ trên ô lễ hội: hai chùm tia nhiều màu nở luân phiên, bàn 3D thì bắn lên trên nóc nhà
 function drawFireworks(i) {
   const r = rectOf(i), flat = MODE === 'flat';
-  const [X, Y] = proj(r.x + r.w / 2, r.y + r.h / 2, flat ? 0 : -34), fw = el('g', { class: 'fw', transform: `translate(${X} ${Y})` }, $('gOwnB'));
+  const [X, Y] = proj(...flatCenter(i), flat ? 0 : -34), fw = el('g', { class: 'fw', transform: `translate(${X} ${Y})` }, $('gOwnB'));
   const burst = (cx, cy, R, cols, cls) => {
     const g = el('g', { class: 'fw-burst ' + cls }, fw);
     for (let k = 0; k < 12; k++) {
@@ -2709,7 +2785,7 @@ function drawBuild() {
   buildKey = key;
   g.innerHTML = '';
   if (!G) return;
-  const order = CITIES.map(i => { const b = bandOf(i); return [i, ...proj(b.x + b.w / 2, b.y + b.h / 2)]; }).sort((a, b) => a[2] - b[2]);
+  const order = CITIES.map(i => { const b = bandOf(i); return [i, ...proj(...toB(i, b.x + b.w / 2, b.y + b.h / 2))]; }).sort((a, b) => a[2] - b[2]);
   for (const [i, bx, by] of order) {
     const p = shownProp(i);
     if (!p.lv || p.owner < 0) continue;
@@ -2730,6 +2806,7 @@ $('board').insertBefore(defs, $('board').firstChild);
     const lg = el('linearGradient', { id: 'monoGrad' + s, x1: 0, y1: 0, x2: 1, y2: 1 }, defs);
     [[0, mix(C.main, '#fff', .35)], [.5, mix(C.main, '#fff', .78)], [1, mix(C.main, '#fff', .35)]].forEach(([o, c]) => el('stop', { offset: o, 'stop-color': c }, lg));
   });
+  el('polygon', { points: PAD_PTS.map(p => p.join(',')).join(' ') }, el('clipPath', { id: 'padClip' }, defs)); // mép tấm đệm ô góc (khung riêng của ô)
   const fg = el('radialGradient', { id: 'feltGrad', cx: .5, cy: .5, r: .68 }, defs);
   [[0, '#1f8f68'], [.55, '#156e52'], [1, '#0e5440']].forEach(([o, c]) => el('stop', { offset: o, 'stop-color': c }, fg));
   // sọc chéo xanh cho ô bị dịch bệnh
@@ -3394,7 +3471,7 @@ function pow(x, y, s, color) {
 function shakeBoard() { const b = $('board'); b.classList.remove('shake'); void b.getBoundingClientRect(); b.classList.add('shake'); }
 function flashSquare(i, color, ms = 800) {
   const r = rectOf(i), w = fx('g', { transform: ISO(0) }, ms);
-  el('rect', { x: r.x + TI, y: r.y + TI, width: r.w - 2 * TI, height: r.h - 2 * TI, rx: 4, class: 'fx glow', fill: 'none', stroke: color, 'stroke-width': 6 }, w);
+  el('rect', { x: r.x + TI, y: r.y + TI, width: r.w - 2 * TI, height: r.h - 2 * TI, rx: 4, class: 'fx glow', fill: 'none', stroke: color, 'stroke-width': 6 }, tileG(w, i));
 }
 function flyToken(s, from, to, { ms, height, spin = 0 }) {
   const g = tokenEls[s], [x0, y0] = from, [x1, y1] = to, cx = (x0 + x1) / 2, cy = Math.min(y0, y1) - height, frames = [];
@@ -3433,7 +3510,7 @@ function showPing(s, i) {
   if (pingEls[s]) pingEls[s].forEach(e => e.remove());
   const r = rectOf(i), c = colorOf(s), [fx0, fy0] = flatCenter(i);
   const flat = fx('g', { transform: ISO(0) }, PING_MS);
-  el('rect', { x: r.x + TI, y: r.y + TI, width: r.w - 2 * TI, height: r.h - 2 * TI, rx: 6, fill: c, 'fill-opacity': .22, stroke: c, 'stroke-width': 6, class: 'ping-ring' }, flat);
+  el('rect', { x: r.x + TI, y: r.y + TI, width: r.w - 2 * TI, height: r.h - 2 * TI, rx: 6, fill: c, 'fill-opacity': .22, stroke: c, 'stroke-width': 6, class: 'ping-ring' }, tileG(flat, i));
   for (let k = 0; k < 3; k++) {
     const w = el('circle', { cx: fx0, cy: fy0, r: 30, fill: 'none', stroke: c, 'stroke-width': 4, class: 'fx' }, flat);
     w.animate([{ transform: 'scale(.4)', opacity: .9 }, { transform: 'scale(2.2)', opacity: 0 }], { duration: 1200, delay: k * 400, iterations: Math.floor(PING_MS / 1200), easing: 'ease-out', fill: 'both' });
@@ -3601,7 +3678,7 @@ async function animateSteps(ev, tok) {
 }
 const sqName = i => SQ[i].name;
 const colorOf = s => col(s).main;
-const bandPt = i => { const b = bandOf(i); return proj(b.x + b.w / 2, b.y + b.h / 2); }; // giữa dải nhà, đã chiếu ra màn hình
+const bandPt = i => { const b = bandOf(i); return proj(...toB(i, b.x + b.w / 2, b.y + b.h / 2)); }; // giữa dải nhà, đã chiếu ra màn hình
 // qua Bắt Đầu: hiện số tiền lương ngay trên ô Bắt Đầu (và trên thẻ người chơi)
 // (lương cộng vào số dư trên thẻ đúng lúc này, không cộng sẵn từ đầu bước đi)
 function passGoFx(s, salary) {
@@ -3828,7 +3905,7 @@ async function animateStep(st, tok) {
     default: await sleep(ms);
   }
 }
-const HOW_TEXT = { last: 'là người cuối cùng trụ lại', triple: 'độc quyền 3 nhóm màu', row: 'độc quyền cả một hàng', tour: 'độc quyền 6 điểm du lịch', landmark: 'xây đủ 5 Biểu tượng', rich: 'giàu nhất khi hết vòng' };
+const HOW_TEXT = { last: 'là người cuối cùng trụ lại', triple: 'độc quyền 3 nhóm màu', row: 'độc quyền cả một cạnh bàn', tour: 'độc quyền 6 điểm du lịch', landmark: 'xây đủ 5 Biểu tượng', rich: 'giàu nhất khi hết vòng' };
 function stepText(st) {
   const s = st.s, w = Number.isInteger(s) ? who(s) : '', nm = i => sqName(i);
   const other = o => (who(o) === 'Bạn' ? 'bạn' : who(o));
@@ -3940,20 +4017,18 @@ function paintPicks() {
   for (let i = 0; i < N; i++) sqEls[i].classList.toggle('pick', !!opts && opts.includes(i));
   if (!opts || !opts.length) return;
   // làm mờ mọi thứ trừ các ô được chọn (đường evenodd khoét lỗ), viền vàng thở quanh từng ô
-  let d = `M0 0 H${SIZE} V${SIZE} H0 Z`;
-  for (const i of opts) { const r = rectOf(i); d += ` M${r.x} ${r.y} h${r.w} v${r.h} h${-r.w} Z`; }
+  let d = 'M' + hexPts(RM + PAD_R + 6).map(p => p.map(v => v.toFixed(1)).join(' ')).join(' L') + ' Z'; // chỉ làm mờ mặt bàn lục giác
+  for (const i of opts) d += ' M' + tilePts(i).map(p => p.map(v => v.toFixed(1)).join(' ')).join(' L') + ' Z';
   el('path', { d, fill: 'rgba(230,236,243,.72)', 'fill-rule': 'evenodd', class: 'pick-dim' }, g);
   opts.forEach((i, k) => {
     const r = rectOf(i);
-    el('rect', { x: r.x + TI, y: r.y + TI, width: r.w - 2 * TI, height: r.h - 2 * TI, rx: 5, class: 'pick-ring', style: `animation-delay:${(k % 5) * .12}s` }, g);
+    el('rect', { x: r.x + TI, y: r.y + TI, width: r.w - 2 * TI, height: r.h - 2 * TI, rx: 5, class: 'pick-ring', style: `animation-delay:${(k % 5) * .12}s` }, tileG(g, i));
     if (opts.length > 10) return; // bến xe: quá nhiều ô, chỉ cần viền
-    // bàn tay chỉ vào ô từ phía trong bàn
-    const [cx, cy] = flatCenter(i);
-    const hx = r.side === 1 ? r.x + r.w : r.side === 3 ? r.x : cx, hy = r.side === 0 ? r.y : r.side === 2 ? r.y + r.h : cy;
-    const [HX, HY] = proj(hx, hy), at = el('g', { transform: `translate(${HX} ${HY})` }, gb);
-    const hand = el('g', { class: 'pick-hand', style: `--dx:${r.side === 1 ? '-6px' : r.side === 3 ? '6px' : '0'};--dy:${r.side === 0 ? '6px' : r.side === 2 ? '-6px' : '0'};animation-delay:${(k % 5) * .1}s` }, at);
+    // bàn tay chỉ vào ô từ phía trong bàn (xoay theo ô, bàn tay 👇 chỉ ra phía ngoài)
+    const [HX, HY] = proj(...toB(i, 0, r.y)), at = el('g', { transform: `translate(${HX} ${HY}) rotate(${FRAMES[i].rot})` }, gb);
+    const hand = el('g', { class: 'pick-hand', style: `--dx:0;--dy:6px;animation-delay:${(k % 5) * .1}s` }, at);
     el('circle', { cx: 0, cy: 0, r: 14, fill: '#fff', stroke: '#ffb020', 'stroke-width': 2.5 }, hand);
-    txt(0, 1, '', r.side === 0 ? '👇' : r.side === 2 ? '👆' : r.side === 1 ? '👈' : '👉', hand);
+    txt(0, 1, '', '👇', hand);
   });
 }
 // tới lượt mình tung: đánh số 1–12 ở mép ngoài 12 ô phía trước (số = tổng xúc xắc cần ra để dừng ở ô đó),
@@ -3976,9 +4051,9 @@ function paintSteps() {
   if (!v) return;
   const { t, mult } = v, c = colorOf(t), P = { pos: v.pos };
   for (let k = 1; k <= 12; k++) {
-    const i = (P.pos + k * mult) % N, r = rectOf(i), [cx, cy] = flatCenter(i), far = k === 1 && mult === 1; // tổng 1 không ra được
-    el('rect', { x: r.x + TI, y: r.y + TI, width: r.w - 2 * TI, height: r.h - 2 * TI, rx: 5, fill: c, 'fill-opacity': far ? .05 : .13, stroke: c, 'stroke-opacity': .5, 'stroke-width': 2, 'pointer-events': 'none' }, tint);
-    const o = 16, [fx, fy] = r.side === 0 ? [cx, SIZE + o] : r.side === 1 ? [-o, cy] : r.side === 2 ? [cx, -o] : [SIZE + o, cy];
+    const i = (P.pos + k * mult) % N, r = rectOf(i), far = k === 1 && mult === 1; // tổng 1 không ra được
+    el('rect', { x: r.x + TI, y: r.y + TI, width: r.w - 2 * TI, height: r.h - 2 * TI, rx: 5, fill: c, 'fill-opacity': far ? .05 : .13, stroke: c, 'stroke-opacity': .5, 'stroke-width': 2, 'pointer-events': 'none' }, tileG(tint, i));
+    const o = 16, [fx, fy] = toB(i, 0, (r.y + r.h) * (isCorner(i) ? CSCALE : 1) + o);
     const [x, y] = proj(fx, fy), b = el('g', { transform: `translate(${x} ${y})`, opacity: far ? .45 : 1 }, gs);
     const pop = el('g', { class: 'step-badge', style: `animation-delay:${k * 35}ms` }, b);
     const big = MODE === 'flat'; // điện thoại: bàn bị thu nhỏ một nửa nên số to hơn
@@ -4395,7 +4470,7 @@ function charInfoInto(box, id) {
 function sqAt(e) {
   const r = $('board').getBoundingClientRect();
   const [x, y] = unproj((e.clientX - r.left) / r.width * VW, (e.clientY - r.top) / r.height * VH);
-  for (let i = 0; i < N; i++) { const q = rectOf(i); if (x >= q.x && x < q.x + q.w && y >= q.y && y < q.y + q.h) return i; }
+  for (let i = 0; i < N; i++) { const q = rectOf(i), [lx, ly] = fromB(i, x, y), m = isCorner(i) ? CSCALE : 1; if (lx >= q.x * m && lx < (q.x + q.w) * m && ly >= q.y * m && ly < (q.y + q.h) * m) return i; }
   return -1;
 }
 let hotSq = -1;
@@ -4470,7 +4545,7 @@ function fit() {
   const ah = (landscape ? w.clientHeight : stage.clientHeight - others) - padY;
   // điện thoại dọc: bàn vuông nhìn thẳng (hình thoi bị bó theo chiều rộng); iPad dọc: hình thoi dựng cao hơn cho ô to hơn
   const mode = !landscape && aw < 700 ? 'flat' : 'iso';
-  const want = mode === 'flat' ? K : Math.max(0.55, Math.min(0.9, ((ah / Math.max(1, aw)) * 1280 - 120) / DIAG));
+  const want = mode === 'flat' ? K : Math.max(0.55, Math.min(0.9, ((ah / Math.max(1, aw)) * 1260 - 150) / BH));
   if (mode !== MODE || Math.abs(want - K) > 0.015) setView(mode, want);
   const bw = Math.max(280, Math.floor(Math.min(aw, ah * VW / VH)));
   $('boardBox').style.width = bw + 'px'; $('boardBox').style.height = Math.round(bw * VH / VW) + 'px';
