@@ -373,7 +373,7 @@ button:disabled { opacity: .4; cursor: default; }
       <li>Ván đầu ai có lá nhỏ nhất (thường là 3♠) đi trước và phải đánh kèm lá đó. Các ván sau người về nhất ván trước đi trước.</li>
       <li>Các bộ được đánh: <b>lá lẻ</b>, <b>đôi</b>, <b>sám cô</b> (3 lá cùng số), <b>sảnh</b> (từ 3 lá liên tiếp, không có heo), <b>đôi thông</b> (từ 3 đôi liên tiếp), <b>tứ quý</b>.</li>
       <li>Người sau phải đánh bộ <b>cùng loại, cùng số lá và lớn hơn</b> (so lá cao nhất), hoặc bỏ lượt. Đã bỏ lượt thì phải chờ vòng sau. Khi mọi người đều bỏ, người đánh cuối được ra bài mới.</li>
-      <li><b>Chặt heo:</b> 3 đôi thông chặt được 1 heo. Tứ quý chặt được heo, đôi heo và 3 đôi thông. 4 đôi thông chặt được tất cả. Bị chặt heo mất điểm cho người chặt (heo đen 1, heo đỏ 2); bị chặt chồng thì trả luôn phần đã ăn.</li>
+      <li><b>Chặt heo:</b> 3 đôi thông chặt được 1 heo. Tứ quý chặt được heo, đôi heo và 3 đôi thông. 4 đôi thông chặt được tất cả và được chặt heo bất cứ lúc nào, không cần tới lượt. Bị chặt heo mất điểm cho người chặt (heo đen 1, heo đỏ 2); bị chặt chồng thì trả luôn phần đã ăn.</li>
       <li>Hết bài trước là về <b>Nhất</b>, rồi Nhì, Ba, Bét. Bốn người: Nhất +2, Nhì +1, Ba −1, Bét −2.</li>
       <li><b>Cóng:</b> có người về nhất mà mình chưa đánh lá nào thì bị cóng, xếp bét và trả thêm 2 điểm cho người nhất. Cuối ván còn heo trên tay là <b>thối heo</b>, trả cho người nhất.</li>
       <li><b>Tới trắng:</b> vừa chia đã có tứ quý heo, sảnh rồng (3 → A), 5 đôi thông hoặc 6 đôi thì thắng luôn, mỗi người trả 3 điểm.</li>
@@ -504,6 +504,12 @@ function genCombos(hand) {
   return out;
 }
 const active = (H, p) => !!H.cards[p] && H.cards[p].length > 0 && !H.cong[p];
+// 4 đôi thông trở lên chặt heo bất cứ lúc nào, không cần tới lượt (kể cả đã bỏ lượt)
+const cutAnytime = (H, s, k) => !!H.last && H.last.s !== s && active(H, s) && !!k && k.t === 'dseq' && k.n >= 8
+  && (isHeo(H.last.k) || (isBomb(H.last.k) && H.stake > 0)) && beats(k, H.last.k);
+function anytimeCut(H, s) {
+  return genCombos(H.cards[s]).filter(o => cutAnytime(H, s, o.k)).sort((a, b) => a.k.n - b.k.n || a.k.top - b.k.top)[0] || null;
+}
 function legalPlays(H, s) {
   const last = H.last && H.last.k;
   let cs = genCombos(H.cards[s]).filter(o => beats(o.k, last));
@@ -649,11 +655,12 @@ function advance(from, ev) {
 }
 function doPlay(s, cards) {
   const H = G && G.hand;
-  if (!H || G.phase !== 'play' || H.stage !== 'play' || H.turn !== s || !Array.isArray(cards)) return;
+  if (!H || G.phase !== 'play' || H.stage !== 'play' || !Array.isArray(cards) || !H.cards[s]) return;
   const hand = H.cards[s], cs = [...new Set(cards)];
   if (cs.length !== cards.length || !cs.every(c => hand.includes(c))) return;
   const k = comboOf(cs);
-  if (!k || !beats(k, H.last && H.last.k) || (H.must >= 0 && !cs.includes(H.must))) return;
+  if (H.turn !== s) { if (!cutAnytime(H, s, k)) return; }
+  else if (!k || !beats(k, H.last && H.last.k) || (H.must >= 0 && !cs.includes(H.must))) return;
   cs.sort(byVal);
   const ev = { type: 'play', s, cards: cs, name: comboName(k) };
   // chặt: hàng (tứ quý / đôi thông) đè heo hoặc đè hàng khác
@@ -753,6 +760,12 @@ function drive(ev) {
   // còn bài lật ra thì chờ lâu hơn cho mọi người kịp xem
   if (H.stage === 'done') { driveT = setTimeout(startHand, wait + (H.cards.some(c => c && c.length) ? 8000 : 5500)); return; }
   const s = H.turn;
+  // máy có 4 đôi thông thì chặt heo ngay, không chờ lượt
+  const cutter = seatIdx().find(p => p !== s && seatAuto(p) && anytimeCut(H, p));
+  if (cutter !== undefined) {
+    driveT = setTimeout(() => { const o = anytimeCut(G.hand, cutter); if (o) doPlay(cutter, o.cards); else drive(); }, wait + 700 + Math.random() * 500);
+    return;
+  }
   if (!seatAuto(s)) return;
   driveT = setTimeout(() => {
     const cs = botPick(G.hand, s);
@@ -784,8 +797,9 @@ function selCombo() {
 }
 function canPlaySel() {
   const H = V && V.hand;
-  if (!myTurn() || !uiReady()) return false;
+  if (!uiReady()) return false;
   const { cs, k } = selCombo();
+  if (!myTurn()) return !!H && H.stage === 'play' && cutAnytime(H, viewerSeat(), k);
   return !!k && beats(k, H.last && H.last.k) && (H.must < 0 || cs.includes(H.must));
 }
 function uiPlay() {
@@ -1049,6 +1063,7 @@ function hintText() {
     const can = legalPlays(H, me).length;
     return can ? `Chặn <b>${esc(comboName(H.last.k))}</b> của ${esc(who(H.last.s))} hoặc bỏ lượt` : `Không có bài chặn được <b>${esc(comboName(H.last.k))}</b> · bỏ lượt thôi`;
   }
+  if (H.last && anytimeCut(H, me)) return `Có <b>4 đôi thông</b> · chặt <b>${esc(comboName(H.last.k))}</b> ngay được, không cần chờ lượt!`;
   if (H.passed[me]) return `Bạn đã bỏ lượt vòng này · chờ <b>${esc(who(H.turn))}</b>` + DOTS;
   return `Chờ <b>${esc(who(H.turn))}</b>` + DOTS;
 }

@@ -506,10 +506,15 @@ function pickText(lang, len) {
   const list = TEXTS[lang] || TEXTS.vi, a = pick(list);
   if (len === 'long') { let b; do b = pick(list); while (b === a); return a + ' ' + b; }
   if (len === 'short') {
-    const w = a.split(' ');
-    let n = Math.min(w.length, 16);
-    for (let i = 9; i < Math.min(w.length, 22); i++) if (/[.!?,]$/.test(w[i])) { n = i + 1; break; }
-    return w.slice(0, n).join(' ').replace(/[,;:]$/, '.');
+    // chỉ cắt ở cuối câu để không mất chữ cuối; bài chỉ có 1 câu dài thì bỏ qua
+    const shortOf = s => {
+      const ss = s.match(/[^.!?]+[.!?]+/g) || [s];
+      let out = '';
+      for (const x of ss) { out = (out + ' ' + x.trim()).trim(); if (out.split(' ').length >= 7) break; }
+      return out.split(' ').length <= 20 ? out : null;
+    };
+    const opts = list.map(shortOf).filter(Boolean);
+    return opts.length ? pick(opts) : a;
   }
   return a;
 }

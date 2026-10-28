@@ -2490,6 +2490,7 @@ function renderCenter() {
 // dải chủ đất, viền màu chủ, sao đất vàng, lễ hội, dịch bệnh / mất điện
 // chỉ vẽ lại khi trạng thái đất thật sự đổi (paint() gọi rất thường xuyên)
 function drawOwnership() {
+  const G = viewG(); // đang hoạt hoạ: vẽ theo trạng thái đang hiển thị
   const g = $('gOwn'), gb = $('gOwnB');
   const key = G ? JSON.stringify([G.pl.map(p => p.char), [0, 1, 2, 3].map(colIdx), G.gold, PROPS.map(i => { const p = shownProp(i); return [p.owner, p.lv, p.fest, p.visits, effectOn(G, i, 'plague'), effectOn(G, i, 'blackout')]; })]) : '';
   if (key === ownKey) return;
@@ -2542,6 +2543,7 @@ function drawEffect(g, i, f) {
 // sắp độc quyền du lịch (còn thiếu 1 điểm là thắng): viền đỏ các điểm của người đó,
 // điểm còn lại cắm biển ⚠️ để mọi người chú ý giành / chặn
 function drawTourWarn(g, gb) {
+  const G = viewG(); // đang hoạt hoạ: vẽ theo trạng thái đang hiển thị
   for (const s of [0, 1, 2, 3]) {
     if (!G.seats[s] || countOwned(G, s, TOURS) !== TOURS.length - 1) continue;
     for (const i of TOURS) {
@@ -2561,6 +2563,7 @@ function drawMonopoly(g, i, owner) {
 // điểm du lịch đã có chủ: dải biểu tượng tô đặc màu chủ, trên đó dựng huy hiệu (biểu tượng riêng từng nơi) viền màu chủ, dưới là phí hiện tại
 // cắm lá cờ phấp phới cùng màu, nhìn từ xa vẫn biết của ai
 function drawTourOwned(g, i, owner) {
+  const G = viewG(); // đang hoạt hoạ: vẽ theo trạng thái đang hiển thị
   const b = bandOf(i), C = col(owner);
   el('rect', { x: b.x + 1, y: b.y + 1, width: b.w - 2, height: b.h - 2, fill: C.main, stroke: '#fff', 'stroke-width': 1.5 }, g);
   const [X, Y] = proj(b.x + b.w / 2, b.y + b.h / 2), t = el('g', { transform: `translate(${X} ${Y})` }, $('gOwnB'));
@@ -2576,6 +2579,7 @@ function drawTourOwned(g, i, owner) {
 }
 // ô đang mở lễ hội: nền vàng (tô ở drawOwnership), viền vàng và nhãn ×N trên dải nhà
 function drawFestival(g, i) {
+  const G = viewG(); // đang hoạt hoạ: vẽ theo trạng thái đang hiển thị
   const r = rectOf(i), b = bandOf(i), st = ownerStrip(i), fg = el('g', {}, g);
   el('rect', { x: r.x + TI + 2, y: r.y + TI + 2, width: r.w - 2 * TI - 4, height: r.h - 2 * TI - 4, rx: 4, fill: 'none', stroke: '#ffd23f', 'stroke-width': 4, class: 'fest-glow', style: 'animation-delay:-.7s' }, fg);
   // nhãn lễ hội ở đầu "trước" của dải nhà (đầu kia dành cho dịch bệnh / mất điện), không che chữ
@@ -3190,18 +3194,35 @@ let animTok = 0, animating = false, statusEv = '';
 let viewCash = null; // số dư đang hiển thị trong lúc hoạt hoạ (cập nhật theo từng bước)
 // quỹ thuế, ai đã phá sản và đất của người phá sản cũng chỉ đổi khi hoạt hoạ tới bước tương ứng
 let viewPot = null, viewOut = null, viewProps = {};
+// đất, thẻ đang giữ, Côn Đảo / vé xe, số lượt (hết hạn dịch bệnh / mất điện) của lần hiển thị trước:
+// lúc hoạt hoạ vẫn vẽ theo trạng thái cũ, tới bước nào (quân tới nơi, lật thẻ...) mới đổi phần đó
+let shownSnap = null, viewPl = {}, viewTurnNo = null;
+const snapOf = g => (g && Array.isArray(g.props) && Array.isArray(g.pl) ? {
+  props: g.props.map(p => p && { ...p }), turnNo: g.turnNo,
+  pl: g.pl.map(P => P && { hold: { ...P.hold }, jail: P.jail, bus: P.bus, laps: P.laps }),
+} : null);
 const shownOut = s => (busy() && viewOut ? viewOut[s] : G.pl[s].out);
 const shownProp = i => (busy() && viewProps[i]) || G.props[i];
+// bàn cờ như đang hiển thị (dùng để vẽ, không dùng để tính luật)
+function viewG() {
+  if (!busy() || viewTurnNo === null) return G;
+  return { ...G, props: G.props.map((p, i) => viewProps[i] || p), pl: G.pl.map((P, s) => (viewPl[s] ? { ...P, ...viewPl[s] } : P)), turnNo: viewTurnNo };
+}
 function shownWorth(s) {
   if (!busy() || !viewCash) return netWorth(G, s);
   if (shownOut(s)) return 0;
-  const VG = { ...G, props: G.props.map((p, i) => viewProps[i] || p) };
+  const VG = viewG();
   let v = viewCash[s];
   for (const i of PROPS) if (VG.props[i].owner === s) v += invested(VG, i);
   return v;
 }
-function initView(steps) {
-  viewPot = G.pot || 0; viewOut = G.pl.map(p => p.out); viewProps = {};
+function initView(steps, base) {
+  viewPot = G.pot || 0; viewOut = G.pl.map(p => p.out); viewProps = {}; viewPl = {}; viewTurnNo = null;
+  if (base && base.props.length === G.props.length && base.pl.length === G.pl.length) {
+    for (const i of PROPS) if (base.props[i]) viewProps[i] = { ...base.props[i] };
+    base.pl.forEach((x, s) => { if (x) viewPl[s] = { ...x, hold: { ...x.hold } }; });
+    viewTurnNo = base.turnNo;
+  }
   for (const st of steps) {
     if (st.k === 'pay' && st.to < 0 && st.why === 'tax') viewPot -= st.amt;
     else if (st.k === 'pot') viewPot += st.amt;
@@ -3236,9 +3257,36 @@ function applyMoney(st) {
   if (viewPot !== null) { if (st.k === 'pay' && st.to < 0 && st.why === 'tax') viewPot += st.amt; else if (st.k === 'pot') viewPot -= st.amt; }
   renderPlayers(); renderCenter();
 }
+// tới bước nào thì hiện thay đổi của bước đó: đất về trạng thái mới, thẻ / Côn Đảo / vé xe cộng trừ dần
+function revealStep(st) {
+  const sq = { build: [st.i], buyTour: [st.i], takeover: [st.i], hack: [st.i], tourUp: [st.i], plague: [st.i], blackout: [st.i],
+    destroy: [st.i], forceSell: [st.i], sell: [st.i], festival: [st.i, ...(st.prev || [])], swap: [st.mine, st.theirs] }[st.k];
+  if (sq) for (const i of sq) delete viewProps[i];
+  if (st.k === 'cure' && viewProps[st.i]) { viewProps[st.i].plague = 0; viewProps[st.i].blackout = 0; }
+  const V = viewPl[st.s];
+  if (!V) return;
+  const dec = k => { V.hold[k] = Math.max(0, (V.hold[k] || 0) - 1); };
+  switch (st.k) {
+    case 'dice': if (st.par) dec('parity'); break;
+    case 'hold': if (!st.full) V.hold[st.h] = (V.hold[st.h] || 0) + 1; break;
+    case 'useFree': dec('free'); break;
+    case 'useHalf': dec('half'); break;
+    case 'shield': dec('shield'); break;
+    case 'free': V.jail = 0; if (st.how === 'card') dec('jail'); break;
+    case 'released': V.jail = 0; break;
+    case 'stay': V.jail = 4 - st.left; break;
+    case 'island': V.jail = 1; break;
+    case 'busStop': V.bus = true; break;
+    case 'busGo': case 'busNoCash': V.bus = false; break;
+    case 'pickSkip': if (st.kind === 'bus') V.bus = false; break;
+    case 'move': if (st.passGo) V.laps++; break;
+    case 'bankrupt': V.hold = freshHold(); break;
+  }
+}
 const busy = () => animating;
 function show(ng, ev) {
   G = ng; pending = false;
+  const base = shownSnap; shownSnap = snapOf(ng);
   const tok = ++animTok;
   animating = false;
   $('gCard').innerHTML = ''; $('gSpy').innerHTML = ''; spyKey = '';
@@ -3250,7 +3298,7 @@ function show(ng, ev) {
   logSteps(ev);
   const st0 = ev && Array.isArray(ev.steps) && ev.steps[0];
   stepsKeep = st0 && st0.k === 'dice' && stepsShown && stepsShown.t === st0.s && !st0.casino ? stepsShown : null;
-  if (ev && Array.isArray(ev.steps) && ev.steps.length) { if (!viewCash) viewCash = G.pl.map(p => p.cash); initView(ev.steps); viewTurn = Number.isInteger(st0.s) ? st0.s : -1; animating = true; paint(true); animateSteps(ev, tok); }
+  if (ev && Array.isArray(ev.steps) && ev.steps.length) { if (!viewCash) viewCash = G.pl.map(p => p.cash); initView(ev.steps, ev.type === 'start' ? null : base); viewTurn = Number.isInteger(st0.s) ? st0.s : -1; animating = true; paint(true); animateSteps(ev, tok); }
   else paint();
   if (ev && ev.won) setTimeout(() => { if (tok === animTok && G.phase === 'over') showResult(); }, animMs(ev) + 600);
   syncLobby();
@@ -3535,7 +3583,7 @@ async function animateSteps(ev, tok) {
     if (tok !== animTok) return;
     const t = stepText(st);
     if (t) { statusEv = t; renderStatus(); }
-    applyMoney(st);
+    revealStep(st); applyMoney(st);
     try { await animateStep(st, tok); } catch (e) { await sleep(stepMs(st)); }
     // quân vừa tung đã tới nơi (hoặc bị đưa ra đảo): ẩn 12 số
     if (stepsKeep && st.s === stepsKeep.t && (st.k === 'move' || st.k === 'island' || st.k === 'stay')) { stepsKeep = null; paintSteps(); }
@@ -3931,6 +3979,7 @@ function paintSteps() {
 }
 const groupColor = i => (SQ[i].t === 'city' ? GROUPS[SQ[i].g].color : '#5b8dc9');
 function renderPlayers() {
+  const G = viewG(); // đang hoạt hoạ: vẽ theo trạng thái đang hiển thị
   const pl = $('players');
   pl.innerHTML = '';
   // thứ hạng theo tổng tài sản (người phá sản xếp cuối)
@@ -4122,6 +4171,7 @@ const SPECIAL = {
 };
 function openProp(i) { if (!G || !SQ[i]) return; propOpen = i; renderProp(); $('propSheet').hidden = false; playTap(); }
 function renderProp() {
+  const G = viewG(); // đang hoạt hoạ: vẽ theo trạng thái đang hiển thị
   const i = propOpen, q = SQ[i], p = G.props[i], panel = $('propPanel'), col = groupColor(i), light = q.t === 'city' && GROUPS[q.g].light;
   panel.innerHTML = '';
   if (!isProp(i)) {
@@ -4198,6 +4248,7 @@ $('propSheet').onclick = e => { if (e.target === $('propSheet')) $('propSheet').
 let plOpen = -1;
 function openPlayer(s) { if (!G || !G.seats[s]) return; plOpen = s; renderPlayerSheet(); $('plSheet').hidden = false; playTap(); }
 function renderPlayerSheet() {
+  const G = viewG(); // đang hoạt hoạ: vẽ theo trạng thái đang hiển thị
   const s = plOpen, P = G.pl[s], ch = charOf(P.char), panel = $('plPanel');
   if (!G.seats[s]) { $('plSheet').hidden = true; return; }
   panel.innerHTML = '';
