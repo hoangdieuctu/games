@@ -250,10 +250,11 @@ button:disabled { opacity: .4; cursor: default; }
 @keyframes cdblink { to { opacity: .45; } }
 .afk-cd { position: absolute; left: 50%; bottom: calc(100% + var(--s) * 1.5); transform: translateX(-50%); width: calc(var(--s) * 1.7); height: calc(var(--s) * 1.7); border-radius: 50%; display: flex; align-items: center; justify-content: center; font: 900 calc(var(--s) * .9) / 1 'Baloo 2', system-ui, sans-serif; color: #fff; background: var(--red); border: 3px solid #fff; box-shadow: 0 0 0 4px rgba(232,50,60,.35), 0 6px 16px rgba(0,0,0,.4); pointer-events: none; z-index: 4; animation: cdpop 1s ease-out infinite; }
 @keyframes cdpop { 0% { transform: translateX(-50%) scale(1.3); } 35%, 100% { transform: translateX(-50%) scale(1); } }
-/* tiến độ thắng: bốn mục (nhóm màu, cạnh bàn, du lịch, biểu tượng), nền tô theo phần trăm; còn thiếu 1 là viền vàng */
-.pl-goal { display: flex; gap: 3px; }
-.pl-goal span { flex: 1; min-width: 0; font-size: 10.5px; font-weight: 800; line-height: 1; padding: 3px 0; border-radius: 6px; text-align: center; white-space: nowrap; color: #fff; background: linear-gradient(90deg, color-mix(in srgb, var(--c) 70%, #000) var(--p, 0%), rgba(0,0,0,.3) var(--p, 0%)); }
-.pl-goal span.near { box-shadow: 0 0 0 1.5px #ffd23f inset; color: #ffd23f; }
+/* tiến độ thắng: chỉ hiện cách thắng đang gần nhất, nền tô theo phần trăm; còn thiếu 1 là viền vàng */
+.pl-goal { display: flex; justify-content: space-between; align-items: center; gap: 6px; font-size: 10.5px; font-weight: 800; line-height: 1; padding: 3px 6px; border-radius: 6px; white-space: nowrap; color: #fff; background: linear-gradient(90deg, color-mix(in srgb, var(--c) 70%, #000) var(--p, 0%), rgba(0,0,0,.3) var(--p, 0%)); }
+.pl-goal .t { overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.pl-goal .n { flex: 0 0 auto; opacity: .9; }
+.pl-goal.near { box-shadow: 0 0 0 1.5px #ffd23f inset; color: #ffd23f; }
 /* đang nói: quầng xanh quanh mặt; mic đang mở: biểu tượng cạnh tên */
 .pl .vc { flex: 0 0 auto; font-size: 12px; line-height: 1; }
 .pl.talk .ava { box-shadow: 0 0 0 2px #fff inset, 0 0 0 3px #4ade3b, 0 0 14px #4ade3b; }
@@ -383,7 +384,7 @@ button:disabled { opacity: .4; cursor: default; }
   .board-wrap { top: 30px; bottom: 38px; }
   .pl { width: clamp(140px, 18vw, 180px); padding: 4px 7px 4px 9px; gap: 2px; } .pl .ava { width: 26px; height: 26px; } .pl .skill { display: none; } .pl .nm { font-size: 12.5px; } .pl-props { display: none; }
   .pl-row { font-size: 11px; min-height: 20px; padding: 1px 7px; } .pl .cash { font-size: 12.5px; } .pl .worth { font-size: 11.5px; } .pl-props { display: none; }
-  .pl-goal span { font-size: 9.5px; padding: 2px 0; }
+  .pl-goal { font-size: 9.5px; padding: 2px 5px; }
   .status { font-size: 12px; padding: 2px 10px; top: calc(env(safe-area-inset-top, 0px) + 36px); }
   .actions button { min-height: 34px; padding: 4px 10px; font-size: 13px; } .actions button small { font-size: 10.5px; }
   .dock button { min-height: 30px; padding: 3px 10px; font-size: 12.5px; }
@@ -1120,10 +1121,10 @@ function monopolyWin(G, s) {
 }
 // tiến độ bốn cách thắng độc quyền của s (hiện trên thẻ người chơi và bảng người chơi)
 const goalsOf = (G, s) => [
-  { ico: '🎨', name: 'Nhóm màu đủ bộ', n: groupsOwned(G, s), max: GROUP_WIN },
-  { ico: '🛣️', name: 'Cả một cạnh bàn (4 thành phố + 1 điểm du lịch)', n: Math.max(...SIDES.map(side => countOwned(G, s, side))), max: SIDES[0].length },
-  { ico: '🏖️', name: 'Điểm du lịch', n: countOwned(G, s, TOURS), max: TOURS.length },
-  { ico: '🗼', name: 'Biểu tượng', n: landmarks(G, s), max: LANDMARK_WIN },
+  { ico: '🎨', short: 'Nhóm màu', name: 'Nhóm màu đủ bộ', n: groupsOwned(G, s), max: GROUP_WIN },
+  { ico: '🛣️', short: 'Cạnh bàn', name: 'Cả một cạnh bàn', n: Math.max(...SIDES.map(side => countOwned(G, s, side))), max: SIDES[0].length },
+  { ico: '🏖️', short: 'Du lịch', name: 'Điểm du lịch', n: countOwned(G, s, TOURS), max: TOURS.length },
+  { ico: '🗼', short: 'Biểu tượng', name: 'Biểu tượng', n: landmarks(G, s), max: LANDMARK_WIN },
 ];
 const canTakeover = (G, s, i) => SQ[i].t === 'city' && G.props[i].owner >= 0 && G.props[i].owner !== s && G.props[i].lv < 5 && !G.pl[G.props[i].owner].out;
 // rào chắn 🚧 đang dựng ở ô i (của người chưa phá sản), chặn người khác đi ngang qua
@@ -4018,16 +4019,13 @@ function renderPlayers() {
     const row2 = document.createElement('div'); row2.className = 'pl-row';
     row2.innerHTML = `<span class="lbl">🏠 <b>Tài sản</b></span><span class="worth">${out ? 'phá sản' : fmt(shownWorth(s))}</span>`;
     d.appendChild(row2);
-    // tiến độ bốn cách thắng độc quyền: nền tô theo phần trăm, còn thiếu 1 là viền vàng
-    if (!out && G.phase === 'play') {
-      const gl = document.createElement('div'); gl.className = 'pl-goal';
-      for (const g of goalsOf(G, s)) {
-        const sp = document.createElement('span');
-        sp.textContent = `${g.ico}${g.n}/${g.max}`; sp.title = g.name;
-        sp.style.setProperty('--p', Math.round(g.n / g.max * 100) + '%');
-        if (g.n > 0 && g.max - g.n <= 1) sp.classList.add('near');
-        gl.appendChild(sp);
-      }
+    // tiến độ thắng: chỉ hiện cách thắng đang có phần trăm cao nhất, nền tô theo phần trăm, còn thiếu 1 là viền vàng
+    const g = !out && G.phase === 'play' ? goalsOf(G, s).reduce((a, b) => b.n / b.max > a.n / a.max ? b : a) : null;
+    if (g && g.n > 0) {
+      const gl = document.createElement('div'); gl.className = 'pl-goal'; gl.title = g.name;
+      gl.innerHTML = `<span class="t">${g.short}</span><span class="n">${g.n}/${g.max}</span>`;
+      gl.style.setProperty('--p', Math.round(g.n / g.max * 100) + '%');
+      if (g.n > 0 && g.max - g.n <= 1) gl.classList.add('near');
       d.appendChild(gl);
     }
     const props = document.createElement('div'); props.className = 'pl-props';
@@ -4337,11 +4335,10 @@ function renderPlayerSheet() {
   }
   if (!P.out) {
     const h = document.createElement('div'); h.className = 'label'; h.textContent = 'Tiến độ thắng ngay (đạt một mục là thắng)'; panel.appendChild(h);
-    const GOAL_T = { '🎨': '🎨 Đủ nhóm màu', '🛣️': '🛣️ Cả một cạnh bàn', '🏖️': '🏖️ Điểm du lịch', '🗼': '🗼 Biểu tượng' };
     for (const g of goalsOf(G, s)) {
       const d = document.createElement('div'); d.className = 'goal';
       d.innerHTML = '<span class="t"></span><span class="bar"><i></i></span><span class="n"></span>';
-      d.querySelector('.t').textContent = GOAL_T[g.ico]; d.querySelector('i').style.width = Math.min(100, g.n / g.max * 100) + '%'; d.querySelector('.n').textContent = `${g.n}/${g.max}`;
+      d.querySelector('.t').textContent = g.name; d.querySelector('i').style.width = Math.min(100, g.n / g.max * 100) + '%'; d.querySelector('.n').textContent = `${g.n}/${g.max}`;
       panel.appendChild(d);
     }
   }
