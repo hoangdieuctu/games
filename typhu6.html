@@ -48,6 +48,14 @@ button:disabled { opacity: .4; cursor: default; }
 .top h1 small { font-size: 14px; font-weight: 800; color: #0b3d2e; background: #ffd23f; border-radius: 999px; padding: 1px 8px; vertical-align: middle; margin-left: 2px; text-shadow: none; }
 .top h1 span:nth-child(1) { color: #ff7b72; } .top h1 span:nth-child(2) { color: #ffd23f; } .top h1 span:nth-child(3) { color: #7be495; }
 .mute.on { background: #ffd23f; border-color: #fff; box-shadow: 0 0 0 3px rgba(255,210,63,.45), 0 3px 10px rgba(0,0,0,.3); animation: pingbtn 1s ease-in-out infinite; }
+/* 🎤 trò chuyện: xanh khi mic đang mở, gạch chéo khi mic tắt, vàng nhấp nháy khi trình duyệt chặn tự phát tiếng (bấm để nghe) */
+#bVoice { position: relative; }
+#bVoice.live { background: #2e9d4f; border-color: #a8f0bb; box-shadow: 0 0 0 3px rgba(46,157,79,.4), 0 3px 10px rgba(0,0,0,.3); }
+#bVoice.off { opacity: 1; }
+#bVoice.off::after { content: ''; position: absolute; width: 60%; height: 3px; background: #ff5252; border-radius: 2px; transform: rotate(-45deg); box-shadow: 0 0 0 1px rgba(0,0,0,.4); }
+#bVoice.blocked { background: #ffd23f; border-color: #fff; color: #5a3a00; animation: pingbtn 1s ease-in-out infinite; }
+/* thông báo ngắn */
+.toast { position: fixed; left: 50%; bottom: 76px; transform: translateX(-50%); z-index: 45; max-width: 92vw; padding: 8px 16px; border-radius: 999px; background: rgba(4,24,18,.92); color: #fff; font-weight: 700; font-size: 14px; line-height: 1.3; text-align: center; box-shadow: 0 6px 18px rgba(0,0,0,.4); border: 1px solid rgba(255,255,255,.18); animation: fade .2s ease-out; pointer-events: none; }
 @keyframes pingbtn { 50% { transform: scale(1.1); } }
 .ping-ring { animation: pingblink .4s ease-in-out infinite alternate; }
 @keyframes pingblink { from { opacity: 1; } to { opacity: .15; } }
@@ -236,6 +244,19 @@ button:disabled { opacity: .4; cursor: default; }
 }
 .pl-props i.m { opacity: .35; }
 .pl .badge { font-size: 11px; font-weight: 800; white-space: nowrap; background: rgba(255,210,63,.2); color: #ffd23f; border-radius: 999px; padding: 0 7px; }
+/* đếm ngược trước khi máy đánh thay (trên thẻ người tới lượt); 10 giây cuối đỏ nhấp nháy */
+.pl .cd { flex: 0 0 auto; font-size: 11px; font-weight: 900; line-height: 18px; padding: 0 6px; border-radius: 999px; white-space: nowrap; background: rgba(0,0,0,.45); color: #ffd23f; border: 1px solid rgba(255,255,255,.2); }
+.pl .cd.urgent { background: var(--red); color: #fff; border-color: #fff; animation: cdblink .5s ease-in-out infinite alternate; }
+@keyframes cdblink { to { opacity: .45; } }
+.afk-cd { position: absolute; left: 50%; bottom: calc(100% + var(--s) * 1.5); transform: translateX(-50%); width: calc(var(--s) * 1.7); height: calc(var(--s) * 1.7); border-radius: 50%; display: flex; align-items: center; justify-content: center; font: 900 calc(var(--s) * .9) / 1 'Baloo 2', system-ui, sans-serif; color: #fff; background: var(--red); border: 3px solid #fff; box-shadow: 0 0 0 4px rgba(232,50,60,.35), 0 6px 16px rgba(0,0,0,.4); pointer-events: none; z-index: 4; animation: cdpop 1s ease-out infinite; }
+@keyframes cdpop { 0% { transform: translateX(-50%) scale(1.3); } 35%, 100% { transform: translateX(-50%) scale(1); } }
+/* tiến độ thắng: bốn mục (nhóm màu, cạnh bàn, du lịch, biểu tượng), nền tô theo phần trăm; còn thiếu 1 là viền vàng */
+.pl-goal { display: flex; gap: 3px; }
+.pl-goal span { flex: 1; min-width: 0; font-size: 10.5px; font-weight: 800; line-height: 1; padding: 3px 0; border-radius: 6px; text-align: center; white-space: nowrap; color: #fff; background: linear-gradient(90deg, color-mix(in srgb, var(--c) 70%, #000) var(--p, 0%), rgba(0,0,0,.3) var(--p, 0%)); }
+.pl-goal span.near { box-shadow: 0 0 0 1.5px #ffd23f inset; color: #ffd23f; }
+/* đang nói: quầng xanh quanh mặt; mic đang mở: biểu tượng cạnh tên */
+.pl .vc { flex: 0 0 auto; font-size: 12px; line-height: 1; }
+.pl.talk .ava { box-shadow: 0 0 0 2px #fff inset, 0 0 0 3px #4ade3b, 0 0 14px #4ade3b; }
 
 /* ── nút ĐỔ: xúc xắc 3D nằm trên nút tròn đỏ ── */
 .dice { flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; gap: calc(var(--s) * .3); padding: calc(var(--s) * .4) calc(var(--s) * .3) 0; transition: transform .1s; }
@@ -320,7 +341,8 @@ button:disabled { opacity: .4; cursor: default; }
   .pl .nm { font-size: 12px; max-width: 90px; } .pl .rank { width: 18px; height: 18px; font-size: 11px; }
   .pl-row { background: none; padding: 0; min-height: 0; gap: 4px; font-size: 12px; flex: 0 0 auto; } .pl-row .lbl b { display: none; }
   .pl .cash { font-size: 13px; } .pl .worth { font-size: 12px; } .pl .delta { font-size: 10px; padding: 0 5px; }
-  .pl-props { display: none; }
+  .pl-props, .pl-goal { display: none; }
+  .pl .cd { font-size: 10.5px; line-height: 16px; padding: 0 5px; }
   .pl .par { font-size: 10.5px; line-height: 16px; padding: 0 4px; }
   /* nhiều người chơi chung máy: hai thẻ chia đôi bề ngang, chỉ giữ tiền mặt cho khỏi chồng chữ */
   .hud:has(.pl.me ~ .pl.me) .pl-row:nth-child(3), .hud:has(.pl.me ~ .pl.me) .pl-row .lbl { display: none; }
@@ -361,6 +383,7 @@ button:disabled { opacity: .4; cursor: default; }
   .board-wrap { top: 30px; bottom: 38px; }
   .pl { width: clamp(140px, 18vw, 180px); padding: 4px 7px 4px 9px; gap: 2px; } .pl .ava { width: 26px; height: 26px; } .pl .skill { display: none; } .pl .nm { font-size: 12.5px; } .pl-props { display: none; }
   .pl-row { font-size: 11px; min-height: 20px; padding: 1px 7px; } .pl .cash { font-size: 12.5px; } .pl .worth { font-size: 11.5px; } .pl-props { display: none; }
+  .pl-goal span { font-size: 9.5px; padding: 2px 0; }
   .status { font-size: 12px; padding: 2px 10px; top: calc(env(safe-area-inset-top, 0px) + 36px); }
   .actions button { min-height: 34px; padding: 4px 10px; font-size: 13px; } .actions button small { font-size: 10.5px; }
   .dock button { min-height: 30px; padding: 3px 10px; font-size: 12.5px; }
@@ -403,7 +426,10 @@ button:disabled { opacity: .4; cursor: default; }
 .colors button { width: 26px; height: 26px; border-radius: 50%; background: var(--c); box-shadow: 0 0 0 2px #fff, 0 0 0 3px rgba(35,50,74,.15); transition: transform .12s; }
 .colors button.on { box-shadow: 0 0 0 3px #fff, 0 0 0 5px var(--c); transform: scale(1.12); }
 .colors button:disabled { opacity: .2; cursor: default; }
-.seat .tag { font-size: 12px; font-weight: 700; color: var(--muted); background: #eef2f7; border-radius: 999px; padding: 1px 8px; }
+.seat .tag { font-size: 12px; font-weight: 700; color: var(--muted); background: #eef2f7; border-radius: 999px; padding: 1px 8px; white-space: nowrap; }
+.seat .tag.ok { color: #1e7a3c; background: #eafaf0; }
+.seat .tag.wait { color: #c0392b; background: #fdecea; }
+#lbReady.on { background: #eafaf0; color: #1e7a3c; }
 .panel .go { display: block; width: 100%; margin-top: 18px; background: var(--ink); color: #fff; border-radius: 14px; padding: 12px; font-weight: 800; font-size: 18px; }
 .panel .rule { margin-top: 12px; font-size: 13px; color: var(--muted); line-height: 1.45; }
 .panel .rule.center { text-align: center; }
@@ -580,6 +606,7 @@ button:disabled { opacity: .4; cursor: default; }
   <span class="round-tag" id="roundTag" hidden></span>
   <span class="room-tag" id="roomTag" hidden></span>
   <button class="mute" id="bEmo" aria-label="Biểu tượng cảm xúc" hidden>😊</button>
+  <button class="mute" id="bVoice" aria-label="Trò chuyện bằng giọng nói" hidden>🎤</button>
   <button class="mute" id="bMusic" aria-label="Bật/tắt nhạc nền">🎵</button>
   <button class="mute" id="bMute" aria-label="Bật/tắt âm thanh">🔊</button>
   <button class="mute" id="bFull" aria-label="Toàn màn hình" hidden></button>
@@ -615,6 +642,7 @@ button:disabled { opacity: .4; cursor: default; }
   </svg>
   </div>
   <div class="mid" id="mid">
+    <div class="afk-cd" id="afkCd" hidden></div>
     <div class="dice-stage" id="diceStage">
       <button class="dice" id="dice" aria-label="Tung xúc xắc"><div class="cubes"><div class="die"></div><div class="die"></div></div><span class="roll-lbl">ĐỔ</span></button>
       <svg class="power-arc" id="powerArc" viewBox="0 0 200 95" aria-hidden="true">
@@ -697,8 +725,8 @@ button:disabled { opacity: .4; cursor: default; }
       <p class="rule center" id="lbHint"></p>
     </div>
     <div id="lbGuestCtl">
-      <p class="rule center">Đang chờ chủ phòng bắt đầu<span class="dots"><span>.</span><span>.</span><span>.</span></span></p>
-      <div class="row"><button id="lbLeave">Rời phòng</button></div>
+      <p class="rule center" id="lbGuestHint">Đang chờ chủ phòng bắt đầu<span class="dots"><span>.</span><span>.</span><span>.</span></span></p>
+      <div class="row"><button id="lbLeave">Rời phòng</button><button class="go" id="lbReady">✅ Sẵn sàng</button></div>
     </div>
   </div>
 </div>
@@ -746,11 +774,12 @@ button:disabled { opacity: .4; cursor: default; }
       <li>Vào thành phố <b>của người khác</b> phải trả <b>phí tham quan</b> theo cấp nhà, rồi có thể <b>mua lại</b> với giá <b>bằng</b> số tiền chủ đã đầu tư (trừ Biểu tượng và điểm du lịch). <b>Biểu tượng</b> 🗼 cũng không bị ép bán, phá cấp hay đổi.</li>
       <li>Phí tham quan <b>×2</b> khi chủ có đủ nhóm màu, <b>×2</b> cho <b>mỗi lần</b> thành phố hoặc điểm du lịch được mở <b>lễ hội</b> (cộng dồn: 2 lần là ×4; mỗi lúc chỉ một nơi có lễ hội — mở ở nơi khác thì nơi cũ bị lấy lại, phí về như cũ), <b>×2</b> ở 4 <b>ô đất vàng ⭐</b> chọn ngẫu nhiên mỗi ván.</li>
       <li><b>6 điểm du lịch</b> 🏖️ càng xa ô Bắt Đầu càng đắt: giá từ $150 (Vũng Tàu) đến $300 (Đồ Sơn), phí tham quan từ $80 đến $320, nhân với số điểm chủ đang có, <b>mỗi lượt có người ghé</b> (kể cả chủ) phí tăng thêm <b>50%</b> phí gốc, không mua lại được. Ai gom đủ cả 6 <b>thắng ngay</b>.</li>
-      <li><b>Côn Đảo</b>: kẹt 3 lượt, ra sớm bằng tung đôi (vẫn được tung tiếp như tung đôi thường), nộp $100 hoặc thẻ ra tù. Tung đôi 3 lần liền cũng vào Côn Đảo. <b>Bến Xe</b>: lượt sau được đi tới ô bất kỳ (vé $40). <b>Đại Nhạc Hội</b>: trả $40 tổ chức lễ hội ở một thành phố hoặc điểm du lịch của mình. <b>Thuế</b>: nộp 10% tổng tài sản, tiền thuế dồn vào <b>Quỹ Thuế</b> — ai rút được thẻ Quỹ Thuế ở ô Cơ Hội sẽ nhận toàn bộ quỹ. <b>Nút ĐỔ</b>: chạm nhanh để tung ngẫu nhiên, hoặc <b>bấm giữ</b> cho thanh lực chạy rồi thả tay — lực càng cao càng dễ ra tổng điểm lớn. <b>Cần Cẩu</b> 🏗️: nhắc một ô đất của mình lên cao — phí tham quan ở đó <b>×2</b> cho tới khi bị hạ xuống. Cả bàn chỉ có <b>một</b> ô được nhắc: ai nhắc ô khác thì ô đang nhắc hạ xuống, phí về như cũ.</li>
+      <li><b>Côn Đảo</b>: kẹt 3 lượt, ra sớm bằng tung đôi (vẫn được tung tiếp như tung đôi thường), nộp $100 hoặc thẻ ra tù. Tung đôi 3 lần liền cũng vào Côn Đảo. <b>Bến Xe</b>: lượt sau được đi tới ô bất kỳ (vé $40). <b>Đại Nhạc Hội</b>: trả $40 tổ chức lễ hội ở một thành phố hoặc điểm du lịch của mình. <b>Thuế</b>: nộp 10% tổng tài sản, tiền thuế dồn vào <b>Quỹ Thuế</b> — ai rút được thẻ Quỹ Thuế ở ô Cơ Hội sẽ nhận toàn bộ quỹ. <b>Nút ĐỔ</b>: chạm nhanh để tung ngẫu nhiên, hoặc <b>bấm giữ</b> cho thanh lực chạy rồi thả tay — lực càng cao càng dễ ra tổng điểm lớn. <b>Cần Cẩu</b> 🏗️: thả một <b>rào chắn</b> 🚧 xuống ô đất của mình (giống thẻ Rào chắn ở ô Cơ Hội, xem mục 7).</li>
       <li><b>Cơ Hội</b>: thẻ có lợi (nhận Quỹ Thuế, miễn phí tham quan, giảm 50%, khiên, ra tù, lễ hội miễn phí, thêm thẻ Chẵn/Lẻ, <b>rào chắn</b> 🚧) hoặc hại (đổi thành phố, ép bán, phá cấp, dịch bệnh, mất điện, bị đưa đi nơi khác). <b>Rào chắn</b>: dựng ở một ô đất của mình trong 5 lượt — đối thủ đi ngang qua (tung xúc xắc hay đi xe) phải <b>dừng lại</b> ngay ô đó và trả phí; rào mất sau khi chặn được một người. Bay thẳng (Dân Chơi) thì không bị chặn.</li>
       <li>Tung đôi được đi tiếp, trừ khi vào Côn Đảo hay Bến Xe; không còn việc gì thì lượt tự chuyển. Thiếu tiền thì bán thành phố (được nửa vốn); bán hết cũng không đủ thì <b>phá sản</b> ngay: ngân hàng mua lại toàn bộ đất (nửa vốn), tiền thu được cùng tiền mặt trả cho chủ nợ. Đang thiếu tiền cũng có thể tự chọn <b>phá sản</b> thay vì bán nhà.</li>
       <li><b>Thắng</b> khi: đối thủ phá sản hết · đủ <b>2 nhóm màu</b> · sở hữu <b>cả một cạnh bàn</b> (4 thành phố + 1 điểm du lịch) · đủ <b>6 điểm du lịch</b> · xây đủ <b>6 Biểu tượng</b> · hoặc <b>giàu nhất</b> khi hết số vòng. Mỗi nhân vật có một kỹ năng riêng.</li>
-      <li><b>Vắng mặt</b>: ai tới lượt mà quá <b>30 giây</b> không thao tác thì <b>máy đánh thay</b> cho hết lượt đó; quay lại thì bấm <b>✋ Tôi quay lại rồi</b> ở thanh dưới (hoặc chờ tới lượt sau) để tự chơi tiếp.</li>
+      <li><b>Vắng mặt</b>: ai tới lượt mà quá <b>30 giây</b> không thao tác thì <b>máy đánh thay</b> cho hết lượt đó — thẻ người chơi hiện <b>đếm ngược</b> ⏳, 10 giây cuối số to giữa bàn; quay lại thì bấm <b>✋ Tôi quay lại rồi</b> ở thanh dưới (hoặc chờ tới lượt sau) để tự chơi tiếp.</li>
+      <li><b>Online</b>: khách vào phòng bấm <b>✅ Sẵn sàng</b>, mọi người sẵn sàng rồi chủ phòng mới bắt đầu được. Người vào khi ván đang chơi sẽ <b>ngồi vào ghế máy</b> (nếu còn). Bấm 🎤 trên cùng để <b>trò chuyện bằng giọng nói</b> với cả phòng (bấm lần nữa để tắt mic). Lỡ tải lại trang thì mở lại link phòng là về đúng ghế cũ — chủ phòng tải lại trang cũng mở lại được phòng cùng mã, ván vẫn giữ nguyên.</li>
       <li>Chạm vào thẻ người chơi khác để <b>tặng tiền</b> 🎁; bấm 😊 trên cùng để gửi <b>biểu tượng cảm xúc</b>; bấm 📍 rồi chạm một ô để <b>đánh dấu</b> ô đó nhấp nháy vài giây cho mọi người cùng chú ý.</li>
     </ol>
     <div class="rules-more">
@@ -763,6 +792,9 @@ button:disabled { opacity: .4; cursor: default; }
   </div>
 </div>
 
+
+<!-- thông báo ngắn nổi trên thanh nút -->
+<div class="toast" id="toast" hidden></div>
 
 <!-- trạng thái kết nối -->
 <div class="overlay" id="netSheet" hidden>
@@ -1086,6 +1118,13 @@ function monopolyWin(G, s) {
   if (countOwned(G, s, TOURS) === TOURS.length) return 'tour';
   return null;
 }
+// tiến độ bốn cách thắng độc quyền của s (hiện trên thẻ người chơi và bảng người chơi)
+const goalsOf = (G, s) => [
+  { ico: '🎨', name: 'Nhóm màu đủ bộ', n: groupsOwned(G, s), max: GROUP_WIN },
+  { ico: '🛣️', name: 'Cả một cạnh bàn (4 thành phố + 1 điểm du lịch)', n: Math.max(...SIDES.map(side => countOwned(G, s, side))), max: SIDES[0].length },
+  { ico: '🏖️', name: 'Điểm du lịch', n: countOwned(G, s, TOURS), max: TOURS.length },
+  { ico: '🗼', name: 'Biểu tượng', n: landmarks(G, s), max: LANDMARK_WIN },
+];
 const canTakeover = (G, s, i) => SQ[i].t === 'city' && G.props[i].owner >= 0 && G.props[i].owner !== s && G.props[i].lv < 5 && !G.pl[G.props[i].owner].out;
 // rào chắn 🚧 đang dựng ở ô i (của người chưa phá sản), chặn người khác đi ngang qua
 const blockedBy = (G, i) => { const p = G.props[i]; return p && p.owner >= 0 && !G.pl[p.owner].out && effectOn(G, i, 'block') ? p.owner : -1; };
@@ -1242,8 +1281,10 @@ function seatsFromSetup() {
 
 // ── ai được đi ──
 const isController = () => !net.on || net.host;
-// ghế do máy điều khiển: máy, khách online rớt mạng, hoặc người vắng mặt (AFK) trong lượt này
-const seatAuto = s => { const x = G.seats[s]; return !!x && (x.type === 'bot' || (x.remote && !x.online) || !!x.afk); };
+// ghế do máy điều khiển: máy, khách online rớt mạng (quá OFF_GRACE — tải lại trang thì vài giây là nối lại được,
+// trong lúc đó lượt của họ vẫn chờ như người vắng mặt), hoặc người vắng mặt (AFK) trong lượt này
+const OFF_GRACE = 25000;
+const seatAuto = s => { const x = G.seats[s]; return !!x && (x.type === 'bot' || (x.remote && !x.online && !(x.lostAt > Date.now() - OFF_GRACE)) || !!x.afk); };
 const mySeat = () => (net.on ? net.seat : -1);
 function canControl(s) {
   if (!G || !G.seats[s] || G.pl[s].out || seatAuto(s)) return false;
@@ -1424,10 +1465,10 @@ function land(s, steps) {
     case 'chance': drawCard(s, steps); break;
     case 'tax': { const amt = hasSkill(G, s, 'detective') ? 0 : r10(netWorth(G, s) * TAX_RATE); if (amt > 0) charge(s, -1, amt, 'tax', steps); else steps.push({ k: 'taxFree', s }); break; }
     case 'crane': {
-      // Cần Cẩu: nhắc một ô đất của mình lên (phí ×2); cả bàn chỉ một ô được nhắc, ô đang nhắc sẽ hạ xuống
-      const opts = pickOpts(s, 'lift');
-      if (opts.length) { setPick(s, 'lift', opts, true); steps.push({ k: 'liftOffer', s }); }
-      else steps.push({ k: 'liftNone', s });
+      // Cần Cẩu: thả rào chắn 🚧 xuống một ô đất của mình (như thẻ Rào chắn): đối thủ đi ngang qua phải dừng lại ở đó
+      const opts = pickOpts(s, 'block');
+      if (opts.length) { setPick(s, 'block', opts, true); steps.push({ k: 'craneOffer', s }); }
+      else steps.push({ k: 'craneNone', s, why: PROPS.some(i => G.props[i].owner === s) ? 'all' : 'none' });
       break;
     }
     case 'island': toIsland(s, steps); break;
@@ -1780,10 +1821,15 @@ function doJailCard(s) {
 
 function commit(ev) {
   G.seq++;
-  if (net.on && net.host) netBroadcast({ t: 'state', G: Object.assign({}, G, { seats: G.seats.map(x => x && Object.assign({}, x, { cid: undefined })) }), ev });
+  if (net.on && net.host) { netBroadcast({ t: 'state', G: Object.assign({}, G, { seats: G.seats.map(x => x && Object.assign({}, x, { cid: undefined })) }), ev }); saveHost(); }
   if (!net.on) store.set('typhu6.game', G.phase === 'play' ? G : null);
-  show(G, ev);
+  // vẽ lỗi (một bước lạ, ván lưu từ bản cũ...) thì vẫn phải cho máy đi tiếp, không được treo ván
+  safeShow(G, ev);
   drive(ev);
+}
+function safeShow(ng, ev) {
+  try { show(ng, ev); }
+  catch (e) { console.error(e); animating = false; G = ng; try { paint(); } catch (e2) {} }
 }
 
 // chạy lượt máy (và đánh thay người rớt mạng / vắng mặt)
@@ -3143,7 +3189,8 @@ function initView(steps, base) {
     for (const st of steps) {
       for (const k of ['i', 'mine', 'theirs']) if (Number.isInteger(st[k])) sqs.add(st[k]);
       for (const j of st.prev || []) sqs.add(j);
-      for (const [i] of st.was || []) sqs.add(i);
+      // bước 'bankrupt' có was là mảng; bước 'sell' tự động có was là ô cũ (object) → không duyệt được
+      for (const [i] of Array.isArray(st.was) ? st.was : []) sqs.add(i);
       if (Number.isInteger(st.s)) seats.add(st.s);
     }
     for (const i of PROPS) if (base.props[i] && sqs.has(i)) viewProps[i] = { ...base.props[i] };
@@ -3224,9 +3271,10 @@ function show(ng, ev) {
   logSteps(ev);
   const st0 = ev && Array.isArray(ev.steps) && ev.steps[0];
   stepsKeep = st0 && st0.k === 'dice' && stepsShown && stepsShown.t === st0.s ? stepsShown : null;
-  if (ev && Array.isArray(ev.steps) && ev.steps.length) { initView(ev.steps, ev.type === 'start' ? null : base); viewTurn = Number.isInteger(st0.s) ? st0.s : -1; animating = true; paint(true); animateSteps(ev, tok); }
+  if (ev && Array.isArray(ev.steps) && ev.steps.length) { initView(ev.steps, ev.type === 'start' ? null : base); viewTurn = Number.isInteger(st0.s) && st0.k !== 'join' ? st0.s : -1; animating = true; paint(true); animateSteps(ev, tok); }
   else paint();
   if (ev && ev.won) setTimeout(() => { if (tok === animTok && G.phase === 'over') showResult(); }, animMs(ev) + 600);
+  afkArm(ev); keepAwake();
   syncLobby();
 }
 // đang hoạt hoạ thì vẫn coi là lượt của người đang đi, quân tới nơi rồi mới chuyển sang người kế
@@ -3496,6 +3544,7 @@ function stepMs(st) {
     case 'pay': return 800; case 'rob': return 1100; case 'debt': return 600; case 'card': return 2700; case 'spyDraw': return 700; case 'hold': return 600; case 'nothing': return 400;
     case 'build': return 850; case 'buyTour': return 750; case 'takeover': case 'hack': return 1000; case 'skip': return 250;
     case 'liftOffer': return 500; case 'liftNone': return 300; case 'lift': return 1500; case 'noCash': return 1100; case 'festNone': return 300; case 'festival': return 1000;
+    case 'craneOffer': return 500; case 'craneNone': return 300; case 'join': return 1200;
     case 'pickCity': return 400; case 'pickSkip': return 250; case 'swap': return 1000; case 'forceSell': return 900; case 'destroy': return 900;
     case 'plague': case 'blackout': return 850; case 'cure': return 1000; case 'shield': return 850; case 'block': return 900; case 'blocked': return 1000; case 'taxFree': return 700; case 'afk': return 900; case 'back': return 500; case 'sell': return st.auto ? 500 : 650; case 'tourUp': return 700; case 'bankrupt': return 1000;
     case 'won': case 'timeup': return 900;
@@ -3701,6 +3750,8 @@ async function animateStep(st, tok) {
     case 'blocked': { const [x, y] = tokenPt(s); playAlert(); shakeBoard(); pow(x, y - 36, '🚧 BỊ CHẶN!', '#b45309'); flashSquare(st.i, '#f59e0b'); await sleep(400); drawOwnership(); await sleep(ms - 400); return; }
     case 'taxFree': { const [x, y] = tokenPt(s); floatText(x, y - 20, '🕵️ miễn thuế', '#2e9d4f', 1000, 18); playPop(); await sleep(ms); return; }
     case 'afk': { const [x, y] = tokenPt(s); pow(x, y - 36, '⏳ MÁY ĐÁNH THAY', '#6b7a90'); renderPlayers(); await sleep(ms); return; }
+    case 'join': { const [x, y] = tokenPt(s); pow(x, y - 36, '🙋 VÀO THAY MÁY', '#1e6fd8'); playParty(); renderPlayers(); if (s !== mySeat()) toast(`🙋 ${who(s)} vào chơi, thay cho ${st.bot}`); await sleep(ms); return; }
+    case 'craneOffer': { flashSquare(G.pl[s].pos, '#f59e0b', 500); playTap(); await sleep(ms); return; }
     case 'back': { const [x, y] = tokenPt(s); floatText(x, y - 20, '✋ đã quay lại', '#2e9d4f', 900, 18); playPop(); renderPlayers(); await sleep(ms); return; }
     case 'noCash': { const [x, y] = tokenPt(s); pow(x, y - 36, 'KHÔNG ĐỦ TIỀN', '#e8323c'); playAlert(); await sleep(ms); return; }
     case 'tourUp': { const [x, y] = centerOf(st.i); drawOwnership(); flashSquare(st.i, '#2e9d4f'); playPop(); floatText(x, y - 22, `📈 +${TOUR_UP * 100}%`, '#2e9d4f', 1000, 18); await sleep(ms); return; }
@@ -3712,6 +3763,8 @@ async function animateStep(st, tok) {
       renderPlayers();
       playSad(); pow(x, y - 34, 'PHÁ SẢN', '#e8323c');
       if (st.paid) { playCoin(true); cardMoney(st.to, st.paid); }
+      // chủ phòng là máy chạy ván: rời đi hay để máy khoá màn hình là cả phòng đứng
+      if (net.on && net.host && s === net.seat && G.phase === 'play') toast('Bạn là chủ phòng — giữ màn hình mở để ván tiếp tục cho mọi người.', 7000);
       g.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 800 });
       g.style.opacity = '0';
       await sleep(ms);
@@ -3802,6 +3855,9 @@ function stepText(st) {
     case 'takeover': return `💰 ${w} mua lại ${nm(st.i)} từ ${other(st.o)} với giá ${fmt(st.price)}!`;
     case 'noCash': return `💸 ${w} không đủ tiền ${st.mode === 'takeover' ? 'mua lại' : st.mode === 'upgrade' ? 'nâng cấp' : 'mua'} ${nm(st.i)} (cần ${fmt(st.need)}, có ${fmt(G.pl[s].cash)})`;
     case 'skip': return st.mode === 'takeover' ? `${w} không mua lại ${nm(st.i)}` : st.mode === 'upgrade' ? `${w} giữ nguyên ${nm(st.i)}` : `${w} không mua ${nm(st.i)}`;
+    case 'craneOffer': return `🏗️ ${w} tới Cần Cẩu — chọn ô đất của mình để dựng rào chắn 🚧`;
+    case 'craneNone': return st.why === 'all' ? `${w} tới Cần Cẩu nhưng các ô đất đều đã có rào chắn` : `${w} tới Cần Cẩu nhưng chưa có ô đất nào để dựng rào`;
+    case 'join': return `🙋 ${w} vào chơi, thay cho ${st.bot}`;
     case 'liftOffer': return `🏗️ ${w} tới Cần Cẩu — chọn ô đất của mình để nhắc lên`;
     case 'liftNone': return `${w} tới Cần Cẩu nhưng chưa có ô đất nào để nhắc lên`;
     case 'lift': return `🏗️ ${w} nhắc ${nm(st.i)} lên — phí tham quan ở đó ×${LIFT_MULT}${st.low >= 0 ? ` · ${nm(st.low)} hạ xuống, phí về như cũ` : ''}`;
@@ -3934,7 +3990,10 @@ function renderPlayers() {
     if (!x) continue;
     const P = G.pl[s], out = shownOut(s), ch = charOf(P.char), d = document.createElement('div');
     const mine = net.on ? s === net.seat : x.type === 'human' && !x.remote;
-    d.className = 'pl s' + s + ' c' + ((s - base + NS) % NS) + (mine ? ' me' : '') + (G.phase === 'play' && shownTurn() === s ? ' turn' : '') + (x.remote && !x.online ? ' off' : '') + (out ? ' out' : '');
+    const turn = G.phase === 'play' && shownTurn() === s;
+    const talk = net.on && (s === net.seat ? VC.talk.has('me') : !!x.pid && VC.talk.has(x.pid));
+    d.className = 'pl s' + s + ' c' + ((s - base + NS) % NS) + (mine ? ' me' : '') + (turn ? ' turn' : '') + (x.remote && !x.online ? ' off' : '') + (out ? ' out' : '') + (talk ? ' talk' : '');
+    d.dataset.s = s;
     d.style.setProperty('--c', col(s).main);
     const top = document.createElement('div'); top.className = 'pl-top';
     const ava = document.createElement('span'); ava.className = 'ava'; ava.appendChild(chibiSvg(P.char)); top.appendChild(ava);
@@ -3942,11 +4001,15 @@ function renderPlayers() {
     id.innerHTML = '<span class="nm"></span>';
     id.querySelector('.nm').textContent = (x.type === 'bot' ? '🤖 ' : '') + who(s) + (x.remote && !x.online ? ' 📴' : '');
     top.appendChild(id);
+    // mic đang mở (trò chuyện bằng giọng nói)
+    if (net.on && x.vc && x.mic) { const v = document.createElement('span'); v.className = 'vc'; v.textContent = '🎤'; v.title = 'Đang mở mic'; top.appendChild(v); }
     // số thẻ Chẵn/Lẻ đang có, luôn hiện cạnh tên
     if (!out) { const pc = document.createElement('span'); pc.className = 'par' + (P.hold.parity ? '' : ' none'); pc.textContent = '🎲' + (P.hold.parity || 0); pc.title = 'Thẻ Chẵn/Lẻ'; top.appendChild(pc); }
     const rk = live.indexOf(s), rank = document.createElement('span');
     rank.className = 'rank r' + (rk < 0 ? 9 : rk + 1); rank.textContent = rk < 0 ? '☠️' : rk + 1; rank.title = 'Hạng theo tổng tài sản';
     top.appendChild(rank);
+    // đếm ngược tới lúc máy đánh thay (renderAfkCd điền số)
+    if (turn && !out) { const cd = document.createElement('span'); cd.className = 'cd'; cd.hidden = true; cd.title = 'Không thao tác thì máy đánh thay'; top.appendChild(cd); }
     d.appendChild(top);
     const cash = busy() && viewCash ? viewCash[s] : P.cash, fxv = cashFx[s], age = fxv ? Date.now() - fxv.t : 1e9;
     const row1 = document.createElement('div'); row1.className = 'pl-row';
@@ -3955,6 +4018,18 @@ function renderPlayers() {
     const row2 = document.createElement('div'); row2.className = 'pl-row';
     row2.innerHTML = `<span class="lbl">🏠 <b>Tài sản</b></span><span class="worth">${out ? 'phá sản' : fmt(shownWorth(s))}</span>`;
     d.appendChild(row2);
+    // tiến độ bốn cách thắng độc quyền: nền tô theo phần trăm, còn thiếu 1 là viền vàng
+    if (!out && G.phase === 'play') {
+      const gl = document.createElement('div'); gl.className = 'pl-goal';
+      for (const g of goalsOf(G, s)) {
+        const sp = document.createElement('span');
+        sp.textContent = `${g.ico}${g.n}/${g.max}`; sp.title = g.name;
+        sp.style.setProperty('--p', Math.round(g.n / g.max * 100) + '%');
+        if (g.n > 0 && g.max - g.n <= 1) sp.classList.add('near');
+        gl.appendChild(sp);
+      }
+      d.appendChild(gl);
+    }
     const props = document.createElement('div'); props.className = 'pl-props';
     if (P.jail && !out) { const b = document.createElement('span'); b.className = 'badge'; b.textContent = `🏝️ Côn Đảo · còn ${Math.max(1, 4 - P.jail)} lượt`; props.appendChild(b); }
     if (P.bus && !out) { const b = document.createElement('span'); b.className = 'badge'; b.textContent = '🚌 lượt sau đi xe'; props.appendChild(b); }
@@ -3968,7 +4043,49 @@ function renderPlayers() {
     d.onclick = () => openPlayer(s);
     pl.appendChild(d);
   }
+  renderAfkCd();
 }
+// ── đếm ngược trước khi máy đánh thay: thẻ người tới lượt hiện ⏳ còn N giây, 10 giây cuối hiện số to giữa bàn (nếu là lượt mình) ──
+// mọi máy tự tính mốc như bộ điều khiển (hoạt hoạ xong + AFK_MS kể từ lúc nhận trạng thái)
+let afkAt = 0;
+function afkArm(ev) {
+  afkAt = 0;
+  if (!G || G.phase !== 'play') return;
+  const x = G.seats[G.turn];
+  if (!x || x.type !== 'human' || seatAuto(G.turn) || G.pl[G.turn].out) return;
+  afkAt = Date.now() + animMs(ev) + AFK_MS;
+}
+function renderAfkCd() {
+  const big = $('afkCd');
+  const left = afkAt ? Math.ceil((afkAt - Date.now()) / 1000) : 0;
+  const on = !!G && G.phase === 'play' && afkAt > 0 && left > 0 && left <= AFK_MS / 1000 && !busy() && !!G.seats[G.turn] && !G.seats[G.turn].afk && !(net.on && !net.host && !net.conn);
+  const card = document.querySelector('#players .pl.turn'), cd = card && card.querySelector('.cd');
+  if (cd) { cd.hidden = !on; if (on) { cd.textContent = `⏳ ${left}s`; cd.classList.toggle('urgent', left <= 10); } }
+  const mine = on && left <= 10 && canAct(G.turn);
+  big.hidden = !mine;
+  if (mine && big.textContent !== String(left)) big.textContent = left;
+}
+setInterval(renderAfkCd, 250);
+// thông báo ngắn nổi trên thanh nút
+let toastT = 0;
+function toast(msg, ms = 3500) {
+  const t = $('toast');
+  t.textContent = msg; t.hidden = false;
+  clearTimeout(toastT); toastT = setTimeout(() => { t.hidden = true; }, ms);
+}
+// giữ màn hình sáng trong ván (chủ phòng online là máy chạy ván: màn hình tắt là cả phòng đứng)
+let wakeLock = null;
+async function keepAwake() {
+  if (!('wakeLock' in navigator) || wakeLock || document.hidden || !G || G.phase !== 'play') return;
+  try { const w = await navigator.wakeLock.request('screen'); wakeLock = w; w.addEventListener('release', () => { if (wakeLock === w) wakeLock = null; }); } catch (e) {}
+}
+document.addEventListener('pointerdown', () => keepAwake(), true);
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) return;
+  keepAwake();
+  // tab vừa hiện lại: trình duyệt hãm bộ đếm giờ lúc ẩn tab nên lượt máy có thể còn treo → cho máy đi tiếp ngay
+  if (isController() && G && G.phase === 'play' && !busy() && seatAuto(G.turn)) drive(null);
+});
 const canRoll = () => G.phase === 'play' && canAct(G.turn) && (G.step === 'roll' || G.step === 'jail') && !busy() && !pending;
 function renderDice() {
   const dice = $('dice');
@@ -4075,6 +4192,7 @@ function renderButtons() {
   $('bBack').hidden = myAfkSeat() < 0;
   if ($('bEmo').hidden) $('emoPop').hidden = true;
   $('roomTag').textContent = net.on ? (host ? 'Chủ phòng' : net.seat < 0 ? 'Đang xem' : 'Online') : '';
+  syncVoiceUi(); syncVoice();
 }
 
 function showResult() {
@@ -4109,7 +4227,7 @@ const SPECIAL = {
   festival: { icon: '🎤', color: '#0ea5e9', desc: () => `Trả ${fmt(FEST_FEE)} mở lễ hội ở một thành phố hoặc điểm du lịch của mình: phí tham quan ×2 mỗi lần mở.` },
   tax: { icon: '💸', color: '#8a5a00', desc: () => `Nộp ${TAX_RATE * 100}% tổng tài sản vào Quỹ Thuế (đang có ${fmt(G.pot || 0)}).` },
   bus: { icon: '🚌', color: '#1e7a3c', desc: () => `Lượt sau được đi tới ô bất kỳ (vé ${fmt(BUS_FEE)}).` },
-  crane: { icon: '🏗️', color: '#b45309', desc: () => `Nhắc một ô đất của mình lên cao: phí tham quan ở đó ×${LIFT_MULT}. Cả bàn chỉ một ô được nhắc — nhắc ô mới thì ô cũ hạ xuống.` },
+  crane: { icon: '🏗️', color: '#b45309', desc: () => 'Thả rào chắn 🚧 xuống một ô đất của mình trong 5 lượt: đối thủ đi ngang qua phải dừng lại đó và trả phí; rào mất sau khi chặn được một người (giống thẻ Rào chắn ở ô Cơ Hội).' },
 };
 function openProp(i) { if (!G || !SQ[i]) return; propOpen = i; renderProp(); $('propSheet').hidden = false; playTap(); }
 function renderProp() {
@@ -4219,18 +4337,13 @@ function renderPlayerSheet() {
   }
   if (!P.out) {
     const h = document.createElement('div'); h.className = 'label'; h.textContent = 'Tiến độ thắng ngay (đạt một mục là thắng)'; panel.appendChild(h);
-    const bestRow = Math.max(...SIDES.map(side => countOwned(G, s, side) / side.length));
-    const goal = (t, n, max) => {
+    const GOAL_T = { '🎨': '🎨 Đủ nhóm màu', '🛣️': '🛣️ Cả một cạnh bàn', '🏖️': '🏖️ Điểm du lịch', '🗼': '🗼 Biểu tượng' };
+    for (const g of goalsOf(G, s)) {
       const d = document.createElement('div'); d.className = 'goal';
       d.innerHTML = '<span class="t"></span><span class="bar"><i></i></span><span class="n"></span>';
-      d.querySelector('.t').textContent = t; d.querySelector('i').style.width = Math.min(100, n / max * 100) + '%'; d.querySelector('.n').textContent = `${n}/${max}`;
+      d.querySelector('.t').textContent = GOAL_T[g.ico]; d.querySelector('i').style.width = Math.min(100, g.n / g.max * 100) + '%'; d.querySelector('.n').textContent = `${g.n}/${g.max}`;
       panel.appendChild(d);
-    };
-    goal('🎨 Đủ nhóm màu', groupsOwned(G, s), GROUP_WIN);
-    goal('🏖️ Điểm du lịch', countOwned(G, s, TOURS), TOURS.length);
-    goal('🗼 Biểu tượng', landmarks(G, s), LANDMARK_WIN);
-    goal('🛣️ Cả một hàng', Math.round(bestRow * 100), 100);
-    panel.lastChild.querySelector('.n').textContent = Math.round(bestRow * 100) + '%';
+    }
   }
   // tặng tiền cho người này (từ ghế mình đang điều khiển)
   const me = localMe();
@@ -4495,8 +4608,15 @@ function netFail(title, msg, retry) {
   if (retry) rows[0].push({ label: 'Thử lại', go: true, fn: retry });
   netSheet('😕', title, msg, rows);
 }
+// chủ phòng lưu ván vào sessionStorage sau mỗi thay đổi: lỡ tải lại trang thì mở lại phòng cùng mã, ván giữ nguyên
+function saveHost() {
+  if (!net.on || !net.host || !G) return;
+  try { sessionStorage.setItem('typhu6.host', JSON.stringify({ code: net.code, G: Object.assign({}, G, { seats: G.seats.map(x => x && Object.assign({}, x, { pid: undefined })) }) })); } catch (e) {}
+}
 function closeNet() {
   clearTimeout(net.timer);
+  VC.wantMic = VC.joined && VC.mic; // nối lại xong thì tự mở mic lại
+  voiceLeave();
   const bye = { t: 'bye' };
   if (net.conn) { netSend(bye); try { net.conn.close(); } catch (e) {} }
   for (const c of net.conns.keys()) { try { c.send(bye); c.close(); } catch (e) {} }
@@ -4512,27 +4632,44 @@ function startNet(host, code) {
 function leaveOnline() {
   closeNet();
   net = freshNet();
+  try { sessionStorage.removeItem('typhu6.host'); } catch (e) {}
   if (location.hash) history.replaceState(null, '', location.pathname + location.search);
   hideNetSheet(); $('lobbySheet').hidden = true;
   resumeLocal();
 }
 
 // ── chủ phòng ──
-async function hostOnline(tries = 0) {
-  const n = startNet(true, randCode());
+// keep = { code, G }: chủ phòng vừa tải lại trang → mở lại phòng cùng mã, giữ nguyên ván; khách tự nối lại và về đúng ghế
+async function hostOnline(tries = 0, keep = null) {
+  const code = keep ? keep.code : randCode();
+  const n = startNet(true, code);
   net.seat = 0;
-  G = Object.assign(freshGame([{ type: 'human', name: myName() || 'Chủ phòng', cid: myCid, online: true, char: myChar(), color: myColor() }, ...Array(NS - 1).fill(null)], roundsOf(gameLen), cashMode), { phase: 'lobby' });
+  if (keep) {
+    G = keep.G;
+    for (const x of G.seats) if (x && x.remote) { x.online = false; x.lostAt = Date.now(); x.vc = false; x.mic = false; delete x.pid; }
+    Object.assign(G.seats[0], { cid: myCid, online: true, vc: false, mic: false }); delete G.seats[0].pid;
+  } else G = Object.assign(freshGame([{ type: 'human', name: myName() || 'Chủ phòng', cid: myCid, online: true, char: myChar(), color: myColor() }, ...Array(NS - 1).fill(null)], roundsOf(gameLen), cashMode), { phase: 'lobby' });
   statusEv = '';
   paint();
-  netSheet('🌐', 'Tạo phòng', `Đang tạo phòng${DOTS}`, [[{ label: 'Huỷ', fn: () => leaveOnline() }]]);
+  netSheet('🌐', keep ? 'Mở lại phòng' : 'Tạo phòng', keep ? `Đang mở lại phòng <b>${showCode(code)}</b>${DOTS}` : `Đang tạo phòng${DOTS}`, [[{ label: 'Huỷ', fn: () => leaveOnline() }]]);
   try { await loadPeerJs(); } catch (e) {
-    if (net === n) netFail('Không tải được', 'Không tải được phần chơi online. Kiểm tra mạng rồi thử lại nhé.', () => hostOnline());
+    if (net === n) netFail('Không tải được', 'Không tải được phần chơi online. Kiểm tra mạng rồi thử lại nhé.', () => hostOnline(0, keep));
     return;
   }
   if (net !== n) return;
-  const peer = n.peer = new Peer(ROOM_PREFIX + n.code, { debug: 0 });
+  const peer = n.peer = new Peer(ROOM_PREFIX + code, { debug: 0 });
   let opened = false;
-  peer.on('open', () => { if (net !== n) return; opened = true; hideNetSheet(); openLobby(); });
+  peer.on('open', () => {
+    if (net !== n) return;
+    opened = true; hideNetSheet();
+    G.seats[0].pid = peer.id;
+    history.replaceState(null, '', location.pathname + location.search + '#room=' + code);
+    if (G.phase === 'lobby') openLobby();
+    else { syncLobby(); if (keep && keep.renamed) openLobby(); drive(null); }
+    if (keep) toast(keep.renamed ? `Mã phòng cũ không mở lại được — phòng mới ${showCode(code)}, gửi lại mã cho bạn bè nhé` : `Đã mở lại phòng ${showCode(code)} — chờ bạn bè nối lại`, 6000);
+    saveHost(); renderButtons();
+  });
+  peer.on('call', vcIncoming);
   peer.on('connection', c => {
     if (net !== n) return c.close();
     c.on('data', d => { if (net === n) hostMsg(c, d); });
@@ -4542,7 +4679,8 @@ async function hostOnline(tries = 0) {
       n.conns.delete(c);
       const s = G.seats.findIndex(x => x && x.cid === cid);
       if (s < 0 || [...n.conns.values()].includes(cid)) return;
-      if (G.phase === 'lobby') G.seats[s] = null; else G.seats[s].online = false;
+      if (G.phase === 'lobby') G.seats[s] = null;
+      else Object.assign(G.seats[s], { online: false, lostAt: Date.now(), vc: false, mic: false }); // chờ OFF_GRACE cho họ nối lại rồi máy mới đánh thay
       commit({ type: 'lobby' });
     };
     c.on('close', lost); c.on('error', lost);
@@ -4550,11 +4688,16 @@ async function hostOnline(tries = 0) {
   peer.on('disconnected', () => { setTimeout(() => { if (net === n && !peer.destroyed && peer.disconnected) peer.reconnect(); }, 1500); });
   peer.on('error', err => {
     if (net !== n) return;
-    if (err.type === 'unavailable-id' && tries < 3) return hostOnline(tries + 1);
+    if (err.type === 'unavailable-id') {
+      // mở lại phòng: máy chủ tìm bạn còn giữ mã cũ vài giây sau khi tải lại → thử lại cùng mã, không được thì lấy mã mới nhưng giữ ván
+      if (keep && tries < 5) { setTimeout(() => { if (net === n) hostOnline(tries + 1, keep); }, 1500); return; }
+      if (keep) return hostOnline(0, Object.assign({}, keep, { code: randCode(), renamed: true }));
+      if (tries < 3) return hostOnline(tries + 1);
+    }
     if (opened) return;
     netFail('Không tạo được phòng', err.type === 'browser-incompatible'
       ? 'Trình duyệt này không hỗ trợ chơi online. Thử Chrome, Safari hoặc Firefox bản mới nhé.'
-      : 'Không kết nối được máy chủ tìm bạn. Kiểm tra mạng rồi thử lại nhé.', () => hostOnline());
+      : 'Không kết nối được máy chủ tìm bạn. Kiểm tra mạng rồi thử lại nhé.', () => hostOnline(0, keep));
   });
 }
 const cleanName = v => String(v || '').replace(/\s+/g, ' ').trim().slice(0, 16);
@@ -4581,17 +4724,28 @@ function hostMsg(c, d) {
     if (!cid) return;
     for (const [oc, ocid] of net.conns) if (ocid === cid && oc !== c) { net.conns.delete(oc); try { oc.close(); } catch (e) {} }
     net.conns.set(c, cid);
-    let s = G.seats.findIndex(x => x && x.cid === cid);
-    if (s >= 0) { G.seats[s].online = true; if (name && G.phase === 'lobby') G.seats[s].name = name; }
+    let s = G.seats.findIndex(x => x && x.cid === cid), joined = null;
+    // giữa ván mà mở link trong tab mới (cid khác): trùng tên với ghế đang mất kết nối thì nhận lại ghế đó
+    if (s < 0 && G.phase !== 'lobby' && name) s = G.seats.findIndex(x => x && x.type === 'human' && x.remote && !x.online && cleanName(x.name).toLowerCase() === name.toLowerCase());
+    if (s >= 0) { Object.assign(G.seats[s], { cid, online: true, pid: c.peer }); delete G.seats[s].lostAt; if (name && G.phase === 'lobby') G.seats[s].name = name; }
     else if (G.phase === 'lobby') {
       s = JOIN_ORDER.find(k => !G.seats[k]);
       if (s === undefined) { try { c.send({ t: 'full' }); } catch (e) {} net.conns.delete(c); setTimeout(() => c.close(), 500); return; }
-      G.seats[s] = { type: 'human', name: name || 'Người chơi ' + (s + 1), cid, online: true, remote: true, char: freeChar(cleanChar(d.char), s), color: null };
+      G.seats[s] = { type: 'human', name: name || 'Người chơi ' + (s + 1), cid, online: true, remote: true, char: freeChar(cleanChar(d.char), s), color: null, ready: false, pid: c.peer };
       G.seats[s].color = freeColor(cleanColor(d.color), s);
       G.pl[s].char = G.seats[s].char;
-    } else s = -1;
+    } else {
+      // ván đang chơi (hoặc vừa xong): người vào sau ngồi vào ghế máy còn trong ván, nhận luôn tiền và đất của máy; hết ghế máy thì xem
+      s = JOIN_ORDER.find(k => G.seats[k] && G.seats[k].type === 'bot' && (G.phase !== 'play' || !G.pl[k].out)) ?? -1;
+      if (s >= 0) {
+        const bot = G.seats[s];
+        G.seats[s] = { type: 'human', name: name || 'Người chơi ' + (s + 1), cid, online: true, remote: true, char: G.pl[s].char, color: bot.color, pid: c.peer };
+        joined = { s, bot: bot.name };
+      }
+    }
     try { c.send({ t: 'welcome', seat: s }); } catch (e) {}
-    commit({ type: 'lobby' });
+    if (joined && G.phase === 'play') commit({ type: 'turn', s: joined.s, steps: [{ k: 'join', s: joined.s, bot: joined.bot }] });
+    else commit({ type: 'lobby' });
     return;
   }
   const s = G.seats.findIndex(x => x && x.cid === net.conns.get(c));
@@ -4599,7 +4753,14 @@ function hostMsg(c, d) {
   if (d.t === 'name' && G.phase === 'lobby') { const nm = cleanName(d.name); if (nm) { G.seats[s].name = nm; commit({ type: 'lobby' }); } }
   else if (d.t === 'char' && G.phase === 'lobby') { const ch = cleanChar(d.c); if (ch && freeChar(ch, s) === ch) { G.seats[s].char = ch; G.pl[s].char = ch; commit({ type: 'lobby' }); } }
   else if (d.t === 'color' && G.phase === 'lobby') { const c = cleanColor(d.c); if (c !== null && freeColor(c, s) === c) { G.seats[s].color = c; commit({ type: 'lobby' }); } }
-  else if (d.t === 'bye') { G.seats[s].online = false; }
+  else if (d.t === 'ready' && G.phase === 'lobby') { G.seats[s].ready = !!d.v; commit({ type: 'lobby' }); }
+  else if (d.t === 'vc') {
+    // cờ trò chuyện giọng nói: gửi riêng (không qua commit) để không cắt ngang hoạt hoạ đang chạy
+    Object.assign(G.seats[s], { vc: !!d.on, mic: !!d.mic, pid: c.peer });
+    netBroadcast({ t: 'vc', s, vc: !!d.on, mic: !!d.mic, pid: c.peer });
+    renderPlayers(); syncVoice();
+  }
+  else if (d.t === 'bye') { Object.assign(G.seats[s], { online: false, lostAt: Date.now(), vc: false, mic: false }); }
   else if (d.t === 'back') doBack(s);
   else if (d.t === 'gift') { if (Number.isInteger(d.to) && Number.isInteger(d.amt)) doGift(s, d.to, d.amt); }
   else if (d.t === 'ping') {
@@ -4624,6 +4785,7 @@ function hostStart() {
   const fill = $('lbFill').checked;
   const seats = G.seats.map((x, k) => x ? Object.assign({}, x) : fill ? { type: 'bot', name: 'Máy ' + COLORS[k].name, char: null } : null);
   if (seats.filter(Boolean).length < 2) return;
+  if (seats.some(x => x && x.remote && !x.ready)) return; // mọi khách phải bấm Sẵn sàng
   Object.assign(G, freshGame(seats, roundsOf(gameLen), cashMode), { seq: G.seq });
   $('lobbySheet').hidden = true;
   commit({ type: 'start', steps: startSteps(G) });
@@ -4634,20 +4796,32 @@ function hostRestart() {
 }
 
 // ── khách ──
-async function joinOnline(code) {
+// again > 0: đang tự nối lại sau khi mất kết nối (giữ bàn cờ đang hiện); thử REJOIN_MAX lần, mỗi lần cách REJOIN_MS
+const REJOIN_MAX = 20, REJOIN_MS = 3000;
+async function joinOnline(code, again = 0) {
   const n = startNet(false, code);
-  G = null;
-  netSheet('🌐', 'Vào phòng', `Đang kết nối với chủ phòng${DOTS}`, [[{ label: 'Huỷ', fn: () => leaveOnline() }]]);
+  n.again = again;
+  if (!again) G = null;
+  netSheet('🌐', again ? 'Mất kết nối' : 'Vào phòng', again ? `Đang nối lại với chủ phòng (lần ${again})${DOTS}` : `Đang kết nối với chủ phòng${DOTS}`, [[{ label: 'Huỷ', fn: () => leaveOnline() }]]);
   const retry = () => joinOnline(code);
+  // mất kết nối giữa chừng (chủ phòng tải lại trang, mạng chập chờn): tự thử lại, hết lượt mới hỏi người chơi
+  const rejoin = () => {
+    if (net !== n || n.left || again >= REJOIN_MAX) return false;
+    netSheet('🌐', 'Mất kết nối', `Đang nối lại với chủ phòng (lần ${again + 1})${DOTS}`, [[{ label: 'Huỷ', fn: () => leaveOnline() }]]);
+    clearTimeout(n.timer);
+    n.timer = setTimeout(() => { if (net === n) joinOnline(code, again + 1); }, REJOIN_MS);
+    return true;
+  };
   try { await loadPeerJs(); } catch (e) {
-    if (net === n) netFail('Không tải được', 'Không tải được phần chơi online. Kiểm tra mạng rồi thử lại nhé.', retry);
+    if (net === n && !rejoin()) netFail('Không tải được', 'Không tải được phần chơi online. Kiểm tra mạng rồi thử lại nhé.', retry);
     return;
   }
   if (net !== n) return;
   const peer = n.peer = new Peer({ debug: 0 });
   n.timer = setTimeout(() => {
-    if (net === n && !n.conn) netFail('Không nối được', 'Không nối được với máy chủ phòng. Có thể mạng của một trong hai bên chặn kết nối trực tiếp — thử đổi sang wifi khác hoặc 4G nhé.', retry);
+    if (net === n && !n.conn && !rejoin()) netFail('Không nối được', 'Không nối được với máy chủ phòng. Có thể mạng của một trong hai bên chặn kết nối trực tiếp — thử đổi sang wifi khác hoặc 4G nhé.', retry);
   }, 20000);
+  peer.on('call', vcIncoming);
   peer.on('open', () => {
     if (net !== n) return;
     const c = peer.connect(ROOM_PREFIX + code, { reliable: true });
@@ -4662,13 +4836,16 @@ async function joinOnline(code) {
       if (net !== n || n.conn !== c) return;
       n.conn = null;
       if (G) paint();
-      netFail('Mất kết nối', n.left ? 'Chủ phòng đã đóng phòng.' : 'Mất kết nối với chủ phòng. Có thể chủ phòng đã tắt game hoặc mạng bị ngắt.', n.left ? null : retry);
+      if (n.left) { netFail('Mất kết nối', 'Chủ phòng đã đóng phòng.', null); return; }
+      again = 0; // vừa nối được rồi mới rớt: đếm lại từ đầu
+      if (!rejoin()) netFail('Mất kết nối', 'Mất kết nối với chủ phòng. Có thể chủ phòng đã tắt game hoặc mạng bị ngắt.', retry);
     };
     c.on('close', lost); c.on('error', lost);
   });
   peer.on('error', err => {
     if (net !== n || n.conn) return;
     clearTimeout(n.timer);
+    if (again && rejoin()) return; // chủ phòng đang mở lại phòng: chờ thêm
     if (err.type === 'peer-unavailable') netSheet('😕', 'Không tìm thấy phòng', `Không có phòng nào mang mã <b>${showCode(code)}</b>. Kiểm tra lại mã, hoặc có thể chủ phòng đã thoát.`,
       [[{ label: 'Chơi với máy', fn: () => leaveOnline() }, { label: 'Nhập lại mã', go: true, fn: () => { leaveOnline(); onlineMenu(showCode(code)); } }]]);
     else netFail('Không vào được phòng', 'Không kết nối được máy chủ tìm bạn. Kiểm tra mạng rồi thử lại nhé.', retry);
@@ -4688,18 +4865,26 @@ function guestMsg(d) {
   if (!d || typeof d !== 'object') return;
   if (d.t === 'welcome') { net.seat = Number.isInteger(d.seat) ? d.seat : -1; if (G) { paint(); syncLobby(); } }
   else if (d.t === 'state') {
-    if (!validState(d.G) || (G && d.G.seq <= G.seq)) return;
-    const first = !G;
+    // vừa nối lại: chủ phòng có thể mở lại ván từ bản lưu với cùng seq → chỉ bỏ trạng thái cũ hơn hẳn
+    if (!validState(d.G) || (G && d.G.seq < G.seq)) return;
+    const fresh = !G || net.again > 0, rejoined = net.again > 0;
     const ev = d.ev && typeof d.ev === 'object' ? d.ev : null;
-    if (first) { statusEv = ''; hideNetSheet(); }
-    show(d.G, first ? null : ev);
-    if (first && G.phase === 'lobby') openLobby();
-    if (first && G.phase === 'over') showResult();
+    if (fresh) { statusEv = ''; hideNetSheet(); if (rejoined) { net.again = 0; toast('✅ Đã nối lại với phòng'); } }
+    safeShow(d.G, fresh ? null : ev);
+    if (fresh && G.phase === 'lobby') openLobby();
+    if (fresh && G.phase === 'over') showResult();
+    if (rejoined && VC.wantMic) { VC.wantMic = false; voiceJoin(true); } // trước khi rớt đang mở mic → mở lại
+    else if (fresh) voiceFlag(); // báo lại cờ mic của mình cho chủ phòng (mới mở lại thì chủ phòng chưa biết)
   }
   else if (d.t === 'full') { const c = net.code; net.conn = null; netFail('Phòng đã đủ người', 'Phòng này đã có 6 người chơi rồi.', () => joinOnline(c)); }
   else if (d.t === 'bye') net.left = true;
   else if (d.t === 'emo') { if (Number.isInteger(d.s) && d.s !== net.seat) showEmote(d.s, d.e); }
   else if (d.t === 'ping') { if (Number.isInteger(d.s) && d.s !== net.seat) showPing(d.s, d.i); }
+  else if (d.t === 'vc') {
+    if (!G || !Number.isInteger(d.s) || !G.seats[d.s]) return;
+    Object.assign(G.seats[d.s], { vc: !!d.vc, mic: !!d.mic, pid: typeof d.pid === 'string' ? d.pid : G.seats[d.s].pid });
+    renderPlayers(); syncVoice();
+  }
 }
 
 // ── phòng chờ ──
@@ -4742,8 +4927,9 @@ function syncLobby(force) {
     const nm = row.querySelector('.nm');
     if (x) {
       nm.textContent = (k === net.seat ? x.name + ' (bạn)' : x.name) + (x.char ? ' · ' + charOf(x.char).name : '');
-      const tag = x.type === 'bot' ? 'máy' : k === 0 ? 'chủ phòng' : x.online === false ? 'mất kết nối' : '';
-      if (tag) { const t = document.createElement('span'); t.className = 'tag'; t.textContent = tag; row.appendChild(t); }
+      const lobbyGuest = G.phase === 'lobby' && x.remote && x.online !== false;
+      const tag = x.type === 'bot' ? 'máy' : k === 0 ? 'chủ phòng' : x.online === false ? 'mất kết nối' : lobbyGuest ? (x.ready ? '✅ sẵn sàng' : 'chưa sẵn sàng') : '';
+      if (tag) { const t = document.createElement('span'); t.className = 'tag' + (lobbyGuest ? (x.ready ? ' ok' : ' wait') : ''); t.textContent = tag; row.appendChild(t); }
       if (x.char) { const pc = document.createElement('span'); pc.className = 'pick-char'; pc.appendChild(chibiSvg(x.char)); row.appendChild(pc); }
     } else { nm.textContent = G.phase === 'lobby' ? (fill && net.host ? 'Máy sẽ chơi' : 'Đang chờ…') : 'Trống'; nm.classList.add('empty'); }
     box.appendChild(row);
@@ -4761,14 +4947,28 @@ function syncLobby(force) {
   }
   if (net.host) {
     const humans = G.seats.filter(x => x && x.type === 'human').length;
+    const guests = G.seats.filter(x => x && x.remote), readyN = guests.filter(x => x.ready).length, allReady = readyN === guests.length;
     $('lbStart').hidden = G.phase !== 'lobby';
     $('lbFill').parentElement.hidden = G.phase !== 'lobby';
     for (const id of ['lbLen', 'lbCash']) { $(id).hidden = G.phase !== 'lobby'; $(id).previousElementSibling.hidden = G.phase !== 'lobby'; }
-    $('lbStart').disabled = humans < 2;
-    $('lbHint').textContent = G.phase !== 'lobby' ? 'Ván đang chơi. Người vào sau sẽ được xem.' : humans < 2 ? 'Cần ít nhất 2 người để bắt đầu.' : `${humans} người đã sẵn sàng.`;
+    $('lbStart').disabled = humans < 2 || !allReady;
+    $('lbHint').textContent = G.phase !== 'lobby' ? 'Ván đang chơi. Người vào sau sẽ ngồi vào ghế máy (nếu còn), không thì xem.'
+      : humans < 2 ? 'Cần ít nhất 2 người để bắt đầu.' : !allReady ? `Chờ ${guests.length - readyN} người bấm Sẵn sàng (${readyN}/${guests.length}).` : `${humans} người đã sẵn sàng.`;
     $('lbCancel').textContent = G.phase === 'lobby' ? 'Huỷ phòng' : 'Đóng';
+  } else if (G.phase === 'lobby') {
+    const me = net.seat >= 0 ? G.seats[net.seat] : null, rd = !!(me && me.ready);
+    $('lbReady').textContent = rd ? '↩️ Chưa xong' : '✅ Sẵn sàng';
+    $('lbReady').classList.toggle('go', !rd); $('lbReady').classList.toggle('on', rd);
+    $('lbReady').disabled = net.seat < 0;
+    $('lbGuestHint').innerHTML = rd ? `Đã sẵn sàng · chờ chủ phòng bắt đầu${DOTS}` : 'Chọn tên, nhân vật, màu xong thì bấm <b>Sẵn sàng</b> — mọi người sẵn sàng rồi chủ phòng mới bắt đầu được.';
   }
 }
+$('lbReady').onclick = () => {
+  if (!net.on || net.host || !G || G.phase !== 'lobby' || net.seat < 0 || !G.seats[net.seat]) return;
+  const v = !G.seats[net.seat].ready;
+  G.seats[net.seat].ready = v; syncLobby(); playTap(); // hiện ngay, chủ phòng xác nhận sau
+  netSend({ t: 'ready', v });
+};
 $('lbChar').onclick = () => {
   if (!net.on || !G || G.phase !== 'lobby' || net.seat < 0) return;
   const taken = G.seats.map((x, k) => (x && k !== net.seat ? x.char : null)).filter(Boolean);
@@ -4805,6 +5005,162 @@ $('lbName').oninput = () => {
   }, 400);
 };
 $('lobbySheet').onclick = e => { if (e.target === $('lobbySheet') && G && G.phase !== 'lobby') $('lobbySheet').hidden = true; };
+
+// ── trò chuyện bằng giọng nói: WebRTC qua PeerJS, nối trực tiếp từng cặp ──
+// Bấm 🎤 là vào kênh với mic. Ai chưa bấm mà có người khác đã vào kênh thì tự vào ở chế độ chỉ nghe (gửi một
+// track im lặng, bật mic sau thì đổi track bằng replaceTrack, không phải nối lại). Giữa hai người, bên có peer id
+// nhỏ hơn là bên gọi, nên không bao giờ gọi chéo. Ai đã vào kênh thì mọi người biết qua cờ vc/mic/pid trên ghế.
+const VC = { joined: false, mic: false, stream: null, micTrack: null, silent: null, calls: new Map(), audios: new Map(), meters: new Map(), blocked: false, talk: new Set(), t: 0, wantMic: false };
+const myPid = () => (net.peer && !net.peer.destroyed && net.peer.id) || null;
+const vcSeatOf = pid => (G ? G.seats.findIndex(x => x && x.pid === pid) : -1);
+function silentTrack() {
+  if (VC.silent && VC.silent.readyState === 'live') return VC.silent;
+  const ctx = audio(); if (!ctx) return null;
+  const dst = ctx.createMediaStreamDestination(), g = ctx.createGain(); g.gain.value = 0;
+  const o = ctx.createOscillator(); o.connect(g).connect(dst); o.start();
+  return VC.silent = dst.stream.getAudioTracks()[0];
+}
+async function voiceJoin(wantMic) {
+  if (!net.on || !net.peer || net.seat < 0) return;
+  if (!VC.stream) { const t = silentTrack(); if (!t) return; VC.stream = new MediaStream([t]); }
+  VC.joined = true;
+  syncVoiceUi();
+  if (wantMic && !VC.micTrack) {
+    try {
+      const ms = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } });
+      const tr = ms.getAudioTracks()[0];
+      if (!net.on || !VC.joined) { tr.stop(); return; }
+      VC.micTrack = tr; VC.mic = true;
+      tr.onended = () => { if (VC.micTrack !== tr) return; VC.micTrack = null; VC.mic = false; voiceSwap(silentTrack()); meterOff('me'); voiceFlag(); syncVoiceUi(); };
+      voiceSwap(tr);
+      meterOn('me', new MediaStream([tr]));
+    } catch (e) { toast('Không mở được mic — kiểm tra quyền truy cập micro của trình duyệt. Bạn vẫn nghe được mọi người.', 5000); }
+  }
+  voiceFlag(); syncVoice(); syncVoiceUi();
+}
+// đổi track đang gửi (im lặng ↔ mic) trên mọi cuộc gọi đang có
+function voiceSwap(track) {
+  if (!VC.stream || !track) return;
+  for (const t of VC.stream.getAudioTracks()) if (t !== track) VC.stream.removeTrack(t);
+  if (!VC.stream.getAudioTracks().includes(track)) VC.stream.addTrack(track);
+  for (const c of VC.calls.values()) {
+    const pc = c.peerConnection; if (!pc) continue;
+    for (const sn of pc.getSenders()) if (!sn.track || sn.track.kind === 'audio') { try { sn.replaceTrack(track).catch(() => {}); } catch (e) {} }
+  }
+}
+function voiceToggle() {
+  if (!net.on || !net.peer || net.seat < 0) return;
+  if (VC.blocked) { voiceUnblock(); return; }
+  if (!VC.joined || !VC.micTrack) { voiceJoin(true); return; }
+  VC.mic = !VC.mic; VC.micTrack.enabled = VC.mic;
+  if (!VC.mic) VC.talk.delete('me');
+  voiceFlag(); syncVoiceUi(); paintTalk(); playTap();
+}
+// báo cờ mic của mình cho cả phòng (chủ phòng ghi thẳng vào ghế và phát đi; khách gửi cho chủ phòng)
+function voiceFlag() {
+  const me = net.seat; if (!net.on || me < 0 || !G || !G.seats[me]) return;
+  const f = { vc: VC.joined, mic: VC.joined && VC.mic, pid: myPid() };
+  if (net.host) { Object.assign(G.seats[0], f); netBroadcast({ t: 'vc', s: 0, vc: f.vc, mic: f.mic, pid: f.pid }); renderPlayers(); }
+  else netSend({ t: 'vc', on: f.vc, mic: f.mic });
+}
+function syncVoice() {
+  if (!net.on || !net.peer || !G) return;
+  const mine = myPid(); if (!mine) return;
+  const live = new Set();
+  G.seats.forEach((x, s) => {
+    if (!x || s === net.seat || !x.vc || !x.pid || x.pid === mine) return;
+    live.add(x.pid);
+    if (!VC.joined) { voiceJoin(false); return; } // có người vào kênh → tự vào để nghe, syncVoice chạy lại ngay trong voiceJoin
+    if (mine < x.pid && !VC.calls.has(x.pid)) voiceCall(x.pid);
+  });
+  // người đã rời phòng / nối lại với id mới: đóng cuộc gọi cũ (chờ 10 giây vì cờ vc có thể tới sau cuộc gọi)
+  for (const [pid, c] of VC.calls) if (!live.has(pid) && Date.now() - (c._t || 0) > 10000) { try { c.close(); } catch (e) {} vcDrop(pid, c); }
+}
+function voiceCall(pid) {
+  let c = null;
+  try { c = net.peer.call(pid, VC.stream, { metadata: { seat: net.seat } }); } catch (e) {}
+  if (c) vcWire(pid, c);
+}
+function vcIncoming(c) {
+  if (!net.on || !net.peer) { try { c.close(); } catch (e) {} return; }
+  const pid = c.peer;
+  if (!VC.joined) voiceJoin(false); // phần tạo stream chạy đồng bộ nên đáp được ngay
+  const mine = myPid();
+  if (!VC.stream || (mine && mine < pid && VC.calls.has(pid))) { try { c.close(); } catch (e) {} return; } // bên id nhỏ hơn là bên gọi
+  vcWire(pid, c);
+  try { c.answer(VC.stream); } catch (e) {}
+}
+function vcWire(pid, c) {
+  const old = VC.calls.get(pid);
+  if (old && old !== c) { try { old.close(); } catch (e) {} }
+  c._t = Date.now();
+  VC.calls.set(pid, c);
+  c.on('stream', st => { if (VC.calls.get(pid) === c) vcAttach(pid, st); });
+  c.on('close', () => vcDrop(pid, c)); c.on('error', () => vcDrop(pid, c));
+}
+function vcDrop(pid, c) {
+  if (VC.calls.get(pid) !== c) return;
+  VC.calls.delete(pid);
+  const a = VC.audios.get(pid); if (a) { a.srcObject = null; a.remove(); VC.audios.delete(pid); }
+  meterOff(pid); paintTalk();
+}
+function vcAttach(pid, st) {
+  let a = VC.audios.get(pid);
+  if (!a) { a = document.createElement('audio'); a.autoplay = true; a.setAttribute('playsinline', ''); a.style.display = 'none'; document.body.appendChild(a); VC.audios.set(pid, a); }
+  a.srcObject = st;
+  const p = a.play(); if (p && p.catch) p.catch(() => { VC.blocked = true; syncVoiceUi(); toast('Bấm 🔊 trên cùng để nghe mọi người nói', 5000); });
+  meterOn(pid, st);
+}
+// trình duyệt chặn tự phát tiếng (chưa chạm gì vào trang): bấm nút là phát hết
+function voiceUnblock() {
+  VC.blocked = false;
+  for (const a of VC.audios.values()) { const p = a.play(); if (p && p.catch) p.catch(() => { VC.blocked = true; syncVoiceUi(); }); }
+  syncVoiceUi();
+}
+// đo mức âm từng người để tô sáng ai đang nói ('me' là mic của mình)
+function meterOn(key, st) {
+  meterOff(key);
+  const ctx = audio(); if (!ctx) return;
+  try { const src = ctx.createMediaStreamSource(st), an = ctx.createAnalyser(); an.fftSize = 512; src.connect(an); VC.meters.set(key, { src, an, buf: new Uint8Array(an.fftSize) }); } catch (e) {}
+  if (!VC.t) VC.t = setInterval(meterTick, 200);
+}
+function meterOff(key) { const m = VC.meters.get(key); if (m) { try { m.src.disconnect(); } catch (e) {} VC.meters.delete(key); } VC.talk.delete(key); }
+function meterTick() {
+  if (!VC.meters.size) { clearInterval(VC.t); VC.t = 0; return; }
+  let changed = false;
+  for (const [key, m] of VC.meters) {
+    m.an.getByteTimeDomainData(m.buf);
+    let sum = 0, n = 0;
+    for (let i = 0; i < m.buf.length; i += 4) { const v = (m.buf[i] - 128) / 128; sum += v * v; n++; }
+    const on = Math.sqrt(sum / n) > 0.04 && (key !== 'me' || VC.mic);
+    if (on !== VC.talk.has(key)) { changed = true; if (on) VC.talk.add(key); else VC.talk.delete(key); }
+  }
+  if (changed) paintTalk();
+}
+function paintTalk() {
+  for (const card of document.querySelectorAll('#players .pl')) {
+    const s = +card.dataset.s, x = G && G.seats[s];
+    card.classList.toggle('talk', !!x && net.on && (s === net.seat ? VC.talk.has('me') : !!x.pid && VC.talk.has(x.pid)));
+  }
+}
+function voiceLeave() {
+  for (const [pid, c] of [...VC.calls]) { try { c.close(); } catch (e) {} vcDrop(pid, c); }
+  if (VC.micTrack) { try { VC.micTrack.stop(); } catch (e) {} }
+  meterOff('me');
+  Object.assign(VC, { joined: false, mic: false, stream: null, micTrack: null, blocked: false });
+  VC.talk.clear();
+  syncVoiceUi();
+}
+function syncVoiceUi() {
+  const b = $('bVoice');
+  b.hidden = !(net.on && net.seat >= 0 && net.peer && !net.peer.destroyed);
+  b.classList.toggle('live', VC.joined && VC.mic && !VC.blocked);
+  b.classList.toggle('off', VC.joined && !VC.mic && !VC.blocked);
+  b.classList.toggle('blocked', VC.blocked);
+  b.textContent = VC.blocked ? '🔊' : '🎤';
+  b.title = VC.blocked ? 'Bấm để nghe mọi người' : !VC.joined ? 'Bật mic trò chuyện với cả phòng' : VC.mic ? 'Mic đang mở · bấm để tắt' : 'Mic đang tắt · bấm để mở';
+}
+$('bVoice').onclick = voiceToggle;
 </script>
 
 <script>
@@ -4965,7 +5321,9 @@ if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitNames);
 const roomInHash = () => { const m = /^#room=([a-z0-9]{4,16})$/.exec(location.hash); return m ? m[1] : null; };
 window.addEventListener('hashchange', () => { const c = roomInHash(); if (c && c !== net.code) joinOnline(c); });
 try { if (localStorage.getItem('typhu6.game') && !validState(JSON.parse(localStorage.getItem('typhu6.game')))) localStorage.removeItem('typhu6.game'); } catch (e) {} // ván lưu của bản luật cũ
-if (roomInHash()) joinOnline(roomInHash());
+// chủ phòng tải lại trang: link còn #room=mã và ván còn trong sessionStorage → mở lại phòng cùng mã, giữ ván
+const hostSaved = (() => { try { const v = JSON.parse(sessionStorage.getItem('typhu6.host')); return v && typeof v.code === 'string' && validState(v.G) && v.G.seats[0] ? v : null; } catch (e) { return null; } })();
+if (roomInHash()) { const c = roomInHash(); if (hostSaved && hostSaved.code === c) hostOnline(0, hostSaved); else joinOnline(c); }
 else if (!store.get('typhu6.setup', null)) { G = freshGame(seatsFromSetup(), roundsOf(gameLen), cashMode); show(G, null); renderSetup(); $('setupSheet').hidden = false; }
 else resumeLocal();
 requestAnimationFrame(() => requestAnimationFrame(() => $('board').classList.remove('init')));
