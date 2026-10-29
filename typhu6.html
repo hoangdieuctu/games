@@ -147,18 +147,19 @@ button:disabled { opacity: .4; cursor: default; }
 .token.dim .tzoom { opacity: .8; } /* quân không tới lượt mờ đi */
 .token .ring { fill: none; stroke-width: 3; opacity: 0; transform-box: fill-box; transform-origin: center; }
 .token .disc { stroke: #fff; stroke-width: 2; }
-.token.turn .ring { opacity: .9; animation: ring 1.2s ease-in-out 3; }
+/* quân tới lượt: quầng vàng thở nhẹ dưới chân, vòng màu nhấp nháy */
+.token .halo { opacity: 0; transform-box: fill-box; transform-origin: center; }
+.token.turn .halo { opacity: .85; animation: halobreathe 1.4s ease-in-out infinite; }
+@keyframes halobreathe { 50% { opacity: .5; transform: scale(1.15); } }
+.token.turn .ring { opacity: .9; animation: ring 1.2s ease-in-out infinite; }
+.token.turn .disc { stroke: #ffd23f; stroke-width: 2.5; filter: drop-shadow(0 0 6px rgba(255,210,63,.95)); }
 @keyframes ring { 0%, 100% { transform: scale(1); opacity: .9; } 50% { transform: scale(1.22); opacity: .3; } }
-/* chấm tròn nhấp nháy trên đầu quân của mình: nằm ngoài lớp phóng to / làm mờ nên luôn rõ, tới lượt thì nâng lên theo quân to ra */
-.token .me-dot { display: none; transform: translateY(-66px); transition: transform .25s ease-out; }
-.token.mine .me-dot { display: inline; }
-.token.turn .me-dot { transform: translateY(-119px); }
-.token .me-core { fill: #ffd23f; stroke: #fff; stroke-width: 2.5; filter: drop-shadow(0 0 4px rgba(255,200,40,.9)) drop-shadow(0 1px 2px rgba(0,0,0,.4)); transform-box: fill-box; transform-origin: center; animation: meblink 1s ease-in-out infinite; }
-.token .me-wave { fill: none; stroke: #ffd23f; stroke-width: 2; transform-box: fill-box; transform-origin: center; animation: mewave 1s ease-out infinite; }
-.token.turn .me-core { fill: #4ade3b; filter: drop-shadow(0 0 5px rgba(74,222,59,.95)) drop-shadow(0 1px 2px rgba(0,0,0,.4)); }
-.token.turn .me-wave { stroke: #4ade3b; }
-@keyframes meblink { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: .35; transform: scale(.75); } }
-@keyframes mewave { 0% { opacity: .9; transform: scale(1); } 100% { opacity: 0; transform: scale(2.4); } }
+/* nhãn tên trên đầu quân tới lượt: hộp màu người chơi, chữ trắng, nổi lên từ dưới */
+.token .tname { display: none; transform: translateY(-128px); }
+.token.turn .tname { display: inline; animation: tnamein .35s ease-out; }
+.token .tname-bg { stroke: #fff; stroke-width: 2; filter: drop-shadow(0 2px 4px rgba(0,0,0,.45)); }
+.token .tname-t { font: 800 13px 'Baloo 2', system-ui, sans-serif; fill: #fff; text-anchor: middle; dominant-baseline: central; paint-order: stroke; stroke: rgba(0,0,0,.35); stroke-width: 2; }
+@keyframes tnamein { from { opacity: 0; transform: translateY(-112px); } }
 .token .face { font-size: 15px; text-anchor: middle; dominant-baseline: central; }
 .token.jailed .face { opacity: .75; }
 .float { font: 900 19px 'Baloo 2', system-ui, sans-serif; text-anchor: middle; dominant-baseline: central; paint-order: stroke; stroke: #fff; stroke-width: 4; pointer-events: none; }
@@ -200,10 +201,22 @@ button:disabled { opacity: .4; cursor: default; }
 }
 .pl::before { content: ''; position: absolute; left: -2px; top: 12px; bottom: 12px; width: 5px; border-radius: 0 4px 4px 0; background: var(--c); }
 .pl.c1 { order: 1; } .pl.c2 { order: 2; } .pl.c3 { order: 3; } .pl.c4 { order: 4; } .pl.c5 { order: 5; } .pl.c0 { order: 6; }
-.pl.turn { border-color: var(--c); box-shadow: 0 0 0 3px color-mix(in srgb, var(--c) 35%, transparent), 0 0 28px color-mix(in srgb, var(--c) 60%, transparent), 0 6px 18px rgba(0,0,0,.35); }
+/* thẻ tới lượt: viền phát sáng nhấp nhịp theo màu người chơi, mặt viền vàng nhún nhẹ, tên vàng, lấp lánh */
+.pl.turn { border-color: color-mix(in srgb, var(--c) 60%, #fff); background: linear-gradient(160deg, color-mix(in srgb, var(--c) 28%, rgba(30,62,82,.94)), rgba(8,24,34,.96)); animation: turnglow 1.6s ease-in-out infinite; }
+@keyframes turnglow {
+  0%, 100% { box-shadow: 0 0 0 3px color-mix(in srgb, var(--c) 40%, transparent), 0 0 24px color-mix(in srgb, var(--c) 60%, transparent), 0 6px 18px rgba(0,0,0,.35); }
+  50% { box-shadow: 0 0 0 4px color-mix(in srgb, var(--c) 55%, #fff), 0 0 42px color-mix(in srgb, var(--c) 95%, transparent), 0 0 70px rgba(255,210,63,.35), 0 6px 18px rgba(0,0,0,.35); }
+}
+.pl.turn .ava { box-shadow: 0 0 0 2px #fff inset, 0 0 0 3px #ffd23f, 0 0 18px rgba(255,210,63,.9); animation: avabob 1.2s ease-in-out infinite; }
+@keyframes avabob { 50% { transform: translateY(-2px) scale(1.07); } }
+.pl.turn .nm { color: #ffd23f; text-shadow: 0 0 10px rgba(255,210,63,.7); }
+.pl.turn .pl-top::before, .pl.turn .pl-top::after { content: '✨'; position: absolute; font-size: 13px; line-height: 1; pointer-events: none; animation: sparkle 1.4s ease-in-out infinite; }
+.pl.turn .pl-top::before { left: -6px; top: -7px; }
+.pl.turn .pl-top::after { left: 34px; top: 30px; font-size: 10px; animation-delay: .7s; }
+@keyframes sparkle { 0%, 100% { opacity: 0; transform: scale(.4) rotate(-20deg); } 50% { opacity: 1; transform: scale(1.15) rotate(15deg); } }
 .pl.off { opacity: .6; }
 .pl.out { opacity: .5; } .pl.out .nm { text-decoration: line-through; }
-.pl-top { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.pl-top { position: relative; display: flex; align-items: center; gap: 8px; min-width: 0; }
 .pl .ava { width: 42px; height: 42px; flex: 0 0 auto; border-radius: 50%; background: var(--c); box-shadow: 0 0 0 2px #fff inset, 0 2px 6px rgba(0,0,0,.4); overflow: hidden; }
 .pl .ava svg { width: 100%; height: 100%; display: block; }
 .pl-id { flex: 1; min-width: 0; display: flex; flex-direction: column; line-height: 1.15; }
@@ -593,8 +606,9 @@ button:disabled { opacity: .4; cursor: default; }
 
 @media (prefers-reduced-motion: reduce) {
   .token { transition: none; }
-  .token .ring, .token .me-core, .token .me-wave, .roll-lbl, .roll-sum, .roll-sum::before, .dots span, .panel, .overlay, .cardpop, .actions button.primary::after, #board.shake, .pick-ring, .pick-hand, .chars button.on, .tour-flag, .tour-warn, .fx-badge, .fx-edge { animation: none; }
-  .fw-burst { animation: none; }
+  .token .ring, .token .halo, .roll-lbl, .roll-sum, .roll-sum::before, .dots span, .panel, .overlay, .cardpop, .actions button.primary::after, #board.shake, .pick-ring, .pick-hand, .chars button.on, .tour-flag, .tour-warn, .fx-badge, .fx-edge { animation: none; }
+  .fw-burst, .token .tname, .pl.turn, .pl.turn .ava, .pl.turn .pl-top::before, .pl.turn .pl-top::after { animation: none; }
+  .pl.turn { box-shadow: 0 0 0 3px color-mix(in srgb, var(--c) 40%, transparent), 0 0 24px color-mix(in srgb, var(--c) 60%, transparent), 0 6px 18px rgba(0,0,0,.35); }
 }
 </style>
 </head>
@@ -770,12 +784,12 @@ button:disabled { opacity: .4; cursor: default; }
   <div class="panel wide">
     <h2>Luật chơi</h2>
     <ol class="rules">
-      <li>Mỗi người bắt đầu với <b>$3.000</b> — mỗi nhân vật có <b>80%</b> may mắn được <b>nhân đôi</b> thành $6.000 — và <b>3 thẻ Chẵn/Lẻ</b> 🎲 (giữ tối đa 3): trước khi tung, dùng một thẻ để chắc chắn tổng ra chẵn hoặc lẻ. Lần lượt tung <b>hai xúc xắc</b> đi vòng quanh <b>42 ô</b> trên <b>bàn lục giác 6 góc</b> (bản mở rộng, tối đa <b>6 người</b> chơi). Sáu góc: Bắt Đầu, Côn Đảo, Đại Nhạc Hội, Bến Xe, Thuế, Cần Cẩu. Qua <b>Bắt Đầu</b> nhận <b>$300</b>; dừng đúng Bắt Đầu (từ vòng 2) còn được nâng cấp một thành phố.</li>
+      <li>Mỗi người bắt đầu với <b>$3.000</b> — mỗi nhân vật có <b>80%</b> may mắn được <b>nhân đôi</b> thành $6.000 — và <b>3 thẻ Chẵn/Lẻ</b> 🎲 (giữ tối đa 3): trước khi tung, dùng một thẻ để chắc chắn tổng ra chẵn hoặc lẻ. Lần lượt tung <b>hai xúc xắc</b> đi vòng quanh <b>42 ô</b> trên <b>bàn lục giác 6 góc</b> (bản mở rộng, tối đa <b>6 người</b> chơi). Sáu góc: Bắt Đầu, Côn Đảo, Đại Nhạc Hội, Bến Xe, Thuế, Hàng Rào. Qua <b>Bắt Đầu</b> nhận <b>$300</b>; dừng đúng Bắt Đầu (từ vòng 2) còn được nâng cấp một thành phố.</li>
       <li>Dừng ở <b>thành phố</b> chưa có chủ thì mua và xây ngay: Nhà → Biệt thự → Chung cư → Khách sạn → Biểu tượng. Vòng đầu chỉ xây tới Chung cư; qua Bắt Đầu rồi mới xây Khách sạn; có Khách sạn rồi mới lên Biểu tượng. Về thành phố của mình thì được nâng cấp.</li>
       <li>Vào thành phố <b>của người khác</b> phải trả <b>phí tham quan</b> theo cấp nhà, rồi có thể <b>mua lại</b> với giá <b>bằng</b> số tiền chủ đã đầu tư (trừ Biểu tượng và điểm du lịch). <b>Biểu tượng</b> 🗼 cũng không bị ép bán, phá cấp hay đổi.</li>
       <li>Phí tham quan <b>×2</b> khi chủ có đủ nhóm màu, <b>×2</b> cho <b>mỗi lần</b> thành phố hoặc điểm du lịch được mở <b>lễ hội</b> (cộng dồn: 2 lần là ×4; mỗi lúc chỉ một nơi có lễ hội — mở ở nơi khác thì nơi cũ bị lấy lại, phí về như cũ), <b>×2</b> ở 4 <b>ô đất vàng ⭐</b> chọn ngẫu nhiên mỗi ván.</li>
       <li><b>6 điểm du lịch</b> 🏖️ càng xa ô Bắt Đầu càng đắt: giá từ $150 (Vũng Tàu) đến $300 (Đồ Sơn), phí tham quan từ $80 đến $320, nhân với số điểm chủ đang có, <b>mỗi lượt có người ghé</b> (kể cả chủ) phí tăng thêm <b>50%</b> phí gốc, không mua lại được. Ai gom đủ cả 6 <b>thắng ngay</b>.</li>
-      <li><b>Côn Đảo</b>: kẹt 3 lượt, ra sớm bằng tung đôi (vẫn được tung tiếp như tung đôi thường), nộp $100 hoặc thẻ ra tù. Tung đôi 3 lần liền cũng vào Côn Đảo. <b>Bến Xe</b>: lượt sau được đi tới ô bất kỳ (vé $40). <b>Đại Nhạc Hội</b>: trả $40 tổ chức lễ hội ở một thành phố hoặc điểm du lịch của mình. <b>Thuế</b>: nộp 10% tổng tài sản, tiền thuế dồn vào <b>Quỹ Thuế</b> — ai rút được thẻ Quỹ Thuế ở ô Cơ Hội sẽ nhận toàn bộ quỹ. <b>Nút ĐỔ</b>: chạm nhanh để tung ngẫu nhiên, hoặc <b>bấm giữ</b> cho thanh lực chạy rồi thả tay — lực càng cao càng dễ ra tổng điểm lớn. <b>Cần Cẩu</b> 🏗️: thả một <b>rào chắn</b> 🚧 xuống ô đất của mình (giống thẻ Rào chắn ở ô Cơ Hội, xem mục 7).</li>
+      <li><b>Côn Đảo</b>: kẹt 3 lượt, ra sớm bằng tung đôi (vẫn được tung tiếp như tung đôi thường), nộp $100 hoặc thẻ ra tù. Tung đôi 3 lần liền cũng vào Côn Đảo. <b>Bến Xe</b>: lượt sau được đi tới ô bất kỳ (vé $40). <b>Đại Nhạc Hội</b>: trả $40 tổ chức lễ hội ở một thành phố hoặc điểm du lịch của mình. <b>Thuế</b>: nộp 10% tổng tài sản, tiền thuế dồn vào <b>Quỹ Thuế</b> — ai rút được thẻ Quỹ Thuế ở ô Cơ Hội sẽ nhận toàn bộ quỹ. <b>Nút ĐỔ</b>: chạm nhanh để tung ngẫu nhiên, hoặc <b>bấm giữ</b> cho thanh lực chạy rồi thả tay — lực càng cao càng dễ ra tổng điểm lớn. <b>Hàng Rào</b> 🚧: dựng một <b>rào chắn</b> ở ô đất của mình (giống thẻ Rào chắn ở ô Cơ Hội, xem mục 7).</li>
       <li><b>Cơ Hội</b>: thẻ có lợi (nhận Quỹ Thuế, miễn phí tham quan, giảm 50%, khiên, ra tù, lễ hội miễn phí, thêm thẻ Chẵn/Lẻ, <b>rào chắn</b> 🚧) hoặc hại (đổi thành phố, ép bán, phá cấp, dịch bệnh, mất điện, bị đưa đi nơi khác). <b>Rào chắn</b>: dựng ở một ô đất của mình trong 5 lượt — đối thủ đi ngang qua (tung xúc xắc hay đi xe) phải <b>dừng lại</b> ngay ô đó và trả phí; rào mất sau khi chặn được một người. Bay thẳng (Dân Chơi) thì không bị chặn.</li>
       <li>Tung đôi được đi tiếp, trừ khi vào Côn Đảo hay Bến Xe; không còn việc gì thì lượt tự chuyển. Thiếu tiền thì bán thành phố (được nửa vốn); bán hết cũng không đủ thì <b>phá sản</b> ngay: ngân hàng mua lại toàn bộ đất (nửa vốn), tiền thu được cùng tiền mặt trả cho chủ nợ. Đang thiếu tiền cũng có thể tự chọn <b>phá sản</b> thay vì bán nhà.</li>
       <li><b>Thắng</b> khi: đối thủ phá sản hết · đủ <b>2 nhóm màu</b> · sở hữu <b>cả một cạnh bàn</b> (4 thành phố + 1 điểm du lịch) · đủ <b>6 điểm du lịch</b> · xây đủ <b>6 Biểu tượng</b> · hoặc <b>giàu nhất</b> khi hết số vòng. Mỗi nhân vật có một kỹ năng riêng.</li>
@@ -807,7 +821,7 @@ button:disabled { opacity: .4; cursor: default; }
 // BẢN MỞ RỘNG: bàn LỤC GIÁC 6 góc, 42 ô, tối đa 6 người chơi (NS ghế).
 // Ô 0 (Bắt Đầu) ở đỉnh dưới, đi theo chiều: dưới → trái dưới → trái trên → đỉnh trên → phải trên → phải dưới.
 // Mỗi cạnh PER = 7 ô (ô góc + 6 ô thường 76 × 94). Sáu góc: Bắt Đầu (0), Côn Đảo (7), Đại Nhạc Hội (14),
-// Bến Xe (21), Thuế (28), Cần Cẩu (35). Ô góc là tấm đệm lục giác (bán kính PAD_R), hình vẽ ô góc phóng CSCALE.
+// Bến Xe (21), Thuế (28), Hàng Rào (35). Ô góc là tấm đệm lục giác (bán kính PAD_R), hình vẽ ô góc phóng CSCALE.
 const NS = 6, SEATS = [0, 1, 2, 3, 4, 5];
 const PER = 7, CORNER = 94, CW = 76, N = PER * 6, PAD_R = 62, CSCALE = 1.12;
 const RAD = Math.PI / 180, COS30 = Math.cos(30 * RAD);
@@ -886,7 +900,7 @@ const C = (name, g, base) => ({ t: 'city', name, g, base });
 const T = (name, price, rent) => ({ t: 'tour', name, price, rent });
 const CH = { t: 'chance', name: 'Cơ Hội' };
 // 42 ô lục giác: 6 ô góc, mỗi cạnh 6 ô thường (4 thành phố, 1 Cơ Hội, 1 điểm du lịch) → 24 thành phố (8 nhóm × 3), 6 điểm du lịch, 6 Cơ Hội
-const CORNERS = [{ t: 'start', name: 'Bắt Đầu' }, { t: 'island', name: 'Côn Đảo' }, { t: 'festival', name: 'Đại Nhạc Hội' }, { t: 'bus', name: 'Bến Xe' }, { t: 'tax', name: 'Thuế' }, { t: 'crane', name: 'Cần Cẩu' }];
+const CORNERS = [{ t: 'start', name: 'Bắt Đầu' }, { t: 'island', name: 'Côn Đảo' }, { t: 'festival', name: 'Đại Nhạc Hội' }, { t: 'bus', name: 'Bến Xe' }, { t: 'tax', name: 'Thuế' }, { t: 'crane', name: 'Hàng Rào' }];
 const CITY_LIST = [['Cà Mau', 100], ['Bạc Liêu', 100], ['Đà Lạt', 120], ['Lạng Sơn', 140], ['Thái Bình', 140], ['Ninh Bình', 160], ['Pleiku', 160], ['Ninh Thuận', 160], ['Buôn Ma Thuột', 180],
   ['Tây Ninh', 180], ['Vinh', 200], ['Hải Dương', 200], ['Thanh Hoá', 220], ['Sa Pa', 240], ['Quy Nhơn', 240], ['Hội An', 260], ['Huế', 260], ['Đà Nẵng', 280],
   ['Bình Dương', 300], ['Cần Thơ', 320], ['Biên Hoà', 320], ['Hải Phòng', 360], ['Hà Nội', 380], ['Sài Gòn', 400]];
@@ -980,7 +994,7 @@ const EMOJIS = ['😀', '😂', '😎', '😍', '😭', '😡', '😱', '🤑', 
 
 // ── hình học ô ──
 const flatCenter = i => { const f = FRAMES[i]; return [f.cx, f.cy]; };
-// ô được Cần Cẩu nhắc lên (G.lift): mặt ô, nhà, quân, biển hiệu đều dời lên LIFT_H px màn hình
+// ô được Hàng Rào nhắc lên (G.lift): mặt ô, nhà, quân, biển hiệu đều dời lên LIFT_H px màn hình
 const LIFT_H = 18;
 let viewLift = null; // ô đang hiện là được nhắc trong lúc hoạt hoạ (null = theo G.lift)
 let liftDrawn = -1; // ô đang vẽ nhắc lên trên bàn
@@ -1082,7 +1096,7 @@ function rentBase(G, i) {
   let r = q.base * LEVELS[p.lv].rent;
   if (ownsGroup(G, p.owner, q.g)) r *= 2;
   if (p.fest) r *= festMult(G, i);
-  if (G.lift === i) r *= LIFT_MULT; // ô được Cần Cẩu nhắc lên
+  if (G.lift === i) r *= LIFT_MULT; // ô được Hàng Rào nhắc lên
   if (G.gold.includes(i)) r *= 2;
   if (effectOn(G, i, 'blackout')) r *= 0.5;
   if (hasSkill(G, p.owner, 'rich')) r *= 1.2;
@@ -1466,7 +1480,7 @@ function land(s, steps) {
     case 'chance': drawCard(s, steps); break;
     case 'tax': { const amt = hasSkill(G, s, 'detective') ? 0 : r10(netWorth(G, s) * TAX_RATE); if (amt > 0) charge(s, -1, amt, 'tax', steps); else steps.push({ k: 'taxFree', s }); break; }
     case 'crane': {
-      // Cần Cẩu: thả rào chắn 🚧 xuống một ô đất của mình (như thẻ Rào chắn): đối thủ đi ngang qua phải dừng lại ở đó
+      // Hàng Rào: thả rào chắn 🚧 xuống một ô đất của mình (như thẻ Rào chắn): đối thủ đi ngang qua phải dừng lại ở đó
       const opts = pickOpts(s, 'block');
       if (opts.length) { setPick(s, 'block', opts, true); steps.push({ k: 'craneOffer', s }); }
       else steps.push({ k: 'craneNone', s, why: PROPS.some(i => G.props[i].owner === s) ? 'all' : 'none' });
@@ -2282,7 +2296,7 @@ function buildBoard() {
     } else if (q.t === 'tour') { icon = tourIcon(i); name = q.name; color = '#1e6fd8'; }
     else if (q.t === 'chance') { icon = '❓'; iconSize = 30; }
     else if (q.t === 'tax') { icon = '💸'; name = 'Thuế'; color = '#8a5a00'; }
-    else if (q.t === 'crane') { icon = '🏗️'; name = 'Cần Cẩu'; color = '#b45309'; }
+    else if (q.t === 'crane') { icon = '🚧'; name = 'Hàng Rào'; color = '#b45309'; }
     // ô không phải thành phố: biểu tượng đứng ở chỗ dải nhà (Cơ Hội: biểu tượng to ở giữa ô)
     if (icon) { const b = bandOf(i), [bx, by] = q.t === 'chance' ? flatCenter(i) : toB(i, b.x + b.w / 2, b.y + b.h / 2); const ib = bill(bx, by, 'sq-icon', icon, $('gIcons'), { style: `font-size:${iconSize}px` }); if (q.t === 'tour') { ib.dataset.sq = i; ib.dataset.y = ib.getAttribute('y'); } }
     // tên in hoa, to, mỗi từ một dòng khi có hai từ; chiếm trọn phần 62 px ngoài dải nhà
@@ -2364,19 +2378,19 @@ function drawCorner(i, sg0) {
     }
   } else {
     bg('#fef3c7');
-    // bãi công trường: nền cát, dải sọc vàng đen, cần cẩu bên trái đang treo một ô đất
+    // công trường có rào chắn: nền cát, hai chân đỡ xám, hai thanh ngang sọc vàng đen, đèn báo đỏ trên nóc
     rect(TI, 64, r.w - 2 * TI, r.h - 64 - TI, { fill: '#fde68a' });
-    for (let k = 0; k < 8; k++) rect(6 + k * 10.5, 56, 10.5, 8, { fill: k % 2 ? '#111827' : '#f59e0b' });
-    rect(14, 18, 5, 40, { fill: '#f59e0b', stroke: '#92400e', 'stroke-width': .8 }); // cột tháp
-    for (let k = 0; k < 4; k++) el('line', { x1: X + 14, y1: Y + 22 + k * 9, x2: X + 19, y2: Y + 27 + k * 9, stroke: '#92400e', 'stroke-width': .8 }, sg);
-    rect(10, 14, 64, 4, { fill: '#f59e0b', stroke: '#92400e', 'stroke-width': .8 }); // tay cần
-    rect(6, 12, 10, 8, { rx: 1.5, fill: '#92400e' }); // đối trọng
-    el('line', { x1: X + 62, y1: Y + 18, x2: X + 62, y2: Y + 29, stroke: '#374151', 'stroke-width': 1 }, sg); // cáp
-    el('path', { d: `M${X + 62} ${Y + 29} q0 4 3 4 q3 0 3 -3`, fill: 'none', stroke: '#374151', 'stroke-width': 1.5 }, sg); // móc
-    rect(52, 46, 22, 7, { rx: 2, fill: 'rgba(0,0,0,.18)' }); // bóng ô đang treo
-    rect(50, 33, 22, 9, { rx: 1.5, fill: '#fff', stroke: '#1e6fd8', 'stroke-width': 1.5 }); rect(50, 33, 22, 3, { fill: '#1e6fd8' }); // ô đất được nhắc lên
+    for (const lx of [14, 72]) { rect(lx, 22, 8, 38, { rx: 2, fill: '#6b7280', stroke: '#1f2937', 'stroke-width': 1.2 }); rect(lx - 5, 57, 18, 4, { rx: 1.5, fill: '#374151' }); }
+    const clip = el('clipPath', { id: 'fenceClip' }, sg); // đặt ngay trong nhóm ô (defs khai báo sau buildBoard)
+    for (const by of [26, 44]) el('rect', { x: X + 6, y: Y + by, width: 82, height: 11, rx: 2 }, clip);
+    for (const by of [26, 44]) rect(6, by, 82, 11, { rx: 2, fill: '#f59e0b', stroke: '#78350f', 'stroke-width': 1.2 });
+    const st = el('g', { 'clip-path': 'url(#fenceClip)' }, sg);
+    for (const by of [26, 44]) for (let k = -1; k < 8; k++) el('polygon', { points: [[k * 12 + 8, by], [k * 12 + 15, by], [k * 12 + 8, by + 11], [k * 12 + 1, by + 11]].map(([a, b]) => `${X + a},${Y + b}`).join(' '), fill: '#111827' }, st);
+    rect(44, 10, 6, 13, { rx: 1.5, fill: '#4b5563' }); // cột đèn
+    el('circle', { cx: X + 47, cy: Y + 10, r: 5.5, fill: '#ef4444', stroke: '#fff', 'stroke-width': 1.5 }, sg); // đèn báo
+    el('circle', { cx: X + 45.5, cy: Y + 8.5, r: 1.6, fill: '#fecaca' }, sg);
     if (flat) {
-      billC(cx - 10, Y + 40, 'sq-icon', '🏗️', gi, { style: 'font-size:16px' });
+      billC(cx, Y + 40, 'sq-icon', '🚧', gi, { style: 'font-size:16px' });
     }
   }
 }
@@ -2490,7 +2504,7 @@ const FX = [
   // rào chắn: viền vàng cam đứt như rào công trường, biển 🚧 — đối thủ đi ngang qua phải dừng
   { key: 'block', ico: '🚧', tag: '✋', bg: '#7c2d12', ring: '#f59e0b', fill: 'rgba(245,158,11,.14)', line: '#f59e0b' },
 ];
-// biển hiệu ô được Cần Cẩu nhắc lên (chỉ biển, không viền)
+// biển hiệu ô được Hàng Rào nhắc lên (chỉ biển, không viền)
 const LIFT_FX = { key: 'lift', ico: '🏗️', tag: '×' + LIFT_MULT, bg: '#78350f', ring: '#fbbf24', pinOnly: true };
 // ô được nhắc lên: mặt ô (lớp gBoard) dời lên LIFT_H px màn hình, hốc cũ tô tối, dựng thành ô sáng ở lớp gLift,
 // biểu tượng điểm du lịch (lớp đứng) dời theo. i = -1: hạ hết xuống.
@@ -2688,21 +2702,25 @@ $('board').insertBefore(defs, $('board').firstChild);
   const mg = el('linearGradient', { id: 'mineGrad', x1: 0, y1: 0, x2: .5, y2: 0, spreadMethod: 'repeat' }, defs);
   ['#ff3b5c', '#ff9f1c', '#ffe03f', '#3ddc84', '#3fa7ff', '#b06cff', '#ff3b5c'].forEach((c, k, a) => el('stop', { offset: k / (a.length - 1), 'stop-color': c }, mg));
   el('animateTransform', { attributeName: 'gradientTransform', type: 'translate', from: '0 0', to: '.5 0', dur: '2s', repeatCount: 'indefinite' }, mg);
+  // quầng sáng vàng dưới chân quân đang tới lượt
+  const th = el('radialGradient', { id: 'turnHalo' }, defs);
+  [[0, '#fff5c2', .95], [.35, '#ffd23f', .7], [1, '#ffd23f', 0]].forEach(([o, c, a]) => el('stop', { offset: o, 'stop-color': c, 'stop-opacity': a }, th));
   const sh = el('linearGradient', { id: 'monoShine', x1: 0, y1: 0, x2: 1, y2: 1 }, defs);
   [[0, 0], [.45, 0], [.5, .75], [.55, 0], [1, 0]].forEach(([o, a]) => el('stop', { offset: o, 'stop-color': '#fff', 'stop-opacity': a }, sh));
 })();
 const tokenEls = SEATS.map(s => {
   const C = COLORS[s], g0 = el('g', { class: 'token' }, $('gTokens')), g = el('g', { transform: `scale(${TOKEN_SCALE})` }, g0);
   const z = el('g', { class: 'tzoom' }, g); // quân đang tới lượt phóng to quanh chân đế
+  el('ellipse', { cx: 0, cy: 1, rx: 34, ry: 16, class: 'halo', fill: 'url(#turnHalo)' }, z); // quầng vàng thở nhẹ khi tới lượt
   el('ellipse', { cx: 0, cy: 2, rx: 16, ry: 6.5, fill: 'rgba(0,0,0,.35)' }, z);
   el('ellipse', { cx: 0, cy: 0, rx: 20, ry: 9.5, class: 'ring', stroke: C.main }, z);
   const b = el('g', { class: 'tbody' }, z);
   el('ellipse', { cx: 0, cy: 0, rx: 13, ry: 6, class: 'disc', fill: C.main }, b);
   el('g', { class: 'face-in', transform: 'translate(0 -22) scale(.72)' }, el('g', { class: 'tspin' }, b)); // tspin: xoay riêng nhân vật, mũi tên đứng yên // nhân vật đủ tay chân, chân đứng trên đế
-  // chấm tròn nhấp nháy đánh dấu quân của mình (ngoài tzoom: không bị mờ khi chưa tới lượt)
-  const dot = el('g', { class: 'me-dot' }, g);
-  el('circle', { cx: 0, cy: 0, r: 7, class: 'me-wave' }, dot);
-  el('circle', { cx: 0, cy: 0, r: 7, class: 'me-core' }, dot);
+  // nhãn tên trên đầu quân đang tới lượt (ngoài tzoom: không bị phóng to / làm mờ)
+  const nm = el('g', { class: 'tname' }, g);
+  el('rect', { x: -30, y: -11, width: 60, height: 22, rx: 11, class: 'tname-bg', fill: C.main }, nm);
+  el('text', { x: 0, y: 0, class: 'tname-t' }, nm).textContent = '';
   g0.style.display = 'none';
   return g0;
 });
@@ -2711,7 +2729,15 @@ function setTokenColor(s) {
   const t = tokenEls[s], m = col(s).main;
   if (t.dataset.c === m) return;
   t.dataset.c = m;
-  t.querySelector('.ring').setAttribute('stroke', m); t.querySelector('.disc').setAttribute('fill', m);
+  t.querySelector('.ring').setAttribute('stroke', m); t.querySelector('.disc').setAttribute('fill', m); t.querySelector('.tname-bg').setAttribute('fill', m);
+}
+function setTokenName(s) {
+  const t = tokenEls[s], name = who(s), nm = t.querySelector('.tname');
+  if (nm.dataset.n === name) return;
+  nm.dataset.n = name;
+  const tx = nm.querySelector('.tname-t'); tx.textContent = name;
+  const w = Math.max(44, Math.round(name.length * 8.2 + 18)); // ước lượng bề rộng, đủ cho 'Baloo 2' đậm 13px
+  const bg = nm.querySelector('.tname-bg'); bg.setAttribute('x', -w / 2); bg.setAttribute('width', w);
 }
 function setTokenFace(s, id) {
   const g = tokenEls[s].querySelector('.face-in');
@@ -3856,11 +3882,11 @@ function stepText(st) {
     case 'takeover': return `💰 ${w} mua lại ${nm(st.i)} từ ${other(st.o)} với giá ${fmt(st.price)}!`;
     case 'noCash': return `💸 ${w} không đủ tiền ${st.mode === 'takeover' ? 'mua lại' : st.mode === 'upgrade' ? 'nâng cấp' : 'mua'} ${nm(st.i)} (cần ${fmt(st.need)}, có ${fmt(G.pl[s].cash)})`;
     case 'skip': return st.mode === 'takeover' ? `${w} không mua lại ${nm(st.i)}` : st.mode === 'upgrade' ? `${w} giữ nguyên ${nm(st.i)}` : `${w} không mua ${nm(st.i)}`;
-    case 'craneOffer': return `🏗️ ${w} tới Cần Cẩu — chọn ô đất của mình để dựng rào chắn 🚧`;
-    case 'craneNone': return st.why === 'all' ? `${w} tới Cần Cẩu nhưng các ô đất đều đã có rào chắn` : `${w} tới Cần Cẩu nhưng chưa có ô đất nào để dựng rào`;
+    case 'craneOffer': return `🚧 ${w} tới Hàng Rào — chọn ô đất của mình để dựng rào chắn`;
+    case 'craneNone': return st.why === 'all' ? `${w} tới Hàng Rào nhưng các ô đất đều đã có rào chắn` : `${w} tới Hàng Rào nhưng chưa có ô đất nào để dựng rào`;
     case 'join': return `🙋 ${w} vào chơi, thay cho ${st.bot}`;
-    case 'liftOffer': return `🏗️ ${w} tới Cần Cẩu — chọn ô đất của mình để nhắc lên`;
-    case 'liftNone': return `${w} tới Cần Cẩu nhưng chưa có ô đất nào để nhắc lên`;
+    case 'liftOffer': return `🏗️ ${w} tới Hàng Rào — chọn ô đất của mình để nhắc lên`;
+    case 'liftNone': return `${w} tới Hàng Rào nhưng chưa có ô đất nào để nhắc lên`;
     case 'lift': return `🏗️ ${w} nhắc ${nm(st.i)} lên — phí tham quan ở đó ×${LIFT_MULT}${st.low >= 0 ? ` · ${nm(st.low)} hạ xuống, phí về như cũ` : ''}`;
     case 'festOffer': return `🎤 ${w} tới Đại Nhạc Hội — chọn nơi mở lễ hội`;
     case 'festNone': return st.why === 'none' ? `${w} tới Đại Nhạc Hội nhưng chưa có đất nào` : `${w} không đủ tiền tổ chức lễ hội`;
@@ -3907,7 +3933,7 @@ function paint(skipTokens) {
     g.classList.toggle('turn', inPlay && G.phase === 'play' && shownTurn() === s);
     g.classList.toggle('dim', inPlay && G.phase === 'play' && shownTurn() !== s);
     g.classList.toggle('mine', inPlay && isMine(s));
-    if (G.seats[s]) { setTokenFace(s, G.pl[s].char); setTokenColor(s); }
+    if (G.seats[s]) { setTokenFace(s, G.pl[s].char); setTokenColor(s); setTokenName(s); }
     if (!skipTokens) placeToken(s, G.pl[s].pos, G.pl[s].jail > 0);
   }
   paintPicks(); renderSpy();
@@ -4225,7 +4251,7 @@ const SPECIAL = {
   festival: { icon: '🎤', color: '#0ea5e9', desc: () => `Trả ${fmt(FEST_FEE)} mở lễ hội ở một thành phố hoặc điểm du lịch của mình: phí tham quan ×2 mỗi lần mở.` },
   tax: { icon: '💸', color: '#8a5a00', desc: () => `Nộp ${TAX_RATE * 100}% tổng tài sản vào Quỹ Thuế (đang có ${fmt(G.pot || 0)}).` },
   bus: { icon: '🚌', color: '#1e7a3c', desc: () => `Lượt sau được đi tới ô bất kỳ (vé ${fmt(BUS_FEE)}).` },
-  crane: { icon: '🏗️', color: '#b45309', desc: () => 'Thả rào chắn 🚧 xuống một ô đất của mình trong 5 lượt: đối thủ đi ngang qua phải dừng lại đó và trả phí; rào mất sau khi chặn được một người (giống thẻ Rào chắn ở ô Cơ Hội).' },
+  crane: { icon: '🚧', color: '#b45309', desc: () => 'Dựng rào chắn ở một ô đất của mình trong 5 lượt: đối thủ đi ngang qua phải dừng lại đó và trả phí; rào mất sau khi chặn được một người (giống thẻ Rào chắn ở ô Cơ Hội).' },
 };
 function openProp(i) { if (!G || !SQ[i]) return; propOpen = i; renderProp(); $('propSheet').hidden = false; playTap(); }
 function renderProp() {
