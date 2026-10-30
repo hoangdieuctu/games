@@ -66,6 +66,10 @@ button:disabled { opacity: .4; cursor: default; }
 .emo-pop button:hover, .emo-pop button:active { background: #eef3f9; transform: scale(1.12); }
 .round-tag { background: rgba(0,0,0,.35); border: 1px solid rgba(255,210,63,.45); border-radius: 999px; padding: 4px 12px; font-weight: 800; font-size: 14px; white-space: nowrap; color: #ffd23f; }
 .round-tag b { color: #fff; }
+.ev-tag { --c: #f39c12; display: inline-flex; align-items: center; gap: 4px; min-width: 0; max-width: 34vw; background: var(--c); color: #fff; border: 1px solid rgba(255,255,255,.45); border-radius: 999px; padding: 4px 10px; font-weight: 800; font-size: 13px; white-space: nowrap; box-shadow: 0 0 12px color-mix(in srgb, var(--c) 70%, transparent); animation: evglow 1.6s ease-in-out infinite alternate; cursor: pointer; }
+.ev-tag span { overflow: hidden; text-overflow: ellipsis; }
+@keyframes evglow { to { box-shadow: 0 0 2px color-mix(in srgb, var(--c) 40%, transparent); } }
+@media (max-width: 480px) { .ev-tag { padding: 4px 7px; } .ev-tag span { display: none; } }
 .room-tag { background: rgba(0,0,0,.35); border: 1px solid rgba(255,255,255,.18); border-radius: 999px; padding: 4px 12px; font-weight: 700; font-size: 13px; white-space: nowrap; color: #fff; }
 
 /* ── bàn cờ ── */
@@ -155,11 +159,11 @@ button:disabled { opacity: .4; cursor: default; }
 .token.turn .disc { stroke: #ffd23f; stroke-width: 2.5; filter: drop-shadow(0 0 6px rgba(255,210,63,.95)); }
 @keyframes ring { 0%, 100% { transform: scale(1); opacity: .9; } 50% { transform: scale(1.22); opacity: .3; } }
 /* nhãn tên trên đầu quân tới lượt: hộp màu người chơi, chữ trắng, nổi lên từ dưới */
-.token .tname { display: none; transform: translateY(-128px); }
+.token .tname { display: none; transform: translateY(-88px); }
 .token.turn .tname { display: inline; animation: tnamein .35s ease-out; }
 .token .tname-bg { stroke: #fff; stroke-width: 2; filter: drop-shadow(0 2px 4px rgba(0,0,0,.45)); }
 .token .tname-t { font: 800 13px 'Baloo 2', system-ui, sans-serif; fill: #fff; text-anchor: middle; dominant-baseline: central; paint-order: stroke; stroke: rgba(0,0,0,.35); stroke-width: 2; }
-@keyframes tnamein { from { opacity: 0; transform: translateY(-112px); } }
+@keyframes tnamein { from { opacity: 0; transform: translateY(-72px); } }
 .token .face { font-size: 15px; text-anchor: middle; dominant-baseline: central; }
 .token.jailed .face { opacity: .75; }
 .float { font: 900 19px 'Baloo 2', system-ui, sans-serif; text-anchor: middle; dominant-baseline: central; paint-order: stroke; stroke: #fff; stroke-width: 4; pointer-events: none; }
@@ -233,6 +237,10 @@ button:disabled { opacity: .4; cursor: default; }
 .pl .rank.r4, .pl .rank.r5, .pl .rank.r6, .pl .rank.r9 { background: #3a4a58; color: #cfd9e5; }
 .pl-row { display: flex; align-items: center; justify-content: space-between; gap: 6px; background: rgba(0,0,0,.28); border-radius: 8px; padding: 2px 8px; font-size: 12px; min-height: 22px; }
 .pl-row .lbl { color: rgba(255,255,255,.65); font-weight: 600; white-space: nowrap; } .pl-row .lbl b { font-weight: inherit; }
+.pl-row .m { display: inline-flex; align-items: center; gap: 4px; min-width: 0; flex: 0 1 auto; white-space: nowrap; overflow: hidden; }
+.pl-row .m .cash, .pl-row .m .worth { overflow: hidden; text-overflow: ellipsis; }
+.pl-row.money { gap: 4px; } .pl-row .ic { font-style: normal; }
+.pl-row .mw { border-left: 1px solid rgba(255,255,255,.18); padding-left: 6px; }
 .pl .cash { white-space: nowrap; font-weight: 800; color: #7be495; font-size: 14px; }
 .pl .cash.low { color: #ff8a80; }
 .pl .worth { white-space: nowrap; font-weight: 800; color: #ffd23f; font-size: 13px; }
@@ -365,7 +373,7 @@ button:disabled { opacity: .4; cursor: default; }
   .pl .cd { font-size: 10.5px; line-height: 16px; padding: 0 5px; }
   .pl .par { font-size: 10.5px; line-height: 16px; padding: 0 4px; }
   /* nhiều người chơi chung máy: hai thẻ chia đôi bề ngang, chỉ giữ tiền mặt cho khỏi chồng chữ */
-  .hud:has(.pl.me ~ .pl.me) .pl-row:nth-child(4), .hud:has(.pl.me ~ .pl.me) .pl-row .lbl { display: none; }
+  .hud:has(.pl.me ~ .pl.me) .pl-row .mw { display: none; }
   .hud:has(.pl.me ~ .pl.me) .pl { gap: 5px; padding-right: 8px; }
   .stage { --s: 26px !important; }
   /* nút hành động treo trong sàn giữa bàn, ngay dưới nút ĐỔ (fit() chuyển #actions vào #mid), không làm bàn co lại */
@@ -404,6 +412,7 @@ button:disabled { opacity: .4; cursor: default; }
   .pl { width: clamp(140px, 18vw, 180px); padding: 4px 7px 4px 9px; gap: 2px; } .pl .ava { width: 26px; height: 26px; } .pl .skill { display: none; } .pl .nm { font-size: 12.5px; } .pl-props { display: none; }
   .pl-row { font-size: 11px; min-height: 20px; padding: 1px 7px; } .pl .cash { font-size: 12.5px; } .pl .worth { font-size: 11.5px; } .pl-props { display: none; }
   .pl-goal { font-size: 9.5px; padding: 2px 5px; }
+  .pl-row.money { padding: 1px 6px; } .pl-row .ic { display: none; } /* thẻ hẹp: bỏ biểu tượng, phân biệt bằng màu (xanh = tiền mặt, vàng = tài sản) */
   .status { font-size: 12px; padding: 2px 10px; top: calc(env(safe-area-inset-top, 0px) + 36px); }
   .actions button { min-height: 34px; padding: 4px 10px; font-size: 13px; } .actions button small { font-size: 10.5px; }
   .dock button { min-height: 30px; padding: 3px 10px; font-size: 12.5px; }
@@ -612,7 +621,7 @@ button:disabled { opacity: .4; cursor: default; }
 
 @media (prefers-reduced-motion: reduce) {
   .token { transition: none; }
-  .token .ring, .token .halo, .roll-lbl, .roll-sum, .roll-sum::before, .dots span, .panel, .overlay, .cardpop, .actions button.primary::after, #board.shake, .pick-ring, .pick-hand, .chars button.on, .tour-flag, .tour-warn, .fx-badge, .fx-edge { animation: none; }
+  .ev-tag, .token .ring, .token .halo, .roll-lbl, .roll-sum, .roll-sum::before, .dots span, .panel, .overlay, .cardpop, .actions button.primary::after, #board.shake, .pick-ring, .pick-hand, .chars button.on, .tour-flag, .tour-warn, .fx-badge, .fx-edge { animation: none; }
   .fw-burst, .token .tname, .pl.turn, .pl.turn .ava, .pl.turn .pl-top::before, .pl.turn .pl-top::after { animation: none; }
   .pl.turn { box-shadow: 0 0 0 3px color-mix(in srgb, var(--c) 40%, transparent), 0 0 24px color-mix(in srgb, var(--c) 60%, transparent), 0 6px 18px rgba(0,0,0,.35); }
 }
@@ -625,6 +634,7 @@ button:disabled { opacity: .4; cursor: default; }
   <a class="back" href="index.html" aria-label="Về trang chính">‹</a>
   <h1><span>Cờ</span> <span>Tỷ</span> <span>Phú</span> <small>6</small></h1>
   <span class="round-tag" id="roundTag" hidden></span>
+  <button class="ev-tag" id="evTag" hidden></button>
   <span class="room-tag" id="roomTag" hidden></span>
   <button class="mute" id="bEmo" aria-label="Biểu tượng cảm xúc" hidden>😊</button>
   <button class="mute" id="bVoice" aria-label="Trò chuyện bằng giọng nói" hidden>🎤</button>
@@ -703,6 +713,9 @@ button:disabled { opacity: .4; cursor: default; }
     <div class="label">Tiền khởi đầu</div>
     <div class="seg" id="suCash"></div>
     <p class="rule" id="suCashHint"></p>
+    <div class="label">Sự kiện chung</div>
+    <div class="seg" id="suEv"></div>
+    <p class="rule" id="suEvHint"></p>
     <button class="go" id="bStart">Bắt đầu</button>
     <p class="rule center">"Người" là một người khác ngồi chơi chung máy này. Muốn chơi với bạn ở xa thì bấm 🌐 Chơi online.</p>
   </div>
@@ -741,6 +754,8 @@ button:disabled { opacity: .4; cursor: default; }
       <div class="seg" id="lbLen"></div>
       <div class="label">Tiền khởi đầu</div>
       <div class="seg" id="lbCash"></div>
+      <div class="label">Sự kiện chung</div>
+      <div class="seg" id="lbEv"></div>
       <div class="label">Nhân vật</div>
       <div class="seg" id="lbCharMode"></div>
       <label class="check"><input type="checkbox" id="lbFill"> Cho máy chơi các ghế còn trống</label>
@@ -811,6 +826,9 @@ button:disabled { opacity: .4; cursor: default; }
     </div>
     <h3 class="rules-h">❓ Thẻ Cơ Hội</h3>
     <ul class="rules-list cols" id="rulesCards"></ul>
+    <h3 class="rules-h">📢 Sự kiện chung cả phòng</h3>
+    <p class="rules-list" id="rulesEvHint"></p>
+    <ul class="rules-list cols" id="rulesEvents"></ul>
     <button class="go" id="bRulesOk">Đã hiểu</button>
   </div>
 </div>
@@ -993,6 +1011,26 @@ const CARDS = [
   { text: 'Thêm một thẻ Chẵn/Lẻ (giữ tối đa 3): chọn trước tổng xúc xắc ra chẵn hay lẻ.', a: { hold: 'parity' }, icon: '🎲' },
 ];
 const HOLD_INFO = { free: ['🎫', 'Vé miễn phí tham quan'], half: ['🏷️', 'Phiếu giảm nửa phí'], shield: ['🛡️', 'Khiên bảo vệ thành phố'], jail: ['🔓', 'Thẻ ra tù'], parity: ['🎲', 'Thẻ Chẵn/Lẻ'] };
+// ── sự kiện chung cả phòng: đầu các vòng 5, 10, 15... (mỗi EVENT_EVERY vòng) có EVENT_CHANCE xảy ra một sự kiện, kéo dài hết vòng đó ──
+const EVENT_EVERY = 5, EVENT_CHANCE = 0.8, TET_GIFT = 200, EV_INTEREST = 0.02;
+const EVENTS = [
+  { id: 'national', icon: '🇻🇳', name: 'Quốc Khánh 2/9', text: 'Cả nước nghỉ lễ, du khách đổ về: phí tham quan mọi nơi ×2.', col: '#da251d' },
+  { id: 'tet', icon: '🧧', name: 'Tết Nguyên Đán', text: `Mỗi người nhận lì xì ${fmt(TET_GIFT)}, qua Bắt Đầu nhận lương ×2.`, col: '#b91c1c' },
+  { id: 'crisis', icon: '📉', name: 'Khủng Hoảng Kinh Tế', text: 'Ai cũng thắt lưng buộc bụng: phí tham quan mọi nơi chỉ còn một nửa.', col: '#475569' },
+  { id: 'stimulus', icon: '🏗️', name: 'Kích Cầu Xây Dựng', text: 'Mua đất, xây nhà và mua điểm du lịch rẻ hơn 30%.', col: '#d97706' },
+  { id: 'summer', icon: '🏖️', name: 'Mùa Du Lịch Hè', text: 'Phí tham quan ở các điểm du lịch ×2.', col: '#0284c7' },
+  { id: 'storm', icon: '🌀', name: 'Bão Về', text: 'Các điểm du lịch đóng cửa, không thu phí tham quan.', col: '#334155' },
+  { id: 'taxfree', icon: '🎁', name: 'Miễn Thuế', text: 'Ô Thuế không thu thuế của ai.', col: '#16a34a' },
+  { id: 'audit', icon: '🧾', name: 'Thanh Tra Thuế', text: `Vào ô Thuế phải nộp gấp đôi (${TAX_RATE * 200}% tài sản).`, col: '#7c2d12' },
+  { id: 'casino', icon: '🎰', name: 'Đêm Hội Sòng Bài', text: 'Sòng Bài trả thưởng gấp đôi: Chẵn/Lẻ ×4, Đôi ×12.', col: '#7e22ce' },
+  { id: 'amnesty', icon: '🕊️', name: 'Đại Xá', text: 'Ai đang ở Côn Đảo được thả ngay; rời đảo không mất phí.', col: '#0f766e' },
+  { id: 'midautumn', icon: '🏮', name: 'Tết Trung Thu', text: 'Tổ chức lễ hội ở Đại Nhạc Hội miễn phí.', col: '#ea580c' },
+  { id: 'bank', icon: '🏦', name: 'Ngân Hàng Chia Lãi', text: `Đầu mỗi lượt, người chơi nhận lãi ${EV_INTEREST * 100}% tiền mặt đang có.`, col: '#1e3a8a' },
+];
+const evOf = id => EVENTS.find(e => e.id === id) || null;
+const evOn = (G, id) => !!(G && G.ev && G.ev.id === id);
+// hệ số phí tham quan của sự kiện đang diễn ra ở ô i
+const evRent = (G, i) => (evOn(G, 'national') ? 2 : evOn(G, 'crisis') ? 0.5 : 1) * (SQ[i].t === 'tour' ? (evOn(G, 'summer') ? 2 : evOn(G, 'storm') ? 0 : 1) : 1);
 const PARITY_MAX = 3, LUCK_CHANCE = 0.8, LANDMARK_WIN = 6, GROUP_WIN = 2, GOLD_N = 4, GIFTS = [50, 100, 200, 500];
 const AFK_MS = 30000; // người tới lượt mà quá 30 giây không thao tác thì máy đánh thay hết lượt đó
 // tiền khởi đầu: mặc định, gấp đôi cho mọi người, hoặc mỗi người 80% được nhân đôi
@@ -1079,6 +1117,7 @@ const active = G => SEATS.filter(s => G.seats[s] && !G.pl[s].out);
 function levelCost(i, lv, G, s) {
   let c = SQ[i].base * LEVELS[lv].cost;
   if (G && s !== undefined && s >= 0 && hasSkill(G, s, 'boss')) c *= 0.85;
+  if (evOn(G, 'stimulus')) c *= 0.7;
   return r10(c);
 }
 const cumCost = (i, from, to, G, s) => { let v = 0; for (let k = from + 1; k <= to; k++) v += levelCost(i, k, G, s); return v; };
@@ -1086,7 +1125,7 @@ const invested = (G, i) => (SQ[i].t === 'tour' ? SQ[i].price : cumCost(i, 0, G.p
 const takeoverPrice = (G, i) => invested(G, i); // mua lại đúng bằng số vốn chủ đã bỏ ra
 const sellValue = (G, i) => invested(G, i) / 2;
 // điểm du lịch càng xa ô Bắt Đầu càng đắt, phí tham quan càng cao
-const tourPrice = (G, s, i) => r10(SQ[i].price * (hasSkill(G, s, 'tourist') ? 0.7 : 1));
+const tourPrice = (G, s, i) => r10(SQ[i].price * (hasSkill(G, s, 'tourist') ? 0.7 : 1) * (evOn(G, 'stimulus') ? 0.7 : 1));
 const ownsGroup = (G, s, g) => GROUP_IDX[g].every(i => G.props[i].owner === s);
 const countOwned = (G, s, list) => list.filter(i => G.props[i].owner === s).length;
 const groupsOwned = (G, s) => GROUPS.filter((g, k) => ownsGroup(G, s, k)).length;
@@ -1098,7 +1137,7 @@ function rentBase(G, i) {
   const q = SQ[i], p = G.props[i];
   if (p.owner < 0) return 0;
   // điểm du lịch: mỗi lượt khách ghé (kể cả chủ) phí tăng thêm 50% phí gốc
-  if (q.t === 'tour') return r10(q.rent * countOwned(G, p.owner, TOURS) * (1 + TOUR_UP * (p.visits || 0)) * (p.fest ? festMult(G, i) : 1) * (G.lift === i ? LIFT_MULT : 1));
+  if (q.t === 'tour') return r10(q.rent * countOwned(G, p.owner, TOURS) * (1 + TOUR_UP * (p.visits || 0)) * (p.fest ? festMult(G, i) : 1) * (G.lift === i ? LIFT_MULT : 1) * evRent(G, i));
   if (!p.lv || effectOn(G, i, 'plague')) return 0;
   let r = q.base * LEVELS[p.lv].rent;
   if (ownsGroup(G, p.owner, q.g)) r *= 2;
@@ -1107,6 +1146,7 @@ function rentBase(G, i) {
   if (G.gold.includes(i)) r *= 2;
   if (effectOn(G, i, 'blackout')) r *= 0.5;
   if (hasSkill(G, p.owner, 'rich')) r *= 1.2;
+  r *= evRent(G, i); // sự kiện chung: Quốc Khánh, Khủng Hoảng...
   return r10(r);
 }
 // hệ số lễ hội của ô i (thành phố hoặc điểm du lịch): mỗi lần tổ chức nhân đôi (Nàng Thơ sở hữu thì nhân ba), cộng dồn.
@@ -1252,6 +1292,10 @@ let setupColors = (c => (Array.isArray(c) && c.length === NS && c.every(v => Num
 const myColor = () => setupColors[0];
 let gameLen = store.get('typhu6.len', 'mid');
 let cashMode = store.get('typhu6.cash', 'luck');
+// sự kiện chung cả phòng: bật / tắt khi tạo ván (G.noEv = tắt; ván lưu từ bản cũ không có cờ này thì coi như bật)
+let evMode = store.get('typhu6.events', 'on');
+const EV_MODES = [{ key: 'on', label: '📢 Bật', hint: `Đầu các vòng ${EVENT_EVERY}, ${EVENT_EVERY * 2}, ${EVENT_EVERY * 3}... có ${EVENT_CHANCE * 100}% xảy ra sự kiện cho cả phòng (Quốc Khánh phí ×2, Khủng Hoảng, Tết lì xì...), kéo dài một vòng.` }, { key: 'off', label: 'Tắt', hint: 'Chơi như thường, không có sự kiện chung.' }];
+const evHint = k => (EV_MODES.find(x => x.key === k) || EV_MODES[0]).hint;
 // chơi online: chủ phòng cho mỗi người tự chọn nhân vật, hoặc chia ngẫu nhiên (G.charRand) — vào ván mới biết mình là ai
 let charMode = store.get('typhu6.charmode', 'pick');
 const CHAR_MODES = [{ key: 'pick', label: 'Tự chọn' }, { key: 'rand', label: '🎲 Ngẫu nhiên' }];
@@ -1269,7 +1313,7 @@ function freshGame(seats, maxRound, cash = 'luck') {
   const G = { phase: 'play', lift: -1, seats, pl: seats.map((x, s) => ({ pos: 0, cash: START_CASH, jail: 0, bus: false, laps: 0, rolls: 0, hold: freshHold(), out: false, char: chars[s] })),
     props: freshProps(), turn: 0, dice: 0, doubles: 0, again: false, step: 'roll', visit: null, pick: null, debt: null, spy: null,
     gold: shuffled(CITIES.length).slice(0, GOLD_N).map(k => CITIES[k]), deck: shuffled(CARDS.length), deckPos: 0, turnNo: 0, pot: 0,
-    round: 1, maxRound: maxRound || 0, winner: null, winHow: null, seq: 0 };
+    round: 1, maxRound: maxRound || 0, winner: null, winHow: null, seq: 0, noEv: evMode === 'off' };
   for (let s = 0; s < NS; s++) {
     if (!seats[s]) continue;
     const P = G.pl[s];
@@ -1315,9 +1359,10 @@ function who(s) {
 
 // ── hành động (chỉ bộ điều khiển chạy) ──
 const okTurn = (s, steps) => G && G.phase === 'play' && G.turn === s && steps.includes(G.step);
-const jailFee = s => (hasSkill(G, s, 'tourist') ? 0 : JAIL_FEE);
+const jailFee = s => (hasSkill(G, s, 'tourist') || evOn(G, 'amnesty') ? 0 : JAIL_FEE);
 const busFee = s => (hasSkill(G, s, 'tourist') ? 0 : BUS_FEE);
-const festFee = s => (hasSkill(G, s, 'diva') ? 0 : FEST_FEE);
+const casinoX = x => x * (evOn(G, 'casino') ? 2 : 1); // Đêm Hội Sòng Bài: tiền trả thưởng gấp đôi
+const festFee = s => (hasSkill(G, s, 'diva') || evOn(G, 'midautumn') ? 0 : FEST_FEE);
 // par: 'even' / 'odd' dùng một thẻ Chẵn/Lẻ, tung lại đến khi tổng đúng chẵn hoặc lẻ
 // tung theo lực (0..1, giữ nút ĐỔ): tổng điểm nghiêng về 2 + 10 × lực, vẫn còn may rủi
 // (mỗi cặp xúc xắc nặng theo hình chuông quanh tổng mong muốn); không có lực thì tung ngẫu nhiên
@@ -1376,7 +1421,7 @@ function moveBy(s, n, steps, how) {
   const passGo = n > 0 ? from + n >= N : n < 0 && from + n < 0;
   P.pos = to;
   let salary = 0;
-  if (passGo) { P.laps++; salary = r10(SALARY * (hasSkill(G, s, 'mc') ? 2 : 1)); P.cash += salary; }
+  if (passGo) { P.laps++; salary = r10(SALARY * (hasSkill(G, s, 'mc') ? 2 : 1) * (evOn(G, 'tet') ? 2 : 1)); P.cash += salary; }
   steps.push({ k: 'move', s, from, to, n, passGo, salary, how, fly: how === 'fly' });
   if (passGo && hasSkill(G, s, 'wizard') && Math.random() < 0.5) hex(s, steps);
   if (passGo && hasSkill(G, s, 'robin')) robin(s, steps);
@@ -1476,7 +1521,7 @@ function land(s, steps) {
       }
       break;
     case 'chance': drawCard(s, steps); break;
-    case 'tax': { const amt = hasSkill(G, s, 'detective') ? 0 : r10(netWorth(G, s) * TAX_RATE); if (amt > 0) charge(s, -1, amt, 'tax', steps); else steps.push({ k: 'taxFree', s }); break; }
+    case 'tax': { const ev = evOn(G, 'taxfree'), amt = hasSkill(G, s, 'detective') || ev ? 0 : r10(netWorth(G, s) * TAX_RATE * (evOn(G, 'audit') ? 2 : 1)); if (amt > 0) charge(s, -1, amt, 'tax', steps); else steps.push({ k: 'taxFree', s, ev }); break; }
     case 'casino': if (P.cash >= CASINO_BET) { G.step = 'casino'; steps.push({ k: 'casinoOffer', s }); } else steps.push({ k: 'casinoSkip', s }); break;
     case 'island': toIsland(s, steps); break;
     case 'festival': {
@@ -1745,7 +1790,7 @@ function doCasino(s, choice) {
   if (P.cash < CASINO_BET) return;
   const d = [rand6(), rand6()], sum = d[0] + d[1];
   const win = choice === 'even' ? sum % 2 === 0 : choice === 'odd' ? sum % 2 === 1 : d[0] === d[1];
-  const gain = win ? CASINO_BET * ((choice === 'double' ? 6 : 2) - 1) : -CASINO_BET;
+  const gain = win ? CASINO_BET * (casinoX(choice === 'double' ? 6 : 2) - 1) : -CASINO_BET;
   P.cash += gain;
   G.step = 'roll';
   finish(s, [{ k: 'casino', s, choice, d, win, gain }]);
@@ -1798,17 +1843,31 @@ function nextTurn(steps) {
       steps.push({ k: 'timeup', s: act[0], v: netWorth(G, act[0]) });
       return;
     }
+    roundEvent(steps);
   }
   G.turn = t;
   const P = G.pl[t];
   // Chủ Ngân Hàng: đầu lượt nhận lãi 1% tiền mặt
   if (hasSkill(G, t, 'banker')) { const amt = r10(P.cash * 0.01); if (amt > 0) { P.cash += amt; steps.push({ k: 'interest', s: t, amt }); } }
+  // sự kiện Ngân Hàng Chia Lãi
+  if (evOn(G, 'bank')) { const amt = r10(P.cash * EV_INTEREST); if (amt > 0) { P.cash += amt; steps.push({ k: 'interest', s: t, amt, ev: true }); } }
   if (P.jail) { if (P.jail > 3) { P.jail = 0; G.step = 'roll'; steps.push({ k: 'released', s: t }); } else G.step = 'jail'; }
   else if (P.bus) {
     if (P.cash < busFee(t)) { P.bus = false; G.step = 'roll'; steps.push({ k: 'busNoCash', s: t }); }
     else setPick(t, 'bus', pickOpts(t, 'bus'), true);
   }
   else G.step = 'roll';
+}
+// đầu vòng mới: sự kiện đang diễn ra thì kết thúc; vòng 5, 10, 15... thì có thể xảy ra sự kiện mới cho cả phòng
+function roundEvent(steps) {
+  if (G.ev) { steps.push({ k: 'evEnd', id: G.ev.id }); G.ev = null; }
+  if (G.noEv || G.round % EVENT_EVERY !== 0 || Math.random() >= EVENT_CHANCE) return;
+  const pool = EVENTS.filter(e => e.id !== G.evLast), e = pool[Math.floor(Math.random() * pool.length)];
+  G.ev = { id: e.id, round: G.round }; G.evLast = e.id;
+  steps.push({ k: 'event', id: e.id });
+  // tác dụng ngay lúc mở màn
+  if (e.id === 'tet') for (const s of active(G)) { G.pl[s].cash += TET_GIFT; steps.push({ k: 'evGift', s, amt: TET_GIFT }); }
+  if (e.id === 'amnesty') for (const s of active(G)) if (G.pl[s].jail) { G.pl[s].jail = 0; steps.push({ k: 'released', s, ev: true }); }
 }
 // tặng tiền: không cần tới lượt, chỉ cần cả hai còn trong ván
 function doGift(s, to, amt) {
@@ -2444,6 +2503,10 @@ function renderCenter() {
   const rt = $('roundTag'), on = !!G && G.phase !== 'lobby';
   rt.hidden = !on;
   if (on) rt.innerHTML = `Vòng <b>${Math.min(G.round, G.maxRound || G.round)}</b>${G.maxRound ? ' / ' + G.maxRound : ''}`;
+  // sự kiện chung đang diễn ra
+  const et = $('evTag'), e = on && G.phase === 'play' && G.ev ? evOf(G.ev.id) : null;
+  et.hidden = !e;
+  if (e) { et.style.setProperty('--c', e.col); et.innerHTML = `${e.icon} <span>${e.name}</span>`; et.title = e.text; }
 }
 // dải chủ đất, viền màu chủ, sao đất vàng, lễ hội, dịch bệnh / mất điện
 // chỉ vẽ lại khi trạng thái đất thật sự đổi (paint() gọi rất thường xuyên)
@@ -3236,7 +3299,7 @@ function moneyDelta(st) {
     case 'bankrupt': if (st.cash !== undefined) out.push([s, -st.cash]); if (st.paid) out.push([st.to, st.paid]); break;
     case 'rob': out.push([s, st.amt], [st.v, -st.amt]); break;
     case 'forceSell': out.push([st.o, st.amt]); break;
-    case 'luck': case 'homePay': case 'interest': case 'pot': case 'bonus': out.push([s, st.amt]); break;
+    case 'luck': case 'homePay': case 'interest': case 'pot': case 'bonus': case 'evGift': out.push([s, st.amt]); break;
     case 'gift': out.push([s, -st.amt], [st.to, st.amt]); break;
   }
   return out;
@@ -3281,6 +3344,7 @@ function show(ng, ev) {
   const base = shownSnap; shownSnap = snapOf(ng);
   const tok = ++animTok;
   animating = false;
+  if (evPeek) { clearTimeout(evPeek.t); evPeek = null; $('diceStage').classList.remove('hide'); } // đang xem thẻ sự kiện thì dọn đi
   $('gCard').innerHTML = ''; $('gSpy').innerHTML = ''; spyKey = '';
   if (ev && ev.type === 'start') {
     statusEv = `Bắt đầu! ${who(G.turn)} đi trước.`;
@@ -3439,7 +3503,7 @@ function wrapWords(s, max) {
   return out;
 }
 function showCard(card, g = $('gCard'), c = CX, cy = CY) {
-  const col = '#f39c12';
+  const col = card.col || '#f39c12';
   g.innerHTML = '';
   const cg = el('g', { class: 'cardpop' }, g);
   const lines = wrapWords(card.text, 26), h = 136 + lines.length * 20;
@@ -3447,10 +3511,41 @@ function showCard(card, g = $('gCard'), c = CX, cy = CY) {
   el('rect', { x: c - 148, y: cy - h / 2, width: 296, height: h, rx: 14, fill: '#fff', stroke: col, 'stroke-width': 3 }, cg);
   el('rect', { x: c - 148, y: cy - h / 2, width: 296, height: 40, rx: 14, fill: col }, cg);
   el('rect', { x: c - 148, y: cy - h / 2 + 24, width: 296, height: 16, fill: col }, cg);
-  txt(c, cy - h / 2 + 20, 'card-head', '❓  CƠ HỘI', cg);
+  txt(c, cy - h / 2 + 20, 'card-head', card.head || '❓  CƠ HỘI', cg);
   txt(c, cy - h / 2 + 70, 'card-icon', card.icon, cg);
   lines.forEach((ln, k) => txt(c, cy - h / 2 + 108 + k * 20, 'card-text', ln, cg));
   return cg;
+}
+// thẻ sự kiện chung giữa bàn (lúc xảy ra, hoặc khi bấm nhãn sự kiện trên thanh trên cùng)
+const EV_SCALE = 1.6, EV_MS = 5000, EV_PEEK_MS = 8000; // thẻ sự kiện to hơn thẻ Cơ Hội; thời gian hiện lúc xảy ra / lúc bấm xem lại
+function evCard(e) {
+  // phóng to quanh tâm bàn bằng một nhóm bọc ngoài (nhóm thẻ bên trong còn chạy hiệu ứng bật ra / thu vào)
+  $('gCard').innerHTML = '';
+  const wrap = el('g', { transform: `translate(${CX} ${CY}) scale(${EV_SCALE}) translate(${-CX} ${-CY})` }, $('gCard'));
+  const card = showCard({ ...e, head: '📢  SỰ KIỆN', text: `${e.name}: ${e.text}` }, wrap);
+  burst(CX, CY - 60, 14, [e.col, '#ffd23f', '#fff'], 90);
+  return card;
+}
+// bấm nhãn sự kiện: hiện lại thẻ như lúc xảy ra, tự tắt sau vài giây hoặc bấm lần nữa để tắt
+let evPeek = null;
+function peekEvent() {
+  const e = G && G.phase === 'play' && G.ev && evOf(G.ev.id);
+  if (!e) return;
+  // đang hoạt hoạ (thẻ Cơ Hội...) thì không chen thẻ vào giữa bàn, chỉ báo ngắn
+  if (busy()) { toast(`${e.icon} ${e.name}: ${e.text} (hết vòng này)`, 5000); playTap(); return; }
+  if (evPeek) { closePeek(); return; }
+  playCard(); $('diceStage').classList.add('hide');
+  const tok = animTok, card = evCard(e);
+  evPeek = { card, tok, t: setTimeout(closePeek, EV_PEEK_MS) };
+}
+function closePeek() {
+  if (!evPeek) return;
+  const { card, tok, t } = evPeek;
+  evPeek = null; clearTimeout(t);
+  // trong lúc xem đã có lượt mới (bàn đã dọn thẻ) thì thôi, khỏi đụng xúc xắc
+  if (tok !== animTok || !card.isConnected) return;
+  card.classList.add('out');
+  setTimeout(() => { card.remove(); if (tok === animTok) $('diceStage').classList.remove('hide'); }, 300);
 }
 // Gián Điệp đang chọn: hai thẻ úp cạnh nhau giữa bàn, người chọn chạm vào thẻ (mọi người cùng thấy)
 let spyKey = '';
@@ -3566,6 +3661,7 @@ function stepMs(st) {
     case 'pickCity': return 400; case 'pickSkip': return 250; case 'swap': return 1000; case 'forceSell': return 900; case 'destroy': return 900;
     case 'plague': case 'blackout': return 850; case 'cure': return 1000; case 'shield': return 850; case 'taxFree': return 700; case 'afk': return 900; case 'back': return 500; case 'sell': return st.auto ? 500 : 650; case 'tourUp': return 700; case 'bankrupt': return 1000;
     case 'won': case 'timeup': return 900;
+    case 'event': return EV_MS; case 'evEnd': return 700; case 'evGift': return 350;
     case 'chars': return 2600; case 'luck': return 1100; case 'pot': return 1300; case 'gift': return 1000;
     default: return 0;
   }
@@ -3667,7 +3763,7 @@ async function animateStep(st, tok) {
     case 'charmFree': { const [x, y] = tokenPt(s); floatText(x, y - 18, '🌹 miễn phí', '#0f766e', 1000, 18); flashSquare(st.i, '#0f766e'); playPop(); await sleep(ms); return; }
     case 'useFree': { const [x, y] = tokenPt(s); floatText(x, y - 18, '🎫 miễn phí', '#1e6fd8', 1000, 18); playPop(); await sleep(ms); return; }
     case 'bonus': { const [x, y] = tokenPt(s); floatText(x, y - 24, `🐒 +${fmt(st.amt)}`, '#2e9d4f', 900, 20); cardMoney(s, st.amt); playCoin(true); await sleep(ms); return; }
-    case 'interest': { const [x, y] = tokenPt(s); floatText(x, y - 24, `🏦 lãi +${fmt(st.amt)}`, '#2e9d4f', 1000, 20); cardMoney(s, st.amt); playCoin(true); await sleep(ms); return; }
+    case 'interest': { const [x, y] = tokenPt(s); floatText(x, y - 24, `🏦 lãi${st.ev ? ' sự kiện' : ''} +${fmt(st.amt)}`, '#2e9d4f', 1000, 20); cardMoney(s, st.amt); playCoin(true); await sleep(ms); return; }
     case 'homePay': { const [x, y] = centerOf(st.i); floatText(x, y - 20, `🔑 +${fmt(st.amt)}`, '#2e9d4f', 1000, 20); flashSquare(st.i, '#2e9d4f'); cardMoney(s, st.amt); playCoin(true); await sleep(ms); return; }
     case 'rentX2': { const [x, y] = centerOf(st.i); pow(x, y - 30, '🃏 ×2!', '#e8323c'); flashSquare(st.i, '#e8323c'); playWhoosh(0.3); await sleep(ms); return; }
     case 'useHalf': { const [x, y] = tokenPt(s); floatText(x, y - 18, '🏷️ giảm 50%', '#1e6fd8', 1000, 18); playPop(); await sleep(ms); return; }
@@ -3684,6 +3780,23 @@ async function animateStep(st, tok) {
       $('diceStage').classList.remove('hide');
       return;
     }
+    case 'event': {
+      // sự kiện chung: thẻ lớn giữa bàn, màu riêng của sự kiện
+      const e = evOf(st.id);
+      if (!e) { await sleep(ms); return; }
+      playParty(); $('diceStage').classList.add('hide');
+      const card = evCard(e);
+      renderCenter();
+      await sleep(ms - 350);
+      if (tok !== animTok) { $('diceStage').classList.remove('hide'); return; }
+      card.classList.add('out');
+      await sleep(300);
+      if (tok === animTok) card.remove();
+      $('diceStage').classList.remove('hide');
+      return;
+    }
+    case 'evEnd': { renderCenter(); playWhoosh(0.3); await sleep(ms); return; }
+    case 'evGift': { const [x, y] = tokenPt(s); floatText(x, y - 24, `🧧 +${fmt(st.amt)}`, '#da251d', 1100, 20); cardMoney(s, st.amt); playCoin(true); await sleep(ms); return; }
     case 'hold': { const [x, y] = tokenPt(s); floatText(x, y - 20, HOLD_INFO[st.h][0] + (st.full ? ' đủ ' + PARITY_MAX : ''), st.full ? '#6b7a90' : '#23324a', 1000, st.full ? 18 : 24); playPop(); await sleep(ms); return; }
     case 'build': {
       const [x, y] = bandPt(st.i), [tx, ty] = tokenPt(s);
@@ -3847,6 +3960,9 @@ function stepText(st) {
   switch (st.k) {
     case 'dice': return `${w} ${st.par ? `dùng thẻ ${st.par === 'even' ? 'Chẵn' : 'Lẻ'}, ` : ''}tung được ${st.d[0]} + ${st.d[1]}${st.dbl ? ' — đôi! 🎉' : ''}`;
     case 'pot': return `💰 ${w} nhận toàn bộ Quỹ Thuế ${fmt(st.amt)}!`;
+    case 'event': { const e = evOf(st.id); return e ? `📢 Sự kiện cả phòng — ${e.icon} ${e.name}: ${e.text} (hết vòng này)` : null; }
+    case 'evEnd': { const e = evOf(st.id); return e ? `${e.icon} Sự kiện ${e.name} đã kết thúc, mọi thứ trở lại bình thường` : null; }
+    case 'evGift': return `🧧 ${w} nhận lì xì Tết ${fmt(st.amt)}`;
     case 'chars': { const me = mySeat(); return me >= 0 && G.seats[me] ? `🎲 Nhân vật chia ngẫu nhiên — bạn là ${charOf(G.pl[me].char).name}: ${charOf(G.pl[me].char).skill}` : '🎲 Nhân vật đã được chia ngẫu nhiên'; }
     case 'luck': return `🍀 ${w} may mắn được nhân đôi tiền khởi đầu (+${fmt(st.amt)})!`;
     case 'gift': return `🎁 ${w} tặng ${other(st.to)} ${fmt(st.amt)}`;
@@ -3858,20 +3974,20 @@ function stepText(st) {
     case 'triple': return `${w} tung đôi ba lần liền — ra Côn Đảo!`;
     case 'stay': return st.left > 0 ? `${w} không ra đôi, ở lại Côn Đảo · còn ${st.left} lượt` : `${w} không ra đôi, lượt sau sẽ được thả`;
     case 'free': return st.how === 'pay' ? (st.fee ? `${w} nộp ${fmt(st.fee)} rời Côn Đảo` : `${w} rời Côn Đảo miễn phí`) : st.how === 'card' ? `${w} dùng thẻ ra tù` : `${w} tung được đôi — rời Côn Đảo! 🎉`;
-    case 'released': return `${w} đã ở Côn Đảo đủ 3 lượt, được thả`;
+    case 'released': return st.ev ? `🕊️ Đại Xá: ${w} được thả khỏi Côn Đảo` : `${w} đã ở Côn Đảo đủ 3 lượt, được thả`;
     case 'busStop': return `🚌 ${w} tới Bến Xe — lượt sau được đi tới ô bất kỳ`;
     case 'busGo': return `🚌 ${w} bắt xe đi ${nm(st.i)}${st.fee ? ' (vé ' + fmt(st.fee) + ')' : ''}`;
     case 'busNoCash': return `${w} không đủ tiền mua vé xe`;
     case 'offer': return SQ[st.i].t === 'tour' ? `${tourIcon(st.i)} ${w} đến ${nm(st.i)} — điểm du lịch chưa có chủ` : `${w} đến ${nm(st.i)} — đất trống, có thể mua`;
     case 'home': return st.can ? `${w} về ${nm(st.i)} của mình — có thể nâng cấp` : `${w} về thăm ${nm(st.i)} của mình`;
     case 'takeoverOffer': return `${w} có thể mua lại ${nm(st.i)} với giá ${fmt(takeoverPrice(G, st.i))}`;
-    case 'norent': return `${w} vào ${nm(st.i)} nhưng không mất phí${G.props[st.i] && effectOn(G, st.i, 'plague') ? ' (dịch bệnh)' : ''}`;
+    case 'norent': return `${w} vào ${nm(st.i)} nhưng không mất phí${G.props[st.i] && effectOn(G, st.i, 'plague') ? ' (dịch bệnh)' : SQ[st.i].t === 'tour' && evOn(G, 'storm') ? ' (bão, đóng cửa)' : ''}`;
     case 'charmFree': return `🌹 Lãng Tử ${w} được ${who(st.o)} mời vào chơi, khỏi trả ${fmt(st.amt)} ở ${nm(st.i)}`;
     case 'useFree': return `🎫 ${w} dùng vé miễn phí, khỏi trả ${fmt(st.amt)} ở ${nm(st.i)}`;
     case 'hack': return `💻 Hacker ${w} chiếm luôn ${nm(st.i)} của ${other(st.o)} — không mất đồng nào!`;
     case 'rob': if (st.robin) return `🏹 Hiệp Đạo ${w} lấy ${fmt(st.amt)} (8%) của ${other(st.v)} — người giàu nhất!`; return `🦹 ${w} cướp ${fmt(st.amt)} (15%) của ${other(st.v)}!`;
     case 'bonus': return `🐒 Ngộ Không ${w} ra đôi, nhận thưởng ${fmt(st.amt)}`;
-    case 'interest': return `🏦 Chủ Ngân Hàng ${w} nhận lãi ${fmt(st.amt)}`;
+    case 'interest': return st.ev ? `🏦 Ngân Hàng Chia Lãi: ${w} nhận ${fmt(st.amt)}` : `🏦 Chủ Ngân Hàng ${w} nhận lãi ${fmt(st.amt)}`;
     case 'homePay': return `🔑 ${w} về ${nm(st.i)} của mình, ngân hàng trả ${fmt(st.amt)}`;
     case 'rentX2': return `🃏 Thần Bài ${w} gặp may: ${who(st.payer)} phải trả phí gấp đôi ở ${nm(st.i)}`;
     case 'useHalf': return `🏷️ ${w} dùng phiếu giảm nửa phí ở ${nm(st.i)}`;
@@ -3912,7 +4028,7 @@ function stepText(st) {
       return `🔌 ${nm(st.i)} của ${other(st.o)} mất điện — phí còn một nửa 5 lượt`;
     case 'cure': return `${st.fx.includes('plague') ? '✨' : '💡'} ${w} ghé ${nm(st.i)} — ${st.fx.map(k => (k === 'plague' ? 'hết dịch bệnh' : 'có điện lại')).join(' và ')}, thu phí bình thường`;
     case 'shield': return `🛡️ Khiên của ${w} chặn được thẻ xấu nhắm vào ${nm(st.i)}`;
-    case 'taxFree': return `🕵️ Thám Tử ${w} được miễn thuế`;
+    case 'taxFree': return st.ev ? `🎁 Đang Miễn Thuế — ${w} không phải nộp thuế` : `🕵️ Thám Tử ${w} được miễn thuế`;
     case 'afk': return `⏳ ${w} vắng mặt quá ${AFK_MS / 1000} giây — máy đánh thay hết lượt này`;
     case 'back': return `✋ ${w} đã quay lại, tự chơi tiếp`;
     case 'tourUp': return `📈 Phí tham quan ${nm(st.i)} tăng lên ${fmt(st.amt)} (+${Math.round(TOUR_UP * 100 * st.v)}%)`;
@@ -4049,12 +4165,11 @@ function renderPlayers() {
     if (turn && !out) { const cd = document.createElement('span'); cd.className = 'cd'; cd.hidden = true; cd.title = 'Không thao tác thì máy đánh thay'; top.appendChild(cd); }
     d.appendChild(top);
     const cash = busy() && viewCash ? viewCash[s] : P.cash, fxv = cashFx[s], age = fxv ? Date.now() - fxv.t : 1e9;
-    const row1 = document.createElement('div'); row1.className = 'pl-row';
-    row1.innerHTML = `<span class="lbl">💵 <b>Tiền mặt</b></span><span class="cash${cash < 200 ? ' low' : ''}${age < 500 ? ' bump' : ''}">${out ? '☠️' : fmt(cash)}</span>`;
-    d.appendChild(row1);
-    const row2 = document.createElement('div'); row2.className = 'pl-row';
-    row2.innerHTML = `<span class="lbl">🏠 <b>Tài sản</b></span><span class="worth">${out ? 'phá sản' : fmt(shownWorth(s))}</span>`;
-    d.appendChild(row2);
+    // tiền mặt và tài sản chung một hàng
+    const row = document.createElement('div'); row.className = 'pl-row money';
+    row.innerHTML = out ? '<span class="m">☠️ <span class="worth">phá sản</span></span>'
+      : `<span class="m" title="Tiền mặt"><i class="ic">💵</i><span class="cash${cash < 200 ? ' low' : ''}${age < 500 ? ' bump' : ''}">${fmt(cash)}</span></span><span class="m mw" title="Tài sản"><i class="ic">🏠</i><span class="worth">${fmt(shownWorth(s))}</span></span>`;
+    d.appendChild(row);
     // tiến độ thắng: hiện đủ 4 cách thắng (2 hàng), nền tô theo phần trăm, còn thiếu 1 là viền vàng
     if (!out && G.phase === 'play') {
       const gs = document.createElement('div'); gs.className = 'pl-goals';
@@ -4159,7 +4274,7 @@ function renderStatus() {
       main = v.mode === 'buy' ? `Mua ${q.name}? Chọn cấp nhà — xây cao thì thu phí khách càng nhiều` : v.mode === 'upgrade' ? `Nâng cấp ${q.name}? Chọn cấp mới` : v.mode === 'tour' ? `Mua điểm du lịch ${q.name}?` : `Mua lại ${q.name} của ${who(G.props[v.i].owner)} với giá ${fmt(takeoverPrice(G, v.i))}?`;
     }
     else if (G.step === 'pick') main = PICK_TEXT[G.pick.kind] + (G.pick.kind === 'bus' && busFee(t) ? ` (vé ${fmt(busFee(t))})` : G.pick.kind === 'festival' && festFee(t) ? ` (${fmt(festFee(t))})` : '');
-    else if (G.step === 'casino') main = `Đặt ${fmt(CASINO_BET)}: Chẵn hay Lẻ (×2), hay Đôi (×6)?`;
+    else if (G.step === 'casino') main = `Đặt ${fmt(CASINO_BET)}: Chẵn hay Lẻ (×${casinoX(2)}), hay Đôi (×${casinoX(6)})?`;
     else if (G.step === 'spy') main = `🕵️ ${cap(nm)} lật được 2 thẻ Cơ Hội — chạm vào thẻ muốn dùng`;
     else if (G.step === 'debt') main = `${cap(nm)} cần ${fmt(G.debt.amt)} — chạm vào thành phố của mình để bán, hoặc chọn phá sản`;
   } else if (net.on && net.seat < 0) main = `Bạn đang xem · lượt của ${who(t)}`;
@@ -4210,9 +4325,9 @@ function renderActions() {
   } else if (G.step === 'pick') {
     if (G.pick.optional) box.appendChild(btn(G.pick.kind === 'bus' ? '🎲 Không đi xe, tung xúc xắc' : 'Bỏ qua', '', () => act('pickSkip')));
   } else if (G.step === 'casino') {
-    box.appendChild(btn('Chẵn ×2', '', () => act('casino', { choice: 'even' })));
-    box.appendChild(btn('Lẻ ×2', '', () => act('casino', { choice: 'odd' })));
-    box.appendChild(btn('Đôi ×6', 'warn', () => act('casino', { choice: 'double' })));
+    box.appendChild(btn(`Chẵn ×${casinoX(2)}`, '', () => act('casino', { choice: 'even' })));
+    box.appendChild(btn(`Lẻ ×${casinoX(2)}`, '', () => act('casino', { choice: 'odd' })));
+    box.appendChild(btn(`Đôi ×${casinoX(6)}`, 'warn', () => act('casino', { choice: 'double' })));
   } else if (G.step === 'spy') {
     G.spy.forEach((c, k) => box.appendChild(btn(`${CARDS[c].icon} Chọn thẻ ${k + 1}`, k ? '' : 'primary', () => act('spy', { k }))));
   } else if (G.step === 'debt') {
@@ -4716,7 +4831,7 @@ async function hostOnline(tries = 0, keep = null) {
     for (const x of G.seats) if (x && x.remote) { x.online = false; x.lostAt = Date.now(); x.vc = false; x.mic = false; delete x.pid; }
     if (G.phase === 'lobby') G.seats.forEach((x, k) => { if (x && x.remote) lobbyHold(n, k); });
     Object.assign(G.seats[0], { cid: myCid, online: true, vc: false, mic: false }); delete G.seats[0].pid;
-  } else G = Object.assign(freshGame([{ type: 'human', name: myName() || 'Chủ phòng', cid: myCid, online: true, char: myChar(), color: myColor() }, ...Array(NS - 1).fill(null)], roundsOf(gameLen), cashMode), { phase: 'lobby', charRand: charMode === 'rand' });
+  } else G = Object.assign(freshGame([{ type: 'human', name: myName() || 'Chủ phòng', cid: myCid, online: true, char: myChar(), color: myColor() }, ...Array(NS - 1).fill(null)], roundsOf(gameLen), cashMode), { phase: 'lobby', charRand: charMode === 'rand', noEv: evMode === 'off' });
   statusEv = '';
   paint();
   netSheet('🌐', keep ? 'Mở lại phòng' : 'Tạo phòng', keep ? `Đang mở lại phòng <b>${showCode(code)}</b>${DOTS}` : `Đang tạo phòng${DOTS}`, [[{ label: 'Huỷ', fn: () => leaveOnline() }]]);
@@ -4883,12 +4998,12 @@ function hostStart() {
   if (seats.filter(Boolean).length < 2) return;
   if (seats.some(x => x && x.remote && (!x.ready || x.online === false))) return; // mọi khách phải bấm Sẵn sàng (và đang kết nối)
   if (G.charRand) for (const x of seats) if (x) x.char = null; // nhân vật ngẫu nhiên: freshGame chia lại, không trùng nhau
-  Object.assign(G, freshGame(seats, roundsOf(gameLen), cashMode), { seq: G.seq });
+  Object.assign(G, freshGame(seats, roundsOf(gameLen), cashMode), { seq: G.seq, noEv: !!G.noEv }); // bật/tắt sự kiện theo phòng chờ
   $('lobbySheet').hidden = true;
   commit({ type: 'start', steps: startSteps(G) });
 }
 function hostRestart() {
-  Object.assign(G, freshGame(G.seats, roundsOf(gameLen), cashMode), { seq: G.seq });
+  Object.assign(G, freshGame(G.seats, roundsOf(gameLen), cashMode), { seq: G.seq, noEv: !!G.noEv });
   commit({ type: 'start', steps: startSteps(G) });
 }
 
@@ -5039,6 +5154,16 @@ function renderCharModeSeg(box) {
     renderCharModeSeg(box);
   }));
 }
+function renderEvSeg(box) {
+  box.innerHTML = '';
+  const cur = net.on && G && G.phase === 'lobby' ? (G.noEv ? 'off' : 'on') : evMode;
+  for (const M of EV_MODES) box.appendChild(btn(M.label, cur === M.key ? 'on' : '', () => {
+    evMode = M.key; store.set('typhu6.events', evMode);
+    if (net.on && net.host && G && G.phase === 'lobby') { G.noEv = M.key === 'off'; commit({ type: 'lobby' }); }
+    renderEvSeg(box);
+    if (box.id === 'suEv') $('suEvHint').textContent = M.hint;
+  }));
+}
 const cashHint = k => (CASHES.find(x => x.key === k) || CASHES[2]).hint;
 function openLobby() {
   if (!net.on) return;
@@ -5048,7 +5173,7 @@ function openLobby() {
     $('lbCodeTxt').textContent = showCode(net.code);
     $('lbNote').hidden = location.protocol !== 'file:';
     $('lbShare').hidden = !navigator.share;
-    renderLenSeg($('lbLen')); renderCashSeg($('lbCash')); renderCharModeSeg($('lbCharMode'));
+    renderLenSeg($('lbLen')); renderCashSeg($('lbCash')); renderEvSeg($('lbEv')); renderCharModeSeg($('lbCharMode'));
   }
   $('lbName').value = myName();
   $('lbName').placeholder = net.host ? 'Chủ phòng' : 'Người chơi';
@@ -5109,7 +5234,7 @@ function syncLobby(force) {
     $('lbReady').textContent = rd ? '↩️ Chưa xong' : '✅ Sẵn sàng';
     $('lbReady').classList.toggle('go', !rd); $('lbReady').classList.toggle('on', rd);
     $('lbReady').disabled = net.seat < 0;
-    $('lbGuestHint').innerHTML = rd ? `Đã sẵn sàng · chờ chủ phòng bắt đầu${DOTS}` : (G.charRand ? 'Chọn tên, màu xong' : 'Chọn tên, nhân vật, màu xong') + ' thì bấm <b>Sẵn sàng</b> — mọi người sẵn sàng rồi chủ phòng mới bắt đầu được.' + (G.charRand ? ' Nhân vật được chia <b>ngẫu nhiên</b> lúc vào ván 🎲' : '');
+    $('lbGuestHint').innerHTML = rd ? `Đã sẵn sàng · chờ chủ phòng bắt đầu${DOTS}` : (G.charRand ? 'Chọn tên, màu xong' : 'Chọn tên, nhân vật, màu xong') + ' thì bấm <b>Sẵn sàng</b> — mọi người sẵn sàng rồi chủ phòng mới bắt đầu được.' + (G.charRand ? ' Nhân vật được chia <b>ngẫu nhiên</b> lúc vào ván 🎲' : '') + (G.noEv ? ' Phòng này <b>tắt</b> sự kiện chung.' : ' Phòng này <b>bật</b> sự kiện chung 📢');
   }
 }
 $('lbReady').onclick = () => {
@@ -5373,6 +5498,7 @@ function renderSetup() {
   });
   renderLenSeg($('suLen')); $('suLenHint').textContent = lenHint(gameLen);
   renderCashSeg($('suCash')); $('suCashHint').textContent = cashHint(cashMode);
+  renderEvSeg($('suEv')); $('suEvHint').textContent = evHint(evMode);
   $('bStart').disabled = setup.filter(t => t !== 'off').length < 2;
 }
 function nameInput(k, placeholder) {
@@ -5427,8 +5553,11 @@ $('bLeave').onclick = () => leaveOnline();
     LEVELS.slice(1).map(L => `<tr><td>${L.icon} ${L.name}</td><td>${pct(L.cost)}</td><td>${pct(L.rent)}</td></tr>`).join('');
   $('rulesChars').innerHTML = CHARS.map(c => `<li><b>${c.name}</b>: ${c.skill}</li>`).join('');
   $('rulesCards').innerHTML = CARDS.map(c => `<li>${c.icon} ${c.text}</li>`).join('');
+  $('rulesEvHint').textContent = `Đầu các vòng ${EVENT_EVERY}, ${EVENT_EVERY * 2}, ${EVENT_EVERY * 3}... có ${EVENT_CHANCE * 100}% xảy ra một sự kiện áp dụng cho mọi người, kéo dài đúng vòng đó. Sự kiện đang diễn ra hiện trên thanh trên cùng, bấm vào để xem lại.`;
+  $('rulesEvents').innerHTML = EVENTS.map(e => `<li>${e.icon} <b>${e.name}</b>: ${e.text}</li>`).join('');
 })();
 $('bRules').onclick = () => { $('rulesSheet').hidden = false; };
+$('evTag').onclick = peekEvent;
 $('bBack').onclick = () => { comeBack(); playTap(); };
 // ⛶ toàn màn hình (trình duyệt không hỗ trợ, như Safari trên iPhone, thì ẩn nút)
 (function fullscreen() {
