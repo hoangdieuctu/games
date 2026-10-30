@@ -4562,7 +4562,22 @@ if (window.ResizeObserver) { const ro = new ResizeObserver(() => fit()); for (co
 const PEERJS_URL = 'https://cdn.jsdelivr.net/npm/peerjs@1.5.5/dist/peerjs.min.js';
 const ROOM_PREFIX = 'typhu6-vibe-';
 const JOIN_ORDER = [3, 1, 4, 2, 5]; // khách vào ngồi so le quanh bàn
-const freshNet = () => ({ on: false, host: false, code: null, peer: null, conn: null, conns: new Map(), seat: -1, timer: 0, left: false });
+const freshNet = () => ({ on: false, host: false, code: null, peer: null, conn: null, conns: new Map(), seat: -1, timer: 0, left: false, dup: false, seen: new Map(), heard: 0, hbAt: 0, hbOk: false, hbT: 0 });
+// nhiều STUN + TURN cả UDP lẫn TCP: hai bên khác mạng (4G, wifi công ty chặn UDP...) vẫn tìm được đường nối
+const PEER_OPTS = { debug: 0, config: { sdpSemantics: 'unified-plan', iceServers: [
+  { urls: ['stun:stun.l.google.com:19302', 'stun:stun.cloudflare.com:3478'] },
+  { urls: ['turn:eu-0.turn.peerjs.com:3478', 'turn:us-0.turn.peerjs.com:3478', 'turn:eu-0.turn.peerjs.com:3478?transport=tcp', 'turn:us-0.turn.peerjs.com:3478?transport=tcp'], username: 'peerjs', credential: 'peerjsp' },
+] } };
+// nhịp tim: WebRTC rớt mạng (đổi wifi/4G, NAT hết hạn...) thường không báo 'close' mà treo im lặng cả chục giây → bàn cờ đứng như lag.
+// Hai bên gửi {t:'hb'} mỗi HB_MS, nhận 'hb' thì đáp {t:'hbr'}; tin nào nhận được cũng tính là còn sống.
+// Khách quá HB_DEAD không nghe gì từ chủ phòng → tự nối lại; chủ phòng quá HB_DROP không nghe gì từ khách → coi như khách rớt.
+// Chỉ áp dụng với bên đã từng gửi nhịp tim (bản game cũ không có thì để nguyên như trước)
+const HB_MS = 2000, HB_DEAD = 8000, HB_DROP = 20000, LOBBY_GRACE = 15000;
+// ICE báo hỏng hẳn thì khỏi chờ nhịp tim
+function watchIce(c, fn) {
+  const pc = c.peerConnection;
+  if (pc) pc.addEventListener('iceconnectionstatechange', () => { if (pc.iceConnectionState === 'failed') fn(); });
+}
 let net = freshNet();
 const myCid = (() => {
   try { let v = sessionStorage.getItem('typhu6.cid'); if (!v) { v = randCode() + randCode(); sessionStorage.setItem('typhu6.cid', v); } return v; }
@@ -4637,7 +4652,7 @@ function saveHost() {
   try { sessionStorage.setItem('typhu6.host', JSON.stringify({ code: net.code, G: Object.assign({}, G, { seats: G.seats.map(x => x && Object.assign({}, x, { pid: undefined })) }) })); } catch (e) {}
 }
 function closeNet() {
-  clearTimeout(net.timer);
+  clearTimeout(net.timer); clearInterval(net.hbT);
   VC.wantMic = VC.joined && VC.mic; // nối lại xong thì tự mở mic lại
   voiceLeave();
   const bye = { t: 'bye' };
@@ -4680,12 +4695,24 @@ async function hostOnline(tries = 0, keep = null) {
     return;
   }
   if (net !== n) return;
-  const peer = n.peer = new Peer(ROOM_PREFIX + code, { debug: 0 });
+  const peer = n.peer = new Peer(ROOM_PREFIX + code, PEER_OPTS);
   let opened = false;
   peer.on('open', () => {
     if (net !== n) return;
     opened = true; hideNetSheet();
     G.seats[0].pid = peer.id;
+    clearInterval(n.hbT);
+    n.hbAt = Date.now();
+    n.hbT = setInterval(() => {
+      if (net !== n) return clearInterval(n.hbT);
+      const now = Date.now(), slept = now - n.hbAt > HB_DROP; // tab bị ẩn, bộ đếm giờ bị hãm: lần này đừng vội đá khách
+      n.hbAt = now;
+      for (const [c, at] of n.seen) {
+        if (slept) n.seen.set(c, now);
+        else if (now - at > HB_DROP && (c.hb || !n.conns.has(c))) { n.seen.delete(c); try { c.close(); } catch (e) {} if (c.lost) c.lost(); continue; }
+        if (c.open) try { c.send({ t: 'hb' }); } catch (e) {}
+      }
+    }, HB_MS);
     history.replaceState(null, '', location.pathname + location.search + '#room=' + code);
     if (G.phase === 'lobby') openLobby();
     else { syncLobby(); if (keep && keep.renamed) openLobby(); drive(null); }
@@ -4695,18 +4722,35 @@ async function hostOnline(tries = 0, keep = null) {
   peer.on('call', vcIncoming);
   peer.on('connection', c => {
     if (net !== n) return c.close();
-    c.on('data', d => { if (net === n) hostMsg(c, d); });
-    const lost = () => {
+    n.seen.set(c, Date.now());
+    c.on('data', d => {
+      if (net !== n) return;
+      if (n.seen.has(c)) n.seen.set(c, Date.now());
+      if (d && d.t === 'hb') { c.hb = true; try { c.send({ t: 'hbr' }); } catch (e) {} return; }
+      if (d && d.t === 'hbr') return;
+      hostMsg(c, d);
+    });
+    const lost = c.lost = () => {
+      n.seen.delete(c);
       if (net !== n || !n.conns.has(c)) return;
       const cid = n.conns.get(c);
       n.conns.delete(c);
       const s = G.seats.findIndex(x => x && x.cid === cid);
       if (s < 0 || [...n.conns.values()].includes(cid)) return;
-      if (G.phase === 'lobby') G.seats[s] = null;
+      if (G.phase === 'lobby') {
+        // phòng chờ: giữ ghế LOBBY_GRACE cho khách nối lại (mạng chập chờn, tải lại trang) — xoá ngay thì người khác vào chiếm mất ghế, khách mất Sẵn sàng
+        Object.assign(G.seats[s], { online: false, lostAt: Date.now(), vc: false, mic: false });
+        setTimeout(() => {
+          const x = G && G.seats[s];
+          if (net !== n || G.phase !== 'lobby' || !x || x.cid !== cid || x.online !== false || [...n.conns.values()].includes(cid)) return;
+          G.seats[s] = null; commit({ type: 'lobby' });
+        }, LOBBY_GRACE);
+      }
       else Object.assign(G.seats[s], { online: false, lostAt: Date.now(), vc: false, mic: false }); // chờ OFF_GRACE cho họ nối lại rồi máy mới đánh thay
       commit({ type: 'lobby' });
     };
     c.on('close', lost); c.on('error', lost);
+    c.on('open', () => watchIce(c, () => { try { c.close(); } catch (e) {} lost(); }));
   });
   peer.on('disconnected', () => { setTimeout(() => { if (net === n && !peer.destroyed && peer.disconnected) peer.reconnect(); }, 1500); });
   peer.on('error', err => {
@@ -4745,7 +4789,7 @@ function hostMsg(c, d) {
   if (d.t === 'hello') {
     const cid = String(d.cid || '').slice(0, 40), name = cleanName(d.name);
     if (!cid) return;
-    for (const [oc, ocid] of net.conns) if (ocid === cid && oc !== c) { net.conns.delete(oc); try { oc.close(); } catch (e) {} }
+    for (const [oc, ocid] of net.conns) if (ocid === cid && oc !== c) { net.conns.delete(oc); try { oc.send({ t: 'dup' }); } catch (e) {} setTimeout(() => { try { oc.close(); } catch (e) {} }, 500); }
     net.conns.set(c, cid);
     let s = G.seats.findIndex(x => x && x.cid === cid), joined = null;
     // giữa ván mà mở link trong tab mới (cid khác): trùng tên với ghế đang mất kết nối thì nhận lại ghế đó
@@ -4771,7 +4815,10 @@ function hostMsg(c, d) {
     else commit({ type: 'lobby' });
     return;
   }
-  const s = G.seats.findIndex(x => x && x.cid === net.conns.get(c));
+  // kết nối cũ đã bị thay (khách nối lại) hoặc chưa hello: cid rỗng sẽ khớp nhầm ghế máy (không có cid) → bỏ qua
+  const cid = net.conns.get(c);
+  if (!cid) return;
+  const s = G.seats.findIndex(x => x && x.cid === cid);
   if (s < 0) return;
   if (d.t === 'name' && G.phase === 'lobby') { const nm = cleanName(d.name); if (nm) { G.seats[s].name = nm; commit({ type: 'lobby' }); } }
   else if (d.t === 'char' && G.phase === 'lobby') { const ch = cleanChar(d.c); if (ch && freeChar(ch, s) === ch) { G.seats[s].char = ch; G.pl[s].char = ch; commit({ type: 'lobby' }); } }
@@ -4783,7 +4830,11 @@ function hostMsg(c, d) {
     netBroadcast({ t: 'vc', s, vc: !!d.on, mic: !!d.mic, pid: c.peer });
     renderPlayers(); syncVoice();
   }
-  else if (d.t === 'bye') { Object.assign(G.seats[s], { online: false, lostAt: Date.now(), vc: false, mic: false }); }
+  else if (d.t === 'bye') {
+    // khách bấm rời phòng: ở phòng chờ thì trả ghế ngay, không giữ chỗ
+    if (G.phase === 'lobby') { net.conns.delete(c); G.seats[s] = null; commit({ type: 'lobby' }); }
+    else Object.assign(G.seats[s], { online: false, lostAt: Date.now(), vc: false, mic: false });
+  }
   else if (d.t === 'back') doBack(s);
   else if (d.t === 'gift') { if (Number.isInteger(d.to) && Number.isInteger(d.amt)) doGift(s, d.to, d.amt); }
   else if (d.t === 'ping') {
@@ -4808,7 +4859,7 @@ function hostStart() {
   const fill = $('lbFill').checked;
   const seats = G.seats.map((x, k) => x ? Object.assign({}, x) : fill ? { type: 'bot', name: 'Máy ' + COLORS[k].name, char: null } : null);
   if (seats.filter(Boolean).length < 2) return;
-  if (seats.some(x => x && x.remote && !x.ready)) return; // mọi khách phải bấm Sẵn sàng
+  if (seats.some(x => x && x.remote && (!x.ready || x.online === false))) return; // mọi khách phải bấm Sẵn sàng (và đang kết nối)
   Object.assign(G, freshGame(seats, roundsOf(gameLen), cashMode), { seq: G.seq });
   $('lobbySheet').hidden = true;
   commit({ type: 'start', steps: startSteps(G) });
@@ -4832,7 +4883,7 @@ async function joinOnline(code, again = 0) {
     if (net !== n || n.left || again >= REJOIN_MAX) return false;
     netSheet('🌐', 'Mất kết nối', `Đang nối lại với chủ phòng (lần ${again + 1})${DOTS}`, [[{ label: 'Huỷ', fn: () => leaveOnline() }]]);
     clearTimeout(n.timer);
-    n.timer = setTimeout(() => { if (net === n) joinOnline(code, again + 1); }, REJOIN_MS);
+    n.timer = setTimeout(() => { if (net === n) joinOnline(code, again + 1); }, again ? REJOIN_MS : 800); // vừa rớt: thử lại ngay
     return true;
   };
   try { await loadPeerJs(); } catch (e) {
@@ -4840,7 +4891,7 @@ async function joinOnline(code, again = 0) {
     return;
   }
   if (net !== n) return;
-  const peer = n.peer = new Peer({ debug: 0 });
+  const peer = n.peer = new Peer(PEER_OPTS);
   n.timer = setTimeout(() => {
     if (net === n && !n.conn && !rejoin()) netFail('Không nối được', 'Không nối được với máy chủ phòng. Có thể mạng của một trong hai bên chặn kết nối trực tiếp — thử đổi sang wifi khác hoặc 4G nhé.', retry);
   }, 20000);
@@ -4853,18 +4904,36 @@ async function joinOnline(code, again = 0) {
       clearTimeout(n.timer);
       n.conn = c;
       c.send({ t: 'hello', cid: myCid, name: myName(), char: myChar(), color: myColor() });
+      n.heard = n.hbAt = Date.now();
+      n.hbT = setInterval(() => {
+        if (net !== n || n.conn !== c) return clearInterval(n.hbT);
+        const now = Date.now();
+        if (now - n.hbAt > HB_DEAD) n.heard = now; // tab vừa bị ẩn, bộ đếm giờ bị hãm: cho thêm thời gian, đừng vội nối lại
+        n.hbAt = now;
+        if (n.hbOk && now - n.heard > HB_DEAD) { try { c.close(); } catch (e) {} lost(); return; }
+        netSend({ t: 'hb' });
+      }, HB_MS);
+      watchIce(c, () => { try { c.close(); } catch (e) {} lost(); });
     });
-    c.on('data', d => { if (net === n && n.conn === c) guestMsg(d); });
+    c.on('data', d => {
+      if (net !== n || n.conn !== c) return;
+      n.heard = Date.now();
+      if (d && d.t === 'hb') { netSend({ t: 'hbr' }); return; }
+      if (d && d.t === 'hbr') { n.hbOk = true; return; }
+      guestMsg(d);
+    });
     const lost = () => {
       if (net !== n || n.conn !== c) return;
       n.conn = null;
       if (G) paint();
       if (n.left) { netFail('Mất kết nối', 'Chủ phòng đã đóng phòng.', null); return; }
+      if (n.dup) { netFail('Đã vào từ nơi khác', 'Bạn vừa vào phòng này từ một tab hoặc cửa sổ khác, nên tab này dừng lại.', retry); return; }
       again = 0; // vừa nối được rồi mới rớt: đếm lại từ đầu
       if (!rejoin()) netFail('Mất kết nối', 'Mất kết nối với chủ phòng. Có thể chủ phòng đã tắt game hoặc mạng bị ngắt.', retry);
     };
     c.on('close', lost); c.on('error', lost);
   });
+  peer.on('disconnected', () => { setTimeout(() => { if (net === n && !peer.destroyed && peer.disconnected) peer.reconnect(); }, 1500); });
   peer.on('error', err => {
     if (net !== n || n.conn) return;
     clearTimeout(n.timer);
@@ -4874,6 +4943,19 @@ async function joinOnline(code, again = 0) {
     else netFail('Không vào được phòng', 'Không kết nối được máy chủ tìm bạn. Kiểm tra mạng rồi thử lại nhé.', retry);
   });
 }
+// tab hiện lại / mạng vừa đổi (wifi ↔ 4G): kiểm tra kết nối ngay, khách cho chủ phòng 4 giây để đáp, im lặng thì nối lại luôn
+function netWake() {
+  if (!net.on) return;
+  const p = net.peer;
+  if (p && !p.destroyed && p.disconnected) try { p.reconnect(); } catch (e) {}
+  if (net.host || !net.conn) return;
+  const now = Date.now();
+  net.hbAt = now; net.heard = Math.max(net.heard, now - HB_DEAD + 4000);
+  netSend({ t: 'hb' });
+}
+document.addEventListener('visibilitychange', () => { if (!document.hidden) netWake(); });
+window.addEventListener('online', netWake);
+window.addEventListener('pageshow', e => { if (e.persisted) netWake(); });
 function validState(g) {
   return g && typeof g === 'object' && Array.isArray(g.seats) && g.seats.length === NS && Array.isArray(g.pl) && g.pl.length === NS &&
     g.pl.every(p => p && Number.isInteger(p.pos) && p.pos >= 0 && p.pos < N && typeof p.cash === 'number' && Number.isInteger(p.jail) && p.hold && typeof p.hold === 'object' && (typeof p.char === 'string' || p.char === null)) &&
@@ -4901,6 +4983,7 @@ function guestMsg(d) {
   }
   else if (d.t === 'full') { const c = net.code; net.conn = null; netFail('Phòng đã đủ người', 'Phòng này đã có 6 người chơi rồi.', () => joinOnline(c)); }
   else if (d.t === 'bye') net.left = true;
+  else if (d.t === 'dup') net.dup = true;
   else if (d.t === 'emo') { if (Number.isInteger(d.s) && d.s !== net.seat) showEmote(d.s, d.e); }
   else if (d.t === 'ping') { if (Number.isInteger(d.s) && d.s !== net.seat) showPing(d.s, d.i); }
   else if (d.t === 'vc') {
@@ -4974,9 +5057,10 @@ function syncLobby(force) {
     $('lbStart').hidden = G.phase !== 'lobby';
     $('lbFill').parentElement.hidden = G.phase !== 'lobby';
     for (const id of ['lbLen', 'lbCash']) { $(id).hidden = G.phase !== 'lobby'; $(id).previousElementSibling.hidden = G.phase !== 'lobby'; }
-    $('lbStart').disabled = humans < 2 || !allReady;
+    const offN = guests.filter(x => x.online === false).length;
+    $('lbStart').disabled = humans < 2 || !allReady || offN > 0;
     $('lbHint').textContent = G.phase !== 'lobby' ? 'Ván đang chơi. Người vào sau sẽ ngồi vào ghế máy (nếu còn), không thì xem.'
-      : humans < 2 ? 'Cần ít nhất 2 người để bắt đầu.' : !allReady ? `Chờ ${guests.length - readyN} người bấm Sẵn sàng (${readyN}/${guests.length}).` : `${humans} người đã sẵn sàng.`;
+      : humans < 2 ? 'Cần ít nhất 2 người để bắt đầu.' : offN ? `Chờ ${offN} người đang nối lại…` : !allReady ? `Chờ ${guests.length - readyN} người bấm Sẵn sàng (${readyN}/${guests.length}).` : `${humans} người đã sẵn sàng.`;
     $('lbCancel').textContent = G.phase === 'lobby' ? 'Huỷ phòng' : 'Đóng';
   } else if (G.phase === 'lobby') {
     const me = net.seat >= 0 ? G.seats[net.seat] : null, rd = !!(me && me.ready);
