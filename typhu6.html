@@ -4677,6 +4677,16 @@ function leaveOnline() {
 }
 
 // ── chủ phòng ──
+// phòng chờ: khách mất kết nối thì giữ ghế LOBBY_GRACE cho họ nối lại (mạng chập chờn, tải lại trang) — xoá ngay thì
+// người khác vào chiếm mất ghế, khách mất Sẵn sàng; quá hạn mà chưa quay lại thì trả ghế (không thì kẹt, chủ phòng không bắt đầu được)
+function lobbyHold(n, s) {
+  const cid = G.seats[s].cid;
+  setTimeout(() => {
+    const x = G && G.seats[s];
+    if (net !== n || G.phase !== 'lobby' || !x || x.cid !== cid || x.online !== false || [...n.conns.values()].includes(cid)) return;
+    G.seats[s] = null; commit({ type: 'lobby' });
+  }, LOBBY_GRACE);
+}
 // keep = { code, G }: chủ phòng vừa tải lại trang → mở lại phòng cùng mã, giữ nguyên ván; khách tự nối lại và về đúng ghế
 async function hostOnline(tries = 0, keep = null) {
   const code = keep ? keep.code : randCode();
@@ -4685,6 +4695,7 @@ async function hostOnline(tries = 0, keep = null) {
   if (keep) {
     G = keep.G;
     for (const x of G.seats) if (x && x.remote) { x.online = false; x.lostAt = Date.now(); x.vc = false; x.mic = false; delete x.pid; }
+    if (G.phase === 'lobby') G.seats.forEach((x, k) => { if (x && x.remote) lobbyHold(n, k); });
     Object.assign(G.seats[0], { cid: myCid, online: true, vc: false, mic: false }); delete G.seats[0].pid;
   } else G = Object.assign(freshGame([{ type: 'human', name: myName() || 'Chủ phòng', cid: myCid, online: true, char: myChar(), color: myColor() }, ...Array(NS - 1).fill(null)], roundsOf(gameLen), cashMode), { phase: 'lobby' });
   statusEv = '';
@@ -4737,16 +4748,8 @@ async function hostOnline(tries = 0, keep = null) {
       n.conns.delete(c);
       const s = G.seats.findIndex(x => x && x.cid === cid);
       if (s < 0 || [...n.conns.values()].includes(cid)) return;
-      if (G.phase === 'lobby') {
-        // phòng chờ: giữ ghế LOBBY_GRACE cho khách nối lại (mạng chập chờn, tải lại trang) — xoá ngay thì người khác vào chiếm mất ghế, khách mất Sẵn sàng
-        Object.assign(G.seats[s], { online: false, lostAt: Date.now(), vc: false, mic: false });
-        setTimeout(() => {
-          const x = G && G.seats[s];
-          if (net !== n || G.phase !== 'lobby' || !x || x.cid !== cid || x.online !== false || [...n.conns.values()].includes(cid)) return;
-          G.seats[s] = null; commit({ type: 'lobby' });
-        }, LOBBY_GRACE);
-      }
-      else Object.assign(G.seats[s], { online: false, lostAt: Date.now(), vc: false, mic: false }); // chờ OFF_GRACE cho họ nối lại rồi máy mới đánh thay
+      Object.assign(G.seats[s], { online: false, lostAt: Date.now(), vc: false, mic: false }); // chờ OFF_GRACE cho họ nối lại rồi máy mới đánh thay
+      if (G.phase === 'lobby') lobbyHold(n, s);
       commit({ type: 'lobby' });
     };
     c.on('close', lost); c.on('error', lost);
