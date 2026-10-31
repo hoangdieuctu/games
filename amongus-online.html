@@ -373,7 +373,7 @@ button:disabled { opacity: .35; cursor: default; }
       <li><b>Kẻ Giả Mạo</b> 🔪: giả vờ làm nhiệm vụ, <b>giết</b> khi ở gần người khác và không ai nhìn thấy (hồi 25 giây), chui <b>ống thông gió</b> để đi nhanh, <b>phá hoại</b>: tắt đèn (mọi người chỉ thấy rất gần) hoặc lò phản ứng (phi hành đoàn phải tới Lò sửa trong 30 giây, không kịp là thua).</li>
       <li><b>Họp</b>: mọi người bàn luận rồi bỏ phiếu. Ai nhiều phiếu nhất bị <b>đẩy ra ngoài</b> (hoà phiếu hoặc phiếu trắng nhiều nhất thì không ai bị đẩy). Người chơi máy nhớ ai đứng cạnh xác, ai chui ống gió, ai giết trước mắt họ — và sẽ tố cáo trong cuộc họp. Bạn bấm <b>📢</b> cạnh tên ai để tố cáo người đó, bấm <b>✔</b> để bỏ phiếu.</li>
       <li>Chết rồi vẫn thành <b>ma</b> 👻: đi xuyên tường, làm nốt nhiệm vụ giúp đồng đội, nhưng không báo, không bỏ phiếu được.</li>
-      <li><b>Online</b> 🌐: chủ phòng tạo phòng, gửi mã/link cho bạn bè; ghế trống có thể cho máy chơi. Bấm <b>🎤</b> để voice chat: phòng chờ và cuộc họp mọi người nghe nhau; lúc đang chơi tuỳ phòng — <i>im lặng</i> hoặc <i>nghe người ở gần</i>. Hồn ma chỉ nói chuyện được với hồn ma. Ai rớt mạng thì máy chơi thay tới khi họ vào lại.</li>
+      <li><b>Online</b> 🌐: chủ phòng tạo phòng, gửi mã/link cho bạn bè; ghế trống có thể cho máy chơi. Bấm <b>🎤</b> để voice chat: phòng chờ và cuộc họp mọi người nghe nhau; lúc đang chơi tuỳ phòng — <i>im lặng</i> hoặc <i>nghe người ở gần</i>. Hồn ma vẫn nghe được mọi người, nhưng chỉ hồn ma nghe được hồn ma. Ai rớt mạng thì máy chơi thay tới khi họ vào lại.</li>
       <li>Điều khiển: kéo nửa trái màn hình (cần ảo) hoặc <b>WASD</b> / mũi tên. Phím tắt hiện ở góc mỗi nút: <b>E</b> dùng/sửa/họp, <b>R</b> báo, <b>Q</b> giết, <b>V</b> ống gió (trong ống: ← → chuyển ống), <b>F</b> phá hoại (rồi <b>1</b> tắt đèn / <b>2</b> lò phản ứng), <b>M</b> bản đồ, <b>T</b> bật/tắt mic.</li>
     </ol>
     <button class="go" id="bRulesOk">Đã hiểu</button>
@@ -1923,7 +1923,7 @@ function syncVchip() {
   const c = $('vchip');
   const show = net.on && VC.joined && (phase === 'play' || phase === 'meeting');
   c.hidden = !show; if (!show) return;
-  c.textContent = me.dead ? '👻 Chỉ hồn ma nghe nhau' : phase === 'meeting' ? (VC.mic ? '🎤 Cả phòng đang nghe bạn' : '🔈 Đang nghe cả phòng') : S.voice === 'near' ? '🔉 Chỉ nghe người ở gần' : '🔇 Im lặng — nói khi họp';
+  c.textContent = me.dead ? '👻 Bạn nghe mọi người · chỉ hồn ma nghe bạn' : phase === 'meeting' ? (VC.mic ? '🎤 Cả phòng đang nghe bạn' : '🔈 Đang nghe cả phòng') : S.voice === 'near' ? '🔉 Chỉ nghe người ở gần' : '🔇 Im lặng — nói khi họp';
   $('bVoice').classList.toggle('hush', phase === 'play' && !me.dead && S.voice !== 'near');
 }
 function meterOn(key, st) {
