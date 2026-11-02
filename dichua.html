@@ -68,6 +68,22 @@ input, textarea { font: inherit; user-select: text; -webkit-user-select: text; }
   display: grid; place-items: center; border: 1.5px solid #fbe6b8;
 }
 
+/* ── giảng đường ── */
+#lect {
+  position: fixed; z-index: 6; left: 50%; top: max(64px, calc(env(safe-area-inset-top) + 56px)); transform: translateX(-50%);
+  width: min(640px, calc(100vw - 24px)); background: rgba(24, 10, 4, .92); border: 1px solid rgba(228, 176, 74, .55);
+  border-radius: 14px; box-shadow: 0 14px 40px rgba(0,0,0,.5); color: #fbe6b8; overflow: hidden;
+}
+#lect .lh { display: flex; justify-content: space-between; padding: 8px 12px; font-weight: 700; font-size: 13px; background: rgba(120, 40, 14, .45); }
+#lect .lv { position: relative; aspect-ratio: 16 / 9; background: #000; }
+#lect .lv iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+#lect .lw { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; gap: 6px; padding: 12px; background: radial-gradient(circle at 50% 40%, #3a2312, #120804); }
+#lect .lt { font-size: 14px; } #lect .lc { font: 800 clamp(36px, 9vw, 58px) 'Be Vietnam Pro', sans-serif; color: #ffd98a; letter-spacing: .04em; }
+#lect .ln { font-size: 12.5px; opacity: .85; font-family: 'Noto Serif', serif; }
+#lect .li { padding: 8px 12px 10px; font-size: 13px; line-height: 1.45; } #lect .li b { display: block; color: #ffe2a0; }
+#lect .li span { font-size: 12px; opacity: .85; } #lect a { color: #ffd98a; }
+#lect.min .lv { height: 0; aspect-ratio: auto; } #lect.min .li span { display: none; }
+
 /* ── bản đồ nhỏ ── */
 #mini {
   position: fixed; z-index: 5; left: max(12px, env(safe-area-inset-left)); bottom: max(14px, env(safe-area-inset-bottom));
@@ -326,6 +342,7 @@ textarea.field { resize: none; min-height: 76px; line-height: 1.45; }
 </div>
 
 <canvas id="mini" width="240" height="222" hidden title="Bản đồ · chạm để xem hành trình"></canvas>
+<div id="lect" hidden><div class="lh"><span>🎧 Giảng đường · Pháp thoại</span><span id="lectCount">👥 1/40</span></div><div class="lv"></div><div class="li"></div></div>
 <div id="actions"></div>
 <div id="toasts"></div>
 <div id="zen" hidden><div class="breath" id="breath"><div><b id="bTxt">Hít vào</b><span id="bCnt">0 hơi thở</span></div></div></div>
@@ -1434,10 +1451,11 @@ const SCENES = {
   out: { name: null, w: 2600, h: 2400 },
   hall: { name: 'Trong Chính điện', w: 1000, h: 700 },
   shop: { name: 'Nhà khách · Quầy lễ', w: 760, h: 560 },
+  lecture: { name: 'Giảng đường', w: 900, h: 640 },
 };
-const SCENE_IDS = ['out', 'hall', 'shop'];
+const SCENE_IDS = ['out', 'hall', 'shop', 'lecture'];
 // vật cản: hình chữ nhật [x0,y0,x1,y1] và hình tròn [x,y,r]
-const COL = { out: { rects: [], circles: [] }, hall: { rects: [], circles: [] }, shop: { rects: [], circles: [] } };
+const COL = { out: { rects: [], circles: [] }, hall: { rects: [], circles: [] }, shop: { rects: [], circles: [] }, lecture: { rects: [], circles: [] } };
 (() => {
   const o = COL.out;
   o.rects.push(
@@ -1447,6 +1465,7 @@ const COL = { out: { rects: [], circles: [] }, hall: { rects: [], circles: [] },
     [150, 2105, 1060, 2140], [1540, 2105, 2450, 2140],                    // tường bao phía nam
     [1060, 2060, 1150, 2140], [1200, 2060, 1400, 2140], [1450, 2060, 1540, 2140], // thân cổng tam quan (2 cửa bên mở)
     [430, 1760, 690, 1870],     // nhà khách
+    [190, 1120, 470, 1238],     // giảng đường
     [560, 1330, 735, 1408],     // gác chuông (để chừa chỗ đứng kéo chày phía trước)
     [840, 720, 1760, 1052],     // chính điện
     [1218, 448, 1382, 512],     // bảo tháp
@@ -1463,6 +1482,7 @@ const COL = { out: { rects: [], circles: [] }, hall: { rects: [], circles: [] },
   h.rects.push([0, 0, 1000, 330], [0, 0, 70, 700], [930, 0, 1000, 700], [0, 642, 455, 700], [545, 642, 1000, 700], [0, 680, 1000, 700],
     [372, 322, 628, 366], [176, 380, 266, 406], [745, 380, 828, 410], [828, 542, 874, 578]);
   h.circles.push([330, 348, 16], [670, 348, 16]);
+  COL.lecture.rects.push([0, 0, 900, 324], [0, 0, 62, 640], [838, 0, 900, 640], [0, 602, 400, 640], [500, 602, 900, 640], [0, 632, 900, 640]);
   const s = COL.shop;
   s.rects.push([0, 0, 760, 282], [0, 0, 60, 560], [700, 0, 760, 560], [0, 502, 330, 560], [430, 502, 760, 560], [0, 545, 760, 560],
     [228, 300, 532, 336], [586, 430, 664, 470]);
@@ -1542,6 +1562,8 @@ const DOORS = [
   { from: 'hall', r: [455, 652, 545, 700], ap: { x: 500, y: 664 }, to: 'out', spawn: { x: 1300, y: 1104 } },
   { from: 'out', r: [515, 1868, 605, 1886], ap: { x: 560, y: 1880 }, to: 'shop', spawn: { x: 380, y: 470, back: true }, label: 'Nhà khách' },
   { from: 'shop', r: [330, 512, 430, 560], ap: { x: 380, y: 524 }, to: 'out', spawn: { x: 560, y: 1918 } },
+  { from: 'out', r: [295, 1238, 365, 1258], ap: { x: 330, y: 1250 }, to: 'lecture', spawn: { x: 450, y: 584, back: true }, label: 'Giảng đường' },
+  { from: 'lecture', r: [400, 612, 500, 640], ap: { x: 450, y: 620 }, to: 'out', spawn: { x: 330, y: 1292 } },
 ];
 const inRect = (x, y, r) => x >= r[0] && x <= r[2] && y >= r[1] && y <= r[3];
 
@@ -1551,6 +1573,7 @@ function zoneAt(x, y) {
   if (y > 2150) return 'Đường làng';
   if (y > 2040 && x > 1040 && x < 1560) return 'Cổng Tam Quan';
   if (y > 1720) return x < 860 ? 'Nhà khách · Quầy lễ' : x > 1600 ? 'Hồ sen' : 'Sân ngoài';
+  if (y > 1080 && y < 1330 && x < 520) return 'Giảng đường';
   if (y > 1080) return x < 860 ? 'Gác chuông' : x > 1680 ? 'Cây Bồ Đề' : 'Sân chùa';
   if (y > 700 && x > 820 && x < 1780) return 'Trước Chính điện';
   return 'Vườn tháp';
@@ -1585,6 +1608,10 @@ for (let i = 0; i < 9; i++) creatures.push(makeFish(i < 6 ? 'koi' : 'gold'));
 // ─────────────────────────── NPC ───────────────────────────
 const MONK = { c: '#c98a2e', d: '#9a6418', p: '#8a5a1e' };
 const POI = [[1000, 1300], [1600, 1300], [1500, 1600], [900, 1640], [1300, 1800], [1100, 2010], [1520, 2010], [1700, 1620], [820, 1200], [1300, 1150], [1560, 1720]];
+// 40 bồ đoàn: 5 hàng × 8, chừa lối đi giữa
+const CUSHIONS = [];
+for (let r = 0; r < 5; r++) for (let c = 0; c < 8; c++) CUSHIONS.push({ x: 150 + c * 80 + (c >= 4 ? 40 : 0), y: 382 + r * 50 });
+const NPC_SEATS = [2, 5, 9, 14, 21, 27];
 const npcs = [
   { id: 'su', scene: 'out', name: 'Sư thầy', look: { robe: MONK, monk: true, skin: SKIN }, x: 1500, y: 1300, dir: -1, ph: 0, pose: 'sweep', bow: 0, ai: 'sweep', t: 3, tx: 1500, ty: 1300, said: -99 },
   { id: 'ba', scene: 'out', name: 'Bà cụ', look: { robe: ROBES[0], hair: 1, skin: '#e8bf98', hairC: '#bdb5aa' }, x: 900, y: 1950, dir: 1, ph: 0, pose: 'walk', bow: 0, ai: 'pilgrim', st: 0, t: -1, bs: .96 },
@@ -1594,6 +1621,7 @@ const npcs = [
   { id: 'ong', scene: 'out', name: 'Ông Tư', look: { robe: ROBES[2], hair: 2, skin: '#e8bf98', hairC: '#9a948a' }, x: 1612, y: 1822, dir: 1, ph: 0, pose: 'stand', bow: 0, ai: 'pond', t: 5, bs: .98 },
   { id: 'pt', scene: 'hall', name: 'Phật tử', look: { robe: ROBES[2], hair: 1, skin: SKIN, hairC: '#3a2a20' }, x: 400, y: 452, dir: 1, back: true, ph: 0, pose: 'kneelbow', bow: 0, ai: 'kneelpray', t: 0 },
   { id: 'su2', scene: 'hall', name: 'Thầy trụ trì', look: { robe: MONK, monk: true, skin: SKIN }, x: 600, y: 452, dir: 1, back: true, ph: 0, pose: 'kneel', bow: 0, ai: 'chantnpc', t: 6 },
+  ...NPC_SEATS.map((si, i) => ({ id: 'ng' + i, scene: 'lecture', name: 'Phật tử', look: { robe: ROBES[[0, 1, 2, 5, 0, 2][i]], hair: i % 3, skin: i % 2 ? SKIN : '#e8bf98', hairC: i === 3 ? '#9a948a' : '#2a1c14' }, x: CUSHIONS[si].x, y: CUSHIONS[si].y, dir: 1, back: true, ph: 0, pose: 'sit', bow: 0, ai: 'listener', t: 0 })),
   { id: 'lan', scene: 'shop', name: 'Cô Lan', look: { robe: ROBES[1], hair: 1, skin: SKIN, hairC: '#2a1c14' }, x: 380, y: 296, dir: 1, ph: 0, pose: 'stand', bow: 0, ai: 'vendor', t: 4 },
 ];
 const MONK_TIPS = [
@@ -1676,6 +1704,7 @@ function updateNpc(n, dt) {
         n.bow = Math.max(0, n.bow - dt * 1.5);
       } else n.bow = 0;
       break;
+    case 'listener': break;
     case 'vendor':
       if (near && n.t <= 0) { n.t = 30; say(n, pick(['Mời con vào sắm lễ, nhà chùa tặng miễn phí.', 'Lễ chay thôi con nhé, hương hoa quả oản là đủ.', 'Con ngồi uống chén trà cho ấm bụng đã.'])); }
       break;
@@ -1869,6 +1898,7 @@ function addProp(key, sx0, sy0, w, h, fn, mx, my, sx, fadeable, extra) { OUT_PRO
   P_('hall', 'hall', 2120, 60, 960, 420, drawHall, true, 'hall');
   P_('bodhi', 'bodhi', 3020, 30, 560, 460, drawBodhi, true, 'ribbons');
   P_('stupa', 'stupa', 4740, 60, 280, 420, drawStupa, true);
+  addProp('lecture', -172, GROUND - 204, 344, 206, drawLectureHall, 330, 1240, 0, true);
   P_('quanam', 'quanam', 4000, 300, 160, 180, drawQuanAm, true);
   P_('willow', 'willow', 4300, 220, 220, 262, g => drawWillow(g, 4400), true);
   P_('banyan', 'banyan', 40, 40, 480, 444, g => drawBanyan(g, 260), true);
@@ -2127,6 +2157,7 @@ function drawTeaTable(g) {
   for (const x of [636, 650]) { g.fillStyle = '#f2ead8'; g.beginPath(); g.ellipse(x, 442, 5, 4, 0, 0, TAU); g.fill(); }
 }
 const ROOM_PROPS = {
+  lecture: [],
   hall: [
     { key: 'rAltar', base: 366, x0: 360, y0: 300, w: 280, h: 70, fn: drawHallAltar, extra: 'altar' },
     { key: 'rXam', base: 408, x0: 170, y0: 320, w: 100, h: 92, fn: drawXamTable },
@@ -2150,6 +2181,7 @@ const HOT = [
   { id: 'altar', scene: 'hall', x: 500, y: 452, face: 'up', icon: '🙏', label: 'Lễ Phật · Dâng lễ', run: () => openAltar() },
   { id: 'xam', scene: 'hall', x: 292, y: 398, face: -1, icon: '🎋', label: 'Xin xăm', run: () => openXam() },
   { id: 'chant', scene: 'hall', x: 731, y: 404, face: 1, icon: '📿', label: 'Tụng niệm', run: () => startChant() },
+  { id: 'listen', scene: 'lecture', x: 450, y: 560, face: 'up', icon: '🎧', label: 'Ngồi nghe pháp', run: () => sitListen(), my: 470 },
   { id: 'donate', scene: 'hall', x: 800, y: 566, face: 1, icon: '💝', label: 'Công đức', run: () => openDonate() },
   { id: 'wish', scene: 'out', x: 1990, y: 1474, face: 'up', icon: '🎗️', label: 'Treo điều ước', run: () => openWish(), my: 1300 },
   { id: 'zen', scene: 'out', x: 2140, y: 1466, face: 1, icon: '🧘', label: 'Ngồi thiền', run: () => openZen() },
@@ -2168,6 +2200,7 @@ const TASKS = [
   ['chant', '📿', 'Tụng niệm', 'Gõ mõ trong Chính điện'],
   ['xam', '🎋', 'Xin xăm', 'Bàn xăm trong Chính điện'],
   ['donate', '💝', 'Công đức', 'Hòm công đức cạnh cửa Chính điện'],
+  ['listen', '🎧', 'Nghe pháp', 'Giảng đường bên trái sân, đầu mỗi giờ'],
   ['wish', '🎗️', 'Treo điều ước', 'Cây Bồ Đề bên phải sân chùa'],
   ['zen', '🧘', 'Ngồi thiền', 'Bồ đoàn dưới gốc Bồ Đề'],
   ['fish', '🐟', 'Phóng sinh', 'Bờ tây hồ sen'],
@@ -2246,17 +2279,22 @@ function standUp() {
   if (me.bench) { me.y = me.bench[1] + 20; me.bench = null; }
   renderActions(true);
 }
-function leaveListen() { mode = 'free'; me.pose = 'stand'; renderActions(true); } // LECTURE_STUB
 function goDoor(d) { me.pending = null; walkPath(d.ap.x, d.ap.y, null); }
 // chuyển cảnh: tối dần, đổi cảnh, sáng dần
 function useDoor(d) {
   if (fade.dir) return;
+  if (d.to === 'lecture') return enterLecture(d);
+  performDoor(d);
+}
+function performDoor(d) {
+  if (fade.dir) return;
   me.path = null; me.onArrive = null; if (mode === 'walking') mode = 'free'; me.pose = 'stand';
   fade.dir = 1; sndNoise(.35, 300, 900, .08, 'bandpass', .7);
   fade.then = () => {
-    me.scene = d.to; me.x = d.spawn.x; me.y = d.spawn.y; me.back = !!d.spawn.back;
+    if (d.from === 'lecture') { if (mode === 'listen') leaveListen(); lectPanel(false); lobbyRelease(); clearTimeout(lobby.holdT); }
+    me.scene = d.to; me.x = d.spawn.x; me.y = d.spawn.y; me.back = !!d.spawn.back; me.front = !d.spawn.back && d.to === 'out';
     snapCam(); hudSig = '';
-    if (d.to !== 'out' && !tipShown.has(d.to)) { tipShown.add(d.to); toast(d.to === 'hall' ? '🛕 Vào chính điện đi nhẹ nói khẽ, không đi cắt ngang trước người đang quỳ lễ.' : '🏠 Nhà khách: sắm lễ chay miễn phí, có trà nóng mời khách.', 5000); }
+    if (d.to !== 'out' && !tipShown.has(d.to)) { tipShown.add(d.to); toast(d.to === 'hall' ? '🛕 Vào chính điện đi nhẹ nói khẽ, không đi cắt ngang trước người đang quỳ lễ.' : d.to === 'lecture' ? '🎧 Giảng đường: đầu mỗi giờ phát 15 phút pháp thoại Thầy Thích Pháp Hòa. Chọn một bồ đoàn để ngồi nghe.' : '🏠 Nhà khách: sắm lễ chay miễn phí, có trà nóng mời khách.', 6000); }
   };
 }
 function snapCam() {
@@ -2330,6 +2368,7 @@ function update(dt) {
   }
   if (mode === 'chant') { const t = T - me.strikeT; me.strike = t < .05 ? 0 : Math.min(.75, (t - .05) / .25 * .75); }
   if (mode === 'zen') updateZen(dt);
+  if (me.scene === 'lecture' || mode === 'listen') updateLecture(dt);
   updateXam(dt);
   for (const n of npcs) updateNpc(n, dt);
   for (const r of remotes.values()) {
@@ -2391,8 +2430,9 @@ function render() {
       items.push({ y: p.base, prop: p, b });
     }
   } else {
-    const back = sprite('room_' + sc, 0, 0, SCENES[sc].w, SCENES[sc].h, sc === 'hall' ? drawHallRoomBack : drawShopRoomBack);
+    const back = sprite('room_' + sc, 0, 0, SCENES[sc].w, SCENES[sc].h, { hall: drawHallRoomBack, shop: drawShopRoomBack, lecture: drawLectureBack }[sc]);
     ctx.drawImage(back.c, 0, 0, back.w, back.h);
+    if (sc === 'lecture') drawLectureScreen();
     for (const p of ROOM_PROPS[sc]) items.push({ y: p.base, room: p });
   }
   items.sort((a, b) => a.y - b.y);
@@ -2530,6 +2570,8 @@ function sceneLights() {
     L.push([1930, 1640, 110, .75], [640, 1300, 90, .5]);
     if (incense.some(s => T - s.t0 < s.life)) { const c = censerPt(CENSER_X, GROUND - 110); L.push([c.x, c.y, 50, .6]); }
     for (const l of lanterns) L.push([l.x, l.y - 12, 56, 1]);
+  } else if (me.scene === 'lecture') {
+    L.push([450, 184, 300, lectNow().live ? 1 : .6], [200, 290, 120, .7], [700, 290, 120, .7], [450, 630, 170, (1 - P.night) * .9 + .1]);
   } else if (me.scene === 'hall') {
     L.push([500, 200, 330, .95], [170, 170, 150, .8], [830, 170, 150, .8], [420, 296, 80, 1], [580, 296, 80, 1], [500, 690, 170, (1 - P.night) * .9 + .1]);
     for (const [x, y] of [[150, 120], [350, 140], [650, 140], [850, 120]]) L.push([x, y + 14, 90, .9]);
@@ -2544,7 +2586,7 @@ function drawLighting() {
   const out = me.scene === 'out';
   const tint = out ? P.tint : [255, 150, 60, .07];
   if (tint[3] > .01) { ctx.fillStyle = `rgba(${tint[0] | 0},${tint[1] | 0},${tint[2] | 0},${tint[3]})`; ctx.fillRect(camX - 2, camY - 2, VW + 4, VH + 4); }
-  const dark = out ? P.dark : me.scene === 'hall' ? .34 + P.dark * .4 : .14 + P.dark * .45;
+  const dark = out ? P.dark : me.scene === 'hall' ? .34 + P.dark * .4 : me.scene === 'lecture' ? .3 + P.dark * .4 : .14 + P.dark * .45;
   const glow = out ? P.glow : .55 + P.glow * .4;
   if (dark < .02) return;
   const lights = sceneLights(), k = SC / 3;
@@ -2571,7 +2613,7 @@ function drawLighting() {
 }
 // ── bản đồ nhỏ ──
 const MINI_RECTS = [
-  [1060, 2060, 1540, 2140, '#c9483a'], [430, 1760, 690, 1870, '#c98a5a'], [560, 1330, 735, 1408, '#c9483a'], [840, 720, 1760, 1052, '#b3402a'], [1218, 448, 1382, 512, '#e8cf98'], [868, 448, 932, 486, '#e8cf98'], [1668, 448, 1732, 486, '#e8cf98'],
+  [1060, 2060, 1540, 2140, '#c9483a'], [190, 1120, 470, 1238, '#c98a5a'], [430, 1760, 690, 1870, '#c98a5a'], [560, 1330, 735, 1408, '#c9483a'], [840, 720, 1760, 1052, '#b3402a'], [1218, 448, 1382, 512, '#e8cf98'], [868, 448, 932, 486, '#e8cf98'], [1668, 448, 1732, 486, '#e8cf98'],
 ];
 function drawMini() {
   const c = $('mini'); if (!c || c.hidden) return;
@@ -2589,15 +2631,293 @@ function drawMini() {
   g.strokeStyle = '#8f4a31'; g.lineWidth = 22; g.strokeRect(160, 215, 2280, 1915);
   for (const h of HOT) {
     if (!TASK_IDS.has(h.id)) continue;
-    const p = h.scene === 'out' ? h : h.scene === 'hall' ? { x: 1300 + (h.x - 500) * .6, y: 900 } : { x: 560, y: 1815 };
+    const p = h.scene === 'out' ? h : h.scene === 'hall' ? { x: 1300 + (h.x - 500) * .6, y: 900 } : h.scene === 'lecture' ? { x: 330, y: 1180 } : { x: 560, y: 1815 };
     const ok = S.today.done.includes(h.id) || (h.id === 'altar' && S.today.done.includes('pray'));
     g.fillStyle = ok ? '#3fbf7f' : '#ffd23f'; g.beginPath(); g.arc(p.x, p.y, 34, 0, TAU); g.fill();
   }
-  const pos = p => p.scene === 'out' ? p : p.scene === 'hall' ? { x: 1300 + (p.x - 500) * .6, y: 760 + (p.y - 330) * .7 } : { x: 560 + (p.x - 380) * .3, y: 1780 + (p.y - 300) * .3 };
+  const pos = p => p.scene === 'out' ? p : p.scene === 'lecture' ? { x: 220 + p.x * .25, y: 1130 + (p.y - 320) * .3 } : p.scene === 'hall' ? { x: 1300 + (p.x - 500) * .6, y: 760 + (p.y - 330) * .7 } : { x: 560 + (p.x - 380) * .3, y: 1780 + (p.y - 300) * .3 };
   for (const r of remotes.values()) { const p = pos(r); g.fillStyle = '#7fd0ff'; g.beginPath(); g.arc(p.x, p.y, 46, 0, TAU); g.fill(); }
   const p = pos(me);
   g.fillStyle = '#fff'; g.beginPath(); g.arc(p.x, p.y, 64, 0, TAU); g.fill();
   g.fillStyle = '#e8432e'; g.beginPath(); g.arc(p.x, p.y, 44, 0, TAU); g.fill();
+}
+
+// ═══════════════════════════ GIẢNG ĐƯỜNG (nghe pháp thoại) ═══════════════════════════
+// Đầu mỗi giờ (phút 0) phát một bài pháp thoại của Thầy Thích Pháp Hòa trong 15 phút.
+// Bài được chọn theo số giờ nên mọi người chơi cùng nghe một bài, tua đúng tới giây hiện tại.
+// Danh sách: các bài mới trên kênh chính thức "Thầy Thích Pháp Hòa Canada" (Tu Viện Trúc Lâm).
+const LECTURES = [
+  ['ESZ3Ft5p-iY', 'Ít Nói Mới Khôn'], ['5lkeL7ffvV8', 'Nghe Để Sống Bình An Mỗi Ngày'], ['7b87rUsz6aU', 'Tâm Người Tốt Hay Xấu Nhìn Là Biết'],
+  ['A2GPqPm4uqI', 'Tập Sống Bằng Lòng Với Những Gì Mình Có'], ['7jruHvowvL0', 'Sống Có Tâm Tốt Giảm Bớt Nghiệp Nặng'], ['Ddz3A95U5Co', 'Cuộc Sống Mệt Mỏi Quá Nên Nghe Bài Này Để Sống Bình An'],
+  ['WsI5j-GUu9M', 'Người Thông Minh Sống Bớt Suy Nghĩ'], ['l5ZHN66DpfE', 'Tập Sống Buông Bỏ Để Có Hạnh Phúc'], ['H_QCveK3riI', 'Ai Hay Nóng Giận Nên Nghe Để Bớt Nghiệp'],
+  ['E6NkcoMF1TE', 'Tập Sống Bằng Lòng Với Hiện Tại'], ['90NuunAhpsE', 'Tâm Phải Biết Buông Bỏ Thì Đời Mới Hạnh Phúc'], ['nCnPN_YhZRc', 'Tâm Xả Bỏ Bớt Phiền Não Đời Tự Khắc Bình An'],
+  ['H9GvWmlBEUo', 'Tâm Tốt Miệng Tốt Hậu Vận Sẽ Thay Đổi'], ['5xgS2vTbU_A', 'Khi Đủ Duyên, Chuyện Gì Đến Rồi Sẽ Đến'], ['smnfhj1a2cw', 'Tâm Tu Đâu Thì Số Phận Mình Ở Đó'],
+  ['iP15SRuqFro', 'Khi Cô Đơn Buồn Khổ Hãy Nhớ Lời Này'], ['Gph2QGOYtNE', 'Dù Cuộc Sống Thế Nào Tập Sống Đơn Giản Nhẹ Nhàng'], ['6AGehj0OSDE', 'Sống Có Đức Thì Nghiệp Gì Cũng Qua'],
+  ['h51lBq5YOfY', 'Người Có Phước Nhìn Là Biết'], ['9-JCiXcdO7A', 'Chịu Khổ Một Lúc, Hưởng Phúc Một Đời'], ['JmW01KfO6V0', 'Tập Buông Bỏ Để Sống Thanh Thản'],
+  ['e4C9JVU22PU', 'Sống Có Tâm Từ Bi Đời Sống Sẽ An Lạc'], ['uBH0dcTFnRU', 'Luật Nhân Quả Ở Đời Chớ Xem Nhẹ'], ['g_erxcXac94', 'Trả Nghiệp Sớm, Đời Bớt Khổ'],
+  ['iQhqkKL6pcQ', 'Vợ Chồng Đừng Giận Nhau Mà Tạo Nghiệp'], ['C-0ootgHUO0', 'Tu Cái Miệng, Tránh Nói Điều Không Nên Nói'], ['JytWGGYwqI8', 'Cuộc Sống Luôn Gặp Khó Khăn Hãy Nhớ Lời Này'],
+  ['fmNojuuYY2g', 'Cách Giữ Tâm Bớt Suy Nghĩ Nhiều'], ['jQDTrUs8QLI', 'Nên Nghe Để Bớt Than Thân Trách Phận'], ['ak7oagyU3So', 'Suy Nghĩ Lạc Quan Thì Cuộc Sống Sẽ Bớt Khổ'],
+];
+const LECT_LEN = 15 * 60, LECT_CAP = 40;
+function lectNow() {
+  const now = Date.now(), d = new Date(now), sec = d.getMinutes() * 60 + d.getSeconds(), hk = Math.floor(now / 3600000);
+  const pickV = h => LECTURES[(((h % 100000) * 2654435761) >>> 0) % LECTURES.length];
+  return { live: sec < LECT_LEN, sec, left: LECT_LEN - sec, wait: 3600 - sec, cur: pickV(hk), next: pickV(hk + 1), nextHour: (d.getHours() + 1) % 24 };
+}
+const mmss = s => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
+
+// ── tòa giảng đường ngoài sân (mặt đứng, x=0 ở giữa) ──
+function drawLectureHall(g) {
+  const y = GROUND;
+  g.fillStyle = '#b3a68f'; g.fillRect(-152, y - 12, 304, 12); g.fillStyle = '#cbbfa7'; g.fillRect(-156, y - 16, 312, 5);
+  wallBody(g, -138, y - 122, 138, y - 14, '#efd9a6');
+  g.fillStyle = '#3a1a0c'; rr(g, -28, y - 96, 56, 82, 26); g.fill();
+  g.fillStyle = grad(g, 0, y - 92, 0, y - 14, ['#8a301b', '#5a1a0d']); rr(g, -25, y - 93, 50, 79, 24); g.fill();
+  g.fillStyle = '#e6c27a'; g.fillRect(-.8, y - 92, 1.6, 78);
+  for (const sd of [-1, 1]) for (let i = 0; i < 3; i++) for (let j = 0; j < 4; j++) { g.beginPath(); g.arc(sd * (7 + i * 6), y - 76 + j * 16, 1.5, 0, TAU); g.fill(); }
+  for (const sd of [-1, 1]) {
+    const wx = sd * 92; g.fillStyle = '#3a1608'; rr(g, wx - 20, y - 92, 40, 44, 4); g.fill();
+    g.strokeStyle = '#c9a050'; g.lineWidth = 1.4; for (let i = 1; i < 4; i++) { g.beginPath(); g.moveTo(wx - 20 + i * 10, y - 92); g.lineTo(wx - 20 + i * 10, y - 48); g.stroke(); }
+    g.beginPath(); g.moveTo(wx - 20, y - 70); g.lineTo(wx + 20, y - 70); g.stroke();
+    g.fillStyle = 'rgba(255,200,110,.35)'; rr(g, wx - 18, y - 90, 36, 40, 3); g.fill();
+  }
+  for (const x of [-138, -50, 50, 138]) pillar(g, x, y - 124, y - 14, x === -138 || x === 138 ? 11 : 9);
+  couplet(g, -38, y - 104, y - 30); couplet(g, 38, y - 104, y - 30);
+  roof(g, 0, y - 122, 336, 58, { curl: 26, over: 16, gourd: true, ridge: 190 });
+  plaque(g, 0, y - 108, 124, 20, 'GIẢNG ĐƯỜNG', 11);
+}
+// ── bên trong giảng đường ──
+function drawLectureBack(g) {
+  g.fillStyle = '#1e0c05'; g.fillRect(0, 0, 900, 640);
+  g.fillStyle = grad(g, 0, 40, 0, 322, ['#4a1e0c', '#6a2c12', '#7a3416']); g.fillRect(60, 40, 780, 282);
+  g.fillStyle = '#2e1206'; g.fillRect(60, 40, 780, 20); g.fillStyle = '#e6c27a'; g.fillRect(60, 58, 780, 2);
+  g.strokeStyle = 'rgba(20,8,2,.35)'; g.lineWidth = 2; for (let x = 100; x < 840; x += 56) { g.beginPath(); g.moveTo(x, 62); g.lineTo(x, 322); g.stroke(); }
+  plaque(g, 450, 84, 200, 26, 'GIẢNG ĐƯỜNG', 14);
+  // khung màn hình (nội dung vẽ động)
+  g.fillStyle = '#c9a050'; rr(g, 286, 104, 328, 160, 6); g.fill(); g.fillStyle = '#120804'; rr(g, 292, 110, 316, 148, 4); g.fill();
+  for (const sd of [-1, 1]) {
+    couplet(g, 450 + sd * 190, 110, 290, 14);
+    const x = 450 + sd * 300; g.fillStyle = sd < 0 ? '#d9a52b' : '#b3262e'; g.fillRect(x - 12, 64, 24, 120); g.beginPath(); g.moveTo(x - 12, 184); g.lineTo(x, 200); g.lineTo(x + 12, 184); g.fill();
+    // tượng Phật nhỏ trên bệ hai bên
+    g.fillStyle = '#6e2a12'; g.fillRect(450 + sd * 250 - 34, 246, 68, 76); g.fillStyle = '#e6c27a'; g.fillRect(450 + sd * 250 - 36, 244, 72, 3);
+    drawBuddha(g, 450 + sd * 250, 246, .62, true);
+  }
+  // pháp tòa: bục giảng, bàn kinh, bình hoa, micro
+  g.fillStyle = '#5e240e'; g.fillRect(330, 276, 240, 46); g.fillStyle = '#e6c27a'; g.fillRect(326, 274, 248, 3);
+  g.fillStyle = grad(g, 0, 286, 0, 316, ['#8a2a14', '#5e180b']); g.fillRect(390, 286, 120, 30); g.fillStyle = '#e6c27a'; g.fillRect(386, 284, 128, 3);
+  g.fillStyle = '#d9a52b'; g.beginPath(); g.ellipse(450, 282, 22, 7, 0, 0, TAU); g.fill();
+  g.strokeStyle = '#2a2a2a'; g.lineWidth = 1.6; g.beginPath(); g.moveTo(480, 284); g.lineTo(474, 266); g.stroke(); g.fillStyle = '#333'; g.beginPath(); g.arc(473, 264, 3, 0, TAU); g.fill();
+  for (const x of [404, 496]) { g.fillStyle = '#4a8a8a'; rr(g, x - 5, 270, 10, 14, 3); g.fill(); for (const d of [-4, 0, 4]) { g.fillStyle = '#f08aa8'; g.beginPath(); g.arc(x + d, 266, 3.4, 0, TAU); g.fill(); } }
+  // sàn gỗ, lối đi, 40 bồ đoàn
+  g.fillStyle = '#9a6a3e'; g.fillRect(60, 322, 780, 300);
+  g.strokeStyle = 'rgba(60,35,15,.3)'; g.lineWidth = 1; g.beginPath(); for (let y = 322; y < 622; y += 20) { g.moveTo(60, y); g.lineTo(840, y); } g.stroke();
+  g.fillStyle = '#a8261c'; g.fillRect(426, 322, 48, 300);
+  for (const c of CUSHIONS) { g.fillStyle = 'rgba(0,0,0,.2)'; g.beginPath(); g.ellipse(c.x, c.y + 3, 21, 8, 0, 0, TAU); g.fill(); g.fillStyle = '#c99a3a'; g.beginPath(); g.ellipse(c.x, c.y, 20, 8.5, 0, 0, TAU); g.fill(); g.strokeStyle = '#9a6f1f'; g.lineWidth = 1.2; g.beginPath(); g.ellipse(c.x, c.y, 13, 5, 0, 0, TAU); g.stroke(); }
+  g.fillStyle = '#3a1608'; g.fillRect(40, 40, 22, 600); g.fillRect(838, 40, 22, 600);
+  g.fillStyle = '#4e1e0a'; g.fillRect(40, 602, 360, 30); g.fillRect(500, 602, 360, 30);
+  g.fillStyle = '#e6c27a'; g.fillRect(40, 602, 360, 2); g.fillRect(500, 602, 360, 2);
+  g.fillStyle = 'rgba(255,230,170,.22)'; g.fillRect(400, 602, 100, 30);
+}
+function drawLectureScreen() {
+  const L_ = lectNow();
+  ctx.save(); rr(ctx, 292, 110, 316, 148, 4); ctx.clip();
+  if (L_.live) {
+    const gl = ctx.createRadialGradient(450, 184, 10, 450, 184, 200); gl.addColorStop(0, '#3a2a18'); gl.addColorStop(1, '#120804');
+    ctx.fillStyle = gl; ctx.fillRect(292, 110, 316, 148);
+    ctx.fillStyle = '#ffd98a'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.font = "700 12px 'Be Vietnam Pro', sans-serif"; ctx.fillText('● ĐANG GIẢNG PHÁP', 450, 132);
+    ctx.font = "700 15px 'Noto Serif', serif"; ctx.fillStyle = '#fff3d6';
+    const words = L_.cur[1].split(' '), lines = []; let cur = '';
+    for (const w of words) { const t = cur ? cur + ' ' + w : w; if (ctx.measureText(t).width > 280 && cur) { lines.push(cur); cur = w; } else cur = t; } lines.push(cur);
+    lines.slice(0, 3).forEach((l, i) => ctx.fillText(l, 450, 170 + i * 20 - (lines.length - 1) * 10));
+    ctx.font = "600 11px 'Be Vietnam Pro', sans-serif"; ctx.fillStyle = '#e8c890'; ctx.fillText(`Thầy Thích Pháp Hòa · còn ${mmss(L_.left)}`, 450, 238);
+    ctx.fillStyle = '#c2412d'; ctx.fillRect(300, 250, 300 * (L_.sec / LECT_LEN), 3);
+  } else {
+    ctx.fillStyle = '#120804'; ctx.fillRect(292, 110, 316, 148);
+    ctx.fillStyle = '#e8c890'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.font = "600 12px 'Be Vietnam Pro', sans-serif"; ctx.fillText(`Buổi giảng tiếp theo · ${String(L_.nextHour).padStart(2, '0')}:00`, 450, 134);
+    ctx.font = "700 40px 'Be Vietnam Pro', sans-serif"; ctx.fillStyle = '#ffd98a'; ctx.fillText(mmss(L_.wait), 450, 182);
+    ctx.font = "italic 12px 'Noto Serif', serif"; ctx.fillStyle = '#fff3d6';
+    const t = L_.next[1].length > 44 ? L_.next[1].slice(0, 42) + '…' : L_.next[1]; ctx.fillText('“' + t + '”', 450, 228);
+  }
+  ctx.restore();
+}
+
+// ── khung xem video ──
+const lect = { iframeId: null, listenT: 0, uiT: 0, min: false };
+function lectPanel(show) {
+  const el = $('lect');
+  if (!show) { el.hidden = true; el.querySelector('.lv').innerHTML = ''; lect.iframeId = null; return; }
+  el.hidden = false; lectUI(true);
+}
+function lectUI(force) {
+  const el = $('lect'); if (el.hidden) return;
+  const L_ = lectNow(), body = el.querySelector('.lv'), info = el.querySelector('.li');
+  el.classList.toggle('min', lect.min);
+  $('lectCount').textContent = `👥 ${lobby.offline ? '—' : Math.max(lobby.count, 1)}/${LECT_CAP}`;
+  if (L_.live) {
+    if (lect.iframeId !== L_.cur[0]) {
+      lect.iframeId = L_.cur[0];
+      body.innerHTML = `<iframe src="https://www.youtube-nocookie.com/embed/${L_.cur[0]}?autoplay=1&start=${L_.sec}&rel=0&playsinline=1&modestbranding=1" title="${esc(L_.cur[1])}" allow="autoplay; encrypted-media; picture-in-picture" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>`;
+    }
+    info.innerHTML = `<b>${esc(L_.cur[1])}</b><span>Thầy Thích Pháp Hòa · còn ${mmss(L_.left)} · <a href="https://www.youtube.com/watch?v=${L_.cur[0]}&t=${L_.sec}s" target="_blank" rel="noopener">mở trên YouTube</a></span>`;
+  } else {
+    if (lect.iframeId !== 'wait' || force) {
+      lect.iframeId = 'wait';
+      body.innerHTML = `<div class="lw"><div class="lt">Buổi giảng tiếp theo lúc <b>${String(L_.nextHour).padStart(2, '0')}:00</b></div><div class="lc" id="lectCd">${mmss(L_.wait)}</div><div class="ln">Bài: “${esc(L_.next[1])}”</div><div class="ln">Mời bạn ngồi tĩnh tâm chờ. Mỗi giờ giảng 15 phút đầu.</div></div>`;
+    }
+    const cd = $('lectCd'); if (cd) cd.textContent = mmss(L_.wait);
+    info.innerHTML = `<b>Đang chờ buổi giảng</b><span>Pháp thoại Thầy Thích Pháp Hòa · kênh chính thức Tu Viện Trúc Lâm</span>`;
+  }
+}
+function updateLecture(dt) {
+  lect.uiT -= dt;
+  if (lect.uiT <= 0) { lect.uiT = 1; lectUI(); }
+  if (mode === 'listen' && lectNow().live) {
+    lect.listenT += dt;
+    if (lect.listenT >= 120 && !S.today.done.includes('listen')) { done('listen'); merit(5); toast('🎧 Nghe pháp là gieo hạt giống lành. Cảm ơn bạn đã lắng nghe.'); }
+  }
+}
+function seatTaken(c) {
+  if (NPC_SEATS.some(i => CUSHIONS[i] === c)) return true;
+  for (const r of remotes.values()) if (r.scene === 'lecture' && Math.hypot(r.x - c.x, r.y - c.y) < 14) return true;
+  return false;
+}
+function sitListen(c) {
+  if (!c) { const free = CUSHIONS.filter(q => !seatTaken(q)); c = free.sort((a, b) => Math.hypot(a.x - me.x, a.y - me.y) - Math.hypot(b.x - me.x, b.y - me.y))[0]; }
+  if (!c) { toast('Không còn bồ đoàn trống.'); return; }
+  walkPath(c.x, c.y, () => {
+    mode = 'listen'; me.x = c.x; me.y = c.y; me.pose = 'sit'; me.back = true; me.front = false; me.vx = me.vy = 0;
+    lect.min = false; lectPanel(true);
+    if (AU.music) AU.music.gain.setTargetAtTime(0, AU.ctx.currentTime, .5);
+    renderActions(true);
+  });
+}
+function leaveListen() {
+  if (mode !== 'listen') return;
+  mode = 'free'; me.pose = 'stand'; me.y += 16; lectPanel(false);
+  if (AU.music) AU.music.gain.setTargetAtTime(.5, AU.ctx.currentTime, 1);
+  renderActions(true);
+}
+
+// ── giới hạn 40 người toàn hệ thống: một máy điều phối tự bầu qua PeerJS ──
+// Ai mở giảng đường đầu tiên giữ mã LOBBY_ID và giữ sổ chỗ ngồi; những người sau nối vào xin chỗ.
+// Máy điều phối thoát thì những người còn lại tự giành lại mã và xin chỗ lại.
+const LOBBY_ID = 'dichua-giangduong-phaphoa-v1';
+const lobby = { peer: null, conn: null, coord: false, ready: false, connecting: null, want: false, seated: false, pos: 0, count: 0, queueLen: 0, offline: false, cb: null, members: new Map() };
+function lobbyEnsure() {
+  if (lobby.ready) return Promise.resolve();
+  if (lobby.connecting) return lobby.connecting;
+  lobby.connecting = loadPeerJs().then(() => new Promise((ok, bad) => {
+    const p = new Peer(LOBBY_ID, { debug: 0 }); let fin = false;
+    const t = setTimeout(() => { if (!fin) { fin = true; try { p.destroy(); } catch (e) {} bad(new Error('timeout')); } }, 8000);
+    p.on('open', () => { if (fin) return; fin = true; clearTimeout(t); becomeCoord(p); ok(); });
+    p.on('error', err => {
+      if (fin) return; fin = true; clearTimeout(t); try { p.destroy(); } catch (e) {}
+      if (err.type === 'unavailable-id') lobbyJoinClient().then(ok, bad); else bad(err);
+    });
+  })).then(() => { lobby.ready = true; }).finally(() => { lobby.connecting = null; });
+  return lobby.connecting;
+}
+function lobbyJoinClient() {
+  return new Promise((ok, bad) => {
+    const p = lobby.peer = new Peer({ debug: 0 }); let fin = false;
+    const t = setTimeout(() => { if (!fin) { fin = true; bad(new Error('timeout')); } }, 9000);
+    p.on('open', () => {
+      const c = p.connect(LOBBY_ID, { reliable: true });
+      c.on('open', () => { if (fin) return; fin = true; clearTimeout(t); lobby.conn = c; lobby.coord = false; ok(); });
+      c.on('data', d => lobbyMsg(d));
+      const lost = () => { if (lobby.conn !== c) return; lobby.conn = null; lobby.ready = false; lobbyLost(); };
+      c.on('close', lost); c.on('error', lost);
+    });
+    p.on('error', err => { if (!fin) { fin = true; clearTimeout(t); bad(err); } });
+  });
+}
+function becomeCoord(p) {
+  lobby.peer = p; lobby.coord = true; lobby.members = new Map();
+  p.on('connection', c => {
+    c.on('data', d => { if (!d || typeof d !== 'object') return; if (d.t === 'req') coordReq(c); else if (d.t === 'rel') coordRel(c); });
+    const lost = () => coordRel(c); c.on('close', lost); c.on('error', lost);
+  });
+  p.on('disconnected', () => setTimeout(() => { if (!p.destroyed && p.disconnected) p.reconnect(); }, 1500));
+}
+const coordSend = (key, msg) => { if (key === 'self') lobbyMsg(msg); else if (key.open) try { key.send(msg); } catch (e) {} };
+function coordSync() {
+  const M = lobby.members, seated = [...M.values()].filter(m => m.seated).length, queue = [...M.entries()].filter(([, m]) => !m.seated).sort((a, b) => a[1].t - b[1].t);
+  queue.forEach(([k], i) => coordSend(k, { t: 'q', pos: i + 1 }));
+  for (const k of M.keys()) coordSend(k, { t: 'gd', n: seated, q: queue.length });
+}
+function coordReq(key) {
+  const M = lobby.members, m = M.get(key);
+  if (m && m.seated) { coordSend(key, { t: 'seat' }); coordSync(); return; }
+  const seated = [...M.values()].filter(v => v.seated).length;
+  if (seated < LECT_CAP) { M.set(key, { seated: true, t: Date.now() }); coordSend(key, { t: 'seat' }); }
+  else if (!m) M.set(key, { seated: false, t: Date.now() });
+  coordSync();
+}
+function coordRel(key) {
+  const M = lobby.members; if (!M.has(key)) return;
+  M.delete(key);
+  const next = [...M.entries()].filter(([, m]) => !m.seated).sort((a, b) => a[1].t - b[1].t)[0];
+  if (next && [...M.values()].filter(v => v.seated).length < LECT_CAP) { next[1].seated = true; coordSend(next[0], { t: 'seat' }); }
+  coordSync();
+}
+function lobbyMsg(d) {
+  if (!d || typeof d !== 'object') return;
+  if (d.t === 'seat') { const was = lobby.seated; lobby.seated = true; lobby.pos = 0; if (!was && lobby.cb) { const f = lobby.cb; lobby.cb = null; f(); } }
+  else if (d.t === 'q') { lobby.pos = num(d.pos, 0, 1e5) | 0; showQueueUI(); }
+  else if (d.t === 'gd') { lobby.count = num(d.n, 0, 1e5) | 0; lobby.queueLen = num(d.q, 0, 1e5) | 0; showQueueUI(); }
+}
+// cập nhật bảng xếp hàng mỗi khi máy điều phối báo vị trí / số người
+function showQueueUI() {
+  if (lobby.seated || !lobby.want || !lobby.pos) return;
+  const m = q('#qMsg');
+  if (m) {
+    m.innerHTML = `Giảng đường đã đủ <b>${lobby.count}/${LECT_CAP}</b> người. Bạn đang xếp hàng thứ <b>${lobby.pos}</b>.<br>Bạn có thể dạo chùa trong lúc chờ, tới lượt sẽ có thông báo.`;
+    if (!q('#qWalk')) {
+      q('.row').innerHTML = '<button class="btn" id="qWalk">🚶 Dạo chùa trong lúc chờ</button><button class="btn alt" id="qLeave">Rời hàng</button>';
+      q('#qWalk').onclick = () => { lobby.asking = false; closeSheet(true); toast('Bạn vẫn đang trong hàng chờ giảng đường.'); };
+      q('#qLeave').onclick = () => { lobbyRelease(); closeSheet(); };
+    }
+  }
+  $('zoneName').title = `Hàng chờ giảng đường: thứ ${lobby.pos}`;
+}
+function lobbyRequest() { lobby.want = true; if (lobby.coord) coordReq('self'); else if (lobby.conn) try { lobby.conn.send({ t: 'req' }); } catch (e) {} }
+function lobbyRelease() {
+  lobby.want = false; lobby.seated = false; lobby.cb = null; lobby.pos = 0;
+  if (lobby.coord) coordRel('self'); else if (lobby.conn) try { lobby.conn.send({ t: 'rel' }); } catch (e) {}
+}
+function lobbyLost() {
+  // máy điều phối đã thoát: giành lại mã rồi xin chỗ lại
+  if (!lobby.want) return;
+  setTimeout(() => lobbyEnsure().then(() => { if (lobby.want) lobbyRequest(); }).catch(() => { lobby.offline = true; }), 300 + Math.random() * 1500);
+}
+const LECT_DOOR = () => DOORS.find(d => d.to === 'lecture');
+function enterLecture(d) {
+  if (lobby.seated || lobby.offline) return performDoor(d);
+  if (lobby.asking) return;
+  lobby.asking = true;
+  me.y = Math.max(me.y, d.r[3] + 14); me.path = null; if (mode === 'walking') mode = 'free';
+  openSheet(`<div style="text-align:center;font-size:40px">🎧</div><h2>Giảng đường</h2><div class="sub" id="qMsg">Đang xin chỗ ngồi…</div>
+    <div class="row"><button class="btn alt" id="qCancel">Huỷ</button></div>`, { sticky: true, onClose: () => { lobby.asking = false; } });
+  q('#qCancel').onclick = () => { lobbyRelease(); closeSheet(); };
+  lobby.cb = () => {
+    lobby.asking = false;
+    const near = me.scene === 'out' && Math.hypot(me.x - d.ap.x, me.y - d.ap.y) < 120;
+    if (near && (mode === 'free' || mode === 'walking')) { closeSheet(true); performDoor(d); return; }
+    // tới lượt khi đang dạo chùa: giữ chỗ 90 giây
+    openSheet(`<div style="text-align:center;font-size:40px">🎉</div><h2>Tới lượt bạn!</h2><div class="sub">Giảng đường đã có chỗ cho bạn. Chỗ được giữ trong 90 giây.</div><div class="row"><button class="btn" id="qGo">🎧 Vào giảng đường</button><button class="btn alt" id="qNo">Thôi</button></div>`, { sticky: true });
+    q('#qGo').onclick = () => { closeSheet(true); goDoor(LECT_DOOR()); };
+    q('#qNo').onclick = () => { lobbyRelease(); closeSheet(); };
+    clearTimeout(lobby.holdT); lobby.holdT = setTimeout(() => { if (lobby.seated && me.scene !== 'lecture') { lobbyRelease(); toast('Đã hết thời gian giữ chỗ ở giảng đường.'); } }, 90000);
+  };
+  lobbyEnsure().then(() => {
+    if (!lobby.cb) return;
+    lobbyRequest();
+  }).catch(() => {
+    lobby.offline = true; lobby.asking = false; lobby.cb = null; closeSheet(true);
+    toast('Không kết nối được hệ thống xếp chỗ, bạn được vào nghe tự do.'); performDoor(d);
+  });
 }
 
 // ─────────────────────────── giao diện ───────────────────────────
@@ -2651,6 +2971,9 @@ function renderActions(force) {
       </div>`;
     $('moBtn').onpointerdown = e => { e.preventDefault(); hitMo(); };
     $('chantDone').onclick = endChant;
+  } else if (mode === 'listen') {
+    box.innerHTML = `<div class="act-row"><button class="act ghost" id="lectMin">${lect.min ? '🎬 Hiện khung giảng' : '🔽 Thu nhỏ'}</button><button class="act ghost" id="standBtn">🚶 Đứng dậy</button></div>`;
+    $('standBtn').onclick = standUp; $('lectMin').onclick = () => { lect.min = !lect.min; lectUI(); renderActions(true); };
   } else if (mode === 'rest') {
     box.innerHTML = `<div class="hint">Đang ngồi nghỉ trên ghế đá · đi tiếp bằng phím di chuyển hoặc chạm vào cảnh</div><div class="act-row"><button class="act ghost" id="standBtn">🚶 Đứng dậy</button></div>`;
     $('standBtn').onclick = standUp;
@@ -3532,6 +3855,10 @@ cv.addEventListener('pointerdown', e => {
     for (const l of lanterns) if (Math.hypot(w.x - l.x, w.y - l.y + 6) < 18) { toast(`🪷 ${l.text ? `<b>${esc(l.name || 'Ai đó')}</b>: “${esc(l.text)}”` : 'Một ngọn hoa đăng lặng lẽ trôi.'}`, 4200); return; }
   }
   for (const r of remotes.values()) if (r.scene === me.scene && Math.abs(w.x - r.x) < 16 && w.y > r.y - 80 && w.y < r.y + 6) { say(me, `Chào ${r.name} 🙏`); netSend({ t: 'ev', k: 'say', text: `Chào ${r.name} 🙏` }); return; }
+  if (me.scene === 'lecture') {
+    const c = CUSHIONS.find(q2 => Math.hypot(w.x - q2.x, (w.y - q2.y) * 1.6) < 22);
+    if (c) { if (seatTaken(c)) toast('Bồ đoàn này đã có người ngồi.'); else sitListen(c); return; }
+  }
   // chạm vào công trình: đi tới cửa hoặc chỗ gần nhất đi được
   let tx = w.x, ty = w.y;
   if (!walkable(tx, ty)) {
