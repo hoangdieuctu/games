@@ -288,6 +288,7 @@ textarea.field { resize: none; min-height: 76px; line-height: 1.45; }
 }
 .intro-sub { color: #fbe6b8; opacity: .9; margin: 6px 0 16px; font-size: 14px; line-height: 1.5; }
 .intro-card .sheet { text-align: left; }
+.intro-card, .intro-card .sheet, .temples { min-width: 0; max-width: 100%; }
 .temples { display: flex; gap: 8px; overflow-x: auto; padding: 2px 2px 8px; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
 .tcard { flex: 0 0 132px; scroll-snap-align: start; text-align: left; padding: 9px 10px; border-radius: 12px; background: #fffaf0; border: 1.5px solid var(--line); position: relative; }
 .tcard b { display: block; font-size: 13px; color: var(--ink); line-height: 1.25; }
@@ -367,6 +368,9 @@ textarea.field { resize: none; min-height: 76px; line-height: 1.45; }
           <input class="field" id="inName" maxlength="16" placeholder="Ví dụ: Minh An" autocomplete="off" enterkeyhint="done">
         </div>
       </div>
+      <div class="label">Nhân vật</div>
+      <div class="chips" id="genderCh"><button class="chip" data-v="f">👩 Nữ</button><button class="chip" data-v="m">👨 Nam</button></div>
+      <div class="chips" id="ageCh" style="margin-top:8px"></div>
       <div class="label">Trang phục</div>
       <div class="swatches" id="robeSw"></div>
       <div class="label">Kiểu tóc</div>
@@ -431,8 +435,11 @@ const ROBES = [
   { n: 'Áo hồng sen', c: '#e48aa6', d: '#b9607d', p: '#f6efe0' },
 ];
 const HAIRS = ['Tóc dài', 'Búi tóc', 'Tóc ngắn'];
+const hairsFor = (g, a) => g === 'm' ? ['Tóc ngắn', 'Tóc chải', a === 'old' ? 'Hói' : 'Đầu đinh'] : HAIRS;
+const AGES = [['child', '🧒 Trẻ em'], ['adult', '🧑 Người lớn'], ['old', '🧓 Người già']];
+const ageScale = a => a === 'child' ? .7 : a === 'old' ? .96 : 1;
 const SKIN = '#f2c9a0';
-const lookOf = (robe, hair) => ({ robe: ROBES[robe % ROBES.length], hair: hair % 3, skin: SKIN, hairC: '#2a1c14' });
+const lookOf = (robe, hair, gender = 'f', age = 'adult') => ({ robe: ROBES[robe % ROBES.length], hair: hair % 3, skin: age === 'old' ? '#ebc49c' : SKIN, hairC: age === 'old' ? (gender === 'm' ? '#c9c3b8' : '#d6d0c6') : '#2a1c14', gender, age });
 
 // ─────────────────────────── danh sách chùa ───────────────────────────
 // Khung cảnh trong game là mô phỏng chung; mỗi chùa có tên, lời giới thiệu và tông màu riêng.
@@ -1260,11 +1267,28 @@ function drawPerson(g, o) {
   g.restore();
 }
 function headSide(g, L, o, cx, cy) {
+  const hk = L.age === 'child' ? 1.22 : 1;
+  if (hk !== 1) { g.save(); g.translate(cx, cy + 6); g.scale(hk, hk); g.translate(-cx, -(cy + 6)); }
+  headSide0(g, L, o, cx, cy);
+  if (hk !== 1) g.restore();
+}
+function headSide0(g, L, o, cx, cy) {
   const skin = L.skin;
   g.fillStyle = skin; g.fillRect(cx - 2.6, cy + 5, 5.2, 5);
   g.beginPath(); g.ellipse(cx, cy, 7.8, 8.8, 0, 0, TAU); g.fill();
   g.beginPath(); g.ellipse(cx + 7.4, cy + 1, 1.6, 2, 0, 0, TAU); g.fill(); // mũi
-  if (!L.monk) {
+  if (!L.monk && L.gender === 'm') {
+    g.fillStyle = L.hairC;
+    if (L.hair === 2 && L.age === 'old') { g.beginPath(); g.ellipse(cx - 5, cy + 1, 3.6, 4.4, 0, 0, TAU); g.fill(); }
+    else {
+      g.globalAlpha = L.hair === 2 ? .8 : 1;
+      g.beginPath(); g.ellipse(cx - 1, cy - 3.6, 8.4, 6.4, 0, Math.PI * .95, TAU * 1.04); g.fill();
+      g.beginPath(); g.ellipse(cx - 4.6, cy - 1, 4.2, 4.8, 0, 0, TAU); g.fill();
+      if (L.hair === 1) { g.beginPath(); g.ellipse(cx + 3, cy - 8.6, 5, 2.8, -.25, 0, TAU); g.fill(); }
+      g.globalAlpha = 1;
+    }
+    if (L.age === 'old') { g.strokeStyle = L.hairC; g.lineWidth = 1.4; g.beginPath(); g.moveTo(cx + 4.6, cy + 3.8); g.lineTo(cx + 7.4, cy + 3.6); g.stroke(); }
+  } else if (!L.monk) {
     g.fillStyle = L.hairC;
     g.beginPath(); g.ellipse(cx - 1, cy - 3, 8.6, 7.6, 0, Math.PI * .92, TAU * 1.03); g.fill();
     g.beginPath(); g.ellipse(cx - 4.6, cy + 1, 4.4, 7, 0, 0, TAU); g.fill();
@@ -1322,6 +1346,8 @@ function personSide(g, o) {
   if (pose === 'pick') tilt = .95;
   if (pose === 'water') tilt = .12;
   if (pose === 'reach') tilt = -.06;
+  const old = L.age === 'old', male = L.gender === 'm';
+  if (old && (pose === 'stand' || pose === 'walk')) tilt += .13;
   const toTorso = (px, py) => { const dx = px, dy = py - hipY, c = Math.cos(-tilt), sn = Math.sin(-tilt); return [dx * c - dy * sn, dx * sn + dy * c]; };
   // ── chân ──
   const leg = (near, phase) => {
@@ -1342,7 +1368,7 @@ function personSide(g, o) {
   // ── đích của hai tay (toạ độ thân) ──
   let nh, fh, held = o.held, malletAng = 0, incAng = -1.4;
   switch (pose) {
-    case 'walk': nh = [-s * 7, -4.5]; fh = [s * 7, -4.5]; if (held === 'can' || held === 'trash') nh = [3, -5]; break;
+    case 'walk': nh = [-s * 7, -4.5]; fh = [s * 7, -4.5]; if (old && !held) nh = [11, -4]; if (held === 'can' || held === 'trash') nh = [3, -5]; break;
     case 'bow': nh = [9, -21]; fh = [8.5, -21.5]; break;
     case 'hold': { const r = o.raise || 0; nh = [9.5 - r * 1.5, -20 - r * 18]; fh = [9 - r * 1.5, -20.5 - r * 18]; incAng = -1.45 - r * .1; break; }
     case 'reach': { nh = o.reach ? toTorso(o.reach.x, o.reach.y) : [15, -46]; fh = [2, -5]; incAng = -1.15; break; }
@@ -1360,7 +1386,7 @@ function personSide(g, o) {
     case 'bench': nh = [11, 0]; fh = [10, 0]; break;
     case 'pick': { nh = o.reach ? toTorso(o.reach.x, o.reach.y) : toTorso(16, -3); fh = [4, -8]; break; }
     case 'water': nh = [17, -12]; fh = [5, -6]; break;
-    default: nh = [1.5, -4.5]; fh = [-1, -4.5];
+    default: nh = [1.5, -4.5]; fh = [-1, -4.5]; if (old && pose === 'stand' && !held) nh = [11, -4];
   }
   g.save(); g.translate(0, hipY); g.rotate(tilt);
   // tay phía xa (sau thân)
@@ -1374,6 +1400,7 @@ function personSide(g, o) {
   else if (pose === 'sit') { g.lineTo(8.5, -4); g.quadraticCurveTo(15, 3, 14, 7); g.lineTo(-14, 7); g.quadraticCurveTo(-15, 3, -8.5, -4); }
   else if (kneeling) { g.lineTo(8, -6); g.quadraticCurveTo(13, 7, 12, 17); g.lineTo(-17, 18); g.quadraticCurveTo(-12, 6, -8, -6); }
   else if (pose === 'pick') { g.lineTo(8, -6); g.quadraticCurveTo(11, 5, 12, 14); g.lineTo(-9, 15); g.quadraticCurveTo(-9, 5, -8, -6); }
+  else if (male) { g.lineTo(8, -6); g.quadraticCurveTo(9.5, 4, 9.5 + fl * .6, 12); g.lineTo(-8.5 + fl * .4, 12); g.quadraticCurveTo(-9, 4, -8, -6); }
   else { g.lineTo(7.5, -6); g.quadraticCurveTo(10.5, 6, 11 + fl, 18); g.lineTo(-10 + fl * .6, 18); g.quadraticCurveTo(-9.5, 6, -7.5, -6); }
   g.closePath(); g.fill();
   g.strokeStyle = robeD; g.lineWidth = 1.1; g.beginPath(); g.moveTo(3, -26); g.quadraticCurveTo(5, -16, 4, -4); g.stroke();
@@ -1390,6 +1417,7 @@ function personSide(g, o) {
     if (held === 'incense' && (pose === 'hold' || pose === 'reach' || pose === 'bow')) heldIncense(g, hx + .5, hy - 2, incAng, o.heldN || 3);
     if (held === 'mallet') heldMallet(g, hx, hy, malletAng);
     if (held === 'can') heldCan(g, hx, hy, pose === 'water' ? .55 : 0, pose === 'water');
+    if (old && !held && (pose === 'stand' || pose === 'walk')) { const tip = toTorso(16 + (walking ? Math.sin(ph) * 3 : 0), -.5); g.strokeStyle = '#6a4a2a'; g.lineWidth = 2.2; g.beginPath(); g.moveTo(hx, hy - 3); g.lineTo(tip[0], tip[1]); g.stroke(); g.beginPath(); g.arc(hx - 1, hy - 4, 2.6, Math.PI, TAU); g.stroke(); }
     if (held === 'trash') { g.fillStyle = '#4a5a3a'; g.beginPath(); g.moveTo(hx - 5, hy + 2); g.lineTo(hx + 5, hy + 2); g.lineTo(hx + 6, hy + 13); g.lineTo(hx - 6, hy + 13); g.fill(); }
     if (pose === 'sweep') {
       const end = toTorso(26 + Math.sin(ph) * 6, -1); g.strokeStyle = '#8a6a3a'; g.lineWidth = 2.2; g.beginPath(); g.moveTo(fh[0] - 3, fh[1] - 6); g.lineTo(end[0], end[1]); g.stroke();
@@ -1446,16 +1474,22 @@ function personFB(g, o, back) {
   if (pose === 'sit') { g.lineTo(9, -4); g.quadraticCurveTo(16, 3, 15, 7); g.lineTo(-15, 7); g.quadraticCurveTo(-16, 3, -9, -4); }
   else if (pose === 'bench') { g.lineTo(8.5, -2); g.lineTo(9.5, 6); g.lineTo(-9.5, 6); g.lineTo(-8.5, -2); }
   else if (kneeling) { g.lineTo(8.5, -6); g.quadraticCurveTo(12, 8, 13, 16); g.lineTo(-13, 16); g.quadraticCurveTo(-12, 8, -8.5, -6); }
+  else if (L.gender === 'm') { const fl = walking ? s * 1 : 0; g.lineTo(8, -6); g.quadraticCurveTo(9, 4, 9 + fl, 12); g.lineTo(-9 + fl, 12); g.quadraticCurveTo(-9, 4, -8, -6); }
   else { const fl = walking ? s * 1.5 : 0; g.lineTo(7.6, -6); g.quadraticCurveTo(10, 6, 10.5 + fl, 18); g.lineTo(-10.5 + fl, 18); g.quadraticCurveTo(-10, 6, -7.6, -6); }
   g.closePath(); g.fill();
   if (!back) { g.strokeStyle = robeD; g.lineWidth = 1.1; g.beginPath(); g.moveTo(0, -27); g.lineTo(0, -4); g.stroke(); g.fillStyle = robeD; g.beginPath(); g.moveTo(-3, -28.5); g.lineTo(0, -25); g.lineTo(3, -28.5); g.fill(); }
   if (L.monk) { g.fillStyle = shade(robe, .82); g.beginPath(); g.moveTo(back ? 7 : -7, -27); g.lineTo(back ? -8 : 8, -5); g.lineTo(back ? -3 : 3, -5); g.lineTo(back ? 3 : -3, -27); g.fill(); }
   // đầu
-  const hy = -38.5;
+  const hy = -38.5, hk = L.age === 'child' ? 1.22 : 1;
+  g.save(); if (hk !== 1) { g.translate(0, hy + 6); g.scale(hk, hk); g.translate(0, -(hy + 6)); }
   g.fillStyle = skin; g.fillRect(-2.6, hy + 5, 5.2, 5);
   g.beginPath(); g.ellipse(0, hy, 8, 8.9, 0, 0, TAU); g.fill();
   if (back) {
-    if (!L.monk) {
+    if (!L.monk && L.gender === 'm') {
+      g.fillStyle = L.hairC;
+      if (L.hair === 2 && L.age === 'old') { g.beginPath(); g.ellipse(0, hy + 2, 8.6, 5, 0, 0, Math.PI); g.fill(); }
+      else { g.globalAlpha = L.hair === 2 ? .8 : 1; g.beginPath(); g.ellipse(0, hy - 1.5, 8.8, 8.6, 0, Math.PI * .9, TAU * 1.1); g.fill(); g.fillRect(-7, hy - 2, 14, 6); g.globalAlpha = 1; }
+    } else if (!L.monk) {
       g.fillStyle = L.hairC; g.beginPath(); g.ellipse(0, hy - 1, 8.8, 9.4, 0, 0, TAU); g.fill();
       if (L.hair === 0) { g.beginPath(); g.moveTo(-4, hy + 2); g.quadraticCurveTo(-5, hy + 18, 0, hy + 30); g.quadraticCurveTo(5, hy + 18, 4, hy + 2); g.fill(); }
       if (L.hair === 1) { g.beginPath(); g.arc(0, hy - 4.5, 4.8, 0, TAU); g.fill(); }
@@ -1463,7 +1497,17 @@ function personFB(g, o, back) {
     g.fillStyle = shade(skin, .86); for (const sd of [-1, 1]) { g.beginPath(); g.ellipse(sd * 8, hy + .5, 1.6, 2.4, 0, 0, TAU); g.fill(); }
     if (o.held === 'incense' && joined) { const n = o.heldN || 3; g.save(); g.scale(1, 1 / squash); heldIncense(g, 0, (-20 - r * 17) * squash - 2, -Math.PI / 2, n); g.restore(); }
   } else {
-    if (!L.monk) {
+    if (!L.monk && L.gender === 'm') {
+      g.fillStyle = L.hairC;
+      if (L.hair === 2 && L.age === 'old') { for (const sd of [-1, 1]) { g.beginPath(); g.ellipse(sd * 7.4, hy, 2.2, 4, 0, 0, TAU); g.fill(); } }
+      else {
+        g.globalAlpha = L.hair === 2 ? .8 : 1;
+        g.beginPath(); g.ellipse(0, hy - 4, 8.6, 6, 0, Math.PI * .98, TAU * 1.02); g.fill();
+        for (const sd of [-1, 1]) { g.beginPath(); g.ellipse(sd * 7.6, hy - 1.5, 2.2, 3.6, 0, 0, TAU); g.fill(); }
+        if (L.hair === 1) { g.beginPath(); g.ellipse(-2.5, hy - 8.4, 6, 2.6, .2, 0, TAU); g.fill(); }
+        g.globalAlpha = 1;
+      }
+    } else if (!L.monk) {
       g.fillStyle = L.hairC;
       g.beginPath(); g.ellipse(0, hy - 3.5, 8.8, 6.6, 0, Math.PI * .98, TAU * 1.01); g.fill();
       g.beginPath(); g.moveTo(-8.6, hy - 3); g.quadraticCurveTo(-3, hy - 6, 0, hy - 2.5); g.quadraticCurveTo(3, hy - 6, 8.6, hy - 3); g.lineTo(8.6, hy - 6); g.lineTo(-8.6, hy - 6); g.fill();
@@ -1477,10 +1521,13 @@ function personFB(g, o, back) {
       g.fillStyle = 'rgba(230,110,90,.33)'; g.beginPath(); g.arc(sd * 4.4, hy + 3.4, 1.7, 0, TAU); g.fill();
     }
     g.strokeStyle = shade(skin, .6); g.lineWidth = .9; g.beginPath(); g.moveTo(-1.4, hy + 5); g.quadraticCurveTo(0, hy + 5.8, 1.4, hy + 5); g.stroke();
+    if (L.gender === 'm' && L.age === 'old') { g.strokeStyle = L.hairC; g.lineWidth = 1.4; g.beginPath(); g.moveTo(-3, hy + 3.8); g.quadraticCurveTo(0, hy + 3, 3, hy + 3.8); g.stroke(); }
   }
+  g.restore();
   if (!(back && joined)) drawArms();
   if (!back && joined && o.held === 'incense') heldIncense(g, 0, -22 - r * 17, -Math.PI / 2, o.heldN || 3);
   if (o.held === 'can' && !joined) heldCan(g, hands[1][0], hands[1][1], 0, false);
+  if (L.age === 'old' && !o.held && (pose === 'stand' || pose === 'walk')) { const [hx, hy2] = hands[1]; g.strokeStyle = '#6a4a2a'; g.lineWidth = 2.2; g.beginPath(); g.moveTo(hx + 1, hy2 - 3); g.lineTo(hx + 2, -hipY - .5); g.stroke(); }
   if (o.held === 'trash' && !joined) { const [hx, hy2] = hands[1]; g.fillStyle = '#4a5a3a'; g.beginPath(); g.moveTo(hx - 5, hy2 + 2); g.lineTo(hx + 5, hy2 + 2); g.lineTo(hx + 6, hy2 + 13); g.lineTo(hx - 6, hy2 + 13); g.fill(); }
   g.restore();
 }
@@ -1676,14 +1723,14 @@ for (let r = 0; r < 5; r++) for (let c = 0; c < 8; c++) CUSHIONS.push({ x: 150 +
 const NPC_SEATS = [2, 5, 9, 14, 21, 27];
 const npcs = [
   { id: 'su', scene: 'out', name: 'Sư thầy', look: { robe: MONK, monk: true, skin: SKIN }, x: 1500, y: 1300, dir: -1, ph: 0, pose: 'sweep', bow: 0, ai: 'sweep', t: 3, tx: 1500, ty: 1300, said: -99 },
-  { id: 'ba', scene: 'out', name: 'Bà cụ', look: { robe: ROBES[0], hair: 1, skin: '#e8bf98', hairC: '#bdb5aa' }, x: 900, y: 1950, dir: 1, ph: 0, pose: 'walk', bow: 0, ai: 'pilgrim', st: 0, t: -1, bs: .96 },
+  { id: 'ba', scene: 'out', name: 'Bà cụ', look: { robe: ROBES[0], hair: 1, skin: '#e8bf98', hairC: '#bdb5aa', age: 'old' }, x: 900, y: 1950, dir: 1, ph: 0, pose: 'walk', bow: 0, ai: 'pilgrim', st: 0, t: -1, bs: .96 },
   { id: 'me2', scene: 'out', name: 'Chị Hạnh', look: { robe: ROBES[4], hair: 0, skin: SKIN, hairC: '#2a1c14' }, x: 1500, y: 2000, dir: 1, ph: 0, pose: 'walk', bow: 0, ai: 'wander', t: 0, tx: 1500, ty: 1600 },
-  { id: 'be', scene: 'out', name: 'Bé Na', look: { robe: ROBES[6], hair: 1, skin: SKIN, hairC: '#2a1c14' }, x: 1470, y: 2010, dir: 1, ph: 0, pose: 'walk', bow: 0, ai: 'follow', leader: 'me2', bs: .64 },
+  { id: 'be', scene: 'out', name: 'Bé Na', look: { robe: ROBES[6], hair: 1, skin: SKIN, hairC: '#2a1c14', age: 'child' }, x: 1470, y: 2010, dir: 1, ph: 0, pose: 'walk', bow: 0, ai: 'follow', leader: 'me2', bs: .64 },
   { id: 'tieu', scene: 'out', name: 'Chú tiểu', look: { robe: { c: '#8f8a7a', d: '#6e6a5c', p: '#6e6a5c' }, monk: true, skin: SKIN }, x: 470, y: 1444, dir: 1, ph: 0, pose: 'stand', bow: 0, ai: 'bell', t: 40, bs: .72 },
-  { id: 'ong', scene: 'out', name: 'Ông Tư', look: { robe: ROBES[2], hair: 2, skin: '#e8bf98', hairC: '#9a948a' }, x: 1612, y: 1822, dir: 1, ph: 0, pose: 'stand', bow: 0, ai: 'pond', t: 5, bs: .98 },
+  { id: 'ong', scene: 'out', name: 'Ông Tư', look: { robe: ROBES[2], hair: 2, skin: '#e8bf98', hairC: '#c9c3b8', gender: 'm', age: 'old' }, x: 1612, y: 1822, dir: 1, ph: 0, pose: 'stand', bow: 0, ai: 'pond', t: 5, bs: .98 },
   { id: 'pt', scene: 'hall', name: 'Phật tử', look: { robe: ROBES[2], hair: 1, skin: SKIN, hairC: '#3a2a20' }, x: 400, y: 452, dir: 1, back: true, ph: 0, pose: 'kneelbow', bow: 0, ai: 'kneelpray', t: 0 },
   { id: 'su2', scene: 'hall', name: 'Thầy trụ trì', look: { robe: MONK, monk: true, skin: SKIN }, x: 600, y: 452, dir: 1, back: true, ph: 0, pose: 'kneel', bow: 0, ai: 'chantnpc', t: 6 },
-  ...NPC_SEATS.map((si, i) => ({ id: 'ng' + i, scene: 'lecture', name: 'Phật tử', look: { robe: ROBES[[0, 1, 2, 5, 0, 2][i]], hair: i % 3, skin: i % 2 ? SKIN : '#e8bf98', hairC: i === 3 ? '#9a948a' : '#2a1c14' }, x: CUSHIONS[si].x, y: CUSHIONS[si].y, dir: 1, back: true, ph: 0, pose: 'sit', bow: 0, ai: 'listener', t: 0 })),
+  ...NPC_SEATS.map((si, i) => ({ id: 'ng' + i, scene: 'lecture', name: 'Phật tử', look: { robe: ROBES[[0, 1, 2, 5, 0, 2][i]], hair: i % 3, gender: i % 2 ? 'm' : 'f', skin: i % 2 ? SKIN : '#e8bf98', hairC: i === 3 ? '#9a948a' : '#2a1c14' }, x: CUSHIONS[si].x, y: CUSHIONS[si].y, dir: 1, back: true, ph: 0, pose: 'sit', bow: 0, ai: 'listener', t: 0 })),
   { id: 'lan', scene: 'shop', name: 'Cô Lan', look: { robe: ROBES[1], hair: 1, skin: SKIN, hairC: '#2a1c14' }, x: 380, y: 296, dir: 1, ph: 0, pose: 'stand', bow: 0, ai: 'vendor', t: 4 },
 ];
 const MONK_TIPS = [
@@ -2561,7 +2608,7 @@ function update(dt) {
   if ((dx || dy) && (mode === 'rest' || mode === 'listen')) standUp();
   if ((dx || dy) && mode === 'walking') { mode = 'free'; me.path = null; me.onArrive = null; me.pending = null; }
   const kbd = (dx || dy) && mode === 'free';
-  { const kd = dx && dy ? Math.SQRT1_2 : 1, tvx = kbd ? dx * 125 * kd : 0, tvy = kbd ? dy * 125 * kd : 0, rate = Math.min(1, dt * (kbd ? 9 : 14));
+  { const kd = dx && dy ? Math.SQRT1_2 : 1, sp0 = me.look.age === 'old' ? 100 : 125, tvx = kbd ? dx * sp0 * kd : 0, tvy = kbd ? dy * sp0 * kd : 0, rate = Math.min(1, dt * (kbd ? 9 : 14));
     me.vx += (tvx - me.vx) * rate; me.vy += (tvy - me.vy) * rate; }
   if (mode === 'free' && Math.hypot(me.vx, me.vy) > 6) {
     const moved = stepMove(me, me.vx * dt, me.vy * dt);
@@ -2682,7 +2729,7 @@ function render() {
   items.sort((a, b) => a.y - b.y);
   for (const it of items) {
     if (it.p) {
-      const p = it.p; p.scale = p.bs ?? 1;
+      const p = it.p; p.scale = p.bs ?? ageScale(p.look && p.look.age);
       const tmp = p === me && !p.held && (p.pose === 'walk' || p.pose === 'stand');
       if (tmp) p.held = me.can != null ? 'can' : me.carry ? 'trash' : null;
       drawPerson(ctx, p); if (tmp) p.held = null;
@@ -2763,6 +2810,7 @@ function render() {
     const r = 6 + (T * 10 % 6); ctx.beginPath(); ctx.ellipse(t.x, t.y + 2, r * 1.6, r * .7, 0, 0, TAU); ctx.stroke();
   }
   for (const p of people) {
+    p.scale = p.bs ?? ageScale(p.look && p.look.age);
     const isMe = p === me, isRemote = remotes.has(p.id);
     let top = p.y - 88 * (p.scale || 1);
     if (isMe || isRemote) top = nameTag(p, isMe ? '#ffe08a' : '#bfe8ff');
@@ -3981,8 +4029,8 @@ function parseCode(s) {
   s = (m ? m[1] : s).toLowerCase().replace(/[^a-z0-9]/g, '').replace(/1/g, 'i').replace(/0/g, 'o');
   return /^[a-z0-9]{4,16}$/.test(s) ? s : null;
 }
-const myLook = () => ({ r: S.robe, h: S.hair });
-const validLook = l => lookOf(Number.isInteger(l && l.r) ? clamp(l.r, 0, ROBES.length - 1) : 0, Number.isInteger(l && l.h) ? clamp(l.h, 0, 2) : 0);
+const myLook = () => ({ r: S.robe, h: S.hair, g: S.gender || 'f', a: S.age || 'adult' });
+const validLook = l => lookOf(Number.isInteger(l && l.r) ? clamp(l.r, 0, ROBES.length - 1) : 0, Number.isInteger(l && l.h) ? clamp(l.h, 0, 2) : 0, l && l.g === 'm' ? 'm' : 'f', l && ['child', 'old'].includes(l.a) ? l.a : 'adult');
 const POSES = new Set(['stand', 'walk', 'bow', 'hold', 'kneel', 'kneelbow', 'sit', 'pull', 'reach', 'bench', 'chant', 'pick', 'water', 'sweep']);
 const num = (v, a, b, d = 0) => (typeof v === 'number' && isFinite(v) ? clamp(v, a, b) : d);
 
@@ -4155,9 +4203,9 @@ function hostMsg(c, d) {
     net.conns.set(c, id);
     const r = addRemote(id, name, d.look, 170);
     r.seen = performance.now();
-    const players = [{ id: 'h', name: me.name, look: myLook() }, ...[...remotes.values()].filter(p => p.id !== id).map(p => ({ id: p.id, name: p.name, look: { r: ROBES.indexOf(p.look.robe), h: p.look.hair } }))];
+    const players = [{ id: 'h', name: me.name, look: myLook() }, ...[...remotes.values()].filter(p => p.id !== id).map(p => ({ id: p.id, name: p.name, look: { r: ROBES.indexOf(p.look.robe), h: p.look.hair, g: p.look.gender, a: p.look.age } }))];
     try { c.send({ t: 'welcome', id, players, world: snapshot(), temple: TEMPLE.id }); } catch (e) {}
-    broadcast({ t: 'join', id, name, look: { r: ROBES.indexOf(r.look.robe), h: r.look.hair }, x: 170 }, c);
+    broadcast({ t: 'join', id, name, look: { r: ROBES.indexOf(r.look.robe), h: r.look.hair, g: r.look.gender, a: r.look.age }, x: 170 }, c);
     return;
   }
   const id = net.conns.get(c); if (!id) return;
@@ -4311,12 +4359,18 @@ function drawPreview() {
   const c = $('pv'), g = c.getContext('2d');
   g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, c.width, c.height);
   g.setTransform(2, 0, 0, 2, 0, 0);
-  drawPerson(g, { x: 38, y: 88, dir: 1, ph: 0, pose: 'bow', bow: .15, look: lookOf(S.robe, S.hair) });
+  drawPerson(g, { x: 38, y: 88, dir: 1, ph: 0, pose: 'stand', front: true, scale: S.age === 'child' ? .82 : 1, look: lookOf(S.robe, S.hair, S.gender || 'f', S.age || 'adult') });
 }
 function buildIntro() {
   $('inName').value = S.name;
   $('robeSw').innerHTML = ROBES.map((r, i) => `<button class="sw ${i === S.robe ? 'on' : ''}" title="${r.n}" data-i="${i}" style="background:${r.c}"></button>`).join('');
-  $('hairCh').innerHTML = HAIRS.map((h, i) => `<button class="chip ${i === S.hair ? 'on' : ''}" data-i="${i}">${h}</button>`).join('');
+  const hairs = () => { $('hairCh').innerHTML = hairsFor(S.gender, S.age).map((h, i) => `<button class="chip ${i === S.hair ? 'on' : ''}" data-i="${i}">${h}</button>`).join(''); };
+  hairs();
+  $('ageCh').innerHTML = AGES.map(([v, l]) => `<button class="chip" data-v="${v}">${l}</button>`).join('');
+  const marks = () => { for (const b of $('genderCh').children) b.classList.toggle('on', b.dataset.v === (S.gender || 'f')); for (const b of $('ageCh').children) b.classList.toggle('on', b.dataset.v === (S.age || 'adult')); };
+  marks();
+  $('genderCh').onclick = e => { const b = e.target.closest('.chip'); if (!b) return; S.gender = b.dataset.v; marks(); hairs(); drawPreview(); };
+  $('ageCh').onclick = e => { const b = e.target.closest('.chip'); if (!b) return; S.age = b.dataset.v; marks(); hairs(); drawPreview(); };
   $('robeSw').onclick = e => { const b = e.target.closest('.sw'); if (!b) return; S.robe = +b.dataset.i; [...$('robeSw').children].forEach(x => x.classList.toggle('on', x === b)); drawPreview(); };
   $('hairCh').onclick = e => { const b = e.target.closest('.chip'); if (!b) return; S.hair = +b.dataset.i; [...$('hairCh').children].forEach(x => x.classList.toggle('on', x === b)); drawPreview(); };
   const showTemple = () => {
@@ -4341,7 +4395,7 @@ function enter(online) {
   if (started) return;
   initAudio();
   S.name = cleanText($('inName').value, 16) || S.name || 'Phật tử';
-  me.name = S.name; me.look = lookOf(S.robe, S.hair);
+  me.name = S.name; me.look = lookOf(S.robe, S.hair, S.gender || 'f', S.age || 'adult');
   if (!S.days.includes(todayKey())) S.days.push(todayKey());
   if (S.days.length > 400) S.days = S.days.slice(-400);
   save();
