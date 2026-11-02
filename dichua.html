@@ -963,39 +963,68 @@ function drawHall(g) {
 }
 function drawBuddha(g, x, baseY, k, side) {
   g.save(); g.translate(x, baseY); g.scale(k, k);
-  // hào quang
-  const hg = g.createRadialGradient(0, -86, 4, 0, -86, 52);
-  hg.addColorStop(0, 'rgba(255,240,190,.9)'); hg.addColorStop(.55, 'rgba(255,200,90,.45)'); hg.addColorStop(1, 'rgba(255,170,60,0)');
-  g.fillStyle = hg; g.beginPath(); g.arc(0, -86, 52, 0, TAU); g.fill();
-  g.strokeStyle = 'rgba(255,220,130,.8)'; g.lineWidth = 2; g.beginPath(); g.arc(0, -86, 30, 0, TAU); g.stroke();
-  // toà sen
-  g.fillStyle = side ? '#c98f3e' : '#d99c42';
-  for (let i = -4; i <= 4; i++) { g.beginPath(); g.ellipse(i * 9, -6, 7, 12, i * .12, 0, TAU); g.fill(); }
-  g.fillStyle = '#b8762a'; g.fillRect(-42, -4, 84, 8);
-  g.fillStyle = side ? '#e2a95a' : '#f0b860';
-  for (let i = -3; i <= 3; i++) { g.beginPath(); g.ellipse(i * 11, -14, 7, 10, i * .18, 0, TAU); g.fill(); }
-  const gold = grad(g, -36, 0, 36, 0, ['#8a5a14', '#e8b448', '#ffe6a0', '#d9a038', '#7a4c10']);
-  g.fillStyle = gold;
-  // chân xếp bằng
-  g.beginPath(); g.ellipse(0, -24, 36, 11, 0, 0, TAU); g.fill();
-  // thân, y áo
-  g.beginPath(); g.moveTo(-26, -26); g.quadraticCurveTo(-30, -60, -18, -70); g.lineTo(18, -70); g.quadraticCurveTo(30, -60, 26, -26); g.closePath(); g.fill();
-  g.strokeStyle = 'rgba(120,70,10,.45)'; g.lineWidth = 1.4;
-  g.beginPath(); g.moveTo(-14, -70); g.quadraticCurveTo(2, -50, 16, -30); g.stroke();
-  g.beginPath(); g.moveTo(-20, -32); g.quadraticCurveTo(0, -26, 20, -32); g.stroke();
+  const gold = (x0, x1) => grad(g, x0, 0, x1, 0, [[0, '#6a3f0c'], [.18, '#b07a24'], [.42, '#f2cf72'], [.55, '#fff0b8'], [.7, '#d9a43c'], [1, '#5a340a']]);
+  // hào quang: vòng lửa ngoài, vầng sáng trong
+  if (!side) {
+    g.save(); g.translate(0, -86);
+    const hg = g.createRadialGradient(0, 0, 6, 0, 0, 70); hg.addColorStop(0, 'rgba(255,240,200,.85)'); hg.addColorStop(.5, 'rgba(255,190,80,.35)'); hg.addColorStop(1, 'rgba(255,150,40,0)');
+    g.fillStyle = hg; g.beginPath(); g.arc(0, 0, 70, 0, TAU); g.fill();
+    g.fillStyle = gold(-52, 52);
+    for (let i = 0; i < 28; i++) { const a = -Math.PI / 2 + (i - 13.5) * .2, r0 = 40, r1 = 52 + (i % 2) * 5; g.beginPath(); g.moveTo(Math.cos(a - .07) * r0, Math.sin(a - .07) * r0); g.quadraticCurveTo(Math.cos(a) * (r1 + 4), Math.sin(a) * (r1 + 4), Math.cos(a + .1) * r1, Math.sin(a + .1) * r1); g.lineTo(Math.cos(a + .07) * r0, Math.sin(a + .07) * r0); g.fill(); }
+    g.strokeStyle = '#e8c060'; g.lineWidth = 3; g.beginPath(); g.arc(0, 0, 40, 0, TAU); g.stroke();
+    g.strokeStyle = 'rgba(255,230,160,.8)'; g.lineWidth = 1.2; g.beginPath(); g.arc(0, 0, 33, 0, TAU); g.stroke(); g.beginPath(); g.arc(0, 0, 20, 0, TAU); g.stroke();
+    for (let i = 0; i < 24; i++) { const a = i * TAU / 24; g.beginPath(); g.moveTo(Math.cos(a) * 21, Math.sin(a) * 21); g.lineTo(Math.cos(a) * 32, Math.sin(a) * 32); g.stroke(); }
+    g.restore();
+  } else {
+    const hg = g.createRadialGradient(0, -86, 4, 0, -86, 46); hg.addColorStop(0, 'rgba(255,240,190,.85)'); hg.addColorStop(.6, 'rgba(255,200,90,.35)'); hg.addColorStop(1, 'rgba(255,170,60,0)');
+    g.fillStyle = hg; g.beginPath(); g.arc(0, -86, 46, 0, TAU); g.fill();
+    g.strokeStyle = 'rgba(240,200,110,.9)'; g.lineWidth = 2; g.beginPath(); g.arc(0, -86, 26, 0, TAU); g.stroke();
+  }
+  // bệ bát giác và toà sen ba lớp cánh
+  g.fillStyle = grad(g, 0, -4, 0, 10, ['#8a2a14', '#5a180a']); g.fillRect(-46, -2, 92, 12);
+  g.fillStyle = '#c99a3a'; g.fillRect(-48, -4, 96, 3); g.fillRect(-48, 9, 96, 2);
+  for (let i = -4; i <= 4; i++) { g.fillStyle = 'rgba(255,220,140,.35)'; g.fillRect(i * 10 - 3, 1, 6, 6); }
+  const petals = (n, w, h, y, r0, col) => { for (let i = 0; i < n; i++) { const t = (i / (n - 1)) * 2 - 1, px = t * r0; g.save(); g.translate(px, y); g.rotate(t * .5); g.fillStyle = grad(g, 0, -h, 0, h * .3, col); g.beginPath(); g.moveTo(0, -h); g.bezierCurveTo(w, -h * .6, w * .9, h * .2, 0, h * .3); g.bezierCurveTo(-w * .9, h * .2, -w, -h * .6, 0, -h); g.fill(); g.strokeStyle = 'rgba(120,60,10,.5)'; g.lineWidth = .8; g.beginPath(); g.moveTo(0, -h * .8); g.lineTo(0, h * .2); g.stroke(); g.restore(); } };
+  petals(11, 7, 12, -6, 44, ['#ffe9a8', '#e0a84a', '#8a5414']);
+  petals(9, 7, 13, -14, 36, ['#fff2c4', '#eab456', '#9a6018']);
+  petals(7, 6.5, 12, -21, 26, ['#fff6d6', '#f0c068', '#a86a1c']);
+  // chân xếp kiết già, vạt cà sa phủ gối
+  g.fillStyle = gold(-40, 40); g.beginPath(); g.ellipse(0, -27, 38, 11, 0, 0, TAU); g.fill();
+  g.strokeStyle = 'rgba(90,50,8,.45)'; g.lineWidth = 1.2;
+  for (const d of [-24, -12, 10, 22]) { g.beginPath(); g.moveTo(d, -36); g.quadraticCurveTo(d + 4, -28, d + 1, -18); g.stroke(); }
+  g.fillStyle = '#f2cf72'; g.beginPath(); g.ellipse(-16, -30, 6, 3, -.3, 0, TAU); g.ellipse(18, -29, 6, 3, .3, 0, TAU); g.fill(); // gót chân ngửa
+  // thân, cà sa vắt vai trái, để trần vai phải
+  g.fillStyle = gold(-30, 30);
+  g.beginPath(); g.moveTo(-24, -28); g.bezierCurveTo(-31, -48, -27, -66, -17, -71); g.lineTo(17, -71); g.bezierCurveTo(27, -66, 31, -48, 24, -28); g.closePath(); g.fill();
+  g.fillStyle = 'rgba(120,60,8,.28)'; g.beginPath(); g.moveTo(-17, -71); g.bezierCurveTo(-4, -56, 8, -42, 22, -30); g.lineTo(24, -36); g.bezierCurveTo(12, -46, 0, -60, -10, -72); g.fill();
+  g.strokeStyle = 'rgba(100,55,8,.5)'; g.lineWidth = 1.1;
+  for (let i = 0; i < 5; i++) { g.beginPath(); g.moveTo(-20 + i * 3, -64 + i * 2); g.bezierCurveTo(-8 + i * 4, -52 + i * 3, 4 + i * 3, -42 + i * 2, 16 + i, -32); g.stroke(); }
+  g.beginPath(); g.moveTo(-22, -33); g.quadraticCurveTo(0, -27, 22, -33); g.stroke();
   // tay kết ấn thiền định
-  g.fillStyle = gold; g.beginPath(); g.ellipse(0, -32, 11, 4.5, 0, 0, TAU); g.fill();
-  // cổ, đầu, nhục kế
-  g.fillRect(-5, -76, 10, 8);
-  g.beginPath(); g.ellipse(0, -86, 11, 13, 0, 0, TAU); g.fill();
-  g.beginPath(); g.ellipse(0, -100, 6, 5, 0, 0, TAU); g.fill();
-  g.fillStyle = 'rgba(120,70,10,.5)';
-  for (let i = -2; i <= 2; i++) for (let j = 0; j < 2; j++) { g.beginPath(); g.arc(i * 4, -95 + j * 3.5, 1, 0, TAU); g.fill(); }
-  g.beginPath(); g.ellipse(-11, -85, 2, 5, 0, 0, TAU); g.ellipse(11, -85, 2, 5, 0, 0, TAU); g.fill();
-  g.strokeStyle = 'rgba(110,60,10,.6)'; g.lineWidth = 1;
-  g.beginPath(); g.moveTo(-6, -87); g.quadraticCurveTo(-3.5, -85.5, -1.5, -87); g.moveTo(1.5, -87); g.quadraticCurveTo(3.5, -85.5, 6, -87); g.stroke();
-  g.beginPath(); g.moveTo(-2.5, -79.5); g.quadraticCurveTo(0, -78, 2.5, -79.5); g.stroke();
-  g.fillStyle = '#c0392b'; g.beginPath(); g.arc(0, -91, 1, 0, TAU); g.fill();
+  g.fillStyle = gold(-14, 14); g.beginPath(); g.ellipse(0, -34, 13, 5.5, 0, 0, TAU); g.fill();
+  g.strokeStyle = 'rgba(100,55,8,.55)'; g.beginPath(); g.ellipse(0, -35, 9, 3, 0, Math.PI, TAU); g.stroke();
+  g.beginPath(); g.moveTo(-3, -37); g.quadraticCurveTo(0, -40, 3, -37); g.stroke();
+  // cổ ba ngấn, đầu
+  g.fillStyle = gold(-7, 7); g.fillRect(-5.5, -78, 11, 9);
+  g.strokeStyle = 'rgba(100,55,8,.4)'; g.lineWidth = .8; for (const yy of [-76, -73.5]) { g.beginPath(); g.moveTo(-5, yy); g.quadraticCurveTo(0, yy + 1, 5, yy); g.stroke(); }
+  g.fillStyle = gold(-12, 12); g.beginPath(); g.ellipse(0, -88, 11, 13, 0, 0, TAU); g.fill();
+  // dái tai dài
+  g.beginPath(); g.ellipse(-11.2, -84, 2.4, 7.5, .1, 0, TAU); g.ellipse(11.2, -84, 2.4, 7.5, -.1, 0, TAU); g.fill();
+  // ốc tóc và nhục kế
+  g.fillStyle = '#4a3010'; g.beginPath(); g.ellipse(0, -94, 11.2, 8, 0, Math.PI, TAU); g.fill(); g.beginPath(); g.ellipse(0, -102, 6.5, 5.5, 0, 0, TAU); g.fill();
+  g.fillStyle = 'rgba(200,150,60,.7)';
+  for (let r = 0; r < 3; r++) for (let i = -4; i <= 4; i++) { const xx = i * 2.4, yy = -96 + r * 2.4 - Math.abs(i) * .25; if (Math.hypot(xx / 11, (yy + 94) / 8) < 1) { g.beginPath(); g.arc(xx, yy, .9, 0, TAU); g.fill(); } }
+  for (let i = -2; i <= 2; i++) { g.beginPath(); g.arc(i * 2.2, -102 + Math.abs(i) * .4, .9, 0, TAU); g.fill(); }
+  g.fillStyle = '#ffe28a'; g.beginPath(); g.arc(0, -108.5, 2, 0, TAU); g.fill();
+  // nét mặt: mắt nhìn xuống, sống mũi, môi, bạch hào
+  g.strokeStyle = 'rgba(90,50,8,.75)'; g.lineWidth = 1;
+  g.beginPath(); g.moveTo(-7, -88.5); g.quadraticCurveTo(-4, -86.8, -1.5, -88.2); g.moveTo(1.5, -88.2); g.quadraticCurveTo(4, -86.8, 7, -88.5); g.stroke();
+  g.beginPath(); g.moveTo(-7.4, -91.5); g.quadraticCurveTo(-4, -93, -1, -91.6); g.moveTo(1, -91.6); g.quadraticCurveTo(4, -93, 7.4, -91.5); g.stroke();
+  g.beginPath(); g.moveTo(0, -88); g.lineTo(-.8, -83.2); g.quadraticCurveTo(0, -82.4, 1.2, -83.2); g.stroke();
+  g.fillStyle = 'rgba(150,70,20,.6)'; g.beginPath(); g.moveTo(-3, -79.6); g.quadraticCurveTo(0, -78, 3, -79.6); g.quadraticCurveTo(0, -78.8, -3, -79.6); g.fill();
+  g.fillStyle = '#e8b040'; g.beginPath(); g.arc(0, -93.6, 1.1, 0, TAU); g.fill();
+  // ánh sáng nến hắt lên má
+  const sh = g.createRadialGradient(-4, -90, 1, -4, -90, 12); sh.addColorStop(0, 'rgba(255,250,220,.45)'); sh.addColorStop(1, 'rgba(255,250,220,0)'); g.fillStyle = sh; g.beginPath(); g.arc(-4, -90, 12, 0, TAU); g.fill();
   g.restore();
 }
 // ── cây bồ đề ──
@@ -2063,38 +2092,174 @@ function drawFloatLantern(l) {
 }
 
 // ─────────────────────────── phòng bên trong ───────────────────────────
-function drawHallRoomBack(g) {
-  // trần, xà gỗ
-  g.fillStyle = '#2a1006'; g.fillRect(0, 0, 1000, 700);
-  g.fillStyle = grad(g, 0, 40, 0, 330, ['#5a2410', '#7a3416', '#8a3e1a']); g.fillRect(60, 40, 880, 290);
-  g.fillStyle = '#3a1608'; g.fillRect(60, 40, 880, 22); g.fillStyle = '#e6c27a'; g.fillRect(60, 60, 880, 2);
-  g.strokeStyle = 'rgba(30,10,4,.35)'; g.lineWidth = 2; for (let x = 100; x < 940; x += 60) { g.beginPath(); g.moveTo(x, 64); g.lineTo(x, 330); g.stroke(); }
-  const halo = g.createRadialGradient(500, 210, 10, 500, 210, 360); halo.addColorStop(0, 'rgba(255,200,110,.6)'); halo.addColorStop(.5, 'rgba(220,130,50,.18)'); halo.addColorStop(1, 'rgba(0,0,0,0)');
-  g.fillStyle = halo; g.fillRect(60, 40, 880, 290);
-  plaque(g, 500, 88, 220, 30, 'ĐẠI HÙNG BẢO ĐIỆN', 15);
-  for (const s of [-1, 1]) { couplet(g, 500 + s * 150, 110, 300, 14); for (const d of [215, 265]) { const x = 500 + s * d; g.fillStyle = d === 215 ? '#d9a52b' : '#b3262e'; g.fillRect(x - 10, 66, 20, 96); g.beginPath(); g.moveTo(x - 10, 162); g.lineTo(x, 176); g.lineTo(x + 10, 162); g.fill(); } }
-  // bệ thờ nhiều cấp
-  g.fillStyle = '#6e2a12'; g.fillRect(330, 290, 340, 40); g.fillStyle = '#e6c27a'; g.fillRect(326, 288, 348, 3);
-  g.fillStyle = '#82341a'; g.fillRect(380, 262, 240, 30); g.fillStyle = '#e6c27a'; g.fillRect(376, 260, 248, 3);
-  drawBuddha(g, 500, 262, 1.3);
-  for (const s of [-1, 1]) { g.fillStyle = '#7a2a14'; g.fillRect(500 + s * 330 - 40, 250, 80, 80); g.fillStyle = '#e6c27a'; g.fillRect(500 + s * 330 - 42, 248, 84, 3); drawBuddha(g, 500 + s * 330, 250, .8, true); }
-  // sàn gạch tàu, thảm đỏ
-  g.fillStyle = '#9a4a2a'; g.fillRect(60, 330, 880, 340);
-  g.strokeStyle = 'rgba(40,14,6,.3)'; g.lineWidth = 1; g.beginPath();
-  for (let y = 330; y <= 670; y += 34) { g.moveTo(60, y); g.lineTo(940, y); } for (let x = 60; x <= 940; x += 34) { g.moveTo(x, 330); g.lineTo(x, 670); } g.stroke();
-  g.fillStyle = '#a8261c'; g.fillRect(450, 366, 100, 304); g.strokeStyle = '#e6c27a'; g.lineWidth = 2; g.strokeRect(456, 366, 88, 304);
-  for (const x of [330, 400, 600, 670]) { g.fillStyle = '#d9a52b'; g.beginPath(); g.ellipse(x, 452, 22, 10, 0, 0, TAU); g.fill(); g.strokeStyle = '#a8721a'; g.stroke(); }
-  g.fillStyle = '#d9a52b'; g.beginPath(); g.ellipse(500, 452, 24, 11, 0, 0, TAU); g.fill();
-  // tường hai bên & tường trước có cửa
-  g.fillStyle = '#4a1c0a'; g.fillRect(40, 40, 22, 640); g.fillRect(938, 40, 22, 640);
-  g.fillStyle = '#5e240e'; g.fillRect(40, 652, 415, 30); g.fillRect(545, 652, 415, 30);
-  g.fillStyle = '#e6c27a'; g.fillRect(40, 652, 415, 2); g.fillRect(545, 652, 415, 2);
-  g.fillStyle = 'rgba(255,230,170,.25)'; g.fillRect(455, 652, 90, 30);
+// ── Đại Hùng Bảo Điện: vẽ chi tiết như thật ──
+// vân gỗ sơn son, ô hộc thếp vàng, cửa võng chạm rồng mây, hoành phi chữ Hán, sàn gạch Bát Tràng bóng
+function woodGrain(g, x, y, w, h, base, dark, seed, vertical = true) {
+  g.fillStyle = base; g.fillRect(x, y, w, h);
+  const r = seeded(seed);
+  g.save(); g.beginPath(); g.rect(x, y, w, h); g.clip();
+  g.lineWidth = .7;
+  for (let i = 0; i < (vertical ? w : h) / 3; i++) {
+    g.strokeStyle = r() < .5 ? dark : 'rgba(255,220,180,.06)'; g.globalAlpha = .25 + r() * .35;
+    const p = (vertical ? x : y) + r() * (vertical ? w : h), amp = 1 + r() * 2.5, fr = .02 + r() * .03;
+    g.beginPath();
+    for (let t = 0; t <= (vertical ? h : w); t += 6) { const o = Math.sin(t * fr + i) * amp; vertical ? (t ? g.lineTo(p + o, y + t) : g.moveTo(p + o, y)) : (t ? g.lineTo(x + t, p + o) : g.moveTo(x, p + o)); }
+    g.stroke();
+  }
+  g.globalAlpha = 1; g.restore();
 }
+const goldG = (g, x0, y0, x1, y1) => grad(g, x0, y0, x1, y1, [[0, '#7a4a10'], [.3, '#d9a43c'], [.5, '#ffe9a0'], [.7, '#c8902e'], [1, '#6a3a0a']]);
+function goldFrame(g, x, y, w, h, t = 4) {
+  g.fillStyle = goldG(g, x, y, x, y + h); g.fillRect(x, y, w, t); g.fillRect(x, y + h - t, w, t);
+  g.fillStyle = goldG(g, x, y, x + w, y); g.fillRect(x, y, t, h); g.fillRect(x + w - t, y, t, h);
+  g.strokeStyle = 'rgba(40,10,0,.5)'; g.lineWidth = 1; g.strokeRect(x + t + .5, y + t + .5, w - 2 * t - 1, h - 2 * t - 1);
+}
+// hoạ tiết mây cuộn thếp vàng
+function cloudScroll(g, x, y, s, flip) {
+  g.save(); g.translate(x, y); g.scale(flip ? -s : s, s);
+  g.strokeStyle = '#f4d27a'; g.lineWidth = 2.2; g.lineCap = 'round';
+  g.beginPath(); g.arc(0, 0, 6, Math.PI * .2, Math.PI * 1.9); g.stroke();
+  g.beginPath(); g.arc(9, -3, 4, Math.PI * 1.1, Math.PI * 2.7); g.stroke();
+  g.beginPath(); g.moveTo(-6, 3); g.quadraticCurveTo(4, 10, 14, 2); g.stroke();
+  g.strokeStyle = 'rgba(80,30,0,.45)'; g.lineWidth = .8; g.beginPath(); g.arc(0, 0, 3.5, Math.PI * .2, Math.PI * 1.9); g.stroke();
+  g.restore();
+}
+// đầu rồng cách điệu thếp vàng (cửa võng)
+function dragonHead(g, x, y, s, flip) {
+  g.save(); g.translate(x, y); g.scale(flip ? -s : s, s);
+  g.fillStyle = goldG(g, -20, -16, 20, 16);
+  g.beginPath(); g.moveTo(-18, 6); g.quadraticCurveTo(-14, -12, 4, -12); g.quadraticCurveTo(16, -12, 20, -2); g.lineTo(26, 2); g.lineTo(18, 6); g.quadraticCurveTo(8, 14, -4, 10); g.closePath(); g.fill();
+  g.strokeStyle = '#f4d27a'; g.lineWidth = 1.6;
+  for (let i = 0; i < 4; i++) { g.beginPath(); g.moveTo(-6 + i * 4, -11); g.quadraticCurveTo(-10 + i * 3, -22, -16 + i * 2, -24); g.stroke(); }
+  g.beginPath(); g.moveTo(14, 4); g.quadraticCurveTo(24, 12, 30, 22); g.stroke(); g.beginPath(); g.moveTo(10, 6); g.quadraticCurveTo(16, 16, 18, 26); g.stroke();
+  g.fillStyle = '#c0281c'; g.beginPath(); g.arc(8, -4, 2.4, 0, TAU); g.fill(); g.fillStyle = '#fff'; g.beginPath(); g.arc(8.6, -4.6, .8, 0, TAU); g.fill();
+  g.restore();
+}
+function drawHallRoomBack(g) {
+  g.fillStyle = '#160803'; g.fillRect(0, 0, 1000, 700);
+  // vách hậu cung: gỗ sơn son, ô hộc khung vàng
+  woodGrain(g, 60, 40, 880, 292, '#6e2410', 'rgba(30,6,0,.6)', 11);
+  for (const [x0, x1] of [[64, 250], [750, 936]]) {
+    for (let y = 104; y < 300; y += 66) for (let x = x0 + 6; x < x1 - 40; x += 62) {
+      g.fillStyle = 'rgba(30,6,0,.35)'; g.fillRect(x + 3, y + 3, 54, 58);
+      goldFrame(g, x, y, 54, 58, 3);
+      g.save(); g.translate(x + 27, y + 29); g.strokeStyle = 'rgba(244,210,122,.55)'; g.lineWidth = 1.2;
+      for (let i = 0; i < 8; i++) { g.rotate(Math.PI / 4); g.beginPath(); g.ellipse(0, -9, 3.4, 9, 0, 0, TAU); g.stroke(); }
+      g.restore();
+    }
+  }
+  // xà ngang, kèo trần
+  woodGrain(g, 40, 30, 920, 30, '#3a1406', 'rgba(0,0,0,.6)', 3, false);
+  g.fillStyle = goldG(g, 0, 58, 0, 64); g.fillRect(40, 58, 920, 5);
+  for (let x = 70; x < 940; x += 70) { woodGrain(g, x - 7, 62, 14, 34, '#4a1a08', 'rgba(0,0,0,.6)', x); g.fillStyle = '#d9a43c'; g.fillRect(x - 8, 92, 16, 3); }
+  // khám thờ phía sau cửa võng: hõm tối, ánh vàng
+  const nx0 = 268, nx1 = 732, ny0 = 120;
+  g.fillStyle = grad(g, 0, ny0, 0, 300, ['#2a0a04', '#4a160a', '#5e1e0c']); g.fillRect(nx0, ny0, nx1 - nx0, 300 - ny0);
+  const hl = g.createRadialGradient(500, 190, 10, 500, 190, 260); hl.addColorStop(0, 'rgba(255,190,90,.55)'); hl.addColorStop(.6, 'rgba(200,100,30,.15)'); hl.addColorStop(1, 'rgba(0,0,0,0)');
+  g.fillStyle = hl; g.fillRect(nx0, ny0, nx1 - nx0, 300 - ny0);
+  // bệ thờ nhiều cấp chạm vàng
+  for (const [x0, x1, y, h] of [[300, 700, 290, 42], [350, 650, 262, 30], [400, 600, 238, 26]]) {
+    woodGrain(g, x0, y, x1 - x0, h, '#7a1e10', 'rgba(30,0,0,.55)', x0 + y);
+    g.fillStyle = goldG(g, 0, y - 3, 0, y + 2); g.fillRect(x0 - 4, y - 3, x1 - x0 + 8, 5);
+    for (let x = x0 + 12; x < x1 - 12; x += 34) { goldFrame(g, x, y + 8, 26, h - 14, 2); cloudScroll(g, x + 13, y + 8 + (h - 14) / 2, .5, (x / 34 | 0) % 2); }
+  }
+  // Tam Thế Phật: ba vị trên bệ cao nhất, vị giữa lớn nhất
+  drawBuddha(g, 500, 238, 1.02);
+  drawBuddha(g, 392, 262, .66, true); drawBuddha(g, 608, 262, .66, true);
+  // cửa võng chạm rồng mây thếp vàng ôm lấy khám thờ
+  g.save();
+  g.fillStyle = goldG(g, 0, 98, 0, 130);
+  g.beginPath(); g.moveTo(250, 98); g.lineTo(750, 98); g.lineTo(750, 300); g.lineTo(722, 300); g.lineTo(722, 138);
+  for (let i = 0; i <= 10; i++) { const t = i / 10, xx = 722 - t * 444, yy = 114 + Math.sin(t * Math.PI) * -3 + (i % 2) * 6; g.quadraticCurveTo(xx + 22, yy + 14, xx, yy); }
+  g.lineTo(278, 300); g.lineTo(250, 300); g.closePath(); g.fill();
+  g.strokeStyle = 'rgba(70,25,0,.6)'; g.lineWidth = 1.2; g.stroke();
+  for (let x = 290; x < 712; x += 38) cloudScroll(g, x, 106, .7, (x / 38 | 0) % 2);
+  for (let y = 150; y < 296; y += 34) { cloudScroll(g, 264, y, .75, false); cloudScroll(g, 736, y, .75, true); }
+  dragonHead(g, 292, 132, .95, false); dragonHead(g, 708, 132, .95, true);
+  g.fillStyle = '#ffe9a0'; g.beginPath(); g.arc(500, 108, 8, 0, TAU); g.fill();
+  g.strokeStyle = '#ffd36a'; g.lineWidth = 1.5; for (let i = 0; i < 10; i++) { const a = i * TAU / 10; g.beginPath(); g.moveTo(500 + Math.cos(a) * 9, 108 + Math.sin(a) * 9); g.lineTo(500 + Math.cos(a) * 14, 108 + Math.sin(a) * 14); g.stroke(); }
+  g.restore();
+  // hoành phi sơn đen chữ Hán thếp vàng
+  g.fillStyle = 'rgba(0,0,0,.4)'; g.fillRect(392, 66, 222, 34);
+  g.fillStyle = grad(g, 0, 62, 0, 96, ['#2a1408', '#120804']); g.fillRect(388, 62, 224, 34); goldFrame(g, 388, 62, 224, 34, 3);
+  g.fillStyle = goldG(g, 0, 68, 0, 92); g.font = "700 22px 'Noto Serif', serif"; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('大 雄 寶 殿', 500, 80);
+  g.font = "600 7px 'Be Vietnam Pro', sans-serif"; g.fillStyle = '#d9a43c'; g.fillText('ĐẠI HÙNG BẢO ĐIỆN', 500, 93);
+  // hai ban thờ Bồ Tát hai bên
+  for (const s of [-1, 1]) {
+    const cx = 500 + s * 345;
+    woodGrain(g, cx - 56, 244, 112, 88, '#6e1c0e', 'rgba(30,0,0,.5)', 70 + s);
+    g.fillStyle = goldG(g, 0, 240, 0, 246); g.fillRect(cx - 60, 240, 120, 5);
+    goldFrame(g, cx - 48, 258, 96, 62, 3); cloudScroll(g, cx - 18, 290, .9, false); cloudScroll(g, cx + 18, 290, .9, true);
+    drawBuddha(g, cx, 242, .82, true);
+    g.fillStyle = s < 0 ? '#c9a03a' : '#b3262e';
+    for (const d of [-1, 1]) { const bx = cx + d * 70; g.fillRect(bx - 9, 66, 18, 118); g.beginPath(); g.moveTo(bx - 9, 184); g.lineTo(bx, 198); g.lineTo(bx + 9, 184); g.fill(); g.fillStyle = 'rgba(255,240,200,.35)'; g.fillRect(bx - 6, 80, 12, 2); g.fillRect(bx - 6, 170, 12, 2); g.fillStyle = s < 0 ? '#c9a03a' : '#b3262e'; }
+  }
+  // sàn gạch Bát Tràng: từng viên đậm nhạt, mạch vữa, ánh phản chiếu
+  const r = seeded(77);
+  for (let y = 332; y < 672; y += 34) for (let x = 60; x < 940; x += 34) {
+    const v = r(); g.fillStyle = `rgb(${150 + v * 26 | 0},${70 + v * 16 | 0},${40 + v * 10 | 0})`; g.fillRect(x, y, 34, 34);
+    g.fillStyle = 'rgba(255,220,180,.06)'; g.fillRect(x + 2, y + 2, 30, 6);
+  }
+  g.strokeStyle = 'rgba(60,24,10,.55)'; g.lineWidth = 1.6; g.beginPath();
+  for (let y = 332; y <= 672; y += 34) { g.moveTo(60, y); g.lineTo(940, y); } for (let x = 60; x <= 940; x += 34) { g.moveTo(x, 332); g.lineTo(x, 672); } g.stroke();
+  const refl = g.createRadialGradient(500, 360, 10, 500, 380, 330); refl.addColorStop(0, 'rgba(255,200,120,.32)'); refl.addColorStop(1, 'rgba(255,200,120,0)'); g.fillStyle = refl; g.fillRect(60, 332, 880, 340);
+  const ao = g.createLinearGradient(0, 330, 0, 360); ao.addColorStop(0, 'rgba(0,0,0,.45)'); ao.addColorStop(1, 'rgba(0,0,0,0)'); g.fillStyle = ao; g.fillRect(60, 330, 880, 30);
+  // thảm đỏ viền vàng hoa văn
+  g.fillStyle = '#9a1a12'; g.fillRect(448, 368, 104, 304);
+  g.strokeStyle = '#d9a43c'; g.lineWidth = 3; g.strokeRect(454, 368, 92, 304); g.lineWidth = 1; g.strokeRect(459, 372, 82, 300);
+  g.strokeStyle = 'rgba(217,164,60,.45)'; for (let y = 390; y < 670; y += 34) { g.beginPath(); g.arc(500, y, 9, 0, TAU); g.stroke(); g.beginPath(); g.moveTo(491, y); g.lineTo(509, y); g.moveTo(500, y - 9); g.lineTo(500, y + 9); g.stroke(); }
+  // bồ đoàn
+  for (const x of [330, 400, 500, 600, 670]) {
+    g.fillStyle = 'rgba(0,0,0,.3)'; g.beginPath(); g.ellipse(x, 456, 24, 10, 0, 0, TAU); g.fill();
+    g.fillStyle = grad(g, 0, 442, 0, 462, ['#f0c050', '#c99a2a', '#8a6414']); g.beginPath(); g.ellipse(x, 452, 23, 10, 0, 0, TAU); g.fill();
+    g.strokeStyle = 'rgba(90,60,10,.6)'; g.lineWidth = 1; for (let i = 0; i < 8; i++) { const a = i * Math.PI / 4; g.beginPath(); g.moveTo(x, 452); g.lineTo(x + Math.cos(a) * 21, 452 + Math.sin(a) * 9); g.stroke(); }
+  }
+  // tường hai bên có song cửa, tường trước có cửa chính
+  for (const x of [40, 938]) {
+    woodGrain(g, x, 40, 22, 642, '#3a1406', 'rgba(0,0,0,.6)', x);
+    g.fillStyle = 'rgba(255,240,200,.18)'; g.fillRect(x + 4, 150, 14, 120);
+    g.fillStyle = '#2a0e04'; for (let y = 150; y < 270; y += 10) g.fillRect(x + 4, y, 14, 2.5);
+  }
+  woodGrain(g, 40, 652, 415, 30, '#4a1a08', 'rgba(0,0,0,.6)', 21, false); woodGrain(g, 545, 652, 415, 30, '#4a1a08', 'rgba(0,0,0,.6)', 22, false);
+  g.fillStyle = goldG(g, 0, 650, 0, 655); g.fillRect(40, 652, 415, 3); g.fillRect(545, 652, 415, 3);
+  g.fillStyle = 'rgba(255,230,170,.28)'; g.fillRect(455, 652, 90, 30);
+}
+// hiệu ứng động trong điện: khói trầm, vệt nắng qua song cửa, bụi lơ lửng
+const hallSmoke = [];
+function drawHallFx(dt) {
+  if (Math.random() < .35 && hallSmoke.length < 70) hallSmoke.push({ x: 500 + rnd(-3, 3), y: 306, vx: rnd(-2, 2), t: 0, life: rnd(4, 6), r: rnd(2, 3.5) });
+  for (let i = hallSmoke.length - 1; i >= 0; i--) {
+    const s = hallSmoke[i]; s.t += dt; if (s.t > s.life) { hallSmoke.splice(i, 1); continue; }
+    s.vx += Math.sin(T * .8 + s.t * 2) * 3 * dt; s.x += s.vx * dt; s.y -= 16 * dt; s.r += dt * 2.6;
+    const a = Math.sin(s.t / s.life * Math.PI) * .16; ctx.fillStyle = `rgba(230,225,215,${a})`; ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, TAU); ctx.fill();
+  }
+  const day = 1 - P.night;
+  if (day > .05) {
+    ctx.save(); ctx.globalCompositeOperation = 'lighter';
+    for (const [x0, dir] of [[62, 1], [938, -1]]) {
+      const gr = ctx.createLinearGradient(x0, 150, x0 + dir * 260, 520); gr.addColorStop(0, `rgba(255,225,160,${.16 * day})`); gr.addColorStop(1, 'rgba(255,225,160,0)');
+      ctx.fillStyle = gr; ctx.beginPath(); ctx.moveTo(x0, 150); ctx.lineTo(x0, 270); ctx.lineTo(x0 + dir * 300, 600); ctx.lineTo(x0 + dir * 380, 520); ctx.closePath(); ctx.fill();
+      for (let i = 0; i < 14; i++) { const t = ((T * .03 + i * .071) % 1), px = x0 + dir * (40 + t * 280 + Math.sin(i * 3 + T * .5) * 14), py = 200 + t * 330 + Math.sin(i * 7 + T) * 30; ctx.fillStyle = `rgba(255,240,200,${.35 * day * Math.sin(t * Math.PI)})`; ctx.beginPath(); ctx.arc(px, py, 1.1, 0, TAU); ctx.fill(); }
+    }
+    ctx.restore();
+  }
+  // tối dần ở góc (vignette)
+  const vg = ctx.createRadialGradient(500, 330, 200, 500, 360, 620); vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(10,3,0,.5)');
+  ctx.fillStyle = vg; ctx.fillRect(0, 0, 1000, 700);
+}
+
 function drawHallAltar(g) {
-  g.fillStyle = grad(g, 0, 322, 0, 366, ['#8a2a14', '#5e180b']); g.fillRect(372, 322, 256, 44);
-  g.fillStyle = '#e6c27a'; g.fillRect(368, 319, 264, 4); g.fillRect(390, 336, 220, 1.5);
-  g.fillStyle = '#c9a050'; g.font = "700 14px 'Noto Serif', serif"; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('卍', 500, 352);
+  woodGrain(g, 372, 318, 256, 48, '#7a1e10', 'rgba(30,0,0,.5)', 5);
+  g.fillStyle = goldG(g, 0, 314, 0, 321); g.fillRect(366, 314, 268, 6);
+  g.fillStyle = grad(g, 0, 322, 0, 352, ['#b3201a', '#8a1410']);
+  g.beginPath(); g.moveTo(380, 322); g.lineTo(620, 322); g.lineTo(620, 346);
+  for (let x = 620; x >= 380; x -= 15) g.quadraticCurveTo(x - 7.5, 356, x - 15, 346);
+  g.closePath(); g.fill();
+  g.strokeStyle = '#e8b84a'; g.lineWidth = 2; g.beginPath(); g.moveTo(382, 328); g.lineTo(618, 328); g.stroke();
+  g.fillStyle = '#e8b84a'; g.font = "700 15px 'Noto Serif', serif"; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('卍', 500, 339);
+  for (const s of [-1, 1]) { cloudScroll(g, 500 + s * 50, 339, .8, s > 0); cloudScroll(g, 500 + s * 92, 339, .8, s < 0); }
+  g.strokeStyle = '#e8b84a'; g.lineWidth = 1; for (let x = 383; x < 620; x += 5) { g.beginPath(); g.moveTo(x, 352); g.lineTo(x + (Math.sin(x) * .8), 360); g.stroke(); }
+  for (const x0 of [372, 616]) { g.fillStyle = goldG(g, x0, 0, x0 + 12, 0); g.fillRect(x0, 320, 12, 46); }
 }
 function drawXamTable(g) {
   g.fillStyle = '#6e2a12'; g.fillRect(176, 380, 90, 8); g.fillRect(182, 388, 7, 20); g.fillRect(253, 388, 7, 20);
@@ -2121,10 +2286,20 @@ function drawDonateBox(g) {
   g.fillStyle = '#f3cf78'; g.font = "700 8px 'Be Vietnam Pro', sans-serif"; g.textAlign = 'center'; g.fillText('CÔNG', 851, 552); g.fillText('ĐỨC', 851, 562);
 }
 function drawColumn(g, x, y) {
-  g.fillStyle = 'rgba(0,0,0,.25)'; g.beginPath(); g.ellipse(x, y + 2, 20, 7, 0, 0, TAU); g.fill();
-  g.fillStyle = '#b5ab9b'; g.fillRect(x - 17, y - 10, 34, 12);
-  g.fillStyle = grad(g, x - 13, 0, x + 13, 0, ['#7a1c12', '#c9483a', '#9e2a1f', '#5e140d']); g.fillRect(x - 13, y - 250, 26, 240);
-  g.fillStyle = '#d8b06a'; g.fillRect(x - 15, y - 14, 30, 4);
+  g.fillStyle = 'rgba(0,0,0,.35)'; g.beginPath(); g.ellipse(x, y + 2, 24, 8, 0, 0, TAU); g.fill();
+  g.fillStyle = grad(g, x - 20, 0, x + 20, 0, ['#7d776c', '#bdb6a8', '#8f897d']); g.beginPath(); g.ellipse(x, y - 4, 20, 7, 0, 0, TAU); g.fill(); g.fillRect(x - 20, y - 12, 40, 8);
+  g.fillStyle = '#a49d90'; g.beginPath(); g.ellipse(x, y - 12, 20, 7, 0, 0, TAU); g.fill();
+  g.fillStyle = grad(g, x - 14, 0, x + 14, 0, ['#5e120c', '#a82c1e', '#d24a34', '#9e2a1f', '#4a0e08']); g.fillRect(x - 14, y - 270, 28, 258);
+  g.save(); g.beginPath(); g.rect(x - 14, y - 270, 28, 258); g.clip();
+  g.strokeStyle = goldG(g, x - 14, 0, x + 14, 0); g.lineWidth = 4;
+  g.beginPath(); for (let t = 0; t <= 1; t += .01) { const yy = y - 20 - t * 230, xx = x + Math.sin(t * TAU * 2.2) * 15; t ? g.lineTo(xx, yy) : g.moveTo(xx, yy); } g.stroke();
+  g.fillStyle = '#ffe28a'; for (let t = .05; t < 1; t += .09) { const yy = y - 20 - t * 230, xx = x + Math.sin(t * TAU * 2.2) * 15; if (Math.cos(t * TAU * 2.2) > 0) { g.beginPath(); g.arc(xx, yy, 1.4, 0, TAU); g.fill(); } }
+  g.restore();
+  g.fillStyle = '#120804'; g.fillRect(x - 9, y - 220, 18, 150); goldFrame(g, x - 10, y - 222, 20, 154, 2);
+  g.fillStyle = '#e8b84a'; g.font = "700 11px 'Noto Serif', serif"; g.textAlign = 'center'; g.textBaseline = 'middle';
+  const words = x < 500 ? ['佛', '光', '普', '照', '十', '方'] : ['法', '輪', '常', '轉', '萬', '世'];
+  words.forEach((c, i) => g.fillText(c, x, y - 206 + i * 24));
+  g.fillStyle = goldG(g, x - 16, 0, x + 16, 0); g.fillRect(x - 16, y - 274, 32, 6);
 }
 function drawShopRoomBack(g) {
   g.fillStyle = '#2a1006'; g.fillRect(0, 0, 760, 560);
@@ -2159,11 +2334,11 @@ function drawTeaTable(g) {
 const ROOM_PROPS = {
   lecture: [],
   hall: [
-    { key: 'rAltar', base: 366, x0: 360, y0: 300, w: 280, h: 70, fn: drawHallAltar, extra: 'altar' },
+    { key: 'rAltar', base: 366, x0: 360, y0: 306, w: 280, h: 64, fn: drawHallAltar, extra: 'altar' },
     { key: 'rXam', base: 408, x0: 170, y0: 320, w: 100, h: 92, fn: drawXamTable },
     { key: 'rMo', base: 410, x0: 740, y0: 370, w: 90, h: 42, fn: drawMoStand },
     { key: 'rBox', base: 578, x0: 824, y0: 528, w: 54, h: 52, fn: drawDonateBox },
-    ...[[330, 348], [670, 348]].map(([x, y], i) => ({ key: 'rCol' + i, base: y, x0: x - 22, y0: y - 254, w: 44, h: 262, fn: g => drawColumn(g, x, y), fadeable: true })),
+    ...[[330, 348], [670, 348]].map(([x, y], i) => ({ key: 'rCol' + i, base: y, x0: x - 26, y0: y - 280, w: 52, h: 290, fn: g => drawColumn(g, x, y), fadeable: true })),
   ],
   shop: [
     { key: 'sCounter', base: 336, x0: 220, y0: 255, w: 320, h: 84, fn: drawCounter },
@@ -2459,7 +2634,7 @@ function render() {
       const p = it.room, s = sprite('rp_' + p.key, p.x0, p.y0, p.w, p.h, p.fn);
       const behind = p.fadeable && me.x > p.x0 && me.x < p.x0 + p.w && me.y < p.base && me.y > p.base - 260;
       ctx.globalAlpha = behind ? .4 : 1; ctx.drawImage(s.c, s.x0, s.y0, s.w, s.h); ctx.globalAlpha = 1;
-      if (p.extra === 'altar') drawAltarOfferings(500, 320);
+      if (p.extra === 'altar') drawAltarOfferings(500, 315);
     }
   }
   for (const a of arcs) {
@@ -2479,7 +2654,8 @@ function render() {
       ctx.strokeStyle = 'rgba(40,30,30,.7)'; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.moveTo(b.x - 7, b.y - w); ctx.quadraticCurveTo(b.x - 2, b.y - 2, b.x, b.y); ctx.quadraticCurveTo(b.x + 2, b.y - 2, b.x + 7, b.y - w); ctx.stroke();
     }
   } else if (sc === 'hall') {
-    for (const [x, y] of [[150, 120], [350, 140], [650, 140], [850, 120]]) { ctx.strokeStyle = 'rgba(40,14,6,.7)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(x, 62); ctx.lineTo(x, y - 6); ctx.stroke(); hangLantern(ctx, x, y, '#d8342a', Math.sin(T * 1.1 + x) * .05); }
+    drawHallFx(Math.min(.05, T - (render.hallT || T))); render.hallT = T;
+    for (const [x, y] of [[150, 120], [236, 140], [764, 140], [850, 120]]) { ctx.strokeStyle = 'rgba(40,14,6,.7)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(x, 62); ctx.lineTo(x, y - 6); ctx.stroke(); hangLantern(ctx, x, y, '#d8342a', Math.sin(T * 1.1 + x) * .05); }
   }
   drawLighting();
   // lớp giao diện (không bị tối)
@@ -2589,7 +2765,7 @@ function sceneLights() {
     L.push([450, 184, 300, lectNow().live ? 1 : .6], [200, 290, 120, .7], [700, 290, 120, .7], [450, 630, 170, (1 - P.night) * .9 + .1]);
   } else if (me.scene === 'hall') {
     L.push([500, 200, 330, .95], [170, 170, 150, .8], [830, 170, 150, .8], [420, 296, 80, 1], [580, 296, 80, 1], [500, 690, 170, (1 - P.night) * .9 + .1]);
-    for (const [x, y] of [[150, 120], [350, 140], [650, 140], [850, 120]]) L.push([x, y + 14, 90, .9]);
+    for (const [x, y] of [[150, 120], [236, 140], [764, 140], [850, 120]]) L.push([x, y + 14, 90, .9]);
   } else {
     L.push([380, 150, 320, .8], [380, 540, 150, (1 - P.night) * .9 + .1], [620, 440, 90, .6]);
   }
