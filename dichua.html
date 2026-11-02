@@ -1241,7 +1241,7 @@ function drawPerson(g, o) {
 
 // ─────────────────────────── trạng thái thế giới ───────────────────────────
 const me = {
-  id: 'me', x: 170, y: FEET, dir: 1, ph: 0, pose: 'stand', bow: 0, look: lookOf(S.robe, S.hair), name: S.name || 'Phật tử',
+  id: 'me', x: 170, y: FEET, ty: FEET, dir: 1, ph: 0, pose: 'stand', bow: 0, look: lookOf(S.robe, S.hair), name: S.name || 'Phật tử',
   target: null, onArrive: null, script: [], held: null, heldN: 0, say: null, speed: 0,
 };
 let mode = 'free';           // free | busy | bell | chant | zen
@@ -1291,6 +1291,7 @@ const npcs = [
   { id: 'tieu', name: 'Chú tiểu', look: { robe: { c: '#8f8a7a', d: '#6e6a5c', p: '#6e6a5c' }, monk: true, skin: SKIN }, x: 1372, y: FEET - 2, dir: 1, ph: 0, pose: 'stand', bow: 0, ai: 'bell', t: 40, scale: .72 },
   { id: 'ong', name: 'Ông Tư', look: { robe: ROBES[2], hair: 2, skin: '#e8bf98', hairC: '#9a948a' }, x: 3960, y: FEET - 2, dir: 1, ph: 0, pose: 'stand', bow: 0, ai: 'pond', t: 5, scale: .98 },
 ];
+for (const n of npcs) { n.bs = n.scale || 1; n.ty = n.y; }
 const MONK_TIPS = [
   'Mô Phật. Thắp hương nên thắp số lẻ: 1, 3 hoặc 5 nén là đủ.',
   'Ban Tam Bảo chỉ dâng lễ chay thôi con nhé: hương, hoa, quả, oản.',
@@ -1303,6 +1304,21 @@ const MONK_TIPS = [
 ];
 const say = (p, text, dur = 4.5) => { p.say = { text, t: T, dur }; };
 
+// vùng đi được: sân gạch và bãi cỏ phía trước, không lội xuống hồ sen
+const Y_MIN = 486;
+function yMax(x) { return x < 560 ? 552 : (x > POND.x0 - 14 && x < POND.x1 + 14) ? POND.y0 - 5 : 578; }
+const walkable = (x, y) => x >= 30 && x <= WORLD_W - 30 && y >= Y_MIN && y <= yMax(x);
+const depth = y => 1 + (y - FEET) * .0026; // đứng gần (phía dưới) to hơn, xa thì nhỏ lại
+// bước một đoạn (vx, vy); bị chặn thì trượt theo từng trục, gặp bờ hồ thì tự vòng lên trên
+function stepMe(vx, vy) {
+  const x = me.x, y = me.y;
+  if (walkable(x + vx, y + vy)) { me.x += vx; me.y += vy; }
+  else if (vx && walkable(x + vx, y)) me.x += vx;
+  else if (vx && walkable(x, y - Math.hypot(vx, vy))) me.y -= Math.hypot(vx, vy);
+  else if (vy && walkable(x, y + vy)) me.y += vy;
+  if (me.y > yMax(me.x)) me.y = yMax(me.x);
+  return Math.hypot(me.x - x, me.y - y);
+}
 function walkTo(p, tx, dt, sp = 70) {
   const d = tx - p.x;
   if (Math.abs(d) < 2) { p.x = tx; p.pose = p.pose === 'walk' ? 'stand' : p.pose; return true; }
@@ -1332,11 +1348,13 @@ function updateNpc(n, dt) {
     }
     case 'wander':
       if (n.t > 0) { n.pose = 'stand'; break; }
-      if (walkTo(n, n.tx, dt, 40)) { n.t = rnd(3, 8); n.tx = rnd(950, 4520); if (Math.random() < .3) say(n, pick(['Đẹp quá con nhỉ!', 'Mình qua hồ sen xem cá nhé.', 'Nhớ đi nhẹ nói khẽ nha con.', 'Con chắp tay vái Phật đi.'])); }
+      { const lim = Math.min(n.ty, yMax(n.x), yMax(n.x + n.dir * 90)); n.y += clamp(lim - n.y, -40 * dt, 18 * dt); }
+      if (walkTo(n, n.tx, dt, 40)) { n.ty = rnd(Y_MIN + 2, 560); n.t = rnd(3, 8); n.tx = rnd(950, 4520); if (Math.random() < .3) say(n, pick(['Đẹp quá con nhỉ!', 'Mình qua hồ sen xem cá nhé.', 'Nhớ đi nhẹ nói khẽ nha con.', 'Con chắp tay vái Phật đi.'])); }
       break;
     case 'follow': {
       const L = npcs.find(q => q.id === n.leader);
       const tx = L.x + n.off * L.dir;
+      n.y += clamp(L.y + 4 - n.y, -40 * dt, 40 * dt);
       if (Math.abs(tx - n.x) > 4) walkTo(n, tx, dt, 46); else { n.pose = L.pose === 'walk' ? 'walk' : 'stand'; n.dir = L.dir; if (n.pose === 'walk') n.ph += dt * 5; }
       if (Math.random() < dt * .01) say(n, pick(['Mẹ ơi cá kìa!', 'Chuông kêu to ghê!', 'Con muốn thả hoa đăng!']), 3);
       break;
@@ -1840,15 +1858,29 @@ function frame(ts) {
 function update(dt) {
   if (todT < 1) { todT = Math.min(1, todT + dt / 2.5); mixTod(todFrom, todIdx, todT); }
   // di chuyển
-  let dx = 0;
-  if (mode === 'free' && started && !sheetOpen()) {
+  let dx = 0, dy = 0;
+  if ((mode === 'free' || mode === 'walking') && started && !sheetOpen()) {
     if (keys.has('ArrowLeft') || keys.has('KeyA')) dx -= 1;
     if (keys.has('ArrowRight') || keys.has('KeyD')) dx += 1;
+    if (keys.has('ArrowUp') || keys.has('KeyW')) dy -= 1;
+    if (keys.has('ArrowDown') || keys.has('KeyS')) dy += 1;
   }
-  if (dx) { me.target = null; me.onArrive = null; me.dir = dx; me.x = clamp(me.x + dx * 150 * dt, 30, WORLD_W - 30); me.pose = 'walk'; me.ph += dt * 150 / 9; }
-  else if (me.target != null && (mode === 'free' || mode === 'walking')) {
-    const far = Math.abs(me.target - me.x) > 700;
-    if (walkTo(me, me.target, dt, far ? 260 : 150)) { me.target = null; me.pose = 'stand'; if (mode === 'walking') mode = 'free'; const f = me.onArrive; me.onArrive = null; f && f(); renderActions(); }
+  if (dx || dy) {
+    if (mode === 'walking') mode = 'free';
+    me.target = null; me.onArrive = null; if (dx) me.dir = dx;
+    const k = dx && dy ? .78 : 1;
+    const moved = stepMe(dx * 150 * k * dt, dy * 100 * k * dt);
+    me.pose = 'walk'; me.ph += moved / 9;
+  } else if (me.target != null && mode === 'walking') {
+    const ddx = me.target - me.x, ddy = me.ty - me.y, dist = Math.hypot(ddx, ddy);
+    if (dist < 2.5) { me.x = me.target; me.y = me.ty; me.target = null; me.pose = 'stand'; mode = 'free'; const f = me.onArrive; me.onArrive = null; f && f(); renderActions(); }
+    else {
+      const st = Math.min(dist, (Math.abs(ddx) > 700 ? 260 : 150) * dt), moved = stepMe(ddx / dist * st, ddy / dist * st);
+      if (Math.abs(ddx) > 1) me.dir = Math.sign(ddx);
+      me.pose = 'walk'; me.ph += moved / 9;
+      me.stuck = moved < st * .1 ? (me.stuck || 0) + dt : 0;
+      if (me.stuck > .4) { me.target = null; me.onArrive = null; me.pose = 'stand'; mode = 'free'; renderActions(); }
+    }
   } else if (mode === 'free' && me.pose === 'walk') me.pose = 'stand';
   if (mode === 'busy') updateScript(dt);
   // chuông: kéo chày
@@ -1863,10 +1895,10 @@ function update(dt) {
   updateXam(dt);
   for (const n of npcs) updateNpc(n, dt);
   for (const r of remotes.values()) {
-    const d = r.tx - r.x;
-    r.walking = Math.abs(d) > 1.5;
-    r.x += d * Math.min(1, dt * 8);
-    if (r.walking && r.pose === 'walk') r.ph += dt * Math.min(Math.abs(d) * 8, 260) / 9;
+    const d = Math.hypot(r.tx - r.x, r.ty - r.y);
+    r.walking = d > 1.5;
+    r.x += (r.tx - r.x) * Math.min(1, dt * 8); r.y += (r.ty - r.y) * Math.min(1, dt * 8);
+    if (r.walking && r.pose === 'walk') r.ph += dt * Math.min(d * 8, 260) / 9;
     if (r.bowT != null) r.bow = lerp(r.bow || 0, r.bowT, Math.min(1, dt * 10));
   }
   for (let i = arcs.length - 1; i >= 0; i--) { const a = arcs[i]; a.t += dt; if (a.t >= a.dur) { arcs.splice(i, 1); a.fin && a.fin(); } }
@@ -1896,14 +1928,15 @@ function onEnterZone(z) { if (started && ZONE_TIPS[z] && !tipShown.has(z)) { tip
 function nearHot() {
   if (mode !== 'free' || me.target != null || me.pose === 'walk') return null;
   let best = null, bd = 80;
+  if (Math.abs(me.y - FEET) > 40) return null;
   for (const h of HOT) { const d = Math.abs(me.x - h.stand); if (d < bd) { bd = d; best = h; } }
   return best;
 }
 function goHot(h) {
   if (mode !== 'free' && mode !== 'walking') return;
   initAudio();
-  if (Math.abs(me.x - h.stand) < 6) { me.dir = h.x >= me.x ? 1 : -1; h.run(); return; }
-  me.target = h.stand; mode = 'walking';
+  if (Math.abs(me.x - h.stand) < 6 && Math.abs(me.y - FEET) < 6) { me.dir = h.x >= me.x ? 1 : -1; h.run(); return; }
+  me.target = h.stand; me.ty = FEET; mode = 'walking';
   me.onArrive = () => { me.dir = h.x >= me.x - 1 ? 1 : -1; h.run(); };
   renderActions();
 }
@@ -1932,7 +1965,7 @@ function render() {
   drawIncense();
   // nhân vật (theo chiều sâu)
   const people = [...npcs, ...remotes.values(), me].filter(p => p.x > camX - 60 && p.x < camX + VW + 60).sort((a, b) => a.y - b.y);
-  for (const p of people) drawPerson(ctx, p);
+  for (const p of people) { p.scale = (p.bs ?? 1) * depth(p.y); drawPerson(ctx, p); }
   for (const a of arcs) {
     const q = a.t / a.dur, x = lerp(a.x0, a.x1, q), y = lerp(a.y0, a.y1, q) - Math.sin(q * Math.PI) * 40;
     drawFish({ x, y, a: 0, tw: T * 10, type: a.type, col: a.type === 'gold' ? '#ffb22a' : '#ff7a2a', spot: true });
@@ -1975,7 +2008,7 @@ function render() {
   }
   if (me.target != null && mode === 'walking') {
     ctx.strokeStyle = 'rgba(255,230,160,.7)'; ctx.lineWidth = 1.5;
-    const r = 6 + (T * 10 % 6); ctx.beginPath(); ctx.ellipse(me.target, FEET + 2, r * 1.6, r * .5, 0, 0, TAU); ctx.stroke();
+    const r = 6 + (T * 10 % 6); ctx.beginPath(); ctx.ellipse(me.target, me.ty + 2, r * 1.6, r * .5, 0, 0, TAU); ctx.stroke();
   }
   // tên, lời nói
   for (const p of people) {
@@ -2059,10 +2092,10 @@ function renderActions(force) {
   if (mode === 'free' && nh) {
     const b = document.createElement('button'); b.className = 'act';
     b.innerHTML = `<span>${nh.icon}</span><span>${nh.label}</span><kbd>E</kbd>`;
-    b.onclick = () => { initAudio(); nh.run(); };
+    b.onclick = () => goHot(nh);
     const row = document.createElement('div'); row.className = 'act-row'; row.appendChild(b); box.appendChild(row);
   } else if (mode === 'free' && T < 25 && !S.today.done.length) {
-    box.innerHTML = `<div class="hint">Chạm vào cảnh để đi tới · chạm biểu tượng để làm lễ · phím ← → và E trên máy tính</div>`;
+    box.innerHTML = `<div class="hint">Chạm vào sân để đi tới bất cứ đâu · chạm biểu tượng để làm lễ · máy tính: phím mũi tên / WASD và E</div>`;
   } else if (mode === 'bell') {
     box.innerHTML = `<div class="hint">Giữ để kéo chày, thả tay để thỉnh chuông · tiếng chuông ${Math.min(bell.count, 3)}/3</div>
       <div class="act-row" style="align-items:center">
@@ -2147,7 +2180,7 @@ function openShop() {
 // ── thỉnh chuông ──
 function startBell() {
   initAudio();
-  mode = 'bell'; bell.count = 0; bell.pull = 0; me.x = BELL_X - 112; me.dir = 1;
+  mode = 'bell'; bell.count = 0; bell.pull = 0; me.x = BELL_X - 112; me.y = FEET; me.dir = 1;
   const t = npcs.find(n => n.id === 'tieu'); if (t) { t.t = Math.max(t.t, 60); t.pose = 'stand'; }
   say(me, 'Nguyện tiếng chuông này vang khắp mười phương.', 4);
   renderActions(true);
@@ -2659,7 +2692,7 @@ function openJourney() {
 function openHelp() {
   openSheet(`<h2>Hướng dẫn</h2><div class="orn">✦</div>
     <div class="tips" style="margin-top:0">
-    <b>Di chuyển:</b> chạm vào cảnh để đi tới, hoặc phím ← → (A/D).<br>
+    <b>Di chuyển:</b> chạm vào sân để đi tới bất cứ đâu (lên, xuống, chéo), hoặc phím mũi tên / WASD. Ra phía trước nhân vật to hơn, vào trong thì nhỏ lại; gặp hồ sen sẽ tự đi vòng lên bờ.<br>
     <b>Làm lễ:</b> chạm biểu tượng nổi trên cảnh, hoặc đứng gần rồi bấm nút / phím E.<br>
     <b>Phím tắt:</b> J hành trình · N đổi giờ · M âm thanh · T nói · Space gõ mõ / kéo chuông.<br>
     <b>Online:</b> nút 🌐 tạo phòng và gửi link cho bạn bè; mọi người thấy nhau đi lại, nghe chuông, thấy hương và hoa đăng của nhau.
@@ -2699,7 +2732,7 @@ function netSend(msg) {
   else if (net.conn && net.conn.open) try { net.conn.send(msg); } catch (e) {}
 }
 function broadcast(msg, except) { for (const c of net.conns.keys()) if (c !== except && c.open) try { c.send(msg); } catch (e) {} }
-function stOf(p) { return [p.x | 0, p.dir < 0 ? -1 : 1, POSES.has(p.pose) ? p.pose : 'stand', +(p.bow || 0).toFixed(2)]; }
+function stOf(p) { return [p.x | 0, p.dir < 0 ? -1 : 1, POSES.has(p.pose) ? p.pose : 'stand', +(p.bow || 0).toFixed(2), p.y | 0]; }
 function netTick(dt) {
   if (!net.on) return;
   net.sendT -= dt;
@@ -2710,7 +2743,7 @@ function netTick(dt) {
     const tnow = performance.now();
     for (const [c, id] of net.conns) { const r = remotes.get(id); if (r && tnow - r.seen > 8000) { c._lost && c._lost(); try { c.close(); } catch (e) {} } }
     const l = [['h', ...stOf(me)]];
-    for (const [id, r] of remotes) l.push([id, r.tx | 0, r.dir, r.pose, +(r.bowT || 0).toFixed(2)]);
+    for (const [id, r] of remotes) l.push([id, r.tx | 0, r.dir, r.pose, +(r.bowT || 0).toFixed(2), r.ty | 0]);
     broadcast({ t: 'ps', l });
   } else if (net.conn && net.conn.open) {
     const st = stOf(me), sig = st.join(',');
@@ -2723,7 +2756,7 @@ function addRemote(id, name, look, x) {
   let r = remotes.get(id);
   if (!r) {
     let h = 0; for (const ch of String(id)) h = (h * 31 + ch.charCodeAt(0)) % 997;
-    r = { id, name, look: validLook(look), x: num(x, 0, WORLD_W, 170), tx: num(x, 0, WORLD_W, 170), y: FEET - 6 + (h % 12), dir: 1, ph: 0, pose: 'stand', bow: 0, bowT: 0 };
+    r = { id, name, look: validLook(look), x: num(x, 0, WORLD_W, 170), tx: num(x, 0, WORLD_W, 170), y: FEET - 6 + (h % 12), ty: FEET - 6 + (h % 12), dir: 1, ph: 0, pose: 'stand', bow: 0, bowT: 0 };
     remotes.set(id, r);
     if (started) toast(`🙏 ${esc(r.name)} đã vào chùa.`);
   } else { r.name = name; r.look = validLook(look); }
@@ -2732,7 +2765,7 @@ function addRemote(id, name, look, x) {
 }
 function applySt(r, s) {
   if (!r || !Array.isArray(s)) return;
-  r.tx = num(s[0], 0, WORLD_W, r.tx); r.dir = s[1] < 0 ? -1 : 1; r.pose = POSES.has(s[2]) ? s[2] : 'stand'; r.bowT = num(s[3], 0, 1);
+  r.tx = num(s[0], 0, WORLD_W, r.tx); r.dir = s[1] < 0 ? -1 : 1; r.pose = POSES.has(s[2]) ? s[2] : 'stand'; r.bowT = num(s[3], 0, 1); r.ty = num(s[4], Y_MIN, 600, r.ty);
   if (r.pose === 'hold') { r.held = 'incense'; r.heldN = 3; } else r.held = null;
 }
 // áp dụng sự kiện từ người khác
@@ -2933,7 +2966,8 @@ cv.addEventListener('pointerdown', e => {
   }
   for (const l of lanterns) if (Math.hypot(w.x - l.x, w.y - l.y + 6) < 18) { toast(`🪷 ${l.text ? `<b>${esc(l.name || 'Ai đó')}</b>: “${esc(l.text)}”` : 'Một ngọn hoa đăng lặng lẽ trôi.'}`, 4200); return; }
   for (const r of remotes.values()) if (Math.abs(w.x - r.x) < 16 && w.y > r.y - 80 && w.y < r.y + 6) { say(me, `Chào ${r.name} 🙏`); netSend({ t: 'ev', k: 'say', text: `Chào ${r.name} 🙏` }); return; }
-  me.target = clamp(w.x, 30, WORLD_W - 30); me.onArrive = null; mode = 'walking'; renderActions();
+  const tx = clamp(w.x, 30, WORLD_W - 30);
+  me.target = tx; me.ty = clamp(w.y >= GROUND ? w.y : me.y, Y_MIN, yMax(tx)); me.onArrive = null; me.stuck = 0; mode = 'walking'; renderActions();
 });
 cv.addEventListener('pointerup', () => { if (mode === 'bell') pullEnd(); });
 cv.addEventListener('pointercancel', () => { if (mode === 'bell') pullEnd(); });
@@ -2947,9 +2981,9 @@ window.addEventListener('keydown', e => {
   if (e.code === 'Space') {
     e.preventDefault();
     if (mode === 'bell') pullStart(); else if (mode === 'chant') hitMo();
-    else if (mode === 'free') { const h = nearHot(); if (h) h.run(); }
+    else if (mode === 'free') { const h = nearHot(); if (h) goHot(h); }
   }
-  else if (e.code === 'KeyE' || e.code === 'Enter') { if (mode === 'free') { const h = nearHot(); if (h) h.run(); } }
+  else if (e.code === 'KeyE' || e.code === 'Enter') { if (mode === 'free') { const h = nearHot(); if (h) goHot(h); } }
   else if (e.code === 'Escape') { if (mode === 'bell') endBell(); else if (mode === 'chant') endChant(); else if (mode === 'zen') endZen(false); }
   else if (e.code === 'KeyJ') openJourney();
   else if (e.code === 'KeyN') cycleTod();
