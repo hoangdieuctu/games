@@ -1247,7 +1247,7 @@ function personSide(g, o) {
   const pose = o.pose || 'stand', walking = pose === 'walk', ph = o.ph || 0, s = walking ? Math.sin(ph) : 0;
   const kneeling = pose === 'kneel' || pose === 'kneelbow' || pose === 'chant';
   let hipY = -30, tilt = 0;
-  if (walking) hipY = -30 + Math.abs(s) * 1.3;
+  if (walking) hipY = -30 + Math.abs(s) * 1;
   if (kneeling) hipY = -21;
   if (pose === 'sit') hipY = -9;
   if (pose === 'bench') hipY = -27;
@@ -1268,7 +1268,7 @@ function personSide(g, o) {
     if (pose === 'sit') { g.strokeStyle = col; g.lineWidth = 6.5; g.lineCap = 'round'; g.beginPath(); g.moveTo(hx - 2, hy); g.quadraticCurveTo(hx + 16, -3, near ? -10 : 10, -3); g.stroke(); return; }
     if (pose === 'bench') { const kx = hx + 13; limb(g, col, 6.8, 6, hx, hy, kx, hy + 1, kx + (near ? 1 : -1), -2); g.fillStyle = SHOE; g.beginPath(); g.ellipse(kx + 3, -1, 4.4, 2.2, 0, 0, TAU); g.fill(); return; }
     let fx, fy;
-    if (walking) { fx = hx + Math.sin(phase) * 11.5; fy = -Math.max(0, Math.cos(phase)) * 5; }
+    if (walking) { fx = hx + Math.sin(phase) * 12.5; fy = -Math.max(0, Math.cos(phase)) * 4.2; }
     else if (pose === 'pull') { fx = hx + (near ? 7 : -6); fy = 0; }
     else if (pose === 'pick') { fx = hx + (near ? 8 : -5); fy = 0; }
     else { fx = hx + (near ? 1.5 : -1); fy = 0; }
@@ -1280,7 +1280,7 @@ function personSide(g, o) {
   // ── đích của hai tay (toạ độ thân) ──
   let nh, fh, held = o.held, malletAng = 0, incAng = -1.4;
   switch (pose) {
-    case 'walk': nh = [-s * 9, -4]; fh = [s * 9, -4]; if (held === 'can' || held === 'trash') nh = [3, -5]; break;
+    case 'walk': nh = [-s * 7, -4.5]; fh = [s * 7, -4.5]; if (held === 'can' || held === 'trash') nh = [3, -5]; break;
     case 'bow': nh = [9, -21]; fh = [8.5, -21.5]; break;
     case 'hold': { const r = o.raise || 0; nh = [9.5 - r * 1.5, -20 - r * 18]; fh = [9 - r * 1.5, -20.5 - r * 18]; incAng = -1.45 - r * .1; break; }
     case 'reach': { nh = o.reach ? toTorso(o.reach.x, o.reach.y) : [15, -46]; fh = [2, -5]; incAng = -1.15; break; }
@@ -1368,7 +1368,7 @@ function personFB(g, o, back) {
   else if (pose === 'bench') hands = [[-6, 0], [6, 0]];
   else if (pose === 'reach') hands = [[-9.5, -5], [7, -48]];
   else if (pose === 'pick') hands = [[-6, 10], [6, 10]];
-  else { const sw = walking ? s * 2.6 : 0; hands = [[-8.6, -5 + sw], [8.6, -5 - sw]]; if (o.held === 'can' || o.held === 'trash') hands[1] = [10, -6]; }
+  else { const sw = walking ? s * 1.8 : 0; hands = [[-8.6, -5 + sw], [8.6, -5 - sw]]; if (o.held === 'can' || o.held === 'trash') hands[1] = [10, -6]; }
   const drawArms = () => {
     hands.forEach(([hx, hy], i) => {
       const sd = i ? 1 : -1, sx = sd * 7.4, sy = -25;
@@ -1641,7 +1641,7 @@ function walkTo(p, tx, ty, dt, sp = 70) {
   const dx = tx - p.x, dy = ty - p.y, d = Math.hypot(dx, dy);
   if (d < 2) { p.x = tx; p.y = ty; if (p.pose === 'walk') p.pose = 'stand'; return true; }
   const s = Math.min(d, sp * dt);
-  p.x += dx / d * s; p.y += dy / d * s; p.pose = 'walk'; p.ph += s / 9;
+  p.x += dx / d * s; p.y += dy / d * s; p.pose = 'walk'; p.ph += s / 17;
   if (Math.abs(dx) > Math.abs(dy) * .5) { p.dir = Math.sign(dx); p.back = false; p.front = false; } else { p.back = dy < 0; p.front = dy > 0; }
   return false;
 }
@@ -1650,7 +1650,7 @@ function updateNpc(n, dt) {
   const near = n.scene === me.scene && Math.hypot(me.x - n.x, me.y - n.y) < 110;
   switch (n.ai) {
     case 'sweep':
-      if (n.pose === 'sweep') { n.ph += dt * 5; if (n.t <= 0) { [n.tx, n.ty] = pick(POI.slice(0, 3).concat([[1300, 1250], [1450, 1350], [1100, 1600]])); n.pose = 'walk'; } }
+      if (n.pose === 'sweep') { n.ph += dt * 3; if (n.t <= 0) { [n.tx, n.ty] = pick(POI.slice(0, 3).concat([[1300, 1250], [1450, 1350], [1100, 1600]])); n.pose = 'walk'; } }
       else if (walkTo(n, n.tx, n.ty, dt, 34)) { n.pose = 'sweep'; n.back = false; n.t = rnd(5, 10); }
       if (near && T - n.said > 40 && mode === 'free') { n.said = T; say(n, pick(MONK_TIPS), 6); }
       break;
@@ -1676,7 +1676,7 @@ function updateNpc(n, dt) {
     case 'follow': {
       const L = npcs.find(q => q.id === n.leader);
       const tx = L.x - 30 * L.dir, ty = L.y + 8;
-      if (Math.hypot(tx - n.x, ty - n.y) > 5) walkTo(n, tx, ty, dt, 46); else { n.pose = L.pose === 'walk' ? 'walk' : 'stand'; n.dir = L.dir; n.back = L.back; if (n.pose === 'walk') n.ph += dt * 5; }
+      if (Math.hypot(tx - n.x, ty - n.y) > 5) walkTo(n, tx, ty, dt, 46); else { n.pose = L.pose === 'walk' ? 'walk' : 'stand'; n.dir = L.dir; n.back = L.back; if (n.pose === 'walk') n.ph += dt * 3.2; }
       if (Math.random() < dt * .01) say(n, pick(['Mẹ ơi cá kìa!', 'Chuông kêu to ghê!', 'Con muốn thả hoa đăng!']), 3);
       break;
     }
@@ -2331,11 +2331,11 @@ function update(dt) {
   if ((dx || dy) && (mode === 'rest' || mode === 'listen')) standUp();
   if ((dx || dy) && mode === 'walking') { mode = 'free'; me.path = null; me.onArrive = null; me.pending = null; }
   const kbd = (dx || dy) && mode === 'free';
-  { const kd = dx && dy ? Math.SQRT1_2 : 1, tvx = kbd ? dx * 170 * kd : 0, tvy = kbd ? dy * 170 * kd : 0, rate = Math.min(1, dt * (kbd ? 9 : 14));
+  { const kd = dx && dy ? Math.SQRT1_2 : 1, tvx = kbd ? dx * 125 * kd : 0, tvy = kbd ? dy * 125 * kd : 0, rate = Math.min(1, dt * (kbd ? 9 : 14));
     me.vx += (tvx - me.vx) * rate; me.vy += (tvy - me.vy) * rate; }
   if (mode === 'free' && Math.hypot(me.vx, me.vy) > 6) {
     const moved = stepMove(me, me.vx * dt, me.vy * dt);
-    if (kbd) faceDir(dx, dy); me.pose = 'walk'; me.ph += moved / 9;
+    if (kbd) faceDir(dx, dy); me.pose = 'walk'; me.ph += moved / 17;
     if (moved < .15) { me.vx *= .5; me.vy *= .5; }
   } else if (me.path && mode === 'walking' && !fade.dir) {
     const t = me.path[0], ddx = t.x - me.x, ddy = t.y - me.y, dist = Math.hypot(ddx, ddy);
@@ -2344,9 +2344,9 @@ function update(dt) {
       if (!me.path.length) { me.path = null; me.pose = 'stand'; mode = 'free'; const f = me.onArrive; me.onArrive = null; f && f(); renderActions(); }
     } else {
       const total = me.path.reduce((s, p, i) => s + Math.hypot(p.x - (i ? me.path[i - 1].x : me.x), p.y - (i ? me.path[i - 1].y : me.y)), 0);
-      const want = (total > 900 ? 280 : 170) * clamp(total / 70, .45, 1); me.spd = lerp(me.spd || 0, want, Math.min(1, dt * 7));
+      const want = (total > 900 ? 210 : 125) * clamp(total / 70, .45, 1); me.spd = lerp(me.spd || 0, want, Math.min(1, dt * 7));
       const st = Math.min(dist, me.spd * dt), moved = stepMove(me, ddx / dist * st, ddy / dist * st);
-      faceDir(ddx, ddy); me.pose = 'walk'; me.ph += moved / 9;
+      faceDir(ddx, ddy); me.pose = 'walk'; me.ph += moved / 17;
       me.stuck = moved < st * .1 ? (me.stuck || 0) + dt : 0;
       if (me.stuck > .5) {
         const goal = me.path[me.path.length - 1], f = me.onArrive;
@@ -2376,7 +2376,7 @@ function update(dt) {
     const ddx = r.tx - r.x, ddy = r.ty - r.y, d = Math.hypot(ddx, ddy);
     r.walking = d > 1.5;
     r.x += ddx * Math.min(1, dt * 8); r.y += ddy * Math.min(1, dt * 8);
-    if (r.walking && r.pose === 'walk') { r.ph += dt * Math.min(d * 8, 280) / 9; if (Math.abs(ddx) > Math.abs(ddy) * .6) { r.back = false; r.front = false; } else { r.back = ddy < 0; r.front = ddy > 0; } }
+    if (r.walking && r.pose === 'walk') { r.ph += dt * Math.min(d * 8, 210) / 17; if (Math.abs(ddx) > Math.abs(ddy) * .6) { r.back = false; r.front = false; } else { r.back = ddy < 0; r.front = ddy > 0; } }
     if (r.bowT != null) r.bow = lerp(r.bow || 0, r.bowT, Math.min(1, dt * 10));
   }
   for (let i = arcs.length - 1; i >= 0; i--) { const a = arcs[i]; a.t += dt; if (a.t >= a.dur) { arcs.splice(i, 1); a.fin && a.fin(); } }
