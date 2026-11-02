@@ -247,7 +247,7 @@ button:disabled { opacity: .4; cursor: default; }
       <button data-v="ai">Máy đi trước</button>
     </div>
     <button class="go" id="bStart">Bắt đầu</button>
-    <p class="rule">Bàn 30 × 30 · Ai xếp được 5 quân liền nhau (ngang, dọc hoặc chéo) trước là thắng.</p>
+    <p class="rule">Bàn 30 × 30 · Ai xếp được 5 quân liền nhau (ngang, dọc hoặc chéo) trước là thắng — trừ khi bị chặn cả hai đầu.</p>
   </div>
 </div>
 
@@ -292,42 +292,47 @@ function CaroEngine(N) {
   const DR = [0, 1, 1, 1], DC = [1, 0, 1, -1];
   const WIN = 10000000, INF = 1000000000, ABORT = {};
 
-  // ── bảng hình: khoá là 8 ô quanh tâm (-4..-1, +1..+4), mỗi ô 0 trống / 1 mình / 2 chặn ──
-  const TABLE = new Uint8Array(6561);
-  (function build() {
-    const memo = new Int8Array(6561).fill(-1), a = new Int8Array(9);
-    const key = () => { let k = 0, m = 1; for (let i = 0; i < 9; i++) { if (i === 4) continue; k += a[i] * m; m *= 3; } return k; };
+  // ── bảng hình: khoá là 10 ô quanh tâm (-5..-1, +1..+5), mỗi ô 0 trống / 1 mình / 2 quân đối thủ / 3 ngoài bàn ──
+  // Luật: năm quân liền (trở lên) thắng, trừ khi bị quân đối thủ chặn cả hai đầu. Bảng tính dần khi cần.
+  const TABLE = new Uint8Array(1 << 20).fill(255);
+  const shapeOf = (function () {
+    const a = new Int8Array(11);
+    const key = () => { let k = 0, m = 1; for (let i = 0; i < 11; i++) { if (i === 5) continue; k += a[i] * m; m *= 4; } return k; };
     const five = () => {
-      for (let s = 0; s <= 4; s++) { let ok = true; for (let j = s; j < s + 5; j++) if (a[j] !== 1) { ok = false; break; } if (ok) return true; }
-      return false;
+      let l = 5, r = 5;
+      while (l > 0 && a[l - 1] === 1) l--;
+      while (r < 10 && a[r + 1] === 1) r++;
+      if (r - l + 1 < 5) return false;
+      return !(l > 0 && a[l - 1] === 2 && r < 10 && a[r + 1] === 2);
     };
     function cls() {
       const k = key();
-      if (memo[k] >= 0) return memo[k];
+      if (TABLE[k] !== 255) return TABLE[k];
       let r = 0;
       if (five()) r = FIVE;
       else {
         let n5 = 0;
-        for (let i = 0; i < 9; i++) if (a[i] === 0) { a[i] = 1; if (five()) n5++; a[i] = 0; }
+        for (let i = 0; i < 11; i++) if (a[i] === 0) { a[i] = 1; if (five()) n5++; a[i] = 0; }
         if (n5 >= 2) r = OPEN4;
         else if (n5 === 1) r = FOUR;
         else {
           // thêm một quân thành bốn mở → ba mở; thành bốn → ba chặn; …
-          for (let i = 0; i < 9; i++) if (a[i] === 0) {
+          for (let i = 0; i < 11; i++) if (a[i] === 0) {
             a[i] = 1; const c = cls(); a[i] = 0;
             const v = c === OPEN4 ? OPEN3 : c === FOUR ? THREE : c === OPEN3 ? OPEN2 : c === THREE ? 2 : (c === OPEN2 || c === 2) ? 1 : 0;
             if (v > r) r = v;
           }
         }
       }
-      memo[k] = r;
+      TABLE[k] = r;
       return r;
     }
-    for (let k = 0; k < 6561; k++) {
+    return k => {
+      if (TABLE[k] !== 255) return TABLE[k];
       let t = k;
-      for (let i = 0; i < 9; i++) { if (i === 4) { a[i] = 1; continue; } a[i] = t % 3; t = (t / 3) | 0; }
-      TABLE[k] = cls();
-    }
+      for (let i = 0; i < 11; i++) { if (i === 5) { a[i] = 1; continue; } a[i] = t & 3; t >>= 2; }
+      return cls();
+    };
   })();
 
   const board = new Int8Array(NN);
@@ -350,15 +355,15 @@ function CaroEngine(N) {
   function shapeAt(q, d, p) {
     const r = (q / N) | 0, c = q - r * N, dr = DR[d], dc = DC[d];
     let k = 0, m = 1;
-    for (let i = -4; i <= 4; i++) {
+    for (let i = -5; i <= 5; i++) {
       if (i === 0) continue;
       const rr = r + i * dr, cc = c + i * dc;
       let v;
-      if (rr < 0 || rr >= N || cc < 0 || cc >= N) v = 2;
+      if (rr < 0 || rr >= N || cc < 0 || cc >= N) v = 3;
       else { const b = board[rr * N + cc]; v = b === 0 ? 0 : b === p ? 1 : 2; }
-      k += v * m; m *= 3;
+      k += v * m; m *= 4;
     }
-    return TABLE[k];
+    return shapeOf(k);
   }
   function fin(q) {
     for (let p = 1; p <= 2; p++) {
@@ -380,7 +385,7 @@ function CaroEngine(N) {
     const r = (q / N) | 0, c = q - r * N;
     for (let d = 0; d < 4; d++) {
       const dr = DR[d], dc = DC[d];
-      for (let i = -4; i <= 4; i++) {
+      for (let i = -5; i <= 5; i++) {
         if (i === 0) continue;
         const rr = r + i * dr, cc = c + i * dc;
         if (rr < 0 || rr >= N || cc < 0 || cc >= N) continue;
@@ -821,7 +826,14 @@ function lineThrough(q) {
         rr += dr * s; cc += dc * s;
       }
     }
-    if (line.length >= 5) return line;
+    if (line.length < 5) continue;
+    // bị quân đối thủ chặn cả hai đầu thì không tính thắng
+    const opp = (t, s) => {
+      const rr = Math.floor(t / N) + dr * s, cc = t % N + dc * s;
+      return rr >= 0 && rr < N && cc >= 0 && cc < N && cells[rr * N + cc] !== 0 && cells[rr * N + cc] !== p;
+    };
+    if (opp(line[0], -1) && opp(line[line.length - 1], 1)) continue;
+    return line;
   }
   return null;
 }
