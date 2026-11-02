@@ -288,6 +288,12 @@ textarea.field { resize: none; min-height: 76px; line-height: 1.45; }
 }
 .intro-sub { color: #fbe6b8; opacity: .9; margin: 6px 0 16px; font-size: 14px; line-height: 1.5; }
 .intro-card .sheet { text-align: left; }
+.temples { display: flex; gap: 8px; overflow-x: auto; padding: 2px 2px 8px; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
+.tcard { flex: 0 0 132px; scroll-snap-align: start; text-align: left; padding: 9px 10px; border-radius: 12px; background: #fffaf0; border: 1.5px solid var(--line); position: relative; }
+.tcard b { display: block; font-size: 13px; color: var(--ink); line-height: 1.25; }
+.tcard span { display: block; font-size: 11px; color: var(--muted); margin-top: 3px; }
+.tcard i { position: absolute; right: 8px; top: 9px; width: 14px; height: 14px; border-radius: 4px; }
+.tcard.on { border-color: var(--red2); background: #fff1e6; box-shadow: 0 3px 10px rgba(158, 42, 31, .2); }
 .preview { display: flex; align-items: center; gap: 14px; }
 .preview canvas { width: 76px; height: 96px; flex: none; background: radial-gradient(circle at 50% 70%, #fff0cf, transparent 70%); border-radius: 12px; }
 .preview .grow { flex: 1; min-width: 0; }
@@ -328,7 +334,7 @@ textarea.field { resize: none; min-height: 76px; line-height: 1.45; }
 <div id="hud" hidden>
   <div class="place">
     <div class="t" id="zoneName">Đường làng</div>
-    <div class="s"><span id="meritTxt">🪷 0 phước</span><span id="peopleTxt" hidden>👥 1</span></div>
+    <div class="s"><span id="templeTxt"></span><span id="meritTxt">🪷 0 phước</span><span id="peopleTxt" hidden>👥 1</span></div>
   </div>
   <div class="hud-btns">
     <button class="hb" id="bJourney" title="Hành trình hôm nay (J)">📜<span class="badge" id="jBadge">0</span></button>
@@ -349,10 +355,12 @@ textarea.field { resize: none; min-height: 76px; line-height: 1.45; }
 
 <div id="intro">
   <div class="intro-card">
-    <div class="intro-title">Chùa An Nhiên</div>
-    <div class="intro-sub">Đi chùa online — thỉnh chuông, thắp hương, xin xăm, thả hoa đăng<br>và tìm chút bình yên giữa ngày bận rộn.</div>
+    <div class="intro-title" id="tName">Chùa An Nhiên</div>
+    <div class="intro-sub" id="tInfo">Đi chùa online — thỉnh chuông, thắp hương, xin xăm, thả hoa đăng<br>và tìm chút bình yên giữa ngày bận rộn.</div>
     <div class="sheet">
-      <div class="preview">
+      <div class="label" style="margin-top:0">Chọn chùa tham quan</div>
+      <div class="temples" id="templeList"></div>
+      <div class="preview" style="margin-top:12px">
         <canvas id="pv" width="152" height="192"></canvas>
         <div class="grow">
           <div class="label" style="margin-top:0">Tên của bạn</div>
@@ -425,6 +433,30 @@ const ROBES = [
 const HAIRS = ['Tóc dài', 'Búi tóc', 'Tóc ngắn'];
 const SKIN = '#f2c9a0';
 const lookOf = (robe, hair) => ({ robe: ROBES[robe % ROBES.length], hair: hair % 3, skin: SKIN, hairC: '#2a1c14' });
+
+// ─────────────────────────── danh sách chùa ───────────────────────────
+// Khung cảnh trong game là mô phỏng chung; mỗi chùa có tên, lời giới thiệu và tông màu riêng.
+const TEMPLES = [
+  { id: 'annhien', name: 'Chùa An Nhiên', plaque: 'CHÙA AN NHIÊN', place: 'Ngôi chùa của game', info: 'Ngôi chùa làng yên bình với tam quan, gác chuông, hồ sen và vườn tháp.', tile: ['#6e3a2a', '#8f4a31', '#a65737'], wall: '#efd9a6', grass: '#7da352' },
+  { id: 'tranquoc', name: 'Chùa Trấn Quốc', plaque: 'TRẤN QUỐC TỰ', place: 'Hồ Tây, Hà Nội', info: 'Ngôi chùa cổ nhất Thăng Long, khoảng 1.500 năm tuổi, nằm trên bán đảo nhỏ giữa Hồ Tây.', tile: ['#4a3a30', '#6a5040', '#7a5a46'], wall: '#d9b37a', grass: '#6f9a4a', stupa: '#c0503a' },
+  { id: 'motcot', name: 'Chùa Một Cột', plaque: 'DIÊN HỰU TỰ', place: 'Ba Đình, Hà Nội', info: 'Dựng năm 1049 thời vua Lý Thái Tông, điện thờ như đoá sen nở trên một cột đá giữa hồ.', tile: ['#5a4030', '#7a5838', '#8e6a44'], wall: '#e6d2a6', grass: '#7aa04e' },
+  { id: 'huong', name: 'Chùa Hương', plaque: 'HƯƠNG TÍCH', place: 'Mỹ Đức, Hà Nội', info: 'Quần thể chùa trong núi Hương Sơn với động Hương Tích, lễ hội kéo dài từ tháng Giêng tới tháng Ba âm lịch.', tile: ['#5a4a3a', '#76604a', '#8a7256'], wall: '#d8c8a0', grass: '#5f8a42' },
+  { id: 'baidinh', name: 'Chùa Bái Đính', plaque: 'BÁI ĐÍNH TỰ', place: 'Gia Viễn, Ninh Bình', info: 'Quần thể chùa rộng lớn trên núi, nổi tiếng với tượng Phật đồng và hành lang La Hán dài.', tile: ['#6a4426', '#8a5a30', '#a06a38'], wall: '#c9a77a', grass: '#6f9a48' },
+  { id: 'tamchuc', name: 'Chùa Tam Chúc', plaque: 'TAM CHÚC TỰ', place: 'Kim Bảng, Hà Nam', info: 'Quần thể chùa nằm giữa hồ nước và núi đá vôi, khung cảnh như bức tranh thuỷ mặc.', tile: ['#4a5a5a', '#5e7070', '#728484'], wall: '#dcd6c8', grass: '#76a050' },
+  { id: 'keo', name: 'Chùa Keo', plaque: 'THẦN QUANG TỰ', place: 'Vũ Thư, Thái Bình', info: 'Kiệt tác kiến trúc gỗ thời hậu Lê, nổi tiếng với gác chuông gỗ nhiều tầng mái.', tile: ['#5a3a2a', '#74503a', '#86604a'], wall: '#cdb08a', grass: '#79a24c' },
+  { id: 'butthap', name: 'Chùa Bút Tháp', plaque: 'NINH PHÚC TỰ', place: 'Thuận Thành, Bắc Ninh', info: 'Ngôi chùa cổ lưu giữ tượng Quan Âm nghìn mắt nghìn tay quý giá.', tile: ['#5a4636', '#76604a', '#8a7058'], wall: '#d6c09a', grass: '#78a04c' },
+  { id: 'thienmu', name: 'Chùa Thiên Mụ', plaque: 'THIÊN MỤ TỰ', place: 'Bờ sông Hương, Huế', info: 'Dựng năm 1601 thời chúa Nguyễn Hoàng, biểu tượng xứ Huế với tháp Phước Duyên bảy tầng.', tile: ['#3e5a3a', '#4e7048', '#5e8456'], wall: '#e8d8a8', grass: '#6f9a48', stupa: '#e2b49a' },
+  { id: 'linhung', name: 'Chùa Linh Ứng', plaque: 'LINH ỨNG TỰ', place: 'Sơn Trà, Đà Nẵng', info: 'Ngôi chùa trên bán đảo Sơn Trà với tượng Quan Âm cao 67 mét hướng ra biển.', tile: ['#2e5a6a', '#3a7080', '#4a8494'], wall: '#f2ecdf', grass: '#7aa452', quanam: 1.7 },
+  { id: 'truclam', name: 'Thiền viện Trúc Lâm', plaque: 'TRÚC LÂM THIỀN VIỆN', place: 'Hồ Tuyền Lâm, Đà Lạt', info: 'Thiền viện giữa rừng thông, nhìn xuống hồ Tuyền Lâm, nơi tu tập thiền phái Trúc Lâm.', tile: ['#4a3a2a', '#5e4a36', '#705a42'], wall: '#e8dcc0', grass: '#5c8a48' },
+  { id: 'vinhnghiem', name: 'Chùa Vĩnh Nghiêm', plaque: 'VĨNH NGHIÊM TỰ', place: 'Quận 3, TP.HCM', info: 'Ngôi chùa lớn của Sài Gòn, xây dựng 1964–1971, có bảo tháp bảy tầng.', tile: ['#7a3a24', '#9a4a2a', '#b25a32'], wall: '#f0e2c0', grass: '#7aa04e' },
+];
+let TEMPLE = TEMPLES.find(t => t.id === S.temple) || TEMPLES[0];
+function setTemple(id) {
+  TEMPLE = TEMPLES.find(t => t.id === id) || TEMPLES[0];
+  S.temple = TEMPLE.id; save();
+  if (typeof spriteCache !== 'undefined') spriteCache.clear();
+  if (typeof chunkCache !== 'undefined') chunkCache.clear();
+}
 
 // ─────────────────────────── canvas ───────────────────────────
 const cv = $('game');
@@ -675,7 +707,7 @@ function roof(g, cx, eaveY, w, h, opt = {}) {
   g.lineTo(cx - rw / 2, eaveY - h);
   g.quadraticCurveTo(L + w * .12, eaveY - h * .42, L - over, eaveY - curl);
   g.closePath();
-  g.fillStyle = grad(g, 0, eaveY - h, 0, eaveY + 4, opt.tile || ['#6e3a2a', '#8f4a31', '#a65737']);
+  g.fillStyle = grad(g, 0, eaveY - h, 0, eaveY + 4, opt.tile || TEMPLE.tile);
   g.fill();
   g.clip();
   // hàng ngói
@@ -754,6 +786,7 @@ function couplet(g, x, y0, y1, w = 9) {
   for (let y = y0 + 6; y < y1 - 5; y += 9) g.fillRect(x - 2, y, 4, 4);
 }
 function wallBody(g, x0, y0, x1, y1, col = '#efd9a6') {
+  if (TEMPLE.wall && /^#(ef|f0|ea|e8|e2)/i.test(col)) col = TEMPLE.wall;
   g.fillStyle = grad(g, 0, y0, 0, y1, [col, '#e2c58a']);
   g.fillRect(x0, y0, x1 - x0, y1 - y0);
   g.fillStyle = 'rgba(120,70,20,.12)'; g.fillRect(x0, y1 - 14, x1 - x0, 14);
@@ -958,7 +991,7 @@ function drawHall(g) {
   roof(g, c, 300, x1 - x0 + 70, 66, { curl: 34, over: 22, ridge: (x1 - x0) * .62 });
   wallBody(g, c - 230, 210, c + 230, 240, '#f0dcae');
   for (let i = -3; i <= 3; i++) { if (!i) continue; g.fillStyle = '#7a2a18'; g.fillRect(c + i * 62 - 14, 220, 28, 15); g.strokeStyle = '#e6c27a'; g.strokeRect(c + i * 62 - 14, 220, 28, 15); }
-  plaque(g, c, 229, 150, 19, 'CHÙA AN NHIÊN', 12);
+  plaque(g, c, 229, Math.max(150, TEMPLE.plaque.length * 9.5), 19, TEMPLE.plaque, 12);
   roof(g, c, 214, 560, 64, { curl: 32, over: 20, ridge: 330, pearl: true });
 }
 function drawBuddha(g, x, baseY, k, side) {
@@ -1115,7 +1148,7 @@ function drawStupa(g) {
   let y = GROUND - 18, w = 120;
   for (let i = 0; i < 7; i++) {
     const h = 44 - i * 3.2;
-    wallBody(g, cx - w / 2, y - h, cx + w / 2, y, i % 2 ? '#ead2a0' : '#efd9a6');
+    if (TEMPLE.stupa) { g.fillStyle = grad(g, 0, y - h, 0, y, [TEMPLE.stupa, shade(TEMPLE.stupa, .85)]); g.fillRect(cx - w / 2, y - h, w, h); } else wallBody(g, cx - w / 2, y - h, cx + w / 2, y, i % 2 ? '#ead2a0' : '#efd9a6');
     g.fillStyle = '#3a1608'; rr(g, cx - 7, y - h + 8, 14, h - 12, 7); g.fill();
     g.fillStyle = 'rgba(255,190,90,.35)'; rr(g, cx - 5, y - h + 10, 10, h - 16, 5); g.fill();
     for (const s of [-1, 1]) { g.strokeStyle = 'rgba(140,90,30,.35)'; g.lineWidth = 1; g.strokeRect(cx + s * w * .3 - 5, y - h + 10, 10, h - 18); }
@@ -1819,7 +1852,7 @@ const chunkCache = new Map();
 function paintGround(g, X0, Y0, SZ = CHUNK) {
   const r = seeded((X0 * 7 + Y0 * 13) | 1);
   // cỏ
-  g.fillStyle = '#7da352'; g.fillRect(X0, Y0, SZ, SZ);
+  g.fillStyle = TEMPLE.grass; g.fillRect(X0, Y0, SZ, SZ);
   for (let i = 0; i < 420; i++) { g.fillStyle = r() < .5 ? 'rgba(60,100,40,.25)' : 'rgba(170,200,110,.22)'; const x = X0 + r() * SZ, y = Y0 + r() * SZ; g.fillRect(x, y, 2 + r() * 4, 1.5 + r() * 2); }
   for (let i = 0; i < 26; i++) { const x = X0 + r() * SZ, y = Y0 + r() * SZ; g.fillStyle = pick(['#f6d04a', '#f8f1e4', '#f08aa8', '#c7a6f0']); g.beginPath(); g.arc(x, y, 1.8, 0, TAU); g.fill(); }
   // rừng bao quanh (ngoài tường)
@@ -1928,7 +1961,7 @@ function addProp(key, sx0, sy0, w, h, fn, mx, my, sx, fadeable, extra) { OUT_PRO
   P_('bodhi', 'bodhi', 3020, 30, 560, 460, drawBodhi, true, 'ribbons');
   P_('stupa', 'stupa', 4740, 60, 280, 420, drawStupa, true);
   addProp('lecture', -172, GROUND - 204, 344, 206, drawLectureHall, 330, 1240, 0, true);
-  P_('quanam', 'quanam', 4000, 300, 160, 180, drawQuanAm, true);
+  P_('quanam', 'quanam', 4000, 300, 160, 180, drawQuanAm, true); OUT_PROPS[OUT_PROPS.length - 1].templeK = 'quanam';
   P_('willow', 'willow', 4300, 220, 220, 262, g => drawWillow(g, 4400), true);
   P_('banyan', 'banyan', 40, 40, 480, 444, g => drawBanyan(g, 260), true);
   // tháp nhỏ hai bên vườn tháp
@@ -1947,6 +1980,7 @@ function addProp(key, sx0, sy0, w, h, fn, mx, my, sx, fadeable, extra) { OUT_PRO
 const POLE_LIGHTS = [[1180, 1340], [1420, 1340], [1180, 1540], [1420, 1540], [1180, 1840], [1420, 1840]].flatMap(([x, y]) => [[x - 11, y - 20], [x + 11, y - 20]]);
 
 function propDraw(p, alpha) {
+  if (p.templeK) { const k = TEMPLE[p.templeK] || 0; p.k = k || undefined; p.px = 4080; }
   const s = sprite(p.key, p.sx0, p.sy0, p.w, p.h, p.fn);
   ctx.save(); ctx.translate(p.dx, p.dy);
   if (p.k) { ctx.translate(p.px, GROUND); ctx.scale(p.k, p.k); ctx.translate(-p.px, -GROUND); }
@@ -3244,6 +3278,7 @@ function toast(msg, ms = 3200) {
 }
 function updateHud() {
   $('meritTxt').textContent = `🪷 ${S.merit} phước`;
+  $('templeTxt').textContent = '🛕 ' + TEMPLE.name;
   $('jBadge').textContent = `${S.today.done.length}`;
   $('bTime').textContent = TODS[todIdx].ic;
   $('bSound').textContent = AU.on ? '🔊' : '🔇';
@@ -3852,7 +3887,7 @@ function makeCard() {
   const verse = lx ? [XAM[lx.n - 1][1], XAM[lx.n - 1][2]] : ['Sen thơm nở giữa đầm trong', 'Gần bùn mà vẫn thơm nồng hương xa'];
   g.fillText(verse[0], 540, 700); g.fillText(verse[1], 540, 752);
   g.font = "600 30px 'Be Vietnam Pro', sans-serif"; g.fillStyle = '#ffd98a';
-  g.fillText(`${me.name} · Chùa An Nhiên · ${new Date().toLocaleDateString('vi-VN')}`, 540, 860);
+  g.fillText(`${me.name} · ${TEMPLE.name} · ${new Date().toLocaleDateString('vi-VN')}`, 540, 860);
   g.font = "400 28px 'Be Vietnam Pro', sans-serif"; g.fillStyle = '#ffeec4';
   const lines = [`🪷 ${S.merit} phước · ${S.today.done.length}/${TASKS.length} việc lành hôm nay`];
   const wish = S.ribbons.filter(r => r.d === todayKey()).pop();
@@ -4026,7 +4061,7 @@ function openRoomInfo() {
     <div class="row"><button class="btn alt" id="nLeave">Rời phòng</button></div>
     <div class="note">${net.host ? 'Bạn là chủ phòng: nếu bạn thoát, phòng sẽ đóng.' : ''}</div>`);
   q('#nCopy').onclick = async () => { try { await navigator.clipboard.writeText(inviteUrl()); q('#nCopy').textContent = '✓ Đã sao chép'; } catch (e) { prompt('Sao chép link này:', inviteUrl()); } };
-  if (q('#nShare')) q('#nShare').onclick = () => navigator.share({ title: 'Đi chùa online cùng mình', text: 'Vào Chùa An Nhiên đi chùa cùng mình nhé 🙏', url: inviteUrl() }).catch(() => {});
+  if (q('#nShare')) q('#nShare').onclick = () => navigator.share({ title: 'Đi chùa online cùng mình', text: `Vào ${TEMPLE.name} đi chùa cùng mình nhé 🙏`, url: inviteUrl() }).catch(() => {});
   q('#nLeave').onclick = () => { leaveOnline(); closeSheet(); toast('Bạn đã rời phòng, tiếp tục đi chùa một mình.'); };
 }
 function netStatus(emoji, title, msg, retry) {
@@ -4093,7 +4128,7 @@ function hostMsg(c, d) {
     const r = addRemote(id, name, d.look, 170);
     r.seen = performance.now();
     const players = [{ id: 'h', name: me.name, look: myLook() }, ...[...remotes.values()].filter(p => p.id !== id).map(p => ({ id: p.id, name: p.name, look: { r: ROBES.indexOf(p.look.robe), h: p.look.hair } }))];
-    try { c.send({ t: 'welcome', id, players, world: snapshot() }); } catch (e) {}
+    try { c.send({ t: 'welcome', id, players, world: snapshot(), temple: TEMPLE.id }); } catch (e) {}
     broadcast({ t: 'join', id, name, look: { r: ROBES.indexOf(r.look.robe), h: r.look.hair }, x: 170 }, c);
     return;
   }
@@ -4138,6 +4173,7 @@ function guestMsg(d) {
     history.replaceState(null, '', location.pathname + location.search + '#room=' + net.code);
     remotes.clear();
     if (Array.isArray(d.players)) for (const p of d.players.slice(0, 12)) addRemote(String(p.id), cleanText(p.name, 16) || 'Bạn', p.look, p.x);
+    if (typeof d.temple === 'string' && d.temple !== TEMPLE.id && TEMPLES.some(t => t.id === d.temple)) { setTemple(d.temple); toast(`🛕 Chủ phòng đang ở ${esc(TEMPLE.name)}, bạn đã vào cùng.`, 4500); }
     applySnapshot(d.world);
     closeSheet(); updateHud();
     toast(`🛕 Đã vào phòng ${showCode(net.code)} cùng ${remotes.size} người.`);
@@ -4255,6 +4291,15 @@ function buildIntro() {
   $('hairCh').innerHTML = HAIRS.map((h, i) => `<button class="chip ${i === S.hair ? 'on' : ''}" data-i="${i}">${h}</button>`).join('');
   $('robeSw').onclick = e => { const b = e.target.closest('.sw'); if (!b) return; S.robe = +b.dataset.i; [...$('robeSw').children].forEach(x => x.classList.toggle('on', x === b)); drawPreview(); };
   $('hairCh').onclick = e => { const b = e.target.closest('.chip'); if (!b) return; S.hair = +b.dataset.i; [...$('hairCh').children].forEach(x => x.classList.toggle('on', x === b)); drawPreview(); };
+  const showTemple = () => {
+    $('tName').textContent = TEMPLE.name;
+    $('tInfo').innerHTML = `${esc(TEMPLE.place)} · ${esc(TEMPLE.info)}<br><small style="opacity:.75">Khung cảnh trong game là mô phỏng chung, không phải bản sao kiến trúc thật.</small>`;
+    $('bEnter').textContent = roomInHash() ? `🛕 Vào phòng ${showCode(roomInHash())}` : `🙏 Vào ${TEMPLE.name}`;
+  };
+  $('templeList').innerHTML = TEMPLES.map(t => `<button class="tcard ${t.id === TEMPLE.id ? 'on' : ''}" data-id="${t.id}"><i style="background:${t.tile[1]}"></i><b>${esc(t.name)}</b><span>${esc(t.place)}</span></button>`).join('');
+  $('templeList').onclick = e => { const b = e.target.closest('.tcard'); if (!b) return; setTemple(b.dataset.id); [...$('templeList').children].forEach(x => x.classList.toggle('on', x === b)); showTemple(); };
+  showTemple();
+  const on = $('templeList').querySelector('.on'); if (on) setTimeout(() => on.scrollIntoView({ inline: 'center', block: 'nearest' }), 50);
   const room = roomInHash();
   if (room) { $('bEnter').textContent = `🛕 Vào phòng ${showCode(room)}`; $('bEnterOnline').hidden = true; }
   $('bEnter').onclick = () => enter(false);
@@ -4278,7 +4323,8 @@ function enter(online) {
   const room = roomInHash();
   if (room) joinOnline(room);
   else if (online) openNetMenu();
-  else setTimeout(() => toast(`🙏 Chào ${esc(me.name)}. Mời bạn đi qua cổng tam quan vào chùa.`, 4000), 400);
+  else setTimeout(() => toast(`🙏 Chào ${esc(me.name)}. Chào mừng đến ${esc(TEMPLE.name)} (${esc(TEMPLE.place)}). Mời bạn đi qua cổng tam quan.`, 5000), 400);
+  document.title = `${TEMPLE.name} · Đi Chùa Online`;
 }
 
 // ═══════════════════════════ khởi động ═══════════════════════════
