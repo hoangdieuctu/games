@@ -1643,7 +1643,7 @@ function zoneAt(x, y) {
 
 // ─────────────────────────── trạng thái ───────────────────────────
 const me = {
-  id: 'me', scene: 'out', x: 1300, y: 2290, vx: 0, vy: 0, dir: 1, back: true, ph: 0, pose: 'stand', bow: 0, look: lookOf(S.robe, S.hair), name: S.name || 'Phật tử',
+  id: 'me', scene: 'out', x: 1300 + Math.round(rnd(-90, 90)), y: 2270 + Math.round(rnd(0, 50)), vx: 0, vy: 0, dir: 1, back: true, ph: 0, pose: 'stand', bow: 0, look: lookOf(S.robe, S.hair), name: S.name || 'Phật tử',
   path: null, onArrive: null, pending: null, script: [], held: null, heldN: 0, say: null,
 };
 let mode = 'free';           // free | walking | busy | bell | chant | zen
@@ -1717,7 +1717,7 @@ function updateNpc(n, dt) {
       if (near && T - n.said > 40 && mode === 'free') { n.said = T; say(n, pick(MONK_TIPS), 6); }
       break;
     case 'pilgrim': {
-      const plan = [[1252, 1460, 'incense'], [1300, 1108, 'pray'], [880, 1964, 'rest']];
+      const plan = [[1252, 1460, 'incense'], [1300, 1108, 'pray'], [865, 1964, 'rest']];
       const [tx, ty, act] = plan[n.st % 3];
       if (n.t > 0) {
         n.back = act === 'pray'; n.front = act === 'rest';
@@ -2452,13 +2452,27 @@ const arcs = [];
 function throwArc(x0, y0, x1, y1, type, fin) { arcs.push({ x0, y0, x1, y1, type, t: 0, dur: .75, fin }); }
 
 // ─────────────────────────── di chuyển ───────────────────────────
+// người khác cùng cảnh (bạn bè online và nhân vật trong chùa)
+function others() { const a = []; for (const r of remotes.values()) if (r.scene === me.scene) a.push(r); for (const n of npcs) if (n.scene === me.scene) a.push(n); return a; }
+// không đi xuyên qua người khác: chặn bước nào làm khoảng cách tới ai đó dưới 20 và gần hơn trước
+function peopleBlock(x0, y0, x1, y1) {
+  for (const p of others()) { const d1 = Math.hypot(p.x - x1, p.y - y1); if (d1 < 20 && d1 < Math.hypot(p.x - x0, p.y - y0) - .01) return true; }
+  return false;
+}
 function stepMove(p, vx, vy) {
-  const x = p.x, y = p.y;
-  if (walkable(x + vx, y + vy)) { p.x += vx; p.y += vy; }
-  else if (vx && walkable(x + vx, y)) p.x += vx;
-  else if (vy && walkable(x, y + vy)) p.y += vy;
+  const x = p.x, y = p.y, ok = (nx, ny) => walkable(nx, ny) && !peopleBlock(x, y, nx, ny);
+  if (ok(x + vx, y + vy)) { p.x += vx; p.y += vy; }
+  else if (vx && ok(x + vx, y)) p.x += vx;
+  else if (vy && ok(x, y + vy)) p.y += vy;
+  else if (peopleBlock(x, y, x + vx, y + vy)) { const l = Math.hypot(vx, vy) || 1, sx = -vy / l * Math.abs(l), sy = vx / l * Math.abs(l); if (ok(x + sx, y + sy)) { p.x += sx; p.y += sy; } else if (ok(x - sx, y - sy)) { p.x -= sx; p.y -= sy; } }
   return Math.hypot(p.x - x, p.y - y);
 }
+// chỗ đứng / chỗ ngồi đang có người?
+function occupant(x, y, r = 16) {
+  for (const p of others()) if (Math.hypot(p.x - x, p.y - y) < r && p.pose !== 'walk') return p;
+  return null;
+}
+function busyMsg(p) { toast(`Chỗ này đang có ${p && p.name ? '<b>' + esc(p.name) + '</b>' : 'người'}. Đợi một chút nhé 🙏`); }
 function faceDir(vx, vy) { if (Math.abs(vx) > Math.abs(vy) * .6) { me.dir = Math.sign(vx); me.back = false; me.front = false; } else if (vy) { me.back = vy < 0; me.front = vy > 0; } }
 function walkPath(x, y, onArrive) {
   const path = findPath(me.scene, me.x, me.y, x, y);
@@ -2477,11 +2491,14 @@ function goHot(h) {
     me.pending = h; walkPath(door.ap.x, door.ap.y, null); return;
   }
   me.pending = null;
+  if (!h.bench) { const o = occupant(h.x, h.y); if (o) { stopWalk(); busyMsg(o); return; } }
   if (Math.hypot(me.x - h.x, me.y - h.y) < 6) { stopWalk(); faceHot(h); h.run(); return; }
-  walkPath(h.x, h.y, () => { me.x = h.x; me.y = h.y; faceHot(h); h.run(); });
+  walkPath(h.x, h.y, () => { if (!h.bench) { const o = occupant(h.x, h.y); if (o) { busyMsg(o); return; } } me.x = h.x; me.y = h.y; faceHot(h); h.run(); });
 }
 function sitBench(b) {
-  stopWalk(); mode = 'rest'; me.x = b[0]; me.y = b[1] + 4; me.pose = 'bench'; me.front = true; me.back = false; me.bench = b; me.vx = me.vy = 0;
+  const seat = [b[0] - 15, b[0] + 15].sort((p, q) => Math.abs(p - me.x) - Math.abs(q - me.x)).find(sx => !occupant(sx, b[1] + 4, 14));
+  if (seat == null) { stopWalk(); toast('Ghế đá này đã đủ 2 người ngồi rồi.'); return; }
+  stopWalk(); mode = 'rest'; me.x = seat; me.y = b[1] + 4; me.pose = 'bench'; me.front = true; me.back = false; me.bench = b; me.vx = me.vy = 0;
   say(me, pick(['Ngồi nghỉ chân một chút.', 'Gió mát quá.', 'Ngắm chùa thật yên bình.', 'Nghe chim hót kìa.']), 3);
   renderActions(true);
 }
@@ -2581,6 +2598,16 @@ function update(dt) {
   }
   if (mode === 'chant') { const t = T - me.strikeT; me.strike = t < .05 ? 0 : Math.min(.75, (t - .05) / .25 * .75); }
   if (mode === 'zen') updateZen(dt);
+  if (net.on && (mode === 'rest' || mode === 'listen' || mode === 'busy' || mode === 'chant' || mode === 'bell')) {
+    me.clashT = (me.clashT || 0) - dt;
+    if (me.clashT <= 0) {
+      me.clashT = .5;
+      for (const r of remotes.values()) if (r.scene === me.scene && r.pose !== 'walk' && Math.hypot(r.x - me.x, r.y - me.y) < 12 && String(net.myId) > String(r.id)) {
+        if (mode === 'rest' || mode === 'listen') standUp(); else if (mode === 'chant') endChant(); else if (mode === 'bell') endBell();
+        toast(`<b>${esc(r.name)}</b> vừa vào chỗ này trước, bạn nhường chỗ nhé 🙏`); break;
+      }
+    }
+  }
   updateChores(dt);
   if (me.scene === 'lecture' || mode === 'listen') updateLecture(dt);
   updateXam(dt);
@@ -3012,6 +3039,7 @@ function sitListen(c) {
   if (!c) { const free = CUSHIONS.filter(q => !seatTaken(q)); c = free.sort((a, b) => Math.hypot(a.x - me.x, a.y - me.y) - Math.hypot(b.x - me.x, b.y - me.y))[0]; }
   if (!c) { toast('Không còn bồ đoàn trống.'); return; }
   walkPath(c.x, c.y, () => {
+    if (seatTaken(c) || occupant(c.x, c.y, 14)) { toast('Bồ đoàn này vừa có người ngồi, chọn chỗ khác nhé.'); return; }
     mode = 'listen'; me.x = c.x; me.y = c.y; me.pose = 'sit'; me.back = true; me.front = false; me.vx = me.vy = 0;
     lect.min = false; lectPanel(true);
     if (AU.music) AU.music.gain.setTargetAtTime(0, AU.ctx.currentTime, .5);
