@@ -275,26 +275,97 @@ textarea.field { resize: none; min-height: 76px; line-height: 1.45; }
 }
 .toast.out { opacity: 0; transform: translateY(-8px); }
 
-/* intro */
+/* intro: vừa đúng một màn hình */
 #intro {
-  position: fixed; inset: 0; z-index: 25; display: grid; place-items: center; padding: 16px;
-  background: radial-gradient(ellipse at 50% 30%, rgba(40, 14, 4, .25), rgba(16, 6, 2, .78));
+  position: fixed; inset: 0; z-index: 25; display: flex; justify-content: center;
+  padding: max(10px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(10px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+  background: radial-gradient(ellipse at 50% 30%, rgba(40, 14, 4, .35), rgba(16, 6, 2, .82));
   overflow: auto;
 }
-.intro-card { width: min(480px, 100%); text-align: center; }
+.intro-card { width: min(1080px, 100%); height: 100%; min-height: 540px; display: flex; flex-direction: column; text-align: center; min-width: 0; }
+.intro-head { flex: none; padding: 2px 0 8px; }
 .intro-title {
-  font-family: 'Noto Serif', serif; font-weight: 700; color: #ffe2a0; font-size: clamp(30px, 8vw, 44px);
+  font-family: 'Noto Serif', serif; font-weight: 700; color: #ffe2a0; font-size: clamp(24px, 6vw, 36px); line-height: 1.15;
   text-shadow: 0 2px 0 #6b1a0e, 0 0 30px rgba(255, 190, 90, .45); letter-spacing: .02em;
 }
-.intro-sub { color: #fbe6b8; opacity: .9; margin: 6px 0 16px; font-size: 14px; line-height: 1.5; }
-.intro-card .sheet { text-align: left; }
-.intro-card, .intro-card .sheet, .temples { min-width: 0; max-width: 100%; }
-.temples { display: flex; gap: 8px; overflow-x: auto; padding: 2px 2px 8px; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
-.tcard { flex: 0 0 132px; scroll-snap-align: start; text-align: left; padding: 9px 10px; border-radius: 12px; background: #fffaf0; border: 1.5px solid var(--line); position: relative; }
-.tcard b { display: block; font-size: 13px; color: var(--ink); line-height: 1.25; }
-.tcard span { display: block; font-size: 11px; color: var(--muted); margin-top: 3px; }
-.tcard i { position: absolute; right: 8px; top: 9px; width: 14px; height: 14px; border-radius: 4px; }
-.tcard.on { border-color: var(--red2); background: #fff1e6; box-shadow: 0 3px 10px rgba(158, 42, 31, .2); }
+.intro-sub {
+  color: #fbe6b8; opacity: .9; margin: 4px auto 0; font-size: 13px; line-height: 1.45; max-width: 680px;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.intro-title, .intro-sub { transition: opacity .35s, transform .35s; }
+.intro-card.fly .intro-title, .intro-card.fly .intro-sub { opacity: 0; transform: translateY(6px); }
+.intro-grid { flex: 1; min-height: 0; display: grid; gap: 12px; grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); }
+@media (min-width: 820px) { .intro-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
+.mapcol { min-width: 0; min-height: 0; display: flex; flex-direction: column; gap: 8px; }
+.itabs { display: none; flex: none; margin: 0 auto 8px; padding: 3px; gap: 3px; border-radius: 13px; background: rgba(40, 18, 8, .6); border: 1px solid rgba(228, 176, 74, .4); }
+.itabs button { padding: 8px 16px; border-radius: 10px; color: #fbe6b8; font-weight: 700; font-size: 13.5px; }
+.itabs button.on { background: linear-gradient(180deg, #ffe39a, #d79a2b); color: #4a2408; }
+@media (max-width: 819px) {
+  .itabs { display: inline-flex; align-self: center; }
+  #intro .intro-card[data-tab="map"] .charpanel, #intro .intro-card[data-tab="char"] .mapcol { display: none; }
+  .opt { grid-template-columns: 50px minmax(0, 1fr); gap: 6px; }
+  .seg .chip { font-size: 12.5px; }
+  .charpanel .sw { width: 27px; height: 27px; }
+  .charpanel .swatches { gap: 5px; flex-wrap: nowrap; }
+  .intro-actions .btn { font-size: 14px; padding-left: 8px; padding-right: 8px; }
+}
+.intro-actions { flex: none; display: flex; gap: 8px; margin-top: 10px; }
+.intro-actions .btn { flex: 1; }
+@media (min-width: 820px) { .intro-actions { width: calc(50% - 6px); margin-left: auto; } }
+
+/* khung chọn nhân vật */
+.intro-card .sheet.charpanel { width: 100%; max-height: none; min-height: 0; overflow: auto; text-align: left; display: flex; flex-direction: column; gap: 10px; padding: 12px; }
+.stage {
+  position: relative; flex: 1 1 auto; min-height: 170px; border-radius: 14px; overflow: hidden; border: 1px solid var(--line);
+  background: radial-gradient(ellipse at 50% 92%, rgba(255, 214, 120, .75), transparent 45%), linear-gradient(180deg, #f6ead2, #ecd6ac);
+}
+.stage::before { content: ''; position: absolute; inset: 0; background: repeating-linear-gradient(90deg, rgba(160, 90, 40, .06) 0 2px, transparent 2px 46px); pointer-events: none; }
+.stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.stage .rn { position: absolute; left: 10px; top: 9px; font-size: 12px; font-weight: 700; color: #6a3a1a; background: rgba(255, 250, 240, .8); border: 1px solid var(--line); padding: 3px 9px; border-radius: 99px; }
+.stage .vn { position: absolute; right: 10px; top: 9px; font-size: 11.5px; font-weight: 700; color: var(--muted); }
+.opts { flex: none; display: grid; gap: 8px; }
+.opt { display: grid; grid-template-columns: 78px minmax(0, 1fr); align-items: center; gap: 8px; }
+.opt > span { font-size: 12.5px; font-weight: 700; color: var(--muted); }
+.opt .field { padding: 8px 11px; font-size: 14.5px; }
+.seg { display: flex; gap: 3px; padding: 3px; border-radius: 12px; background: #f1e2c4; border: 1px solid var(--line); min-width: 0; }
+.seg .chip { flex: 1 1 0; min-width: 0; padding: 7px 4px; border-radius: 9px; border: 0; background: transparent; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; box-shadow: none; }
+.seg .chip.on { background: var(--red); color: #fff6df; box-shadow: 0 2px 6px rgba(158, 42, 31, .3); }
+.charpanel .swatches { justify-content: flex-start; gap: 6px; }
+.charpanel .sw { width: 30px; height: 30px; border-width: 2px; }
+.charpanel .sw.on::after { font-size: 13px; }
+@media (max-height: 640px) { .stage { min-height: 130px; } .opts { gap: 6px; } .seg .chip { padding: 5px 4px; } }
+
+/* bản đồ chọn chùa */
+.vnmap {
+  position: relative; border-radius: 18px; overflow: hidden; width: 100%; flex: 1; min-height: 0;
+  background: radial-gradient(ellipse at 70% 40%, #e9f1ec, #d3e4e2 55%, #bcd3d4);
+  border: 1.5px solid rgba(228, 176, 74, .55); box-shadow: 0 10px 30px rgba(0,0,0,.35), inset 0 0 40px rgba(60, 40, 10, .18);
+  touch-action: none; cursor: grab;
+}
+.vnmap.drag { cursor: grabbing; }
+.vnmap svg { display: block; width: 100%; height: 100%; }
+.vnmap .tl { cursor: pointer; }
+.vnmap .tl rect { fill: #fffaf0; stroke: rgba(122, 72, 30, .45); stroke-width: 1; transition: fill .2s; }
+.vnmap .tl text { font: 700 12px 'Be Vietnam Pro', sans-serif; fill: #3a2414; }
+.vnmap .tl:hover rect { fill: #fff1dc; }
+.vnmap .tl.on rect { fill: #b8321f; stroke: #ffd98a; }
+.vnmap .tl.on text { fill: #fff4dc; }
+.vnmap .tl:focus { outline: none; }
+.vnmap .tl:focus-visible rect { stroke: #2a6fd6; stroke-width: 2; }
+.map-top { position: absolute; left: 10px; right: 10px; top: 10px; display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; pointer-events: none; }
+.map-top > * { pointer-events: auto; }
+.map-reset { font: 700 12px 'Be Vietnam Pro', sans-serif; color: #5a2c12; background: rgba(255, 250, 240, .92); border: 1px solid var(--line); border-radius: 10px; padding: 7px 10px; transition: opacity .25s; }
+.map-reset[disabled] { opacity: 0; pointer-events: none; }
+.map-card {
+  flex: none; position: relative; text-align: left; display: flex; gap: 10px; align-items: center;
+  background: rgba(255, 250, 240, .94); border: 1px solid var(--line); border-radius: 13px; padding: 9px 11px; box-shadow: 0 6px 18px rgba(40, 20, 5, .25);
+  transition: opacity .3s, transform .3s;
+}
+.map-card.hide { opacity: .35; }
+.map-card .ic { font-size: 24px; flex: none; }
+.map-card b { display: block; font: 700 14px 'Noto Serif', serif; color: var(--red); }
+.map-card span { display: block; font-size: 11.5px; color: var(--muted); line-height: 1.35; }
+.map-card .mhint { font-size: 10.5px; opacity: .8; margin-top: 2px; }
 .preview { display: flex; align-items: center; gap: 14px; }
 .preview canvas { width: 76px; height: 96px; flex: none; background: radial-gradient(circle at 50% 70%, #fff0cf, transparent 70%); border-radius: 12px; }
 .preview .grow { flex: 1; min-width: 0; }
@@ -355,34 +426,37 @@ textarea.field { resize: none; min-height: 76px; line-height: 1.45; }
 <div id="zen" hidden><div class="breath" id="breath"><div><b id="bTxt">Hít vào</b><span id="bCnt">0 hơi thở</span></div></div></div>
 
 <div id="intro">
-  <div class="intro-card">
-    <div class="intro-title" id="tName">Chùa An Nhiên</div>
-    <div class="intro-sub" id="tInfo">Đi chùa online — thỉnh chuông, thắp hương, xin xăm, thả hoa đăng<br>và tìm chút bình yên giữa ngày bận rộn.</div>
-    <div class="sheet">
-      <div class="label" style="margin-top:0">Chọn chùa tham quan</div>
-      <div class="temples" id="templeList"></div>
-      <div class="preview" style="margin-top:12px">
-        <canvas id="pv" width="152" height="192"></canvas>
-        <div class="grow">
-          <div class="label" style="margin-top:0">Tên của bạn</div>
-          <input class="field" id="inName" maxlength="16" placeholder="Ví dụ: Minh An" autocomplete="off" enterkeyhint="done">
+  <div class="intro-card" data-tab="map">
+    <div class="intro-head">
+      <div class="intro-title" id="tName">Chùa An Nhiên</div>
+      <div class="intro-sub" id="tInfo"></div>
+    </div>
+    <div class="itabs" role="tablist">
+      <button class="on" data-t="map" role="tab">🗺️ Chọn chùa</button>
+      <button data-t="char" role="tab">🙏 Nhân vật</button>
+    </div>
+    <div class="intro-grid">
+      <div class="mapcol">
+        <div class="vnmap" id="vnMap">
+          <svg id="mapSvg" viewBox="0 0 507 636" role="group" aria-label="Bản đồ các ngôi chùa"></svg>
+          <div class="map-top"><span></span><button class="map-reset" id="mapReset" disabled>🗺️ Toàn cảnh</button></div>
+        </div>
+        <div class="map-card" id="mapCard"><div class="ic">🛕</div><div><b id="mcName"></b><span id="mcPlace"></span><span class="mhint">Chạm tên chùa trên bản đồ để đến thăm · cảnh trong game là mô phỏng chung</span></div></div>
+      </div>
+      <div class="sheet charpanel">
+        <div class="stage"><canvas id="pv"></canvas><span class="rn" id="robeName"></span><span class="vn" id="visitNote"></span></div>
+        <div class="opts">
+          <label class="opt"><span>Tên</span><input class="field" id="inName" maxlength="16" placeholder="Ví dụ: Minh An" autocomplete="off" enterkeyhint="done"></label>
+          <div class="opt"><span>Giới tính</span><div class="seg" id="genderCh"><button class="chip" data-v="f">👩 Nữ</button><button class="chip" data-v="m">👨 Nam</button></div></div>
+          <div class="opt"><span>Tuổi</span><div class="seg" id="ageCh"></div></div>
+          <div class="opt"><span>Áo</span><div class="swatches" id="robeSw"></div></div>
+          <div class="opt"><span>Tóc</span><div class="seg" id="hairCh"></div></div>
         </div>
       </div>
-      <div class="label">Nhân vật</div>
-      <div class="chips" id="genderCh"><button class="chip" data-v="f">👩 Nữ</button><button class="chip" data-v="m">👨 Nam</button></div>
-      <div class="chips" id="ageCh" style="margin-top:8px"></div>
-      <div class="label">Trang phục</div>
-      <div class="swatches" id="robeSw"></div>
-      <div class="label">Kiểu tóc</div>
-      <div class="chips" id="hairCh"></div>
-      <div class="row">
-        <button class="btn" id="bEnter">🙏 Vào chùa</button>
-        <button class="btn alt" id="bEnterOnline">🌐 Đi cùng bạn bè</button>
-      </div>
-      <div class="tips">
-        <b>Lời nhắc khi đi chùa:</b> ăn mặc kín đáo, đi nhẹ nói khẽ; qua cổng tam quan đi cửa bên; thắp hương số lẻ (1, 3 hoặc 5 nén); chỉ dâng lễ chay lên ban Tam Bảo; không đi cắt ngang trước người đang lễ.
-      </div>
-      <div class="note" id="visitNote"></div>
+    </div>
+    <div class="intro-actions">
+      <button class="btn" id="bEnter">🙏 Vào chùa</button>
+      <button class="btn alt" id="bEnterOnline">🌐 Đi cùng bạn bè</button>
     </div>
   </div>
 </div>
@@ -436,7 +510,7 @@ const ROBES = [
 ];
 const HAIRS = ['Tóc dài', 'Búi tóc', 'Tóc ngắn'];
 const hairsFor = (g, a) => g === 'm' ? ['Tóc ngắn', 'Tóc chải', a === 'old' ? 'Hói' : 'Đầu đinh'] : HAIRS;
-const AGES = [['child', '🧒 Trẻ em'], ['adult', '🧑 Người lớn'], ['old', '🧓 Người già']];
+const AGES = [['child', 'Trẻ em'], ['adult', 'Người lớn'], ['old', 'Người già']];
 const ageScale = a => a === 'child' ? .7 : a === 'old' ? .96 : 1;
 const SKIN = '#f2c9a0';
 const lookOf = (robe, hair, gender = 'f', age = 'adult') => ({ robe: ROBES[robe % ROBES.length], hair: hair % 3, skin: age === 'old' ? '#ebc49c' : SKIN, hairC: age === 'old' ? (gender === 'm' ? '#c9c3b8' : '#d6d0c6') : '#2a1c14', gender, age });
@@ -444,18 +518,18 @@ const lookOf = (robe, hair, gender = 'f', age = 'adult') => ({ robe: ROBES[robe 
 // ─────────────────────────── danh sách chùa ───────────────────────────
 // Khung cảnh trong game là mô phỏng chung; mỗi chùa có tên, lời giới thiệu và tông màu riêng.
 const TEMPLES = [
-  { id: 'annhien', name: 'Chùa An Nhiên', plaque: 'CHÙA AN NHIÊN', place: 'Ngôi chùa của game', info: 'Ngôi chùa làng yên bình với tam quan, gác chuông, hồ sen và vườn tháp.', tile: ['#6e3a2a', '#8f4a31', '#a65737'], wall: '#efd9a6', grass: '#7da352' },
-  { id: 'tranquoc', name: 'Chùa Trấn Quốc', plaque: 'TRẤN QUỐC TỰ', place: 'Hồ Tây, Hà Nội', info: 'Ngôi chùa cổ nhất Thăng Long, khoảng 1.500 năm tuổi, nằm trên bán đảo nhỏ giữa Hồ Tây.', tile: ['#4a3a30', '#6a5040', '#7a5a46'], wall: '#d9b37a', grass: '#6f9a4a', stupa: '#c0503a' },
-  { id: 'motcot', name: 'Chùa Một Cột', plaque: 'DIÊN HỰU TỰ', place: 'Ba Đình, Hà Nội', info: 'Dựng năm 1049 thời vua Lý Thái Tông, điện thờ như đoá sen nở trên một cột đá giữa hồ.', tile: ['#5a4030', '#7a5838', '#8e6a44'], wall: '#e6d2a6', grass: '#7aa04e' },
-  { id: 'huong', name: 'Chùa Hương', plaque: 'HƯƠNG TÍCH', place: 'Mỹ Đức, Hà Nội', info: 'Quần thể chùa trong núi Hương Sơn với động Hương Tích, lễ hội kéo dài từ tháng Giêng tới tháng Ba âm lịch.', tile: ['#5a4a3a', '#76604a', '#8a7256'], wall: '#d8c8a0', grass: '#5f8a42' },
-  { id: 'baidinh', name: 'Chùa Bái Đính', plaque: 'BÁI ĐÍNH TỰ', place: 'Gia Viễn, Ninh Bình', info: 'Quần thể chùa rộng lớn trên núi, nổi tiếng với tượng Phật đồng và hành lang La Hán dài.', tile: ['#6a4426', '#8a5a30', '#a06a38'], wall: '#c9a77a', grass: '#6f9a48' },
-  { id: 'tamchuc', name: 'Chùa Tam Chúc', plaque: 'TAM CHÚC TỰ', place: 'Kim Bảng, Hà Nam', info: 'Quần thể chùa nằm giữa hồ nước và núi đá vôi, khung cảnh như bức tranh thuỷ mặc.', tile: ['#4a5a5a', '#5e7070', '#728484'], wall: '#dcd6c8', grass: '#76a050' },
-  { id: 'keo', name: 'Chùa Keo', plaque: 'THẦN QUANG TỰ', place: 'Vũ Thư, Thái Bình', info: 'Kiệt tác kiến trúc gỗ thời hậu Lê, nổi tiếng với gác chuông gỗ nhiều tầng mái.', tile: ['#5a3a2a', '#74503a', '#86604a'], wall: '#cdb08a', grass: '#79a24c' },
-  { id: 'butthap', name: 'Chùa Bút Tháp', plaque: 'NINH PHÚC TỰ', place: 'Thuận Thành, Bắc Ninh', info: 'Ngôi chùa cổ lưu giữ tượng Quan Âm nghìn mắt nghìn tay quý giá.', tile: ['#5a4636', '#76604a', '#8a7058'], wall: '#d6c09a', grass: '#78a04c' },
-  { id: 'thienmu', name: 'Chùa Thiên Mụ', plaque: 'THIÊN MỤ TỰ', place: 'Bờ sông Hương, Huế', info: 'Dựng năm 1601 thời chúa Nguyễn Hoàng, biểu tượng xứ Huế với tháp Phước Duyên bảy tầng.', tile: ['#3e5a3a', '#4e7048', '#5e8456'], wall: '#e8d8a8', grass: '#6f9a48', stupa: '#e2b49a' },
-  { id: 'linhung', name: 'Chùa Linh Ứng', plaque: 'LINH ỨNG TỰ', place: 'Sơn Trà, Đà Nẵng', info: 'Ngôi chùa trên bán đảo Sơn Trà với tượng Quan Âm cao 67 mét hướng ra biển.', tile: ['#2e5a6a', '#3a7080', '#4a8494'], wall: '#f2ecdf', grass: '#7aa452', quanam: 1.7 },
-  { id: 'truclam', name: 'Thiền viện Trúc Lâm', plaque: 'TRÚC LÂM THIỀN VIỆN', place: 'Hồ Tuyền Lâm, Đà Lạt', info: 'Thiền viện giữa rừng thông, nhìn xuống hồ Tuyền Lâm, nơi tu tập thiền phái Trúc Lâm.', tile: ['#4a3a2a', '#5e4a36', '#705a42'], wall: '#e8dcc0', grass: '#5c8a48' },
-  { id: 'vinhnghiem', name: 'Chùa Vĩnh Nghiêm', plaque: 'VĨNH NGHIÊM TỰ', place: 'Quận 3, TP.HCM', info: 'Ngôi chùa lớn của Sài Gòn, xây dựng 1964–1971, có bảo tháp bảy tầng.', tile: ['#7a3a24', '#9a4a2a', '#b25a32'], wall: '#f0e2c0', grass: '#7aa04e' },
+  { id: 'annhien', lon: 106.5, lat: 17.35, short: 'An Nhiên', lab: ['L', -22, -6], name: 'Chùa An Nhiên', plaque: 'CHÙA AN NHIÊN', place: 'Ngôi chùa của game', info: 'Ngôi chùa làng yên bình với tam quan, gác chuông, hồ sen và vườn tháp.', tile: ['#6e3a2a', '#8f4a31', '#a65737'], wall: '#efd9a6', grass: '#7da352' },
+  { id: 'tranquoc', lon: 105.836, lat: 21.048, short: 'Trấn Quốc', lab: ['L', -36, -30], name: 'Chùa Trấn Quốc', plaque: 'TRẤN QUỐC TỰ', place: 'Hồ Tây, Hà Nội', info: 'Ngôi chùa cổ nhất Thăng Long, khoảng 1.500 năm tuổi, nằm trên bán đảo nhỏ giữa Hồ Tây.', tile: ['#4a3a30', '#6a5040', '#7a5a46'], wall: '#d9b37a', grass: '#6f9a4a', stupa: '#c0503a' },
+  { id: 'motcot', lon: 105.834, lat: 21.036, short: 'Một Cột', lab: ['L', -36, -8], name: 'Chùa Một Cột', plaque: 'DIÊN HỰU TỰ', place: 'Ba Đình, Hà Nội', info: 'Dựng năm 1049 thời vua Lý Thái Tông, điện thờ như đoá sen nở trên một cột đá giữa hồ.', tile: ['#5a4030', '#7a5838', '#8e6a44'], wall: '#e6d2a6', grass: '#7aa04e' },
+  { id: 'huong', lon: 105.75, lat: 20.62, short: 'Hương', lab: ['L', -30, -2], name: 'Chùa Hương', plaque: 'HƯƠNG TÍCH', place: 'Mỹ Đức, Hà Nội', info: 'Quần thể chùa trong núi Hương Sơn với động Hương Tích, lễ hội kéo dài từ tháng Giêng tới tháng Ba âm lịch.', tile: ['#5a4a3a', '#76604a', '#8a7256'], wall: '#d8c8a0', grass: '#5f8a42' },
+  { id: 'baidinh', lon: 105.85, lat: 20.27, short: 'Bái Đính', lab: ['L', -34, 10], name: 'Chùa Bái Đính', plaque: 'BÁI ĐÍNH TỰ', place: 'Gia Viễn, Ninh Bình', info: 'Quần thể chùa rộng lớn trên núi, nổi tiếng với tượng Phật đồng và hành lang La Hán dài.', tile: ['#6a4426', '#8a5a30', '#a06a38'], wall: '#c9a77a', grass: '#6f9a48' },
+  { id: 'tamchuc', lon: 105.82, lat: 20.52, short: 'Tam Chúc', lab: ['R', 40, -6], name: 'Chùa Tam Chúc', plaque: 'TAM CHÚC TỰ', place: 'Kim Bảng, Hà Nam', info: 'Quần thể chùa nằm giữa hồ nước và núi đá vôi, khung cảnh như bức tranh thuỷ mặc.', tile: ['#4a5a5a', '#5e7070', '#728484'], wall: '#dcd6c8', grass: '#76a050' },
+  { id: 'keo', lon: 106.33, lat: 20.38, short: 'Keo', lab: ['R', 22, 12], name: 'Chùa Keo', plaque: 'THẦN QUANG TỰ', place: 'Vũ Thư, Thái Bình', info: 'Kiệt tác kiến trúc gỗ thời hậu Lê, nổi tiếng với gác chuông gỗ nhiều tầng mái.', tile: ['#5a3a2a', '#74503a', '#86604a'], wall: '#cdb08a', grass: '#79a24c' },
+  { id: 'butthap', lon: 106.1, lat: 21.08, short: 'Bút Tháp', lab: ['R', 30, -20], name: 'Chùa Bút Tháp', plaque: 'NINH PHÚC TỰ', place: 'Thuận Thành, Bắc Ninh', info: 'Ngôi chùa cổ lưu giữ tượng Quan Âm nghìn mắt nghìn tay quý giá.', tile: ['#5a4636', '#76604a', '#8a7058'], wall: '#d6c09a', grass: '#78a04c' },
+  { id: 'thienmu', lon: 107.545, lat: 16.455, short: 'Thiên Mụ', lab: ['L', -24, -10], name: 'Chùa Thiên Mụ', plaque: 'THIÊN MỤ TỰ', place: 'Bờ sông Hương, Huế', info: 'Dựng năm 1601 thời chúa Nguyễn Hoàng, biểu tượng xứ Huế với tháp Phước Duyên bảy tầng.', tile: ['#3e5a3a', '#4e7048', '#5e8456'], wall: '#e8d8a8', grass: '#6f9a48', stupa: '#e2b49a' },
+  { id: 'linhung', lon: 108.28, lat: 16.1, short: 'Linh Ứng', lab: ['R', 22, -6], name: 'Chùa Linh Ứng', plaque: 'LINH ỨNG TỰ', place: 'Sơn Trà, Đà Nẵng', info: 'Ngôi chùa trên bán đảo Sơn Trà với tượng Quan Âm cao 67 mét hướng ra biển.', tile: ['#2e5a6a', '#3a7080', '#4a8494'], wall: '#f2ecdf', grass: '#7aa452', quanam: 1.7 },
+  { id: 'truclam', lon: 108.43, lat: 11.9, short: 'Trúc Lâm', lab: ['L', -24, -6], name: 'Thiền viện Trúc Lâm', plaque: 'TRÚC LÂM THIỀN VIỆN', place: 'Hồ Tuyền Lâm, Đà Lạt', info: 'Thiền viện giữa rừng thông, nhìn xuống hồ Tuyền Lâm, nơi tu tập thiền phái Trúc Lâm.', tile: ['#4a3a2a', '#5e4a36', '#705a42'], wall: '#e8dcc0', grass: '#5c8a48' },
+  { id: 'vinhnghiem', lon: 106.68, lat: 10.79, short: 'Vĩnh Nghiêm', lab: ['R', 22, 18], name: 'Chùa Vĩnh Nghiêm', plaque: 'VĨNH NGHIÊM TỰ', place: 'Quận 3, TP.HCM', info: 'Ngôi chùa lớn của Sài Gòn, xây dựng 1964–1971, có bảo tháp bảy tầng.', tile: ['#7a3a24', '#9a4a2a', '#b25a32'], wall: '#f0e2c0', grass: '#7aa04e' },
 ];
 let TEMPLE = TEMPLES.find(t => t.id === S.temple) || TEMPLES[0];
 function setTemple(id) {
@@ -1266,8 +1340,10 @@ function drawPerson(g, o) {
   if (o.back || o.front) personFB(g, o, !!o.back); else personSide(g, o);
   g.restore();
 }
+// đầu to hơn thân một chút cho dễ thương (kiểu chibi nhẹ)
+const headK = L => L.age === 'child' ? 1.42 : L.monk ? 1.12 : 1.2;
 function headSide(g, L, o, cx, cy) {
-  const hk = L.age === 'child' ? 1.22 : 1;
+  const hk = headK(L);
   if (hk !== 1) { g.save(); g.translate(cx, cy + 6); g.scale(hk, hk); g.translate(-cx, -(cy + 6)); }
   headSide0(g, L, o, cx, cy);
   if (hk !== 1) g.restore();
@@ -1276,7 +1352,8 @@ function headSide0(g, L, o, cx, cy) {
   const skin = L.skin;
   g.fillStyle = skin; g.fillRect(cx - 2.6, cy + 5, 5.2, 5);
   g.beginPath(); g.ellipse(cx, cy, 7.8, 8.8, 0, 0, TAU); g.fill();
-  g.beginPath(); g.ellipse(cx + 7.4, cy + 1, 1.6, 2, 0, 0, TAU); g.fill(); // mũi
+  g.strokeStyle = shade(skin, .74); g.lineWidth = .7; g.stroke();
+  g.beginPath(); g.ellipse(cx + 7.2, cy + 1.2, 1.3, 1.6, 0, 0, TAU); g.fill(); // mũi
   if (!L.monk && L.gender === 'm') {
     g.fillStyle = L.hairC;
     if (L.hair === 2 && L.age === 'old') { g.beginPath(); g.ellipse(cx - 5, cy + 1, 3.6, 4.4, 0, 0, TAU); g.fill(); }
@@ -1294,13 +1371,18 @@ function headSide0(g, L, o, cx, cy) {
     g.beginPath(); g.ellipse(cx - 4.6, cy + 1, 4.4, 7, 0, 0, TAU); g.fill();
     if (L.hair === 0) { g.beginPath(); g.moveTo(cx - 6, cy - 2); g.quadraticCurveTo(cx - 13, cy + 12, cx - 9.5, cy + 26); g.quadraticCurveTo(cx - 5, cy + 12, cx - 2.5, cy); g.fill(); }
     if (L.hair === 1) { g.beginPath(); g.arc(cx - 7, cy - 5.5, 4.6, 0, TAU); g.fill(); }
+    g.fillStyle = 'rgba(255,255,255,.17)'; g.beginPath(); g.ellipse(cx - 2, cy - 7.2, 3.6, 1.3, -.25, 0, TAU); g.fill();
   } else { g.fillStyle = 'rgba(80,50,30,.18)'; g.beginPath(); g.ellipse(cx - 1, cy - 3, 8, 6.5, 0, Math.PI, TAU); g.fill(); }
   g.fillStyle = shade(skin, .86); g.beginPath(); g.ellipse(cx - 1.5, cy + .5, 1.8, 2.4, 0, 0, TAU); g.fill(); // tai
   const eyesClosed = o.pose === 'sit' || o.pose === 'kneelbow' || o.pose === 'chant' || (o.bow || 0) > .45;
   if (eyesClosed) { g.strokeStyle = '#2a1a10'; g.lineWidth = .9; g.beginPath(); g.moveTo(3.6 + cx, cy - .5); g.quadraticCurveTo(4.8 + cx, cy + .6, 6 + cx, cy - .5); g.stroke(); }
-  else { g.fillStyle = '#2a1a10'; g.beginPath(); g.arc(cx + 4.6, cy - .5, 1.15, 0, TAU); g.fill(); }
-  g.fillStyle = 'rgba(230,110,90,.35)'; g.beginPath(); g.arc(cx + 3.4, cy + 3.4, 1.8, 0, TAU); g.fill();
-  g.strokeStyle = shade(skin, .62); g.lineWidth = .8; g.beginPath(); g.moveTo(cx + 5, cy + 5.2); g.lineTo(cx + 6.4, cy + 5); g.stroke();
+  else {
+    g.fillStyle = '#2a1a10'; g.beginPath(); g.ellipse(cx + 4.5, cy - .3, 1.15, 1.6, 0, 0, TAU); g.fill();
+    g.fillStyle = '#fff'; g.beginPath(); g.arc(cx + 4.85, cy - .9, .45, 0, TAU); g.fill();
+    g.strokeStyle = L.monk || L.age === 'old' ? 'rgba(90,60,40,.6)' : L.hairC; g.lineWidth = .8; g.beginPath(); g.moveTo(cx + 3, cy - 3.3); g.quadraticCurveTo(cx + 4.6, cy - 4.1, cx + 6, cy - 3.2); g.stroke();
+  }
+  g.fillStyle = 'rgba(240,120,110,.38)'; g.beginPath(); g.ellipse(cx + 3.6, cy + 3.2, 2, 1.4, 0, 0, TAU); g.fill();
+  g.strokeStyle = '#b0553f'; g.lineWidth = .85; g.beginPath(); g.moveTo(cx + 4.6, cy + 5); g.quadraticCurveTo(cx + 5.8, cy + 5.8, cx + 6.6, cy + 4.8); g.stroke();
 }
 // que hương cầm tay: n que chụm, đầu đỏ cháy, làn khói mảnh
 function heldIncense(g, x, y, ang, n) {
@@ -1403,13 +1485,14 @@ function personSide(g, o) {
   else if (male) { g.lineTo(8, -6); g.quadraticCurveTo(9.5, 4, 9.5 + fl * .6, 12); g.lineTo(-8.5 + fl * .4, 12); g.quadraticCurveTo(-9, 4, -8, -6); }
   else { g.lineTo(7.5, -6); g.quadraticCurveTo(10.5, 6, 11 + fl, 18); g.lineTo(-10 + fl * .6, 18); g.quadraticCurveTo(-9.5, 6, -7.5, -6); }
   g.closePath(); g.fill();
+  g.strokeStyle = shade(robeD, .78); g.lineWidth = .8; g.stroke();
   g.strokeStyle = robeD; g.lineWidth = 1.1; g.beginPath(); g.moveTo(3, -26); g.quadraticCurveTo(5, -16, 4, -4); g.stroke();
-  g.fillStyle = robeD; g.fillRect(-3, -29.5, 7, 2.4); // cổ áo
+  g.fillStyle = robeD; rr(g, -3, -30.4, 7, 3.2, 1.3); g.fill(); // cổ áo đứng
   if (L.monk) { g.fillStyle = shade(robe, .82); g.beginPath(); g.moveTo(-7, -27); g.lineTo(8, -4); g.lineTo(9, -10); g.lineTo(-3, -28); g.fill(); }
   // đầu
   headSide(g, L, o, 1.5, -38.5);
   // tay phía gần
-  { const [ex, ey, hx, hy] = ik2(1, -25, nh[0], nh[1], 10.5, 10.5, 1); limb(g, robe, 5.8, 5, 1, -25, ex, ey, hx, hy);
+  { const [ex, ey, hx, hy] = ik2(1, -25, nh[0], nh[1], 10.5, 10.5, 1); limb(g, shade(robeD, .8), 7, 6.2, 1, -25, ex, ey, hx, hy); limb(g, robe, 5.6, 4.8, 1, -25, ex, ey, hx, hy);
     const joined = pose === 'bow' || pose === 'hold' || pose === 'kneel' || (pose === 'kneelbow' && (o.bow || 0) < .5);
     g.fillStyle = skin;
     if (joined) { g.beginPath(); g.ellipse(hx + .5, hy - 1.5, 2.4, 3.6, -.2, 0, TAU); g.fill(); }
@@ -1458,12 +1541,14 @@ function personFB(g, o, back) {
   else if (pose === 'bench') hands = [[-6, 0], [6, 0]];
   else if (pose === 'reach') hands = [[-9.5, -5], [7, -48]];
   else if (pose === 'pick') hands = [[-6, 10], [6, 10]];
-  else { const sw = walking ? s * 1.8 : 0; hands = [[-8.6, -5 + sw], [8.6, -5 - sw]]; if (o.held === 'can' || o.held === 'trash') hands[1] = [10, -6]; }
+  else { const sw = walking ? s * 1.8 : 0; hands = [[-11.2, -6 + sw], [11.2, -6 - sw]]; if (o.held === 'can' || o.held === 'trash') hands[1] = [10, -6]; }
   const drawArms = () => {
     hands.forEach(([hx, hy], i) => {
-      const sd = i ? 1 : -1, sx = sd * 7.4, sy = -25;
-      const [ex, ey] = ik2(sx, sy, hx, hy, 10.5, 10.5, joined ? (sd > 0 ? -1 : 1) : (sd > 0 ? 1 : -1));
-      limb(g, robe, 5.6, 4.8, sx, sy, ex, ey, hx, hy);
+      const sd = i ? 1 : -1, sx = sd * 7.6, sy = -25.4;
+      // tay buông: khuỷu hơi cong ra ngoài; tay chắp: khuỷu khép vào trước ngực
+      const [ex, ey] = ik2(sx, sy, hx, hy, 10.5, 10.5, joined ? (sd > 0 ? -1 : 1) : (sd > 0 ? -1 : 1));
+      limb(g, shade(robeD, .8), 6.8, 6, sx, sy, ex, ey, hx, hy);
+      limb(g, robe, 5.4, 4.6, sx, sy, ex, ey, hx, hy);
       if (!back || !joined) { g.fillStyle = skin; g.beginPath(); g.arc(hx, hy, 2.5, 0, TAU); g.fill(); }
     });
   };
@@ -1477,13 +1562,24 @@ function personFB(g, o, back) {
   else if (L.gender === 'm') { const fl = walking ? s * 1 : 0; g.lineTo(8, -6); g.quadraticCurveTo(9, 4, 9 + fl, 12); g.lineTo(-9 + fl, 12); g.quadraticCurveTo(-9, 4, -8, -6); }
   else { const fl = walking ? s * 1.5 : 0; g.lineTo(7.6, -6); g.quadraticCurveTo(10, 6, 10.5 + fl, 18); g.lineTo(-10.5 + fl, 18); g.quadraticCurveTo(-10, 6, -7.6, -6); }
   g.closePath(); g.fill();
-  if (!back) { g.strokeStyle = robeD; g.lineWidth = 1.1; g.beginPath(); g.moveTo(0, -27); g.lineTo(0, -4); g.stroke(); g.fillStyle = robeD; g.beginPath(); g.moveTo(-3, -28.5); g.lineTo(0, -25); g.lineTo(3, -28.5); g.fill(); }
+  g.strokeStyle = shade(robeD, .78); g.lineWidth = .8; g.stroke();
+  if (!back) {
+    if (L.monk) { g.strokeStyle = robeD; g.lineWidth = 1.1; g.beginPath(); g.moveTo(0, -27); g.lineTo(0, -4); g.stroke(); g.fillStyle = robeD; g.beginPath(); g.moveTo(-3, -28.5); g.lineTo(0, -25); g.lineTo(3, -28.5); g.fill(); }
+    else {
+      // áo dài: cổ đứng, đường cúc chéo sang nách phải, nếp eo
+      g.fillStyle = robeD; rr(g, -3.4, -30.6, 6.8, 3.4, 1.4); g.fill();
+      g.strokeStyle = robeD; g.lineWidth = 1; g.beginPath(); g.moveTo(.5, -27.4); g.quadraticCurveTo(4.6, -26.6, 6.6, -22.4); g.stroke();
+      g.fillStyle = 'rgba(255,255,255,.5)'; for (const [bx, by] of [[2.2, -27], [4.6, -25.6], [6, -23.4]]) { g.beginPath(); g.arc(bx, by, .6, 0, TAU); g.fill(); }
+      g.strokeStyle = 'rgba(0,0,0,.12)'; g.lineWidth = .8; g.beginPath(); g.moveTo(-6.6, -10); g.quadraticCurveTo(0, -8.6, 6.6, -10); g.stroke();
+    }
+  } else { g.strokeStyle = 'rgba(0,0,0,.12)'; g.lineWidth = .8; g.beginPath(); g.moveTo(0, -27); g.lineTo(0, -6); g.stroke(); }
   if (L.monk) { g.fillStyle = shade(robe, .82); g.beginPath(); g.moveTo(back ? 7 : -7, -27); g.lineTo(back ? -8 : 8, -5); g.lineTo(back ? -3 : 3, -5); g.lineTo(back ? 3 : -3, -27); g.fill(); }
   // đầu
-  const hy = -38.5, hk = L.age === 'child' ? 1.22 : 1;
+  const hy = -38.5, hk = headK(L);
   g.save(); if (hk !== 1) { g.translate(0, hy + 6); g.scale(hk, hk); g.translate(0, -(hy + 6)); }
   g.fillStyle = skin; g.fillRect(-2.6, hy + 5, 5.2, 5);
   g.beginPath(); g.ellipse(0, hy, 8, 8.9, 0, 0, TAU); g.fill();
+  g.strokeStyle = shade(skin, .74); g.lineWidth = .7; g.stroke();
   if (back) {
     if (!L.monk && L.gender === 'm') {
       g.fillStyle = L.hairC;
@@ -1513,14 +1609,19 @@ function personFB(g, o, back) {
       g.beginPath(); g.moveTo(-8.6, hy - 3); g.quadraticCurveTo(-3, hy - 6, 0, hy - 2.5); g.quadraticCurveTo(3, hy - 6, 8.6, hy - 3); g.lineTo(8.6, hy - 6); g.lineTo(-8.6, hy - 6); g.fill();
       for (const sd of [-1, 1]) { g.beginPath(); g.ellipse(sd * 7.6, hy + (L.hair === 0 ? 6 : 1), 2.6, L.hair === 0 ? 11 : 6, 0, 0, TAU); g.fill(); }
       if (L.hair === 1) { g.beginPath(); g.arc(0, hy - 9.5, 4.4, 0, TAU); g.fill(); }
+      g.fillStyle = 'rgba(255,255,255,.17)'; g.beginPath(); g.ellipse(-3.2, hy - 7, 3.4, 1.3, -.3, 0, TAU); g.fill();
     } else { g.fillStyle = 'rgba(80,50,30,.16)'; g.beginPath(); g.ellipse(0, hy - 4, 7.5, 4.5, 0, Math.PI, TAU); g.fill(); }
     const closed = pose === 'sit' || pose === 'kneelbow' || (o.bow || 0) > .45;
     for (const sd of [-1, 1]) {
       if (closed) { g.strokeStyle = '#2a1a10'; g.lineWidth = .9; g.beginPath(); g.moveTo(sd * 3 - 1.4, hy); g.quadraticCurveTo(sd * 3, hy + 1, sd * 3 + 1.4, hy); g.stroke(); }
-      else { g.fillStyle = '#2a1a10'; g.beginPath(); g.arc(sd * 3, hy - .2, 1.15, 0, TAU); g.fill(); }
-      g.fillStyle = 'rgba(230,110,90,.33)'; g.beginPath(); g.arc(sd * 4.4, hy + 3.4, 1.7, 0, TAU); g.fill();
+      else {
+        g.fillStyle = '#2a1a10'; g.beginPath(); g.ellipse(sd * 3, hy, 1.15, 1.6, 0, 0, TAU); g.fill();
+        g.fillStyle = '#fff'; g.beginPath(); g.arc(sd * 3 + .4, hy - .6, .45, 0, TAU); g.fill();
+        g.strokeStyle = L.monk || L.age === 'old' ? 'rgba(90,60,40,.6)' : L.hairC; g.lineWidth = .8; g.beginPath(); g.moveTo(sd * 3 - 1.6, hy - 3.1); g.quadraticCurveTo(sd * 3, hy - 3.9, sd * 3 + 1.6, hy - 3.1); g.stroke();
+      }
+      g.fillStyle = 'rgba(240,120,110,.36)'; g.beginPath(); g.ellipse(sd * 4.6, hy + 3.2, 1.9, 1.3, 0, 0, TAU); g.fill();
     }
-    g.strokeStyle = shade(skin, .6); g.lineWidth = .9; g.beginPath(); g.moveTo(-1.4, hy + 5); g.quadraticCurveTo(0, hy + 5.8, 1.4, hy + 5); g.stroke();
+    g.strokeStyle = '#b0553f'; g.lineWidth = .9; g.beginPath(); g.moveTo(-1.6, hy + 4.7); g.quadraticCurveTo(0, hy + 6.1, 1.6, hy + 4.7); g.stroke();
     if (L.gender === 'm' && L.age === 'old') { g.strokeStyle = L.hairC; g.lineWidth = 1.4; g.beginPath(); g.moveTo(-3, hy + 3.8); g.quadraticCurveTo(0, hy + 3, 3, hy + 3.8); g.stroke(); }
   }
   g.restore();
@@ -4355,11 +4456,37 @@ for (const ev of ['fullscreenchange', 'webkitfullscreenchange']) document.addEve
 $('mini').onclick = () => openJourney();
 
 // ═══════════════════════════ màn hình chào ═══════════════════════════
+// nhân vật xem trước: đứng trên đài sen, thỉnh thoảng chắp tay vái
+let pvRaf = 0;
 function drawPreview() {
-  const c = $('pv'), g = c.getContext('2d');
-  g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, c.width, c.height);
-  g.setTransform(2, 0, 0, 2, 0, 0);
-  drawPerson(g, { x: 38, y: 88, dir: 1, ph: 0, pose: 'stand', front: true, scale: S.age === 'child' ? .82 : 1, look: lookOf(S.robe, S.hair, S.gender || 'f', S.age || 'adult') });
+  $('robeName').textContent = ROBES[S.robe % ROBES.length].n;
+  if (!pvRaf) pvRaf = requestAnimationFrame(pvLoop);
+}
+function pvLoop(now) {
+  pvRaf = 0;
+  if ($('intro').hidden) return;
+  const c = $('pv'), d = Math.min(2, devicePixelRatio || 1), W = Math.round(c.clientWidth * d), H = Math.round(c.clientHeight * d);
+  if (W && H) {
+    if (c.width !== W || c.height !== H) { c.width = W; c.height = H; }
+    const g = c.getContext('2d'), age = S.age || 'adult';
+    g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, W, H);
+    const t = (now / 1000) % 7, sm = k => k * k * (3 - 2 * k);
+    const bow = t < 3.6 ? 0 : t < 4.3 ? sm((t - 3.6) / .7) : t < 5.6 ? 1 : t < 6.3 ? 1 - sm((t - 5.6) / .7) : 0;
+    const base = Math.min(H * .8 / 80, W * .5 / 36), k = base * (age === 'child' ? .84 : 1), fy = H * .86;
+    // vầng sáng và đài sen
+    let gr = g.createRadialGradient(W / 2, fy - 34 * base, 0, W / 2, fy - 34 * base, 46 * base);
+    gr.addColorStop(0, 'rgba(255,236,170,.75)'); gr.addColorStop(1, 'rgba(255,236,170,0)');
+    g.fillStyle = gr; g.beginPath(); g.arc(W / 2, fy - 34 * base, 46 * base, 0, TAU); g.fill();
+    g.save(); g.translate(W / 2, fy); g.scale(base, base);
+    for (let i = -3; i <= 3; i++) { g.fillStyle = i % 2 ? '#e98aa4' : '#f2a9bc'; g.beginPath(); g.ellipse(i * 6.2, 2.5, 5.2, 3.4, i * .12, 0, TAU); g.fill(); }
+    g.fillStyle = '#7da352'; g.beginPath(); g.ellipse(0, 5, 26, 4.2, 0, 0, TAU); g.fill();
+    g.fillStyle = '#f7c9d4'; g.beginPath(); g.ellipse(0, 1.2, 20, 4, 0, 0, TAU); g.fill();
+    g.restore();
+    g.save(); g.translate(W / 2, fy); g.scale(k, k);
+    drawPerson(g, { x: 0, y: 0, dir: 1, pose: bow > 0 ? 'bow' : 'stand', bow, front: true, look: lookOf(S.robe, S.hair, S.gender || 'f', age) });
+    g.restore();
+  }
+  pvRaf = requestAnimationFrame(pvLoop);
 }
 function buildIntro() {
   $('inName').value = S.name;
@@ -4367,6 +4494,8 @@ function buildIntro() {
   const hairs = () => { $('hairCh').innerHTML = hairsFor(S.gender, S.age).map((h, i) => `<button class="chip ${i === S.hair ? 'on' : ''}" data-i="${i}">${h}</button>`).join(''); };
   hairs();
   $('ageCh').innerHTML = AGES.map(([v, l]) => `<button class="chip" data-v="${v}">${l}</button>`).join('');
+  const card = $('intro').querySelector('.intro-card');
+  $('intro').querySelector('.itabs').onclick = e => { const b = e.target.closest('button'); if (!b) return; card.dataset.tab = b.dataset.t; for (const x of b.parentNode.children) x.classList.toggle('on', x === b); if (b.dataset.t === 'char') drawPreview(); dispatchEvent(new Event('resize')); };
   const marks = () => { for (const b of $('genderCh').children) b.classList.toggle('on', b.dataset.v === (S.gender || 'f')); for (const b of $('ageCh').children) b.classList.toggle('on', b.dataset.v === (S.age || 'adult')); };
   marks();
   $('genderCh').onclick = e => { const b = e.target.closest('.chip'); if (!b) return; S.gender = b.dataset.v; marks(); hairs(); drawPreview(); };
@@ -4375,20 +4504,187 @@ function buildIntro() {
   $('hairCh').onclick = e => { const b = e.target.closest('.chip'); if (!b) return; S.hair = +b.dataset.i; [...$('hairCh').children].forEach(x => x.classList.toggle('on', x === b)); drawPreview(); };
   const showTemple = () => {
     $('tName').textContent = TEMPLE.name;
-    $('tInfo').innerHTML = `${esc(TEMPLE.place)} · ${esc(TEMPLE.info)}<br><small style="opacity:.75">Khung cảnh trong game là mô phỏng chung, không phải bản sao kiến trúc thật.</small>`;
-    $('bEnter').textContent = roomInHash() ? `🛕 Vào phòng ${showCode(roomInHash())}` : `🙏 Vào ${TEMPLE.name}`;
+    $('tInfo').textContent = `${TEMPLE.place} · ${TEMPLE.info}`;
+    $('bEnter').textContent = roomInHash() ? `🛕 Vào phòng ${showCode(roomInHash())}` : `🙏 Vào chùa`;
   };
-  $('templeList').innerHTML = TEMPLES.map(t => `<button class="tcard ${t.id === TEMPLE.id ? 'on' : ''}" data-id="${t.id}"><i style="background:${t.tile[1]}"></i><b>${esc(t.name)}</b><span>${esc(t.place)}</span></button>`).join('');
-  $('templeList').onclick = e => { const b = e.target.closest('.tcard'); if (!b) return; setTemple(b.dataset.id); [...$('templeList').children].forEach(x => x.classList.toggle('on', x === b)); showTemple(); };
   showTemple();
-  const on = $('templeList').querySelector('.on'); if (on) setTimeout(() => on.scrollIntoView({ inline: 'center', block: 'nearest' }), 50);
+  templeMap(id => { setTemple(id); }, showTemple);
   const room = roomInHash();
   if (room) { $('bEnter').textContent = `🛕 Vào phòng ${showCode(room)}`; $('bEnterOnline').hidden = true; }
   $('bEnter').onclick = () => enter(false);
   $('bEnterOnline').onclick = () => enter(true);
-  $('visitNote').textContent = S.days.length ? `Bạn đã đi chùa ${S.days.length} ngày · 🪷 ${S.merit} phước` : '';
+  $('visitNote').textContent = S.days.length ? `${S.days.length} ngày đi chùa · 🪷 ${S.merit}` : '';
   drawPreview();
   if (document.fonts) document.fonts.ready.then(() => { spriteCache.clear(); drawPreview(); });
+}
+// ─────────────────────────── bản đồ chọn chùa ───────────────────────────
+// Bản đồ Việt Nam cách điệu (toạ độ kinh/vĩ độ gần đúng); chạm vào chùa → người hành hương đi tới đó.
+const VN_OUTLINE = [[102.14,22.40],[102.40,22.65],[102.70,22.70],[103.00,22.55],[103.30,22.78],[103.65,22.79],[104.00,22.52],[104.30,22.75],[104.75,22.85],[105.05,23.15],[105.35,23.36],[105.65,23.20],[105.90,22.95],[106.25,22.92],[106.70,22.85],[106.75,22.40],[106.65,22.00],[107.05,21.80],[107.45,21.65],[107.98,21.53],
+  [107.70,21.30],[107.35,21.05],[106.90,20.85],[106.62,20.55],[106.50,20.25],[106.15,19.98],[105.95,19.75],[105.80,19.35],[105.72,19.00],[105.80,18.65],[106.10,18.35],[106.45,18.00],[106.65,17.60],[107.05,17.10],[107.40,16.75],[107.85,16.40],[108.20,16.15],[108.32,16.08],[108.40,15.85],[108.75,15.35],[108.95,15.00],[109.08,14.50],[109.22,13.85],[109.28,13.30],[109.42,12.88],[109.45,12.60],[109.20,12.30],[109.20,11.85],[109.10,11.50],[108.90,11.25],[108.60,11.10],[108.25,10.95],[107.90,10.75],[107.55,10.50],[107.15,10.40],[106.85,10.30],[106.70,10.05],[106.55,9.75],[106.30,9.50],[105.90,9.30],[105.50,9.05],[105.20,8.80],[104.80,8.58],
+  [104.82,8.90],[104.85,9.35],[104.92,9.75],[105.05,10.05],[104.80,10.25],[104.47,10.42],
+  [104.80,10.60],[105.10,10.90],[105.40,10.95],[105.85,10.88],[106.15,11.05],[106.20,11.40],[106.45,11.70],[106.80,11.95],[107.20,12.10],[107.55,12.30],[107.50,12.75],[107.58,13.35],[107.45,13.90],[107.55,14.40],[107.40,14.70],
+  [107.65,15.10],[107.55,15.50],[107.30,15.80],[107.00,16.10],[106.70,16.35],[106.55,16.70],[106.30,17.10],[105.95,17.45],[105.65,17.85],[105.40,18.15],[105.10,18.45],[104.70,18.75],[104.30,19.05],[103.95,19.30],[104.20,19.60],[104.55,19.70],[104.85,20.05],[104.60,20.40],[104.20,20.65],[103.75,20.70],[103.40,20.75],[103.15,20.90],[102.85,21.25],[102.95,21.65],[102.70,21.85],[102.40,22.05],[102.15,22.25]];
+const MAP_W = 507, MAP_H = 636;
+const mapXY = (lon, lat) => [(lon - 101.6) * 38.4, (23.8 - lat) * 40];
+function smoothPath(pts, closed) {
+  const n = pts.length, P = i => pts[closed ? (i + n) % n : clamp(i, 0, n - 1)];
+  let d = `M${pts[0][0].toFixed(1)},${pts[0][1].toFixed(1)}`;
+  for (let i = 0; i < (closed ? n : n - 1); i++) {
+    const p0 = P(i - 1), p1 = P(i), p2 = P(i + 1), p3 = P(i + 2);
+    d += `C${(p1[0] + (p2[0] - p0[0]) / 6).toFixed(1)},${(p1[1] + (p2[1] - p0[1]) / 6).toFixed(1)} ${(p2[0] - (p3[0] - p1[0]) / 6).toFixed(1)},${(p2[1] - (p3[1] - p1[1]) / 6).toFixed(1)} ${p2[0].toFixed(1)},${p2[1].toFixed(1)}`;
+  }
+  return d + (closed ? 'Z' : '');
+}
+function templeMap(onPick, onArrive) {
+  const box = $('vnMap'), svg = $('mapSvg'), NS = 'http://www.w3.org/2000/svg';
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const land = smoothPath(VN_OUTLINE.map(([a, b]) => mapXY(a, b)), true);
+  const line = arr => smoothPath(arr.map(([a, b]) => mapXY(a, b)), false);
+  const mount = (lon, lat, s = 1) => { const [x, y] = mapXY(lon, lat); return `<path d="M${x - 7 * s},${y + 4 * s}L${x - 1 * s},${y - 5 * s}L${x + 2 * s},${y - 1 * s}L${x + 4 * s},${y - 3 * s}L${x + 9 * s},${y + 4 * s}" fill="none" stroke="#8a7a52" stroke-width="1.3" stroke-linejoin="round" opacity=".55"/>`; };
+  const isl = (lon, lat, n, r) => { let o = ''; for (let i = 0; i < n; i++) { const [x, y] = mapXY(lon + Math.sin(i * 2.4) * r, lat + Math.cos(i * 1.7) * r * .8); o += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${(1.6 + (i % 3) * .5).toFixed(1)}" fill="#d9c79a" stroke="#9c8656" stroke-width=".6"/>`; } return o; };
+  const txt = (lon, lat, t, sz, extra = '') => { const [x, y] = mapXY(lon, lat); return `<text x="${x}" y="${y}" font-size="${sz}" ${extra}>${t}</text>`; };
+  const pq = mapXY(103.98, 10.22), cd = mapXY(106.6, 8.7);
+  const P = Object.fromEntries(TEMPLES.map(t => [t.id, mapXY(t.lon, t.lat)]));
+  let waves = ''; for (let i = 0; i < 16; i++) { const x = 300 + (i * 67) % 200, y = 120 + (i * 131) % 480; waves += `<path d="M${x},${y}q5,-4 10,0t10,0" fill="none" stroke="#8fb3b8" stroke-width="1.1" opacity=".6"/>`; }
+  svg.innerHTML = `<defs>
+      <linearGradient id="mLand" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e9dfb6"/><stop offset=".55" stop-color="#dcd3a2"/><stop offset="1" stop-color="#cfd09a"/></linearGradient>
+      <filter id="mSh" x="-10%" y="-10%" width="120%" height="120%"><feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#2c4a4c" flood-opacity=".35"/></filter>
+      <radialGradient id="mGlow"><stop offset="0" stop-color="#ffd76a" stop-opacity=".9"/><stop offset="1" stop-color="#ffd76a" stop-opacity="0"/></radialGradient>
+    </defs>
+    <g id="mCam">
+      <rect x="-400" y="-400" width="${MAP_W + 800}" height="${MAP_H + 800}" fill="transparent"/>
+      ${waves}
+      <path d="${land}" fill="#9fc3c4" opacity=".55" transform="translate(0,0) scale(1)" stroke="#9fc3c4" stroke-width="9" stroke-linejoin="round"/>
+      <path d="${land}" fill="url(#mLand)" stroke="#8c6a3a" stroke-width="1.4" stroke-linejoin="round" filter="url(#mSh)"/>
+      <path d="${line([[103.9, 22.55], [104.6, 21.9], [105.2, 21.4], [105.8, 21.05], [106.3, 20.6], [106.55, 20.3]])}" fill="none" stroke="#6f9fb0" stroke-width="1.6" stroke-linecap="round" opacity=".8"/>
+      <path d="${line([[105.1, 10.9], [105.6, 10.4], [106.1, 9.95], [106.45, 9.65]])}" fill="none" stroke="#6f9fb0" stroke-width="1.8" stroke-linecap="round" opacity=".8"/>
+      <path d="${line([[105.25, 10.85], [105.75, 10.2], [106.25, 9.6]])}" fill="none" stroke="#6f9fb0" stroke-width="1.3" stroke-linecap="round" opacity=".7"/>
+      <ellipse cx="${pq[0]}" cy="${pq[1]}" rx="5" ry="9" fill="url(#mLand)" stroke="#8c6a3a" stroke-width="1"/>
+      <circle cx="${cd[0]}" cy="${cd[1]}" r="2.6" fill="#d9c79a" stroke="#9c8656" stroke-width=".8"/>
+      ${isl(111.8, 16.5, 9, .55)}${isl(114.0, 9.9, 11, .9)}
+      ${mount(103.4, 21.9)}${mount(104.3, 22.3, .9)}${mount(103.1, 21.35, .8)}${mount(104.9, 19.6, .8)}${mount(105.9, 18.0, .8)}${mount(106.6, 16.9, .7)}${mount(107.9, 14.2)}${mount(108.1, 13.0, .9)}${mount(107.8, 12.4, .8)}
+      <g font-family="'Noto Serif', serif" font-style="italic" fill="#4d7579" text-anchor="middle">
+        ${txt(112.0, 13.8, 'Biển Đông', 17, 'letter-spacing="2" opacity=".75"')}
+        ${txt(111.8, 17.25, 'QĐ. Hoàng Sa', 10)}${txt(114.0, 11.0, 'QĐ. Trường Sa', 10)}
+        ${txt(108.1, 19.8, 'Vịnh Bắc Bộ', 10, 'opacity=".8"')}${txt(103.25, 9.6, 'Phú Quốc', 9)}
+      </g>
+      <g id="mRoute"><path id="mTrail" fill="none" stroke="#b8321f" stroke-width="2" stroke-dasharray="4 4" stroke-linecap="round" vector-effect="non-scaling-stroke"/></g>
+      <g id="mPins"></g>
+      <g id="mLabels"></g>
+      <g id="mWalker"><circle r="16" fill="url(#mGlow)"/><g id="mWalkerS"><circle r="8.5" fill="#fff6dc" stroke="#b8321f" stroke-width="1.6"/><text y="4.2" text-anchor="middle" font-size="11">🙏</text></g></g>
+    </g>`;
+  const cam = svg.querySelector('#mCam'), pins = svg.querySelector('#mPins'), labs = svg.querySelector('#mLabels');
+  const walker = svg.querySelector('#mWalker'), walkerS = svg.querySelector('#mWalkerS'), trail = svg.querySelector('#mTrail');
+  pins.innerHTML = TEMPLES.map(t => { const [x, y] = P[t.id], [sd, dx, dy] = t.lab; return `<g data-id="${t.id}" transform="translate(${x},${y})"><line class="lead" x1="0" y1="0" x2="${dx}" y2="${dy}" stroke="#7a4a1e" stroke-width="1" opacity=".6" vector-effect="non-scaling-stroke"/><circle class="ring" r="7" fill="none" stroke="#b8321f" stroke-width="2" opacity="0" vector-effect="non-scaling-stroke"/><circle class="dot" r="3.4" fill="${t.tile[1]}" stroke="#fff6dc" stroke-width="1.4" vector-effect="non-scaling-stroke"/></g>`; }).join('');
+  labs.innerHTML = TEMPLES.map(t => `<g class="tl" data-id="${t.id}" role="button" tabindex="0" aria-label="${esc(t.name)}, ${esc(t.place)}"><rect rx="9" height="20" y="-10"/><text y="4.3">${esc(t.short)}</text></g>`).join('');
+  // đo chữ để vẽ nhãn
+  const LW = {};
+  for (const g of labs.children) { const w = g.querySelector('text').getComputedTextLength() || g.textContent.length * 6.5; LW[g.dataset.id] = w + 16; g.querySelector('rect').setAttribute('width', w + 16); }
+  const measure = () => { for (const g of labs.children) { const w = g.querySelector('text').getComputedTextLength(); if (w) { LW[g.dataset.id] = w + 16; g.querySelector('rect').setAttribute('width', w + 16); } } };
+  if (document.fonts) document.fonts.ready.then(() => { measure(); draw(); });
+
+  // camera: tâm (x, y) và độ phóng z
+  const C = { x: MAP_W / 2, y: MAP_H / 2, z: 1 };
+  let at = [...P[TEMPLE.id]], anim = null, face = 1;
+  const clampCam = () => {
+    C.z = clamp(C.z, 1, 3.2);
+    const hw = MAP_W / 2 / C.z, hh = MAP_H / 2 / C.z;
+    C.x = clamp(C.x, hw, MAP_W - hw); C.y = clamp(C.y, hh, MAP_H - hh);
+  };
+  const scr = () => { const w = box.clientWidth, h = box.clientHeight; return w && h ? Math.min(w / MAP_W, h / MAP_H) : 1; };
+  function draw() {
+    clampCam();
+    cam.setAttribute('transform', `translate(${MAP_W / 2},${MAP_H / 2}) scale(${C.z}) translate(${-C.x},${-C.y})`);
+    const f = 1 / (C.z * scr()); // giữ nhãn cùng cỡ trên màn hình
+    for (const g of labs.children) {
+      const t = TEMPLES.find(o => o.id === g.dataset.id), [x, y] = P[t.id], [sd, dx, dy] = t.lab, w = LW[t.id];
+      const lx = x + dx * Math.min(1, 1.6 / C.z) * 1, ly = y + dy * Math.min(1, 1.6 / C.z);
+      g.setAttribute('transform', `translate(${lx},${ly}) scale(${f})`);
+      g.querySelector('rect').setAttribute('x', sd === 'L' ? -w : 0);
+      g.querySelector('text').setAttribute('x', sd === 'L' ? -w + 8 : 8);
+      const ln = pins.querySelector(`[data-id="${t.id}"] .lead`);
+      ln.setAttribute('x2', lx - x); ln.setAttribute('y2', ly - y);
+    }
+    for (const g of pins.children) g.querySelector('.dot').setAttribute('r', (g.dataset.id === TEMPLE.id ? 4.6 : 3.4) * f);
+    walker.setAttribute('transform', `translate(${at[0]},${at[1] - 11 * f}) scale(${f})`);
+    walkerS.setAttribute('transform', `scale(${face},1)`);
+    $('mapReset').disabled = C.z < 1.05;
+  }
+  const mark = () => { for (const g of labs.children) g.classList.toggle('on', g.dataset.id === TEMPLE.id); };
+  const card = () => { $('mcName').textContent = TEMPLE.name; $('mcPlace').textContent = TEMPLE.place; };
+  const pulse = id => {
+    const r = pins.querySelector(`[data-id="${id}"] .ring`); if (!r || reduce) return;
+    const t0 = performance.now();
+    const step = now => { const k = (now - t0) / 1100; if (k >= 1) { r.setAttribute('opacity', 0); return; } const f = 1 / (C.z * scr()); r.setAttribute('r', (5 + k * 22) * f); r.setAttribute('opacity', (1 - k) * .9); requestAnimationFrame(step); };
+    requestAnimationFrame(step);
+  };
+  const ease = k => k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
+
+  function flyTo(id) {
+    const from = [...at], to = P[id], dist = Math.hypot(to[0] - from[0], to[1] - from[1]);
+    onPick(id); mark(); sndPop(880);
+    const intro = box.closest('.intro-card');
+    if (dist < 1) { pulse(id); C.x = to[0]; C.y = to[1]; C.z = Math.max(C.z, 1.8); draw(); onArrive(); card(); return; }
+    // đường cong đi, hơi vồng sang một bên
+    const mx = (from[0] + to[0]) / 2, my = (from[1] + to[1]) / 2, nx = -(to[1] - from[1]) / dist, ny = (to[0] - from[0]) / dist;
+    const bend = Math.min(60, dist * .22) * (nx > 0 ? 1 : -1), ctl = [mx + nx * bend, my + ny * bend];
+    const bz = k => [(1 - k) * (1 - k) * from[0] + 2 * (1 - k) * k * ctl[0] + k * k * to[0], (1 - k) * (1 - k) * from[1] + 2 * (1 - k) * k * ctl[1] + k * k * to[1]];
+    const dur = reduce ? 1 : clamp(800 + dist * 4.5, 900, 2400), c0 = { ...C }, zEnd = 1.9, dip = clamp(dist / 260, 0, 1) * .55;
+    face = to[0] >= from[0] ? -1 : 1;
+    const t0 = performance.now(); if (anim) cancelAnimationFrame(anim);
+    intro.classList.add('fly'); $('mapCard').classList.add('hide');
+    const step = now => {
+      const k = Math.min(1, (now - t0) / dur), e = ease(k);
+      at = bz(e);
+      const pts = []; for (let i = 0; i <= 24; i++) pts.push(bz(e * i / 24));
+      trail.setAttribute('d', 'M' + pts.map(p => p[0].toFixed(1) + ',' + p[1].toFixed(1)).join('L'));
+      trail.setAttribute('opacity', k < .85 ? 1 : (1 - k) / .15);
+      const zl = c0.z + (zEnd - c0.z) * e;
+      C.z = Math.max(1, zl * (1 - dip * Math.sin(Math.PI * k)));
+      const fk = Math.min(1, k * 2.2), fe = fk * fk * (3 - 2 * fk);
+      C.x = c0.x + (at[0] - c0.x) * fe; C.y = c0.y + (at[1] - c0.y) * fe;
+      // nhún bước chân
+      walker.style.opacity = 1;
+      draw();
+      if (k < 1) { walkerS.setAttribute('transform', `translate(0,${-Math.abs(Math.sin(k * dist / 9)) * 3}) scale(${face},1)`); anim = requestAnimationFrame(step); return; }
+      anim = null; trail.setAttribute('d', ''); pulse(id); sndPop(1320);
+      onArrive(); card(); intro.classList.remove('fly'); $('mapCard').classList.remove('hide');
+    };
+    anim = requestAnimationFrame(step);
+  }
+
+  // kéo để di chuyển bản đồ, lăn chuột để phóng to
+  let drag = null;
+  box.addEventListener('pointerdown', e => {
+    if (e.target.closest('.map-reset')) return;
+    drag = { x: e.clientX, y: e.clientY, cx: C.x, cy: C.y, moved: false, id: (e.target.closest('[data-id]') || {}).dataset?.id };
+    box.setPointerCapture(e.pointerId);
+  });
+  box.addEventListener('pointermove', e => {
+    if (!drag) return;
+    const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+    if (!drag.moved && Math.hypot(dx, dy) > 6) { drag.moved = true; box.classList.add('drag'); }
+    if (drag.moved && !anim) { const s = scr() * C.z; C.x = drag.cx - dx / s; C.y = drag.cy - dy / s; draw(); }
+  });
+  const up = () => { if (!drag) return; const d = drag; drag = null; box.classList.remove('drag'); if (!d.moved && d.id) flyTo(d.id); };
+  box.addEventListener('pointerup', up);
+  box.addEventListener('pointercancel', () => { drag = null; box.classList.remove('drag'); });
+  box.addEventListener('wheel', e => {
+    if (anim) return; e.preventDefault();
+    const r = box.getBoundingClientRect(), s = scr() * C.z;
+    const wx = C.x + (e.clientX - r.left - r.width / 2) / s, wy = C.y + (e.clientY - r.top - r.height / 2) / s;
+    const z2 = clamp(C.z * Math.exp(-e.deltaY * .0015), 1, 3.2), k = C.z / z2;
+    C.x = wx - (wx - C.x) * k; C.y = wy - (wy - C.y) * k; C.z = z2; draw();
+  }, { passive: false });
+  labs.addEventListener('keydown', e => { const g = e.target.closest('.tl'); if (g && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); flyTo(g.dataset.id); } });
+  $('mapReset').onclick = () => {
+    if (anim) return;
+    const c0 = { ...C }, t0 = performance.now();
+    const step = now => { const k = Math.min(1, (now - t0) / (reduce ? 1 : 650)), e = ease(k); C.z = c0.z + (1 - c0.z) * e; C.x = c0.x + (MAP_W / 2 - c0.x) * e; C.y = c0.y + (MAP_H / 2 - c0.y) * e; draw(); if (k < 1) requestAnimationFrame(step); };
+    requestAnimationFrame(step);
+  };
+  addEventListener('resize', draw);
+  mark(); card(); draw();
 }
 const roomInHash = () => { const m = /^#room=([a-z0-9]{4,16})$/.exec(location.hash); return m ? m[1] : null; };
 function enter(online) {

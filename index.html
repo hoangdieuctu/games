@@ -37,17 +37,17 @@ html, body {
   opacity: .5;
 }
 
-/* ── hero ── */
+/* ── hero (gọn: biểu tượng + tên trên một dòng) ── */
 .hero {
   position: relative; z-index: 1;
-  display: flex; flex-direction: column; align-items: center;
-  padding: 72px 24px 48px;
+  display: flex; align-items: center; justify-content: center; gap: 14px;
+  padding: 26px 16px 18px;
   text-align: center;
 }
 
 .hero-gate {
   font-family: serif;
-  font-size: clamp(96px, 18vw, 200px);
+  font-size: clamp(40px, 8vw, 58px);
   line-height: 1;
   color: transparent;
   background: radial-gradient(ellipse at 40% 35%, #38bdf8 0%, #0a3080 55%, #050a1a 100%);
@@ -64,39 +64,14 @@ html, body {
   50%       { filter: drop-shadow(0 0 55px rgba(56,189,248,.65)) drop-shadow(0 0 110px rgba(56,189,248,.3)); }
 }
 
-.hero-eyebrow {
-  font-size: 11px; letter-spacing: .28em; color: var(--muted);
-  text-transform: uppercase; margin-bottom: 18px;
-}
-
 .hero-title {
   font-family: 'Cinzel', serif;
-  font-size: clamp(22px, 4vw, 38px);
+  font-size: clamp(19px, 4vw, 32px);
   font-weight: 900;
   letter-spacing: .12em;
   color: var(--gold);
   text-shadow: 0 0 40px rgba(255,215,0,.5);
-  margin-top: 20px;
-}
-
-.hero-sub {
-  font-size: 12px; letter-spacing: .14em; color: var(--muted);
-  margin-top: 10px;
-}
-
-/* ── divider ── */
-.divider {
-  position: relative; z-index: 1;
-  display: flex; align-items: center; gap: 18px;
-  max-width: 680px; margin: 0 auto 52px; padding: 0 24px;
-}
-.divider::before, .divider::after {
-  content: ''; flex: 1; height: 1px;
-  background: linear-gradient(90deg, transparent, var(--border) 60%, transparent);
-}
-.divider-mark {
-  font-size: 10px; letter-spacing: .22em; color: var(--muted); white-space: nowrap;
-  text-transform: uppercase;
+  margin: 0;
 }
 
 /* ── grid ── */
@@ -226,25 +201,6 @@ html, body {
   line-height: 1.5; color: #b3a5cc;
   min-width: 0;
 }
-.card-play {
-  display: inline-flex; align-items: center; gap: 7px;
-  background: transparent;
-  border: 1px solid var(--gold);
-  border-radius: 2px;
-  color: var(--gold);
-  font-family: 'Cinzel', serif;
-  font-size: 10px; letter-spacing: .2em;
-  padding: 7px 16px;
-  text-transform: uppercase;
-  text-decoration: none;
-  transition: background .15s, box-shadow .15s;
-  white-space: nowrap;
-}
-.card-play:hover {
-  background: rgba(255,215,0,.1);
-  box-shadow: 0 0 20px rgba(255,215,0,.3);
-}
-.card-play::before { content: '▶'; font-size: 8px; }
 
 
 /* ══ thẻ game kiểu mới: ảnh lớn, tên, nhãn thể loại, huy hiệu chế độ chơi ══ */
@@ -264,18 +220,11 @@ html, body {
 .card-mode.online { color: #9ff0c8; border-color: rgba(120,230,170,.45); }
 .card-mode.offline { color: #cfc4ff; border-color: rgba(190,170,255,.35); }
 .card-body { padding: 0 16px 16px; margin-top: -26px; position: relative; z-index: 2; gap: 10px; }
-.card-title { font-size: 18px; font-weight: 900; color: #fff3d6; text-shadow: 0 2px 8px rgba(0,0,0,.6); margin: 0; order: 1; }
-.card-tag { order: 2; margin: 0; gap: 5px; }
+.card-title { font-size: 18px; font-weight: 900; color: #fff3d6; text-shadow: 0 2px 8px rgba(0,0,0,.6); margin: 0; order: 1; text-align: center; }
+.card-tag { order: 2; margin: 0; gap: 5px; justify-content: center; text-align: center; }
 .card-tag span { font-size: 10.5px; padding: 4px 9px; color: #e8dcff; background: rgba(255,255,255,.07); border-color: rgba(255,255,255,.14); }
-.card-footer { order: 3; margin-top: 4px; justify-content: stretch; }
-.card-play {
-  flex: 1; justify-content: center; gap: 8px; padding: 10px 14px; border-radius: 12px; border: 0;
-  font: 900 12.5px 'Nunito', sans-serif; letter-spacing: .08em; color: #2a1606;
-  background: linear-gradient(180deg, #ffe08a, #e0a22a); box-shadow: 0 4px 14px rgba(224,162,42,.25), inset 0 1px 0 rgba(255,255,255,.5);
-}
-.card:hover .card-play { box-shadow: 0 6px 22px rgba(255,200,80,.45), inset 0 1px 0 rgba(255,255,255,.5); }
-.card-play::before { content: '▶'; font-size: 10px; }
-@media (max-width: 520px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; padding: 0 12px 80px; } .card-title { font-size: 15px; } .card-tag span { font-size: 9.5px; padding: 3px 7px; } .card-body { padding: 0 11px 12px; } .card-play { padding: 8px 10px; font-size: 11px; } .card-thumb > svg:not(.card-thumb-ring) { width: 70px; height: 70px; } }
+.card-footer { display: none; } /* chỉ còn dòng thông số đang ẩn — cả thẻ là link, bấm vào là chơi */
+@media (max-width: 520px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; padding: 0 12px 80px; } .card-title { font-size: 15px; } .card-tag span { font-size: 9.5px; padding: 3px 7px; } .card-body { padding: 0 11px 12px; } .card-thumb > svg:not(.card-thumb-ring) { width: 70px; height: 70px; } }
 
 /* ── coming soon card ── */
 .card.card--soon {
@@ -316,15 +265,9 @@ footer {
 <canvas id="bg-canvas"></canvas>
 
 <header class="hero">
-  <div class="hero-eyebrow">Kho Trò Chơi · Thư Viện</div>
   <div class="hero-gate" aria-hidden="true">門</div>
   <h1 class="hero-title">Tuyển Tập Trò Chơi</h1>
-  <p class="hero-sub">Chọn trò chơi để bắt đầu</p>
 </header>
-
-<div class="divider" aria-hidden="true">
-  <span class="divider-mark">Trò Chơi</span>
-</div>
 
 <nav class="filters" id="filters" aria-label="Lọc theo loại trò chơi"></nav>
 
@@ -344,7 +287,6 @@ footer {
       <h2 class="card-title">Sinh Tử Môn</h2>
       <div class="card-footer">
         <span class="card-meta">30 đợt · 6 vũ khí · 5 loại quái</span>
-        <span class="card-play">Chơi Ngay</span>
       </div>
     </div>
   </a>
@@ -363,7 +305,6 @@ footer {
       <h2 class="card-title">Học Đếm Số</h2>
       <div class="card-footer">
         <span class="card-meta">Số 1–10 · Tiếng Việt · 2–4 tuổi</span>
-        <span class="card-play">Chơi Ngay</span>
       </div>
     </div>
   </a>
@@ -382,7 +323,6 @@ footer {
       <h2 class="card-title">Ghép Đôi</h2>
       <div class="card-footer">
         <span class="card-meta">6 cặp · 4 chủ đề · 2–5 tuổi</span>
-        <span class="card-play">Chơi Ngay</span>
       </div>
     </div>
   </a>
@@ -401,7 +341,6 @@ footer {
       <h2 class="card-title">100 Động Vật</h2>
       <div class="card-footer">
         <span class="card-meta">100 loài · 8 nhóm · Tiếng Việt</span>
-        <span class="card-play">Khám Phá</span>
       </div>
     </div>
   </a>
@@ -420,7 +359,6 @@ footer {
       <h2 class="card-title">Bé Yêu Hổ</h2>
       <div class="card-footer">
         <span class="card-meta">6 trò · Ảnh thật · 2–4 tuổi</span>
-        <span class="card-play">Chơi Ngay</span>
       </div>
     </div>
   </a>
@@ -439,7 +377,6 @@ footer {
       <h2 class="card-title">Úm Ba La!</h2>
       <div class="card-footer">
         <span class="card-meta">91 ảnh · Tiếng Anh · 2–4 tuổi</span>
-        <span class="card-play">Làm Phép</span>
       </div>
     </div>
   </a>
@@ -458,7 +395,6 @@ footer {
       <h2 class="card-title">Cờ Các Nước</h2>
       <div class="card-footer">
         <span class="card-meta">50+ quốc gia · 6 châu lục · Tiếng Việt</span>
-        <span class="card-play">Khám Phá</span>
       </div>
     </div>
   </a>
@@ -477,7 +413,6 @@ footer {
       <h2 class="card-title">Jewel Pop</h2>
       <div class="card-footer">
         <span class="card-meta">N² điểm · 6 màu · Bom & Sét</span>
-        <span class="card-play">Chơi Ngay</span>
       </div>
     </div>
   </a>
@@ -496,7 +431,6 @@ footer {
       <h2 class="card-title">Nối Hình Pikachu</h2>
       <div class="card-footer">
         <span class="card-meta">6 vòng · 12 chủ đề · Từ dễ đến khó</span>
-        <span class="card-play">Chơi Ngay</span>
       </div>
     </div>
   </a>
@@ -528,7 +462,6 @@ footer {
       <h2 class="card-title">Tetris</h2>
       <div class="card-footer">
         <span class="card-meta">30 cấp · Classic · Âm thanh</span>
-        <span class="card-play">Chơi Ngay</span>
       </div>
     </div>
   </a>
@@ -573,7 +506,6 @@ footer {
       <h2 class="card-title">Bong Bóng Vui</h2>
       <div class="card-footer">
         <span class="card-meta">Đa chạm · Toàn màn hình · Khóa cho bé</span>
-        <span class="card-play">Chơi Ngay</span>
       </div>
     </div>
   </a>
@@ -612,7 +544,6 @@ footer {
       <h2 class="card-title">Bể Cá</h2>
       <div class="card-footer">
         <span class="card-meta">11 loài · Lớn &amp; lấp lánh · Trốn, ngủ, sinh con · 9 cảnh</span>
-        <span class="card-play">Vào Bể</span>
       </div>
     </div>
   </a>
@@ -648,7 +579,6 @@ footer {
       <h2 class="card-title">Sắp Xếp Sắc Màu 3D</h2>
       <div class="card-footer">
         <span class="card-meta">Vô tận · 11 màu · Vật phẩm · iPad</span>
-        <span class="card-play">Xếp Ngay</span>
       </div>
     </div>
   </a>
@@ -681,7 +611,6 @@ footer {
       <h2 class="card-title">Hồ Cá Thư Giãn</h2>
       <div class="card-footer">
         <span class="card-meta">Thời gian thực · 28 loài · 6 hồ</span>
-        <span class="card-play">Chơi Ngay</span>
       </div>
     </div>
   </a>
@@ -712,7 +641,6 @@ footer {
       <h2 class="card-title">Tìm Điểm Khác Nhau</h2>
       <div class="card-footer">
         <span class="card-meta">100 vòng · 4 chủ đề · Tiền vàng &amp; gợi ý · iPad</span>
-        <span class="card-play">Soi Ngay</span>
       </div>
     </div>
   </a>
@@ -745,7 +673,6 @@ footer {
       <h2 class="card-title">Đong Nước</h2>
       <div class="card-footer">
         <span class="card-meta">100 vòng · 2–4 thùng · Gợi ý · Tự lưu</span>
-        <span class="card-play">Đong Ngay</span>
       </div>
     </div>
   </a>
@@ -779,7 +706,6 @@ footer {
       <h2 class="card-title">Nhà Mới Của Chúng Ta</h2>
       <div class="card-footer">
         <span class="card-meta">2–4 người · Chơi online qua link · Chơi một mình cũng được · iPad</span>
-        <span class="card-play">Về Nhà Thôi</span>
       </div>
     </div>
   </a>
@@ -806,7 +732,6 @@ footer {
       <h2 class="card-title">Kẻ Giả Mạo</h2>
       <div class="card-footer">
         <span class="card-meta">Chơi một mình với 4–9 máy · Cần ảo trên điện thoại · 1–2 kẻ giả mạo</span>
-        <span class="card-play">Chơi Ngay</span>
       </div>
     </div>
   </a>
@@ -832,7 +757,6 @@ footer {
       <h2 class="card-title">Kẻ Giả Mạo Online</h2>
       <div class="card-footer">
         <span class="card-meta">2–10 người · Chơi online qua link · Voice chat 🎤 · Phím tắt hiện trên nút</span>
-        <span class="card-play">Chơi Ngay</span>
       </div>
     </div>
   </a>
@@ -861,7 +785,6 @@ footer {
       <h2 class="card-title">Exploding Kittens</h2>
       <div class="card-footer">
         <span class="card-meta">2–5 người · Có máy chơi cùng · Bản mở rộng</span>
-        <span class="card-play">Rút Bài</span>
       </div>
     </div>
   </a>
@@ -892,7 +815,6 @@ footer {
       <h2 class="card-title">Hải Chiến</h2>
       <div class="card-footer">
         <span class="card-meta">Biển 10 × 10 · 3 mức độ · Chơi online qua link</span>
-        <span class="card-play">Khai Hoả</span>
       </div>
     </div>
   </a>
@@ -920,7 +842,6 @@ footer {
       <h2 class="card-title">Cờ Caro</h2>
       <div class="card-footer">
         <span class="card-meta">Bàn 30 × 30 · 3 mức độ · Gợi ý &amp; đi lại</span>
-        <span class="card-play">Chơi Ngay</span>
       </div>
     </div>
   </a>
@@ -951,7 +872,6 @@ footer {
       <h2 class="card-title">Cờ Cá Ngựa</h2>
       <div class="card-footer">
         <span class="card-meta">2–4 người · Chơi online qua link · Có máy chơi cùng</span>
-        <span class="card-play">Chơi Ngay</span>
       </div>
     </div>
   </a>
@@ -987,7 +907,6 @@ footer {
       <h2 class="card-title">Cờ Tỷ Phú</h2>
       <div class="card-footer">
         <span class="card-meta">2–4 người · 10 nhân vật · Chơi online qua link · Có máy chơi cùng</span>
-        <span class="card-play">Chơi Ngay</span>
       </div>
     </div>
   </a>
@@ -1025,7 +944,6 @@ footer {
       <h2 class="card-title">Cờ Tỷ Phú Lục Giác</h2>
       <div class="card-footer">
         <span class="card-meta">2–6 người · Bàn lục giác 42 ô · Chơi online qua link · Có máy chơi cùng</span>
-        <span class="card-play">Chơi Ngay</span>
       </div>
     </div>
   </a>
@@ -1054,7 +972,6 @@ footer {
       <h2 class="card-title">Xì Tố</h2>
       <div class="card-footer">
         <span class="card-meta">2–6 người · Chơi online qua link · Có máy chơi cùng</span>
-        <span class="card-play">Chơi Ngay</span>
       </div>
     </div>
   </a>
@@ -1082,7 +999,6 @@ footer {
       <h2 class="card-title">Đua Xe Gà</h2>
       <div class="card-footer">
         <span class="card-meta">Tối đa 10 người · Chơi online qua link · Có gà máy chạy cùng</span>
-        <span class="card-play">Đua Ngay</span>
       </div>
     </div>
   </a>
@@ -1110,7 +1026,6 @@ footer {
       <h2 class="card-title">Đua Xe Gõ Chữ</h2>
       <div class="card-footer">
         <span class="card-meta">Không giới hạn người · Chơi online qua link · Có xe máy chạy cùng</span>
-        <span class="card-play">Đua Ngay</span>
       </div>
     </div>
   </a>
@@ -1145,7 +1060,6 @@ footer {
       <h2 class="card-title">Đi Chùa Online</h2>
       <div class="card-footer">
         <span class="card-meta">1–12 người · Chơi online qua link · Âm thanh chuông, mõ, sáo thiền 🔔</span>
-        <span class="card-play">Vào Chùa</span>
       </div>
     </div>
   </a>
@@ -1174,7 +1088,6 @@ footer {
       <h2 class="card-title">Tiến Lên Miền Nam</h2>
       <div class="card-footer">
         <span class="card-meta">2–4 người · Chơi online qua link · Có máy chơi cùng</span>
-        <span class="card-play">Chơi Ngay</span>
       </div>
     </div>
   </a>
