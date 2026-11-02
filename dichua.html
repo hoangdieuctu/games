@@ -571,6 +571,7 @@ const sndCoin = () => { [0, .14, .24, .3].forEach((d, i) => { sndTone(2600 - i *
 const sndLight = () => { sndNoise(.08, 4000, 2000, .25, 'highpass', 1); sndNoise(.6, 600, 1400, .12, 'bandpass', .6, .05); };
 const sndPop = (f = 660) => { sndTone(f, .18, .18, 'sine', 0, f * 1.5); sndTone(f * 2, .12, .06, 'sine', .03); };
 const sndChime = () => { [0, .12, .24].forEach((d, i) => sndTone([784, 988, 1175][i], 1.2, .1, 'sine', d)); };
+function sndStep() { if (!AU.ctx || !AU.on) return; sndNoise(.05, me.scene === 'out' ? (me.y > 2150 ? 700 : 1300) : 800, 240, .045, 'lowpass', .9); }
 const sndPaper = () => sndNoise(.25, 1800, 3500, .12, 'bandpass', .8);
 // tiếng chim (ban ngày), dế (ban đêm), sáo thiền ngẫu nhiên
 const PENTA = [261.6, 293.7, 329.6, 392, 440, 523.3, 587.3, 659.3];
@@ -1130,6 +1131,16 @@ function drawWillow(g, x) {
   }
   g.fillStyle = '#6a9a48'; for (let i = 0; i < 22; i++) { g.beginPath(); g.arc(x - 90 + r() * 180, 268 + r() * 30, 14 + r() * 10, 0, TAU); g.fill(); }
 }
+// ghế đá granite nhìn chéo: mặt ngồi, mặt trước, hai chân
+function drawBench(g) {
+  const y = GROUND;
+  g.fillStyle = 'rgba(30,30,20,.22)'; g.beginPath(); g.ellipse(0, y + 1, 38, 6, 0, 0, TAU); g.fill();
+  for (const sd of [-1, 1]) { g.fillStyle = '#8a857a'; g.fillRect(sd * 23 - 5, y - 15, 10, 15); g.fillStyle = '#9d988c'; g.fillRect(sd * 23 - 5, y - 15, 10, 3); }
+  g.fillStyle = grad(g, 0, y - 31, 0, y - 22, ['#d2cdc2', '#b9b3a6']); rr(g, -34, y - 31, 68, 10, 3); g.fill();
+  g.fillStyle = grad(g, 0, y - 22, 0, y - 15, ['#9d978a', '#857f73']); g.fillRect(-34, y - 22, 68, 7);
+  g.fillStyle = 'rgba(255,255,255,.18)'; g.fillRect(-32, y - 30, 64, 2);
+  const r = seeded(5); g.fillStyle = 'rgba(60,55,45,.18)'; for (let i = 0; i < 40; i++) g.fillRect(-33 + r() * 66, y - 30 + r() * 14, 1.2, 1.2);
+}
 // tường bao
 function drawWall(g, x0, x1) {
   const y0 = GROUND - 62;
@@ -1144,120 +1155,254 @@ function drawWall(g, x0, x1) {
 }
 
 // ─────────────────────────── nhân vật ───────────────────────────
-// o: { x, y, dir, ph (bước chân), pose, bow 0..1, look, held, scale }
+// o: { x, y, dir, ph (pha bước chân), pose, bow 0..1, look, back, front, scale,
+//      raise 0..1 (nâng tay lên trán), held: 'incense' | 'mallet' | 'can' | 'trash',
+//      reach {x,y} (đích với tay, toạ độ theo chân), tool {x,y} (đầu dùi mõ chạm), strike 0..1 (dùi giơ lên) }
+// Ba góc nhìn: nghiêng (dir ±1), chính diện (front), sau lưng (back). Tay chân 2 khớp, gập bằng IK.
+function ik2(sx, sy, tx, ty, l1, l2, bend) {
+  let dx = tx - sx, dy = ty - sy, d = Math.hypot(dx, dy) || .001;
+  const maxd = l1 + l2 - .05; if (d > maxd) { dx *= maxd / d; dy *= maxd / d; d = maxd; }
+  const a = Math.atan2(dy, dx), c = clamp((l1 * l1 + d * d - l2 * l2) / (2 * l1 * d), -1, 1), off = Math.acos(c) * bend;
+  return [sx + Math.cos(a + off) * l1, sy + Math.sin(a + off) * l1, sx + dx, sy + dy];
+}
+function limb(g, col, w1, w2, ax, ay, bx, by, cx, cy) {
+  g.strokeStyle = col; g.lineCap = 'round';
+  g.lineWidth = w1; g.beginPath(); g.moveTo(ax, ay); g.lineTo(bx, by); g.stroke();
+  g.lineWidth = w2; g.beginPath(); g.moveTo(bx, by); g.lineTo(cx, cy); g.stroke();
+}
+const shadeCache = new Map();
+function shade(hex, k) { const key = hex + k; let v = shadeCache.get(key); if (!v) { const [r, g, b] = hex2(hex); v = `rgb(${r * k | 0},${g * k | 0},${b * k | 0})`; shadeCache.set(key, v); } return v; }
+const SHOE = '#3a2a1a';
 function drawPerson(g, o) {
-  const L = o.look, R = L.robe, k = o.scale || 1;
+  const k = o.scale || 1;
   g.save(); g.translate(o.x, o.y); g.scale(k, k);
-  g.fillStyle = 'rgba(30,15,5,.22)'; g.beginPath(); g.ellipse(0, 1, 15, 3.5, 0, 0, TAU); g.fill();
+  g.fillStyle = 'rgba(30,15,5,.22)'; g.beginPath(); g.ellipse(0, 1, (o.pose === 'sit' || o.pose === 'kneel' || o.pose === 'kneelbow') ? 17 : 13, 3.6, 0, 0, TAU); g.fill();
+  if (o.back || o.front) personFB(g, o, !!o.back); else personSide(g, o);
+  g.restore();
+}
+function headSide(g, L, o, cx, cy) {
+  const skin = L.skin;
+  g.fillStyle = skin; g.fillRect(cx - 2.6, cy + 5, 5.2, 5);
+  g.beginPath(); g.ellipse(cx, cy, 7.8, 8.8, 0, 0, TAU); g.fill();
+  g.beginPath(); g.ellipse(cx + 7.4, cy + 1, 1.6, 2, 0, 0, TAU); g.fill(); // mũi
+  if (!L.monk) {
+    g.fillStyle = L.hairC;
+    g.beginPath(); g.ellipse(cx - 1, cy - 3, 8.6, 7.6, 0, Math.PI * .92, TAU * 1.03); g.fill();
+    g.beginPath(); g.ellipse(cx - 4.6, cy + 1, 4.4, 7, 0, 0, TAU); g.fill();
+    if (L.hair === 0) { g.beginPath(); g.moveTo(cx - 6, cy - 2); g.quadraticCurveTo(cx - 13, cy + 12, cx - 9.5, cy + 26); g.quadraticCurveTo(cx - 5, cy + 12, cx - 2.5, cy); g.fill(); }
+    if (L.hair === 1) { g.beginPath(); g.arc(cx - 7, cy - 5.5, 4.6, 0, TAU); g.fill(); }
+  } else { g.fillStyle = 'rgba(80,50,30,.18)'; g.beginPath(); g.ellipse(cx - 1, cy - 3, 8, 6.5, 0, Math.PI, TAU); g.fill(); }
+  g.fillStyle = shade(skin, .86); g.beginPath(); g.ellipse(cx - 1.5, cy + .5, 1.8, 2.4, 0, 0, TAU); g.fill(); // tai
+  const eyesClosed = o.pose === 'sit' || o.pose === 'kneelbow' || o.pose === 'chant' || (o.bow || 0) > .45;
+  if (eyesClosed) { g.strokeStyle = '#2a1a10'; g.lineWidth = .9; g.beginPath(); g.moveTo(3.6 + cx, cy - .5); g.quadraticCurveTo(4.8 + cx, cy + .6, 6 + cx, cy - .5); g.stroke(); }
+  else { g.fillStyle = '#2a1a10'; g.beginPath(); g.arc(cx + 4.6, cy - .5, 1.15, 0, TAU); g.fill(); }
+  g.fillStyle = 'rgba(230,110,90,.35)'; g.beginPath(); g.arc(cx + 3.4, cy + 3.4, 1.8, 0, TAU); g.fill();
+  g.strokeStyle = shade(skin, .62); g.lineWidth = .8; g.beginPath(); g.moveTo(cx + 5, cy + 5.2); g.lineTo(cx + 6.4, cy + 5); g.stroke();
+}
+// que hương cầm tay: n que chụm, đầu đỏ cháy, làn khói mảnh
+function heldIncense(g, x, y, ang, n) {
+  for (let i = 0; i < n; i++) {
+    const sp = (i - (n - 1) / 2) * .07, a = ang + sp, ex = x + Math.cos(a) * 25, ey = y + Math.sin(a) * 25;
+    g.strokeStyle = '#a8301e'; g.lineWidth = 1.5; g.beginPath(); g.moveTo(x - Math.cos(a) * 3, y - Math.sin(a) * 3); g.lineTo(x + Math.cos(a) * 6, y + Math.sin(a) * 6); g.stroke();
+    g.strokeStyle = '#c9a060'; g.lineWidth = 1.1; g.beginPath(); g.moveTo(x + Math.cos(a) * 6, y + Math.sin(a) * 6); g.lineTo(ex, ey); g.stroke();
+    g.fillStyle = '#ff6a1a'; g.beginPath(); g.arc(ex, ey, 1.4, 0, TAU); g.fill();
+    g.strokeStyle = 'rgba(235,235,235,.28)'; g.lineWidth = 1; g.beginPath(); g.moveTo(ex, ey);
+    g.quadraticCurveTo(ex + Math.sin(T * 2 + i) * 4, ey - 9, ex + Math.sin(T * 1.4 + i) * 5, ey - 20); g.stroke();
+  }
+}
+function heldMallet(g, x, y, ang) {
+  const ex = x + Math.cos(ang) * 13, ey = y + Math.sin(ang) * 13;
+  g.strokeStyle = '#7a4a22'; g.lineWidth = 2.2; g.lineCap = 'round'; g.beginPath(); g.moveTo(x - Math.cos(ang) * 2, y - Math.sin(ang) * 2); g.lineTo(ex, ey); g.stroke();
+  g.fillStyle = '#5a2a12'; g.beginPath(); g.ellipse(ex, ey, 3.6, 3, ang, 0, TAU); g.fill();
+}
+function heldCan(g, x, y, tilt, water) {
+  g.save(); g.translate(x, y + 7); g.rotate(tilt);
+  g.fillStyle = '#5f8f9a'; rr(g, -6, -6, 12, 11, 3); g.fill();
+  g.strokeStyle = '#4a7480'; g.lineWidth = 1.6; g.beginPath(); g.arc(0, -7, 5, Math.PI, TAU); g.stroke();
+  g.beginPath(); g.moveTo(5, -1); g.lineTo(14, -7); g.stroke();
+  g.fillStyle = '#4a7480'; g.beginPath(); g.ellipse(14.5, -7.5, 2.2, 1.6, -.6, 0, TAU); g.fill();
+  if (water) { g.fillStyle = 'rgba(160,210,255,.9)'; for (let i = 0; i < 6; i++) { const t = (T * 3 + i / 6) % 1; g.beginPath(); g.arc(16 + t * 6 + Math.sin(i * 7) * 2, -6 + t * 26, 1.3, 0, TAU); g.fill(); } }
+  g.restore();
+}
+function personSide(g, o) {
+  const L = o.look, R = L.robe, skin = L.skin, robe = R.c, robeD = R.d, pants = R.p, pantsF = shade(pants, .76), robeF = shade(robe, .8);
   g.scale(o.dir < 0 ? -1 : 1, 1);
-  const pose = o.pose || 'stand', sw = pose === 'walk' ? Math.sin(o.ph) : 0, bob = pose === 'walk' ? Math.abs(Math.cos(o.ph)) * 1.6 : 0;
-  const skin = L.skin, robe = R.c, robeD = R.d, pants = R.p;
-  const isMonk = L.monk;
-  let hipY = -30 - bob, tilt = 0;
-  if (pose === 'kneel' || pose === 'kneelbow') hipY = -16;
+  const pose = o.pose || 'stand', walking = pose === 'walk', ph = o.ph || 0, s = walking ? Math.sin(ph) : 0;
+  const kneeling = pose === 'kneel' || pose === 'kneelbow' || pose === 'chant';
+  let hipY = -30, tilt = 0;
+  if (walking) hipY = -30 + Math.abs(s) * 1.3;
+  if (kneeling) hipY = -21;
   if (pose === 'sit') hipY = -9;
-  if (pose === 'bow' || pose === 'hold') tilt = (o.bow || 0) * .55;
-  if (pose === 'kneelbow') tilt = .3 + (o.bow || 0) * 1.05;
+  if (pose === 'bench') hipY = -27;
+  if (pose === 'pick') hipY = -24;
+  if (pose === 'bow' || pose === 'hold') tilt = (o.bow || 0) * .6;
+  if (pose === 'kneelbow') tilt = .2 + (o.bow || 0) * 1.15;
   if (pose === 'pull') tilt = -(o.bow || 0) * .25;
-  if (pose === 'reach') tilt = -.08;
-  // quay lưng về phía người xem: cúi lạy thể hiện bằng thân trên thu ngắn lại
-  let squash = 1;
-  if (o.back) { squash = 1 - clamp(tilt, 0, 1.4) * .3; tilt = 0; }
+  if (pose === 'chant') tilt = .1 + (1 - (o.strike ?? .6)) * .12;
+  if (pose === 'sweep') tilt = .18;
+  if (pose === 'pick') tilt = .95;
+  if (pose === 'water') tilt = .12;
+  if (pose === 'reach') tilt = -.06;
+  const toTorso = (px, py) => { const dx = px, dy = py - hipY, c = Math.cos(-tilt), sn = Math.sin(-tilt); return [dx * c - dy * sn, dx * sn + dy * c]; };
+  // ── chân ──
+  const leg = (near, phase) => {
+    const col = near ? pants : pantsF, hx = near ? 1.5 : -1.5, hy = hipY + 3;
+    if (kneeling) { const kx = hx + 9; limb(g, col, 6.8, 6, hx, hy, kx, -3.2, kx - 16, -2.6); g.fillStyle = SHOE; g.beginPath(); g.ellipse(kx - 17, -2, 3.8, 2, 0, 0, TAU); g.fill(); return; }
+    if (pose === 'sit') { g.strokeStyle = col; g.lineWidth = 6.5; g.lineCap = 'round'; g.beginPath(); g.moveTo(hx - 2, hy); g.quadraticCurveTo(hx + 16, -3, near ? -10 : 10, -3); g.stroke(); return; }
+    if (pose === 'bench') { const kx = hx + 13; limb(g, col, 6.8, 6, hx, hy, kx, hy + 1, kx + (near ? 1 : -1), -2); g.fillStyle = SHOE; g.beginPath(); g.ellipse(kx + 3, -1, 4.4, 2.2, 0, 0, TAU); g.fill(); return; }
+    let fx, fy;
+    if (walking) { fx = hx + Math.sin(phase) * 11.5; fy = -Math.max(0, Math.cos(phase)) * 5; }
+    else if (pose === 'pull') { fx = hx + (near ? 7 : -6); fy = 0; }
+    else if (pose === 'pick') { fx = hx + (near ? 8 : -5); fy = 0; }
+    else { fx = hx + (near ? 1.5 : -1); fy = 0; }
+    const [kx, ky, ex, ey] = ik2(hx, hy, fx, fy - 2, 13, 13, -1);
+    limb(g, col, 7, 6, hx, hy, kx, ky, ex, ey);
+    g.fillStyle = SHOE; g.beginPath(); g.ellipse(ex + 2.6, ey + 1.4, 4.7, 2.3, 0, 0, TAU); g.fill();
+  };
+  leg(false, ph + Math.PI); leg(true, ph);
+  // ── đích của hai tay (toạ độ thân) ──
+  let nh, fh, held = o.held, malletAng = 0, incAng = -1.4;
+  switch (pose) {
+    case 'walk': nh = [-s * 9, -4]; fh = [s * 9, -4]; if (held === 'can' || held === 'trash') nh = [3, -5]; break;
+    case 'bow': nh = [9, -21]; fh = [8.5, -21.5]; break;
+    case 'hold': { const r = o.raise || 0; nh = [9.5 - r * 1.5, -20 - r * 18]; fh = [9 - r * 1.5, -20.5 - r * 18]; incAng = -1.45 - r * .1; break; }
+    case 'reach': { nh = o.reach ? toTorso(o.reach.x, o.reach.y) : [15, -46]; fh = [2, -5]; incAng = -1.15; break; }
+    case 'pull': nh = [19, -13]; fh = [17, -15]; break;
+    case 'sweep': nh = [12, -5]; fh = [7, -16]; break;
+    case 'kneel': nh = [8.5, -20]; fh = [8, -20.5]; break;
+    case 'kneelbow': { const b = o.bow || 0, gt = toTorso(21, -2); nh = [lerp(8.5, gt[0], b), lerp(-20, gt[1], b)]; fh = [lerp(8, gt[0] - 1, b), lerp(-20.5, gt[1], b)]; break; }
+    case 'chant': {
+      // tay phải cầm dùi: chạm mặt mõ khi strike = 0, giơ lên khi strike = 1
+      const st = o.strike ?? .6, a0 = .75, a1 = -1.1, tt = o.tool ? toTorso(o.tool.x, o.tool.y) : [26, -4];
+      const contact = [tt[0] - Math.cos(a0) * 13, tt[1] - Math.sin(a0) * 13];
+      nh = [lerp(contact[0], 11, st), lerp(contact[1], -26, st)]; malletAng = lerp(a0, a1, st); fh = [8, -18]; held = 'mallet'; break;
+    }
+    case 'sit': nh = [7, -1]; fh = [6, -1]; break;
+    case 'bench': nh = [11, 0]; fh = [10, 0]; break;
+    case 'pick': { nh = o.reach ? toTorso(o.reach.x, o.reach.y) : toTorso(16, -3); fh = [4, -8]; break; }
+    case 'water': nh = [17, -12]; fh = [5, -6]; break;
+    default: nh = [1.5, -4.5]; fh = [-1, -4.5];
+  }
+  g.save(); g.translate(0, hipY); g.rotate(tilt);
+  // tay phía xa (sau thân)
+  const sh = [-.5, -24.5];
+  { const [ex, ey, hx, hy] = ik2(sh[0], sh[1], fh[0], fh[1], 10.5, 10.5, 1); limb(g, robeF, 5.6, 4.8, sh[0], sh[1], ex, ey, hx, hy); g.fillStyle = shade(skin, .9); g.beginPath(); g.arc(hx, hy, 2.5, 0, TAU); g.fill(); }
+  // áo dài / áo tràng
+  const fl = walking ? s * 3.5 : 0;
+  g.fillStyle = grad(g, -9, 0, 10, 0, [robeD, robe, robe, shade(robe, .92)]);
+  g.beginPath(); g.moveTo(-7.5, -27); g.quadraticCurveTo(0, -30.5, 7.5, -27);
+  if (pose === 'bench') { g.lineTo(8, -6); g.lineTo(15, -2); g.lineTo(15, 4); g.lineTo(-9, 5); g.lineTo(-8, -6); }
+  else if (pose === 'sit') { g.lineTo(8.5, -4); g.quadraticCurveTo(15, 3, 14, 7); g.lineTo(-14, 7); g.quadraticCurveTo(-15, 3, -8.5, -4); }
+  else if (kneeling) { g.lineTo(8, -6); g.quadraticCurveTo(13, 7, 12, 17); g.lineTo(-17, 18); g.quadraticCurveTo(-12, 6, -8, -6); }
+  else if (pose === 'pick') { g.lineTo(8, -6); g.quadraticCurveTo(11, 5, 12, 14); g.lineTo(-9, 15); g.quadraticCurveTo(-9, 5, -8, -6); }
+  else { g.lineTo(7.5, -6); g.quadraticCurveTo(10.5, 6, 11 + fl, 18); g.lineTo(-10 + fl * .6, 18); g.quadraticCurveTo(-9.5, 6, -7.5, -6); }
+  g.closePath(); g.fill();
+  g.strokeStyle = robeD; g.lineWidth = 1.1; g.beginPath(); g.moveTo(3, -26); g.quadraticCurveTo(5, -16, 4, -4); g.stroke();
+  g.fillStyle = robeD; g.fillRect(-3, -29.5, 7, 2.4); // cổ áo
+  if (L.monk) { g.fillStyle = shade(robe, .82); g.beginPath(); g.moveTo(-7, -27); g.lineTo(8, -4); g.lineTo(9, -10); g.lineTo(-3, -28); g.fill(); }
+  // đầu
+  headSide(g, L, o, 1.5, -38.5);
+  // tay phía gần
+  { const [ex, ey, hx, hy] = ik2(1, -25, nh[0], nh[1], 10.5, 10.5, 1); limb(g, robe, 5.8, 5, 1, -25, ex, ey, hx, hy);
+    const joined = pose === 'bow' || pose === 'hold' || pose === 'kneel' || (pose === 'kneelbow' && (o.bow || 0) < .5);
+    g.fillStyle = skin;
+    if (joined) { g.beginPath(); g.ellipse(hx + .5, hy - 1.5, 2.4, 3.6, -.2, 0, TAU); g.fill(); }
+    else { g.beginPath(); g.arc(hx, hy, 2.7, 0, TAU); g.fill(); }
+    if (held === 'incense' && (pose === 'hold' || pose === 'reach' || pose === 'bow')) heldIncense(g, hx + .5, hy - 2, incAng, o.heldN || 3);
+    if (held === 'mallet') heldMallet(g, hx, hy, malletAng);
+    if (held === 'can') heldCan(g, hx, hy, pose === 'water' ? .55 : 0, pose === 'water');
+    if (held === 'trash') { g.fillStyle = '#4a5a3a'; g.beginPath(); g.moveTo(hx - 5, hy + 2); g.lineTo(hx + 5, hy + 2); g.lineTo(hx + 6, hy + 13); g.lineTo(hx - 6, hy + 13); g.fill(); }
+    if (pose === 'sweep') {
+      const end = toTorso(26 + Math.sin(ph) * 6, -1); g.strokeStyle = '#8a6a3a'; g.lineWidth = 2.2; g.beginPath(); g.moveTo(fh[0] - 3, fh[1] - 6); g.lineTo(end[0], end[1]); g.stroke();
+      g.fillStyle = '#c9a85a'; g.beginPath(); g.moveTo(end[0] - 3, end[1] - 4); g.lineTo(end[0] + 9, end[1] + 2); g.lineTo(end[0] - 5, end[1] + 3); g.fill();
+    }
+  }
+  g.restore();
+}
+function personFB(g, o, back) {
+  const L = o.look, R = L.robe, skin = L.skin, robe = R.c, robeD = R.d, pants = R.p;
+  const pose = o.pose || 'stand', walking = pose === 'walk', ph = o.ph || 0, s = walking ? Math.sin(ph) : 0;
+  const kneeling = pose === 'kneel' || pose === 'kneelbow' || pose === 'chant';
+  let hipY = walking ? -30 + Math.abs(s) * 1 : -30, bowT = 0;
+  if (kneeling) hipY = -20; if (pose === 'sit') hipY = -9; if (pose === 'bench') hipY = -27; if (pose === 'pick') hipY = -24;
+  if (pose === 'bow' || pose === 'hold') bowT = (o.bow || 0) * .6;
+  if (pose === 'kneelbow') bowT = .2 + (o.bow || 0) * 1.15;
+  if (pose === 'pick') bowT = .9;
+  const squash = 1 - clamp(bowT, 0, 1.4) * .32;
   // chân
   g.lineCap = 'round';
-  if (pose === 'kneel' || pose === 'kneelbow') {
-    g.fillStyle = pants; rr(g, -14, -12, 22, 11, 5); g.fill();
-    g.fillStyle = robeD; rr(g, -16, -18, 24, 12, 6); g.fill();
-    g.fillStyle = '#3a2a1a'; g.fillRect(-18, -4, 6, 4);
-  } else if (pose === 'sit') {
-    g.fillStyle = pants; g.beginPath(); g.ellipse(0, -5, 18, 6, 0, 0, TAU); g.fill();
-    g.fillStyle = robeD; g.beginPath(); g.ellipse(0, -8, 16, 5, 0, 0, TAU); g.fill();
-  } else {
-    for (const s of [-1, 1]) {
-      const a = sw * .45 * s;
-      g.strokeStyle = pants; g.lineWidth = 6.5;
-      g.beginPath(); g.moveTo(s * 2.5, hipY + 4); g.lineTo(s * 2.5 + Math.sin(a) * 26, hipY + 4 + Math.cos(a) * 26); g.stroke();
-      g.fillStyle = '#3a2a1a'; g.beginPath(); g.ellipse(s * 2.5 + Math.sin(a) * 26 + 2.5, hipY + 4 + Math.cos(a) * 26 + 1, 4.5, 2.2, 0, 0, TAU); g.fill();
-    }
+  if (kneeling) { g.fillStyle = shade(pants, .8); g.beginPath(); g.ellipse(0, -3, 12, 4, 0, 0, TAU); g.fill(); }
+  else if (pose === 'sit') { g.fillStyle = pants; g.beginPath(); g.ellipse(0, -4, 17, 5.5, 0, 0, TAU); g.fill(); g.fillStyle = shade(pants, .8); g.beginPath(); g.ellipse(0, -2.5, 12, 3, 0, 0, TAU); g.fill(); }
+  else if (pose === 'bench') { for (const sd of [-1, 1]) { g.strokeStyle = pants; g.lineWidth = 6.5; g.beginPath(); g.moveTo(sd * 3.6, hipY + 3); g.lineTo(sd * 4.6, hipY + 7); g.lineTo(sd * 4.6, -2); g.stroke(); g.fillStyle = SHOE; g.beginPath(); g.ellipse(sd * 4.8, -.5, 3.4, 2.4, 0, 0, TAU); g.fill(); } }
+  else for (const sd of [-1, 1]) {
+    const lift = walking ? Math.max(0, s * sd) * 4.5 : 0, fx = sd * (pose === 'pick' ? 5 : 3.6);
+    g.strokeStyle = sd < 0 ? pants : shade(pants, .9); g.lineWidth = 6.6;
+    g.beginPath(); g.moveTo(sd * 3.2, hipY + 3); g.lineTo(fx, -lift - 2); g.stroke();
+    g.fillStyle = SHOE; g.beginPath(); g.ellipse(fx, -lift + .2, 3.5, 2.5, 0, 0, TAU); g.fill();
   }
-  // thân trên (xoay quanh hông)
-  g.translate(0, hipY); g.rotate(tilt); if (squash < 1) g.scale(1, squash);
-  // vạt áo dài / áo tràng
-  const longRobe = !(pose === 'sit');
-  g.fillStyle = robe;
-  g.beginPath();
-  g.moveTo(-7, -28); g.lineTo(7, -28);
-  if (longRobe) {
-    const flap = sw * 3;
-    g.quadraticCurveTo(10, -10, 11 + flap, pose === 'kneel' || pose === 'kneelbow' ? 8 : 18);
-    g.lineTo(-11 + flap, pose === 'kneel' || pose === 'kneelbow' ? 8 : 18);
-    g.quadraticCurveTo(-10, -10, -7, -28);
-  } else { g.lineTo(10, 2); g.lineTo(-10, 2); }
-  g.closePath(); g.fill();
-  g.fillStyle = robeD; g.fillRect(-1, -27, 2, 24);
-  g.strokeStyle = 'rgba(0,0,0,.12)'; g.lineWidth = 1; g.beginPath(); g.moveTo(-6, -2); g.lineTo(6, -2); g.stroke();
-  if (isMonk) { g.fillStyle = robeD; g.beginPath(); g.moveTo(-7, -28); g.lineTo(7, -4); g.lineTo(9, -10); g.lineTo(-3, -28); g.fill(); }
-  // tay
-  const armBack = (a1, a2, hx, hy) => {
-    g.strokeStyle = robe; g.lineWidth = 5.5;
-    g.beginPath(); g.moveTo(0, -24); g.quadraticCurveTo(hx * .5 + a1, (hy - 24) * .5 + a2, hx, hy); g.stroke();
-    g.fillStyle = skin; g.beginPath(); g.arc(hx, hy, 2.8, 0, TAU); g.fill();
+  g.save(); g.translate(0, hipY); g.scale(1, squash);
+  // tay: đích theo tư thế
+  const joined = pose === 'bow' || pose === 'hold' || pose === 'kneel' || (pose === 'kneelbow' && (o.bow || 0) < .5);
+  const r = o.raise || 0;
+  let hands;
+  if (joined) hands = [[-1.4, -20 - r * 17], [1.4, -20 - r * 17]];
+  else if (pose === 'kneelbow') hands = [[-6, 2 / squash], [6, 2 / squash]];
+  else if (pose === 'sit') hands = [[-4, -2], [4, -2]];
+  else if (pose === 'bench') hands = [[-6, 0], [6, 0]];
+  else if (pose === 'reach') hands = [[-9.5, -5], [7, -48]];
+  else if (pose === 'pick') hands = [[-6, 10], [6, 10]];
+  else { const sw = walking ? s * 2.6 : 0; hands = [[-8.6, -5 + sw], [8.6, -5 - sw]]; if (o.held === 'can' || o.held === 'trash') hands[1] = [10, -6]; }
+  const drawArms = () => {
+    hands.forEach(([hx, hy], i) => {
+      const sd = i ? 1 : -1, sx = sd * 7.4, sy = -25;
+      const [ex, ey] = ik2(sx, sy, hx, hy, 10.5, 10.5, joined ? (sd > 0 ? -1 : 1) : (sd > 0 ? 1 : -1));
+      limb(g, robe, 5.6, 4.8, sx, sy, ex, ey, hx, hy);
+      if (!back || !joined) { g.fillStyle = skin; g.beginPath(); g.arc(hx, hy, 2.5, 0, TAU); g.fill(); }
+    });
   };
-  if (pose === 'walk' || pose === 'stand') {
-    const a = pose === 'walk' ? sw * .5 : 0;
-    armBack(0, 0, Math.sin(-a) * 18 + 1, -24 + Math.cos(a) * 19);
-  } else if (pose === 'pull') {
-    armBack(0, 2, 20, -16);
-  } else if (pose === 'reach') {
-    armBack(4, -6, 14, -48);
-  } else if (pose === 'sit') {
-    armBack(4, 4, 6, -6);
-  } else if (pose === 'sweep') {
-    armBack(4, 2, 12, -12);
-    g.strokeStyle = '#8a6a3a'; g.lineWidth = 2.2; g.beginPath(); g.moveTo(14, -24); g.lineTo(24 + Math.sin(o.ph) * 6, 26 - hipY - 30); g.stroke();
-    g.fillStyle = '#c9a85a'; g.beginPath(); g.moveTo(20 + Math.sin(o.ph) * 6, 22 - hipY - 30); g.lineTo(34 + Math.sin(o.ph) * 6, 30 - hipY - 30); g.lineTo(18 + Math.sin(o.ph) * 6, 30 - hipY - 30); g.fill();
-  } else {
-    // chắp tay trước ngực
-    armBack(5, 2, 9, -21);
-    if (o.held === 'incense') {
-      g.strokeStyle = '#b8321f'; g.lineWidth = 1.3;
-      const n = o.heldN || 3;
-      for (let i = 0; i < n; i++) { const dx = (i - (n - 1) / 2) * 1.6; g.beginPath(); g.moveTo(9 + dx, -18); g.lineTo(11 + dx * 2.4, -44); g.stroke(); }
-      g.fillStyle = '#ff7a2a';
-      for (let i = 0; i < n; i++) { const dx = (i - (n - 1) / 2) * 1.6; g.beginPath(); g.arc(11 + dx * 2.4, -44.5, 1.3, 0, TAU); g.fill(); }
-    }
-  }
+  if (back && joined) drawArms(); // nhìn từ sau, tay chắp phía trước bị thân che
+  // thân áo
+  g.fillStyle = grad(g, -10, 0, 10, 0, [robeD, robe, robe, robeD]);
+  g.beginPath(); g.moveTo(-7.6, -27); g.quadraticCurveTo(0, -30, 7.6, -27);
+  if (pose === 'sit') { g.lineTo(9, -4); g.quadraticCurveTo(16, 3, 15, 7); g.lineTo(-15, 7); g.quadraticCurveTo(-16, 3, -9, -4); }
+  else if (pose === 'bench') { g.lineTo(8.5, -2); g.lineTo(9.5, 6); g.lineTo(-9.5, 6); g.lineTo(-8.5, -2); }
+  else if (kneeling) { g.lineTo(8.5, -6); g.quadraticCurveTo(12, 8, 13, 16); g.lineTo(-13, 16); g.quadraticCurveTo(-12, 8, -8.5, -6); }
+  else { const fl = walking ? s * 1.5 : 0; g.lineTo(7.6, -6); g.quadraticCurveTo(10, 6, 10.5 + fl, 18); g.lineTo(-10.5 + fl, 18); g.quadraticCurveTo(-10, 6, -7.6, -6); }
+  g.closePath(); g.fill();
+  if (!back) { g.strokeStyle = robeD; g.lineWidth = 1.1; g.beginPath(); g.moveTo(0, -27); g.lineTo(0, -4); g.stroke(); g.fillStyle = robeD; g.beginPath(); g.moveTo(-3, -28.5); g.lineTo(0, -25); g.lineTo(3, -28.5); g.fill(); }
+  if (L.monk) { g.fillStyle = shade(robe, .82); g.beginPath(); g.moveTo(back ? 7 : -7, -27); g.lineTo(back ? -8 : 8, -5); g.lineTo(back ? -3 : 3, -5); g.lineTo(back ? 3 : -3, -27); g.fill(); }
   // đầu
-  g.translate(0, -36);
-  g.fillStyle = skin; g.fillRect(-2.5, 3, 5, 5);
-  g.beginPath(); g.ellipse(0, -2, 8, 9, 0, 0, TAU); g.fill();
-  if (!isMonk) {
-    g.fillStyle = L.hairC;
-    g.beginPath(); g.ellipse(-1, -5, 8.6, 7.5, 0, Math.PI * .95, TAU * 1.02); g.fill();
-    g.beginPath(); g.ellipse(-5, -1, 4, 6.5, 0, 0, TAU); g.fill();
-    if (L.hair === 0) { g.beginPath(); g.moveTo(-6, -4); g.quadraticCurveTo(-14, 10, -10, 26); g.quadraticCurveTo(-6, 12, -3, -2); g.fill(); }
-    if (L.hair === 1) { g.beginPath(); g.arc(-7.5, -7, 4.6, 0, TAU); g.fill(); }
+  const hy = -38.5;
+  g.fillStyle = skin; g.fillRect(-2.6, hy + 5, 5.2, 5);
+  g.beginPath(); g.ellipse(0, hy, 8, 8.9, 0, 0, TAU); g.fill();
+  if (back) {
+    if (!L.monk) {
+      g.fillStyle = L.hairC; g.beginPath(); g.ellipse(0, hy - 1, 8.8, 9.4, 0, 0, TAU); g.fill();
+      if (L.hair === 0) { g.beginPath(); g.moveTo(-4, hy + 2); g.quadraticCurveTo(-5, hy + 18, 0, hy + 30); g.quadraticCurveTo(5, hy + 18, 4, hy + 2); g.fill(); }
+      if (L.hair === 1) { g.beginPath(); g.arc(0, hy - 4.5, 4.8, 0, TAU); g.fill(); }
+    } else { g.fillStyle = 'rgba(80,50,30,.2)'; g.beginPath(); g.ellipse(0, hy - 1, 8, 8.6, 0, 0, TAU); g.fill(); }
+    g.fillStyle = shade(skin, .86); for (const sd of [-1, 1]) { g.beginPath(); g.ellipse(sd * 8, hy + .5, 1.6, 2.4, 0, 0, TAU); g.fill(); }
+    if (o.held === 'incense' && joined) { const n = o.heldN || 3; g.save(); g.scale(1, 1 / squash); heldIncense(g, 0, (-20 - r * 17) * squash - 2, -Math.PI / 2, n); g.restore(); }
   } else {
-    g.fillStyle = 'rgba(80,50,30,.18)'; g.beginPath(); g.ellipse(-1, -5, 8, 6.5, 0, Math.PI, TAU); g.fill();
-  }
-  if (o.back) {
-    // nhìn từ sau lưng: tóc phủ kín đầu, không thấy mặt
-    if (!isMonk) {
-      g.fillStyle = L.hairC; g.beginPath(); g.ellipse(0, -3, 8.8, 9.4, 0, 0, TAU); g.fill();
-      if (L.hair === 0) { g.beginPath(); g.moveTo(-4, 0); g.quadraticCurveTo(-5, 16, 0, 28); g.quadraticCurveTo(5, 16, 4, 0); g.fill(); }
-      if (L.hair === 1) { g.beginPath(); g.arc(0, -6, 4.8, 0, TAU); g.fill(); }
-    } else { g.fillStyle = 'rgba(80,50,30,.2)'; g.beginPath(); g.ellipse(0, -3, 8, 8.6, 0, 0, TAU); g.fill(); }
-    if (o.held === 'incense') {
-      const n = o.heldN || 3; g.strokeStyle = '#b8321f'; g.lineWidth = 1.3;
-      for (let i = 0; i < n; i++) { const dx = (i - (n - 1) / 2) * 2.4; g.beginPath(); g.moveTo(dx * .5, 8); g.lineTo(dx, -22); g.stroke(); }
-      g.fillStyle = '#ff7a2a'; for (let i = 0; i < n; i++) { g.beginPath(); g.arc((i - (n - 1) / 2) * 2.4, -22.5, 1.4, 0, TAU); g.fill(); }
+    if (!L.monk) {
+      g.fillStyle = L.hairC;
+      g.beginPath(); g.ellipse(0, hy - 3.5, 8.8, 6.6, 0, Math.PI * .98, TAU * 1.01); g.fill();
+      g.beginPath(); g.moveTo(-8.6, hy - 3); g.quadraticCurveTo(-3, hy - 6, 0, hy - 2.5); g.quadraticCurveTo(3, hy - 6, 8.6, hy - 3); g.lineTo(8.6, hy - 6); g.lineTo(-8.6, hy - 6); g.fill();
+      for (const sd of [-1, 1]) { g.beginPath(); g.ellipse(sd * 7.6, hy + (L.hair === 0 ? 6 : 1), 2.6, L.hair === 0 ? 11 : 6, 0, 0, TAU); g.fill(); }
+      if (L.hair === 1) { g.beginPath(); g.arc(0, hy - 9.5, 4.4, 0, TAU); g.fill(); }
+    } else { g.fillStyle = 'rgba(80,50,30,.16)'; g.beginPath(); g.ellipse(0, hy - 4, 7.5, 4.5, 0, Math.PI, TAU); g.fill(); }
+    const closed = pose === 'sit' || pose === 'kneelbow' || (o.bow || 0) > .45;
+    for (const sd of [-1, 1]) {
+      if (closed) { g.strokeStyle = '#2a1a10'; g.lineWidth = .9; g.beginPath(); g.moveTo(sd * 3 - 1.4, hy); g.quadraticCurveTo(sd * 3, hy + 1, sd * 3 + 1.4, hy); g.stroke(); }
+      else { g.fillStyle = '#2a1a10'; g.beginPath(); g.arc(sd * 3, hy - .2, 1.15, 0, TAU); g.fill(); }
+      g.fillStyle = 'rgba(230,110,90,.33)'; g.beginPath(); g.arc(sd * 4.4, hy + 3.4, 1.7, 0, TAU); g.fill();
     }
-  } else {
-  g.fillStyle = '#2a1a10'; g.beginPath(); g.arc(4.2, -2, 1.1, 0, TAU); g.fill();
-  if (pose === 'sit' || pose === 'kneelbow' || (o.bow || 0) > .5) { g.fillStyle = skin; g.fillRect(3, -3.5, 2.6, 1.6); g.strokeStyle = '#2a1a10'; g.lineWidth = .8; g.beginPath(); g.moveTo(3, -2); g.lineTo(5.6, -2); g.stroke(); }
-  g.fillStyle = 'rgba(230,110,90,.35)'; g.beginPath(); g.arc(3.2, 1.6, 1.8, 0, TAU); g.fill();
+    g.strokeStyle = shade(skin, .6); g.lineWidth = .9; g.beginPath(); g.moveTo(-1.4, hy + 5); g.quadraticCurveTo(0, hy + 5.8, 1.4, hy + 5); g.stroke();
   }
-  if (L.hat) { g.fillStyle = '#e8d9a8'; g.beginPath(); g.moveTo(-16, -6); g.lineTo(0, -20); g.lineTo(16, -6); g.closePath(); g.fill(); g.strokeStyle = '#b89c5a'; g.lineWidth = .8; g.stroke(); }
+  if (!(back && joined)) drawArms();
+  if (!back && joined && o.held === 'incense') heldIncense(g, 0, -22 - r * 17, -Math.PI / 2, o.heldN || 3);
+  if (o.held === 'can' && !joined) heldCan(g, hands[1][0], hands[1][1], 0, false);
+  if (o.held === 'trash' && !joined) { const [hx, hy2] = hands[1]; g.fillStyle = '#4a5a3a'; g.beginPath(); g.moveTo(hx - 5, hy2 + 2); g.lineTo(hx + 5, hy2 + 2); g.lineTo(hx + 6, hy2 + 13); g.lineTo(hx - 6, hy2 + 13); g.fill(); }
   g.restore();
 }
 
@@ -1276,6 +1421,7 @@ const PLACE = {
 const offOf = k => [PLACE[k].mx - PLACE[k].sx, PLACE[k].my - GROUND];
 const toMap = (k, sx, sy) => { const [dx, dy] = offOf(k); return { x: sx + dx, y: sy + dy }; };
 const BELL_POS = toMap('tower', BELL_X, 340);
+const censerPt = (sx, sy) => ({ x: 1300 + (sx - CENSER_X) * .72, y: 1450 + (sy - GROUND) * .72 });
 const POND = { cx: 1930, cy: 1885, rx: 280, ry: 125 };
 const inPond = (x, y, m = 0) => ((x - POND.cx) / (POND.rx - m)) ** 2 + ((y - POND.cy) / (POND.ry - m * .6)) ** 2 < 1;
 function pondPointNear(x, y, inset = 40) {
@@ -1307,7 +1453,7 @@ const COL = { out: { rects: [], circles: [] }, hall: { rects: [], circles: [] },
     [868, 448, 932, 486], [1668, 448, 1732, 486],                         // tháp nhỏ
   );
   o.circles.push(
-    [1300, 1440, 46], [1990, 1412, 34], [1930, 1752, 54], [2300, 1795, 14], [330, 2245, 38],
+    [1300, 1446, 36], [1990, 1412, 34], [1930, 1752, 54], [2300, 1795, 14], [330, 2245, 38],
     ...[[1180, 1210], [1420, 1210], [1180, 1660], [1420, 1660], [1170, 1990], [1430, 1990]].map(([x, y]) => [x, y, 13]),
     ...[[1060, 1820], [1540, 1820], [960, 1260], [1640, 1260]].map(([x, y]) => [x, y, 10]),
     ...[[1180, 1340], [1420, 1340], [1180, 1540], [1420, 1540], [1180, 1840], [1420, 1840]].map(([x, y]) => [x, y, 7]),
@@ -1315,12 +1461,15 @@ const COL = { out: { rects: [], circles: [] }, hall: { rects: [], circles: [] },
   );
   const h = COL.hall;
   h.rects.push([0, 0, 1000, 330], [0, 0, 70, 700], [930, 0, 1000, 700], [0, 642, 455, 700], [545, 642, 1000, 700], [0, 680, 1000, 700],
-    [372, 322, 628, 366], [176, 380, 266, 406], [738, 386, 832, 412], [828, 542, 874, 578]);
+    [372, 322, 628, 366], [176, 380, 266, 406], [745, 380, 828, 410], [828, 542, 874, 578]);
   h.circles.push([330, 348, 16], [670, 348, 16]);
   const s = COL.shop;
   s.rects.push([0, 0, 760, 282], [0, 0, 60, 560], [700, 0, 760, 560], [0, 502, 330, 560], [430, 502, 760, 560], [0, 545, 760, 560],
     [228, 300, 532, 336], [586, 430, 664, 470]);
 })();
+// ghế đá quanh khuôn viên (toạ độ chân ghế)
+const BENCHES = [[880, 1960], [1560, 1980], [1830, 1640], [760, 1250], [1700, 1150], [1050, 600], [1550, 600]];
+for (const [x, y] of BENCHES) COL.out.rects.push([x - 32, y - 12, x + 32, y + 2]);
 const PR = 11; // bán kính va chạm của người
 function walkable(x, y, sc = me.scene, r = PR) {
   const S_ = SCENES[sc], c = COL[sc];
@@ -1409,7 +1558,7 @@ function zoneAt(x, y) {
 
 // ─────────────────────────── trạng thái ───────────────────────────
 const me = {
-  id: 'me', scene: 'out', x: 1300, y: 2290, dir: 1, back: true, ph: 0, pose: 'stand', bow: 0, look: lookOf(S.robe, S.hair), name: S.name || 'Phật tử',
+  id: 'me', scene: 'out', x: 1300, y: 2290, vx: 0, vy: 0, dir: 1, back: true, ph: 0, pose: 'stand', bow: 0, look: lookOf(S.robe, S.hair), name: S.name || 'Phật tử',
   path: null, onArrive: null, pending: null, script: [], held: null, heldN: 0, say: null,
 };
 let mode = 'free';           // free | walking | busy | bell | chant | zen
@@ -1443,8 +1592,8 @@ const npcs = [
   { id: 'be', scene: 'out', name: 'Bé Na', look: { robe: ROBES[6], hair: 1, skin: SKIN, hairC: '#2a1c14' }, x: 1470, y: 2010, dir: 1, ph: 0, pose: 'walk', bow: 0, ai: 'follow', leader: 'me2', bs: .64 },
   { id: 'tieu', scene: 'out', name: 'Chú tiểu', look: { robe: { c: '#8f8a7a', d: '#6e6a5c', p: '#6e6a5c' }, monk: true, skin: SKIN }, x: 470, y: 1444, dir: 1, ph: 0, pose: 'stand', bow: 0, ai: 'bell', t: 40, bs: .72 },
   { id: 'ong', scene: 'out', name: 'Ông Tư', look: { robe: ROBES[2], hair: 2, skin: '#e8bf98', hairC: '#9a948a' }, x: 1612, y: 1822, dir: 1, ph: 0, pose: 'stand', bow: 0, ai: 'pond', t: 5, bs: .98 },
-  { id: 'pt', scene: 'hall', name: 'Phật tử', look: { robe: ROBES[2], hair: 1, skin: SKIN, hairC: '#3a2a20' }, x: 430, y: 452, dir: 1, back: true, ph: 0, pose: 'kneelbow', bow: 0, ai: 'kneelpray', t: 0 },
-  { id: 'su2', scene: 'hall', name: 'Thầy trụ trì', look: { robe: MONK, monk: true, skin: SKIN }, x: 640, y: 452, dir: 1, back: true, ph: 0, pose: 'kneel', bow: 0, ai: 'chantnpc', t: 6 },
+  { id: 'pt', scene: 'hall', name: 'Phật tử', look: { robe: ROBES[2], hair: 1, skin: SKIN, hairC: '#3a2a20' }, x: 400, y: 452, dir: 1, back: true, ph: 0, pose: 'kneelbow', bow: 0, ai: 'kneelpray', t: 0 },
+  { id: 'su2', scene: 'hall', name: 'Thầy trụ trì', look: { robe: MONK, monk: true, skin: SKIN }, x: 600, y: 452, dir: 1, back: true, ph: 0, pose: 'kneel', bow: 0, ai: 'chantnpc', t: 6 },
   { id: 'lan', scene: 'shop', name: 'Cô Lan', look: { robe: ROBES[1], hair: 1, skin: SKIN, hairC: '#2a1c14' }, x: 380, y: 296, dir: 1, ph: 0, pose: 'stand', bow: 0, ai: 'vendor', t: 4 },
 ];
 const MONK_TIPS = [
@@ -1465,7 +1614,7 @@ function walkTo(p, tx, ty, dt, sp = 70) {
   if (d < 2) { p.x = tx; p.y = ty; if (p.pose === 'walk') p.pose = 'stand'; return true; }
   const s = Math.min(d, sp * dt);
   p.x += dx / d * s; p.y += dy / d * s; p.pose = 'walk'; p.ph += s / 9;
-  if (Math.abs(dx) > Math.abs(dy) * .5) { p.dir = Math.sign(dx); p.back = false; } else p.back = dy < 0;
+  if (Math.abs(dx) > Math.abs(dy) * .5) { p.dir = Math.sign(dx); p.back = false; p.front = false; } else { p.back = dy < 0; p.front = dy > 0; }
   return false;
 }
 function updateNpc(n, dt) {
@@ -1478,15 +1627,15 @@ function updateNpc(n, dt) {
       if (near && T - n.said > 40 && mode === 'free') { n.said = T; say(n, pick(MONK_TIPS), 6); }
       break;
     case 'pilgrim': {
-      const plan = [[1250, 1505, 'incense'], [1300, 1108, 'pray'], [880, 1960, 'rest']];
+      const plan = [[1252, 1460, 'incense'], [1300, 1108, 'pray'], [880, 1964, 'rest']];
       const [tx, ty, act] = plan[n.st % 3];
       if (n.t > 0) {
-        n.back = act !== 'rest';
-        if (act === 'incense') { n.pose = 'hold'; n.held = 'incense'; n.heldN = 3; n.bow = Math.max(0, Math.sin((6 - n.t) * 2.6)); }
+        n.back = act === 'pray'; n.front = act === 'rest';
+        if (act === 'incense') { n.pose = 'hold'; n.dir = 1; n.held = 'incense'; n.heldN = 3; n.raise = 1; n.bow = Math.max(0, Math.sin((6 - n.t) * 2.6)); }
         else if (act === 'pray') { n.pose = 'kneelbow'; n.bow = Math.max(0, Math.sin((10 - n.t) * 1.4)); }
-        else { n.pose = 'stand'; n.bow = 0; }
+        else { n.pose = 'bench'; n.bow = 0; }
         if (n.t - dt <= 0) {
-          if (act === 'incense') { addIncense(3, CENSER_X + rnd(-20, 20), 'npc'); n.held = null; }
+          if (act === 'incense') { addIncense(3, CENSER_X + rnd(-20, 20), 'npc'); n.held = null; n.raise = 0; }
           n.pose = 'walk'; n.bow = 0; n.st++; n.t = -1;
         }
       } else if (walkTo(n, tx, ty, dt, 26)) n.t = act === 'incense' ? 6 : act === 'pray' ? 10 : 14;
@@ -1716,7 +1865,7 @@ function addProp(key, sx0, sy0, w, h, fn, mx, my, sx, fadeable, extra) { OUT_PRO
   P_('gate', 'gate', 470, 150, 480, 332, drawGate, true);
   P_('shop', 'shop', 960, 300, 260, 180, drawShop, true);
   P_('tower', 'tower', 1300, 140, 280, 340, drawBellTower, true, 'bell');
-  P_('censer', 'censer', 1790, 360, 100, 130, drawCenser, false, 'incense');
+  P_('censer', 'censer', 1790, 360, 100, 130, drawCenser, false, 'incense'); Object.assign(OUT_PROPS[OUT_PROPS.length - 1], { k: .72, px: CENSER_X });
   P_('hall', 'hall', 2120, 60, 960, 420, drawHall, true, 'hall');
   P_('bodhi', 'bodhi', 3020, 30, 560, 460, drawBodhi, true, 'ribbons');
   P_('stupa', 'stupa', 4740, 60, 280, 420, drawStupa, true);
@@ -1724,7 +1873,7 @@ function addProp(key, sx0, sy0, w, h, fn, mx, my, sx, fadeable, extra) { OUT_PRO
   P_('willow', 'willow', 4300, 220, 220, 262, g => drawWillow(g, 4400), true);
   P_('banyan', 'banyan', 40, 40, 480, 444, g => drawBanyan(g, 260), true);
   // tháp nhỏ hai bên vườn tháp
-  for (const mx of [900, 1700]) addProp('stupaS', STUPA_X - 140, 60, 280, 420, drawStupa, mx, 480, STUPA_X, true, 'small');
+  for (const mx of [900, 1700]) { addProp('stupaS', STUPA_X - 140, 60, 280, 420, drawStupa, mx, 480, STUPA_X, true); Object.assign(OUT_PROPS[OUT_PROPS.length - 1], { k: .55, px: STUPA_X }); }
   // tường bao ngang (mặt đứng)
   for (const [x0, x1, y] of [[150, 1060, 2140], [1540, 2450, 2140], [150, 2450, 232]]) {
     for (let x = x0; x < x1; x += 600) { const a = x, b = Math.min(x + 600, x1); addProp('wall' + a + '_' + y, a - 6, GROUND - 76, b - a + 12, 78, g => drawWall(g, a, b), 0, y, 0, false); }
@@ -1733,6 +1882,7 @@ function addProp(key, sx0, sy0, w, h, fn, mx, my, sx, fadeable, extra) { OUT_PRO
   at('bam', -100, 100, 200, GROUND + 4 - 100, g => drawBamboo(g, 0, 3), [[420, 480], [2180, 480], [300, 1050], [2320, 1050], [980, 2210], [1620, 2210], [300, 1650], [2330, 1350]]);
   at('fr', -130, 260, 260, GROUND + 4 - 260, g => drawFrangi(g, 0, 41), TREES_F);
   at('sl', -20, 380, 40, GROUND + 2 - 380, g => stoneLantern(g, 0), [[1180, 1210], [1420, 1210], [1180, 1660], [1420, 1660], [1170, 1990], [1430, 1990]], false);
+  at('bench', -40, GROUND - 40, 80, 44, drawBench, BENCHES, false);
   at('pole', -20, GROUND - 124, 40, 126, lanternPole, [[1180, 1340], [1420, 1340], [1180, 1540], [1420, 1540], [1180, 1840], [1420, 1840]], false);
 })();
 const POLE_LIGHTS = [[1180, 1340], [1420, 1340], [1180, 1540], [1420, 1540], [1180, 1840], [1420, 1840]].flatMap(([x, y]) => [[x - 11, y - 20], [x + 11, y - 20]]);
@@ -1740,7 +1890,7 @@ const POLE_LIGHTS = [[1180, 1340], [1420, 1340], [1180, 1540], [1420, 1540], [11
 function propDraw(p, alpha) {
   const s = sprite(p.key, p.sx0, p.sy0, p.w, p.h, p.fn);
   ctx.save(); ctx.translate(p.dx, p.dy);
-  if (p.extra === 'small') { ctx.translate(STUPA_X, GROUND); ctx.scale(.55, .55); ctx.translate(-STUPA_X, -GROUND); }
+  if (p.k) { ctx.translate(p.px, GROUND); ctx.scale(p.k, p.k); ctx.translate(-p.px, -GROUND); }
   ctx.globalAlpha = alpha;
   ctx.drawImage(s.c, s.x0, s.y0, s.w, s.h);
   ctx.globalAlpha = 1;
@@ -1754,9 +1904,7 @@ function propDraw(p, alpha) {
 }
 // khung mờ: người chơi đứng phía sau công trình thì công trình mờ đi để nhìn thấy nhân vật
 function propBounds(p) {
-  const k = p.extra === 'small' ? .55 : 1;
-  const cx = p.extra === 'small' ? p.dx + STUPA_X : 0;
-  const x0 = p.extra === 'small' ? cx + (p.sx0 - STUPA_X) * k : p.sx0 + p.dx, y0 = p.base - (GROUND - p.sy0) * k;
+  const k = p.k || 1, px = p.k ? p.px : 0, x0 = p.dx + px + (p.sx0 - px) * k, y0 = p.base - (GROUND - p.sy0) * k;
   return [x0, y0, x0 + p.w * k, p.base];
 }
 function drawIncense() {
@@ -1926,11 +2074,15 @@ function drawXamTable(g) {
   g.fillStyle = '#b3262e'; g.beginPath(); g.ellipse(236, 378, 6, 3, 0, 0, TAU); g.ellipse(250, 378, 6, 3, 0, 0, TAU); g.fill();
 }
 function drawMoStand(g) {
-  g.fillStyle = '#5a2a10'; g.fillRect(740, 394, 34, 16); g.fillRect(790, 394, 42, 16);
-  g.fillStyle = grad(g, 740, 0, 774, 0, ['#5c4416', '#e0bd5c', '#6a4e16']); g.beginPath(); g.moveTo(740, 378); g.quadraticCurveTo(742, 394, 757, 394); g.quadraticCurveTo(772, 394, 774, 378); g.closePath(); g.fill();
-  g.fillStyle = '#2d1f0b'; g.beginPath(); g.ellipse(757, 378, 17, 3, 0, 0, TAU); g.fill();
-  g.fillStyle = grad(g, 790, 0, 832, 0, ['#7a2010', '#b8452a', '#6a1a0c']); g.beginPath(); g.ellipse(811, 382, 21, 14, 0, 0, TAU); g.fill();
-  g.strokeStyle = '#2a0d04'; g.lineWidth = 2; g.beginPath(); g.moveTo(796, 384); g.quadraticCurveTo(811, 392, 826, 384); g.stroke();
+  // bồ đoàn mõ: mõ gỗ đặt trên gối đỏ, khánh đồng bên cạnh
+  g.fillStyle = '#7a1c12'; g.beginPath(); g.ellipse(765, 402, 20, 7, 0, 0, TAU); g.fill();
+  g.fillStyle = grad(g, 746, 0, 784, 0, ['#5a1a0c', '#a8402a', '#c25a3a', '#6a1a0c']); g.beginPath(); g.ellipse(765, 390, 18, 13, 0, 0, TAU); g.fill();
+  g.strokeStyle = '#2a0d04'; g.lineWidth = 2; g.beginPath(); g.moveTo(751, 392); g.quadraticCurveTo(765, 400, 779, 392); g.stroke();
+  g.fillStyle = 'rgba(255,220,170,.25)'; g.beginPath(); g.ellipse(759, 383, 7, 3, -.3, 0, TAU); g.fill();
+  g.fillStyle = '#e6c27a'; g.beginPath(); g.arc(765, 381, 1.8, 0, TAU); g.fill();
+  g.fillStyle = '#5a2a10'; g.fillRect(796, 398, 28, 10);
+  g.fillStyle = grad(g, 796, 0, 824, 0, ['#5c4416', '#e0bd5c', '#6a4e16']); g.beginPath(); g.moveTo(796, 384); g.quadraticCurveTo(798, 398, 810, 398); g.quadraticCurveTo(822, 398, 824, 384); g.closePath(); g.fill();
+  g.fillStyle = '#2d1f0b'; g.beginPath(); g.ellipse(810, 384, 14, 2.6, 0, 0, TAU); g.fill();
 }
 function drawDonateBox(g) {
   g.fillStyle = grad(g, 0, 532, 0, 578, ['#a8301f', '#6e1b11']); g.fillRect(828, 532, 46, 46);
@@ -1978,7 +2130,7 @@ const ROOM_PROPS = {
   hall: [
     { key: 'rAltar', base: 366, x0: 360, y0: 300, w: 280, h: 70, fn: drawHallAltar, extra: 'altar' },
     { key: 'rXam', base: 408, x0: 170, y0: 320, w: 100, h: 92, fn: drawXamTable },
-    { key: 'rMo', base: 412, x0: 736, y0: 360, w: 100, h: 54, fn: drawMoStand },
+    { key: 'rMo', base: 410, x0: 740, y0: 370, w: 90, h: 42, fn: drawMoStand },
     { key: 'rBox', base: 578, x0: 824, y0: 528, w: 54, h: 52, fn: drawDonateBox },
     ...[[330, 348], [670, 348]].map(([x, y], i) => ({ key: 'rCol' + i, base: y, x0: x - 22, y0: y - 254, w: 44, h: 262, fn: g => drawColumn(g, x, y), fadeable: true })),
   ],
@@ -1994,10 +2146,10 @@ const HOT = [
   { id: 'shop', scene: 'shop', x: 380, y: 382, face: 'up', icon: '🧺', label: 'Sắm lễ', run: () => openShop(), my: 228 },
   { id: 'tea', scene: 'shop', x: 566, y: 452, face: 1, icon: '🍵', label: 'Uống trà', run: () => openTea() },
   { id: 'bell', scene: 'out', x: 528, y: 1420, face: 1, icon: '🔔', label: 'Thỉnh chuông', run: () => startBell(), my: 1250, mx: 640 },
-  { id: 'incense', scene: 'out', x: 1300, y: 1505, face: 'up', icon: '🎐', label: 'Thắp hương', run: () => openIncense(), my: 1330 },
+  { id: 'incense', scene: 'out', x: 1252, y: 1460, face: 1, icon: '🎐', label: 'Thắp hương', run: () => openIncense(), my: 1330, mx: 1300 },
   { id: 'altar', scene: 'hall', x: 500, y: 452, face: 'up', icon: '🙏', label: 'Lễ Phật · Dâng lễ', run: () => openAltar() },
   { id: 'xam', scene: 'hall', x: 292, y: 398, face: -1, icon: '🎋', label: 'Xin xăm', run: () => openXam() },
-  { id: 'chant', scene: 'hall', x: 712, y: 404, face: 1, icon: '📿', label: 'Tụng niệm', run: () => startChant() },
+  { id: 'chant', scene: 'hall', x: 731, y: 404, face: 1, icon: '📿', label: 'Tụng niệm', run: () => startChant() },
   { id: 'donate', scene: 'hall', x: 800, y: 566, face: 1, icon: '💝', label: 'Công đức', run: () => openDonate() },
   { id: 'wish', scene: 'out', x: 1990, y: 1474, face: 'up', icon: '🎗️', label: 'Treo điều ước', run: () => openWish(), my: 1300 },
   { id: 'zen', scene: 'out', x: 2140, y: 1466, face: 1, icon: '🧘', label: 'Ngồi thiền', run: () => openZen() },
@@ -2005,6 +2157,7 @@ const HOT = [
   { id: 'lantern', scene: 'out', x: 1930, y: 2030, face: 'up', icon: '🪷', label: 'Thả hoa đăng', run: () => openLantern() },
   { id: 'dedicate', scene: 'out', x: 1300, y: 560, face: 'up', icon: '✨', label: 'Hồi hướng', run: () => openDedicate(), my: 420 },
 ];
+BENCHES.forEach((b, i) => HOT.push({ id: 'bench' + i, scene: 'out', x: b[0], y: b[1] + 20, face: 'front', icon: '🪑', label: 'Ngồi nghỉ', bench: b, run: () => sitBench(b), my: b[1] - 70 }));
 for (const h of HOT) { h.mx = h.mx ?? h.x; h.my = h.my ?? h.y - 118; }
 const TASKS = [
   ['shop', '🧺', 'Sắm lễ chay', 'Vào Nhà khách bên trái sân ngoài'],
@@ -2021,6 +2174,7 @@ const TASKS = [
   ['lantern', '🪷', 'Thả hoa đăng', 'Bờ nam hồ sen'],
   ['dedicate', '✨', 'Hồi hướng', 'Bảo tháp ở vườn sau Chính điện'],
 ];
+const TASK_IDS = new Set([...TASKS.map(t => t[0]), 'altar']);
 const taskHot = id => HOT.find(h => h.id === (id === 'offer' || id === 'pray' ? 'altar' : id));
 function done(id) {
   if (S.today.done.includes(id)) return;
@@ -2035,9 +2189,12 @@ function runScript(steps, fin) { mode = 'busy'; me.path = null; me.script = step
 function updateScript(dt) {
   const s = me.script[0];
   if (!s) return;
-  if (s.t === 0) { if (s.pose) me.pose = s.pose; if ('held' in s) me.held = s.held; if (s.dir) me.dir = s.dir; if ('back' in s) me.back = s.back; s.at && s.at(); }
+  if (s.t === 0) { if (s.pose) me.pose = s.pose; if ('held' in s) me.held = s.held; if (s.dir) me.dir = s.dir; if ('back' in s) me.back = s.back; if ('front' in s) me.front = s.front; s.at && s.at(); }
   s.t += dt;
-  me.bow = s.bow ? s.bow(clamp(s.t / s.d, 0, 1)) : 0;
+  const kk = clamp(s.t / s.d, 0, 1);
+  me.bow = s.bow ? s.bow(kk) : 0;
+  me.raise = typeof s.raise === 'function' ? s.raise(kk) : (s.raise || 0);
+  me.reach = s.reach || null;
   if (s.t >= s.d) {
     s.end && s.end();
     me.script.shift();
@@ -2057,15 +2214,15 @@ function stepMove(p, vx, vy) {
   else if (vy && walkable(x, y + vy)) p.y += vy;
   return Math.hypot(p.x - x, p.y - y);
 }
-function faceDir(vx, vy) { if (Math.abs(vx) > Math.abs(vy) * .6) { me.dir = Math.sign(vx); me.back = false; } else if (vy) me.back = vy < 0; }
+function faceDir(vx, vy) { if (Math.abs(vx) > Math.abs(vy) * .6) { me.dir = Math.sign(vx); me.back = false; me.front = false; } else if (vy) { me.back = vy < 0; me.front = vy > 0; } }
 function walkPath(x, y, onArrive) {
   const path = findPath(me.scene, me.x, me.y, x, y);
   if (!path) { toast('Chỗ đó không đi tới được.'); return false; }
-  me.path = path; me.onArrive = onArrive || null; me.stuck = 0; me.retried = false; mode = 'walking'; renderActions();
+  me.path = path; me.onArrive = onArrive || null; me.stuck = 0; me.retried = false; me.spd = 0; mode = 'walking'; renderActions();
   return true;
 }
 function stopWalk() { me.path = null; me.onArrive = null; if (mode === 'walking') mode = 'free'; me.pose = 'stand'; renderActions(); }
-function faceHot(h) { if (h.face === 'up') me.back = true; else { me.back = false; me.dir = h.face; } }
+function faceHot(h) { me.back = h.face === 'up'; me.front = h.face === 'front'; if (typeof h.face === 'number') me.dir = h.face; }
 function goHot(h) {
   if (mode !== 'free' && mode !== 'walking') return;
   initAudio();
@@ -2077,6 +2234,19 @@ function goHot(h) {
   if (Math.hypot(me.x - h.x, me.y - h.y) < 6) { stopWalk(); faceHot(h); h.run(); return; }
   walkPath(h.x, h.y, () => { me.x = h.x; me.y = h.y; faceHot(h); h.run(); });
 }
+function sitBench(b) {
+  stopWalk(); mode = 'rest'; me.x = b[0]; me.y = b[1] + 4; me.pose = 'bench'; me.front = true; me.back = false; me.bench = b; me.vx = me.vy = 0;
+  say(me, pick(['Ngồi nghỉ chân một chút.', 'Gió mát quá.', 'Ngắm chùa thật yên bình.', 'Nghe chim hót kìa.']), 3);
+  renderActions(true);
+}
+function standUp() {
+  if (mode === 'listen') { leaveListen(); return; }
+  if (mode !== 'rest') return;
+  mode = 'free'; me.pose = 'stand'; me.front = true;
+  if (me.bench) { me.y = me.bench[1] + 20; me.bench = null; }
+  renderActions(true);
+}
+function leaveListen() { mode = 'free'; me.pose = 'stand'; renderActions(true); } // LECTURE_STUB
 function goDoor(d) { me.pending = null; walkPath(d.ap.x, d.ap.y, null); }
 // chuyển cảnh: tối dần, đổi cảnh, sáng dần
 function useDoor(d) {
@@ -2114,17 +2284,21 @@ function update(dt) {
   }
   // di chuyển bằng phím (8 hướng)
   let dx = 0, dy = 0;
-  if ((mode === 'free' || mode === 'walking') && started && !sheetOpen() && !fade.dir) {
+  if ((mode === 'free' || mode === 'walking' || mode === 'rest' || mode === 'listen') && started && !sheetOpen() && !fade.dir) {
     if (keys.has('ArrowLeft') || keys.has('KeyA')) dx -= 1;
     if (keys.has('ArrowRight') || keys.has('KeyD')) dx += 1;
     if (keys.has('ArrowUp') || keys.has('KeyW')) dy -= 1;
     if (keys.has('ArrowDown') || keys.has('KeyS')) dy += 1;
   }
-  if (dx || dy) {
-    if (mode === 'walking') { mode = 'free'; me.path = null; me.onArrive = null; me.pending = null; }
-    const k = dx && dy ? Math.SQRT1_2 : 1, sp = 170;
-    const moved = stepMove(me, dx * sp * k * dt, dy * sp * k * dt);
-    faceDir(dx, dy); me.pose = 'walk'; me.ph += moved / 9;
+  if ((dx || dy) && (mode === 'rest' || mode === 'listen')) standUp();
+  if ((dx || dy) && mode === 'walking') { mode = 'free'; me.path = null; me.onArrive = null; me.pending = null; }
+  const kbd = (dx || dy) && mode === 'free';
+  { const kd = dx && dy ? Math.SQRT1_2 : 1, tvx = kbd ? dx * 170 * kd : 0, tvy = kbd ? dy * 170 * kd : 0, rate = Math.min(1, dt * (kbd ? 9 : 14));
+    me.vx += (tvx - me.vx) * rate; me.vy += (tvy - me.vy) * rate; }
+  if (mode === 'free' && Math.hypot(me.vx, me.vy) > 6) {
+    const moved = stepMove(me, me.vx * dt, me.vy * dt);
+    if (kbd) faceDir(dx, dy); me.pose = 'walk'; me.ph += moved / 9;
+    if (moved < .15) { me.vx *= .5; me.vy *= .5; }
   } else if (me.path && mode === 'walking' && !fade.dir) {
     const t = me.path[0], ddx = t.x - me.x, ddy = t.y - me.y, dist = Math.hypot(ddx, ddy);
     if (dist < 3) {
@@ -2132,7 +2306,8 @@ function update(dt) {
       if (!me.path.length) { me.path = null; me.pose = 'stand'; mode = 'free'; const f = me.onArrive; me.onArrive = null; f && f(); renderActions(); }
     } else {
       const total = me.path.reduce((s, p, i) => s + Math.hypot(p.x - (i ? me.path[i - 1].x : me.x), p.y - (i ? me.path[i - 1].y : me.y)), 0);
-      const st = Math.min(dist, (total > 900 ? 280 : 170) * dt), moved = stepMove(me, ddx / dist * st, ddy / dist * st);
+      const want = (total > 900 ? 280 : 170) * clamp(total / 70, .45, 1); me.spd = lerp(me.spd || 0, want, Math.min(1, dt * 7));
+      const st = Math.min(dist, me.spd * dt), moved = stepMove(me, ddx / dist * st, ddy / dist * st);
       faceDir(ddx, ddy); me.pose = 'walk'; me.ph += moved / 9;
       me.stuck = moved < st * .1 ? (me.stuck || 0) + dt : 0;
       if (me.stuck > .5) {
@@ -2142,6 +2317,7 @@ function update(dt) {
       }
     }
   } else if (mode === 'free' && me.pose === 'walk') me.pose = 'stand';
+  if (me.pose === 'walk') { const up = Math.sin(me.ph) > 0; if (up !== me.stepUp) { me.stepUp = up; sndStep(); } }
   // bước qua cửa
   if ((mode === 'free' || mode === 'walking') && !fade.dir && started) for (const d of DOORS) if (d.from === me.scene && inRect(me.x, me.y, d.r)) { useDoor(d); break; }
   if (mode === 'busy') updateScript(dt);
@@ -2152,6 +2328,7 @@ function update(dt) {
     const ring = document.querySelector('#holdRing circle.p');
     if (ring) ring.style.strokeDashoffset = String(320 * (1 - bell.pull));
   }
+  if (mode === 'chant') { const t = T - me.strikeT; me.strike = t < .05 ? 0 : Math.min(.75, (t - .05) / .25 * .75); }
   if (mode === 'zen') updateZen(dt);
   updateXam(dt);
   for (const n of npcs) updateNpc(n, dt);
@@ -2160,7 +2337,7 @@ function update(dt) {
     const ddx = r.tx - r.x, ddy = r.ty - r.y, d = Math.hypot(ddx, ddy);
     r.walking = d > 1.5;
     r.x += ddx * Math.min(1, dt * 8); r.y += ddy * Math.min(1, dt * 8);
-    if (r.walking && r.pose === 'walk') { r.ph += dt * Math.min(d * 8, 280) / 9; if (Math.abs(ddx) > Math.abs(ddy) * .6) r.back = false; else r.back = ddy < 0; }
+    if (r.walking && r.pose === 'walk') { r.ph += dt * Math.min(d * 8, 280) / 9; if (Math.abs(ddx) > Math.abs(ddy) * .6) { r.back = false; r.front = false; } else { r.back = ddy < 0; r.front = ddy > 0; } }
     if (r.bowT != null) r.bow = lerp(r.bow || 0, r.bowT, Math.min(1, dt * 10));
   }
   for (let i = arcs.length - 1; i >= 0; i--) { const a = arcs[i]; a.t += dt; if (a.t >= a.dur) { arcs.splice(i, 1); a.fin && a.fin(); } }
@@ -2279,6 +2456,7 @@ function render() {
     };
     for (const h of HOT) {
       if (h.scene !== sc || h === nh || !inView(h.mx - 20, h.my - 20, h.mx + 20, h.my + 20)) continue;
+      if (!TASK_IDS.has(h.id) && h.id !== 'tea' && Math.hypot(me.x - h.x, me.y - h.y) > 260) continue;
       marker(h.mx, h.my, h.icon, S.today.done.includes(h.id) || (h.id === 'altar' && S.today.done.includes('pray')));
     }
     for (const d of DOORS) {
@@ -2350,7 +2528,7 @@ function sceneLights() {
     const sh = toMap('shop', 1090, 420); L.push([sh.x, sh.y, 110, .8]);
     const st = toMap('stupa', STUPA_X, 300); L.push([st.x, st.y, 130, .55]);
     L.push([1930, 1640, 110, .75], [640, 1300, 90, .5]);
-    if (incense.some(s => T - s.t0 < s.life)) { const c = toMap('censer', CENSER_X, GROUND - 110); L.push([c.x, c.y, 50, .6]); }
+    if (incense.some(s => T - s.t0 < s.life)) { const c = censerPt(CENSER_X, GROUND - 110); L.push([c.x, c.y, 50, .6]); }
     for (const l of lanterns) L.push([l.x, l.y - 12, 56, 1]);
   } else if (me.scene === 'hall') {
     L.push([500, 200, 330, .95], [170, 170, 150, .8], [830, 170, 150, .8], [420, 296, 80, 1], [580, 296, 80, 1], [500, 690, 170, (1 - P.night) * .9 + .1]);
@@ -2410,7 +2588,7 @@ function drawMini() {
   for (const [a, b, c2, d, col] of MINI_RECTS) { g.fillStyle = col; g.fillRect(a, b, c2 - a, d - b); }
   g.strokeStyle = '#8f4a31'; g.lineWidth = 22; g.strokeRect(160, 215, 2280, 1915);
   for (const h of HOT) {
-    if (h.scene !== 'out' && h.scene !== 'hall' && h.scene !== 'shop') continue;
+    if (!TASK_IDS.has(h.id)) continue;
     const p = h.scene === 'out' ? h : h.scene === 'hall' ? { x: 1300 + (h.x - 500) * .6, y: 900 } : { x: 560, y: 1815 };
     const ok = S.today.done.includes(h.id) || (h.id === 'altar' && S.today.done.includes('pray'));
     g.fillStyle = ok ? '#3fbf7f' : '#ffd23f'; g.beginPath(); g.arc(p.x, p.y, 34, 0, TAU); g.fill();
@@ -2473,6 +2651,9 @@ function renderActions(force) {
       </div>`;
     $('moBtn').onpointerdown = e => { e.preventDefault(); hitMo(); };
     $('chantDone').onclick = endChant;
+  } else if (mode === 'rest') {
+    box.innerHTML = `<div class="hint">Đang ngồi nghỉ trên ghế đá · đi tiếp bằng phím di chuyển hoặc chạm vào cảnh</div><div class="act-row"><button class="act ghost" id="standBtn">🚶 Đứng dậy</button></div>`;
+    $('standBtn').onclick = standUp;
   } else if (mode === 'zen') {
     box.innerHTML = `<div class="act-row"><button class="act ghost" id="zenDone">Kết thúc thiền</button></div>`;
     $('zenDone').onclick = () => endZen(false);
@@ -2569,12 +2750,17 @@ function openIncense() {
   q('#goInc').onclick = () => {
     const wish = cleanText(q('#wishTxt').value, 120); closeSheet();
     me.heldN = n;
+    // cầm nhang hai tay → nâng lên trán → vái ba vái → hạ xuống → với tay cắm vào lư hương → vái một vái
+    me.x = 1252; me.y = 1460;
     runScript([
-      { d: .8, pose: 'hold', held: 'incense', back: true, at: () => { sndLight(); say(me, 'Nam mô A Di Đà Phật.', 3); } },
-      { d: 1.4, pose: 'hold', bow: bowCurve }, { d: 1.4, pose: 'hold', bow: bowCurve }, { d: 1.4, pose: 'hold', bow: bowCurve },
-      { d: .9, pose: 'reach', held: null, end: () => {
+      { d: .7, pose: 'hold', held: 'incense', dir: 1, back: false, front: false, raise: 0, at: () => sndLight() },
+      { d: .6, pose: 'hold', raise: k => k, at: () => say(me, 'Nam mô A Di Đà Phật.', 3) },
+      { d: 1.5, pose: 'hold', raise: 1, bow: bowCurve }, { d: 1.5, pose: 'hold', raise: 1, bow: bowCurve }, { d: 1.5, pose: 'hold', raise: 1, bow: bowCurve },
+      { d: .5, pose: 'hold', raise: k => 1 - k },
+      { d: 1.1, pose: 'reach', held: 'incense', reach: { x: 30, y: -76 } },
+      { d: .7, pose: 'bow', held: null, bow: bowCurve, at: () => {
         const x = CENSER_X + rnd(-20, 20); addIncense(n, x, 'me'); netSend({ t: 'ev', k: 'incense', n, x: Math.round(x) });
-        if (wish) { const c = toMap('censer', CENSER_X, GROUND - 120); motesFrom(c.x, c.y, c.x + 40, c.y - 420, 22); }
+        if (wish) { const c = censerPt(CENSER_X, GROUND - 120); motesFrom(c.x, c.y, c.x + 40, c.y - 420, 22); }
       } },
     ], () => { done('incense'); merit(3); if (wish) toast('✨ Lời nguyện theo khói hương bay lên.'); if (S.inv.includes('incense')) { S.inv = S.inv.filter(i => i !== 'incense'); save(); } });
   };
@@ -2615,15 +2801,14 @@ function openAltar() {
 // ── tụng niệm (gõ mõ) ──
 const CHANT = ['Nam', 'mô', 'A', 'Di', 'Đà', 'Phật'];
 const chant = { n: 0, lastT: 0, gaps: [] };
-function startChant() { initAudio(); mode = 'chant'; chant.n = 0; chant.gaps = []; me.pose = 'kneel'; me.dir = 1; renderActions(true); }
+function startChant() { initAudio(); mode = 'chant'; chant.n = 0; chant.gaps = []; me.x = 731; me.y = 404; me.pose = 'chant'; me.held = 'mallet'; me.dir = 1; me.back = me.front = false; me.tool = { x: 765 - 731, y: 381 - 404 }; me.strike = .75; me.strikeT = -9; renderActions(true); }
 function hitMo() {
   if (mode !== 'chant') return;
   initAudio(); sndMo(); netSend({ t: 'ev', k: 'mo' });
   const gap = T - chant.lastT; chant.lastT = T;
   if (gap < 2) chant.gaps.push(gap); if (chant.gaps.length > 6) chant.gaps.shift();
   const syl = CHANT[chant.n % 6]; chant.n++;
-  me.bow = .25; setTimeout(() => { if (mode === 'chant') me.bow = 0; }, 120);
-  me.pose = 'kneelbow';
+  me.strikeT = T;
   addFloat(me.x + rnd(-10, 30), me.y - 70, syl, '#fff3c4', 14);
   if (chant.n % 6 === 0) {
     const g = chant.gaps, avg = g.reduce((a, b) => a + b, 0) / (g.length || 1), dev = g.reduce((a, b) => a + Math.abs(b - avg), 0) / (g.length || 1);
@@ -2634,7 +2819,7 @@ function hitMo() {
   if (chant.n === 108) { toast('📿 108 tiếng mõ, tâm an như mặt hồ phẳng lặng.'); merit(5); }
   renderActions(true);
 }
-function endChant() { mode = 'free'; me.pose = 'stand'; me.bow = 0; if (chant.n >= 6 && chant.n < 18) toast('Niệm thêm vài câu nữa (18 tiếng mõ) để hoàn thành nhé.'); renderActions(true); }
+function endChant() { mode = 'free'; me.pose = 'stand'; me.bow = 0; me.held = null; if (chant.n >= 6 && chant.n < 18) toast('Niệm thêm vài câu nữa (18 tiếng mõ) để hoàn thành nhé.'); renderActions(true); }
 
 // ── xin xăm ──
 const XAM = [
@@ -3096,7 +3281,7 @@ function parseCode(s) {
 }
 const myLook = () => ({ r: S.robe, h: S.hair });
 const validLook = l => lookOf(Number.isInteger(l && l.r) ? clamp(l.r, 0, ROBES.length - 1) : 0, Number.isInteger(l && l.h) ? clamp(l.h, 0, 2) : 0);
-const POSES = new Set(['stand', 'walk', 'bow', 'hold', 'kneel', 'kneelbow', 'sit', 'pull', 'reach']);
+const POSES = new Set(['stand', 'walk', 'bow', 'hold', 'kneel', 'kneelbow', 'sit', 'pull', 'reach', 'bench', 'chant', 'pick', 'water', 'sweep']);
 const num = (v, a, b, d = 0) => (typeof v === 'number' && isFinite(v) ? clamp(v, a, b) : d);
 
 function netSend(msg) {
@@ -3105,7 +3290,7 @@ function netSend(msg) {
   else if (net.conn && net.conn.open) try { net.conn.send(msg); } catch (e) {}
 }
 function broadcast(msg, except) { for (const c of net.conns.keys()) if (c !== except && c.open) try { c.send(msg); } catch (e) {} }
-function stOf(p) { return [p.x | 0, p.dir < 0 ? -1 : 1, POSES.has(p.pose) ? p.pose : 'stand', +(p.bow || 0).toFixed(2), p.y | 0, SCENE_IDS.indexOf(p.scene), p.back ? 1 : 0]; }
+function stOf(p) { return [p.x | 0, p.dir < 0 ? -1 : 1, POSES.has(p.pose) ? p.pose : 'stand', +(p.bow || 0).toFixed(2), p.y | 0, SCENE_IDS.indexOf(p.scene), p.back ? 1 : p.front ? 2 : 0]; }
 function netTick(dt) {
   if (!net.on) return;
   net.sendT -= dt;
@@ -3116,7 +3301,7 @@ function netTick(dt) {
     const tnow = performance.now();
     for (const [c, id] of net.conns) { const r = remotes.get(id); if (r && tnow - r.seen > 8000) { c._lost && c._lost(); try { c.close(); } catch (e) {} } }
     const l = [['h', ...stOf(me)]];
-    for (const [id, r] of remotes) l.push([id, r.tx | 0, r.dir, r.pose, +(r.bowT || 0).toFixed(2), r.ty | 0, SCENE_IDS.indexOf(r.scene), r.back ? 1 : 0]);
+    for (const [id, r] of remotes) l.push([id, r.tx | 0, r.dir, r.pose, +(r.bowT || 0).toFixed(2), r.ty | 0, SCENE_IDS.indexOf(r.scene), r.back ? 1 : r.front ? 2 : 0]);
     broadcast({ t: 'ps', l });
   } else if (net.conn && net.conn.open) {
     const st = stOf(me), sig = st.join(',');
@@ -3140,7 +3325,7 @@ function addRemote(id, name, look, x) {
 function applySt(r, s) {
   if (!r || !Array.isArray(s)) return;
   r.tx = num(s[0], 0, 2600, r.tx); r.dir = s[1] < 0 ? -1 : 1; r.pose = POSES.has(s[2]) ? s[2] : 'stand'; r.bowT = num(s[3], 0, 1); r.ty = num(s[4], 0, 2400, r.ty);
-  r.scene = SCENE_IDS[s[5]] || 'out'; if (r.pose !== 'walk') r.back = !!s[6];
+  r.scene = SCENE_IDS[s[5]] || 'out'; if (r.pose !== 'walk') { r.back = s[6] === 1; r.front = s[6] === 2; }
   if (r.pose === 'hold') { r.held = 'incense'; r.heldN = 3; } else r.held = null;
 }
 // áp dụng sự kiện từ người khác
@@ -3333,6 +3518,7 @@ cv.addEventListener('pointerdown', e => {
   if (!started || sheetOpen()) return;
   if (mode === 'bell') { pullStart(); cv.setPointerCapture(e.pointerId); return; }
   if (mode === 'chant') { hitMo(); return; }
+  if (mode === 'rest') standUp();
   if (mode !== 'free' && mode !== 'walking') return;
   const w = toWorld(e);
   for (const h of HOT) if (h.scene === me.scene && Math.hypot(w.x - h.mx, w.y - h.my) < 26) { goHot(h); return; }
@@ -3373,7 +3559,7 @@ window.addEventListener('keydown', e => {
     else if (mode === 'free') { const h = nearHot(); if (h) goHot(h); }
   }
   else if (e.code === 'KeyE' || e.code === 'Enter') { if (mode === 'free') { const h = nearHot(); if (h) goHot(h); } }
-  else if (e.code === 'Escape') { if (mode === 'bell') endBell(); else if (mode === 'chant') endChant(); else if (mode === 'zen') endZen(false); }
+  else if (e.code === 'Escape') { if (mode === 'rest' || mode === 'listen') standUp(); else if (mode === 'bell') endBell(); else if (mode === 'chant') endChant(); else if (mode === 'zen') endZen(false); }
   else if (e.code === 'KeyJ') openJourney();
   else if (e.code === 'KeyN') cycleTod();
   else if (e.code === 'KeyM') setSound(!AU.on);
