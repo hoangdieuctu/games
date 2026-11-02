@@ -246,6 +246,37 @@ html, body {
 }
 .card-play::before { content: '▶'; font-size: 8px; }
 
+
+/* ══ thẻ game kiểu mới: ảnh lớn, tên, nhãn thể loại, huy hiệu chế độ chơi ══ */
+.grid { grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 20px; max-width: 1180px; }
+.card { border-radius: 18px; border: 1px solid rgba(255,255,255,.07); background: linear-gradient(180deg, #120a22, #0a0614); box-shadow: 0 6px 22px rgba(0,0,0,.45); }
+.card:hover { transform: translateY(-6px); border-color: rgba(255,215,0,.55); box-shadow: 0 16px 44px rgba(255,190,60,.16), 0 4px 14px rgba(0,0,0,.6); }
+.card-thumb { aspect-ratio: 4 / 3; border-bottom: 0; }
+.card-thumb > svg:not(.card-thumb-ring), .card-thumb-icon { transition: transform .35s cubic-bezier(.2,.8,.3,1.2), filter .2s; }
+.card:hover .card-thumb > svg:not(.card-thumb-ring) { transform: scale(1.12) rotate(-2deg); }
+.card-thumb::after { content: ''; position: absolute; inset: auto 0 0 0; height: 45%; background: linear-gradient(180deg, transparent, rgba(10,6,20,.85)); pointer-events: none; }
+.card-mode {
+  position: absolute; top: 10px; left: 10px; z-index: 2; display: inline-flex; align-items: center; gap: 5px;
+  font: 800 10.5px 'Nunito', sans-serif; letter-spacing: .06em; text-transform: uppercase; color: #fff;
+  padding: 5px 9px; border-radius: 999px; background: rgba(10,6,20,.55); border: 1px solid rgba(255,255,255,.18);
+  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+}
+.card-mode.online { color: #9ff0c8; border-color: rgba(120,230,170,.45); }
+.card-mode.offline { color: #cfc4ff; border-color: rgba(190,170,255,.35); }
+.card-body { padding: 0 16px 16px; margin-top: -26px; position: relative; z-index: 2; gap: 10px; }
+.card-title { font-size: 18px; font-weight: 900; color: #fff3d6; text-shadow: 0 2px 8px rgba(0,0,0,.6); margin: 0; order: 1; }
+.card-tag { order: 2; margin: 0; gap: 5px; }
+.card-tag span { font-size: 10.5px; padding: 4px 9px; color: #e8dcff; background: rgba(255,255,255,.07); border-color: rgba(255,255,255,.14); }
+.card-footer { order: 3; margin-top: 4px; justify-content: stretch; }
+.card-play {
+  flex: 1; justify-content: center; gap: 8px; padding: 10px 14px; border-radius: 12px; border: 0;
+  font: 900 12.5px 'Nunito', sans-serif; letter-spacing: .08em; color: #2a1606;
+  background: linear-gradient(180deg, #ffe08a, #e0a22a); box-shadow: 0 4px 14px rgba(224,162,42,.25), inset 0 1px 0 rgba(255,255,255,.5);
+}
+.card:hover .card-play { box-shadow: 0 6px 22px rgba(255,200,80,.45), inset 0 1px 0 rgba(255,255,255,.5); }
+.card-play::before { content: '▶'; font-size: 10px; }
+@media (max-width: 520px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; padding: 0 12px 80px; } .card-title { font-size: 15px; } .card-tag span { font-size: 9.5px; padding: 3px 7px; } .card-body { padding: 0 11px 12px; } .card-play { padding: 8px 10px; font-size: 11px; } .card-thumb > svg:not(.card-thumb-ring) { width: 70px; height: 70px; } }
+
 /* ── coming soon card ── */
 .card.card--soon {
   opacity: .38; pointer-events: none;
@@ -311,7 +342,6 @@ footer {
     <div class="card-body">
       <div class="card-tag">Tower Defense · Hành Động</div>
       <h2 class="card-title">Sinh Tử Môn</h2>
-      <p class="card-desc">Bảo vệ Cửa Thiêng trước 30 đợt quái tấn công. Nâng cấp vũ khí, mở khoá Dấu Ấn Huyền Thoại và trụ vững đến đợt cuối.</p>
       <div class="card-footer">
         <span class="card-meta">30 đợt · 6 vũ khí · 5 loại quái</span>
         <span class="card-play">Chơi Ngay</span>
@@ -331,7 +361,6 @@ footer {
     <div class="card-body">
       <div class="card-tag">Giáo Dục · Trẻ Em</div>
       <h2 class="card-title">Học Đếm Số</h2>
-      <p class="card-desc">Bé nhận biết và tìm đúng con số từ 1 đến 10. Màu sắc tươi vui, có tiếng khen thưởng, hợp với bé 2–4 tuổi.</p>
       <div class="card-footer">
         <span class="card-meta">Số 1–10 · Tiếng Việt · 2–4 tuổi</span>
         <span class="card-play">Chơi Ngay</span>
@@ -351,7 +380,6 @@ footer {
     <div class="card-body">
       <div class="card-tag">Trí Nhớ · Trẻ Em</div>
       <h2 class="card-title">Ghép Đôi</h2>
-      <p class="card-desc">Lật bài tìm 6 cặp giống nhau qua 4 chủ đề: Động Vật, Trái Cây, Màu & Hình, Hỗn Hợp. Trò chơi nhẹ nhàng giúp bé rèn trí nhớ.</p>
       <div class="card-footer">
         <span class="card-meta">6 cặp · 4 chủ đề · 2–5 tuổi</span>
         <span class="card-play">Chơi Ngay</span>
@@ -371,7 +399,6 @@ footer {
     <div class="card-body">
       <div class="card-tag">Giáo Dục · Thiên Nhiên</div>
       <h2 class="card-title">100 Động Vật</h2>
-      <p class="card-desc">Khám phá 100 loài động vật thuộc 8 nhóm bằng ảnh thật. Bấm vào từng con để xem tên và thông tin thú vị.</p>
       <div class="card-footer">
         <span class="card-meta">100 loài · 8 nhóm · Tiếng Việt</span>
         <span class="card-play">Khám Phá</span>
@@ -391,7 +418,6 @@ footer {
     <div class="card-body">
       <div class="card-tag">Tập Nói · Trẻ Em</div>
       <h2 class="card-title">Bé Yêu Hổ</h2>
-      <p class="card-desc">Bé tập nói “Tiger” cùng 39 ảnh hổ thật. Có xem ảnh, ú òa, tìm hổ, gọi hổ dậy bằng micro, cho hổ ăn và bắn bong bóng.</p>
       <div class="card-footer">
         <span class="card-meta">6 trò · Ảnh thật · 2–4 tuổi</span>
         <span class="card-play">Chơi Ngay</span>
@@ -411,7 +437,6 @@ footer {
     <div class="card-body">
       <div class="card-tag">Tập Nói · Trẻ Em</div>
       <h2 class="card-title">Úm Ba La!</h2>
-      <p class="card-desc">Chạm vào mũ phép thuật, “Abracadabra!” là một ảnh thật bật ra kèm giọng đọc tên tiếng Anh. Có 91 ảnh thuộc 6 chủ đề.</p>
       <div class="card-footer">
         <span class="card-meta">91 ảnh · Tiếng Anh · 2–4 tuổi</span>
         <span class="card-play">Làm Phép</span>
@@ -431,7 +456,6 @@ footer {
     <div class="card-body">
       <div class="card-tag">Giáo Dục · Địa Lý</div>
       <h2 class="card-title">Cờ Các Nước</h2>
-      <p class="card-desc">Khám phá cờ của các quốc gia trên 6 châu lục. Bấm vào từng nước để xem thủ đô, dân số và điều thú vị.</p>
       <div class="card-footer">
         <span class="card-meta">50+ quốc gia · 6 châu lục · Tiếng Việt</span>
         <span class="card-play">Khám Phá</span>
@@ -451,7 +475,6 @@ footer {
     <div class="card-body">
       <div class="card-tag">Giải Đố · Chiến Thuật</div>
       <h2 class="card-title">Jewel Pop</h2>
-      <p class="card-desc">Chạm vào nhóm từ 2 viên đá quý cùng màu để nổ tung, nhóm càng lớn điểm càng cao. Dùng Bom và Sét để vượt qua màn khó.</p>
       <div class="card-footer">
         <span class="card-meta">N² điểm · 6 màu · Bom & Sét</span>
         <span class="card-play">Chơi Ngay</span>
@@ -471,7 +494,6 @@ footer {
     <div class="card-body">
       <div class="card-tag">Trí Tuệ · Kết Nối</div>
       <h2 class="card-title">Nối Hình Pikachu</h2>
-      <p class="card-desc">Tìm và nối các cặp hình giống nhau bằng đường thẳng. Bắt đầu dễ với 6 cặp, rồi khó dần qua 6 vòng.</p>
       <div class="card-footer">
         <span class="card-meta">6 vòng · 12 chủ đề · Từ dễ đến khó</span>
         <span class="card-play">Chơi Ngay</span>
@@ -504,7 +526,6 @@ footer {
     <div class="card-body">
       <div class="card-tag">Classic · Xếp Hình</div>
       <h2 class="card-title">Tetris</h2>
-      <p class="card-desc">Tetris cổ điển với tông màu gỗ ấm áp, tốc độ tăng dần theo cấp. Có giữ khối, bóng khối, combo và hiệu ứng vỡ gỗ đẹp mắt.</p>
       <div class="card-footer">
         <span class="card-meta">30 cấp · Classic · Âm thanh</span>
         <span class="card-play">Chơi Ngay</span>
@@ -550,7 +571,6 @@ footer {
     <div class="card-body">
       <div class="card-tag">Cảm Ứng · Trẻ Em</div>
       <h2 class="card-title">Bong Bóng Vui</h2>
-      <p class="card-desc">Bong bóng nhiều màu bay khắp màn hình, chạm hoặc vuốt để nổ tung thành tia nước rực rỡ. Thỉnh thoảng có bong bóng cầu vồng và bong bóng ngôi sao bất ngờ.</p>
       <div class="card-footer">
         <span class="card-meta">Đa chạm · Toàn màn hình · Khóa cho bé</span>
         <span class="card-play">Chơi Ngay</span>
@@ -590,7 +610,6 @@ footer {
     <div class="card-body">
       <div class="card-tag">Thư Giãn · Trẻ Em</div>
       <h2 class="card-title">Bể Cá</h2>
-      <p class="card-desc">Bể biển hoạt hình với cá, sứa, rùa, cua, bạch tuộc mắt to má hồng; rắc thức ăn để chúng lớn dần, lấp lánh và đội vương miện. Cá biết trốn, ngủ, sinh em bé, bể đổi cảnh ngày đêm mỗi phút.</p>
       <div class="card-footer">
         <span class="card-meta">11 loài · Lớn &amp; lấp lánh · Trốn, ngủ, sinh con · 9 cảnh</span>
         <span class="card-play">Vào Bể</span>
@@ -627,7 +646,6 @@ footer {
     <div class="card-body">
       <div class="card-tag">Xếp Hình · Trí Tuệ</div>
       <h2 class="card-title">Sắp Xếp Sắc Màu 3D</h2>
-      <p class="card-desc">Rót bóng qua lại giữa các ống thuỷ tinh sao cho mỗi ống chỉ còn một màu. Vòng sau khó hơn vòng trước, có ống thêm, đũa thần và gợi ý khi bí.</p>
       <div class="card-footer">
         <span class="card-meta">Vô tận · 11 màu · Vật phẩm · iPad</span>
         <span class="card-play">Xếp Ngay</span>
@@ -661,7 +679,6 @@ footer {
     <div class="card-body">
       <div class="card-tag">Mô Phỏng · Thư Giãn</div>
       <h2 class="card-title">Hồ Cá Thư Giãn</h2>
-      <p class="card-desc">Thiết kế và chăm sóc hồ cá theo thời gian thực: lọc nước, cho ăn, dọn hồ, chữa bệnh. Lai tạo các loài để khám phá 11 giống cá hiếm.</p>
       <div class="card-footer">
         <span class="card-meta">Thời gian thực · 28 loài · 6 hồ</span>
         <span class="card-play">Chơi Ngay</span>
@@ -693,7 +710,6 @@ footer {
     <div class="card-body">
       <div class="card-tag">Quan Sát · Trí Tuệ</div>
       <h2 class="card-title">Tìm Điểm Khác Nhau</h2>
-      <p class="card-desc">Chạm vào chỗ khác nhau giữa hai bức tranh để kiếm vàng qua 100 vòng với bốn chủ đề. Càng lên cao càng khó, bí thì dùng vàng mua gợi ý.</p>
       <div class="card-footer">
         <span class="card-meta">100 vòng · 4 chủ đề · Tiền vàng &amp; gợi ý · iPad</span>
         <span class="card-play">Soi Ngay</span>
@@ -727,7 +743,6 @@ footer {
     <div class="card-body">
       <div class="card-tag">Suy Luận · Trẻ Em</div>
       <h2 class="card-title">Đong Nước</h2>
-      <p class="card-desc">Dùng vài thùng nước dung tích khác nhau để đong đúng số lít bạn nhỏ cần bằng cách đổ đầy, đổ bỏ, đổ qua lại. Có 100 vòng khó dần, có gợi ý và tự lưu để chơi tiếp.</p>
       <div class="card-footer">
         <span class="card-meta">100 vòng · 2–4 thùng · Gợi ý · Tự lưu</span>
         <span class="card-play">Đong Ngay</span>
@@ -762,7 +777,6 @@ footer {
     <div class="card-body">
       <div class="card-tag">Xây Dựng · Gia Đình</div>
       <h2 class="card-title">Nhà Mới Của Chúng Ta</h2>
-      <p class="card-desc">Cả nhà cùng đến vùng đất hoang, thu thập vật liệu và dựng lửa trại, kho, nhà, ruộng. Không đánh nhau, không thua, thế giới lớn dần và tự lưu để chơi tiếp.</p>
       <div class="card-footer">
         <span class="card-meta">2–4 người · Chơi online qua link · Chơi một mình cũng được · iPad</span>
         <span class="card-play">Về Nhà Thôi</span>
@@ -790,7 +804,6 @@ footer {
     <div class="card-body">
       <div class="card-tag">Suy Luận · Hành Động</div>
       <h2 class="card-title">Kẻ Giả Mạo</h2>
-      <p class="card-desc">Phi thuyền 14 phòng với ống thông gió và 7 kiểu nhiệm vụ mini, chơi cùng 4–9 máy. Làm phi hành gia tìm kẻ giả mạo, hoặc làm kẻ giả mạo giết lén, phá hoại rồi qua mặt cuộc họp bỏ phiếu.</p>
       <div class="card-footer">
         <span class="card-meta">Chơi một mình với 4–9 máy · Cần ảo trên điện thoại · 1–2 kẻ giả mạo</span>
         <span class="card-play">Chơi Ngay</span>
@@ -817,7 +830,6 @@ footer {
     <div class="card-body">
       <div class="card-tag">Suy Luận · Online · Voice Chat</div>
       <h2 class="card-title">Kẻ Giả Mạo Online</h2>
-      <p class="card-desc">Phi thuyền Kẻ Giả Mạo chơi cùng bạn bè qua mã phòng, có voice chat theo khoảng cách và hồn ma nói chuyện riêng. Ghế trống có máy chơi thay, ai rớt mạng thì máy đánh hộ tới khi vào lại.</p>
       <div class="card-footer">
         <span class="card-meta">2–10 người · Chơi online qua link · Voice chat 🎤 · Phím tắt hiện trên nút</span>
         <span class="card-play">Chơi Ngay</span>
@@ -847,7 +859,6 @@ footer {
     <div class="card-body">
       <div class="card-tag">Bài · Chiến Thuật</div>
       <h2 class="card-title">Exploding Kittens</h2>
-      <p class="card-desc">Mèo Nổ bản hiện đại: rút bài sao cho đừng trúng mèo, dùng Defuse, Attack, Skip, Nope và combo mèo để thoát thân. Có bản mở rộng Imploding Kittens, mỗi lá đều có hình và giải thích tiếng Việt.</p>
       <div class="card-footer">
         <span class="card-meta">2–5 người · Có máy chơi cùng · Bản mở rộng</span>
         <span class="card-play">Rút Bài</span>
@@ -879,7 +890,6 @@ footer {
     <div class="card-body">
       <div class="card-tag">Chiến Thuật · Hai Người</div>
       <h2 class="card-title">Hải Chiến</h2>
-      <p class="card-desc">Trò bắn tàu kinh điển: kéo thả 5 chiến hạm rồi thay phiên khai hoả, đoán xem hạm đội địch nấp ở đâu. Đấu với máy 3 mức hoặc mời bạn bè vào phòng chơi online.</p>
       <div class="card-footer">
         <span class="card-meta">Biển 10 × 10 · 3 mức độ · Chơi online qua link</span>
         <span class="card-play">Khai Hoả</span>
@@ -908,7 +918,6 @@ footer {
     <div class="card-body">
       <div class="card-tag">Cờ · Trí Tuệ</div>
       <h2 class="card-title">Cờ Caro</h2>
-      <p class="card-desc">Xếp năm quân liền nhau để thắng trên bàn 30 × 30, máy mức Khó biết ép thắng và chặn bẫy. Có gợi ý, đi lại và tự lưu ván đang chơi dở.</p>
       <div class="card-footer">
         <span class="card-meta">Bàn 30 × 30 · 3 mức độ · Gợi ý &amp; đi lại</span>
         <span class="card-play">Chơi Ngay</span>
@@ -940,7 +949,6 @@ footer {
     <div class="card-body">
       <div class="card-tag">Cờ · Nhiều Người</div>
       <h2 class="card-title">Cờ Cá Ngựa</h2>
-      <p class="card-desc">Tung hai xúc xắc 3D đưa bốn chú ngựa đi hết vòng lên đích, đá ngựa đối thủ về chuồng. Chơi với máy, chung một máy, hoặc tạo phòng online mời 1–3 bạn.</p>
       <div class="card-footer">
         <span class="card-meta">2–4 người · Chơi online qua link · Có máy chơi cùng</span>
         <span class="card-play">Chơi Ngay</span>
@@ -977,7 +985,6 @@ footer {
     <div class="card-body">
       <div class="card-tag">Cờ · Nhiều Người</div>
       <h2 class="card-title">Cờ Tỷ Phú</h2>
-      <p class="card-desc">Cờ tỷ phú với 32 ô địa danh Việt Nam: mua đất, xây lên Biểu tượng, thu phí và mua lại đất đối thủ. Chọn nhân vật chibi có kỹ năng riêng, thắng bằng phá sản đối thủ hoặc gom đủ nhóm màu, một hàng, điểm du lịch.</p>
       <div class="card-footer">
         <span class="card-meta">2–4 người · 10 nhân vật · Chơi online qua link · Có máy chơi cùng</span>
         <span class="card-play">Chơi Ngay</span>
@@ -1016,7 +1023,6 @@ footer {
     <div class="card-body">
       <div class="card-tag">Cờ · Nhiều Người · Lục Giác</div>
       <h2 class="card-title">Cờ Tỷ Phú Lục Giác</h2>
-      <p class="card-desc">Cờ Tỷ Phú trên bàn lục giác 42 ô với 24 thành phố, 6 điểm du lịch, ô Cần Cẩu nâng giá đất và thẻ Rào chắn chặn đường. Tới 6 người chơi chung một máy hoặc online qua link, máy chơi thay ghế trống.</p>
       <div class="card-footer">
         <span class="card-meta">2–6 người · Bàn lục giác 42 ô · Chơi online qua link · Có máy chơi cùng</span>
         <span class="card-play">Chơi Ngay</span>
@@ -1046,7 +1052,6 @@ footer {
     <div class="card-body">
       <div class="card-tag">Bài · Nhiều Người</div>
       <h2 class="card-title">Xì Tố</h2>
-      <p class="card-desc">Poker Texas Hold’em đầy đủ: 2 lá tẩy, 5 lá chung, tiền mù, tố, theo, tất tay và tụ phụ. Chơi với 1–5 máy hoặc tạo phòng online mời bạn bè.</p>
       <div class="card-footer">
         <span class="card-meta">2–6 người · Chơi online qua link · Có máy chơi cùng</span>
         <span class="card-play">Chơi Ngay</span>
@@ -1075,7 +1080,6 @@ footer {
     <div class="card-body">
       <div class="card-tag">Đua Xe · Nhiều Người</div>
       <h2 class="card-title">Đua Xe Gà</h2>
-      <p class="card-desc">Đua xe gà góc nhìn sau xe trên đường đua giả 3D: chạm trái phải để lái, nhặt bắp tăng tốc, lao qua bệ phóng và tránh ổ gà. Đua với gà máy hoặc mời bạn bè, về đích có bục vinh quang.</p>
       <div class="card-footer">
         <span class="card-meta">Tối đa 10 người · Chơi online qua link · Có gà máy chạy cùng</span>
         <span class="card-play">Đua Ngay</span>
@@ -1104,7 +1108,6 @@ footer {
     <div class="card-body">
       <div class="card-tag">Gõ Phím · Nhiều Người</div>
       <h2 class="card-title">Đua Xe Gõ Chữ</h2>
-      <p class="card-desc">Gõ chữ thật nhanh để xe chạy về đích, bằng tiếng Việt hoặc tiếng Anh. Chọn nhân vật, kiểu xe, màu sắc và đua cùng bạn bè, cuối cuộc đua có pháo giấy và bảng xếp hạng.</p>
       <div class="card-footer">
         <span class="card-meta">Không giới hạn người · Chơi online qua link · Có xe máy chạy cùng</span>
         <span class="card-play">Đua Ngay</span>
@@ -1140,7 +1143,6 @@ footer {
     <div class="card-body">
       <div class="card-tag">Tâm Linh · Online · Thư Giãn</div>
       <h2 class="card-title">Đi Chùa Online</h2>
-      <p class="card-desc">Dạo Chùa An Nhiên trong thế giới mở: qua cổng tam quan, sân lư hương, gác chuông, hồ sen, cây bồ đề, vào chính điện và vườn tháp. Sắm lễ, thỉnh chuông, thắp hương, xin xăm, thả hoa đăng một mình hoặc cùng người thân qua phòng online.</p>
       <div class="card-footer">
         <span class="card-meta">1–12 người · Chơi online qua link · Âm thanh chuông, mõ, sáo thiền 🔔</span>
         <span class="card-play">Vào Chùa</span>
@@ -1170,7 +1172,6 @@ footer {
     <div class="card-body">
       <div class="card-tag">Bài · Nhiều Người</div>
       <h2 class="card-title">Tiến Lên Miền Nam</h2>
-      <p class="card-desc">Đánh bài tiến lên 13 lá với sảnh, đôi thông, tứ quý chặt heo, cóng, thối heo, tới trắng. Có gợi ý nước đi, tính điểm nhiều ván, chơi với 1–3 máy hoặc online cùng bạn bè.</p>
       <div class="card-footer">
         <span class="card-meta">2–4 người · Chơi online qua link · Có máy chơi cùng</span>
         <span class="card-play">Chơi Ngay</span>
@@ -1240,6 +1241,13 @@ for (const t of document.querySelectorAll('.card-tag')) {
   [...t.children].forEach((sp, i) => { sp.textContent = parts[i]; });
 }
 const catOf = c => (c.dataset.cat || '').split(/\s+/).filter(Boolean);
+// huy hiệu chế độ chơi góc trên ảnh
+for (const c of document.querySelectorAll('#game-grid .card')) {
+  const th = c.querySelector('.card-thumb'); if (!th || th.querySelector('.card-mode')) continue;
+  const on = catOf(c).includes('online'), b = document.createElement('span');
+  b.className = 'card-mode ' + (on ? 'online' : 'offline'); b.textContent = on ? '🌐 Online' : '📴 Offline';
+  th.appendChild(b);
+}
 const filters = document.getElementById('filters');
 let empty = null;
 function applyFilter(key) {
