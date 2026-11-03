@@ -1841,6 +1841,8 @@ function drawPerson(g, o) {
   const k = o.scale || 1;
   g.save(); g.translate(o.x, o.y); g.scale(k, k);
   g.fillStyle = 'rgba(30,15,5,.22)'; g.beginPath(); g.ellipse(0, 1, (o.pose === 'sit' || o.pose === 'kneel' || o.pose === 'kneelbow') ? 17 : 13, 3.6, 0, 0, TAU); g.fill();
+  // nhân vật 3D chibi (chibi3d.js); không có WebGL thì vẽ 2D như cũ
+  if (window.Chibi3D && Chibi3D.ready && Chibi3D.draw(g, o)) { g.restore(); return; }
   if (o.back || o.front) personFB(g, o, !!o.back); else personSide(g, o);
   g.restore();
 }
@@ -3229,13 +3231,12 @@ function render() {
     for (const p of ROOM_PROPS[sc]) items.push({ y: p.base, room: p });
   }
   items.sort((a, b) => a.y - b.y);
+  for (const p of people) p.scale = p.bs ?? ageScale(p.look && p.look.age);
+  const tmpHeld = !me.held && (me.pose === 'walk' || me.pose === 'stand');
+  if (tmpHeld) me.held = me.can != null ? 'can' : me.carry ? 'trash' : null;
+  if (window.Chibi3D && Chibi3D.ready) Chibi3D.prepare(people, k); // vẽ trước nhân vật 3D vào atlas
   for (const it of items) {
-    if (it.p) {
-      const p = it.p; p.scale = p.bs ?? ageScale(p.look && p.look.age);
-      const tmp = p === me && !p.held && (p.pose === 'walk' || p.pose === 'stand');
-      if (tmp) p.held = me.can != null ? 'can' : me.carry ? 'trash' : null;
-      drawPerson(ctx, p); if (tmp) p.held = null;
-    }
+    if (it.p) drawPerson(ctx, it.p);
     else if (it.plant) drawPlant(it.plant);
     else if (it.prop) {
       const b = it.b, behind = it.prop.fadeable && me.scene === 'out' && me.x > b[0] + 6 && me.x < b[2] - 6 && me.y < b[3] - 4 && me.y - 80 < b[3] && me.y > b[1] + 20;
@@ -3247,6 +3248,7 @@ function render() {
       if (p.extra === 'altar') drawAltarOfferings(500, 315);
     }
   }
+  if (tmpHeld) me.held = null;
   for (const a of arcs) {
     const q = a.t / a.dur, x = lerp(a.x0, a.x1, q), y = lerp(a.y0, a.y1, q) - Math.sin(q * Math.PI) * 40;
     drawFish({ x, y, a: Math.atan2(a.y1 - a.y0, a.x1 - a.x0), tw: T * 10, type: a.type, col: a.type === 'gold' ? '#ffb22a' : '#ff7a2a', spot: true });
@@ -3354,7 +3356,7 @@ function bubble(x, y, text, a) {
 }
 function nameTag(p, col) {
   ctx.font = "700 11px 'Be Vietnam Pro', sans-serif"; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
-  const y = p.y - 84 * (p.scale || 1) - (p.pose === 'kneel' || p.pose === 'kneelbow' ? -14 : p.pose === 'sit' ? -20 : 0);
+  const y = p.y - (window.Chibi3D && Chibi3D.ready ? 70 : 84) * (p.scale || 1) - (p.pose === 'kneel' || p.pose === 'kneelbow' ? -14 : p.pose === 'sit' ? -20 : 0);
   const w = ctx.measureText(p.name).width + 12;
   ctx.fillStyle = 'rgba(30,12,4,.5)'; rr(ctx, p.x - w / 2, y - 15, w, 16, 8); ctx.fill();
   ctx.fillStyle = col || '#fff3d6'; ctx.fillText(p.name, p.x, y - 1.5);
@@ -4892,7 +4894,7 @@ function pvLoop(now) {
     g.fillStyle = '#f7c9d4'; g.beginPath(); g.ellipse(0, 1.2, 20, 4, 0, 0, TAU); g.fill();
     g.restore();
     g.save(); g.translate(W / 2, fy); g.scale(k, k);
-    drawPerson(g, { x: 0, y: 0, dir: 1, pose: bow > 0 ? 'bow' : 'stand', bow, front: true, look: lookOf(S.robe, S.hair, S.gender || 'f', age) });
+    drawPerson(g, { x: 0, y: 0, dir: 1, pose: bow > 0 ? 'bow' : 'stand', bow, front: true, yaw: Math.sin(now / 1000 * 1.1) * .6 * (1 - bow), look: lookOf(S.robe, S.hair, S.gender || 'f', age) });
     g.restore();
   }
   pvRaf = requestAnimationFrame(pvLoop);
@@ -5801,5 +5803,7 @@ buildIntro();
 updateHud();
 requestAnimationFrame(t => { last = t; requestAnimationFrame(frame); });
 </script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.149.0/build/three.min.js"></script>
+<script src="chibi3d.js"></script>
 </body>
 </html>
