@@ -1543,7 +1543,7 @@ function render() {
     const fw = Math.ceil(W * FOG_K), fh = Math.ceil(H * FOG_K);
     if (fogCv.width !== fw || fogCv.height !== fh) { fogCv.width = fw; fogCv.height = fh; }
     fg.setTransform(FOG_K, 0, 0, FOG_K, 0, 0); fg.globalCompositeOperation = 'source-over'; fg.clearRect(0, 0, W, H);
-    fg.fillStyle = dark ? 'rgba(3,5,12,.97)' : 'rgba(3,5,12,.45)'; fg.fillRect(0, 0, W, H); // chỗ khuất chỉ phủ mờ, mất điện mới tối hẳn
+    fg.fillStyle = dark ? 'rgba(3,5,12,.97)' : 'rgba(3,5,12,.58)'; fg.fillRect(0, 0, W, H); // chỗ khuất chỉ phủ mờ, mất điện mới tối hẳn
     fg.globalCompositeOperation = 'destination-out';
     fg.translate(ox, oy); fg.scale(zoom, zoom);
     const pts = visPoly(me.x, me.y, r), g = fg.createRadialGradient(me.x, me.y, r * (dark ? .62 : .88), me.x, me.y, r);
