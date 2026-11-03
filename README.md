@@ -6,6 +6,7 @@ Trang web tĩnh, chạy trên GitHub Pages. Mở `index.html` để vào trang c
 
 ```
 index.html        trang chủ
+icon.png          icon trang chủ khi thêm vào màn hình chính
 games/<tên>/      mỗi game một thư mục, mở bằng index.html
 shared/sounds/    âm thanh dùng chung
 tools/            bộ gộp mã nguồn
@@ -14,7 +15,8 @@ tools/            bộ gộp mã nguồn
 
 ## Thêm game mới
 
-1. Tạo `games/<tên>/index.html`.
+1. Tạo `games/<tên>/index.html` và `icon.png` (180×180), thêm
+   `<link rel="apple-touch-icon" href="icon.png">` để có icon trên iPad.
 2. Nút quay lại trỏ về `../../index.html`.
 3. Thêm thẻ game vào `index.html`.
 
