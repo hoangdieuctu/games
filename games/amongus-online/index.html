@@ -594,7 +594,7 @@ function pathTo(a, b) {
 }
 
 // ═══════════════════════════ trạng thái ván ═══════════════════════════
-const SPEED = 175, BOT_SPEED = 140, VIS_CREW = 380, VIS_IMP = 480, VIS_DARK = 130, IDLE_T = 90, KILL_RANGE = 72, KILL_CD = 25, SABO_CD = 30, REACTOR_T = 30, TASK_N = 5, USE_RANGE = 60;
+const SPEED = 175, BOT_SPEED = 140, VIS_CREW = 640, VIS_IMP = 720, VIS_DARK = 140, IDLE_T = 90, KILL_RANGE = 72, KILL_CD = 25, SABO_CD = 30, REACTOR_T = 30, TASK_N = 5, USE_RANGE = 60;
 let P = []; // người chơi: {id, name, ci, bot, imp, dead, x, y, ...}
 let me = null, bodies = [], phase = 'setup', tStart = 0, sabo = null, saboCd = 0, emergencyLeft = 1, meeting = null, hud = {}, cam = { x: 1000, y: 300 }, zoom = 1, mapOpen = false, winner = null;
 let muted = store.get('amongusol.mute', false);
@@ -1433,7 +1433,7 @@ function visPoly(cx, cy, r) {
   const pts = new Array(RAYS * 2);
   for (let k = 0; k < RAYS; k++) {
     const dx = RCOS[k], dy = RSIN[k]; let d = 0;
-    while (d < r) { d += 5; if (opaque(cx + dx * d, cy + dy * d)) { d += 12; break; } }
+    while (d < r) { d += 6; if (opaque(cx + dx * d, cy + dy * d)) { d += 12; break; } }
     d = Math.min(d, r); pts[k * 2] = cx + dx * d; pts[k * 2 + 1] = cy + dy * d;
   }
   return pts;
@@ -1531,10 +1531,10 @@ function render() {
     const r = visOf(me), dark = sabo && sabo.kind === 'lights' && !me.imp;
     if (fogCv.width !== cv.width || fogCv.height !== cv.height) { fogCv.width = cv.width; fogCv.height = cv.height; }
     fg.setTransform(d, 0, 0, d, 0, 0); fg.globalCompositeOperation = 'source-over'; fg.clearRect(0, 0, W, H);
-    fg.fillStyle = dark ? 'rgba(3,5,12,.97)' : 'rgba(3,5,12,.9)'; fg.fillRect(0, 0, W, H);
+    fg.fillStyle = dark ? 'rgba(3,5,12,.97)' : 'rgba(3,5,12,.7)'; fg.fillRect(0, 0, W, H); // chỗ khuất chỉ phủ mờ, mất điện mới tối hẳn
     fg.globalCompositeOperation = 'destination-out';
     fg.translate(ox, oy); fg.scale(zoom, zoom);
-    const pts = visPoly(me.x, me.y, r), g = fg.createRadialGradient(me.x, me.y, r * .62, me.x, me.y, r);
+    const pts = visPoly(me.x, me.y, r), g = fg.createRadialGradient(me.x, me.y, r * (dark ? .62 : .88), me.x, me.y, r);
     g.addColorStop(0, 'rgba(0,0,0,1)'); g.addColorStop(1, 'rgba(0,0,0,0)');
     fg.fillStyle = g; fg.beginPath(); fg.moveTo(pts[0], pts[1]); for (let k = 2; k < pts.length; k += 2) fg.lineTo(pts[k], pts[k + 1]); fg.closePath(); fg.fill();
     ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.drawImage(fogCv, 0, 0); ctx.setTransform(d, 0, 0, d, 0, 0);
