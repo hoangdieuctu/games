@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Không tìm thấy trang</title>
+<script>
+// Các game từng nằm ngay ở thư mục gốc (caro.html, tiger/…). Nay chúng ở games/<tên>/.
+// GitHub Pages trả trang này cho mọi đường dẫn không tồn tại, nên link cũ, dấu trang
+// và biểu tượng đã thêm vào màn hình chính được chuyển sang chỗ mới — giữ nguyên
+// ?… và #room=… để link mời vào phòng chơi cũ vẫn dùng được.
+(function () {
+  var FILES = ['amongus-online', 'amongus', 'animals', 'battleship', 'bubbles', 'cangua', 'caro',
+    'dichua', 'dongnuoc', 'duaxe', 'duaxega', 'fish', 'flags', 'gate-of-life', 'jewel', 'matching',
+    'meono', 'mole', 'numbers', 'pikachu', 'tetris', 'tienlen', 'typhu', 'typhu6', 'xito'];
+  var DIRS = ['aquarium', 'colorsort', 'newhome', 'princess', 'restaurant', 'spa', 'spot', 'tiger', 'umbala'];
+
+  var parts = location.pathname.split('/');
+  // Trang dự án trên github.io nằm dưới /<tên-repo>/; tên miền riêng thì nằm ngay ở gốc.
+  var baseLen = /\.github\.io$/.test(location.hostname) ? 2 : 1;
+  var base = parts.slice(0, baseLen).join('/') + '/';
+  var rest = parts.slice(baseLen);
+  var first = rest[0] || '';
+  var target = null;
+
+  var m = /^([a-z0-9-]+)\.html$/.exec(first);
+  if (m && FILES.indexOf(m[1]) >= 0 && rest.length === 1) {
+    target = base + 'games/' + m[1] + '/index.html';
+  } else if (DIRS.indexOf(first) >= 0) {
+    var sub = rest.slice(1).join('/');
+    target = base + 'games/' + first + '/' + (sub || 'index.html');
+  }
+  if (target) location.replace(target + location.search + location.hash);
+})();
+</script>
+<style>
+  :root { color-scheme: light dark; }
+  body { margin: 0; min-height: 100vh; display: grid; place-items: center; font-family: system-ui, sans-serif;
+         background: #fff7ec; color: #3a2a1a; text-align: center; padding: 16px; box-sizing: border-box; }
+  @media (prefers-color-scheme: dark) { body { background: #1d1813; color: #f3e6d6; } a { color: #ffb86b; } }
+  h1 { font-size: 22px; margin: 0 0 8px; }
+  a { color: #c25b00; font-weight: 600; }
+</style>
+</head>
+<body>
+  <div>
+    <h1>Không tìm thấy trang này</h1>
+    <p><a id="home" href="./">‹ Về kho trò chơi</a></p>
+  </div>
+<script>
+  // Trang 404 có thể được trả ở bất kỳ độ sâu nào — tính lại link về trang chủ.
+  (function () {
+    var n = /\.github\.io$/.test(location.hostname) ? 2 : 1;
+    document.getElementById('home').href = location.pathname.split('/').slice(0, n).join('/') + '/index.html';
+  })();
+</script>
+</body>
+</html>
