@@ -43,8 +43,10 @@ button:disabled { opacity: .35; cursor: default; }
 .tasks h3 { font-size: 12px; color: #ffd23f; margin-bottom: 2px; }
 .tasks div { display: flex; gap: 6px; align-items: baseline; } .tasks div.done { color: #7be495; text-decoration: line-through; opacity: .7; }
 .tasks div.hot { color: #ffe066; }
+.tasks div.idle { color: #8fe3ff; } .tasks div.idle.urgent { color: #ff6b6b; animation: blink 1s ease-in-out infinite; }
 .tasks small { color: rgba(255,255,255,.6); font-weight: 600; }
 .tasks.imp h3 { color: #ff6b6b; }
+.mmap { position: fixed; z-index: 5; top: calc(env(safe-area-inset-top, 0px) + 80px); right: calc(env(safe-area-inset-right, 0px) + 10px); width: 220px; height: 124px; max-width: 42vw; max-height: 24vw; background: rgba(5,8,20,.72); border: 1px solid rgba(143,227,255,.35); border-radius: 10px; box-shadow: 0 4px 14px rgba(0,0,0,.45); cursor: pointer; touch-action: none; }
 /* ── cảnh báo phá hoại ── */
 .alert { position: fixed; z-index: 7; top: calc(env(safe-area-inset-top, 0px) + 106px); left: 50%; transform: translateX(-50%); padding: 6px 16px; border-radius: 999px; background: rgba(200,20,20,.85); border: 2px solid #ffb3b3; font-weight: 800; font-size: 15px; white-space: nowrap; animation: blink 1s ease-in-out infinite; text-shadow: 0 1px 2px #000; }
 .alert.dark { background: rgba(40,40,60,.9); border-color: #ffd23f; animation: none; }
@@ -123,6 +125,7 @@ button:disabled { opacity: .35; cursor: default; }
 .prow canvas { width: 30px; height: 36px; flex: 0 0 auto; }
 .prow .nm { flex: 1; min-width: 0; font-weight: 800; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .prow .nm small { display: block; font-size: 11px; font-weight: 700; color: #9fb0c8; }
+.prow .vb.undo { background: #f59e0b; color: #2a1600; }
 .prow .vb { width: 34px; height: 34px; border-radius: 50%; background: #3ddc84; color: #05210f; font-weight: 900; font-size: 16px; flex: 0 0 auto; }
 .prow .ab { width: 34px; height: 34px; border-radius: 50%; background: rgba(255,255,255,.14); font-size: 16px; flex: 0 0 auto; }
 .prow .votes { position: absolute; left: 8px; bottom: -6px; display: flex; gap: 2px; }
@@ -314,6 +317,7 @@ button:disabled { opacity: .35; cursor: default; }
 </header>
 <div class="prog" id="prog" hidden><i></i><b>Nhiệm vụ 0%</b></div>
 <div class="tasks" id="tasks" hidden></div>
+<canvas class="mmap" id="mmap" hidden title="Bản đồ (M)"></canvas>
 <div class="alert" id="alert" hidden></div>
 <div class="vchip" id="vchip" hidden></div>
 <div class="joy" id="joy" hidden><i></i></div>
@@ -375,7 +379,7 @@ button:disabled { opacity: .35; cursor: default; }
     <div class="plist" id="mtList"></div>
     <div class="skip"><button id="mtSkip">⏭️ Bỏ phiếu trắng</button></div>
     <div class="chat" id="mtChat"></div>
-    <form class="say" id="mtSay" hidden><input id="mtSayIn" maxlength="80" placeholder="Nhắn cho cả phòng…" autocomplete="off" enterkeyhint="send"><button>Gửi</button></form>
+    <form class="say" id="mtSay" hidden><input id="mtSayIn" maxlength="80" placeholder="Nhắn cả phòng… (nhắc tên ai đó, họ sẽ trả lời)" autocomplete="off" enterkeyhint="send"><button>Gửi</button></form>
   </div>
 </div>
 
@@ -590,7 +594,7 @@ function pathTo(a, b) {
 }
 
 // ═══════════════════════════ trạng thái ván ═══════════════════════════
-const SPEED = 175, BOT_SPEED = 140, VIS_CREW = 280, VIS_IMP = 390, VIS_DARK = 100, KILL_RANGE = 72, KILL_CD = 25, SABO_CD = 30, REACTOR_T = 30, TASK_N = 5, USE_RANGE = 60;
+const SPEED = 175, BOT_SPEED = 140, VIS_CREW = 380, VIS_IMP = 480, VIS_DARK = 130, IDLE_T = 90, KILL_RANGE = 72, KILL_CD = 25, SABO_CD = 30, REACTOR_T = 30, TASK_N = 5, USE_RANGE = 60;
 let P = []; // người chơi: {id, name, ci, bot, imp, dead, x, y, ...}
 let me = null, bodies = [], phase = 'setup', tStart = 0, sabo = null, saboCd = 0, emergencyLeft = 1, meeting = null, hud = {}, cam = { x: 1000, y: 300 }, zoom = 1, mapOpen = false, winner = null;
 let muted = store.get('amongusol.mute', false);
@@ -598,6 +602,8 @@ let setup = Object.assign({ name: '', ci: 0, bots: 7, imps: 2, role: 'random', c
 // online (xem phần "chơi online" cuối file): chủ phòng chạy luật + máy chơi, khách chỉ tự đi lại và gửi hành động lên
 const isHost = () => net.on && net.host, isGuest = () => net.on && !net.host;
 let impN = 0, netProg = 0; // số kẻ giả mạo (khách phi hành đoàn không biết là ai) · % nhiệm vụ chủ phòng gửi xuống
+let progShown = 0; // thanh tiến độ chỉ cập nhật khi có cuộc họp
+let miniBg = null; // nền minimap vẽ sẵn
 const place = (p, x, y) => { p.x = p.tx = x; p.y = p.ty = y; };
 const confirmOn = () => (net.on ? !!S.confirm : setup.confirm);
 
@@ -625,7 +631,8 @@ function beginRound() {
   // xếp quanh bàn Nhà Ăn
   P.forEach((p, k) => { const a = (k / P.length) * Math.PI * 2; place(p, BUTTON.x + Math.cos(a) * 95, BUTTON.y + Math.sin(a) * 70); p.dir = Math.cos(a) < 0 ? 1 : -1; });
   bodies = []; sabo = null; saboCd = 10; meeting = null; winner = null; mapOpen = false; splats.length = 0; fx.length = 0; bodyBorn.clear();
-  for (const p of P) p.killCd = 10;
+  for (const p of P) { p.killCd = 10; p.idleT = 0; p.idleWarn = false; }
+  progShown = 0;
   cam.x = me.x; cam.y = me.y;
   phase = 'reveal';
   for (const id of ['setupSheet', 'resultSheet', 'meetSheet', 'taskSheet', 'lobbySheet', 'netSheet']) $(id).hidden = true;
@@ -637,8 +644,10 @@ const impsAlive = () => alive().filter(p => p.imp);
 const taskTotal = () => P.filter(p => !p.imp).reduce((a, p) => a + p.tasks.length, 0);
 const taskDone = () => P.filter(p => !p.imp).reduce((a, p) => a + p.tasks.filter(t => t.done).length, 0);
 const visOf = p => (p.dead ? 9999 : p.imp ? VIS_IMP : sabo && sabo.kind === 'lights' ? VIS_DARK : VIS_CREW);
+// máy giữ tầm nhìn cũ (hẹp hơn người) để kẻ giả mạo máy vẫn có cơ hội ra tay
+const botVis = p => (p.dead ? 9999 : p.imp ? 390 : sabo && sabo.kind === 'lights' ? 100 : 280);
 const canSee = (p, q) => dist(p, q) <= visOf(p) && q.vent < 0;
-const sees = (w, q, k = 1) => dist(w, q) < visOf(w) * k && losClear(w, q); // trong tầm và không bị tường che
+const sees = (w, q, k = 1) => dist(w, q) < (w.bot ? botVis(w) : visOf(w)) * k && losClear(w, q); // trong tầm và không bị tường che
 
 function checkWin() {
   if (isGuest()) return false;
@@ -664,6 +673,26 @@ function endGame(side, why) {
   if (net.on) onlineOverUi();
   syncHud();
   return true;
+}
+
+// ── hạn nhiệm vụ: phi hành gia (người thật) còn nhiệm vụ mà quá IDLE_T giây không làm xong cái nào
+// thì thua (chơi với máy) hoặc bị loại (online). Đồng hồ dừng trong lúc họp; sửa phá hoại cũng tính.
+const idleOn = p => !!p && !p.dead && !p.imp && !p.bot && p.tasks.some(t => !t.done);
+const idleReset = p => { p.idleT = 0; p.idleWarn = false; };
+function idleTick(dt) {
+  for (const p of isGuest() ? [me] : P) {
+    if (!idleOn(p)) continue;
+    p.idleT = (p.idleT || 0) + dt;
+    if (p === me && !p.idleWarn && IDLE_T - p.idleT <= 20) { p.idleWarn = true; toast('⏳ Còn 20 giây! Làm xong một nhiệm vụ đi, không là thua đấy!', 3500); playAlert(); }
+    if (p.idleT >= IDLE_T && !isGuest()) { idleOut(p); if (phase !== 'play') return; }
+  }
+}
+function idleOut(p) {
+  if (!net.on) return endGame('imp', `Bạn không làm xong nhiệm vụ nào trong ${IDLE_T} giây nên phi hành đoàn thua.`);
+  p.dead = true; p.vx = p.vy = 0; idleReset(p);
+  if (isHost()) netBroadcast({ t: 'idle', v: p.id });
+  toast(p === me ? `⏳ Bạn bị loại vì ${IDLE_T} giây không làm nhiệm vụ.` : `⏳ ${p.name} bị loại vì ${IDLE_T} giây không làm nhiệm vụ.`, 3500);
+  syncHud(); checkWin();
 }
 
 // ═══════════════════════════ lộ vai ═══════════════════════════
@@ -880,21 +909,22 @@ function startMeeting(reporter, body) {
   for (const p of P) { if (p.vent >= 0) { p.vent = -1; } p.path = []; p.state = 'idle'; p.vx = p.vy = 0; }
   if (sabo && sabo.kind === 'reactor') { sabo = null; } // lò được tạm hoãn khi họp
   const victim = body ? P[body.id] : null, room = body ? roomName(body.x, body.y) : null;
-  meeting = { reporter, body, victim, room, t: 0, votes: {}, picked: null, chat: [], acc: {}, lines: [], phaseV: 'talk', talkT: net.on ? 25 : 9, voteT: net.on ? 45 : 30 };
+  progShown = realPct(); // họp mới cập nhật thanh tiến độ
+  meeting = { reporter, body, victim, room, t: 0, votes: {}, picked: null, chat: [], acc: {}, lines: [], phaseV: 'talk', talkT: net.on ? 25 : 18, voteT: net.on ? 45 : 40, nextTalk: 3, botLines: 0, allAt: null };
   // ai đứng gần xác lúc báo thì bị nghi (trừ người báo); người báo cũng hơi bị nghi (tự báo)
   if (body) for (const w of alive().filter(p => p.bot)) {
     for (const o of alive()) if (o !== reporter && o !== w && dist(o, body) < 220) { w.sus[o.id] = (w.sus[o.id] || 0) + 25; w.near = w.near || []; w.near.push(o.id); }
     if (reporter !== w) w.sus[reporter.id] = (w.sus[reporter.id] || 0) + 6;
   }
-  if (isHost()) netBroadcast({ t: 'meet', r: reporter.id, v: victim ? victim.id : -1, room, talkT: meeting.talkT, voteT: meeting.voteT });
+  if (isHost()) netBroadcast({ t: 'meet', r: reporter.id, v: victim ? victim.id : -1, room, talkT: meeting.talkT, voteT: meeting.voteT, pr: progShown });
   buildChat();
-  meetingUi();
+  meetingUi(); syncHud();
 }
 function meetingUi() {
   const m = meeting;
   $('mtTitle').textContent = m.victim ? `☠️ ${m.reporter.name} báo: tìm thấy xác ${m.victim.name}` : `🚨 ${m.reporter.name} họp khẩn cấp`;
   $('mtChat').innerHTML = '';
-  $('mtSay').hidden = !net.on || me.dead; $('mtSayIn').value = '';
+  $('mtSay').hidden = me.dead; $('mtSayIn').value = '';
   renderMeeting();
   $('meetSheet').hidden = false;
   playReport();
@@ -913,21 +943,98 @@ function buildChat() {
   for (const w of bots) { if (!w.near || !w.near.length) continue; const o = P[pick(w.near)]; w.near = []; if (!o.dead && Math.random() < 0.7) say(w, `${o.name} đứng ngay cạnh xác ở ${m.room}...`, () => { for (const q of bots) if (q !== w && !q.imp) q.sus[o.id] = (q.sus[o.id] || 0) + 20; }); }
   // ngoại phạm: hai máy vừa ở cùng phòng
   for (const w of shuffle(bots).slice(0, 2)) { const r = w.lastRooms[w.lastRooms.length - 1]; if (!r) continue; const o = alive().find(q => q !== w && q.lastRooms.length && q.lastRooms[q.lastRooms.length - 1].id === r.id); if (o && !w.imp) say(w, `Tôi ở ${ROOMS.find(x => x.id === r.id).name} với ${o.name}, ${o === me ? 'bạn ấy' : o.name} ổn.`, () => { for (const q of bots) if (!q.imp) q.sus[o.id] = Math.max(0, (q.sus[o.id] || 0) - 20); }); }
-  // kẻ giả mạo bị tố thì chối và đổ ngược
-  for (const l of L.slice()) { const acc = /THẤY (.+) GIẾT|thấy (.+) chui/.exec(l.text); if (!acc) continue; const nm = (acc[1] || acc[2]).toLowerCase(); const k = P.find(p => p.name.toLowerCase() === nm.toLowerCase()); if (k && k.bot && k.imp && !k.dead) say(k, `Không phải tôi! Tôi đang ở ${pick(ROOMS).name} làm nhiệm vụ. ${l.p.name} mới khả nghi, bám theo tôi suốt!`, () => { for (const q of bots) if (q.imp || Math.random() < 0.25) q.sus[l.p.id] = (q.sus[l.p.id] || 0) + 15; }); }
   const fillers = ['Chưa đủ bằng chứng, bỏ phiếu trắng đi.', 'Ai ở phòng Điện lúc nãy?', 'Mất điện tôi chẳng thấy gì cả.', 'Tôi làm nhiệm vụ ở Kho suốt.', 'Nghi quá... mọi người lúc nãy ở đâu?', 'Đừng bỏ phiếu bừa nhé.'];
   for (const w of shuffle(bots).slice(0, 2)) if (!L.some(l => l.p === w)) say(w, pick(fillers));
-  m.lines = L.slice(0, 8);
-  // thời điểm nói: dàn đều trong lúc bàn luận
-  m.lines.forEach((l, k) => { l.at = 0.6 + k * (m.talkT - 1.2) / Math.max(1, m.lines.length); });
+  m.lines = L.slice(0, 7);
+  // thời điểm nói: dàn đều nửa đầu lúc bàn luận (sau đó máy tự tranh luận, xem botChatter / botsHear)
+  m.lines.forEach((l, k) => { l.at = 0.6 + k * (m.talkT * .6) / Math.max(1, m.lines.length); });
   // thời điểm máy bỏ phiếu
   for (const b of bots) b.voteAt = m.talkT + 3 + Math.random() * 16;
 }
-function addChat(p, text) {
+function addChat(p, text, depth = 0) {
   const d = document.createElement('p'); d.style.setProperty('--c', COLORS[p.ci][1]);
   const b = document.createElement('b'); b.textContent = p.name + ': '; d.appendChild(b); d.appendChild(document.createTextNode(text));
   $('mtChat').appendChild(d); $('mtChat').scrollTop = 1e6; playPop();
   if (isHost()) netBroadcast({ t: 'chat', p: p.id, text });
+  if (!isGuest() && phase === 'meeting' && meeting && meeting.phaseV !== 'done') botsHear(p, text, depth);
+}
+// ── máy bàn luận: tự lên tiếng theo thời gian, nghe chat, ai nhắc tên (hoặc màu áo) thì phản biện ──
+const normTx = s => ' ' + String(s).toLowerCase().normalize('NFC').replace(/\?/g, ' ? ').replace(/[^\p{L}\p{N}?]+/gu, ' ').trim() + ' ';
+const COMMON = [' bạn ', ' tôi ', ' mình ', ' ai ', ' người '];
+const mentioned = text => { const t = normTx(text); return P.filter(p => { const n = normTx(p.name); return (n.trim() && !COMMON.includes(n) && t.includes(n)) || t.includes(normTx(COLORS[p.ci][0])); }); };
+const lastRoomOf = b => { const r = b.lastRooms[b.lastRooms.length - 1]; return r ? ROOMS.find(x => x.id === r.id).name : roomName(b.x, b.y); };
+const taskOf = b => { const t = b.imp ? null : b.tasks.filter(x => x.done).pop(); return t ? TASKS[t.id].n : b.imp ? pick(TASKS).n : null; };
+const buddyOf = b => { const r = b.lastRooms[b.lastRooms.length - 1]; return r ? alive().find(q => q !== b && q.lastRooms.length && q.lastRooms[q.lastRooms.length - 1].id === r.id) : null; };
+const sus = (o, x, v) => { o.sus[x.id] = Math.max(0, (o.sus[x.id] || 0) + v); };
+const crewBots = () => alive().filter(o => o.bot && !o.imp);
+function botSay(p, text, delay, depth = 0, fx) {
+  const m = meeting; if (!m || p.dead || m.phaseV === 'done' || m.botLines >= 48) return;
+  m.said = m.said || new Set(); const key = p.id + '|' + text; if (m.said.has(key)) return; m.said.add(key); // không lặp lại y câu cũ
+  m.botLines++; p.lastSay = m.t + delay; m.lines.push({ p, text, at: m.t + delay, depth, fx });
+}
+// có người vừa nói: ai bị nhắc tên thì đáp lại; người ngoài cuộc thỉnh thoảng hùa theo hoặc bênh vực
+function botsHear(sp, text, depth) {
+  const m = meeting; if (depth >= 4) return;
+  const t = normTx(text), q = / \? | đâu | làm gì | sao | giải thích /.test(t) && !/ nghi | giết | bỏ /.test(t);
+  const pos = / ổn | an toàn | vô tội | không phải | tin | sạch | cảm ơn | với | đi cùng | ở đó | nói chuẩn | nói đúng /.test(t) && !/ nghi | giết | bỏ phiếu | mới là | tố | tật | lạc hướng | một mình | bằng chứng | đáng | không phải tôi | hỏi /.test(t);
+  const ask = / hỏi [^?]* xem /.test(t); // "hỏi X xem": X xác nhận hoặc phủ nhận
+  const hit = mentioned(text).filter(b => b !== sp && !b.dead);
+  if (!hit.length) return;
+  // máy phi hành đoàn nghe theo người nói nếu chưa nghi người nói
+  for (const x of hit) for (const o of crewBots()) if (o !== x && o !== sp && (o.sus[sp.id] || 0) < 50) sus(o, x, pos ? -8 : q ? 2 : 9);
+  for (const b of hit.filter(b => b.bot).slice(0, 2)) {
+    if (sp.bot && m.t - (b.lastReply ?? -9) < 2) continue; // người thật nhắc tên thì luôn được đáp
+    b.lastReply = m.t; ask ? botConfirm(b, sp) : botReply(b, sp, pos, q, depth + 1);
+  }
+  if (pos || q || ask || Math.random() > .5) return;
+  const x = hit[0], o = pick(alive().filter(o => o.bot && o !== sp && o !== x && m.t - (o.lastSay ?? -9) > 2) .concat([null]));
+  if (!o) return;
+  const d = 2.6 + Math.random() * 1.6;
+  if (o.imp && x.imp) botSay(o, `Khoan, ${x.name} ở ${x.fake && x.fake.m === m ? x.fake.r : lastRoomOf(x)} với tôi mà, ${x.name} vô tội.`, d, 9, () => { for (const c of crewBots()) sus(c, x, -10); });
+  else if (o.imp) botSay(o, pick([`Đúng, ${x.name} khả nghi thật.`, `Tôi cũng thấy ${x.name} lạ lắm.`, `Đồng ý, bỏ ${x.name} đi.`]), d, depth + 1);
+  else if ((o.sus[x.id] || 0) >= 30) botSay(o, pick([`Đồng ý, tôi cũng nghi ${x.name}.`, `${x.name} khả nghi thật, lúc nãy đi một mình.`]), d, depth + 1);
+  else if (buddyOf(o) === x) botSay(o, `Không phải ${x.name} đâu, lúc nãy ${x.name} ở ${lastRoomOf(o)} với tôi.`, d, depth + 1, () => { for (const c of crewBots()) if (c !== o) sus(c, x, -15); });
+  else botSay(o, pick([`${x.name} giải thích đi?`, `${sp.name} có bằng chứng không? Đừng đổ oan ${x.name}.`, `${x.name} lúc nãy ở đâu?`]), d, depth + 1);
+}
+function botConfirm(b, sp) {
+  const d = 1 + Math.random() * 1.2;
+  if (!b.imp && buddyOf(b) === sp) botSay(b, `Đúng, ${sp.name} ở ${lastRoomOf(b)} với tôi.`, d, 9, () => { for (const c of crewBots()) if (c !== b) sus(c, sp, -12); });
+  else if (b.imp && !sp.imp) botSay(b, `Tôi có thấy ${sp.name} ở đó đâu?`, d, 9, () => { for (const c of crewBots()) if (Math.random() < .5) sus(c, sp, 10); });
+  else if (b.imp) botSay(b, `Đúng, ${sp.name} ở với tôi.`, d, 9, () => { for (const c of crewBots()) sus(c, sp, -8); });
+  else botSay(b, `Tôi không để ý ${sp.name} lắm.`, d, 9);
+}
+function botReply(b, sp, pos, q, depth) {
+  const d = 1 + Math.random() * 1.4, room = lastRoomOf(b), task = taskOf(b), buddy = buddyOf(b);
+  if (pos) return botSay(b, pick([`Cảm ơn ${sp.name}!`, 'Đúng vậy, tôi vô tội mà.', `${sp.name} nói chuẩn.`]), d, 9);
+  const saw = b.saw.find(x => x.k === sp.id);
+  if (saw && !b.imp) return botSay(b, `Chính ${sp.name} ${saw.kind === 'kill' ? 'giết người' : 'chui ống gió'}, tôi thấy tận mắt!`, d, depth, () => { for (const c of crewBots()) if (c !== b) sus(c, sp, 60); });
+  if (b.imp) {
+    const fake = b.fake && b.fake.m === meeting ? b.fake.r : (b.fake = { m: meeting, r: pick(ROOMS.filter(r => r.name !== (meeting.room || ''))).name }).r; // khai nhất quán
+    if (q) botSay(b, pick([`Tôi ở ${fake}, làm ${task}.`, `Lúc nãy tôi ở ${fake} mà.`, `Tôi ở ${fake} suốt, làm ${task}.`]), d, depth);
+    else botSay(b, pick([`Vô lý! Tôi ở ${fake} cả buổi. ${sp.name} tố tôi để đánh lạc hướng đấy!`, `${sp.name} đổ tội cho tôi nhanh thế, có tật giật mình à?`, `Không phải tôi. ${sp.name} mới là người đi một mình suốt.`, `Tôi đang làm ${task} ở ${fake}. ${sp.name} nói xem lúc đó bạn ở đâu?`]), d, depth,
+      () => { for (const c of crewBots()) if (Math.random() < .35) sus(c, sp, 12); });
+    const mate = alive().find(o => o.bot && o.imp && o !== b);
+    if (mate && !q && Math.random() < .6) botSay(mate, `Tôi đi cùng ${b.name} ở ${fake}, ${b.name} vô tội.`, d + 2, 9, () => { for (const c of crewBots()) sus(c, b, -8); });
+    return;
+  }
+  const where = pick([`Tôi ở ${room}${task ? ` làm ${task}` : ''}`, `Lúc nãy tôi ở ${room}${task ? `, vừa xong ${task}` : ''}`, `Tôi ở ${room} suốt${task ? `, làm ${task}` : ''}`]);
+  if (q) botSay(b, `${where}.${buddy ? ` Có ${buddy.name} ở đó nữa.` : ''}`, d, depth);
+  else botSay(b, pick(['Không phải tôi!', 'Oan quá!', 'Tôi vô tội!']) + ` ${where}.` + ((b.sus[sp.id] || 0) >= 35 ? ` ${sp.name} tố tôi làm gì, chính ${sp.name} mới đáng nghi!` : buddy ? ` Hỏi ${buddy.name} xem.` : ` ${sp.name} có bằng chứng gì không?`), d, depth,
+    () => { for (const c of crewBots()) if (c !== b) sus(c, b, -6); });
+  if (buddy && buddy.bot && !buddy.imp && !q) botSay(buddy, `Đúng, ${b.name} ở ${room} với tôi.`, d + 2.2, 9, () => { for (const c of crewBots()) if (c !== buddy) sus(c, b, -18); });
+}
+// tự lên tiếng: tố người mình nghi nhất, hỏi vặn, hoặc nói chuyện chung
+function botChatter() {
+  const m = meeting, bots = alive().filter(b => b.bot && m.t - (b.lastSay ?? -9) > 3);
+  if (!bots.length) return;
+  const b = pick(bots), others = alive().filter(o => o !== b);
+  let top = null, tv = 0;
+  for (const o of others) { let v = (b.sus[o.id] || 0) + Math.random() * 8; if (b.imp) v = o.imp ? -99 : v + 18 + (o.sus[b.id] || 0) * .4; if (v > tv) { tv = v; top = o; } }
+  if (top && tv >= 30) return botSay(b, pick([`Tôi vẫn nghi ${top.name} nhất.`, `${top.name} giải thích đi, lúc nãy ở đâu?`, `Bỏ phiếu ${top.name} đi mọi người.`, `${top.name} cứ im im, khả nghi lắm.`, `Lúc nãy tôi thấy ${top.name} đi một mình ở ${lastRoomOf(top)}.`]), .2);
+  if (Math.random() < .5) { const x = pick(others); return botSay(b, pick([`${x.name} ơi, lúc nãy bạn ở đâu?`, `${x.name} làm nhiệm vụ gì rồi?`]), .2); }
+  const fill = ['Chưa đủ bằng chứng thì bỏ phiếu trắng thôi.', 'Ai ở phòng Điện lúc nãy?', 'Đừng bỏ phiếu bừa nhé.', 'Mọi người nói rõ lúc nãy ở đâu đi.', 'Có ai thấy ai chui ống gió không?', 'Tôi làm nhiệm vụ suốt, chẳng thấy gì.'];
+  if (m.victim) fill.push(`${m.victim.name} chết ở ${m.room}, ai vừa đi qua đó?`, `Ai ở gần ${m.room} nhất?`);
+  botSay(b, pick(fill), .2);
 }
 // người chơi (mình hoặc khách) tố cáo: máy phi hành đoàn tin nếu người tố chưa bị nghi
 function accuse(h, p) {
@@ -937,6 +1044,20 @@ function accuse(h, p) {
   for (const b of alive().filter(q => q.bot && !q.imp)) if ((b.sus[h.id] || 0) < 60) b.sus[p.id] = (b.sus[p.id] || 0) + 30;
 }
 function botVote(b) {
+  const t = botChoice(b); castVote(b, t);
+  b.revoteAt = meeting.t + 4 + Math.random() * 9;
+  if (t && Math.random() < .55) botSay(b, pick([`Tôi bỏ phiếu cho ${t.name}.`, `Phiếu của tôi: ${t.name}.`]), .3);
+  else if (!t && Math.random() < .3) botSay(b, 'Tôi bỏ phiếu trắng.', .3);
+}
+// đổi phiếu nếu sau tranh luận đã nghi người khác hẳn
+function botRevote(b) {
+  const m = meeting; b.revoteAt = Infinity;
+  const cur = m.votes[b.id], t = botChoice(b), nv = t ? t.id : -1;
+  if (nv === cur || (t && cur >= 0 && (b.sus[t.id] || 0) < (b.sus[cur] || 0) + 25 && !b.imp)) return;
+  castVote(b, t);
+  botSay(b, t ? `Tôi đổi phiếu, giờ bỏ cho ${t.name}.` : 'Nghĩ lại thì tôi chuyển sang phiếu trắng.', .2);
+}
+function botChoice(b) {
   const m = meeting, cands = alive().filter(p => p !== b);
   let best = null, bv = -Infinity;
   for (const c of cands) {
@@ -945,16 +1066,22 @@ function botVote(b) {
     for (const [h, t] of Object.entries(m.acc)) if (t === c.id && !b.imp && (b.sus[h] || 0) < 60) v += 30; // tin lời tố cáo nếu người tố chưa bị nghi
     if (v > bv) { bv = v; best = c; }
   }
-  const target = bv >= 60 ? best : (b.imp ? best : Math.random() < 0.2 ? best : null);
-  castVote(b, target);
+  return bv >= 60 ? best : (b.imp ? best : Math.random() < 0.2 ? best : null);
 }
+// bỏ phiếu hoặc đổi phiếu (bỏ lại cho người khác); huỷ phiếu bằng cancelVote — được tới lúc chốt
 function castVote(voter, target) {
-  const m = meeting; if (!m || m.phaseV === 'done' || m.votes[voter.id] !== undefined || voter.dead) return;
-  m.votes[voter.id] = target ? target.id : -1;
-  if (isGuest()) { netSend({ t: 'vote', p: m.votes[voter.id] }); renderMeeting(); return; }
+  const m = meeting, v = target ? target.id : -1; if (!m || m.phaseV === 'done' || voter.dead || m.votes[voter.id] === v) return;
+  m.votes[voter.id] = v;
+  if (isGuest()) { netSend({ t: 'vote', p: v }); renderMeeting(); return; }
   if (isHost()) netBroadcast({ t: 'voted', v: voter.id });
   renderMeeting();
-  if (alive().every(p => m.votes[p.id] !== undefined)) finishVotes();
+}
+function cancelVote(voter) {
+  const m = meeting; if (!m || m.phaseV === 'done' || m.votes[voter.id] === undefined) return;
+  delete m.votes[voter.id];
+  if (isGuest()) { netSend({ t: 'vote', p: -2 }); renderMeeting(); return; }
+  if (isHost()) netBroadcast({ t: 'unvoted', v: voter.id });
+  renderMeeting();
 }
 function finishVotes() {
   const m = meeting; if (m.phaseV === 'done') return; m.phaseV = 'done';
@@ -992,7 +1119,7 @@ function endMeeting() {
 }
 function renderMeeting(reveal) {
   const m = meeting, list = $('mtList'); list.innerHTML = '';
-  const canVote = !me.dead && m.phaseV !== 'done' && m.votes[me.id] === undefined;
+  const canVote = !me.dead && m.phaseV !== 'done', myV = m.votes[me.id];
   for (const p of P) {
     const row = document.createElement('div'); row.dataset.id = p.id; row.className = 'prow' + (p.dead ? ' dead' : '') + (p === me ? ' me' : '') + (m.votes[me.id] === p.id ? ' picked' : '');
     row.appendChild(beanCanvas(p.ci, 30, 36, p.dead));
@@ -1002,27 +1129,35 @@ function renderMeeting(reveal) {
     if (!p.dead && p !== me && canVote) {
       const ab = document.createElement('button'); ab.className = 'ab'; ab.textContent = '📢'; ab.title = 'Tố cáo'; ab.onclick = () => { if (m.acc[me.id] === p.id) return; if (isGuest()) { m.acc[me.id] = p.id; netSend({ t: 'acc', p: p.id }); } else accuse(me, p); };
       row.appendChild(ab);
-      const vb = document.createElement('button'); vb.className = 'vb'; vb.textContent = '✔'; vb.title = 'Bỏ phiếu'; vb.onclick = () => { castVote(me, p); playPop(); };
+      const vb = document.createElement('button'), mine = myV === p.id; vb.className = 'vb' + (mine ? ' undo' : ''); vb.textContent = mine ? '↩️' : '✔';
+      vb.title = mine ? 'Huỷ phiếu' : myV !== undefined ? 'Đổi phiếu sang người này' : 'Bỏ phiếu'; vb.onclick = () => { mine ? cancelVote(me) : castVote(me, p); playPop(); };
       row.appendChild(vb);
     }
     if (reveal) { const vs = document.createElement('div'); vs.className = 'votes'; for (const [vid, t] of Object.entries(m.votes)) if (t === p.id) { const i = document.createElement('i'); i.style.setProperty('--c', COLORS[P[vid].ci][1]); vs.appendChild(i); } row.appendChild(vs); }
     list.appendChild(row);
   }
   if (net.on) paintTalk();
-  const sk = $('mtSkip'); sk.disabled = !canVote; sk.classList.toggle('on', m.votes[me.id] === -1);
-  if (reveal) { const n = Object.values(m.votes).filter(v => v === -1).length; sk.textContent = `⏭️ Phiếu trắng: ${n}`; } else sk.textContent = me.dead ? '👻 Ma không bỏ phiếu được' : m.votes[me.id] !== undefined ? '✔ Bạn đã bỏ phiếu' : '⏭️ Bỏ phiếu trắng';
+  const sk = $('mtSkip'); sk.disabled = !canVote; sk.classList.toggle('on', myV === -1);
+  if (reveal) { const n = Object.values(m.votes).filter(v => v === -1).length; sk.textContent = `⏭️ Phiếu trắng: ${n}`; } else sk.textContent = me.dead ? '👻 Ma không bỏ phiếu được' : myV === -1 ? '↩️ Huỷ phiếu trắng' : myV !== undefined ? '⏭️ Đổi sang phiếu trắng' : '⏭️ Bỏ phiếu trắng';
 }
-$('mtSkip').onclick = () => { if (meeting && !me.dead) { castVote(me, null); playPop(); } };
+$('mtSkip').onclick = () => { if (meeting && !me.dead) { meeting.votes[me.id] === -1 ? cancelVote(me) : castVote(me, null); playPop(); } };
 function meetingTick(dt) {
   const m = meeting; if (!m || m.phaseV === 'done') return;
   m.t += dt;
-  for (const l of m.lines) if (!l.said && m.t >= l.at) { l.said = true; addChat(l.p, l.text); if (l.fx) l.fx(); }
+  for (const l of m.lines.slice()) if (!l.said && m.t >= l.at) { l.said = true; if (l.p.dead) continue; addChat(l.p, l.text, l.depth || 0); if (l.fx) l.fx(); }
+  if (!isGuest() && m.t >= m.nextTalk) { m.nextTalk = m.t + 2.2 + Math.random() * 2.2; botChatter(); }
   if (m.phaseV === 'talk') { $('mtTimer').innerHTML = `Bàn luận · còn <b>${Math.ceil(m.talkT - m.t)}</b>s`; if (m.t >= m.talkT) { m.phaseV = 'vote'; renderMeeting(); } return; }
   const left = m.talkT + m.voteT - m.t;
-  $('mtTimer').innerHTML = `Bỏ phiếu · còn <b>${Math.max(0, Math.ceil(left))}</b>s`;
-  if (isGuest()) return; // khách: chủ phòng đếm phiếu
-  for (const b of alive().filter(p => p.bot)) if (m.votes[b.id] === undefined && m.t >= b.voteAt) botVote(b);
-  if (left <= 0) finishVotes();
+  if (isGuest()) { $('mtTimer').innerHTML = `Bỏ phiếu · còn <b>${Math.max(0, Math.ceil(left))}</b>s · đổi/huỷ phiếu được`; return; } // khách: chủ phòng đếm phiếu
+  for (const b of alive().filter(p => p.bot)) {
+    if (m.votes[b.id] === undefined && m.t >= b.voteAt) botVote(b);
+    else if (m.votes[b.id] !== undefined && m.t >= (b.revoteAt ?? Infinity)) botRevote(b);
+  }
+  // đủ phiếu thì chờ thêm 5 giây cho ai muốn đổi ý
+  const all = alive().every(p => m.votes[p.id] !== undefined);
+  if (all && m.allAt == null) m.allAt = m.t; else if (!all) m.allAt = null;
+  $('mtTimer').innerHTML = m.allAt != null ? `Mọi người đã bỏ phiếu · chốt sau <b>${Math.max(0, Math.ceil(5 - (m.t - m.allAt)))}</b>s` : `Bỏ phiếu · còn <b>${Math.max(0, Math.ceil(left))}</b>s · đổi/huỷ phiếu được`;
+  if (left <= 0 || (m.allAt != null && m.t - m.allAt >= 5)) finishVotes();
 }
 
 // ═══════════════════════════ nhiệm vụ mini ═══════════════════════════
@@ -1041,8 +1176,8 @@ function closeTask() { $('taskSheet').hidden = true; $('tkBox').innerHTML = ''; 
 $('tkClose').onclick = closeTask;
 function miniDone() {
   if (!taskCur) return;
-  if (taskCur.kind === 'fix') { if (isGuest()) netSend({ t: 'fix' }); else fixSabotage(); }
-  else { const t = me.tasks.find(x => x.id === taskCur.id); if (t && !me.imp) { t.done = true; if (isGuest()) netSend({ t: 'task', id: t.id }); toast('✅ Xong nhiệm vụ!'); } else toast(me.imp ? '🎭 Giả vờ xong rồi' : '✅ Xong'); }
+  if (taskCur.kind === 'fix') { idleReset(me); if (isGuest()) netSend({ t: 'fix' }); else fixSabotage(); }
+  else { const t = me.tasks.find(x => x.id === taskCur.id); if (t && !me.imp) { t.done = true; idleReset(me); if (isGuest()) netSend({ t: 'task', id: t.id }); toast('✅ Xong nhiệm vụ!'); } else toast(me.imp ? '🎭 Giả vờ xong rồi' : '✅ Xong'); }
   playTaskDone(); closeTask(); syncHud(); checkWin();
 }
 function buildMini(type, opt = {}) {
@@ -1100,7 +1235,7 @@ function buildMini(type, opt = {}) {
 }
 
 // ═══════════════════════════ vẽ ═══════════════════════════
-function fit() { const d = devicePixelRatio || 1; cv.width = innerWidth * d; cv.height = innerHeight * d; cv.style.width = innerWidth + 'px'; cv.style.height = innerHeight + 'px'; zoom = clamp(Math.min(innerWidth / 980, innerHeight / 620), 0.55, 1.35); }
+function fit() { const d = devicePixelRatio || 1; cv.width = innerWidth * d; cv.height = innerHeight * d; cv.style.width = innerWidth + 'px'; cv.style.height = innerHeight + 'px'; zoom = clamp(Math.min(innerWidth / 1100, innerHeight / 720), 0.5, 1.25); miniBg = null; }
 addEventListener('resize', fit); fit();
 // nhân vật hình hạt đậu: thân, chân, ba lô, kính
 function drawBean(c, x, y, col, dir = 1, anim = 0, o = {}) {
@@ -1291,6 +1426,18 @@ function showKillScene(kci, vci) {
   requestAnimationFrame(frame);
 }
 
+// đa giác tầm nhìn: bắn tia từ mắt ra mọi hướng, dừng ở tường / vật cao (lấn vào 12px để thấy mặt tường)
+const fogCv = document.createElement('canvas'), fg = fogCv.getContext('2d'), RAYS = 360, RCOS = [], RSIN = [];
+for (let k = 0; k < RAYS; k++) { RCOS.push(Math.cos(k / RAYS * Math.PI * 2)); RSIN.push(Math.sin(k / RAYS * Math.PI * 2)); }
+function visPoly(cx, cy, r) {
+  const pts = new Array(RAYS * 2);
+  for (let k = 0; k < RAYS; k++) {
+    const dx = RCOS[k], dy = RSIN[k]; let d = 0;
+    while (d < r) { d += 5; if (opaque(cx + dx * d, cy + dy * d)) { d += 12; break; } }
+    d = Math.min(d, r); pts[k * 2] = cx + dx * d; pts[k * 2 + 1] = cy + dy * d;
+  }
+  return pts;
+}
 let stars = Array.from({ length: 220 }, () => [Math.random(), Math.random(), Math.random() * 1.6 + .3, Math.random() < .5 ? .15 : .35]);
 const seesMe = q => me.dead || (dist(me, q) <= visOf(me) * 1.02 && losClear(me, q));
 function render() {
@@ -1379,12 +1526,18 @@ function render() {
   }
   ctx.globalAlpha = 1;
   ctx.restore();
-  // bóng tối ngoài tầm nhìn: vòng tròn mềm quanh mình, phòng vẫn hiện bình thường; người / xác khuất tường đã bị ẩn ở trên (ma thấy hết)
+  // bóng tối ngoài tầm nhìn: chỉ sáng phần nhìn thẳng tới được (tường, vật cao che góc khuất); ma thấy hết
   if (!me.dead && me.vent < 0) {
-    const r = visOf(me) * zoom, mx = ox + me.x * zoom, my = oy + me.y * zoom, dark = sabo && sabo.kind === 'lights' && !me.imp;
-    const g = ctx.createRadialGradient(mx, my, r * .55, mx, my, r);
-    g.addColorStop(0, 'rgba(3,5,12,0)'); g.addColorStop(1, dark ? 'rgba(3,5,12,.97)' : 'rgba(3,5,12,.88)');
-    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    const r = visOf(me), dark = sabo && sabo.kind === 'lights' && !me.imp;
+    if (fogCv.width !== cv.width || fogCv.height !== cv.height) { fogCv.width = cv.width; fogCv.height = cv.height; }
+    fg.setTransform(d, 0, 0, d, 0, 0); fg.globalCompositeOperation = 'source-over'; fg.clearRect(0, 0, W, H);
+    fg.fillStyle = dark ? 'rgba(3,5,12,.97)' : 'rgba(3,5,12,.9)'; fg.fillRect(0, 0, W, H);
+    fg.globalCompositeOperation = 'destination-out';
+    fg.translate(ox, oy); fg.scale(zoom, zoom);
+    const pts = visPoly(me.x, me.y, r), g = fg.createRadialGradient(me.x, me.y, r * .62, me.x, me.y, r);
+    g.addColorStop(0, 'rgba(0,0,0,1)'); g.addColorStop(1, 'rgba(0,0,0,0)');
+    fg.fillStyle = g; fg.beginPath(); fg.moveTo(pts[0], pts[1]); for (let k = 2; k < pts.length; k += 2) fg.lineTo(pts[k], pts[k + 1]); fg.closePath(); fg.fill();
+    ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.drawImage(fogCv, 0, 0); ctx.setTransform(d, 0, 0, d, 0, 0);
   }
   // báo động lò: cả màn hình nhấp nháy đỏ
   if (sabo && sabo.kind === 'reactor' && phase === 'play') { ctx.fillStyle = `rgba(255,0,0,${.08 + .1 * Math.max(0, Math.sin(now / 160))})`; ctx.fillRect(0, 0, W, H); }
@@ -1405,14 +1558,12 @@ function render() {
   }
   if (me.vent >= 0) { ctx.fillStyle = 'rgba(0,0,0,.75)'; ctx.fillRect(0, 0, W, H); ctx.fillStyle = '#fff'; ctx.font = '800 20px "Baloo 2", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('🕳️ Trong ống gió — ← → chuyển ống · Ống gió để chui ra', W / 2, H / 2); }
   if (mapOpen) drawMinimap(W, H);
+  drawMini();
 }
 function drawMinimap(W, H) {
   const k = Math.min((W - 40) / MAP_W, (H - 140) / MAP_H, .3), ox = (W - MAP_W * k) / 2, oy = 70 + (H - 140 - MAP_H * k) / 2, now = performance.now();
   ctx.fillStyle = 'rgba(5,8,20,.9)'; roundRect(ctx, ox - 14, oy - 14, MAP_W * k + 28, MAP_H * k + 28, 14); ctx.fill(); ctx.strokeStyle = 'rgba(143,227,255,.35)'; ctx.lineWidth = 1.5; ctx.stroke();
-  ctx.fillStyle = '#2a3552'; for (const r of WALK) ctx.fillRect(ox + (r[0] - 6) * k, oy + (r[1] - 6) * k, (r[2] + 12) * k, (r[3] + 12) * k);
-  ctx.fillStyle = '#56607a'; for (const h of HALLS) ctx.fillRect(ox + h[0] * k, oy + h[1] * k, h[2] * k, h[3] * k);
-  for (const r of ROOMS) { ctx.fillStyle = r.col; ctx.fillRect(ox + r.r[0] * k, oy + r.r[1] * k, r.r[2] * k, r.r[3] * k); }
-  ctx.fillStyle = 'rgba(10,14,28,.7)'; for (const o of OBST) ctx.fillRect(ox + o[0] * k, oy + o[1] * k, o[2] * k, o[3] * k);
+  paintPlan(ctx, k, ox, oy);
   ctx.fillStyle = '#fff'; ctx.font = `800 ${Math.max(9, 34 * k)}px "Baloo 2", sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
   for (const r of ROOMS) ctx.fillText(r.name, ox + (r.r[0] + r.r[2] / 2) * k, oy + (r.r[1] + r.r[3] / 2) * k);
   if (me.imp) { ctx.fillStyle = '#94a3b8'; for (const v of VENTS) { ctx.beginPath(); ctx.arc(ox + v[0] * k, oy + v[1] * k, 3.5, 0, Math.PI * 2); ctx.fill(); } }
@@ -1422,6 +1573,37 @@ function drawMinimap(W, H) {
   ctx.fillStyle = COLORS[me.ci][1]; ctx.beginPath(); ctx.arc(ox + me.x * k, oy + me.y * k, pr, 0, Math.PI * 2); ctx.fill(); ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke();
 }
 
+// mặt bằng tàu (dùng cho bản đồ lớn và minimap)
+function paintPlan(g, k, ox, oy) {
+  g.fillStyle = '#2a3552'; for (const r of WALK) g.fillRect(ox + (r[0] - 6) * k, oy + (r[1] - 6) * k, (r[2] + 12) * k, (r[3] + 12) * k);
+  g.fillStyle = '#56607a'; for (const h of HALLS) g.fillRect(ox + h[0] * k, oy + h[1] * k, h[2] * k, h[3] * k);
+  for (const r of ROOMS) { g.fillStyle = r.col; g.fillRect(ox + r.r[0] * k, oy + r.r[1] * k, r.r[2] * k, r.r[3] * k); }
+  g.fillStyle = 'rgba(10,14,28,.7)'; for (const o of OBST) g.fillRect(ox + o[0] * k, oy + o[1] * k, o[2] * k, o[3] * k);
+}
+// minimap góc phải: luôn hiện khi chơi; chấm người mình đang thấy, xác, nhiệm vụ, chỗ sửa phá hoại; chạm để mở bản đồ lớn
+const miniCv = $('mmap'), mgc = miniCv.getContext('2d');
+function drawMini() {
+  const show = phase === 'play' && !mapOpen && !!me;
+  if (miniCv.hidden === show) miniCv.hidden = !show;
+  if (!show) return;
+  const d = devicePixelRatio || 1, w = miniCv.clientWidth, h = miniCv.clientHeight; if (!w || !h) return;
+  if (miniCv.width !== Math.round(w * d) || miniCv.height !== Math.round(h * d)) { miniCv.width = Math.round(w * d); miniCv.height = Math.round(h * d); miniBg = null; }
+  const k = Math.min((w - 8) / MAP_W, (h - 8) / MAP_H), ox = (w - MAP_W * k) / 2, oy = (h - MAP_H * k) / 2, now = performance.now();
+  if (!miniBg) { miniBg = document.createElement('canvas'); miniBg.width = miniCv.width; miniBg.height = miniCv.height; const g = miniBg.getContext('2d'); g.scale(d, d); paintPlan(g, k, ox, oy); }
+  const g = mgc; g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, miniCv.width, miniCv.height); g.drawImage(miniBg, 0, 0); g.setTransform(d, 0, 0, d, 0, 0);
+  const dot = (x, y, r, col, stroke) => { g.fillStyle = col; g.beginPath(); g.arc(ox + x * k, oy + y * k, r, 0, Math.PI * 2); g.fill(); if (stroke) { g.strokeStyle = stroke; g.lineWidth = 1.5; g.stroke(); } };
+  // vùng nhìn thấy
+  if (!me.dead && me.vent < 0) { g.fillStyle = 'rgba(255,255,255,.12)'; g.beginPath(); g.arc(ox + me.x * k, oy + me.y * k, visOf(me) * k, 0, Math.PI * 2); g.fill(); }
+  if (me.imp) for (const v of VENTS) dot(v[0], v[1], 1.6, '#94a3b8');
+  if (!me.imp) for (const t of me.tasks) if (!t.done) dot(TASKS[t.id].x, TASKS[t.id].y, 2.6, '#ffd23f');
+  if (sabo) dot(FIX[sabo.kind].x, FIX[sabo.kind].y, 4, Math.sin(now / 150) > 0 ? '#ff4d4d' : '#fff');
+  g.strokeStyle = '#ff4d4d'; g.lineWidth = 1.6;
+  for (const b of bodies) if (seesMe(b)) { const x = ox + b.x * k, y = oy + b.y * k; g.beginPath(); g.moveTo(x - 3, y - 3); g.lineTo(x + 3, y + 3); g.moveTo(x + 3, y - 3); g.lineTo(x - 3, y + 3); g.stroke(); }
+  for (const p of P) if (p !== me && !p.dead && p.vent < 0 && seesMe(p)) dot(p.x, p.y, 2.6, COLORS[p.ci][1], 'rgba(0,0,0,.6)');
+  dot(me.x, me.y, 3.6 + Math.sin(now / 200) * .8, COLORS[me.ci][1], '#fff');
+}
+miniCv.addEventListener('pointerdown', e => { e.stopPropagation(); toggleMap(); });
+
 // ═══════════════════════════ HUD ═══════════════════════════
 let toastT = 0;
 function toast(s, ms = 2600) { let t = document.querySelector('.toast'); if (!t) { t = document.createElement('div'); t.className = 'toast'; document.body.appendChild(t); } t.textContent = s; clearTimeout(toastT); toastT = setTimeout(() => t.remove(), ms); }
@@ -1429,13 +1611,14 @@ function syncHud() {
   const inPlay = phase === 'play' || phase === 'meeting' || phase === 'over';
   $('prog').hidden = !inPlay; $('tasks').hidden = !inPlay; $('acts').hidden = phase !== 'play'; $('hint').hidden = phase !== 'play' || innerWidth < 700; $('roleTag').hidden = !inPlay;
   if (!inPlay) return;
-  const pct = isGuest() ? netProg : taskTotal() ? Math.round(taskDone() / taskTotal() * 100) : 0;
-  $('prog').firstElementChild.style.width = pct + '%'; $('prog').lastElementChild.textContent = `Nhiệm vụ ${pct}%`;
+  const pct = isGuest() ? netProg : hostPct();
+  $('prog').firstElementChild.style.width = pct + '%'; $('prog').lastElementChild.textContent = `Nhiệm vụ ${pct}%` + (phase === 'over' ? '' : ' · cập nhật khi họp');
   const rt = $('roleTag'); rt.className = 'role-tag ' + (me.dead ? 'ghost' : me.imp ? 'imp' : 'crew'); rt.textContent = me.dead ? '👻 Ma' + (me.imp ? ' (Kẻ Giả Mạo)' : '') : me.imp ? '🔪 Kẻ Giả Mạo' : '👩‍🚀 Phi hành gia';
   const tk = $('tasks'); tk.className = 'tasks' + (me.imp ? ' imp' : ''); tk.innerHTML = '';
   const h = document.createElement('h3'); h.textContent = me.imp ? 'Nhiệm vụ giả (ngụy trang)' : `Nhiệm vụ của bạn · ${me.tasks.filter(t => t.done).length}/${me.tasks.length}`; tk.appendChild(h);
   for (const t of me.tasks) { const T = TASKS[t.id], d = document.createElement('div'); d.className = t.done ? 'done' : ''; d.innerHTML = `<span>${t.done ? '✅' : '▫️'} ${T.n}</span><small>${T.room}</small>`; tk.appendChild(d); }
   if (me.imp && !me.dead) { const d = document.createElement('div'); d.className = 'hot'; d.textContent = `🔪 Giết: ${me.killCd > 0 ? Math.ceil(me.killCd) + 's' : 'sẵn sàng'}`; tk.appendChild(d); }
+  if (idleOn(me) && phase !== 'over') { const d = document.createElement('div'); d.className = 'idle'; tk.appendChild(d); idleHud(); }
   $('bKill').hidden = $('bSabo').hidden = $('bVent').hidden = !(me.imp && !me.dead);
   $('bReport').hidden = me.dead;
   const al = $('alert'); if (sabo) { al.hidden = false; al.className = 'alert' + (sabo.kind === 'lights' ? ' dark' : ''); al.textContent = sabo.kind === 'lights' ? `💡 Mất điện — sửa ở phòng ${FIX.lights.room}` : `☢️ Lò phản ứng nổ sau ${Math.ceil(sabo.t)}s — sửa ở ${FIX.reactor.room}`; } else al.hidden = true;
@@ -1452,7 +1635,14 @@ function hudTick() {
     const bv = $('bVent'); bv.disabled = me.vent < 0 && o.vent < 0; bv.innerHTML = (me.vent >= 0 ? '<span>⬆️</span>Chui ra' : '<span>🕳️</span>Ống gió') + '<kbd>V</kbd>';
   }
   if (sabo) { const al = $('alert'); if (sabo.kind === 'reactor') al.textContent = `☢️ Lò phản ứng nổ sau ${Math.ceil(sabo.t)}s — sửa ở ${FIX.reactor.room}`; }
+  idleHud();
   if (me.imp && !me.dead) { const d = $('tasks').querySelector('.hot'); if (d) d.textContent = `🔪 Giết: ${me.killCd > 0 ? Math.ceil(me.killCd) + 's' : 'sẵn sàng'}`; }
+}
+
+function idleHud() {
+  const d = $('tasks').querySelector('.idle'); if (!d) return;
+  const s = Math.max(0, Math.ceil(IDLE_T - (me.idleT || 0)));
+  d.textContent = `⏳ Hạn làm nhiệm vụ: ${s}s`; d.classList.toggle('urgent', s <= 20);
 }
 
 // ═══════════════════════════ vòng lặp ═══════════════════════════
@@ -1480,6 +1670,7 @@ function step(dt, now) {
     if (!isGuest()) for (const p of P) { if (p.bot && !(p.dead && p.imp)) botStep(p, dt); if (p.imp) p.killCd = Math.max(0, p.killCd - dt); }
     else if (me.imp) me.killCd = Math.max(0, me.killCd - dt);
     saboCd = Math.max(0, saboCd - dt);
+    idleTick(dt);
     if (sabo && sabo.kind === 'reactor' && (sirenT -= dt) <= 0) { sirenT = 1; playSiren(); }
     if (sabo && sabo.kind === 'reactor') { sabo.t -= dt; if (sabo.t <= 0 && !isGuest()) { sabo = null; endGame('imp', 'Lò phản ứng đã nổ!'); } }
     if (net.on) netTick(dt, now);
@@ -1938,9 +2129,9 @@ function hostMsg(c, d) {
     case 'report': { const b = bodies.find(x => x.id === d.b); if (phase === 'play' && !p.dead && b && dist(ps, b) < 170) startMeeting(p, b); return; }
     case 'emerg': if (phase === 'play' && !p.dead && !sabo && p.emergency > 0 && dist(ps, BUTTON) < 160) { p.emergency--; startMeeting(p, null); } return;
     case 'sabo': if (phase === 'play' && p.imp && !p.dead && (d.kind === 'lights' || d.kind === 'reactor')) doSabotage(d.kind, p); return;
-    case 'fix': if (phase === 'play' && sabo && !p.dead && dist(ps, FIX[sabo.kind]) < USE_RANGE + 70) fixSabotage(); return;
-    case 'task': { const t = p.tasks.find(x => x.id === d.id); if (t && !p.imp && (phase === 'play' || phase === 'meeting')) { t.done = true; syncHud(); checkWin(); } return; }
-    case 'vote': if (phase === 'meeting' && meeting && meeting.phaseV !== 'done') { const t = d.p === -1 ? null : P[d.p]; if (d.p === -1 || (t && !t.dead)) castVote(p, t); } return;
+    case 'fix': if (phase === 'play' && sabo && !p.dead && dist(ps, FIX[sabo.kind]) < USE_RANGE + 70) { idleReset(p); fixSabotage(); } return;
+    case 'task': { const t = p.tasks.find(x => x.id === d.id); if (t && !p.imp && (phase === 'play' || phase === 'meeting')) { t.done = true; idleReset(p); syncHud(); checkWin(); } return; }
+    case 'vote': if (phase === 'meeting' && meeting && meeting.phaseV !== 'done') { if (d.p === -2) { cancelVote(p); return; } const t = d.p === -1 ? null : P[d.p]; if (d.p === -1 || (t && !t.dead)) castVote(p, t); } return;
     case 'acc': { const t = P[d.p]; if (phase === 'meeting' && t && t !== p) accuse(p, t); return; }
     case 'say': { const tx = String(d.text || '').replace(/\s+/g, ' ').trim().slice(0, 80); if (phase === 'meeting' && meeting && !p.dead && tx) addChat(p, tx); return; }
   }
@@ -1976,10 +2167,11 @@ function fullFor(p) {
     P: P.map(q => ({ id: q.id, name: q.name, ci: q.ci, cid: q.cid, imp: see && q.imp, dead: q.dead, ej: q.ejected, x: Math.round(q.x), y: Math.round(q.y), dir: q.dir })),
     tasks: p.tasks, em: p.emergency, kc: p.killCd, sabo: sabo ? { kind: sabo.kind, t: sabo.t } : null, sc: saboCd,
     b: bodies.map(b => [b.id, Math.round(b.x), Math.round(b.y)]), pr: hostPct(),
-    m: m ? { r: m.reporter.id, v: m.victim ? m.victim.id : -1, room: m.room, t: m.t, phaseV: m.phaseV === 'done' ? 'vote' : m.phaseV, talkT: m.talkT, voteT: m.voteT, voted: Object.keys(m.votes).map(Number), my: m.votes[p.id] } : null,
+    m: m ? { pr: progShown, r: m.reporter.id, v: m.victim ? m.victim.id : -1, room: m.room, t: m.t, phaseV: m.phaseV === 'done' ? 'vote' : m.phaseV, talkT: m.talkT, voteT: m.voteT, voted: Object.keys(m.votes).map(Number), my: m.votes[p.id] } : null,
   };
 }
-const hostPct = () => (taskTotal() ? Math.round(taskDone() / taskTotal() * 100) : 0);
+const realPct = () => (taskTotal() ? Math.round(taskDone() / taskTotal() * 100) : 0);
+const hostPct = () => (phase === 'over' ? realPct() : progShown);
 function hostSnap() {
   const imps = P.filter(q => q.imp).map(q => q.id);
   const base = { t: 's', p: P.map(q => [Math.round(q.x), Math.round(q.y), q.dir, Math.hypot(q.vx, q.vy) > 5 ? 1 : 0, q.dead ? 1 : 0, q.vent >= 0 ? 1 : 0]),
@@ -2104,9 +2296,11 @@ function guestMsg(d) {
       syncHud(); return;
     }
     case 'sabo': sabo = { kind: d.kind, t: REACTOR_T }; playAlert(); toast(d.kind === 'lights' ? '💡 Mất điện! Phi hành đoàn chỉ thấy rất gần. Sửa ở phòng Điện.' : '☢️ Lò phản ứng sắp nổ! Tới Lò Phản Ứng sửa trong 30 giây!'); if (me.imp) saboCd = SABO_CD; syncHud(); return;
+    case 'idle': { const v = P_(d.v); if (!v) return; v.dead = true; toast(v === me ? `⏳ Bạn bị loại vì ${IDLE_T} giây không làm nhiệm vụ.` : `⏳ ${v.name} bị loại vì ${IDLE_T} giây không làm nhiệm vụ.`, 3500); syncHud(); return; }
     case 'fixed': sabo = null; if (taskCur && taskCur.kind === 'fix') closeTask(); toast(d.kind === 'lights' ? '💡 Có điện lại rồi!' : '☢️ Lò phản ứng đã ổn định.'); playChime(); syncHud(); return;
     case 'meet': guestMeeting(d); return;
     case 'chat': { const p = P_(d.p); if (p && meeting) addChat(p, String(d.text || '').slice(0, 120)); return; }
+    case 'unvoted': if (meeting && d.v !== me.id) { delete meeting.votes[d.v]; renderMeeting(); } return;
     case 'voted': if (meeting && Number.isInteger(d.v) && meeting.votes[d.v] === undefined) { meeting.votes[d.v] = '?'; renderMeeting(); } return;
     case 'reveal': {
       const m = meeting; if (!m) return;
@@ -2154,6 +2348,7 @@ function guestMeeting(d) {
   closeTask(); $('saboPop').hidden = true; joy = null; $('joy').hidden = true; me.vent = -1;
   if (sabo && sabo.kind === 'reactor') sabo = null;
   const reporter = P[d.r] || me, victim = d.v >= 0 ? P[d.v] : null;
+  if (Number.isInteger(d.pr)) netProg = d.pr;
   meeting = { reporter, body: victim ? { id: victim.id } : null, victim, room: d.room, t: +d.t || 0, votes: {}, acc: {}, lines: [], phaseV: d.phaseV || 'talk', talkT: d.talkT || 25, voteT: d.voteT || 45 };
   for (const id of d.voted || []) meeting.votes[id] = '?';
   if (d.my !== undefined) meeting.votes[me.id] = d.my;
