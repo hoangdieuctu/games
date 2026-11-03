@@ -1427,15 +1427,26 @@ function showKillScene(kci, vci) {
 }
 
 // đa giác tầm nhìn: bắn tia từ mắt ra mọi hướng, dừng ở tường / vật cao (lấn vào 12px để thấy mặt tường)
-const fogCv = document.createElement('canvas'), fg = fogCv.getContext('2d'), RAYS = 360, RCOS = [], RSIN = [];
+// lớp mờ vẽ ở độ phân giải thấp (FOG_K) rồi phóng lên: mép bóng tự mềm, không răng cưa / nhấp nháy khi đi
+const fogCv = document.createElement('canvas'), fg = fogCv.getContext('2d'), FOG_K = .3, RAYS = 900, RCOS = [], RSIN = [];
 for (let k = 0; k < RAYS; k++) { RCOS.push(Math.cos(k / RAYS * Math.PI * 2)); RSIN.push(Math.sin(k / RAYS * Math.PI * 2)); }
+// dò tia theo từng ô lưới (DDA): điểm chạm tường chính xác nên mép bóng thẳng và đứng yên khi nhân vật di chuyển
+function castRay(cx, cy, dx, dy, r) {
+  let ix = Math.floor(cx / GC), iy = Math.floor(cy / GC);
+  const sx = dx > 0 ? 1 : -1, sy = dy > 0 ? 1 : -1, adx = Math.abs(dx), ady = Math.abs(dy);
+  const tdx = adx > 1e-9 ? GC / adx : Infinity, tdy = ady > 1e-9 ? GC / ady : Infinity;
+  let tx = adx > 1e-9 ? (sx > 0 ? (ix + 1) * GC - cx : cx - ix * GC) / adx : Infinity;
+  let ty = ady > 1e-9 ? (sy > 0 ? (iy + 1) * GC - cy : cy - iy * GC) / ady : Infinity;
+  for (;;) {
+    let t; if (tx < ty) { t = tx; tx += tdx; ix += sx; } else { t = ty; ty += tdy; iy += sy; }
+    if (t >= r) return r;
+    if (ix < 0 || iy < 0 || ix >= GW || iy >= GH) return t;
+    const c = GRID[iy * GW + ix]; if (c === 0 || c === 3) return Math.min(r, t + 12); // lấn vào để thấy mặt tường
+  }
+}
 function visPoly(cx, cy, r) {
   const pts = new Array(RAYS * 2);
-  for (let k = 0; k < RAYS; k++) {
-    const dx = RCOS[k], dy = RSIN[k]; let d = 0;
-    while (d < r) { d += 6; if (opaque(cx + dx * d, cy + dy * d)) { d += 12; break; } }
-    d = Math.min(d, r); pts[k * 2] = cx + dx * d; pts[k * 2 + 1] = cy + dy * d;
-  }
+  for (let k = 0; k < RAYS; k++) { const dx = RCOS[k], dy = RSIN[k], d = castRay(cx, cy, dx, dy, r); pts[k * 2] = cx + dx * d; pts[k * 2 + 1] = cy + dy * d; }
   return pts;
 }
 let stars = Array.from({ length: 220 }, () => [Math.random(), Math.random(), Math.random() * 1.6 + .3, Math.random() < .5 ? .15 : .35]);
@@ -1529,15 +1540,16 @@ function render() {
   // bóng tối ngoài tầm nhìn: chỉ sáng phần nhìn thẳng tới được (tường, vật cao che góc khuất); ma thấy hết
   if (!me.dead && me.vent < 0) {
     const r = visOf(me), dark = sabo && sabo.kind === 'lights' && !me.imp;
-    if (fogCv.width !== cv.width || fogCv.height !== cv.height) { fogCv.width = cv.width; fogCv.height = cv.height; }
-    fg.setTransform(d, 0, 0, d, 0, 0); fg.globalCompositeOperation = 'source-over'; fg.clearRect(0, 0, W, H);
+    const fw = Math.ceil(W * FOG_K), fh = Math.ceil(H * FOG_K);
+    if (fogCv.width !== fw || fogCv.height !== fh) { fogCv.width = fw; fogCv.height = fh; }
+    fg.setTransform(FOG_K, 0, 0, FOG_K, 0, 0); fg.globalCompositeOperation = 'source-over'; fg.clearRect(0, 0, W, H);
     fg.fillStyle = dark ? 'rgba(3,5,12,.97)' : 'rgba(3,5,12,.7)'; fg.fillRect(0, 0, W, H); // chỗ khuất chỉ phủ mờ, mất điện mới tối hẳn
     fg.globalCompositeOperation = 'destination-out';
     fg.translate(ox, oy); fg.scale(zoom, zoom);
     const pts = visPoly(me.x, me.y, r), g = fg.createRadialGradient(me.x, me.y, r * (dark ? .62 : .88), me.x, me.y, r);
     g.addColorStop(0, 'rgba(0,0,0,1)'); g.addColorStop(1, 'rgba(0,0,0,0)');
     fg.fillStyle = g; fg.beginPath(); fg.moveTo(pts[0], pts[1]); for (let k = 2; k < pts.length; k += 2) fg.lineTo(pts[k], pts[k + 1]); fg.closePath(); fg.fill();
-    ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.drawImage(fogCv, 0, 0); ctx.setTransform(d, 0, 0, d, 0, 0);
+    ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'low'; ctx.drawImage(fogCv, 0, 0, W, H);
   }
   // báo động lò: cả màn hình nhấp nháy đỏ
   if (sabo && sabo.kind === 'reactor' && phase === 'play') { ctx.fillStyle = `rgba(255,0,0,${.08 + .1 * Math.max(0, Math.sin(now / 160))})`; ctx.fillRect(0, 0, W, H); }
