@@ -7,7 +7,7 @@ Trang web tĩnh, chạy trên GitHub Pages. Mở `index.html` để vào trang c
 ```
 index.html        trang chủ
 icon.png          icon trang chủ khi thêm vào màn hình chính
-games/<tên>/      mỗi game một thư mục, mở bằng index.html
+<tên>/            mỗi game một thư mục, mở bằng index.html
 shared/sounds/    âm thanh dùng chung
 tools/            bộ gộp mã nguồn
 404.html          chuyển link cũ sang chỗ mới
@@ -15,9 +15,9 @@ tools/            bộ gộp mã nguồn
 
 ## Thêm game mới
 
-1. Tạo `games/<tên>/index.html` và `icon.png` (180×180), thêm
+1. Tạo `<tên>/index.html` và `icon.png` (180×180), thêm
    `<link rel="apple-touch-icon" href="icon.png">` để có icon trên iPad.
-2. Nút quay lại trỏ về `../../index.html`.
+2. Nút quay lại trỏ về `../index.html`.
 3. Thêm thẻ game vào `index.html`.
 
 ## Game có thư mục `src/`
@@ -25,7 +25,7 @@ tools/            bộ gộp mã nguồn
 `aquarium`, `colorsort`, `spot`, `little-world`: sửa trong `src/`, rồi chạy
 
 ```
-node games/<tên>/build.mjs
+node <tên>/build.mjs
 ```
 
 Đừng sửa trực tiếp `index.html` của các game này.

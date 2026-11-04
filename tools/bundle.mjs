@@ -1,8 +1,8 @@
-// ── Bộ gộp dùng chung: gộp games/<game>/src/ thành một tệp games/<game>/index.html tự chứa ──
+// ── Bộ gộp dùng chung: gộp <game>/src/ thành một tệp <game>/index.html tự chứa ──
 //
 // Mỗi game có build.mjs riêng chỉ khai báo thứ tự nạp rồi gọi bundle():
 //
-//   node games/colorsort/build.mjs
+//   node colorsort/build.mjs
 //
 // Vì sao phải gộp: trình duyệt chặn ES module khi trang được mở bằng file:// —
 // nháy đúp vào tệp thì không mẩu mã nào chạy. Gộp hết vào một tệp thì nháy đúp,
@@ -93,8 +93,8 @@ export function bundle({ dir, order, mode = 'module' }) {
     .replace('/*__JS__*/', () => js)
     .replace('<!DOCTYPE html>',
       '<!DOCTYPE html>\n<!-- TỆP NÀY ĐƯỢC TẠO TỰ ĐỘNG — đừng sửa trực tiếp.\n'
-      + `     Sửa trong games/${game}/src/ rồi chạy: node games/${game}/build.mjs -->`);
+      + `     Sửa trong ${game}/src/ rồi chạy: node ${game}/build.mjs -->`);
 
   writeFileSync(join(dir, 'index.html'), html);
-  console.log(`games/${game}/index.html: ${(html.length / 1024).toFixed(0)} KB (${order.length} tệp)`);
+  console.log(`${game}/index.html: ${(html.length / 1024).toFixed(0)} KB (${order.length} tệp)`);
 }

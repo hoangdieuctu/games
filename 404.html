@@ -14,7 +14,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Không tìm thấy trang</title>
 <script>
-// Các game từng nằm ngay ở thư mục gốc (caro.html, tiger/…). Nay chúng ở games/<tên>/.
+// Các game từng nằm ngay ở thư mục gốc (caro.html, tiger/…). Nay chúng ở <tên>/.
 // GitHub Pages trả trang này cho mọi đường dẫn không tồn tại, nên link cũ, dấu trang
 // và biểu tượng đã thêm vào màn hình chính được chuyển sang chỗ mới — giữ nguyên
 // ?… và #room=… để link mời vào phòng chơi cũ vẫn dùng được.
@@ -34,10 +34,10 @@
 
   var m = /^([a-z0-9-]+)\.html$/.exec(first);
   if (m && FILES.indexOf(m[1]) >= 0 && rest.length === 1) {
-    target = base + 'games/' + m[1] + '/index.html';
+    target = base + m[1] + '/index.html';
   } else if (DIRS.indexOf(first) >= 0) {
     var sub = rest.slice(1).join('/');
-    target = base + 'games/' + first + '/' + (sub || 'index.html');
+    target = base + first + '/' + (sub || 'index.html');
   }
   if (target) location.replace(target + location.search + location.hash);
 })();
