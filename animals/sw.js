@@ -1,7 +1,7 @@
 // Service worker for the "100 Động Vật" game (animals/).
-// Caches the animal images (animals/img/*) with a cache-first strategy so
+// Caches the animal images (animals/img/*) and name clips (animals/voice/*) with a cache-first strategy so
 // they load instantly on repeat visits and work offline once seen.
-const CACHE = 'animals-img-v2';
+const CACHE = 'animals-img-v3';
 
 self.addEventListener('install', () => {
   // Activate this worker immediately instead of waiting for old tabs to close.
@@ -22,7 +22,7 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
   // Only handle GET requests for the animal images; everything else goes to network.
-  if (event.request.method !== 'GET' || !url.pathname.includes('/animals/img/')) {
+  if (event.request.method !== 'GET' || !/\/animals\/(img|voice)\//.test(url.pathname)) {
     return;
   }
   event.respondWith(

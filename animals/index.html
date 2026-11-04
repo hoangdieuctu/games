@@ -247,7 +247,8 @@ html, body {
 }
 .card-speak:active { transform: scale(.88); background: #26de81; }
 
-.name-row { display: flex; align-items: center; gap: 10px; }
+.name-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.speak-btns { display: flex; gap: 8px; flex-wrap: wrap; }
 .name-row .modal-vi, .name-row .modal-en { flex: 1; min-width: 0; }
 .btn-speak {
   flex-shrink: 0; border: none; border-radius: 100px;
@@ -258,6 +259,7 @@ html, body {
   box-shadow: 0 3px 0 #1ab36a; white-space: nowrap;
 }
 .btn-speak:active { transform: translateY(2px); box-shadow: none; }
+#btn-speak-vi { background: #ff9f43; box-shadow: 0 3px 0 #e67e22; }
 .btn-speak.speaking { animation: speak-pulse .7s ease-in-out infinite; }
 @keyframes speak-pulse {
   0%,100% { transform: scale(1); }
@@ -294,8 +296,9 @@ html, body {
 <div class="screen" id="screen-browse">
   <div class="browse-header">
     <div class="browse-title">🐾 100 Động Vật</div>
-    <div style="display:flex;align-items:center;gap:10px;">
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end;">
       <button class="sound-toggle" id="sound-toggle" onclick="toggleSound()">🔊 Đọc tên</button>
+      <button class="sound-toggle" id="lang-toggle" onclick="toggleLang()">🗣 EN+VI</button>
       <button class="sound-toggle" id="auto-toggle" onclick="toggleAutoPlay()">⏭ Tự động</button>
       <div class="browse-count" id="browse-count">100 con</div>
     </div>
@@ -311,7 +314,10 @@ html, body {
     <div class="modal-body">
       <div class="name-row">
         <div class="modal-vi" id="modal-vi"></div>
-        <button class="btn-speak" id="btn-speak-en" onclick="speakCurrent()">🔊 English</button>
+        <div class="speak-btns">
+          <button class="btn-speak" id="btn-speak-en" onclick="speakCurrent('en')">🔊 English</button>
+          <button class="btn-speak" id="btn-speak-vi" onclick="speakCurrent('vi')">🔊 Tiếng Việt</button>
+        </div>
       </div>
       <div class="modal-en" id="modal-en"></div>
       <div class="speak-warn hidden" id="speak-warn"></div>
@@ -660,9 +666,35 @@ const ANIMALS = [
    habitat:'Đáy biển nhiệt đới và cận nhiệt đới', food:'Ăn thịt', size:'Rộng 30cm–2m, nặng 0,5–300kg', fact:'Cá đuối có gai độc ở đuôi dùng để tự vệ khi bị đe dọa.', story:'Cá đuối lượn sát đáy biển phẳng như chiếc bánh dẹt khổng lồ. Chú vùi mình dưới cát để ẩn náu và nghỉ ngơi yên tĩnh. Cá đuối vỗ vây nhẹ nhàng bơi đi trông như đang bay dưới biển!'},
 ];
 
-/* ══════════ Phát âm tên con vật (tiếng Anh) ══════════ */
+/* ══════════ Phát âm tên con vật ══════════
+   Ưu tiên clip mp3 giọng nơ-ron sinh sẵn (art/gen-voice.mjs → voice/en, voice/vi).
+   Clip lỗi / thiếu thì rơi về giọng máy (Speech Synthesis). */
+const Clip = {
+  // một thẻ <audio> dùng lại cho mọi câu: iOS chỉ cho phát tự động (không cần chạm)
+  // trên thẻ đã từng được phát trong một cú chạm
+  el: new Audio(), unlocked: false,
+  unlock() {
+    if (this.unlocked) return;
+    this.unlocked = true;
+    const a = this.el;
+    a.src = 'data:audio/mpeg;base64,SUQzBAAAAAAAIlRTU0UAAAAOAAADTGF2ZjYyLjMuMTAwAAAAAAAAAAAAAAD/84TAAAAAAAAAAAAASW5mbwAAAA8AAAAFAAACoABtbW1tbW1tbW1tbW1tbW1tbW1tkpKSkpKSkpKSkpKSkpKSkpKSkpK2tra2tra2tra2tra2tra2tra2ttvb29vb29vb29vb29vb29vb29vb//////////////////////////8AAAAATGF2YzYyLjExAAAAAAAAAAAAAAAAJARQAAAAAAAAAqC9P8gWAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD/80TEAAAAA0gAAAAATEFNRTMuMTAwVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVMQU1FMy7/80TEUwAAA0gAAAAAMTAwVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVMQU1FMy7/80TEpgAAA0gAAAAAMTAwVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVX/80TErAAAA0gAAAAAVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVX/80TErAAAA0gAAAAAVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVU=';
+    const p = a.play(); if (p && p.catch) p.catch(() => { this.unlocked = false; });
+  },
+  stop() { this.el.onended = this.el.onerror = null; try { this.el.pause(); } catch (e) {} },
+  // phát voice/<lang>/<tên>.mp3; ok = phát xong, fail = không phát được
+  play(lang, a, ok, fail) {
+    this.stop();
+    const el = this.el;
+    el.onended = ok;
+    el.onerror = fail;
+    el.src = `voice/${lang}/${a.img.replace(/^.*\//, '').replace(/\.[^.]+$/, '')}.mp3`;
+    const p = el.play(); if (p && p.catch) p.catch(fail);
+  }
+};
+document.addEventListener('pointerdown', () => Clip.unlock(), true);
+
 const Speech = {
-  enVoice: null, loaded: false, supported: 'speechSynthesis' in window,
+  enVoice: null, viVoice: null, loaded: false, supported: 'speechSynthesis' in window,
 
   loadVoices() {
     if (!this.supported) return;
@@ -674,6 +706,7 @@ const Speech = {
         vs.find(v => /^en[-_]US/i.test(v.lang)) ||
         vs.find(v => /^en[-_]GB/i.test(v.lang)) ||
         vs.find(v => /^en/i.test(v.lang)) || null;
+    this.viVoice = vs.find(v => /^vi/i.test(v.lang)) || null;
     this.loaded = true;
     updateSpeakWarn();
   },
@@ -684,15 +717,16 @@ const Speech = {
     try { speechSynthesis.cancel(); } catch (e) {}
   },
 
-  say(text, onEnd) {
+  say(text, onEnd, lang = 'en') {
     if (!this.supported || !text) { if (onEnd) onEnd(); return; }
     if (!this.loaded) this.loadVoices();
     this.cancel();
 
     const done = onceOnly(onEnd);
     const u = new SpeechSynthesisUtterance(text);
-    u.lang = this.enVoice ? this.enVoice.lang : 'en-US';
-    if (this.enVoice) u.voice = this.enVoice;
+    const v = lang === 'vi' ? this.viVoice : this.enVoice;
+    u.lang = v ? v.lang : (lang === 'vi' ? 'vi-VN' : 'en-US');
+    if (v) u.voice = v;
     u.rate = 0.92;
     u.pitch = 1.05;
     u.volume = 1;
@@ -722,13 +756,25 @@ if (Speech.supported) {
 
 let autoSpeak = localStorage.getItem('animals_autospeak') !== '0';
 let autoPlay  = localStorage.getItem('animals_autoplay')  === '1';
+// ngôn ngữ đọc khi mở con vật / tự động / loa trên thẻ: 'en', 'vi' hoặc 'both' (tiếng Anh trước rồi tiếng Việt)
+const LANG_MODES = ['both', 'en', 'vi'];
+const LANG_LABEL = { both: '🗣 EN+VI', en: '🗣 English', vi: '🗣 Tiếng Việt' };
+let voiceLang = localStorage.getItem('animals_voicelang');
+if (!LANG_MODES.includes(voiceLang)) voiceLang = 'both';
+const langSeq = () => (voiceLang === 'both' ? ['en', 'vi'] : [voiceLang]);
 let autoTimer = null;
 const AUTO_DELAY = 5000;
 
 function toggleSound() {
   autoSpeak = !autoSpeak;
   localStorage.setItem('animals_autospeak', autoSpeak ? '1' : '0');
-  if (!autoSpeak) { speakToken++; Speech.cancel(); markSpeaking(false); }
+  if (!autoSpeak) stopSpeaking();
+  renderToggles();
+}
+
+function toggleLang() {
+  voiceLang = LANG_MODES[(LANG_MODES.indexOf(voiceLang) + 1) % LANG_MODES.length];
+  localStorage.setItem('animals_voicelang', voiceLang);
   renderToggles();
 }
 
@@ -745,6 +791,7 @@ function renderToggles() {
   const b = document.getElementById('sound-toggle');
   b.textContent = autoSpeak ? '🔊 Đọc tên' : '🔇 Tắt tiếng';
   b.classList.toggle('off', !autoSpeak);
+  document.getElementById('lang-toggle').textContent = LANG_LABEL[voiceLang];
   const a = document.getElementById('auto-toggle');
   a.textContent = autoPlay ? '⏭ Tự động 5s' : '⏭ Tự động';
   a.classList.toggle('off', !autoPlay);
@@ -753,7 +800,7 @@ function renderToggles() {
 function updateSpeakWarn() {
   const el = document.getElementById('speak-warn');
   if (!el) return;
-  const msg = Speech.supported ? '' : '⚠️ Trình duyệt này không hỗ trợ đọc tên.';
+  const msg = '';  // đã có clip mp3, không cần giọng máy của trình duyệt
   el.textContent = msg;
   el.classList.toggle('hidden', !msg);
 }
@@ -780,20 +827,36 @@ function armAutoPlay() {
 /* ── Đọc tên ── */
 let speakToken = 0;
 
-function speakName(a) {
+// đọc lần lượt từng ngôn ngữ trong langs (mặc định theo cài đặt), nghỉ ngắn giữa hai thứ tiếng
+function speakName(a, langs = langSeq()) {
   if (!a) return;
   const my = ++speakToken;
-  Speech.cancel();
-  markSpeaking(true);
-  Speech.say(a.en, () => { if (my === speakToken) markSpeaking(false); });
+  Clip.stop(); Speech.cancel();
+  const next = k => {
+    if (my !== speakToken) return;
+    markSpeaking(null);
+    if (k >= langs.length) return;
+    const lang = langs[k], go = () => setTimeout(() => next(k + 1), 350);
+    markSpeaking(lang);
+    let fell = false;
+    Clip.play(lang, a, go, () => {
+      if (fell || my !== speakToken) return; fell = true;
+      Speech.say(lang === 'vi' ? a.vi : a.en, () => { if (my === speakToken) go(); }, lang);
+    });
+  };
+  next(0);
 }
 
-function markSpeaking(on) {
-  const en = document.getElementById('btn-speak-en');
-  if (en) en.classList.toggle('speaking', !!on);
+function stopSpeaking() { speakToken++; Clip.stop(); Speech.cancel(); markSpeaking(null); }
+
+function markSpeaking(lang) {
+  for (const l of ['en', 'vi']) {
+    const b = document.getElementById('btn-speak-' + l);
+    if (b) b.classList.toggle('speaking', lang === l);
+  }
 }
 
-function speakCurrent() { speakName(filteredList[currentIdx]); }
+function speakCurrent(lang) { speakName(filteredList[currentIdx], [lang]); }
 
 // Nút loa nhỏ trên từng thẻ ở lưới.
 function speakCard(e, idx) {
@@ -870,7 +933,7 @@ function renderModal() {
   document.getElementById('modal-fact').textContent    = a.fact    || '—';
   document.getElementById('modal-story').textContent   = a.story   || '';
   document.getElementById('modal-tag').textContent     = a.cat     || '';
-  markSpeaking(false);
+  markSpeaking(null);
   updateSpeakWarn();
   if (autoSpeak) speakName(a);
   armAutoPlay();
@@ -882,9 +945,7 @@ function nav(dir) {
 }
 
 function closeModal() {
-  speakToken++;
-  Speech.cancel();
-  markSpeaking(false);
+  stopSpeaking();
   stopAutoPlay();
   document.getElementById('modal').classList.add('hidden');
 }
