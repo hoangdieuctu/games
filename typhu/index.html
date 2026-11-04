@@ -3104,7 +3104,7 @@ let sfxLoading = false;
 function audio() {
   if (!actx) { try { actx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return null; } }
   if (actx.state === 'suspended') actx.resume().catch(() => {});
-  loadSfx();
+  loadSfx(); loadVoice();
   return actx;
 }
 function loadSfx() {
@@ -3310,6 +3310,83 @@ function playParty() {
 function playPing() { const ctx = ready(); if (!ctx) return; const t = ctx.currentTime + 0.005; tone(ctx, 'sine', 1320, t, 0.12, 0.22); tone(ctx, 'sine', 1760, t + 0.13, 0.2, 0.22); }
 function playPop() { const ctx = ready(); if (!ctx) return; tone(ctx, 'sine', 520, ctx.currentTime + 0.005, 0.12, 0.3, 1250); }
 function playTap() { const ctx = ready(); if (!ctx) return; clack(ctx.currentTime + 0.005, 0.3, 1800, 0.03); }
+// ── lời hô: clip giọng nơ-ron sinh sẵn (art/gen-voice.mjs → voice/), mỗi khoảnh khắc vài câu, chọn ngẫu nhiên ──
+// Câu mới chỉ ngắt câu đang đọc khi quan trọng bằng hoặc hơn (vd. "ba đôi liền" không bị "ra đảo" cắt ngang).
+// Lúc đọc thì nhạc nền nhỏ lại.
+const VOICE_DIR = 'voice/';
+let voiceIdx = null, voiceLoading = false, voiceNow = null;
+const voiceBuf = {};
+function loadVoice() {
+  if (voiceLoading || !actx) return;
+  voiceLoading = true;
+  fetch(VOICE_DIR + 'index.json').then(r => (r.ok ? r.json() : Promise.reject(r.status))).then(idx => {
+    voiceIdx = idx;
+    for (const f of Object.values(idx).flat()) {
+      fetch(VOICE_DIR + f).then(r => (r.ok ? r.arrayBuffer() : Promise.reject(r.status)))
+        .then(b => new Promise((ok, bad) => actx.decodeAudioData(b, ok, bad)))
+        .then(buf => { voiceBuf[f] = buf; }).catch(() => {});
+    }
+  }).catch(() => {});
+}
+function duckMusic(on) {
+  if (!musicBus || !actx) return;
+  const g = musicBus.gain, t = actx.currentTime;
+  g.cancelScheduledValues(t); g.setValueAtTime(g.value, t); g.linearRampToValueAtTime(on ? 0.18 : 0.55, t + (on ? 0.12 : 0.5));
+}
+function sayVoice(key, prio = 1) {
+  const ctx = ready(); if (!ctx) return;
+  loadVoice();
+  const files = (voiceIdx && voiceIdx[key] || []).filter(f => voiceBuf[f]);
+  if (!files.length) return;
+  if (voiceNow && ctx.currentTime < voiceNow.end) {
+    if (prio < voiceNow.prio) return;
+    try { voiceNow.src.stop(); } catch (e) {}
+  }
+  const b = voiceBuf[files[Math.floor(Math.random() * files.length)]];
+  const src = ctx.createBufferSource(), g = ctx.createGain();
+  src.buffer = b; g.gain.value = 1.1;
+  src.connect(g).connect(ctx.destination); src.start();
+  const me = voiceNow = { src, prio, end: ctx.currentTime + b.duration };
+  duckMusic(true);
+  src.onended = () => { if (voiceNow === me) { voiceNow = null; duckMusic(false); } };
+}
+// bước hoạt hoạ → [khoảnh khắc, độ ưu tiên, trễ ms]
+function voiceFor(st) {
+  switch (st.k) {
+    case 'dice': return st.dbl ? ['double', 1, THROW_MS - 200] : null;
+    case 'triple': return ['triple', 3, 0];
+    case 'island': return ['island', 2, 0];
+    case 'free': return st.how === 'dbl' ? null : ['free', 1, 0]; // ra đảo nhờ đôi: câu "đổ đôi" đã đọc
+    case 'released': return ['free', 1, 0];
+    case 'bankrupt': return ['bankrupt', 4, 0];
+    case 'festival': return ['festival', 2, 0];
+    case 'festJump': return ['festJump', 2, 0];
+    case 'build': return st.to === 5 ? ['landmark', 2, 0] : null;
+    case 'buyTour': return ['tour', 1, 0];
+    case 'takeover': return ['takeover', 2, 0];
+    case 'hack': return ['hack', 2, 0];
+    case 'pay': return st.why === 'rent' && st.amt >= 600 ? ['bigRent', 1, 0] : null;
+    case 'debt': return ['debt', 2, 0];
+    case 'pot': return ['pot', 2, 0];
+    case 'casino': return [st.win ? 'casinoWin' : 'casinoLose', 2, 1000];
+    case 'rob': return st.robin ? null : ['rob', 2, 0];
+    case 'destroy': return ['destroy', 2, 0];
+    case 'plague': return ['plague', 2, 0];
+    case 'blackout': return ['blackout', 2, 0];
+    case 'forceSell': return ['forceSell', 2, 0];
+    case 'swap': return ['swap', 1, 0];
+    case 'lift': return ['lift', 1, 0];
+    case 'luck': return ['luck', 1, 0];
+    case 'event': return ['event', 1, 0];
+    case 'won': case 'timeup': return ['won', 5, 0];
+  }
+  return null;
+}
+function voiceStep(st, tok) {
+  const v = voiceFor(st); if (!v) return;
+  if (v[2]) setTimeout(() => { if (tok === animTok) sayVoice(v[0], v[1]); }, v[2]);
+  else sayVoice(v[0], v[1]);
+}
 function syncMute() { $('bMute').textContent = muted ? '🔇' : '🔊'; $('bMusic').classList.toggle('off', !musicOn || muted); }
 $('bMusic').onclick = () => {
   musicOn = !musicOn; store.set('typhu.music', musicOn);
@@ -3767,6 +3844,7 @@ async function animateSteps(ev, tok) {
     const t = stepText(st);
     if (t) { statusEv = t; renderStatus(); }
     revealStep(st); applyMoney(st);
+    try { voiceStep(st, tok); } catch (e) {}
     try { await animateStep(st, tok); } catch (e) { await sleep(stepMs(st)); }
     // quân vừa tung đã tới nơi (hoặc bị đưa ra đảo): ẩn 12 số
     if (stepsKeep && st.s === stepsKeep.t && (st.k === 'move' || st.k === 'island' || st.k === 'stay')) { stepsKeep = null; paintSteps(); }
