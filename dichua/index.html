@@ -409,6 +409,11 @@ textarea.field { resize: none; min-height: 76px; line-height: 1.45; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
 }
+
+/* nút về trang chủ */
+a.hb { text-decoration: none; box-sizing: border-box; }
+.intro-head { position: relative; }
+.intro-home { position: absolute; left: 0; top: 2px; width: 40px; height: 40px; font-size: 26px; font-weight: 700; padding-bottom: 3px; }
 </style>
 </head>
 <body>
@@ -426,6 +431,7 @@ textarea.field { resize: none; min-height: 76px; line-height: 1.45; }
     <button class="hb" id="bChat" title="Nói (T)">💬</button>
     <button class="hb" id="bOnline" title="Đi chùa cùng bạn bè">🌐</button>
     <button class="hb" id="bHelp" title="Hướng dẫn (H)">❔</button>
+    <a class="hb" href="../index.html" title="Về trang chính" aria-label="Về trang chính">🏠</a>
     <button class="hb" id="bFull" title="Toàn màn hình (F)">⛶</button>
   </div>
 </div>
@@ -439,6 +445,7 @@ textarea.field { resize: none; min-height: 76px; line-height: 1.45; }
 <div id="intro">
   <div class="intro-card" data-tab="map">
     <div class="intro-head">
+      <a class="hb intro-home" href="../index.html" aria-label="Về trang chính" title="Trò chơi khác">‹</a>
       <div class="intro-title" id="tName">Chùa An Nhiên</div>
       <div class="intro-sub" id="tInfo"></div>
     </div>

@@ -282,13 +282,18 @@ html, body {
   color: #e8804a; font-weight: 700;
 }
 .speak-warn.hidden { display: none; }
+
+/* ── nút về trang chủ ── */
+.home-back { display: inline-grid; place-items: center; width: 1.45em; height: 1.45em; margin-right: 8px; vertical-align: middle;
+  border-radius: 50%; background: #f1f3f5; color: #444; text-decoration: none; font-weight: 900; line-height: 1; padding-bottom: .08em; box-sizing: border-box; }
+.home-back:active { transform: scale(.92); }
 </style>
 </head>
 <body>
 
 <div class="screen" id="screen-browse">
   <div class="browse-header">
-    <div class="browse-title">🐾 100 Động Vật</div>
+    <div class="browse-title"><a class="home-back" href="../index.html" aria-label="Về trang chính">‹</a>🐾 100 Động Vật</div>
     <div style="display:flex;align-items:center;gap:10px;">
       <button class="sound-toggle" id="sound-toggle" onclick="toggleSound()">🔊 Đọc tên</button>
       <button class="sound-toggle" id="auto-toggle" onclick="toggleAutoPlay()">⏭ Tự động</button>

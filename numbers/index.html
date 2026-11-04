@@ -208,9 +208,16 @@ html, body {
 }
 .btn-again:hover  { transform: translateY(-3px); box-shadow: 0 8px 0 #c0392b; }
 .btn-again:active { transform: translateY(1px); box-shadow: 0 2px 0 #c0392b; }
+
+/* ── nút về trang chủ ── */
+.home-back { position: fixed; top: max(10px, env(safe-area-inset-top)); left: max(10px, env(safe-area-inset-left)); z-index: 60;
+  width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; padding-bottom: 3px; box-sizing: border-box;
+  background: #fff; color: #444; font: 900 30px/1 system-ui, sans-serif; text-decoration: none; box-shadow: 0 3px 10px rgba(0,0,0,.18); }
+.home-back:active { transform: scale(.92); }
 </style>
 </head>
 <body>
+<a class="home-back" href="../index.html" aria-label="Về trang chính">‹</a>
 
 <!-- SCREEN 1: show the target number -->
 <div class="screen" id="screen-show">

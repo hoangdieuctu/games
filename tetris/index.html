@@ -262,6 +262,9 @@ canvas#board {
 
 /* ── PARTICLES CANVAS ── */
 #particles { position: fixed; inset: 0; pointer-events: none; z-index: 50; }
+
+.ov-home { margin-top: 10px; color: var(--glow-c); opacity: .75; font-family: 'Orbitron', sans-serif; font-size: 11px; letter-spacing: .15em; text-decoration: none; }
+.ov-home:hover { opacity: 1; }
 </style>
 </head>
 <body>
@@ -343,6 +346,7 @@ canvas#board {
   <div class="ov-sub" id="ov-sub">CLASSIC · MODERN · FAST</div>
   <div id="ov-stats"></div>
   <button class="ov-btn" id="ov-btn" onclick="startGame()">START GAME</button>
+  <a class="ov-home" href="../index.html">‹ TRÒ CHƠI KHÁC</a>
   <div class="key-hint" style="margin-top:4px">
     <kbd>←→</kbd> Move &nbsp; <kbd>↑</kbd><kbd>Z</kbd> Rotate &nbsp; <kbd>↓</kbd> Soft Drop<br>
     <kbd>Space</kbd> Hard Drop &nbsp; <kbd>C</kbd> Hold &nbsp; <kbd>P</kbd> Pause

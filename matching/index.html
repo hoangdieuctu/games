@@ -168,12 +168,19 @@ html, body {
 .confetti-wrap { position: fixed; inset: 0; pointer-events: none; overflow: hidden; }
 .confetto { position: absolute; width: 10px; height: 14px; border-radius: 2px; top: -20px; animation: fall linear forwards; }
 @keyframes fall { to { transform: translateY(110vh) rotate(720deg); opacity: 0; } }
+
+/* ── nút về trang chủ ── */
+.home-back { position: fixed; top: max(10px, env(safe-area-inset-top)); left: max(10px, env(safe-area-inset-left)); z-index: 60;
+  width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; padding-bottom: 3px; box-sizing: border-box;
+  background: #fff; color: #444; font: 900 30px/1 system-ui, sans-serif; text-decoration: none; box-shadow: 0 3px 10px rgba(0,0,0,.18); }
+.home-back:active { transform: scale(.92); }
 </style>
 </head>
 <body>
 
 <!-- SCREEN 1: choose theme -->
 <div class="screen" id="screen-theme">
+  <a class="home-back" href="../index.html" aria-label="Về trang chính">‹</a>
   <div class="theme-title">Chọn chủ đề nhé! 🎮</div>
   <div class="theme-grid">
     <button class="theme-btn" style="--c:#26de81" onclick="startGame('animals')">

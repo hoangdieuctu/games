@@ -291,6 +291,12 @@ html, body {
 .confetti-wrap { position:fixed; inset:0; pointer-events:none; overflow:hidden; z-index:0; }
 .confetto { position:absolute; width:10px; height:14px; border-radius:2px; top:-20px; animation:fall-conf linear forwards; }
 @keyframes fall-conf { to { transform:translateY(110vh) rotate(720deg); opacity:0; } }
+
+/* ── nút về trang chủ ── */
+.home-back { position: fixed; top: max(10px, env(safe-area-inset-top)); left: max(10px, env(safe-area-inset-left)); z-index: 60;
+  width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; padding-bottom: 3px; box-sizing: border-box;
+  background: #fff; color: #444; font: 900 30px/1 system-ui, sans-serif; text-decoration: none; box-shadow: 0 3px 10px rgba(0,0,0,.18); }
+.home-back:active { transform: scale(.92); }
 </style>
 </head>
 <body>
@@ -299,6 +305,7 @@ html, body {
 
 <!-- TITLE -->
 <div class="screen" id="screen-title">
+  <a class="home-back" href="../index.html" aria-label="Về trang chính">‹</a>
   <div class="title-gem">💎</div>
   <div class="title-name">JEWEL POP</div>
   <div class="title-sub">Chọn nhóm đá quý cùng màu để nổ!</div>
