@@ -47,6 +47,7 @@ button:disabled { opacity: .35; cursor: default; }
 /* ── nhiệm vụ & tiến độ ── */
 .prog { position: fixed; z-index: 5; top: calc(env(safe-area-inset-top, 0px) + 54px); left: 50%; transform: translateX(-50%); width: min(60vw, 420px); height: 18px; border-radius: 999px; background: rgba(0,0,0,.5); border: 2px solid rgba(255,255,255,.35); overflow: hidden; }
 .prog i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #3ddc84, #8fe3ff); transition: width .4s; }
+.prog b.late { color: #ff8a8a; animation: blink 1s ease-in-out infinite; }
 .prog b { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; text-shadow: 0 1px 2px #000; }
 .tasks { position: fixed; z-index: 5; top: calc(env(safe-area-inset-top, 0px) + 80px); left: calc(env(safe-area-inset-left, 0px) + 10px); width: 230px; max-width: 46vw; background: rgba(0,0,0,.5); border: 1px solid rgba(255,255,255,.15); border-radius: 12px; padding: 6px 10px; font-size: 12.5px; font-weight: 700; line-height: 1.35; }
 .tasks h3 { font-size: 12px; color: #ffd23f; margin-bottom: 2px; }
@@ -356,12 +357,14 @@ button:disabled { opacity: .35; cursor: default; }
     <div class="seg" id="suBots"></div>
     <div class="label">Số Kẻ Giả Mạo</div>
     <div class="seg" id="suImps"></div>
+    <div class="label">Thời gian ván</div>
+    <div class="seg" id="suTime"></div>
     <div class="label">Vai của bạn</div>
     <div class="seg" id="suRole"></div>
     <label class="check"><input type="checkbox" id="suConfirm"> Công bố vai người bị đẩy ra ngoài</label>
     <button class="go" id="bStart">Chơi với máy</button>
     <button class="online-btn" id="bOnline">🌐 Chơi online với bạn bè · có voice chat</button>
-    <p class="rule">Phi hành đoàn làm xong hết nhiệm vụ hoặc đẩy hết Kẻ Giả Mạo ra ngoài thì thắng. Kẻ Giả Mạo thắng khi số người còn sống bằng số kẻ giả mạo hoặc lò phản ứng nổ.</p>
+    <p class="rule">Phi hành đoàn làm xong hết nhiệm vụ hoặc đẩy hết Kẻ Giả Mạo ra ngoài thì thắng. Kẻ Giả Mạo thắng khi số người còn sống bằng số kẻ giả mạo, lò phản ứng nổ, hoặc <b>hết giờ</b> mà nhiệm vụ chưa xong.</p>
   </div>
 </div>
 
@@ -435,6 +438,8 @@ button:disabled { opacity: .35; cursor: default; }
       <div class="seg" id="lbBots"></div>
       <div class="label">Số Kẻ Giả Mạo</div>
       <div class="seg" id="lbImps"></div>
+      <div class="label">Thời gian ván</div>
+      <div class="seg" id="lbTime"></div>
       <div class="label">Voice chat khi đang chơi</div>
       <div class="seg" id="lbVoice"></div>
       <label class="check"><input type="checkbox" id="lbConfirm"> Công bố vai người bị đẩy ra ngoài</label>
@@ -454,7 +459,7 @@ button:disabled { opacity: .35; cursor: default; }
   <div class="panel wide">
     <h2>Luật chơi</h2>
     <ol class="rules">
-      <li><b>Phi hành đoàn</b> 👩‍🚀: đi khắp phi thuyền làm các <b>nhiệm vụ</b> (nối dây, quẹt thẻ, nhập mã, bật cầu dao, tải dữ liệu, lặp chuỗi đèn, bắn thiên thạch). Thanh tiến độ trên cùng đầy là <b>thắng</b>. Thấy xác thì bấm <b>📢 Báo</b>; đứng cạnh bàn tròn ở Nhà Ăn có thể bấm <b>Dùng</b> để <b>họp khẩn cấp</b> (1 lần mỗi ván).</li>
+      <li><b>Phi hành đoàn</b> 👩‍🚀: đi khắp phi thuyền làm các <b>nhiệm vụ</b> (nối dây, quẹt thẻ, nhập mã, bật cầu dao, tải dữ liệu, lặp chuỗi đèn, bắn thiên thạch). Thanh tiến độ trên cùng đầy là <b>thắng</b>; <b>hết giờ</b> (⏱ trên thanh, đồng hồ dừng khi họp) mà chưa xong thì Kẻ Giả Mạo thắng. Thấy xác thì bấm <b>📢 Báo</b>; đứng cạnh bàn tròn ở Nhà Ăn có thể bấm <b>Dùng</b> để <b>họp khẩn cấp</b> (1 lần mỗi ván).</li>
       <li><b>Kẻ Giả Mạo</b> 🔪: giả vờ làm nhiệm vụ, <b>giết</b> khi ở gần người khác và không ai nhìn thấy (hồi 25 giây), chui <b>ống thông gió</b> để đi nhanh, <b>phá hoại</b>: tắt đèn (mọi người chỉ thấy rất gần) hoặc lò phản ứng (phi hành đoàn phải tới Lò sửa trong 30 giây, không kịp là thua).</li>
       <li><b>Họp</b>: mọi người bàn luận rồi bỏ phiếu. Ai nhiều phiếu nhất bị <b>đẩy ra ngoài</b> (hoà phiếu hoặc phiếu trắng nhiều nhất thì không ai bị đẩy). Người chơi máy nhớ ai đứng cạnh xác, ai chui ống gió, ai giết trước mắt họ — và sẽ tố cáo trong cuộc họp. Bạn bấm <b>📢</b> cạnh tên ai để tố cáo người đó, bấm <b>✔</b> để bỏ phiếu.</li>
       <li><b>Tầm nhìn</b> 👁️: chỉ thấy những gì nhìn thẳng tới được — tường, thùng hàng, động cơ… che khuất người phía sau. Đèn tắt thì tầm nhìn còn rất ngắn. Phi thuyền rộng, mũi tên vàng ở mép màn hình chỉ tới nhiệm vụ của bạn.</li>
@@ -610,6 +615,9 @@ let muted = store.get('amongusol.mute', false);
 let setup = Object.assign({ name: '', ci: 0, bots: 7, imps: 2, role: 'random', confirm: true }, store.get('amongusol.setup', {}));
 // online (xem phần "chơi online" cuối file): chủ phòng chạy luật + máy chơi, khách chỉ tự đi lại và gửi hành động lên
 const isHost = () => net.on && net.host, isGuest = () => net.on && !net.host;
+const TIME_OPTS = [[5, '5 phút'], [8, '8 phút'], [12, '12 phút']], TIME_DEF = 8;
+const timeMin = () => { const v = net.on ? S.time : setup.time; return TIME_OPTS.some(o => o[0] === v) ? v : TIME_DEF; };
+let gameLeft = 0, timeWarn = 0; // giây chơi còn lại của ván (dừng khi họp)
 let impN = 0, netProg = 0; // số kẻ giả mạo (khách phi hành đoàn không biết là ai) · % nhiệm vụ chủ phòng gửi xuống
 let progShown = 0; // thanh tiến độ chỉ cập nhật khi có cuộc họp
 let miniBg = null; // nền minimap vẽ sẵn
@@ -641,7 +649,7 @@ function beginRound() {
   P.forEach((p, k) => { const a = (k / P.length) * Math.PI * 2; place(p, BUTTON.x + Math.cos(a) * 95, BUTTON.y + Math.sin(a) * 70); p.dir = Math.cos(a) < 0 ? 1 : -1; });
   bodies = []; sabo = null; saboCd = 10; meeting = null; winner = null; mapOpen = false; splats.length = 0; fx.length = 0; bodyBorn.clear();
   for (const p of P) { p.killCd = 10; p.idleT = 0; p.idleWarn = false; }
-  progShown = 0;
+  progShown = 0; gameLeft = timeMin() * 60; timeWarn = 0;
   cam.x = me.x; cam.y = me.y;
   phase = 'reveal';
   for (const id of ['setupSheet', 'resultSheet', 'meetSheet', 'taskSheet', 'lobbySheet', 'netSheet']) $(id).hidden = true;
@@ -1633,7 +1641,7 @@ function syncHud() {
   $('prog').hidden = !inPlay; $('tasks').hidden = !inPlay; $('acts').hidden = phase !== 'play'; $('hint').hidden = phase !== 'play' || innerWidth < 700; $('roleTag').hidden = !inPlay;
   if (!inPlay) return;
   const pct = isGuest() ? netProg : hostPct();
-  $('prog').firstElementChild.style.width = pct + '%'; $('prog').lastElementChild.textContent = `Nhiệm vụ ${pct}%` + (phase === 'over' ? '' : ' · cập nhật khi họp');
+  $('prog').firstElementChild.style.width = pct + '%'; progLabel(pct);
   const rt = $('roleTag'); rt.className = 'role-tag ' + (me.dead ? 'ghost' : me.imp ? 'imp' : 'crew'); rt.textContent = me.dead ? '👻 Ma' + (me.imp ? ' (Kẻ Giả Mạo)' : '') : me.imp ? '🔪 Kẻ Giả Mạo' : '👩‍🚀 Phi hành gia';
   const tk = $('tasks'); tk.className = 'tasks' + (me.imp ? ' imp' : ''); tk.innerHTML = '';
   const h = document.createElement('h3'); h.textContent = me.imp ? 'Nhiệm vụ giả (ngụy trang)' : `Nhiệm vụ của bạn · ${me.tasks.filter(t => t.done).length}/${me.tasks.length}`; tk.appendChild(h);
@@ -1644,8 +1652,13 @@ function syncHud() {
   $('bReport').hidden = me.dead;
   const al = $('alert'); if (sabo) { al.hidden = false; al.className = 'alert' + (sabo.kind === 'lights' ? ' dark' : ''); al.textContent = sabo.kind === 'lights' ? `💡 Mất điện — sửa ở phòng ${FIX.lights.room}` : `☢️ Lò phản ứng nổ sau ${Math.ceil(sabo.t)}s — sửa ở ${FIX.reactor.room}`; } else al.hidden = true;
 }
+function progLabel(pct) {
+  const b = $('prog').lastElementChild, s = Math.ceil(gameLeft), late = phase !== 'over' && s <= 60;
+  b.textContent = `Nhiệm vụ ${pct}%` + (phase === 'over' ? '' : ` · ⏱ ${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`); b.classList.toggle('late', late);
+}
 function hudTick() {
   if (phase !== 'play') return;
+  progLabel(isGuest() ? netProg : hostPct());
   const o = nearby();
   const bu = $('bUse'); bu.disabled = me.vent >= 0 || !(o.task || o.button || o.fix); bu.classList.toggle('pulse', !bu.disabled);
   bu.innerHTML = (o.fix ? '<span>🛠️</span>Sửa' : o.button && !o.task ? '<span>🚨</span>Họp' : '<span>🔧</span>Dùng') + '<kbd>E</kbd>';
@@ -1692,6 +1705,9 @@ function step(dt, now) {
     else if (me.imp) me.killCd = Math.max(0, me.killCd - dt);
     saboCd = Math.max(0, saboCd - dt);
     idleTick(dt);
+    gameLeft = Math.max(0, gameLeft - dt);
+    if (!timeWarn && gameLeft <= 60) { timeWarn = 1; toast(me.imp ? '⏱ Còn 1 phút! Cầm chân phi hành đoàn là thắng.' : '⏱ Còn 1 phút! Làm nhanh nhiệm vụ không là Kẻ Giả Mạo thắng!', 3500); playAlert(); }
+    if (gameLeft <= 0 && !isGuest()) { endGame('imp', 'Hết giờ mà phi hành đoàn chưa làm xong nhiệm vụ!'); return; }
     if (sabo && sabo.kind === 'reactor' && (sirenT -= dt) <= 0) { sirenT = 1; playSiren(); }
     if (sabo && sabo.kind === 'reactor') { sabo.t -= dt; if (sabo.t <= 0 && !isGuest()) { sabo = null; endGame('imp', 'Lò phản ứng đã nổ!'); } }
     if (net.on) netTick(dt, now);
@@ -1804,6 +1820,7 @@ function renderSetup() {
   const seg = (box, opts, cur, fn) => { box.innerHTML = ''; for (const [v, l] of opts) { const b = document.createElement('button'); b.textContent = l; if (v === cur) b.className = 'on'; b.onclick = () => { fn(v); renderSetup(); }; box.appendChild(b); } };
   seg($('suBots'), [[4, '4'], [5, '5'], [6, '6'], [7, '7'], [8, '8'], [9, '9']], setup.bots, v => { setup.bots = v; if (setup.imps > Math.floor(v / 2)) setup.imps = 1; });
   seg($('suImps'), [[1, '1 kẻ'], [2, '2 kẻ']].filter(([v]) => v <= Math.floor(setup.bots / 2)), setup.imps, v => { setup.imps = v; });
+  seg($('suTime'), TIME_OPTS, timeMin(), v => { setup.time = v; });
   seg($('suRole'), [['random', 'Ngẫu nhiên'], ['crew', 'Phi hành gia'], ['imp', 'Kẻ giả mạo']], setup.role, v => { setup.role = v; });
   $('suConfirm').checked = !!setup.confirm;
 }
@@ -1984,16 +2001,17 @@ function renderLobby() {
     const seg = (el, opts, cur, fn) => { el.innerHTML = ''; for (const [v, l] of opts) { const b = document.createElement('button'); b.textContent = l; if (v === cur) b.className = 'on'; b.onclick = () => { fn(v); fixS(); roomChanged(); }; el.appendChild(b); } };
     seg($('lbBots'), [0, 1, 2, 3, 4, 5, 6, 7, 8].filter(v => v <= MAX_P - humans.length).map(v => [v, String(v)]), nb, v => { S.bots = v; });
     seg($('lbImps'), [[1, '1 kẻ'], [2, '2 kẻ'], [3, '3 kẻ']].filter(([v]) => v === 1 || v <= Math.floor((total - 1) / 2)), S.imps, v => { S.imps = v; });
+    seg($('lbTime'), TIME_OPTS, timeMin(), v => { S.time = v; });
     seg($('lbVoice'), [['meet', '🔇 Chỉ khi họp'], ['near', '🔉 Nghe người ở gần']], S.voice, v => { S.voice = v; });
     $('lbConfirm').checked = !!S.confirm;
     const guests = humans.filter(m => !m.host), notReady = guests.filter(m => !m.ready).length;
     $('lbStart').disabled = total < 4 || notReady > 0;
-    $('lbHint').textContent = total < 4 ? 'Cần ít nhất 4 người chơi (thêm máy cho đủ cũng được).' : notReady ? `Chờ ${notReady} người bấm Sẵn sàng.` : `${total} người chơi · ${S.imps} Kẻ Giả Mạo · sẵn sàng!`;
+    $('lbHint').textContent = total < 4 ? 'Cần ít nhất 4 người chơi (thêm máy cho đủ cũng được).' : notReady ? `Chờ ${notReady} người bấm Sẵn sàng.` : `${total} người chơi · ${S.imps} Kẻ Giả Mạo · ${timeMin()} phút · sẵn sàng!`;
   } else {
     const rd = !!(mine && mine.ready);
     $('lbReady').textContent = rd ? '↩️ Chưa xong' : '✅ Sẵn sàng'; $('lbReady').classList.toggle('go', !rd); $('lbReady').disabled = !mine;
     $('lbGuestHint').innerHTML = (rd ? `Đã sẵn sàng · chờ chủ phòng bắt đầu${DOTS}` : 'Chọn tên, màu áo rồi bấm <b>Sẵn sàng</b>.')
-      + `<br>Phòng: ${S.imps} Kẻ Giả Mạo · ${S.voice === 'near' ? 'đang chơi nghe được người ở gần' : 'đang chơi im lặng, nói khi họp'}.`;
+      + `<br>Phòng: ${S.imps} Kẻ Giả Mạo · ván ${timeMin()} phút · ${S.voice === 'near' ? 'đang chơi nghe được người ở gần' : 'đang chơi im lặng, nói khi họp'}.`;
   }
   paintTalk();
 }
@@ -2025,7 +2043,7 @@ $('lbShare').onclick = () => navigator.share({ title: 'Kẻ Giả Mạo Online',
 async function hostOnline(tries = 0) {
   const code = randCode(), n = startNet(true, code);
   M = [{ cid: myCid, name: myName() || 'Chủ phòng', ci: setup.ci, host: true, ready: true, online: true }];
-  S = Object.assign({}, S, { imps: setup.imps, confirm: setup.confirm, bots: Math.min(setup.bots, 3) });
+  S = Object.assign({}, S, { imps: setup.imps, confirm: setup.confirm, bots: Math.min(setup.bots, 3), time: TIME_OPTS.some(o => o[0] === setup.time) ? setup.time : TIME_DEF });
   netSheet('🌐', 'Tạo phòng', `Đang tạo phòng${DOTS}`, [[{ label: 'Huỷ', fn: () => leaveOnline() }]]);
   try { await loadPeerJs(); } catch (e) { if (net === n) netFail('Không tải được', 'Không tải được phần chơi online. Kiểm tra mạng rồi thử lại nhé.', () => hostOnline()); return; }
   if (net !== n) return;
@@ -2187,7 +2205,7 @@ function fullFor(p) {
     t: 'full', id: p.id, ph: phase, S, impN,
     P: P.map(q => ({ id: q.id, name: q.name, ci: q.ci, cid: q.cid, imp: see && q.imp, dead: q.dead, ej: q.ejected, x: Math.round(q.x), y: Math.round(q.y), dir: q.dir })),
     tasks: p.tasks, em: p.emergency, kc: p.killCd, sabo: sabo ? { kind: sabo.kind, t: sabo.t } : null, sc: saboCd,
-    b: bodies.map(b => [b.id, Math.round(b.x), Math.round(b.y)]), pr: hostPct(),
+    b: bodies.map(b => [b.id, Math.round(b.x), Math.round(b.y)]), pr: hostPct(), gl: gameLeft,
     m: m ? { pr: progShown, r: m.reporter.id, v: m.victim ? m.victim.id : -1, room: m.room, t: m.t, phaseV: m.phaseV === 'done' ? 'vote' : m.phaseV, talkT: m.talkT, voteT: m.voteT, voted: Object.keys(m.votes).map(Number), my: m.votes[p.id] } : null,
   };
 }
@@ -2196,7 +2214,7 @@ const hostPct = () => (phase === 'over' ? realPct() : progShown);
 function hostSnap() {
   const imps = P.filter(q => q.imp).map(q => q.id);
   const base = { t: 's', p: P.map(q => [Math.round(q.x), Math.round(q.y), q.dir, Math.hypot(q.vx, q.vy) > 5 ? 1 : 0, q.dead ? 1 : 0, q.vent >= 0 ? 1 : 0]),
-    b: bodies.map(b => [b.id, Math.round(b.x), Math.round(b.y)]), sb: sabo ? [sabo.kind, Math.round(sabo.t * 10) / 10] : 0, pr: hostPct() };
+    b: bodies.map(b => [b.id, Math.round(b.x), Math.round(b.y)]), sb: sabo ? [sabo.kind, Math.round(sabo.t * 10) / 10] : 0, pr: hostPct(), gl: Math.round(gameLeft * 10) / 10 };
   for (const [c, cid] of net.conns) {
     const p = P.find(q => q.cid === cid); if (!p || !c.open) continue;
     try { c.send(Object.assign({}, base, { kc: Math.round(p.killCd * 10) / 10, em: p.emergency, sc: Math.round(saboCd), im: p.imp || p.dead ? imps : undefined })); } catch (e) {}
@@ -2352,6 +2370,7 @@ function applyFull(d) {
   me = P[d.id];
   me.tasks = Array.isArray(d.tasks) ? d.tasks : []; me.emergency = d.em | 0; me.killCd = +d.kc || 0;
   sabo = d.sabo ? { kind: d.sabo.kind, t: d.sabo.t } : null; saboCd = +d.sc || 0; netProg = d.pr | 0;
+  gameLeft = Number.isFinite(+d.gl) ? +d.gl : timeMin() * 60; timeWarn = gameLeft <= 60 ? 1 : 0;
   bodies = (d.b || []).map(([id, x, y]) => ({ id, x, y, ci: P[id] ? P[id].ci : 0, t: 0 }));
   meeting = null; winner = null; mapOpen = false;
   for (const id of ['lobbySheet', 'resultSheet', 'meetSheet', 'taskSheet', 'setupSheet']) $(id).hidden = true;
@@ -2387,6 +2406,7 @@ function applySnap(d) {
   if (d.sb) { if (sabo && sabo.kind === d.sb[0]) sabo.t = d.sb[1]; else sabo = { kind: d.sb[0], t: d.sb[1] }; } else sabo = null;
   if (me.imp) { me.killCd = +d.kc || 0; saboCd = +d.sc || 0; }
   me.emergency = d.em | 0; netProg = d.pr | 0;
+  if (Number.isFinite(+d.gl)) gameLeft = +d.gl;
   if (Array.isArray(d.im)) for (const id of d.im) if (P[id]) P[id].imp = true;
   const key = `${netProg}|${d.sb ? d.sb[0] : ''}|${me.dead}|${(d.im || []).length}`;
   if (key !== net.snapKey) { net.snapKey = key; syncHud(); }
