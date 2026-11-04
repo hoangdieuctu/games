@@ -308,7 +308,7 @@
       case 'sit': hands = [v(-1.5, 1.6, 5.4), v(1.5, 1.6, 5.4)]; poles = [v(-1, 0, 0), v(1, 0, 0)]; break;
       case 'bench': hands = [toT(v(-3.6, hipY + .2, 6.4)), toT(v(3.6, hipY + .2, 6.4))]; poles = [v(-1, 0, -.4), v(1, 0, -.4)]; break;
       case 'pick': hands = [toT(o.reach ? fromSide(o.reach, -2) : v(-2, 1.5, 14)), v(4.4, 2, 4)]; break;
-      case 'water': hands = [v(-2.6, 7, 7.4), v(7, 4, 1)]; poles[0] = v(-1, -.6, 0); break;
+      case 'water': hands = [v(-2.2, 9.4, 8.6), v(6.6, 5, 2)]; poles[0] = v(-1, -.6, 0); break;
       default: hands = [v(-7.2, 3.6, .8), v(7.2, 3.6, .8)];
         if (old && !held && pose === 'stand') hands[0] = v(-6.2, 5.2, 4.6);
     }
@@ -341,7 +341,7 @@
     if (held === 'mallet') { const g = I.mallet; g.visible = true; g.position.copy(hp[0]); aimY(g, malletDir || v(0, .6, .8)); }
     if (held === 'can') {
       const g = I.can; g.visible = true; g.position.copy(hp[0]).add(v(0, .4, 0));
-      g.rotation.set(pose === 'water' ? .6 : 0, 0, 0); fx.spout = g.spout; fx.water = pose === 'water';
+      g.rotation.set(pose === 'water' ? .85 : 0, 0, 0); fx.spout = g.spout; fx.water = pose === 'water';
     }
     if (held === 'trash') { const g = I.trash; g.visible = true; g.position.copy(hp[0]); g.rotation.set(-tilt, 0, 0); }
     if (broom) {
@@ -456,7 +456,8 @@
       g.strokeStyle = 'rgba(235,235,235,.32)'; g.lineWidth = 1; g.beginPath(); g.moveTo(x, y);
       g.quadraticCurveTo(x + Math.sin(T * 2 + i) * 4, y - 9, x + Math.sin(T * 1.4 + i) * 5, y - 20); g.stroke();
     });
-    if (c.water && c.spout) {
+    if (c.water && c.spout && o.pour && window.drawPour) drawPour(g, c.spout[0], c.spout[1], o);
+    else if (c.water && c.spout) {
       const [x, y] = c.spout;
       g.fillStyle = 'rgba(160,210,255,.9)';
       for (let i = 0; i < 6; i++) { const t = (T * 3 + i / 6) % 1; g.beginPath(); g.arc(x + c.wdir * (t * 6 + Math.sin(i * 7) * 2), y + t * 24, 1.3, 0, TAU); g.fill(); }

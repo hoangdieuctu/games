@@ -1846,13 +1846,27 @@ function limb(g, col, w1, w2, ax, ay, bx, by, cx, cy) {
 const shadeCache = new Map();
 function shade(hex, k) { const key = hex + k; let v = shadeCache.get(key); if (!v) { const [r, g, b] = hex2(hex); v = `rgb(${r * k | 0},${g * k | 0},${b * k | 0})`; shadeCache.set(key, v); } return v; }
 const SHOE = '#3a2a1a';
+// dòng nước từ vòi bình tưới rơi vào chậu (toạ độ quanh chân nhân vật, đã chia tỉ lệ)
+function drawPour(g, sx, sy, o) {
+  const k = o.scale || 1, tx = (o.dir < 0 ? -1 : 1) * o.pour.x / k, ty = o.pour.y / k;
+  const at = t => [sx + (tx - sx) * t, sy + (ty - sy) * t * t - 5 * t * (1 - t)];
+  g.strokeStyle = 'rgba(170,215,255,.55)'; g.lineWidth = 1.6; g.lineCap = 'round'; g.beginPath();
+  for (let i = 0; i <= 10; i++) { const [x, y] = at(i / 10); i ? g.lineTo(x, y) : g.moveTo(x, y); } g.stroke();
+  g.fillStyle = 'rgba(190,228,255,.95)';
+  for (let i = 0; i < 7; i++) { const t = (T * 2.6 + i / 7) % 1, [x, y] = at(t); g.beginPath(); g.arc(x + Math.sin(i * 7) * .8, y, 1.3, 0, TAU); g.fill(); }
+  // tia bắn nhẹ trên mặt đất trong chậu
+  g.fillStyle = 'rgba(200,235,255,.8)';
+  for (let i = 0; i < 4; i++) { const t = (T * 3 + i / 4) % 1; g.beginPath(); g.arc(tx + (i - 1.5) * 3 * (1 + t), ty - Math.sin(t * Math.PI) * 4, 1, 0, TAU); g.fill(); }
+}
 function drawPerson(g, o) {
   const k = o.scale || 1;
   g.save(); g.translate(o.x, o.y); g.scale(k, k);
   g.fillStyle = 'rgba(30,15,5,.22)'; g.beginPath(); g.ellipse(0, 1, (o.pose === 'sit' || o.pose === 'kneel' || o.pose === 'kneelbow') ? 17 : 13, 3.6, 0, 0, TAU); g.fill();
   // nhân vật 3D chibi (chibi3d.js); không có WebGL thì vẽ 2D như cũ
   if (window.Chibi3D && Chibi3D.ready && Chibi3D.draw(g, o)) { g.restore(); return; }
+  o._spout = null; if (o.pour) o._base = g.getTransform();
   if (o.back || o.front) personFB(g, o, !!o.back); else personSide(g, o);
+  if (o._spout) { g.setTransform(o._base); drawPour(g, o._spout[0], o._spout[1], o); } // personSide lật khung khi quay trái
   g.restore();
 }
 // đầu to hơn thân một chút cho dễ thương (kiểu chibi nhẹ)
@@ -1915,8 +1929,9 @@ function heldMallet(g, x, y, ang) {
   g.strokeStyle = '#7a4a22'; g.lineWidth = 2.2; g.lineCap = 'round'; g.beginPath(); g.moveTo(x - Math.cos(ang) * 2, y - Math.sin(ang) * 2); g.lineTo(ex, ey); g.stroke();
   g.fillStyle = '#5a2a12'; g.beginPath(); g.ellipse(ex, ey, 3.6, 3, ang, 0, TAU); g.fill();
 }
-function heldCan(g, x, y, tilt, water) {
+function heldCan(g, x, y, tilt, water, o) {
   g.save(); g.translate(x, y + 7); g.rotate(tilt);
+  if (o && o.pour && o._base) { const q = o._base.inverse().transformPoint(g.getTransform().transformPoint(new DOMPoint(16, -8))); o._spout = [q.x, q.y]; }
   g.fillStyle = '#5f8f9a'; rr(g, -6, -6, 12, 11, 3); g.fill();
   g.strokeStyle = '#4a7480'; g.lineWidth = 1.6; g.beginPath(); g.arc(0, -7, 5, Math.PI, TAU); g.stroke();
   g.beginPath(); g.moveTo(5, -1); g.lineTo(14, -7); g.stroke();
@@ -1982,7 +1997,7 @@ function personSide(g, o) {
     case 'sit': nh = [7, -1]; fh = [6, -1]; break;
     case 'bench': nh = [11, 0]; fh = [10, 0]; break;
     case 'pick': { nh = o.reach ? toTorso(o.reach.x, o.reach.y) : toTorso(16, -3); fh = [4, -8]; break; }
-    case 'water': nh = [17, -12]; fh = [5, -6]; break;
+    case 'water': nh = [15, -20]; fh = [6, -10]; break;
     default: nh = [1.5, -4.5]; fh = [-1, -4.5]; if (old && pose === 'stand' && !held) nh = [11, -4];
   }
   g.save(); g.translate(0, hipY); g.rotate(tilt);
@@ -2014,7 +2029,7 @@ function personSide(g, o) {
     else { g.beginPath(); g.arc(hx, hy, 2.7, 0, TAU); g.fill(); }
     if (held === 'incense' && (pose === 'hold' || pose === 'reach' || pose === 'bow')) heldIncense(g, hx + .5, hy - 2, incAng, o.heldN || 3);
     if (held === 'mallet') heldMallet(g, hx, hy, malletAng);
-    if (held === 'can') heldCan(g, hx, hy, pose === 'water' ? .55 : 0, pose === 'water');
+    if (held === 'can') heldCan(g, hx, hy, pose === 'water' ? .75 : 0, pose === 'water' && !o.pour, o);
     if (old && !held && (pose === 'stand' || pose === 'walk')) { const tip = toTorso(16 + (walking ? Math.sin(ph) * 3 : 0), -.5); g.strokeStyle = '#6a4a2a'; g.lineWidth = 2.2; g.beginPath(); g.moveTo(hx, hy - 3); g.lineTo(tip[0], tip[1]); g.stroke(); g.beginPath(); g.arc(hx - 1, hy - 4, 2.6, Math.PI, TAU); g.stroke(); }
     if (held === 'trash') { g.fillStyle = '#4a5a3a'; g.beginPath(); g.moveTo(hx - 5, hy + 2); g.lineTo(hx + 5, hy + 2); g.lineTo(hx + 6, hy + 13); g.lineTo(hx - 6, hy + 13); g.fill(); }
     if (pose === 'sweep') {
@@ -2996,10 +3011,11 @@ function updateScript(dt) {
   me.bow = s.bow ? s.bow(kk) : 0;
   me.raise = typeof s.raise === 'function' ? s.raise(kk) : (s.raise || 0);
   me.reach = s.reach || null;
+  me.pour = s.pour || null;
   if (s.t >= s.d) {
     s.end && s.end();
     me.script.shift();
-    if (!me.script.length) { me.pose = 'stand'; me.bow = 0; me.held = null; mode = 'free'; const f = me.scriptFin; me.scriptFin = null; f && f(); renderActions(); }
+    if (!me.script.length) { me.pose = 'stand'; me.bow = 0; me.held = null; me.pour = null; mode = 'free'; const f = me.scriptFin; me.scriptFin = null; f && f(); renderActions(); }
   }
 }
 const bowCurve = k => Math.sin(k * Math.PI);
@@ -3792,10 +3808,22 @@ function fillCan() {
     me.can = 4; toast('🪣 Đã múc đầy bình tưới (4 lần tưới). Chậu cây nào héo thì tưới nhé.');
   });
 }
-function waterPlant(p) {
+const POUR_DX = 34; // đứng cách tâm chậu bấy nhiêu để vòi bình chĩa đúng miệng chậu
+function waterPlant(p, arrived) {
   if (!me.can) { toast('Bình hết nước rồi, ra chum 🪣 múc thêm nhé.'); return; }
+  const sy = p.y + 4;
+  if (!arrived && (Math.abs(Math.abs(me.x - p.x) - POUR_DX) > 6 || Math.abs(me.y - sy) > 6)) {
+    // đi tới đứng cạnh chậu (ưu tiên phía đang đứng, không được thì sang phía kia)
+    const pref = me.x < p.x ? -1 : 1;
+    for (const sd of [pref, -pref]) {
+      const sx = p.x + sd * POUR_DX;
+      if (walkable(sx, sy, me.scene, 10) && findPath(me.scene, me.x, me.y, sx, sy)) { walkPath(sx, sy, () => waterPlant(p, true)); return; }
+    }
+  }
   me.dir = p.x >= me.x ? 1 : -1; me.back = me.front = false;
-  runScript([{ d: 1.6, pose: 'water', held: 'can', at: () => sndNoise(1.4, 2600, 1400, .07, 'bandpass', .6) }], () => {
+  // đích rót: giữa mặt đất trong chậu, toạ độ nhìn ngang so với chân nhân vật
+  const pour = { x: Math.max(14, Math.abs(p.x - me.x) - 3), y: p.y - 27 - me.y };
+  runScript([{ d: 1.6, pose: 'water', held: 'can', pour, at: () => sndNoise(1.4, 2600, 1400, .07, 'bandpass', .6) }], () => {
     p.thirst = 0; p.wT = T; me.can--;
     S.today.watered = (S.today.watered || 0) + 1; save();
     merit(1); addFloat(p.x, p.y - 60, '🌱', '#c8f5a0', 16);
@@ -4586,7 +4614,8 @@ function applySt(r, s) {
   if (!r || !Array.isArray(s)) return;
   r.tx = num(s[0], 0, 2600, r.tx); r.dir = s[1] < 0 ? -1 : 1; r.pose = POSES.has(s[2]) ? s[2] : 'stand'; r.bowT = num(s[3], 0, 1); r.ty = num(s[4], 0, 2400, r.ty);
   r.scene = SCENE_IDS[s[5]] || 'out'; if (r.pose !== 'walk') { r.back = s[6] === 1; r.front = s[6] === 2; }
-  if (r.pose === 'hold') { r.held = 'incense'; r.heldN = 3; } else r.held = null;
+  if (r.pose === 'hold') { r.held = 'incense'; r.heldN = 3; } else r.held = r.pose === 'water' ? 'can' : null;
+  r.pour = r.pose === 'water' ? { x: POUR_DX - 3, y: -31 } : null;
 }
 // áp dụng sự kiện từ người khác
 function applyEv(from, d) {
@@ -4793,7 +4822,7 @@ cv.addEventListener('pointerdown', e => {
       if (Math.abs(lx - s_.x) < 10 && ly > s_.y - 8 && ly < s_.y + s_.len + 8) { toast(`🎗️ <b>${esc(r.name || 'Ai đó')}</b>: “${esc(r.text)}”`, 4200); return; }
     }
     for (const l of litter) if (Math.hypot(w.x - l.x, w.y - l.y) < 18) { if (me.carry >= 6) toast('Túi rác đầy rồi, mang ra thùng rác 🗑️ nhé.'); else walkPath(l.x, l.y + 2, () => pickLitter(l)); return; }
-    if (me.can != null) for (const p of PLANTS) if (Math.abs(w.x - p.x) < 22 && w.y < p.y + 6 && w.y > p.y - 80) { const sx = me.x < p.x ? p.x - 36 : p.x + 36; walkPath(sx, p.y + 4, () => waterPlant(p)); return; }
+    if (me.can != null) for (const p of PLANTS) if (Math.abs(w.x - p.x) < 22 && w.y < p.y + 6 && w.y > p.y - 80) { waterPlant(p); return; }
     for (const l of lanterns) if (Math.hypot(w.x - l.x, w.y - l.y + 6) < 18) { toast(`🪷 ${l.text ? `<b>${esc(l.name || 'Ai đó')}</b>: “${esc(l.text)}”` : 'Một ngọn hoa đăng lặng lẽ trôi.'}`, 4200); return; }
   }
   for (const r of remotes.values()) if (r.scene === me.scene && Math.abs(w.x - r.x) < 16 && w.y > r.y - 80 && w.y < r.y + 6) { say(me, `Chào ${r.name} 🙏`); netSend({ t: 'ev', k: 'say', text: `Chào ${r.name} 🙏` }); return; }
