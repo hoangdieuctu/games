@@ -266,19 +266,6 @@ canvas#board {
 .ov-home { margin-top: 10px; color: var(--glow-c); opacity: .75; font-family: 'Orbitron', sans-serif; font-size: 11px; letter-spacing: .15em; text-decoration: none; }
 .ov-home:hover { opacity: 1; }
 </style>
-<style id="kho-back-css">
-/* Nút về kho trò chơi — dùng chung cho mọi game (theo kiểu Xếp Bi) */
-a.kho-back.kho-back{display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:4px!important;
-  width:auto!important;height:auto!important;min-width:0!important;min-height:0!important;padding:8px 15px 8px 12px!important;
-  border-radius:999px!important;border:2px solid rgba(255,255,255,.4)!important;background:rgba(35,18,77,.62)!important;
-  color:#efe6ff!important;font:700 15px/1.1 'Baloo 2','Nunito',system-ui,-apple-system,sans-serif!important;letter-spacing:normal!important;
-  text-transform:none!important;text-decoration:none!important;white-space:nowrap!important;opacity:1!important;
-  box-shadow:0 4px 14px rgba(20,8,60,.28)!important;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);cursor:pointer;flex:none!important;box-sizing:border-box!important}
-a.kho-back.kho-back:hover{background:rgba(35,18,77,.75)!important}
-a.kho-back.kho-back:active{transform:scale(.96)}
-a.kho-back .kb-ar{font-size:22px;line-height:.8;margin-top:-2px}
-@media (max-width:520px){a.kho-back.kb-compact .kb-tx{display:none}a.kho-back.kho-back.kb-compact{padding:7px 13px 9px!important}}
-</style>
 </head>
 <body>
 
@@ -359,7 +346,6 @@ a.kho-back .kb-ar{font-size:22px;line-height:.8;margin-top:-2px}
   <div class="ov-sub" id="ov-sub">CLASSIC · MODERN · FAST</div>
   <div id="ov-stats"></div>
   <button class="ov-btn" id="ov-btn" onclick="startGame()">START GAME</button>
-  <a class="ov-home kho-back" href="../index.html" aria-label="Về kho trò chơi"><span class="kb-ar">‹</span><span class="kb-tx">Về kho trò chơi</span></a>
   <div class="key-hint" style="margin-top:4px">
     <kbd>←→</kbd> Move &nbsp; <kbd>↑</kbd><kbd>Z</kbd> Rotate &nbsp; <kbd>↓</kbd> Soft Drop<br>
     <kbd>Space</kbd> Hard Drop &nbsp; <kbd>C</kbd> Hold &nbsp; <kbd>P</kbd> Pause
