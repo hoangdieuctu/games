@@ -1,0 +1,746 @@
+{
+ "width": 3840,
+ "height": 2160,
+ "background": "world-map-base",
+ "homeIsland": {
+  "x": 1960,
+  "y": 1105,
+  "asset": "world-map-home-island"
+ },
+ "regions": [
+  {
+   "id": "animal-island",
+   "name": "Đảo Động Vật",
+   "nameEn": "Animal Island",
+   "color": "#6cc46a",
+   "polygon": [
+    [
+     190,
+     1215
+    ],
+    [
+     450,
+     1110
+    ],
+    [
+     790,
+     1135
+    ],
+    [
+     1000,
+     1300
+    ],
+    [
+     1060,
+     1590
+    ],
+    [
+     960,
+     1880
+    ],
+    [
+     670,
+     2040
+    ],
+    [
+     340,
+     2030
+    ],
+    [
+     130,
+     1850
+    ],
+    [
+     80,
+     1500
+    ]
+   ],
+   "center": [
+    580,
+    1600
+   ],
+   "label": [
+    600,
+    1270
+   ],
+   "icon": "world-animal-island-icon",
+   "entrance": "world-animal-island-entrance",
+   "entrancePos": [
+    905,
+    1575
+   ],
+   "background": "world-animal-island-background",
+   "lockedOverlay": {
+    "asset": "world-animal-island-locked",
+    "x": 569,
+    "y": 1580
+   },
+   "unlocked": true,
+   "landmarks": [
+    {
+     "asset": "world-animal-island-waterfall",
+     "x": 470,
+     "y": 1470
+    },
+    {
+     "asset": "world-animal-island-big-tree",
+     "x": 300,
+     "y": 1700
+    },
+    {
+     "asset": "world-animal-island-animal-houses",
+     "x": 760,
+     "y": 1730
+    },
+    {
+     "asset": "world-animal-island-barn",
+     "x": 470,
+     "y": 1930
+    }
+   ]
+  },
+  {
+   "id": "puzzle-forest",
+   "name": "Rừng Câu Đố",
+   "nameEn": "Puzzle Forest",
+   "color": "#9b85d9",
+   "polygon": [
+    [
+     255,
+     650
+    ],
+    [
+     300,
+     300
+    ],
+    [
+     470,
+     175
+    ],
+    [
+     800,
+     125
+    ],
+    [
+     1150,
+     150
+    ],
+    [
+     1420,
+     120
+    ],
+    [
+     1470,
+     480
+    ],
+    [
+     1400,
+     760
+    ],
+    [
+     1300,
+     950
+    ],
+    [
+     1260,
+     1180
+    ],
+    [
+     1095,
+     1190
+    ],
+    [
+     905,
+     1060
+    ],
+    [
+     610,
+     1005
+    ],
+    [
+     390,
+     885
+    ]
+   ],
+   "center": [
+    820,
+    560
+   ],
+   "label": [
+    820,
+    210
+   ],
+   "icon": "world-puzzle-forest-icon",
+   "entrance": "world-puzzle-forest-entrance",
+   "entrancePos": [
+    1100,
+    900
+   ],
+   "background": "world-puzzle-forest-background",
+   "lockedOverlay": {
+    "asset": "world-puzzle-forest-locked",
+    "x": 861,
+    "y": 654
+   },
+   "unlocked": false,
+   "landmarks": [
+    {
+     "asset": "world-puzzle-forest-magic-tree",
+     "x": 800,
+     "y": 600
+    },
+    {
+     "asset": "world-puzzle-forest-mushrooms",
+     "x": 520,
+     "y": 860
+    },
+    {
+     "asset": "world-puzzle-forest-jigsaw-arch",
+     "x": 1110,
+     "y": 460
+    },
+    {
+     "asset": "world-puzzle-forest-maze",
+     "x": 520,
+     "y": 470
+    },
+    {
+     "asset": "world-puzzle-forest-rune-stones",
+     "x": 1180,
+     "y": 720
+    }
+   ]
+  },
+  {
+   "id": "math-mountain",
+   "name": "Núi Toán Học",
+   "nameEn": "Math Mountain",
+   "color": "#ff9d5c",
+   "polygon": [
+    [
+     1420,
+     120
+    ],
+    [
+     1500,
+     98
+    ],
+    [
+     1900,
+     84
+    ],
+    [
+     2300,
+     104
+    ],
+    [
+     2620,
+     90
+    ],
+    [
+     2640,
+     480
+    ],
+    [
+     2600,
+     860
+    ],
+    [
+     2360,
+     805
+    ],
+    [
+     2060,
+     775
+    ],
+    [
+     1760,
+     785
+    ],
+    [
+     1520,
+     848
+    ],
+    [
+     1400,
+     760
+    ],
+    [
+     1470,
+     480
+    ]
+   ],
+   "center": [
+    2020,
+    440
+   ],
+   "label": [
+    2040,
+    700
+   ],
+   "icon": "world-math-mountain-icon",
+   "entrance": "world-math-mountain-entrance",
+   "entrancePos": [
+    1905,
+    680
+   ],
+   "background": "world-math-mountain-background",
+   "lockedOverlay": {
+    "asset": "world-math-mountain-locked",
+    "x": 2027,
+    "y": 471
+   },
+   "unlocked": true,
+   "landmarks": [
+    {
+     "asset": "world-math-mountain-peak",
+     "x": 2040,
+     "y": 560
+    },
+    {
+     "asset": "world-math-mountain-floating-blocks",
+     "x": 2390,
+     "y": 400
+    },
+    {
+     "asset": "world-math-mountain-dice-tower",
+     "x": 1590,
+     "y": 500
+    },
+    {
+     "asset": "world-math-mountain-fruit-garden",
+     "x": 2420,
+     "y": 700
+    }
+   ]
+  },
+  {
+   "id": "creative-town",
+   "name": "Thị Trấn Sáng Tạo",
+   "nameEn": "Creative Town",
+   "color": "#f58aa8",
+   "polygon": [
+    [
+     2620,
+     90
+    ],
+    [
+     3100,
+     134
+    ],
+    [
+     3420,
+     250
+    ],
+    [
+     3610,
+     470
+    ],
+    [
+     3640,
+     720
+    ],
+    [
+     3500,
+     930
+    ],
+    [
+     3260,
+     1040
+    ],
+    [
+     3010,
+     1050
+    ],
+    [
+     2800,
+     995
+    ],
+    [
+     2600,
+     860
+    ],
+    [
+     2640,
+     480
+    ]
+   ],
+   "center": [
+    3120,
+    600
+   ],
+   "label": [
+    3130,
+    210
+   ],
+   "icon": "world-creative-town-icon",
+   "entrance": "world-creative-town-entrance",
+   "entrancePos": [
+    2960,
+    800
+   ],
+   "background": "world-creative-town-background",
+   "lockedOverlay": {
+    "asset": "world-creative-town-locked",
+    "x": 3120,
+    "y": 563
+   },
+   "unlocked": false,
+   "landmarks": [
+    {
+     "asset": "world-creative-town-art-studio",
+     "x": 2930,
+     "y": 470
+    },
+    {
+     "asset": "world-creative-town-houses",
+     "x": 3170,
+     "y": 640
+    },
+    {
+     "asset": "world-creative-town-crane",
+     "x": 3250,
+     "y": 390
+    },
+    {
+     "asset": "world-creative-town-workshop",
+     "x": 2900,
+     "y": 700
+    }
+   ]
+  },
+  {
+   "id": "life-skills-village",
+   "name": "Làng Kỹ Năng",
+   "nameEn": "Life Skills Village",
+   "color": "#f5c242",
+   "polygon": [
+    [
+     1330,
+     1140
+    ],
+    [
+     1400,
+     1300
+    ],
+    [
+     1600,
+     1385
+    ],
+    [
+     1900,
+     1400
+    ],
+    [
+     2200,
+     1355
+    ],
+    [
+     2460,
+     1290
+    ],
+    [
+     2690,
+     1275
+    ],
+    [
+     2900,
+     1330
+    ],
+    [
+     3010,
+     1440
+    ],
+    [
+     2930,
+     1640
+    ],
+    [
+     2680,
+     1850
+    ],
+    [
+     2320,
+     1995
+    ],
+    [
+     1900,
+     2050
+    ],
+    [
+     1500,
+     2015
+    ],
+    [
+     1225,
+     1880
+    ],
+    [
+     1115,
+     1660
+    ],
+    [
+     1125,
+     1420
+    ],
+    [
+     1095,
+     1190
+    ],
+    [
+     1260,
+     1180
+    ]
+   ],
+   "center": [
+    2000,
+    1700
+   ],
+   "label": [
+    1960,
+    1640
+   ],
+   "icon": "world-life-skills-village-icon",
+   "entrance": "world-life-skills-village-entrance",
+   "entrancePos": [
+    1900,
+    1540
+   ],
+   "background": "world-life-skills-village-background",
+   "lockedOverlay": {
+    "asset": "world-life-skills-village-locked",
+    "x": 2050,
+    "y": 1595
+   },
+   "unlocked": true,
+   "landmarks": [
+    {
+     "asset": "world-life-skills-village-school",
+     "x": 1560,
+     "y": 1700
+    },
+    {
+     "asset": "world-life-skills-village-grocery",
+     "x": 2150,
+     "y": 1600
+    },
+    {
+     "asset": "world-life-skills-village-kitchen",
+     "x": 2480,
+     "y": 1740
+    },
+    {
+     "asset": "world-life-skills-village-playground",
+     "x": 1640,
+     "y": 1960
+    },
+    {
+     "asset": "world-life-skills-village-garden",
+     "x": 2280,
+     "y": 1920
+    }
+   ]
+  },
+  {
+   "id": "adventure-ocean",
+   "name": "Đại Dương Phiêu Lưu",
+   "nameEn": "Adventure Ocean",
+   "color": "#3d9ad6",
+   "polygon": [
+    [
+     3010,
+     1090
+    ],
+    [
+     3290,
+     1075
+    ],
+    [
+     3560,
+     960
+    ],
+    [
+     3800,
+     930
+    ],
+    [
+     3810,
+     2130
+    ],
+    [
+     2350,
+     2130
+    ],
+    [
+     2700,
+     1900
+    ],
+    [
+     2980,
+     1660
+    ],
+    [
+     3070,
+     1440
+    ],
+    [
+     2960,
+     1300
+    ]
+   ],
+   "center": [
+    3380,
+    1620
+   ],
+   "label": [
+    3420,
+    1900
+   ],
+   "icon": "world-adventure-ocean-icon",
+   "entrance": "world-adventure-ocean-entrance",
+   "entrancePos": [
+    2985,
+    1470
+   ],
+   "background": "world-adventure-ocean-background",
+   "lockedOverlay": {
+    "asset": "world-adventure-ocean-locked",
+    "x": 3114,
+    "y": 1537
+   },
+   "unlocked": false,
+   "landmarks": [
+    {
+     "asset": "world-adventure-ocean-submarine-dock",
+     "x": 3040,
+     "y": 1530
+    },
+    {
+     "asset": "world-adventure-ocean-coral-reef",
+     "x": 3330,
+     "y": 1560
+    },
+    {
+     "asset": "world-adventure-ocean-sea-cave",
+     "x": 3540,
+     "y": 1745
+    },
+    {
+     "asset": "world-adventure-ocean-palm-hut",
+     "x": 3290,
+     "y": 1320
+    }
+   ]
+  }
+ ],
+ "decorations": [
+  {
+   "asset": "world-map-cloud-1",
+   "x": 900,
+   "y": 1150,
+   "drift": true
+  },
+  {
+   "asset": "world-map-cloud-2",
+   "x": 2600,
+   "y": 1020,
+   "drift": true
+  },
+  {
+   "asset": "world-map-cloud-3",
+   "x": 2500,
+   "y": 1990,
+   "drift": true
+  },
+  {
+   "asset": "world-map-cloud-2",
+   "x": 230,
+   "y": 2050,
+   "drift": true
+  },
+  {
+   "asset": "world-map-boat",
+   "x": 2300,
+   "y": 1160
+  },
+  {
+   "asset": "world-map-boat",
+   "x": 3420,
+   "y": 1980
+  },
+  {
+   "asset": "world-map-seagull",
+   "x": 3000,
+   "y": 1250,
+   "anim": "seagull-flap",
+   "drift": true
+  },
+  {
+   "asset": "world-map-seagull",
+   "x": 1500,
+   "y": 1180,
+   "anim": "seagull-flap",
+   "drift": true
+  },
+  {
+   "asset": "world-map-seagull",
+   "x": 700,
+   "y": 1080,
+   "anim": "seagull-flap",
+   "drift": true
+  },
+  {
+   "asset": "world-map-whale",
+   "x": 3600,
+   "y": 1450,
+   "anim": "whale-spout"
+  },
+  {
+   "asset": "world-map-fish-jump",
+   "x": 3350,
+   "y": 1800,
+   "anim": "fish-jump"
+  },
+  {
+   "asset": "world-map-fish-jump",
+   "x": 2150,
+   "y": 1250,
+   "anim": "fish-jump"
+  },
+  {
+   "asset": "world-map-wave-sparkle",
+   "x": 3150,
+   "y": 1700,
+   "anim": "wave-sparkle"
+  },
+  {
+   "asset": "world-map-wave-sparkle",
+   "x": 1700,
+   "y": 1240,
+   "anim": "wave-sparkle"
+  },
+  {
+   "asset": "world-map-wave-sparkle",
+   "x": 3700,
+   "y": 700,
+   "anim": "wave-sparkle"
+  },
+  {
+   "asset": "world-map-wave-sparkle",
+   "x": 80,
+   "y": 700,
+   "anim": "wave-sparkle"
+  },
+  {
+   "asset": "world-map-wave-sparkle",
+   "x": 2700,
+   "y": 2100,
+   "anim": "wave-sparkle"
+  },
+  {
+   "asset": "world-ui-compass",
+   "x": 3690,
+   "y": 190
+  }
+ ]
+}

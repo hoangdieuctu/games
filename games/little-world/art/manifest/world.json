@@ -1,0 +1,2170 @@
+{
+ "group": "world",
+ "entries": [
+  {
+   "type": "image",
+   "scale": 1,
+   "origin": [
+    0,
+    0
+   ],
+   "id": "world-map-base",
+   "file": "world-map/world-map-base.webp",
+   "width": 3840,
+   "height": 2160,
+   "format": "webp",
+   "category": "world-map",
+   "usage": "Ảnh nền bản đồ thế giới (địa hình + chi tiết nhỏ nướng sẵn). Đặt tại (0,0), depth thấp nhất.",
+   "tags": [
+    "background",
+    "world-map"
+   ]
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "world-map-home-island",
+   "file": "world-map/home-island.png",
+   "width": 952,
+   "height": 592,
+   "category": "world-map",
+   "usage": "Đảo Nhà của bé giữa Vịnh Trung Tâm; đặt tại homeIsland.x,y (tâm đảo).",
+   "tags": [
+    "landmark",
+    "home"
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "world-animal-island-icon",
+   "file": "regions/animal-island/icon.png",
+   "width": 272,
+   "height": 272,
+   "category": "regions/animal-island",
+   "usage": "Huy hiệu tròn của vùng Đảo Động Vật (~128 đơn vị)",
+   "tags": [
+    "icon",
+    "region"
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.4952,
+    0.8978
+   ],
+   "id": "world-animal-island-entrance",
+   "file": "regions/animal-island/entrance.png",
+   "width": 626,
+   "height": 548,
+   "category": "regions/animal-island",
+   "usage": "Cổng vào vùng Đảo Động Vật; có biển trống để Phaser vẽ tên. Dùng trong cảnh vùng (scale 0.5 ≈ 260 đơn vị) hoặc trên bản đồ (scale ~0.2).",
+   "tags": [
+    "entrance",
+    "region"
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 1,
+   "origin": [
+    0,
+    0
+   ],
+   "id": "world-animal-island-background",
+   "file": "regions/animal-island/background.webp",
+   "width": 1920,
+   "height": 1080,
+   "format": "webp",
+   "category": "regions/animal-island",
+   "usage": "Ảnh nền cảnh bên trong vùng Đảo Động Vật (trời/xa/giữa/gần); vùng giữa-dưới để trống cho UI/mini-game.",
+   "tags": [
+    "background",
+    "region"
+   ]
+  },
+  {
+   "type": "image",
+   "scale": 1,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "world-animal-island-locked",
+   "file": "regions/animal-island/locked-overlay.webp",
+   "width": 1144,
+   "height": 1114,
+   "category": "regions/animal-island",
+   "usage": "Mây phép phủ vùng Đảo Động Vật khi còn khoá (toạ độ bản đồ, scale 1).",
+   "tags": [
+    "overlay",
+    "locked"
+   ],
+   "format": "webp"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.494,
+    0.8872
+   ],
+   "id": "world-animal-island-waterfall",
+   "file": "regions/animal-island/waterfall.png",
+   "width": 664,
+   "height": 674,
+   "category": "regions/animal-island",
+   "usage": "Thác nước trên vách đá — mốc vùng Đảo Động Vật trên bản đồ (setDepth theo y đế).",
+   "tags": [
+    "landmark",
+    "region",
+    "animal-island"
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5039,
+    0.9035
+   ],
+   "id": "world-animal-island-big-tree",
+   "file": "regions/animal-island/big-tree.png",
+   "width": 516,
+   "height": 622,
+   "category": "regions/animal-island",
+   "usage": "Cây cổ thụ có nhà trên cây — mốc vùng Đảo Động Vật trên bản đồ (setDepth theo y đế).",
+   "tags": [
+    "landmark",
+    "region",
+    "animal-island"
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5145,
+    0.8385
+   ],
+   "id": "world-animal-island-animal-houses",
+   "file": "regions/animal-island/animal-houses.png",
+   "width": 622,
+   "height": 384,
+   "category": "regions/animal-island",
+   "usage": "Cụm nhà thú (hang thỏ, nhà gấu, chuồng chim) — mốc vùng Đảo Động Vật trên bản đồ (setDepth theo y đế).",
+   "tags": [
+    "landmark",
+    "region",
+    "animal-island"
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.8093
+   ],
+   "id": "world-animal-island-barn",
+   "file": "regions/animal-island/barn.png",
+   "width": 472,
+   "height": 388,
+   "category": "regions/animal-island",
+   "usage": "Chuồng trại & tháp silo — mốc vùng Đảo Động Vật trên bản đồ (setDepth theo y đế).",
+   "tags": [
+    "landmark",
+    "region",
+    "animal-island"
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "world-puzzle-forest-icon",
+   "file": "regions/puzzle-forest/icon.png",
+   "width": 272,
+   "height": 272,
+   "category": "regions/puzzle-forest",
+   "usage": "Huy hiệu tròn của vùng Rừng Câu Đố (~128 đơn vị)",
+   "tags": [
+    "icon",
+    "region"
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.4936,
+    0.8911
+   ],
+   "id": "world-puzzle-forest-entrance",
+   "file": "regions/puzzle-forest/entrance.png",
+   "width": 628,
+   "height": 514,
+   "category": "regions/puzzle-forest",
+   "usage": "Cổng vào vùng Rừng Câu Đố; có biển trống để Phaser vẽ tên. Dùng trong cảnh vùng (scale 0.5 ≈ 260 đơn vị) hoặc trên bản đồ (scale ~0.2).",
+   "tags": [
+    "entrance",
+    "region"
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 1,
+   "origin": [
+    0,
+    0
+   ],
+   "id": "world-puzzle-forest-background",
+   "file": "regions/puzzle-forest/background.webp",
+   "width": 1920,
+   "height": 1080,
+   "format": "webp",
+   "category": "regions/puzzle-forest",
+   "usage": "Ảnh nền cảnh bên trong vùng Rừng Câu Đố (trời/xa/giữa/gần); vùng giữa-dưới để trống cho UI/mini-game.",
+   "tags": [
+    "background",
+    "region"
+   ]
+  },
+  {
+   "type": "image",
+   "scale": 1,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "world-puzzle-forest-locked",
+   "file": "regions/puzzle-forest/locked-overlay.webp",
+   "width": 1381,
+   "height": 1265,
+   "category": "regions/puzzle-forest",
+   "usage": "Mây phép phủ vùng Rừng Câu Đố khi còn khoá (toạ độ bản đồ, scale 1).",
+   "tags": [
+    "overlay",
+    "locked"
+   ],
+   "format": "webp"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.9129
+   ],
+   "id": "world-puzzle-forest-magic-tree",
+   "file": "regions/puzzle-forest/magic-tree.png",
+   "width": 632,
+   "height": 712,
+   "category": "regions/puzzle-forest",
+   "usage": "Cây phép thuật phát sáng — mốc vùng Rừng Câu Đố trên bản đồ (setDepth theo y đế).",
+   "tags": [
+    "landmark",
+    "region",
+    "puzzle-forest"
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.4841,
+    0.8409
+   ],
+   "id": "world-puzzle-forest-mushrooms",
+   "file": "regions/puzzle-forest/mushrooms.png",
+   "width": 566,
+   "height": 440,
+   "category": "regions/puzzle-forest",
+   "usage": "Cụm nấm khổng lồ — mốc vùng Rừng Câu Đố trên bản đồ (setDepth theo y đế).",
+   "tags": [
+    "landmark",
+    "region",
+    "puzzle-forest"
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.4924,
+    0.8787
+   ],
+   "id": "world-puzzle-forest-jigsaw-arch",
+   "file": "regions/puzzle-forest/jigsaw-arch.png",
+   "width": 524,
+   "height": 478,
+   "category": "regions/puzzle-forest",
+   "usage": "Cổng vòm đá ghép hình — mốc vùng Rừng Câu Đố trên bản đồ (setDepth theo y đế).",
+   "tags": [
+    "landmark",
+    "region",
+    "puzzle-forest"
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.8654
+   ],
+   "id": "world-puzzle-forest-maze",
+   "file": "regions/puzzle-forest/maze.png",
+   "width": 632,
+   "height": 416,
+   "category": "regions/puzzle-forest",
+   "usage": "Mê cung hàng rào — mốc vùng Rừng Câu Đố trên bản đồ (setDepth theo y đế).",
+   "tags": [
+    "landmark",
+    "region",
+    "puzzle-forest"
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.854
+   ],
+   "id": "world-puzzle-forest-rune-stones",
+   "file": "regions/puzzle-forest/rune-stones.png",
+   "width": 472,
+   "height": 274,
+   "category": "regions/puzzle-forest",
+   "usage": "Vòng đá ký hiệu phát sáng — mốc vùng Rừng Câu Đố trên bản đồ (setDepth theo y đế).",
+   "tags": [
+    "landmark",
+    "region",
+    "puzzle-forest"
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "world-math-mountain-icon",
+   "file": "regions/math-mountain/icon.png",
+   "width": 272,
+   "height": 272,
+   "category": "regions/math-mountain",
+   "usage": "Huy hiệu tròn của vùng Núi Toán Học (~128 đơn vị)",
+   "tags": [
+    "icon",
+    "region"
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.4813,
+    0.9018
+   ],
+   "id": "world-math-mountain-entrance",
+   "file": "regions/math-mountain/entrance.png",
+   "width": 640,
+   "height": 570,
+   "category": "regions/math-mountain",
+   "usage": "Cổng vào vùng Núi Toán Học; có biển trống để Phaser vẽ tên. Dùng trong cảnh vùng (scale 0.5 ≈ 260 đơn vị) hoặc trên bản đồ (scale ~0.2).",
+   "tags": [
+    "entrance",
+    "region"
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 1,
+   "origin": [
+    0,
+    0
+   ],
+   "id": "world-math-mountain-background",
+   "file": "regions/math-mountain/background.webp",
+   "width": 1920,
+   "height": 1080,
+   "format": "webp",
+   "category": "regions/math-mountain",
+   "usage": "Ảnh nền cảnh bên trong vùng Núi Toán Học (trời/xa/giữa/gần); vùng giữa-dưới để trống cho UI/mini-game.",
+   "tags": [
+    "background",
+    "region"
+   ]
+  },
+  {
+   "type": "image",
+   "scale": 1,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "world-math-mountain-locked",
+   "file": "regions/math-mountain/locked-overlay.webp",
+   "width": 1413,
+   "height": 970,
+   "category": "regions/math-mountain",
+   "usage": "Mây phép phủ vùng Núi Toán Học khi còn khoá (toạ độ bản đồ, scale 1).",
+   "tags": [
+    "overlay",
+    "locked"
+   ],
+   "format": "webp"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.4864,
+    0.9241
+   ],
+   "id": "world-math-mountain-peak",
+   "file": "regions/math-mountain/peak.png",
+   "width": 1102,
+   "height": 948,
+   "category": "regions/math-mountain",
+   "usage": "Đỉnh Núi Toán (bậc khối màu, bàn tính, cờ đỉnh) — mốc vùng Núi Toán Học trên bản đồ (setDepth theo y đế).",
+   "tags": [
+    "landmark",
+    "region",
+    "math-mountain"
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.4982,
+    0.9134
+   ],
+   "id": "world-math-mountain-floating-blocks",
+   "file": "regions/math-mountain/floating-blocks.png",
+   "width": 546,
+   "height": 554,
+   "category": "regions/math-mountain",
+   "usage": "Đảo khối hình học bay — mốc vùng Núi Toán Học trên bản đồ (setDepth theo y đế).",
+   "tags": [
+    "landmark",
+    "region",
+    "math-mountain"
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5143,
+    0.9249
+   ],
+   "id": "world-math-mountain-dice-tower",
+   "file": "regions/math-mountain/dice-tower.png",
+   "width": 350,
+   "height": 692,
+   "category": "regions/math-mountain",
+   "usage": "Tháp xúc xắc — mốc vùng Núi Toán Học trên bản đồ (setDepth theo y đế).",
+   "tags": [
+    "landmark",
+    "region",
+    "math-mountain"
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.8165
+   ],
+   "id": "world-math-mountain-fruit-garden",
+   "file": "regions/math-mountain/fruit-garden.png",
+   "width": 584,
+   "height": 316,
+   "category": "regions/math-mountain",
+   "usage": "Vườn trái cây — mốc vùng Núi Toán Học trên bản đồ (setDepth theo y đế).",
+   "tags": [
+    "landmark",
+    "region",
+    "math-mountain"
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "world-creative-town-icon",
+   "file": "regions/creative-town/icon.png",
+   "width": 272,
+   "height": 272,
+   "category": "regions/creative-town",
+   "usage": "Huy hiệu tròn của vùng Thị Trấn Sáng Tạo (~128 đơn vị)",
+   "tags": [
+    "icon",
+    "region"
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5408,
+    0.888
+   ],
+   "id": "world-creative-town-entrance",
+   "file": "regions/creative-town/entrance.png",
+   "width": 662,
+   "height": 500,
+   "category": "regions/creative-town",
+   "usage": "Cổng vào vùng Thị Trấn Sáng Tạo; có biển trống để Phaser vẽ tên. Dùng trong cảnh vùng (scale 0.5 ≈ 260 đơn vị) hoặc trên bản đồ (scale ~0.2).",
+   "tags": [
+    "entrance",
+    "region"
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 1,
+   "origin": [
+    0,
+    0
+   ],
+   "id": "world-creative-town-background",
+   "file": "regions/creative-town/background.webp",
+   "width": 1920,
+   "height": 1080,
+   "format": "webp",
+   "category": "regions/creative-town",
+   "usage": "Ảnh nền cảnh bên trong vùng Thị Trấn Sáng Tạo (trời/xa/giữa/gần); vùng giữa-dưới để trống cho UI/mini-game.",
+   "tags": [
+    "background",
+    "region"
+   ]
+  },
+  {
+   "type": "image",
+   "scale": 1,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "world-creative-town-locked",
+   "file": "regions/creative-town/locked-overlay.webp",
+   "width": 1218,
+   "height": 1147,
+   "category": "regions/creative-town",
+   "usage": "Mây phép phủ vùng Thị Trấn Sáng Tạo khi còn khoá (toạ độ bản đồ, scale 1).",
+   "tags": [
+    "overlay",
+    "locked"
+   ],
+   "format": "webp"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.4314,
+    0.8862
+   ],
+   "id": "world-creative-town-art-studio",
+   "file": "regions/creative-town/art-studio.png",
+   "width": 612,
+   "height": 492,
+   "category": "regions/creative-town",
+   "usage": "Xưởng vẽ mái bảng màu — mốc vùng Thị Trấn Sáng Tạo trên bản đồ (setDepth theo y đế).",
+   "tags": [
+    "landmark",
+    "region",
+    "creative-town"
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5186,
+    0.8766
+   ],
+   "id": "world-creative-town-houses",
+   "file": "regions/creative-town/houses.png",
+   "width": 698,
+   "height": 470,
+   "category": "regions/creative-town",
+   "usage": "Dãy nhà nhiều màu — mốc vùng Thị Trấn Sáng Tạo trên bản đồ (setDepth theo y đế).",
+   "tags": [
+    "landmark",
+    "region",
+    "creative-town"
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5077,
+    0.9202
+   ],
+   "id": "world-creative-town-crane",
+   "file": "regions/creative-town/crane.png",
+   "width": 520,
+   "height": 652,
+   "category": "regions/creative-town",
+   "usage": "Công trường: cần cẩu & giàn giáo — mốc vùng Thị Trấn Sáng Tạo trên bản đồ (setDepth theo y đế).",
+   "tags": [
+    "landmark",
+    "region",
+    "creative-town"
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5372,
+    0.9128
+   ],
+   "id": "world-creative-town-workshop",
+   "file": "regions/creative-town/workshop.png",
+   "width": 484,
+   "height": 390,
+   "category": "regions/creative-town",
+   "usage": "Xưởng mộc bánh răng — mốc vùng Thị Trấn Sáng Tạo trên bản đồ (setDepth theo y đế).",
+   "tags": [
+    "landmark",
+    "region",
+    "creative-town"
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "world-life-skills-village-icon",
+   "file": "regions/life-skills-village/icon.png",
+   "width": 272,
+   "height": 272,
+   "category": "regions/life-skills-village",
+   "usage": "Huy hiệu tròn của vùng Làng Kỹ Năng (~128 đơn vị)",
+   "tags": [
+    "icon",
+    "region"
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.8906
+   ],
+   "id": "world-life-skills-village-entrance",
+   "file": "regions/life-skills-village/entrance.png",
+   "width": 640,
+   "height": 512,
+   "category": "regions/life-skills-village",
+   "usage": "Cổng vào vùng Làng Kỹ Năng; có biển trống để Phaser vẽ tên. Dùng trong cảnh vùng (scale 0.5 ≈ 260 đơn vị) hoặc trên bản đồ (scale ~0.2).",
+   "tags": [
+    "entrance",
+    "region"
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 1,
+   "origin": [
+    0,
+    0
+   ],
+   "id": "world-life-skills-village-background",
+   "file": "regions/life-skills-village/background.webp",
+   "width": 1920,
+   "height": 1080,
+   "format": "webp",
+   "category": "regions/life-skills-village",
+   "usage": "Ảnh nền cảnh bên trong vùng Làng Kỹ Năng (trời/xa/giữa/gần); vùng giữa-dưới để trống cho UI/mini-game.",
+   "tags": [
+    "background",
+    "region"
+   ]
+  },
+  {
+   "type": "image",
+   "scale": 1,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "world-life-skills-village-locked",
+   "file": "regions/life-skills-village/locked-overlay.webp",
+   "width": 2081,
+   "height": 1071,
+   "category": "regions/life-skills-village",
+   "usage": "Mây phép phủ vùng Làng Kỹ Năng khi còn khoá (toạ độ bản đồ, scale 1).",
+   "tags": [
+    "overlay",
+    "locked"
+   ],
+   "format": "webp"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5044,
+    0.8857
+   ],
+   "id": "world-life-skills-village-school",
+   "file": "regions/life-skills-village/school.png",
+   "width": 686,
+   "height": 560,
+   "category": "regions/life-skills-village",
+   "usage": "Trường học có tháp chuông — mốc vùng Làng Kỹ Năng trên bản đồ (setDepth theo y đế).",
+   "tags": [
+    "landmark",
+    "region",
+    "life-skills-village"
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.4928,
+    0.8352
+   ],
+   "id": "world-life-skills-village-grocery",
+   "file": "regions/life-skills-village/grocery.png",
+   "width": 552,
+   "height": 364,
+   "category": "regions/life-skills-village",
+   "usage": "Cửa hàng tạp hoá — mốc vùng Làng Kỹ Năng trên bản đồ (setDepth theo y đế).",
+   "tags": [
+    "landmark",
+    "region",
+    "life-skills-village"
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5316,
+    0.9022
+   ],
+   "id": "world-life-skills-village-kitchen",
+   "file": "regions/life-skills-village/kitchen.png",
+   "width": 474,
+   "height": 552,
+   "category": "regions/life-skills-village",
+   "usage": "Nhà bếp cộng đồng — mốc vùng Làng Kỹ Năng trên bản đồ (setDepth theo y đế).",
+   "tags": [
+    "landmark",
+    "region",
+    "life-skills-village"
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.4836,
+    0.7882
+   ],
+   "id": "world-life-skills-village-playground",
+   "file": "regions/life-skills-village/playground.png",
+   "width": 608,
+   "height": 340,
+   "category": "regions/life-skills-village",
+   "usage": "Sân chơi — mốc vùng Làng Kỹ Năng trên bản đồ (setDepth theo y đế).",
+   "tags": [
+    "landmark",
+    "region",
+    "life-skills-village"
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.4867,
+    0.8406
+   ],
+   "id": "world-life-skills-village-garden",
+   "file": "regions/life-skills-village/garden.png",
+   "width": 600,
+   "height": 276,
+   "category": "regions/life-skills-village",
+   "usage": "Vườn rau cộng đồng — mốc vùng Làng Kỹ Năng trên bản đồ (setDepth theo y đế).",
+   "tags": [
+    "landmark",
+    "region",
+    "life-skills-village"
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "world-adventure-ocean-icon",
+   "file": "regions/adventure-ocean/icon.png",
+   "width": 272,
+   "height": 272,
+   "category": "regions/adventure-ocean",
+   "usage": "Huy hiệu tròn của vùng Đại Dương Phiêu Lưu (~128 đơn vị)",
+   "tags": [
+    "icon",
+    "region"
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.4933,
+    0.8811
+   ],
+   "id": "world-adventure-ocean-entrance",
+   "file": "regions/adventure-ocean/entrance.png",
+   "width": 600,
+   "height": 572,
+   "category": "regions/adventure-ocean",
+   "usage": "Cổng vào vùng Đại Dương Phiêu Lưu; có biển trống để Phaser vẽ tên. Dùng trong cảnh vùng (scale 0.5 ≈ 260 đơn vị) hoặc trên bản đồ (scale ~0.2).",
+   "tags": [
+    "entrance",
+    "region"
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 1,
+   "origin": [
+    0,
+    0
+   ],
+   "id": "world-adventure-ocean-background",
+   "file": "regions/adventure-ocean/background.webp",
+   "width": 1920,
+   "height": 1080,
+   "format": "webp",
+   "category": "regions/adventure-ocean",
+   "usage": "Ảnh nền cảnh bên trong vùng Đại Dương Phiêu Lưu (trời/xa/giữa/gần); vùng giữa-dưới để trống cho UI/mini-game.",
+   "tags": [
+    "background",
+    "region"
+   ]
+  },
+  {
+   "type": "image",
+   "scale": 1,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "world-adventure-ocean-locked",
+   "file": "regions/adventure-ocean/locked-overlay.webp",
+   "width": 1780,
+   "height": 1542,
+   "category": "regions/adventure-ocean",
+   "usage": "Mây phép phủ vùng Đại Dương Phiêu Lưu khi còn khoá (toạ độ bản đồ, scale 1).",
+   "tags": [
+    "overlay",
+    "locked"
+   ],
+   "format": "webp"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.4505,
+    0.8451
+   ],
+   "id": "world-adventure-ocean-submarine-dock",
+   "file": "regions/adventure-ocean/submarine-dock.png",
+   "width": 626,
+   "height": 284,
+   "category": "regions/adventure-ocean",
+   "usage": "Bến tàu ngầm — mốc vùng Đại Dương Phiêu Lưu trên bản đồ (setDepth theo y đế).",
+   "tags": [
+    "landmark",
+    "region",
+    "adventure-ocean"
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5261,
+    0.8889
+   ],
+   "id": "world-adventure-ocean-coral-reef",
+   "file": "regions/adventure-ocean/coral-reef.png",
+   "width": 574,
+   "height": 342,
+   "category": "regions/adventure-ocean",
+   "usage": "Rạn san hô — mốc vùng Đại Dương Phiêu Lưu trên bản đồ (setDepth theo y đế).",
+   "tags": [
+    "landmark",
+    "region",
+    "adventure-ocean"
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.9034
+   ],
+   "id": "world-adventure-ocean-sea-cave",
+   "file": "regions/adventure-ocean/sea-cave.png",
+   "width": 632,
+   "height": 580,
+   "category": "regions/adventure-ocean",
+   "usage": "Hang biển trên đảo đá — mốc vùng Đại Dương Phiêu Lưu trên bản đồ (setDepth theo y đế).",
+   "tags": [
+    "landmark",
+    "region",
+    "adventure-ocean"
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.4336,
+    0.8736
+   ],
+   "id": "world-adventure-ocean-palm-hut",
+   "file": "regions/adventure-ocean/palm-hut.png",
+   "width": 452,
+   "height": 348,
+   "category": "regions/adventure-ocean",
+   "usage": "Chòi sàn trên đảo dừa — mốc vùng Đại Dương Phiêu Lưu trên bản đồ (setDepth theo y đế).",
+   "tags": [
+    "landmark",
+    "region",
+    "adventure-ocean"
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.4884,
+    0.4773
+   ],
+   "id": "world-ui-lock-badge",
+   "file": "ui/lock-badge.png",
+   "width": 172,
+   "height": 176,
+   "category": "ui",
+   "usage": "Huy hiệu ổ khoá đặt ở nhãn vùng đang khoá",
+   "tags": [
+    "ui",
+    "world-map"
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "world-ui-unlocked-sparkle",
+   "file": "ui/unlocked-sparkle.png",
+   "width": 216,
+   "height": 216,
+   "category": "ui",
+   "usage": "Lấp lánh khi vùng vừa mở khoá (tween scale/alpha)",
+   "tags": [
+    "ui",
+    "world-map"
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.8605
+   ],
+   "id": "world-ui-map-pin",
+   "file": "ui/map-pin.png",
+   "width": 120,
+   "height": 172,
+   "category": "ui",
+   "usage": "Ghim đánh dấu vị trí trên bản đồ (neo ở mũi ghim)",
+   "tags": [
+    "ui",
+    "world-map"
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.4881,
+    0.5165
+   ],
+   "id": "world-ui-compass",
+   "file": "ui/compass.png",
+   "width": 336,
+   "height": 364,
+   "category": "ui",
+   "usage": "La bàn trang trí góc bản đồ (tam giác đỏ = hướng Bắc)",
+   "tags": [
+    "ui",
+    "world-map"
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.4974,
+    0.6263
+   ],
+   "id": "world-map-cloud-1",
+   "file": "world-map/cloud-1.png",
+   "width": 760,
+   "height": 396,
+   "category": "world-map",
+   "usage": "Mây trôi ngang bản đồ (drift: tween x chậm, lặp lại)",
+   "tags": [
+    "decoration",
+    "world-map",
+    "cloud"
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.4903,
+    0.6076
+   ],
+   "id": "world-map-cloud-2",
+   "file": "world-map/cloud-2.png",
+   "width": 616,
+   "height": 316,
+   "category": "world-map",
+   "usage": "Mây trôi ngang bản đồ (drift: tween x chậm, lặp lại)",
+   "tags": [
+    "decoration",
+    "world-map",
+    "cloud"
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.4959,
+    0.6242
+   ],
+   "id": "world-map-cloud-3",
+   "file": "world-map/cloud-3.png",
+   "width": 484,
+   "height": 298,
+   "category": "world-map",
+   "usage": "Mây trôi ngang bản đồ (drift: tween x chậm, lặp lại)",
+   "tags": [
+    "decoration",
+    "world-map",
+    "cloud"
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5789,
+    0.7849
+   ],
+   "id": "world-map-boat",
+   "file": "world-map/boat.png",
+   "width": 228,
+   "height": 186,
+   "category": "world-map",
+   "usage": "Thuyền buồm nhỏ trên biển (lắc nhẹ, trôi theo tuyến)",
+   "tags": [
+    "decoration",
+    "world-map",
+    "boat"
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.4884,
+    0.5652
+   ],
+   "id": "world-map-footprints",
+   "file": "world-map/footprints.png",
+   "width": 86,
+   "height": 92,
+   "category": "world-map",
+   "usage": "Dấu chân trên đường đi (decal)",
+   "tags": [
+    "decoration",
+    "world-map",
+    "path"
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "world-map-path-dash",
+   "file": "world-map/path-dash.png",
+   "width": 68,
+   "height": 48,
+   "category": "world-map",
+   "usage": "Vạch đường đi (vẽ tuyến động/đường mới mở)",
+   "tags": [
+    "decoration",
+    "world-map",
+    "path"
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5556
+   ],
+   "id": "world-map-bridge-wood",
+   "file": "world-map/bridge-wood.png",
+   "width": 320,
+   "height": 162,
+   "category": "world-map",
+   "usage": "Mảnh cầu gỗ ngang (dùng thêm cầu mới)",
+   "tags": [
+    "decoration",
+    "world-map",
+    "bridge"
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.6533
+   ],
+   "id": "world-map-bridge-stone",
+   "file": "world-map/bridge-stone.png",
+   "width": 360,
+   "height": 150,
+   "category": "world-map",
+   "usage": "Mảnh cầu đá vòm ngang",
+   "tags": [
+    "decoration",
+    "world-map",
+    "bridge"
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 1,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "world-map-cloud-transition",
+   "file": "world-map/cloud-transition.png",
+   "width": 2147,
+   "height": 1444,
+   "category": "world-map",
+   "usage": "Khối mây lớn dùng chuyển cảnh (phóng to che màn hình rồi tan)",
+   "tags": [
+    "transition"
+   ],
+   "format": "png"
+  },
+  {
+   "type": "spritesheet",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.6818
+   ],
+   "id": "world-map-seagull",
+   "file": "world-map/seagull.png",
+   "width": 544,
+   "height": 88,
+   "frameWidth": 136,
+   "frameHeight": 88,
+   "frames": 4,
+   "category": "world-map",
+   "usage": "Mòng biển vỗ cánh (bay ngang bản đồ)",
+   "tags": [
+    "decoration",
+    "animated"
+   ],
+   "animations": [
+    {
+     "key": "seagull-flap",
+     "frames": [
+      0,
+      1,
+      2,
+      3
+     ],
+     "frameRate": 8,
+     "repeat": -1
+    }
+   ],
+   "format": "png"
+  },
+  {
+   "type": "spritesheet",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.9036
+   ],
+   "id": "world-map-whale",
+   "file": "world-map/whale.png",
+   "width": 2496,
+   "height": 332,
+   "frameWidth": 416,
+   "frameHeight": 332,
+   "frames": 6,
+   "category": "world-map",
+   "usage": "Cá voi trồi lên phun nước (chạy 1 lượt, nghỉ vài giây rồi lặp)",
+   "tags": [
+    "decoration",
+    "animated"
+   ],
+   "animations": [
+    {
+     "key": "whale-spout",
+     "frames": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      3,
+      4,
+      2,
+      1,
+      5
+     ],
+     "frameRate": 6,
+     "repeat": 0
+    }
+   ],
+   "format": "png"
+  },
+  {
+   "type": "spritesheet",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "world-map-wave-sparkle",
+   "file": "world-map/wave-sparkle.png",
+   "width": 384,
+   "height": 96,
+   "frameWidth": 96,
+   "frameHeight": 96,
+   "frames": 4,
+   "category": "world-map",
+   "usage": "Lấp lánh mặt nước",
+   "tags": [
+    "decoration",
+    "animated"
+   ],
+   "animations": [
+    {
+     "key": "wave-sparkle",
+     "frames": [
+      0,
+      1,
+      2,
+      3,
+      0
+     ],
+     "frameRate": 7,
+     "repeat": -1,
+     "repeatDelay": 900
+    }
+   ],
+   "format": "png"
+  },
+  {
+   "type": "spritesheet",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.8158
+   ],
+   "id": "world-map-fish-jump",
+   "file": "world-map/fish-jump.png",
+   "width": 1120,
+   "height": 152,
+   "frameWidth": 224,
+   "frameHeight": 152,
+   "frames": 5,
+   "category": "world-map",
+   "usage": "Cá nhảy khỏi mặt nước",
+   "tags": [
+    "decoration",
+    "animated"
+   ],
+   "animations": [
+    {
+     "key": "fish-jump",
+     "frames": [
+      0,
+      1,
+      2,
+      3,
+      4
+     ],
+     "frameRate": 8,
+     "repeat": 0
+    }
+   ],
+   "format": "png"
+  }
+ ],
+ "data": {
+  "world": {
+   "width": 3840,
+   "height": 2160,
+   "background": "world-map-base",
+   "homeIsland": {
+    "x": 1960,
+    "y": 1105,
+    "asset": "world-map-home-island"
+   },
+   "regions": [
+    {
+     "id": "animal-island",
+     "name": "Đảo Động Vật",
+     "nameEn": "Animal Island",
+     "color": "#6cc46a",
+     "polygon": [
+      [
+       190,
+       1215
+      ],
+      [
+       450,
+       1110
+      ],
+      [
+       790,
+       1135
+      ],
+      [
+       1000,
+       1300
+      ],
+      [
+       1060,
+       1590
+      ],
+      [
+       960,
+       1880
+      ],
+      [
+       670,
+       2040
+      ],
+      [
+       340,
+       2030
+      ],
+      [
+       130,
+       1850
+      ],
+      [
+       80,
+       1500
+      ]
+     ],
+     "center": [
+      580,
+      1600
+     ],
+     "label": [
+      600,
+      1270
+     ],
+     "icon": "world-animal-island-icon",
+     "entrance": "world-animal-island-entrance",
+     "entrancePos": [
+      905,
+      1575
+     ],
+     "background": "world-animal-island-background",
+     "lockedOverlay": {
+      "asset": "world-animal-island-locked",
+      "x": 569,
+      "y": 1580
+     },
+     "unlocked": true,
+     "landmarks": [
+      {
+       "asset": "world-animal-island-waterfall",
+       "x": 470,
+       "y": 1470
+      },
+      {
+       "asset": "world-animal-island-big-tree",
+       "x": 300,
+       "y": 1700
+      },
+      {
+       "asset": "world-animal-island-animal-houses",
+       "x": 760,
+       "y": 1730
+      },
+      {
+       "asset": "world-animal-island-barn",
+       "x": 470,
+       "y": 1930
+      }
+     ]
+    },
+    {
+     "id": "puzzle-forest",
+     "name": "Rừng Câu Đố",
+     "nameEn": "Puzzle Forest",
+     "color": "#9b85d9",
+     "polygon": [
+      [
+       255,
+       650
+      ],
+      [
+       300,
+       300
+      ],
+      [
+       470,
+       175
+      ],
+      [
+       800,
+       125
+      ],
+      [
+       1150,
+       150
+      ],
+      [
+       1420,
+       120
+      ],
+      [
+       1470,
+       480
+      ],
+      [
+       1400,
+       760
+      ],
+      [
+       1300,
+       950
+      ],
+      [
+       1260,
+       1180
+      ],
+      [
+       1095,
+       1190
+      ],
+      [
+       905,
+       1060
+      ],
+      [
+       610,
+       1005
+      ],
+      [
+       390,
+       885
+      ]
+     ],
+     "center": [
+      820,
+      560
+     ],
+     "label": [
+      820,
+      210
+     ],
+     "icon": "world-puzzle-forest-icon",
+     "entrance": "world-puzzle-forest-entrance",
+     "entrancePos": [
+      1100,
+      900
+     ],
+     "background": "world-puzzle-forest-background",
+     "lockedOverlay": {
+      "asset": "world-puzzle-forest-locked",
+      "x": 861,
+      "y": 654
+     },
+     "unlocked": false,
+     "landmarks": [
+      {
+       "asset": "world-puzzle-forest-magic-tree",
+       "x": 800,
+       "y": 600
+      },
+      {
+       "asset": "world-puzzle-forest-mushrooms",
+       "x": 520,
+       "y": 860
+      },
+      {
+       "asset": "world-puzzle-forest-jigsaw-arch",
+       "x": 1110,
+       "y": 460
+      },
+      {
+       "asset": "world-puzzle-forest-maze",
+       "x": 520,
+       "y": 470
+      },
+      {
+       "asset": "world-puzzle-forest-rune-stones",
+       "x": 1180,
+       "y": 720
+      }
+     ]
+    },
+    {
+     "id": "math-mountain",
+     "name": "Núi Toán Học",
+     "nameEn": "Math Mountain",
+     "color": "#ff9d5c",
+     "polygon": [
+      [
+       1420,
+       120
+      ],
+      [
+       1500,
+       98
+      ],
+      [
+       1900,
+       84
+      ],
+      [
+       2300,
+       104
+      ],
+      [
+       2620,
+       90
+      ],
+      [
+       2640,
+       480
+      ],
+      [
+       2600,
+       860
+      ],
+      [
+       2360,
+       805
+      ],
+      [
+       2060,
+       775
+      ],
+      [
+       1760,
+       785
+      ],
+      [
+       1520,
+       848
+      ],
+      [
+       1400,
+       760
+      ],
+      [
+       1470,
+       480
+      ]
+     ],
+     "center": [
+      2020,
+      440
+     ],
+     "label": [
+      2040,
+      700
+     ],
+     "icon": "world-math-mountain-icon",
+     "entrance": "world-math-mountain-entrance",
+     "entrancePos": [
+      1905,
+      680
+     ],
+     "background": "world-math-mountain-background",
+     "lockedOverlay": {
+      "asset": "world-math-mountain-locked",
+      "x": 2027,
+      "y": 471
+     },
+     "unlocked": true,
+     "landmarks": [
+      {
+       "asset": "world-math-mountain-peak",
+       "x": 2040,
+       "y": 560
+      },
+      {
+       "asset": "world-math-mountain-floating-blocks",
+       "x": 2390,
+       "y": 400
+      },
+      {
+       "asset": "world-math-mountain-dice-tower",
+       "x": 1590,
+       "y": 500
+      },
+      {
+       "asset": "world-math-mountain-fruit-garden",
+       "x": 2420,
+       "y": 700
+      }
+     ]
+    },
+    {
+     "id": "creative-town",
+     "name": "Thị Trấn Sáng Tạo",
+     "nameEn": "Creative Town",
+     "color": "#f58aa8",
+     "polygon": [
+      [
+       2620,
+       90
+      ],
+      [
+       3100,
+       134
+      ],
+      [
+       3420,
+       250
+      ],
+      [
+       3610,
+       470
+      ],
+      [
+       3640,
+       720
+      ],
+      [
+       3500,
+       930
+      ],
+      [
+       3260,
+       1040
+      ],
+      [
+       3010,
+       1050
+      ],
+      [
+       2800,
+       995
+      ],
+      [
+       2600,
+       860
+      ],
+      [
+       2640,
+       480
+      ]
+     ],
+     "center": [
+      3120,
+      600
+     ],
+     "label": [
+      3130,
+      210
+     ],
+     "icon": "world-creative-town-icon",
+     "entrance": "world-creative-town-entrance",
+     "entrancePos": [
+      2960,
+      800
+     ],
+     "background": "world-creative-town-background",
+     "lockedOverlay": {
+      "asset": "world-creative-town-locked",
+      "x": 3120,
+      "y": 563
+     },
+     "unlocked": false,
+     "landmarks": [
+      {
+       "asset": "world-creative-town-art-studio",
+       "x": 2930,
+       "y": 470
+      },
+      {
+       "asset": "world-creative-town-houses",
+       "x": 3170,
+       "y": 640
+      },
+      {
+       "asset": "world-creative-town-crane",
+       "x": 3250,
+       "y": 390
+      },
+      {
+       "asset": "world-creative-town-workshop",
+       "x": 2900,
+       "y": 700
+      }
+     ]
+    },
+    {
+     "id": "life-skills-village",
+     "name": "Làng Kỹ Năng",
+     "nameEn": "Life Skills Village",
+     "color": "#f5c242",
+     "polygon": [
+      [
+       1330,
+       1140
+      ],
+      [
+       1400,
+       1300
+      ],
+      [
+       1600,
+       1385
+      ],
+      [
+       1900,
+       1400
+      ],
+      [
+       2200,
+       1355
+      ],
+      [
+       2460,
+       1290
+      ],
+      [
+       2690,
+       1275
+      ],
+      [
+       2900,
+       1330
+      ],
+      [
+       3010,
+       1440
+      ],
+      [
+       2930,
+       1640
+      ],
+      [
+       2680,
+       1850
+      ],
+      [
+       2320,
+       1995
+      ],
+      [
+       1900,
+       2050
+      ],
+      [
+       1500,
+       2015
+      ],
+      [
+       1225,
+       1880
+      ],
+      [
+       1115,
+       1660
+      ],
+      [
+       1125,
+       1420
+      ],
+      [
+       1095,
+       1190
+      ],
+      [
+       1260,
+       1180
+      ]
+     ],
+     "center": [
+      2000,
+      1700
+     ],
+     "label": [
+      1960,
+      1640
+     ],
+     "icon": "world-life-skills-village-icon",
+     "entrance": "world-life-skills-village-entrance",
+     "entrancePos": [
+      1900,
+      1540
+     ],
+     "background": "world-life-skills-village-background",
+     "lockedOverlay": {
+      "asset": "world-life-skills-village-locked",
+      "x": 2050,
+      "y": 1595
+     },
+     "unlocked": true,
+     "landmarks": [
+      {
+       "asset": "world-life-skills-village-school",
+       "x": 1560,
+       "y": 1700
+      },
+      {
+       "asset": "world-life-skills-village-grocery",
+       "x": 2150,
+       "y": 1600
+      },
+      {
+       "asset": "world-life-skills-village-kitchen",
+       "x": 2480,
+       "y": 1740
+      },
+      {
+       "asset": "world-life-skills-village-playground",
+       "x": 1640,
+       "y": 1960
+      },
+      {
+       "asset": "world-life-skills-village-garden",
+       "x": 2280,
+       "y": 1920
+      }
+     ]
+    },
+    {
+     "id": "adventure-ocean",
+     "name": "Đại Dương Phiêu Lưu",
+     "nameEn": "Adventure Ocean",
+     "color": "#3d9ad6",
+     "polygon": [
+      [
+       3010,
+       1090
+      ],
+      [
+       3290,
+       1075
+      ],
+      [
+       3560,
+       960
+      ],
+      [
+       3800,
+       930
+      ],
+      [
+       3810,
+       2130
+      ],
+      [
+       2350,
+       2130
+      ],
+      [
+       2700,
+       1900
+      ],
+      [
+       2980,
+       1660
+      ],
+      [
+       3070,
+       1440
+      ],
+      [
+       2960,
+       1300
+      ]
+     ],
+     "center": [
+      3380,
+      1620
+     ],
+     "label": [
+      3420,
+      1900
+     ],
+     "icon": "world-adventure-ocean-icon",
+     "entrance": "world-adventure-ocean-entrance",
+     "entrancePos": [
+      2985,
+      1470
+     ],
+     "background": "world-adventure-ocean-background",
+     "lockedOverlay": {
+      "asset": "world-adventure-ocean-locked",
+      "x": 3114,
+      "y": 1537
+     },
+     "unlocked": false,
+     "landmarks": [
+      {
+       "asset": "world-adventure-ocean-submarine-dock",
+       "x": 3040,
+       "y": 1530
+      },
+      {
+       "asset": "world-adventure-ocean-coral-reef",
+       "x": 3330,
+       "y": 1560
+      },
+      {
+       "asset": "world-adventure-ocean-sea-cave",
+       "x": 3540,
+       "y": 1745
+      },
+      {
+       "asset": "world-adventure-ocean-palm-hut",
+       "x": 3290,
+       "y": 1320
+      }
+     ]
+    }
+   ],
+   "decorations": [
+    {
+     "asset": "world-map-cloud-1",
+     "x": 900,
+     "y": 1150,
+     "drift": true
+    },
+    {
+     "asset": "world-map-cloud-2",
+     "x": 2600,
+     "y": 1020,
+     "drift": true
+    },
+    {
+     "asset": "world-map-cloud-3",
+     "x": 2500,
+     "y": 1990,
+     "drift": true
+    },
+    {
+     "asset": "world-map-cloud-2",
+     "x": 230,
+     "y": 2050,
+     "drift": true
+    },
+    {
+     "asset": "world-map-boat",
+     "x": 2300,
+     "y": 1160
+    },
+    {
+     "asset": "world-map-boat",
+     "x": 3420,
+     "y": 1980
+    },
+    {
+     "asset": "world-map-seagull",
+     "x": 3000,
+     "y": 1250,
+     "anim": "seagull-flap",
+     "drift": true
+    },
+    {
+     "asset": "world-map-seagull",
+     "x": 1500,
+     "y": 1180,
+     "anim": "seagull-flap",
+     "drift": true
+    },
+    {
+     "asset": "world-map-seagull",
+     "x": 700,
+     "y": 1080,
+     "anim": "seagull-flap",
+     "drift": true
+    },
+    {
+     "asset": "world-map-whale",
+     "x": 3600,
+     "y": 1450,
+     "anim": "whale-spout"
+    },
+    {
+     "asset": "world-map-fish-jump",
+     "x": 3350,
+     "y": 1800,
+     "anim": "fish-jump"
+    },
+    {
+     "asset": "world-map-fish-jump",
+     "x": 2150,
+     "y": 1250,
+     "anim": "fish-jump"
+    },
+    {
+     "asset": "world-map-wave-sparkle",
+     "x": 3150,
+     "y": 1700,
+     "anim": "wave-sparkle"
+    },
+    {
+     "asset": "world-map-wave-sparkle",
+     "x": 1700,
+     "y": 1240,
+     "anim": "wave-sparkle"
+    },
+    {
+     "asset": "world-map-wave-sparkle",
+     "x": 3700,
+     "y": 700,
+     "anim": "wave-sparkle"
+    },
+    {
+     "asset": "world-map-wave-sparkle",
+     "x": 80,
+     "y": 700,
+     "anim": "wave-sparkle"
+    },
+    {
+     "asset": "world-map-wave-sparkle",
+     "x": 2700,
+     "y": 2100,
+     "anim": "wave-sparkle"
+    },
+    {
+     "asset": "world-ui-compass",
+     "x": 3690,
+     "y": 190
+    }
+   ]
+  }
+ }
+}

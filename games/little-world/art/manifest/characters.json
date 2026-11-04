@@ -1,0 +1,2056 @@
+{
+ "group": "characters",
+ "entries": [
+  {
+   "type": "spritesheet",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.92
+   ],
+   "id": "avatar-hairback-ponytail",
+   "file": "characters/avatar/layers/hairback-ponytail.png",
+   "category": "characters/avatar",
+   "width": 1920,
+   "height": 1728,
+   "format": "png",
+   "frameWidth": 192,
+   "frameHeight": 192,
+   "frames": 90,
+   "usage": "Lớp \"hairBack\" của bé — Tóc buộc đuôi ngựa. Tóc phía sau đầu/thân (tô màu tóc). Cùng bố cục khung với mọi lớp khác.",
+   "tags": [
+    "avatar-layer",
+    "hairBack",
+    "tint"
+   ]
+  },
+  {
+   "type": "spritesheet",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.92
+   ],
+   "id": "avatar-hairback-bob",
+   "file": "characters/avatar/layers/hairback-bob.png",
+   "category": "characters/avatar",
+   "width": 1920,
+   "height": 1728,
+   "format": "png",
+   "frameWidth": 192,
+   "frameHeight": 192,
+   "frames": 90,
+   "usage": "Lớp \"hairBack\" của bé — Tóc bob. Tóc phía sau đầu/thân (tô màu tóc). Cùng bố cục khung với mọi lớp khác.",
+   "tags": [
+    "avatar-layer",
+    "hairBack",
+    "tint"
+   ]
+  },
+  {
+   "type": "spritesheet",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.92
+   ],
+   "id": "avatar-hairback-puffs",
+   "file": "characters/avatar/layers/hairback-puffs.png",
+   "category": "characters/avatar",
+   "width": 1920,
+   "height": 1728,
+   "format": "png",
+   "frameWidth": 192,
+   "frameHeight": 192,
+   "frames": 90,
+   "usage": "Lớp \"hairBack\" của bé — Tóc hai búi xoăn. Tóc phía sau đầu/thân (tô màu tóc). Cùng bố cục khung với mọi lớp khác.",
+   "tags": [
+    "avatar-layer",
+    "hairBack",
+    "tint"
+   ]
+  },
+  {
+   "type": "spritesheet",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.92
+   ],
+   "id": "avatar-hairback-long",
+   "file": "characters/avatar/layers/hairback-long.png",
+   "category": "characters/avatar",
+   "width": 1920,
+   "height": 1728,
+   "format": "png",
+   "frameWidth": 192,
+   "frameHeight": 192,
+   "frames": 90,
+   "usage": "Lớp \"hairBack\" của bé — Tóc dài. Tóc phía sau đầu/thân (tô màu tóc). Cùng bố cục khung với mọi lớp khác.",
+   "tags": [
+    "avatar-layer",
+    "hairBack",
+    "tint"
+   ]
+  },
+  {
+   "type": "spritesheet",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.92
+   ],
+   "id": "avatar-body",
+   "file": "characters/avatar/layers/body.png",
+   "category": "characters/avatar",
+   "width": 1920,
+   "height": 1728,
+   "format": "png",
+   "frameWidth": 192,
+   "frameHeight": 192,
+   "frames": 90,
+   "usage": "Lớp \"body\" của bé — Dáng bé. Da: đầu, tai, cổ, tay, chân + bóng đất (tô màu da). Cùng bố cục khung với mọi lớp khác.",
+   "tags": [
+    "avatar-layer",
+    "body",
+    "tint"
+   ]
+  },
+  {
+   "type": "spritesheet",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.92
+   ],
+   "id": "avatar-face-default",
+   "file": "characters/avatar/layers/face-default.png",
+   "category": "characters/avatar",
+   "width": 1920,
+   "height": 1728,
+   "format": "png",
+   "frameWidth": 192,
+   "frameHeight": 192,
+   "frames": 90,
+   "usage": "Lớp \"face\" của bé — Mắt tròn lấp lánh. Mắt, mày, miệng, má hồng (đủ màu, không tô). Cùng bố cục khung với mọi lớp khác.",
+   "tags": [
+    "avatar-layer",
+    "face",
+    "full-color"
+   ]
+  },
+  {
+   "type": "spritesheet",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.92
+   ],
+   "id": "avatar-face-freckles",
+   "file": "characters/avatar/layers/face-freckles.png",
+   "category": "characters/avatar",
+   "width": 1920,
+   "height": 1728,
+   "format": "png",
+   "frameWidth": 192,
+   "frameHeight": 192,
+   "frames": 90,
+   "usage": "Lớp \"face\" của bé — Tàn nhang đáng yêu. Mắt, mày, miệng, má hồng (đủ màu, không tô). Cùng bố cục khung với mọi lớp khác.",
+   "tags": [
+    "avatar-layer",
+    "face",
+    "full-color"
+   ]
+  },
+  {
+   "type": "spritesheet",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.92
+   ],
+   "id": "avatar-bottom-shorts",
+   "file": "characters/avatar/layers/bottom-shorts.png",
+   "category": "characters/avatar",
+   "width": 1920,
+   "height": 1728,
+   "format": "png",
+   "frameWidth": 192,
+   "frameHeight": 192,
+   "frames": 90,
+   "usage": "Lớp \"bottom\" của bé — Quần soóc. Quần/váy (tô màu quần). Cùng bố cục khung với mọi lớp khác.",
+   "tags": [
+    "avatar-layer",
+    "bottom",
+    "tint"
+   ]
+  },
+  {
+   "type": "spritesheet",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.92
+   ],
+   "id": "avatar-bottom-skirt",
+   "file": "characters/avatar/layers/bottom-skirt.png",
+   "category": "characters/avatar",
+   "width": 1920,
+   "height": 1728,
+   "format": "png",
+   "frameWidth": 192,
+   "frameHeight": 192,
+   "frames": 90,
+   "usage": "Lớp \"bottom\" của bé — Chân váy xoè. Quần/váy (tô màu quần). Cùng bố cục khung với mọi lớp khác.",
+   "tags": [
+    "avatar-layer",
+    "bottom",
+    "tint"
+   ]
+  },
+  {
+   "type": "spritesheet",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.92
+   ],
+   "id": "avatar-bottom-pants",
+   "file": "characters/avatar/layers/bottom-pants.png",
+   "category": "characters/avatar",
+   "width": 1920,
+   "height": 1728,
+   "format": "png",
+   "frameWidth": 192,
+   "frameHeight": 192,
+   "frames": 90,
+   "usage": "Lớp \"bottom\" của bé — Quần dài. Quần/váy (tô màu quần). Cùng bố cục khung với mọi lớp khác.",
+   "tags": [
+    "avatar-layer",
+    "bottom",
+    "tint"
+   ]
+  },
+  {
+   "type": "spritesheet",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.92
+   ],
+   "id": "avatar-top-tshirt",
+   "file": "characters/avatar/layers/top-tshirt.png",
+   "category": "characters/avatar",
+   "width": 1920,
+   "height": 1728,
+   "format": "png",
+   "frameWidth": 192,
+   "frameHeight": 192,
+   "frames": 90,
+   "usage": "Lớp \"top\" của bé — Áo phông ngôi sao. Áo (tô màu áo). Cùng bố cục khung với mọi lớp khác.",
+   "tags": [
+    "avatar-layer",
+    "top",
+    "tint"
+   ]
+  },
+  {
+   "type": "spritesheet",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.92
+   ],
+   "id": "avatar-top-hoodie",
+   "file": "characters/avatar/layers/top-hoodie.png",
+   "category": "characters/avatar",
+   "width": 1920,
+   "height": 1728,
+   "format": "png",
+   "frameWidth": 192,
+   "frameHeight": 192,
+   "frames": 90,
+   "usage": "Lớp \"top\" của bé — Áo hoodie. Áo (tô màu áo). Cùng bố cục khung với mọi lớp khác.",
+   "tags": [
+    "avatar-layer",
+    "top",
+    "tint"
+   ]
+  },
+  {
+   "type": "spritesheet",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.92
+   ],
+   "id": "avatar-top-dress",
+   "file": "characters/avatar/layers/top-dress.png",
+   "category": "characters/avatar",
+   "width": 1920,
+   "height": 1728,
+   "format": "png",
+   "frameWidth": 192,
+   "frameHeight": 192,
+   "frames": 90,
+   "usage": "Lớp \"top\" của bé — Áo váy bèo. Áo (tô màu áo). Cùng bố cục khung với mọi lớp khác.",
+   "tags": [
+    "avatar-layer",
+    "top",
+    "tint"
+   ]
+  },
+  {
+   "type": "spritesheet",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.92
+   ],
+   "id": "avatar-top-stripe",
+   "file": "characters/avatar/layers/top-stripe.png",
+   "category": "characters/avatar",
+   "width": 1920,
+   "height": 1728,
+   "format": "png",
+   "frameWidth": 192,
+   "frameHeight": 192,
+   "frames": 90,
+   "usage": "Lớp \"top\" của bé — Áo len kẻ sọc. Áo (tô màu áo). Cùng bố cục khung với mọi lớp khác.",
+   "tags": [
+    "avatar-layer",
+    "top",
+    "tint"
+   ]
+  },
+  {
+   "type": "spritesheet",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.92
+   ],
+   "id": "avatar-shoes-sneakers",
+   "file": "characters/avatar/layers/shoes-sneakers.png",
+   "category": "characters/avatar",
+   "width": 1920,
+   "height": 1728,
+   "format": "png",
+   "frameWidth": 192,
+   "frameHeight": 192,
+   "frames": 90,
+   "usage": "Lớp \"shoes\" của bé — Giày thể thao. Giày (tô màu giày). Cùng bố cục khung với mọi lớp khác.",
+   "tags": [
+    "avatar-layer",
+    "shoes",
+    "tint"
+   ]
+  },
+  {
+   "type": "spritesheet",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.92
+   ],
+   "id": "avatar-shoes-boots",
+   "file": "characters/avatar/layers/shoes-boots.png",
+   "category": "characters/avatar",
+   "width": 1920,
+   "height": 1728,
+   "format": "png",
+   "frameWidth": 192,
+   "frameHeight": 192,
+   "frames": 90,
+   "usage": "Lớp \"shoes\" của bé — Ủng đi mưa. Giày (tô màu giày). Cùng bố cục khung với mọi lớp khác.",
+   "tags": [
+    "avatar-layer",
+    "shoes",
+    "tint"
+   ]
+  },
+  {
+   "type": "spritesheet",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.92
+   ],
+   "id": "avatar-shoes-maryjane",
+   "file": "characters/avatar/layers/shoes-maryjane.png",
+   "category": "characters/avatar",
+   "width": 1920,
+   "height": 1728,
+   "format": "png",
+   "frameWidth": 192,
+   "frameHeight": 192,
+   "frames": 90,
+   "usage": "Lớp \"shoes\" của bé — Giày búp bê. Giày (tô màu giày). Cùng bố cục khung với mọi lớp khác.",
+   "tags": [
+    "avatar-layer",
+    "shoes",
+    "tint"
+   ]
+  },
+  {
+   "type": "spritesheet",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.92
+   ],
+   "id": "avatar-hairfront-short",
+   "file": "characters/avatar/layers/hairfront-short.png",
+   "category": "characters/avatar",
+   "width": 1920,
+   "height": 1728,
+   "format": "png",
+   "frameWidth": 192,
+   "frameHeight": 192,
+   "frames": 90,
+   "usage": "Lớp \"hairFront\" của bé — Tóc ngắn rối. Tóc mái/đỉnh đầu, che gáy khi quay lưng (tô màu tóc). Cùng bố cục khung với mọi lớp khác.",
+   "tags": [
+    "avatar-layer",
+    "hairFront",
+    "tint"
+   ]
+  },
+  {
+   "type": "spritesheet",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.92
+   ],
+   "id": "avatar-hairfront-bob",
+   "file": "characters/avatar/layers/hairfront-bob.png",
+   "category": "characters/avatar",
+   "width": 1920,
+   "height": 1728,
+   "format": "png",
+   "frameWidth": 192,
+   "frameHeight": 192,
+   "frames": 90,
+   "usage": "Lớp \"hairFront\" của bé — Tóc bob. Tóc mái/đỉnh đầu, che gáy khi quay lưng (tô màu tóc). Cùng bố cục khung với mọi lớp khác.",
+   "tags": [
+    "avatar-layer",
+    "hairFront",
+    "tint"
+   ]
+  },
+  {
+   "type": "spritesheet",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.92
+   ],
+   "id": "avatar-hairfront-ponytail",
+   "file": "characters/avatar/layers/hairfront-ponytail.png",
+   "category": "characters/avatar",
+   "width": 1920,
+   "height": 1728,
+   "format": "png",
+   "frameWidth": 192,
+   "frameHeight": 192,
+   "frames": 90,
+   "usage": "Lớp \"hairFront\" của bé — Tóc buộc đuôi ngựa. Tóc mái/đỉnh đầu, che gáy khi quay lưng (tô màu tóc). Cùng bố cục khung với mọi lớp khác.",
+   "tags": [
+    "avatar-layer",
+    "hairFront",
+    "tint"
+   ]
+  },
+  {
+   "type": "spritesheet",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.92
+   ],
+   "id": "avatar-hairfront-puffs",
+   "file": "characters/avatar/layers/hairfront-puffs.png",
+   "category": "characters/avatar",
+   "width": 1920,
+   "height": 1728,
+   "format": "png",
+   "frameWidth": 192,
+   "frameHeight": 192,
+   "frames": 90,
+   "usage": "Lớp \"hairFront\" của bé — Tóc hai búi xoăn. Tóc mái/đỉnh đầu, che gáy khi quay lưng (tô màu tóc). Cùng bố cục khung với mọi lớp khác.",
+   "tags": [
+    "avatar-layer",
+    "hairFront",
+    "tint"
+   ]
+  },
+  {
+   "type": "spritesheet",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.92
+   ],
+   "id": "avatar-hairfront-long",
+   "file": "characters/avatar/layers/hairfront-long.png",
+   "category": "characters/avatar",
+   "width": 1920,
+   "height": 1728,
+   "format": "png",
+   "frameWidth": 192,
+   "frameHeight": 192,
+   "frames": 90,
+   "usage": "Lớp \"hairFront\" của bé — Tóc dài. Tóc mái/đỉnh đầu, che gáy khi quay lưng (tô màu tóc). Cùng bố cục khung với mọi lớp khác.",
+   "tags": [
+    "avatar-layer",
+    "hairFront",
+    "tint"
+   ]
+  },
+  {
+   "type": "spritesheet",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.92
+   ],
+   "id": "avatar-acc-cap",
+   "file": "characters/avatar/layers/acc-cap.png",
+   "category": "characters/avatar",
+   "width": 1920,
+   "height": 1728,
+   "format": "png",
+   "frameWidth": 192,
+   "frameHeight": 192,
+   "frames": 90,
+   "usage": "Lớp \"accessory\" của bé — Mũ lưỡi trai. Phụ kiện (đủ màu, không tô). Cùng bố cục khung với mọi lớp khác.",
+   "tags": [
+    "avatar-layer",
+    "accessory",
+    "full-color"
+   ]
+  },
+  {
+   "type": "spritesheet",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.92
+   ],
+   "id": "avatar-acc-flower",
+   "file": "characters/avatar/layers/acc-flower.png",
+   "category": "characters/avatar",
+   "width": 1920,
+   "height": 1728,
+   "format": "png",
+   "frameWidth": 192,
+   "frameHeight": 192,
+   "frames": 90,
+   "usage": "Lớp \"accessory\" của bé — Kẹp hoa. Phụ kiện (đủ màu, không tô). Cùng bố cục khung với mọi lớp khác.",
+   "tags": [
+    "avatar-layer",
+    "accessory",
+    "full-color"
+   ]
+  },
+  {
+   "type": "spritesheet",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.92
+   ],
+   "id": "avatar-acc-glasses",
+   "file": "characters/avatar/layers/acc-glasses.png",
+   "category": "characters/avatar",
+   "width": 1920,
+   "height": 1728,
+   "format": "png",
+   "frameWidth": 192,
+   "frameHeight": 192,
+   "frames": 90,
+   "usage": "Lớp \"accessory\" của bé — Kính tròn. Phụ kiện (đủ màu, không tô). Cùng bố cục khung với mọi lớp khác.",
+   "tags": [
+    "avatar-layer",
+    "accessory",
+    "full-color"
+   ]
+  },
+  {
+   "type": "spritesheet",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.92
+   ],
+   "id": "avatar-acc-backpack",
+   "file": "characters/avatar/layers/acc-backpack.png",
+   "category": "characters/avatar",
+   "width": 1920,
+   "height": 1728,
+   "format": "png",
+   "frameWidth": 192,
+   "frameHeight": 192,
+   "frames": 90,
+   "usage": "Lớp \"accessory\" của bé — Ba lô nhỏ. Phụ kiện (đủ màu, không tô). Cùng bố cục khung với mọi lớp khác.",
+   "tags": [
+    "avatar-layer",
+    "accessory",
+    "full-color"
+   ]
+  },
+  {
+   "type": "spritesheet",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.92
+   ],
+   "id": "avatar-acc-scarf",
+   "file": "characters/avatar/layers/acc-scarf.png",
+   "category": "characters/avatar",
+   "width": 1920,
+   "height": 1728,
+   "format": "png",
+   "frameWidth": 192,
+   "frameHeight": 192,
+   "frames": 90,
+   "usage": "Lớp \"accessory\" của bé — Khăn quàng. Phụ kiện (đủ màu, không tô). Cùng bố cục khung với mọi lớp khác.",
+   "tags": [
+    "avatar-layer",
+    "accessory",
+    "full-color"
+   ]
+  },
+  {
+   "type": "spritesheet",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.92
+   ],
+   "id": "avatar-default",
+   "file": "characters/avatar/avatar-default.png",
+   "category": "characters/avatar",
+   "width": 1920,
+   "height": 1728,
+   "format": "png",
+   "frameWidth": 192,
+   "frameHeight": 192,
+   "frames": 90,
+   "usage": "Bé mặc định đã ghép sẵn đủ màu (tóc ngắn nâu, áo phông vàng, quần soóc xanh, giày san hô). Dùng khi không cần tuỳ biến.",
+   "tags": [
+    "avatar",
+    "composite"
+   ],
+   "animations": [
+    {
+     "key": "avatar-idle-down",
+     "frames": [
+      0,
+      1,
+      2,
+      3
+     ],
+     "frameRate": 5,
+     "repeat": -1
+    },
+    {
+     "key": "avatar-idle-up",
+     "frames": [
+      4,
+      5,
+      6,
+      7
+     ],
+     "frameRate": 5,
+     "repeat": -1
+    },
+    {
+     "key": "avatar-idle-side",
+     "frames": [
+      8,
+      9,
+      10,
+      11
+     ],
+     "frameRate": 5,
+     "repeat": -1
+    },
+    {
+     "key": "avatar-idle-threequarter",
+     "frames": [
+      12,
+      13,
+      14,
+      15
+     ],
+     "frameRate": 5,
+     "repeat": -1
+    },
+    {
+     "key": "avatar-walk-down",
+     "frames": [
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23
+     ],
+     "frameRate": 10,
+     "repeat": -1
+    },
+    {
+     "key": "avatar-walk-up",
+     "frames": [
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31
+     ],
+     "frameRate": 10,
+     "repeat": -1
+    },
+    {
+     "key": "avatar-walk-side",
+     "frames": [
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39
+     ],
+     "frameRate": 10,
+     "repeat": -1
+    },
+    {
+     "key": "avatar-run-down",
+     "frames": [
+      40,
+      41,
+      42,
+      43,
+      44,
+      45
+     ],
+     "frameRate": 12,
+     "repeat": -1
+    },
+    {
+     "key": "avatar-run-up",
+     "frames": [
+      46,
+      47,
+      48,
+      49,
+      50,
+      51
+     ],
+     "frameRate": 12,
+     "repeat": -1
+    },
+    {
+     "key": "avatar-run-side",
+     "frames": [
+      52,
+      53,
+      54,
+      55,
+      56,
+      57
+     ],
+     "frameRate": 12,
+     "repeat": -1
+    },
+    {
+     "key": "avatar-happy",
+     "frames": [
+      58,
+      59,
+      60,
+      61,
+      62,
+      63
+     ],
+     "frameRate": 10,
+     "repeat": -1
+    },
+    {
+     "key": "avatar-celebrate",
+     "frames": [
+      64,
+      65,
+      66,
+      67,
+      68,
+      69,
+      70,
+      71
+     ],
+     "frameRate": 12,
+     "repeat": 0
+    },
+    {
+     "key": "avatar-think",
+     "frames": [
+      72,
+      73,
+      74,
+      75,
+      76,
+      77
+     ],
+     "frameRate": 6,
+     "repeat": 0
+    },
+    {
+     "key": "avatar-wave",
+     "frames": [
+      78,
+      79,
+      80,
+      81,
+      82,
+      83
+     ],
+     "frameRate": 9,
+     "repeat": -1
+    },
+    {
+     "key": "avatar-interact",
+     "frames": [
+      84,
+      85,
+      86,
+      87,
+      88,
+      89
+     ],
+     "frameRate": 9,
+     "repeat": 0
+    }
+   ]
+  },
+  {
+   "type": "image",
+   "scale": 1,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "avatar-reference",
+   "file": "characters/avatar/reference-sheet.png",
+   "category": "characters/avatar",
+   "width": 1920,
+   "height": 1440,
+   "format": "png",
+   "usage": "Bảng tham chiếu gốc của bé (xoay vòng, phối đồ, biểu cảm, bảng màu). Không dùng trong game.",
+   "tags": [
+    "reference"
+   ]
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "avatar-portrait",
+   "file": "characters/avatar/portrait.png",
+   "category": "characters/avatar",
+   "width": 256,
+   "height": 256,
+   "format": "png",
+   "usage": "Huy hiệu chân dung bé (đầu + vai) trong khung tròn cho UI",
+   "tags": [
+    "portrait",
+    "ui"
+   ]
+  },
+  {
+   "type": "spritesheet",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.92
+   ],
+   "id": "fox-sheet",
+   "file": "characters/fox/fox-sheet.png",
+   "category": "characters/fox",
+   "width": 1280,
+   "height": 1120,
+   "format": "png",
+   "frameWidth": 160,
+   "frameHeight": 160,
+   "frames": 56,
+   "usage": "Cáo Cam — thú cưng đồng hành (đủ màu). Nhìn nghiêng quay PHẢI; sang trái dùng flipX.",
+   "tags": [
+    "pet",
+    "fox"
+   ],
+   "animations": [
+    {
+     "key": "fox-idle-front",
+     "frames": [
+      0,
+      1,
+      2,
+      3
+     ],
+     "frameRate": 5,
+     "repeat": -1
+    },
+    {
+     "key": "fox-idle-side",
+     "frames": [
+      4,
+      5,
+      6,
+      7
+     ],
+     "frameRate": 5,
+     "repeat": -1
+    },
+    {
+     "key": "fox-idle-back",
+     "frames": [
+      8,
+      9
+     ],
+     "frameRate": 3,
+     "repeat": -1
+    },
+    {
+     "key": "fox-walk-side",
+     "frames": [
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17
+     ],
+     "frameRate": 10,
+     "repeat": -1
+    },
+    {
+     "key": "fox-walk-front",
+     "frames": [
+      18,
+      19,
+      20,
+      21,
+      22,
+      23
+     ],
+     "frameRate": 9,
+     "repeat": -1
+    },
+    {
+     "key": "fox-walk-back",
+     "frames": [
+      24,
+      25,
+      26,
+      27,
+      28,
+      29
+     ],
+     "frameRate": 9,
+     "repeat": -1
+    },
+    {
+     "key": "fox-happy",
+     "frames": [
+      30,
+      31,
+      32,
+      33,
+      34,
+      35
+     ],
+     "frameRate": 10,
+     "repeat": -1
+    },
+    {
+     "key": "fox-greet",
+     "frames": [
+      36,
+      37,
+      38,
+      39,
+      40,
+      41
+     ],
+     "frameRate": 8,
+     "repeat": 0
+    },
+    {
+     "key": "fox-celebrate",
+     "frames": [
+      42,
+      43,
+      44,
+      45,
+      46,
+      47,
+      48,
+      49
+     ],
+     "frameRate": 12,
+     "repeat": 0
+    },
+    {
+     "key": "fox-interact",
+     "frames": [
+      50,
+      51,
+      52,
+      53,
+      54,
+      55
+     ],
+     "frameRate": 8,
+     "repeat": 0
+    }
+   ]
+  },
+  {
+   "type": "image",
+   "scale": 1,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "fox-reference",
+   "file": "characters/fox/reference-sheet.png",
+   "category": "characters/fox",
+   "width": 1650,
+   "height": 1140,
+   "format": "png",
+   "usage": "Bảng tham chiếu gốc của Cáo Cam. Không dùng trong game.",
+   "tags": [
+    "reference"
+   ]
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "fox-portrait",
+   "file": "characters/fox/portrait.png",
+   "category": "characters/fox",
+   "width": 256,
+   "height": 256,
+   "format": "png",
+   "usage": "Huy hiệu chân dung Cáo Cam trong khung tròn cho UI",
+   "tags": [
+    "portrait",
+    "ui"
+   ]
+  },
+  {
+   "type": "spritesheet",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.92
+   ],
+   "id": "bunny-sheet",
+   "file": "characters/bunny/bunny-sheet.png",
+   "category": "characters/bunny",
+   "width": 1280,
+   "height": 1120,
+   "format": "png",
+   "frameWidth": 160,
+   "frameHeight": 160,
+   "frames": 56,
+   "usage": "Thỏ Bông — thú cưng đồng hành (đủ màu). Nhìn nghiêng quay PHẢI; sang trái dùng flipX.",
+   "tags": [
+    "pet",
+    "bunny"
+   ],
+   "animations": [
+    {
+     "key": "bunny-idle-front",
+     "frames": [
+      0,
+      1,
+      2,
+      3
+     ],
+     "frameRate": 5,
+     "repeat": -1
+    },
+    {
+     "key": "bunny-idle-side",
+     "frames": [
+      4,
+      5,
+      6,
+      7
+     ],
+     "frameRate": 5,
+     "repeat": -1
+    },
+    {
+     "key": "bunny-idle-back",
+     "frames": [
+      8,
+      9
+     ],
+     "frameRate": 3,
+     "repeat": -1
+    },
+    {
+     "key": "bunny-walk-side",
+     "frames": [
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17
+     ],
+     "frameRate": 10,
+     "repeat": -1
+    },
+    {
+     "key": "bunny-walk-front",
+     "frames": [
+      18,
+      19,
+      20,
+      21,
+      22,
+      23
+     ],
+     "frameRate": 9,
+     "repeat": -1
+    },
+    {
+     "key": "bunny-walk-back",
+     "frames": [
+      24,
+      25,
+      26,
+      27,
+      28,
+      29
+     ],
+     "frameRate": 9,
+     "repeat": -1
+    },
+    {
+     "key": "bunny-happy",
+     "frames": [
+      30,
+      31,
+      32,
+      33,
+      34,
+      35
+     ],
+     "frameRate": 10,
+     "repeat": -1
+    },
+    {
+     "key": "bunny-greet",
+     "frames": [
+      36,
+      37,
+      38,
+      39,
+      40,
+      41
+     ],
+     "frameRate": 8,
+     "repeat": 0
+    },
+    {
+     "key": "bunny-celebrate",
+     "frames": [
+      42,
+      43,
+      44,
+      45,
+      46,
+      47,
+      48,
+      49
+     ],
+     "frameRate": 12,
+     "repeat": 0
+    },
+    {
+     "key": "bunny-interact",
+     "frames": [
+      50,
+      51,
+      52,
+      53,
+      54,
+      55
+     ],
+     "frameRate": 8,
+     "repeat": 0
+    }
+   ]
+  },
+  {
+   "type": "image",
+   "scale": 1,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "bunny-reference",
+   "file": "characters/bunny/reference-sheet.png",
+   "category": "characters/bunny",
+   "width": 1650,
+   "height": 1140,
+   "format": "png",
+   "usage": "Bảng tham chiếu gốc của Thỏ Bông. Không dùng trong game.",
+   "tags": [
+    "reference"
+   ]
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "bunny-portrait",
+   "file": "characters/bunny/portrait.png",
+   "category": "characters/bunny",
+   "width": 256,
+   "height": 256,
+   "format": "png",
+   "usage": "Huy hiệu chân dung Thỏ Bông trong khung tròn cho UI",
+   "tags": [
+    "portrait",
+    "ui"
+   ]
+  },
+  {
+   "type": "spritesheet",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.92
+   ],
+   "id": "bear-sheet",
+   "file": "characters/bear/bear-sheet.png",
+   "category": "characters/bear",
+   "width": 1280,
+   "height": 1120,
+   "format": "png",
+   "frameWidth": 160,
+   "frameHeight": 160,
+   "frames": 56,
+   "usage": "Gấu Mật — thú cưng đồng hành (đủ màu). Nhìn nghiêng quay PHẢI; sang trái dùng flipX.",
+   "tags": [
+    "pet",
+    "bear"
+   ],
+   "animations": [
+    {
+     "key": "bear-idle-front",
+     "frames": [
+      0,
+      1,
+      2,
+      3
+     ],
+     "frameRate": 5,
+     "repeat": -1
+    },
+    {
+     "key": "bear-idle-side",
+     "frames": [
+      4,
+      5,
+      6,
+      7
+     ],
+     "frameRate": 5,
+     "repeat": -1
+    },
+    {
+     "key": "bear-idle-back",
+     "frames": [
+      8,
+      9
+     ],
+     "frameRate": 3,
+     "repeat": -1
+    },
+    {
+     "key": "bear-walk-side",
+     "frames": [
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17
+     ],
+     "frameRate": 10,
+     "repeat": -1
+    },
+    {
+     "key": "bear-walk-front",
+     "frames": [
+      18,
+      19,
+      20,
+      21,
+      22,
+      23
+     ],
+     "frameRate": 9,
+     "repeat": -1
+    },
+    {
+     "key": "bear-walk-back",
+     "frames": [
+      24,
+      25,
+      26,
+      27,
+      28,
+      29
+     ],
+     "frameRate": 9,
+     "repeat": -1
+    },
+    {
+     "key": "bear-happy",
+     "frames": [
+      30,
+      31,
+      32,
+      33,
+      34,
+      35
+     ],
+     "frameRate": 10,
+     "repeat": -1
+    },
+    {
+     "key": "bear-greet",
+     "frames": [
+      36,
+      37,
+      38,
+      39,
+      40,
+      41
+     ],
+     "frameRate": 8,
+     "repeat": 0
+    },
+    {
+     "key": "bear-celebrate",
+     "frames": [
+      42,
+      43,
+      44,
+      45,
+      46,
+      47,
+      48,
+      49
+     ],
+     "frameRate": 12,
+     "repeat": 0
+    },
+    {
+     "key": "bear-interact",
+     "frames": [
+      50,
+      51,
+      52,
+      53,
+      54,
+      55
+     ],
+     "frameRate": 8,
+     "repeat": 0
+    }
+   ]
+  },
+  {
+   "type": "image",
+   "scale": 1,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "bear-reference",
+   "file": "characters/bear/reference-sheet.png",
+   "category": "characters/bear",
+   "width": 1650,
+   "height": 1140,
+   "format": "png",
+   "usage": "Bảng tham chiếu gốc của Gấu Mật. Không dùng trong game.",
+   "tags": [
+    "reference"
+   ]
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "bear-portrait",
+   "file": "characters/bear/portrait.png",
+   "category": "characters/bear",
+   "width": 256,
+   "height": 256,
+   "format": "png",
+   "usage": "Huy hiệu chân dung Gấu Mật trong khung tròn cho UI",
+   "tags": [
+    "portrait",
+    "ui"
+   ]
+  }
+ ],
+ "data": {
+  "avatar": {
+   "frameWidth": 192,
+   "frameHeight": 192,
+   "origin": [
+    0.5,
+    0.92
+   ],
+   "scale": 0.5,
+   "anims": {
+    "idle-down": {
+     "start": 0,
+     "count": 4,
+     "frameRate": 5,
+     "repeat": -1
+    },
+    "idle-up": {
+     "start": 4,
+     "count": 4,
+     "frameRate": 5,
+     "repeat": -1
+    },
+    "idle-side": {
+     "start": 8,
+     "count": 4,
+     "frameRate": 5,
+     "repeat": -1
+    },
+    "idle-threequarter": {
+     "start": 12,
+     "count": 4,
+     "frameRate": 5,
+     "repeat": -1
+    },
+    "walk-down": {
+     "start": 16,
+     "count": 8,
+     "frameRate": 10,
+     "repeat": -1
+    },
+    "walk-up": {
+     "start": 24,
+     "count": 8,
+     "frameRate": 10,
+     "repeat": -1
+    },
+    "walk-side": {
+     "start": 32,
+     "count": 8,
+     "frameRate": 10,
+     "repeat": -1
+    },
+    "run-down": {
+     "start": 40,
+     "count": 6,
+     "frameRate": 12,
+     "repeat": -1
+    },
+    "run-up": {
+     "start": 46,
+     "count": 6,
+     "frameRate": 12,
+     "repeat": -1
+    },
+    "run-side": {
+     "start": 52,
+     "count": 6,
+     "frameRate": 12,
+     "repeat": -1
+    },
+    "happy": {
+     "start": 58,
+     "count": 6,
+     "frameRate": 10,
+     "repeat": -1
+    },
+    "celebrate": {
+     "start": 64,
+     "count": 8,
+     "frameRate": 12,
+     "repeat": 0
+    },
+    "think": {
+     "start": 72,
+     "count": 6,
+     "frameRate": 6,
+     "repeat": 0
+    },
+    "wave": {
+     "start": 78,
+     "count": 6,
+     "frameRate": 9,
+     "repeat": -1
+    },
+    "interact": {
+     "start": 84,
+     "count": 6,
+     "frameRate": 9,
+     "repeat": 0
+    }
+   },
+   "views": {
+    "front": 0,
+    "side": 8,
+    "back": 4,
+    "threequarter": 12
+   },
+   "layers": [
+    {
+     "slot": "hairBack",
+     "tint": true,
+     "variants": [
+      {
+       "id": "avatar-hairback-ponytail",
+       "name": "Tóc buộc đuôi ngựa"
+      },
+      {
+       "id": "avatar-hairback-bob",
+       "name": "Tóc bob"
+      },
+      {
+       "id": "avatar-hairback-puffs",
+       "name": "Tóc hai búi xoăn"
+      },
+      {
+       "id": "avatar-hairback-long",
+       "name": "Tóc dài"
+      },
+      {
+       "id": null,
+       "name": "Không"
+      }
+     ]
+    },
+    {
+     "slot": "body",
+     "tint": true,
+     "variants": [
+      {
+       "id": "avatar-body",
+       "name": "Dáng bé"
+      }
+     ]
+    },
+    {
+     "slot": "face",
+     "tint": false,
+     "variants": [
+      {
+       "id": "avatar-face-default",
+       "name": "Mắt tròn lấp lánh"
+      },
+      {
+       "id": "avatar-face-freckles",
+       "name": "Tàn nhang đáng yêu"
+      }
+     ]
+    },
+    {
+     "slot": "bottom",
+     "tint": true,
+     "variants": [
+      {
+       "id": "avatar-bottom-shorts",
+       "name": "Quần soóc"
+      },
+      {
+       "id": "avatar-bottom-skirt",
+       "name": "Chân váy xoè"
+      },
+      {
+       "id": "avatar-bottom-pants",
+       "name": "Quần dài"
+      }
+     ]
+    },
+    {
+     "slot": "top",
+     "tint": true,
+     "variants": [
+      {
+       "id": "avatar-top-tshirt",
+       "name": "Áo phông ngôi sao"
+      },
+      {
+       "id": "avatar-top-hoodie",
+       "name": "Áo hoodie"
+      },
+      {
+       "id": "avatar-top-dress",
+       "name": "Áo váy bèo"
+      },
+      {
+       "id": "avatar-top-stripe",
+       "name": "Áo len kẻ sọc"
+      }
+     ]
+    },
+    {
+     "slot": "shoes",
+     "tint": true,
+     "variants": [
+      {
+       "id": "avatar-shoes-sneakers",
+       "name": "Giày thể thao"
+      },
+      {
+       "id": "avatar-shoes-boots",
+       "name": "Ủng đi mưa"
+      },
+      {
+       "id": "avatar-shoes-maryjane",
+       "name": "Giày búp bê"
+      }
+     ]
+    },
+    {
+     "slot": "hairFront",
+     "tint": true,
+     "variants": [
+      {
+       "id": "avatar-hairfront-short",
+       "name": "Tóc ngắn rối"
+      },
+      {
+       "id": "avatar-hairfront-bob",
+       "name": "Tóc bob"
+      },
+      {
+       "id": "avatar-hairfront-ponytail",
+       "name": "Tóc buộc đuôi ngựa"
+      },
+      {
+       "id": "avatar-hairfront-puffs",
+       "name": "Tóc hai búi xoăn"
+      },
+      {
+       "id": "avatar-hairfront-long",
+       "name": "Tóc dài"
+      }
+     ]
+    },
+    {
+     "slot": "accessory",
+     "tint": false,
+     "variants": [
+      {
+       "id": null,
+       "name": "Không"
+      },
+      {
+       "id": "avatar-acc-cap",
+       "name": "Mũ lưỡi trai"
+      },
+      {
+       "id": "avatar-acc-flower",
+       "name": "Kẹp hoa"
+      },
+      {
+       "id": "avatar-acc-glasses",
+       "name": "Kính tròn"
+      },
+      {
+       "id": "avatar-acc-backpack",
+       "name": "Ba lô nhỏ"
+      },
+      {
+       "id": "avatar-acc-scarf",
+       "name": "Khăn quàng"
+      }
+     ]
+    }
+   ],
+   "palettes": {
+    "skin": [
+     "#ffe3cf",
+     "#f9cfae",
+     "#e7b08a",
+     "#c68a63",
+     "#94603f"
+    ],
+    "hair": [
+     "#4a3426",
+     "#7a4b2e",
+     "#c98c4f",
+     "#f2cf7a",
+     "#e86f5a",
+     "#2f2c3d",
+     "#b49ae6",
+     "#ff9fbf"
+    ],
+    "cloth": [
+     "#ffd96b",
+     "#ff8f8f",
+     "#ffac6b",
+     "#9fd67c",
+     "#7cc3ee",
+     "#7b8fd1",
+     "#c7b5f0",
+     "#ffb8cb"
+    ],
+    "shoes": [
+     "#ff8f8f",
+     "#7cc3ee",
+     "#fffaf2",
+     "#9b85d9",
+     "#cf9161"
+    ]
+   },
+   "tintSlots": {
+    "body": "skin",
+    "hairBack": "hair",
+    "hairFront": "hair",
+    "top": "cloth",
+    "bottom": "cloth",
+    "shoes": "shoes"
+   },
+   "defaults": {
+    "hairBack": null,
+    "body": "avatar-body",
+    "face": "avatar-face-default",
+    "bottom": "avatar-bottom-shorts",
+    "top": "avatar-top-tshirt",
+    "shoes": "avatar-shoes-sneakers",
+    "hairFront": "avatar-hairfront-short",
+    "accessory": null,
+    "skin": 1,
+    "hair": 1,
+    "topColor": "#ffd96b",
+    "bottomColor": "#7b8fd1",
+    "shoesColor": "#ff8f8f"
+   },
+   "composite": "avatar-default",
+   "hairstyles": [
+    {
+     "key": "short",
+     "name": "Tóc ngắn rối",
+     "hairFront": "avatar-hairfront-short",
+     "hairBack": null
+    },
+    {
+     "key": "bob",
+     "name": "Tóc bob",
+     "hairFront": "avatar-hairfront-bob",
+     "hairBack": "avatar-hairback-bob"
+    },
+    {
+     "key": "ponytail",
+     "name": "Tóc buộc đuôi ngựa",
+     "hairFront": "avatar-hairfront-ponytail",
+     "hairBack": "avatar-hairback-ponytail"
+    },
+    {
+     "key": "puffs",
+     "name": "Tóc hai búi xoăn",
+     "hairFront": "avatar-hairfront-puffs",
+     "hairBack": "avatar-hairback-puffs"
+    },
+    {
+     "key": "long",
+     "name": "Tóc dài",
+     "hairFront": "avatar-hairfront-long",
+     "hairBack": "avatar-hairback-long"
+    }
+   ],
+   "flipForLeft": true
+  },
+  "pets": {
+   "fox": {
+    "sheet": "fox-sheet",
+    "name": "Cáo Cam",
+    "personality": "Tò mò, lanh lợi và thích phiêu lưu. Luôn chạy trước dẫn đường, đánh hơi mọi bí mật quanh đảo.",
+    "frameWidth": 160,
+    "frameHeight": 160,
+    "origin": [
+     0.5,
+     0.92
+    ],
+    "scale": 0.5,
+    "anims": {
+     "idle-front": {
+      "start": 0,
+      "count": 4,
+      "frameRate": 5,
+      "repeat": -1
+     },
+     "idle-side": {
+      "start": 4,
+      "count": 4,
+      "frameRate": 5,
+      "repeat": -1
+     },
+     "idle-back": {
+      "start": 8,
+      "count": 2,
+      "frameRate": 3,
+      "repeat": -1
+     },
+     "walk-side": {
+      "start": 10,
+      "count": 8,
+      "frameRate": 10,
+      "repeat": -1
+     },
+     "walk-front": {
+      "start": 18,
+      "count": 6,
+      "frameRate": 9,
+      "repeat": -1
+     },
+     "walk-back": {
+      "start": 24,
+      "count": 6,
+      "frameRate": 9,
+      "repeat": -1
+     },
+     "happy": {
+      "start": 30,
+      "count": 6,
+      "frameRate": 10,
+      "repeat": -1
+     },
+     "greet": {
+      "start": 36,
+      "count": 6,
+      "frameRate": 8,
+      "repeat": 0
+     },
+     "celebrate": {
+      "start": 42,
+      "count": 8,
+      "frameRate": 12,
+      "repeat": 0
+     },
+     "interact": {
+      "start": 50,
+      "count": 6,
+      "frameRate": 8,
+      "repeat": 0
+     }
+    },
+    "views": {
+     "front": 0,
+     "side": 4,
+     "back": 8
+    },
+    "portrait": "fox-portrait",
+    "flipForLeft": true
+   },
+   "bunny": {
+    "sheet": "bunny-sheet",
+    "name": "Thỏ Bông",
+    "personality": "Hiền lành, thân thiện và tinh nghịch. Thích nhảy lò cò, an ủi bạn khi buồn và reo vui khi bạn làm được.",
+    "frameWidth": 160,
+    "frameHeight": 160,
+    "origin": [
+     0.5,
+     0.92
+    ],
+    "scale": 0.5,
+    "anims": {
+     "idle-front": {
+      "start": 0,
+      "count": 4,
+      "frameRate": 5,
+      "repeat": -1
+     },
+     "idle-side": {
+      "start": 4,
+      "count": 4,
+      "frameRate": 5,
+      "repeat": -1
+     },
+     "idle-back": {
+      "start": 8,
+      "count": 2,
+      "frameRate": 3,
+      "repeat": -1
+     },
+     "walk-side": {
+      "start": 10,
+      "count": 8,
+      "frameRate": 10,
+      "repeat": -1
+     },
+     "walk-front": {
+      "start": 18,
+      "count": 6,
+      "frameRate": 9,
+      "repeat": -1
+     },
+     "walk-back": {
+      "start": 24,
+      "count": 6,
+      "frameRate": 9,
+      "repeat": -1
+     },
+     "happy": {
+      "start": 30,
+      "count": 6,
+      "frameRate": 10,
+      "repeat": -1
+     },
+     "greet": {
+      "start": 36,
+      "count": 6,
+      "frameRate": 8,
+      "repeat": 0
+     },
+     "celebrate": {
+      "start": 42,
+      "count": 8,
+      "frameRate": 12,
+      "repeat": 0
+     },
+     "interact": {
+      "start": 50,
+      "count": 6,
+      "frameRate": 8,
+      "repeat": 0
+     }
+    },
+    "views": {
+     "front": 0,
+     "side": 4,
+     "back": 8
+    },
+    "portrait": "bunny-portrait",
+    "flipForLeft": true
+   },
+   "bear": {
+    "sheet": "bear-sheet",
+    "name": "Gấu Mật",
+    "personality": "Điềm tĩnh, chu đáo và che chở. Thích chăm cây, ôm bạn thật chặt và luôn nhắc bạn nghỉ ngơi.",
+    "frameWidth": 160,
+    "frameHeight": 160,
+    "origin": [
+     0.5,
+     0.92
+    ],
+    "scale": 0.5,
+    "anims": {
+     "idle-front": {
+      "start": 0,
+      "count": 4,
+      "frameRate": 5,
+      "repeat": -1
+     },
+     "idle-side": {
+      "start": 4,
+      "count": 4,
+      "frameRate": 5,
+      "repeat": -1
+     },
+     "idle-back": {
+      "start": 8,
+      "count": 2,
+      "frameRate": 3,
+      "repeat": -1
+     },
+     "walk-side": {
+      "start": 10,
+      "count": 8,
+      "frameRate": 10,
+      "repeat": -1
+     },
+     "walk-front": {
+      "start": 18,
+      "count": 6,
+      "frameRate": 9,
+      "repeat": -1
+     },
+     "walk-back": {
+      "start": 24,
+      "count": 6,
+      "frameRate": 9,
+      "repeat": -1
+     },
+     "happy": {
+      "start": 30,
+      "count": 6,
+      "frameRate": 10,
+      "repeat": -1
+     },
+     "greet": {
+      "start": 36,
+      "count": 6,
+      "frameRate": 8,
+      "repeat": 0
+     },
+     "celebrate": {
+      "start": 42,
+      "count": 8,
+      "frameRate": 12,
+      "repeat": 0
+     },
+     "interact": {
+      "start": 50,
+      "count": 6,
+      "frameRate": 8,
+      "repeat": 0
+     }
+    },
+    "views": {
+     "front": 0,
+     "side": 4,
+     "back": 8
+    },
+    "portrait": "bear-portrait",
+    "flipForLeft": true
+   }
+  }
+ }
+}

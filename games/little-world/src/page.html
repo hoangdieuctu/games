@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-CBV0HJRM37"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-CBV0HJRM37');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="icon" type="image/png" href="/*__ICON__*/">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Little World">
+<meta name="theme-color" content="#a8dcf7">
+<title>Little World — Thế Giới Nhỏ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Nunito:wght@600;800;900&display=swap" rel="stylesheet">
+<style>/*__CSS__*/</style>
+</head>
+<body>
+<div id="game"></div>
+
+<header class="topbar">
+  <a class="back" href="../../index.html" aria-label="Trò chơi khác">‹</a>
+  <div class="brand"><b>Little World</b><span>Thế Giới Nhỏ · Phase 1</span></div>
+  <nav class="tabs">
+    <button data-scene="WorldMap">Bản đồ</button>
+    <button data-scene="Island">Đảo của bé</button>
+    <button data-scene="Gallery">Nhân vật</button>
+  </nav>
+</header>
+
+<section id="panel" class="panel" hidden></section>
+<aside id="card" class="card" hidden></aside>
+<div id="modal" hidden></div>
+<div id="toast"></div>
+<div id="loading"><div class="ld-box"><div class="ld-orb"></div><div class="label">Đang tải thế giới nhỏ…</div><div class="bar"><i></i></div></div></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.80.1/phaser.min.js"></script>
+<script>/*__JS__*/</script>
+</body>
+</html>

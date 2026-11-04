@@ -1,0 +1,873 @@
+{
+ "width": 2560,
+ "height": 1600,
+ "tile": 64,
+ "terrain": "island-terrain-base",
+ "gridOverlay": "island-terrain-grid",
+ "walkArea": [
+  [
+   354,
+   340
+  ],
+  [
+   539,
+   227
+  ],
+  [
+   832,
+   190
+  ],
+  [
+   1124,
+   210
+  ],
+  [
+   1397,
+   180
+  ],
+  [
+   1690,
+   208
+  ],
+  [
+   1982,
+   247
+  ],
+  [
+   2207,
+   340
+  ],
+  [
+   2308,
+   526
+  ],
+  [
+   2296,
+   760
+  ],
+  [
+   2247,
+   974
+  ],
+  [
+   2129,
+   1140
+  ],
+  [
+   1943,
+   1202
+  ],
+  [
+   1752,
+   1236
+  ],
+  [
+   1756,
+   1320
+  ],
+  [
+   1850,
+   1386
+  ],
+  [
+   1746,
+   1406
+  ],
+  [
+   1742,
+   1572
+  ],
+  [
+   1690,
+   1572
+  ],
+  [
+   1686,
+   1406
+  ],
+  [
+   1590,
+   1386
+  ],
+  [
+   1668,
+   1320
+  ],
+  [
+   1672,
+   1236
+  ],
+  [
+   1787,
+   1224
+  ],
+  [
+   1612,
+   1239
+  ],
+  [
+   1397,
+   1257
+  ],
+  [
+   1154,
+   1268
+  ],
+  [
+   910,
+   1249
+  ],
+  [
+   666,
+   1200
+  ],
+  [
+   461,
+   1103
+  ],
+  [
+   325,
+   939
+  ],
+  [
+   266,
+   724
+  ],
+  [
+   288,
+   506
+  ]
+ ],
+ "buildCells": [
+  [
+   26,
+   4
+  ],
+  [
+   27,
+   4
+  ],
+  [
+   28,
+   4
+  ],
+  [
+   29,
+   4
+  ],
+  [
+   30,
+   4
+  ],
+  [
+   26,
+   5
+  ],
+  [
+   27,
+   5
+  ],
+  [
+   28,
+   5
+  ],
+  [
+   29,
+   5
+  ],
+  [
+   30,
+   5
+  ],
+  [
+   31,
+   5
+  ],
+  [
+   26,
+   6
+  ],
+  [
+   27,
+   6
+  ],
+  [
+   28,
+   6
+  ],
+  [
+   29,
+   6
+  ],
+  [
+   30,
+   6
+  ],
+  [
+   31,
+   6
+  ],
+  [
+   15,
+   16
+  ],
+  [
+   16,
+   16
+  ],
+  [
+   17,
+   16
+  ],
+  [
+   18,
+   16
+  ],
+  [
+   19,
+   16
+  ],
+  [
+   15,
+   17
+  ],
+  [
+   16,
+   17
+  ],
+  [
+   17,
+   17
+  ],
+  [
+   18,
+   17
+  ],
+  [
+   19,
+   17
+  ],
+  [
+   15,
+   18
+  ],
+  [
+   16,
+   18
+  ],
+  [
+   17,
+   18
+  ],
+  [
+   18,
+   18
+  ],
+  [
+   19,
+   18
+  ],
+  [
+   28,
+   13
+  ],
+  [
+   29,
+   13
+  ],
+  [
+   30,
+   13
+  ],
+  [
+   31,
+   13
+  ],
+  [
+   32,
+   13
+  ],
+  [
+   29,
+   14
+  ],
+  [
+   30,
+   14
+  ],
+  [
+   31,
+   14
+  ],
+  [
+   32,
+   14
+  ],
+  [
+   29,
+   15
+  ],
+  [
+   30,
+   15
+  ],
+  [
+   31,
+   15
+  ],
+  [
+   32,
+   15
+  ],
+  [
+   28,
+   16
+  ],
+  [
+   29,
+   16
+  ],
+  [
+   30,
+   16
+  ],
+  [
+   31,
+   16
+  ],
+  [
+   32,
+   16
+  ],
+  [
+   5,
+   10
+  ],
+  [
+   6,
+   10
+  ],
+  [
+   7,
+   10
+  ],
+  [
+   8,
+   10
+  ],
+  [
+   5,
+   11
+  ],
+  [
+   6,
+   11
+  ],
+  [
+   7,
+   11
+  ],
+  [
+   8,
+   11
+  ],
+  [
+   6,
+   12
+  ],
+  [
+   7,
+   12
+  ],
+  [
+   8,
+   12
+  ]
+ ],
+ "objects": [
+  {
+   "asset": "island-building-house-main",
+   "x": 1284,
+   "y": 652,
+   "flipX": false
+  },
+  {
+   "asset": "island-tree-great-tree",
+   "x": 790,
+   "y": 590,
+   "flipX": false
+  },
+  {
+   "asset": "island-terrain-pond",
+   "x": 1930,
+   "y": 660,
+   "flipX": false
+  },
+  {
+   "asset": "island-terrain-plot-sprout",
+   "x": 520,
+   "y": 986,
+   "flipX": false
+  },
+  {
+   "asset": "island-terrain-plot-growing",
+   "x": 662,
+   "y": 986,
+   "flipX": false
+  },
+  {
+   "asset": "island-terrain-plot-empty",
+   "x": 520,
+   "y": 1086,
+   "flipX": false
+  },
+  {
+   "asset": "island-deco-fence-h",
+   "x": 436,
+   "y": 1150,
+   "flipX": false
+  },
+  {
+   "asset": "island-deco-fence-h",
+   "x": 500,
+   "y": 1150,
+   "flipX": false
+  },
+  {
+   "asset": "island-deco-fence-h",
+   "x": 564,
+   "y": 1150,
+   "flipX": false
+  },
+  {
+   "asset": "island-deco-fence-gate",
+   "x": 628,
+   "y": 1150,
+   "flipX": false
+  },
+  {
+   "asset": "island-deco-fence-h",
+   "x": 692,
+   "y": 1150,
+   "flipX": false
+  },
+  {
+   "asset": "island-deco-fence-post",
+   "x": 756,
+   "y": 1150,
+   "flipX": false
+  },
+  {
+   "asset": "island-deco-fence-v",
+   "x": 436,
+   "y": 1150,
+   "flipX": false
+  },
+  {
+   "asset": "island-deco-fence-v",
+   "x": 436,
+   "y": 1086,
+   "flipX": false
+  },
+  {
+   "asset": "island-deco-fence-post",
+   "x": 436,
+   "y": 1022,
+   "flipX": false
+  },
+  {
+   "asset": "island-deco-sign-board",
+   "x": 812,
+   "y": 1012,
+   "flipX": false
+  },
+  {
+   "asset": "island-building-pet-house",
+   "x": 1600,
+   "y": 700,
+   "flipX": false
+  },
+  {
+   "asset": "island-deco-pet-bed",
+   "x": 1516,
+   "y": 760,
+   "flipX": false
+  },
+  {
+   "asset": "island-deco-mailbox",
+   "x": 1150,
+   "y": 708,
+   "flipX": false
+  },
+  {
+   "asset": "island-deco-lamp-street",
+   "x": 1404,
+   "y": 712,
+   "flipX": false
+  },
+  {
+   "asset": "island-deco-lamp-mushroom",
+   "x": 1460,
+   "y": 958,
+   "flipX": false
+  },
+  {
+   "asset": "island-deco-lamp-mushroom",
+   "x": 1640,
+   "y": 1170,
+   "flipX": false
+  },
+  {
+   "asset": "island-deco-bench-wood",
+   "x": 960,
+   "y": 720,
+   "flipX": false
+  },
+  {
+   "asset": "island-deco-flower-pot-1",
+   "x": 1234,
+   "y": 682,
+   "flipX": false
+  },
+  {
+   "asset": "island-deco-flower-pot-2",
+   "x": 1336,
+   "y": 682,
+   "flipX": false
+  },
+  {
+   "asset": "island-deco-birdhouse",
+   "x": 664,
+   "y": 716,
+   "flipX": false
+  },
+  {
+   "asset": "island-tree-pine-1",
+   "x": 420,
+   "y": 470,
+   "flipX": false
+  },
+  {
+   "asset": "island-tree-pine-2",
+   "x": 520,
+   "y": 380,
+   "flipX": false
+  },
+  {
+   "asset": "island-tree-pine-2",
+   "x": 348,
+   "y": 640,
+   "flipX": false
+  },
+  {
+   "asset": "island-tree-blossom",
+   "x": 1586,
+   "y": 446,
+   "flipX": false
+  },
+  {
+   "asset": "island-tree-oak-1",
+   "x": 2200,
+   "y": 470,
+   "flipX": false
+  },
+  {
+   "asset": "island-tree-apple",
+   "x": 2150,
+   "y": 860,
+   "flipX": false
+  },
+  {
+   "asset": "island-tree-oak-2",
+   "x": 1040,
+   "y": 400,
+   "flipX": false
+  },
+  {
+   "asset": "island-tree-palm",
+   "x": 2110,
+   "y": 1290,
+   "flipX": false
+  },
+  {
+   "asset": "island-tree-palm",
+   "x": 300,
+   "y": 1140,
+   "flipX": false
+  },
+  {
+   "asset": "island-plant-bush-1",
+   "x": 1090,
+   "y": 610,
+   "flipX": false
+  },
+  {
+   "asset": "island-plant-bush-3",
+   "x": 1488,
+   "y": 612,
+   "flipX": false
+  },
+  {
+   "asset": "island-plant-bush-2",
+   "x": 2280,
+   "y": 640,
+   "flipX": false
+  },
+  {
+   "asset": "island-plant-bush-1",
+   "x": 1840,
+   "y": 1170,
+   "flipX": false
+  },
+  {
+   "asset": "island-plant-bush-3",
+   "x": 1600,
+   "y": 1236,
+   "flipX": false
+  },
+  {
+   "asset": "island-plant-flower-white",
+   "x": 1800,
+   "y": 1232,
+   "flipX": false
+  },
+  {
+   "asset": "island-plant-flower-pink",
+   "x": 1640,
+   "y": 1252,
+   "flipX": false
+  },
+  {
+   "asset": "island-plant-flower-pink",
+   "x": 1186,
+   "y": 760,
+   "flipX": false
+  },
+  {
+   "asset": "island-plant-flower-yellow",
+   "x": 1390,
+   "y": 770,
+   "flipX": false
+  },
+  {
+   "asset": "island-plant-flower-lavender",
+   "x": 1560,
+   "y": 1080,
+   "flipX": false
+  },
+  {
+   "asset": "island-plant-flower-white",
+   "x": 1004,
+   "y": 958,
+   "flipX": false
+  },
+  {
+   "asset": "island-plant-flower-tulip",
+   "x": 850,
+   "y": 860,
+   "flipX": false
+  },
+  {
+   "asset": "island-plant-flower-blue",
+   "x": 1700,
+   "y": 810,
+   "flipX": false
+  },
+  {
+   "asset": "island-plant-flower-pink",
+   "x": 2070,
+   "y": 760,
+   "flipX": false
+  },
+  {
+   "asset": "island-plant-flower-yellow",
+   "x": 330,
+   "y": 1000,
+   "flipX": false
+  },
+  {
+   "asset": "island-terrain-meadow",
+   "x": 800,
+   "y": 1136,
+   "flipX": false
+  },
+  {
+   "asset": "island-terrain-rock-3",
+   "x": 2010,
+   "y": 1172,
+   "flipX": false
+  },
+  {
+   "asset": "island-terrain-rock-mossy",
+   "x": 300,
+   "y": 884,
+   "flipX": false
+  },
+  {
+   "asset": "island-terrain-rock-2",
+   "x": 1780,
+   "y": 520,
+   "flipX": false
+  },
+  {
+   "asset": "island-terrain-rock-1",
+   "x": 1260,
+   "y": 1020,
+   "flipX": false
+  },
+  {
+   "asset": "island-terrain-rock-1",
+   "x": 2120,
+   "y": 640,
+   "flipX": false
+  },
+  {
+   "asset": "island-plant-grass-1",
+   "x": 1120,
+   "y": 840,
+   "flipX": false
+  },
+  {
+   "asset": "island-plant-grass-2",
+   "x": 1600,
+   "y": 900,
+   "flipX": false
+  },
+  {
+   "asset": "island-plant-grass-3",
+   "x": 760,
+   "y": 760,
+   "flipX": false
+  },
+  {
+   "asset": "island-plant-grass-1",
+   "x": 1764,
+   "y": 1004,
+   "flipX": false
+  },
+  {
+   "asset": "island-plant-grass-2",
+   "x": 880,
+   "y": 1180,
+   "flipX": false
+  },
+  {
+   "asset": "island-plant-grass-3",
+   "x": 1360,
+   "y": 1180,
+   "flipX": false
+  },
+  {
+   "asset": "island-plant-grass-1",
+   "x": 1560,
+   "y": 280,
+   "flipX": false
+  },
+  {
+   "asset": "island-plant-grass-2",
+   "x": 2240,
+   "y": 1060,
+   "flipX": false
+  },
+  {
+   "asset": "island-plant-mushroom-red",
+   "x": 640,
+   "y": 600,
+   "flipX": false
+  },
+  {
+   "asset": "island-plant-mushroom-glow",
+   "x": 980,
+   "y": 560,
+   "flipX": false
+  },
+  {
+   "asset": "env-pier-segment",
+   "x": 1716,
+   "y": 1480,
+   "flipX": false
+  },
+  {
+   "asset": "env-pier-end",
+   "x": 1716,
+   "y": 1596,
+   "flipX": false
+  },
+  {
+   "asset": "env-starfish",
+   "x": 1540,
+   "y": 1400,
+   "flipX": false
+  },
+  {
+   "asset": "env-shells-cluster",
+   "x": 1950,
+   "y": 1370,
+   "flipX": false
+  },
+  {
+   "asset": "env-shell-pink",
+   "x": 760,
+   "y": 1350,
+   "flipX": false
+  },
+  {
+   "asset": "env-sea-rock",
+   "x": 250,
+   "y": 1440,
+   "flipX": false
+  },
+  {
+   "asset": "env-sea-rock",
+   "x": 2420,
+   "y": 300,
+   "flipX": false
+  }
+ ],
+ "spawn": {
+  "avatar": [
+   1284,
+   760
+  ],
+  "pet": [
+   1470,
+   790
+  ]
+ },
+ "petArea": [
+  1516,
+  746
+ ],
+ "placeable": [
+  "island-tree-oak-1",
+  "island-tree-oak-2",
+  "island-tree-pine-1",
+  "island-tree-apple",
+  "island-tree-blossom",
+  "island-tree-palm",
+  "island-tree-magic",
+  "island-plant-bush-1",
+  "island-plant-bush-2",
+  "island-plant-bush-3",
+  "island-plant-flower-pink",
+  "island-plant-flower-yellow",
+  "island-plant-flower-lavender",
+  "island-plant-flower-tulip",
+  "island-plant-flower-blue",
+  "island-plant-mushroom-glow",
+  "island-plant-hedge-small",
+  "island-terrain-rock-2",
+  "island-terrain-plot-empty",
+  "island-deco-bench-wood",
+  "island-deco-lamp-street",
+  "island-deco-lamp-mushroom",
+  "island-deco-fence-h",
+  "island-deco-flower-pot-1",
+  "island-deco-statue-bunny",
+  "island-deco-fountain",
+  "island-deco-birdhouse",
+  "island-deco-swing",
+  "island-deco-picnic-blanket",
+  "island-deco-windmill"
+ ]
+}

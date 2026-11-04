@@ -1,0 +1,3441 @@
+{
+ "group": "island",
+ "entries": [
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.92
+   ],
+   "id": "island-building-house-main",
+   "file": "island/buildings/house-main.png",
+   "category": "island/buildings",
+   "width": 672,
+   "height": 600,
+   "usage": "Nhà chính của bé (mái hồng san hô): cửa sổ tròn, ống khói, hộp hoa, hiên – tiêu điểm của đảo",
+   "tags": [
+    "building",
+    "home"
+   ],
+   "layer": "object",
+   "worldSize": [
+    336,
+    300
+   ],
+   "footprint": [
+    4,
+    3
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.92
+   ],
+   "id": "island-building-house-main-blue",
+   "file": "island/buildings/house-main-blue.png",
+   "category": "island/buildings",
+   "width": 672,
+   "height": 600,
+   "usage": "Nhà chính – phối màu mái xanh dương, tường bạc hà",
+   "tags": [
+    "building",
+    "home",
+    "variant"
+   ],
+   "layer": "object",
+   "worldSize": [
+    336,
+    300
+   ],
+   "footprint": [
+    4,
+    3
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.92
+   ],
+   "id": "island-building-house-main-lavender",
+   "file": "island/buildings/house-main-lavender.png",
+   "category": "island/buildings",
+   "width": 672,
+   "height": 600,
+   "usage": "Nhà chính – phối màu mái tím lavender, tường vàng kem",
+   "tags": [
+    "building",
+    "home",
+    "variant"
+   ],
+   "layer": "object",
+   "worldSize": [
+    336,
+    300
+   ],
+   "footprint": [
+    4,
+    3
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.8942
+   ],
+   "id": "island-building-cottage-1",
+   "file": "island/buildings/cottage-1.png",
+   "category": "island/buildings",
+   "width": 428,
+   "height": 416,
+   "usage": "Nhà nhỏ 1: mái dốc xanh ngọc, tường kem (nhà khách/bạn bè)",
+   "tags": [
+    "building",
+    "cottage",
+    "placeable"
+   ],
+   "layer": "object",
+   "worldSize": [
+    214,
+    208
+   ],
+   "footprint": [
+    3,
+    2
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.8911
+   ],
+   "id": "island-building-cottage-2",
+   "file": "island/buildings/cottage-2.png",
+   "category": "island/buildings",
+   "width": 428,
+   "height": 404,
+   "usage": "Nhà nhỏ 2: mái tròn lợp rơm vàng, tường đá-vữa (nhà rơm)",
+   "tags": [
+    "building",
+    "cottage",
+    "placeable"
+   ],
+   "layer": "object",
+   "worldSize": [
+    214,
+    202
+   ],
+   "footprint": [
+    3,
+    2
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.9113
+   ],
+   "id": "island-building-cottage-3",
+   "file": "island/buildings/cottage-3.png",
+   "category": "island/buildings",
+   "width": 428,
+   "height": 496,
+   "usage": "Nhà nhỏ 3: nhà chữ A mái tím, mặt hồi gỗ",
+   "tags": [
+    "building",
+    "cottage",
+    "placeable"
+   ],
+   "layer": "object",
+   "worldSize": [
+    214,
+    248
+   ],
+   "footprint": [
+    3,
+    2
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.8938
+   ],
+   "id": "island-building-bunny-hutch",
+   "file": "island/buildings/bunny-hutch.png",
+   "category": "island/buildings",
+   "width": 344,
+   "height": 320,
+   "usage": "Chuồng thỏ gỗ trên chân, có lưới, cỏ khô và cà rốt",
+   "tags": [
+    "building",
+    "animal",
+    "placeable"
+   ],
+   "layer": "object",
+   "worldSize": [
+    172,
+    160
+   ],
+   "footprint": [
+    2,
+    1
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.873
+   ],
+   "id": "island-building-pet-house",
+   "file": "island/buildings/pet-house.png",
+   "category": "island/buildings",
+   "width": 284,
+   "height": 252,
+   "usage": "Nhà thú cưng (kiểu nhà gỗ chó): cửa vòm, gối nằm, khay đồ ăn",
+   "tags": [
+    "building",
+    "animal",
+    "pet",
+    "placeable"
+   ],
+   "layer": "object",
+   "worldSize": [
+    142,
+    126
+   ],
+   "footprint": [
+    2,
+    1
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.8927
+   ],
+   "id": "island-building-barn",
+   "file": "island/buildings/barn.png",
+   "category": "island/buildings",
+   "width": 440,
+   "height": 410,
+   "usage": "Kho thóc nhỏ / chuồng gà màu đỏ hồng, cửa chữ X, ô gác mái",
+   "tags": [
+    "building",
+    "animal",
+    "farm",
+    "placeable"
+   ],
+   "layer": "object",
+   "worldSize": [
+    220,
+    205
+   ],
+   "footprint": [
+    3,
+    2
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.9288
+   ],
+   "id": "island-building-school",
+   "file": "island/buildings/school.png",
+   "category": "island/buildings",
+   "width": 716,
+   "height": 730,
+   "usage": "Trường học nhỏ của đảo: tháp chuông, đồng hồ (không số), cửa sổ lớn, cờ",
+   "tags": [
+    "building",
+    "public"
+   ],
+   "layer": "object",
+   "worldSize": [
+    358,
+    365
+   ],
+   "footprint": [
+    4,
+    3
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.8924
+   ],
+   "id": "island-building-grocery",
+   "file": "island/buildings/grocery.png",
+   "category": "island/buildings",
+   "width": 656,
+   "height": 446,
+   "usage": "Cửa hàng tạp hoá: mái hiên sọc hồng-trắng, kệ trái cây/rau trước cửa",
+   "tags": [
+    "building",
+    "shop",
+    "public"
+   ],
+   "layer": "object",
+   "worldSize": [
+    328,
+    223
+   ],
+   "footprint": [
+    4,
+    2
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.9018
+   ],
+   "id": "island-building-workshop",
+   "file": "island/buildings/workshop.png",
+   "category": "island/buildings",
+   "width": 556,
+   "height": 448,
+   "usage": "Xưởng thủ công: tường gỗ, cửa kho lớn, biểu tượng bánh răng, đống gỗ & bàn cưa",
+   "tags": [
+    "building",
+    "craft",
+    "public"
+   ],
+   "layer": "object",
+   "worldSize": [
+    278,
+    224
+   ],
+   "footprint": [
+    3,
+    2
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.8967
+   ],
+   "id": "island-building-art-studio",
+   "file": "island/buildings/art-studio.png",
+   "category": "island/buildings",
+   "width": 544,
+   "height": 426,
+   "usage": "Xưởng vẽ: tường tím nhạt, cửa sổ mái kính lớn, bảng màu và vết sơn",
+   "tags": [
+    "building",
+    "craft",
+    "public"
+   ],
+   "layer": "object",
+   "worldSize": [
+    272,
+    213
+   ],
+   "footprint": [
+    3,
+    2
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.886
+   ],
+   "id": "island-building-greenhouse",
+   "file": "island/buildings/greenhouse.png",
+   "category": "island/buildings",
+   "width": 544,
+   "height": 386,
+   "usage": "Nhà kính trồng cây: khung trắng, mái vòm kính, cây xanh và chậu bên trong",
+   "tags": [
+    "building",
+    "garden",
+    "placeable"
+   ],
+   "layer": "object",
+   "worldSize": [
+    272,
+    193
+   ],
+   "footprint": [
+    3,
+    2
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.9455
+   ],
+   "id": "island-building-lighthouse",
+   "file": "island/buildings/lighthouse.png",
+   "category": "island/buildings",
+   "width": 412,
+   "height": 660,
+   "usage": "Hải đăng sọc đỏ-trắng trên bệ đá, phòng đèn vàng sáng, ban công",
+   "tags": [
+    "building",
+    "landmark",
+    "coast"
+   ],
+   "layer": "object",
+   "worldSize": [
+    206,
+    330
+   ],
+   "footprint": [
+    2,
+    2
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.8908
+   ],
+   "id": "island-building-submarine-station",
+   "file": "island/buildings/submarine-station.png",
+   "category": "island/buildings",
+   "width": 784,
+   "height": 476,
+   "usage": "Trạm tàu ngầm: nhà trên cầu cảng gỗ, tàu ngầm vàng dễ thương neo bên cạnh – đặt ở mép nước/bãi biển",
+   "tags": [
+    "building",
+    "ocean",
+    "coast"
+   ],
+   "layer": "object",
+   "worldSize": [
+    392,
+    238
+   ],
+   "footprint": [
+    4,
+    3
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.9175
+   ],
+   "id": "island-tree-oak-1",
+   "file": "island/trees/oak-1.png",
+   "category": "island/trees",
+   "width": 360,
+   "height": 412,
+   "usage": "Cây sồi tròn xanh lá (to vừa), đặt trên cỏ",
+   "tags": [
+    "tree",
+    "nature",
+    "placeable"
+   ],
+   "layer": "object",
+   "worldSize": [
+    180,
+    206
+   ],
+   "footprint": [
+    1,
+    1
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.9076
+   ],
+   "id": "island-tree-oak-2",
+   "file": "island/trees/oak-2.png",
+   "category": "island/trees",
+   "width": 304,
+   "height": 368,
+   "usage": "Cây sồi tròn nhỏ hơn, lá xanh vàng",
+   "tags": [
+    "tree",
+    "nature",
+    "placeable"
+   ],
+   "layer": "object",
+   "worldSize": [
+    152,
+    184
+   ],
+   "footprint": [
+    1,
+    1
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.9315
+   ],
+   "id": "island-tree-pine-1",
+   "file": "island/trees/pine-1.png",
+   "category": "island/trees",
+   "width": 256,
+   "height": 438,
+   "usage": "Cây thông xanh đậm, cao (dùng viền đảo, góc rừng)",
+   "tags": [
+    "tree",
+    "nature",
+    "placeable"
+   ],
+   "layer": "object",
+   "worldSize": [
+    128,
+    219
+   ],
+   "footprint": [
+    1,
+    1
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.9162
+   ],
+   "id": "island-tree-pine-2",
+   "file": "island/trees/pine-2.png",
+   "category": "island/trees",
+   "width": 220,
+   "height": 358,
+   "usage": "Cây linh sam nhỏ xanh ngọc, đầu ngọn lấp lánh",
+   "tags": [
+    "tree",
+    "nature",
+    "placeable"
+   ],
+   "layer": "object",
+   "worldSize": [
+    110,
+    179
+   ],
+   "footprint": [
+    1,
+    1
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.9163
+   ],
+   "id": "island-tree-apple",
+   "file": "island/trees/apple-tree.png",
+   "category": "island/trees",
+   "width": 352,
+   "height": 406,
+   "usage": "Cây táo (quả đỏ hồng) – có thể dùng cho hoạt động hái quả",
+   "tags": [
+    "tree",
+    "nature",
+    "placeable",
+    "fruit"
+   ],
+   "layer": "object",
+   "worldSize": [
+    176,
+    203
+   ],
+   "footprint": [
+    1,
+    1
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.9171
+   ],
+   "id": "island-tree-orange",
+   "file": "island/trees/orange-tree.png",
+   "category": "island/trees",
+   "width": 352,
+   "height": 410,
+   "usage": "Cây cam (quả cam) – có thể dùng cho hoạt động hái quả",
+   "tags": [
+    "tree",
+    "nature",
+    "placeable",
+    "fruit"
+   ],
+   "layer": "object",
+   "worldSize": [
+    176,
+    205
+   ],
+   "footprint": [
+    1,
+    1
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.9187
+   ],
+   "id": "island-tree-blossom",
+   "file": "island/trees/blossom-tree.png",
+   "category": "island/trees",
+   "width": 372,
+   "height": 418,
+   "usage": "Cây hoa hồng phấn (anh đào), cánh hoa rơi dưới gốc",
+   "tags": [
+    "tree",
+    "nature",
+    "placeable",
+    "flower"
+   ],
+   "layer": "object",
+   "worldSize": [
+    186,
+    209
+   ],
+   "footprint": [
+    1,
+    1
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.9269
+   ],
+   "id": "island-tree-palm",
+   "file": "island/trees/palm.png",
+   "category": "island/trees",
+   "width": 468,
+   "height": 438,
+   "usage": "Cây dừa (bãi biển), lá xoè, có trái dừa",
+   "tags": [
+    "tree",
+    "nature",
+    "placeable",
+    "beach"
+   ],
+   "layer": "object",
+   "worldSize": [
+    234,
+    219
+   ],
+   "footprint": [
+    1,
+    1
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.9212
+   ],
+   "id": "island-tree-great-tree",
+   "file": "island/trees/great-tree.png",
+   "category": "island/trees",
+   "width": 800,
+   "height": 812,
+   "usage": "Cây cổ thụ lớn thân thiện của đảo: tán to, sàn nhà cây nhỏ, xích đu – điểm nhấn bên trái nhà",
+   "tags": [
+    "tree",
+    "nature",
+    "placeable",
+    "landmark",
+    "large"
+   ],
+   "layer": "object",
+   "worldSize": [
+    400,
+    406
+   ],
+   "footprint": [
+    3,
+    2
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.9277
+   ],
+   "id": "island-tree-magic",
+   "file": "island/trees/magic-tree.png",
+   "category": "island/trees",
+   "width": 392,
+   "height": 470,
+   "usage": "Cây phép thuật: tán tím lavender phát sáng nhẹ, quả cầu sáng – vật hiếm/phần thưởng",
+   "tags": [
+    "tree",
+    "nature",
+    "placeable",
+    "magic",
+    "rare"
+   ],
+   "layer": "object",
+   "worldSize": [
+    196,
+    235
+   ],
+   "footprint": [
+    1,
+    1
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.8158
+   ],
+   "id": "island-plant-bush-1",
+   "file": "island/plants/bush-1.png",
+   "category": "island/plants",
+   "width": 200,
+   "height": 152,
+   "usage": "Bụi cây tròn xanh lá",
+   "tags": [
+    "plant",
+    "nature",
+    "placeable"
+   ],
+   "layer": "object",
+   "worldSize": [
+    100,
+    76
+   ],
+   "footprint": [
+    1,
+    1
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.8101
+   ],
+   "id": "island-plant-bush-2",
+   "file": "island/plants/bush-2.png",
+   "category": "island/plants",
+   "width": 200,
+   "height": 158,
+   "usage": "Bụi quả mọng (quả đỏ hồng)",
+   "tags": [
+    "plant",
+    "nature",
+    "placeable",
+    "fruit"
+   ],
+   "layer": "object",
+   "worldSize": [
+    100,
+    79
+   ],
+   "footprint": [
+    1,
+    1
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.8101
+   ],
+   "id": "island-plant-bush-3",
+   "file": "island/plants/bush-3.png",
+   "category": "island/plants",
+   "width": 208,
+   "height": 158,
+   "usage": "Bụi hoa cẩm tú cầu (xanh lavender)",
+   "tags": [
+    "plant",
+    "nature",
+    "placeable",
+    "flower"
+   ],
+   "layer": "object",
+   "worldSize": [
+    104,
+    79
+   ],
+   "footprint": [
+    1,
+    1
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.8036
+   ],
+   "id": "island-plant-flower-pink",
+   "file": "island/plants/flower-pink.png",
+   "category": "island/plants",
+   "width": 128,
+   "height": 112,
+   "usage": "Cụm hoa cúc hồng",
+   "tags": [
+    "plant",
+    "nature",
+    "placeable",
+    "flower"
+   ],
+   "layer": "object",
+   "worldSize": [
+    64,
+    56
+   ],
+   "footprint": [
+    1,
+    1
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.8036
+   ],
+   "id": "island-plant-flower-yellow",
+   "file": "island/plants/flower-yellow.png",
+   "category": "island/plants",
+   "width": 128,
+   "height": 112,
+   "usage": "Cụm hoa vàng",
+   "tags": [
+    "plant",
+    "nature",
+    "placeable",
+    "flower"
+   ],
+   "layer": "object",
+   "worldSize": [
+    64,
+    56
+   ],
+   "footprint": [
+    1,
+    1
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.8036
+   ],
+   "id": "island-plant-flower-lavender",
+   "file": "island/plants/flower-lavender.png",
+   "category": "island/plants",
+   "width": 128,
+   "height": 112,
+   "usage": "Cụm hoa tím lavender",
+   "tags": [
+    "plant",
+    "nature",
+    "placeable",
+    "flower"
+   ],
+   "layer": "object",
+   "worldSize": [
+    64,
+    56
+   ],
+   "footprint": [
+    1,
+    1
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.8036
+   ],
+   "id": "island-plant-flower-white",
+   "file": "island/plants/flower-white.png",
+   "category": "island/plants",
+   "width": 128,
+   "height": 112,
+   "usage": "Cụm hoa cúc trắng",
+   "tags": [
+    "plant",
+    "nature",
+    "placeable",
+    "flower"
+   ],
+   "layer": "object",
+   "worldSize": [
+    64,
+    56
+   ],
+   "footprint": [
+    1,
+    1
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.807
+   ],
+   "id": "island-plant-flower-tulip",
+   "file": "island/plants/flower-tulip.png",
+   "category": "island/plants",
+   "width": 128,
+   "height": 114,
+   "usage": "Cụm tulip đỏ-cam",
+   "tags": [
+    "plant",
+    "nature",
+    "placeable",
+    "flower"
+   ],
+   "layer": "object",
+   "worldSize": [
+    64,
+    57
+   ],
+   "footprint": [
+    1,
+    1
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.8136
+   ],
+   "id": "island-plant-flower-blue",
+   "file": "island/plants/flower-blue.png",
+   "category": "island/plants",
+   "width": 132,
+   "height": 118,
+   "usage": "Cụm hoa chuông xanh",
+   "tags": [
+    "plant",
+    "nature",
+    "placeable",
+    "flower"
+   ],
+   "layer": "object",
+   "worldSize": [
+    66,
+    59
+   ],
+   "footprint": [
+    1,
+    1
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.7368
+   ],
+   "id": "island-plant-grass-1",
+   "file": "island/plants/grass-1.png",
+   "category": "island/plants",
+   "width": 104,
+   "height": 76,
+   "usage": "Khóm cỏ nhỏ (rải trang trí trên cỏ)",
+   "tags": [
+    "plant",
+    "nature",
+    "placeable",
+    "grass"
+   ],
+   "layer": "object",
+   "worldSize": [
+    52,
+    38
+   ],
+   "footprint": [
+    1,
+    1
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.7143
+   ],
+   "id": "island-plant-grass-2",
+   "file": "island/plants/grass-2.png",
+   "category": "island/plants",
+   "width": 96,
+   "height": 70,
+   "usage": "Khóm cỏ nhỏ (rải trang trí trên cỏ)",
+   "tags": [
+    "plant",
+    "nature",
+    "placeable",
+    "grass"
+   ],
+   "layer": "object",
+   "worldSize": [
+    48,
+    35
+   ],
+   "footprint": [
+    1,
+    1
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.75
+   ],
+   "id": "island-plant-grass-3",
+   "file": "island/plants/grass-3.png",
+   "category": "island/plants",
+   "width": 104,
+   "height": 80,
+   "usage": "Khóm cỏ nhỏ (rải trang trí trên cỏ)",
+   "tags": [
+    "plant",
+    "nature",
+    "placeable",
+    "grass"
+   ],
+   "layer": "object",
+   "worldSize": [
+    52,
+    40
+   ],
+   "footprint": [
+    1,
+    1
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.7619
+   ],
+   "id": "island-plant-mushroom-red",
+   "file": "island/plants/mushroom-red.png",
+   "category": "island/plants",
+   "width": 116,
+   "height": 84,
+   "usage": "Nấm mũ đỏ chấm trắng",
+   "tags": [
+    "plant",
+    "nature",
+    "placeable",
+    "mushroom"
+   ],
+   "layer": "object",
+   "worldSize": [
+    58,
+    42
+   ],
+   "footprint": [
+    1,
+    1
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.75
+   ],
+   "id": "island-plant-mushroom-brown",
+   "file": "island/plants/mushroom-brown.png",
+   "category": "island/plants",
+   "width": 136,
+   "height": 80,
+   "usage": "Cụm nấm nâu nhỏ",
+   "tags": [
+    "plant",
+    "nature",
+    "placeable",
+    "mushroom"
+   ],
+   "layer": "object",
+   "worldSize": [
+    68,
+    40
+   ],
+   "footprint": [
+    1,
+    1
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.7073
+   ],
+   "id": "island-plant-mushroom-glow",
+   "file": "island/plants/mushroom-glow.png",
+   "category": "island/plants",
+   "width": 188,
+   "height": 164,
+   "usage": "Nấm phát sáng tím (ma thuật, đẹp vào ban đêm)",
+   "tags": [
+    "plant",
+    "nature",
+    "placeable",
+    "mushroom",
+    "magic"
+   ],
+   "layer": "object",
+   "worldSize": [
+    94,
+    82
+   ],
+   "footprint": [
+    1,
+    1
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.8056
+   ],
+   "id": "island-plant-hedge-long",
+   "file": "island/plants/hedge-long.png",
+   "category": "island/plants",
+   "width": 320,
+   "height": 144,
+   "usage": "Hàng rào cây xén (dài 2 ô ngang)",
+   "tags": [
+    "plant",
+    "nature",
+    "placeable",
+    "hedge"
+   ],
+   "layer": "object",
+   "worldSize": [
+    160,
+    72
+   ],
+   "footprint": [
+    2,
+    1
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.7941
+   ],
+   "id": "island-plant-hedge-small",
+   "file": "island/plants/hedge-small.png",
+   "category": "island/plants",
+   "width": 164,
+   "height": 136,
+   "usage": "Khối cây xén nhỏ (1 ô)",
+   "tags": [
+    "plant",
+    "nature",
+    "placeable",
+    "hedge"
+   ],
+   "layer": "object",
+   "worldSize": [
+    82,
+    68
+   ],
+   "footprint": [
+    1,
+    1
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.3913
+   ],
+   "id": "island-plant-lilypad-1",
+   "file": "island/plants/lilypad-1.png",
+   "category": "island/plants",
+   "width": 220,
+   "height": 92,
+   "usage": "Lá súng có hoa (đặt trên mặt nước ao)",
+   "tags": [
+    "plant",
+    "nature",
+    "placeable",
+    "water",
+    "ground"
+   ],
+   "layer": "ground",
+   "worldSize": [
+    110,
+    46
+   ],
+   "footprint": [
+    1,
+    1
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5319
+   ],
+   "id": "island-plant-lilypad-2",
+   "file": "island/plants/lilypad-2.png",
+   "category": "island/plants",
+   "width": 140,
+   "height": 94,
+   "usage": "Cụm 2 lá súng (đặt trên mặt nước)",
+   "tags": [
+    "plant",
+    "nature",
+    "placeable",
+    "water",
+    "ground"
+   ],
+   "layer": "ground",
+   "worldSize": [
+    70,
+    47
+   ],
+   "footprint": [
+    1,
+    1
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.7576
+   ],
+   "id": "island-terrain-rock-1",
+   "file": "island/terrain/rock-1.png",
+   "category": "island/terrain",
+   "width": 88,
+   "height": 66,
+   "usage": "Đá nhỏ",
+   "tags": [
+    "terrain",
+    "rock",
+    "placeable"
+   ],
+   "layer": "object",
+   "worldSize": [
+    44,
+    33
+   ],
+   "footprint": [
+    1,
+    1
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.7609
+   ],
+   "id": "island-terrain-rock-2",
+   "file": "island/terrain/rock-2.png",
+   "category": "island/terrain",
+   "width": 124,
+   "height": 92,
+   "usage": "Đá vừa",
+   "tags": [
+    "terrain",
+    "rock",
+    "placeable"
+   ],
+   "layer": "object",
+   "worldSize": [
+    62,
+    46
+   ],
+   "footprint": [
+    1,
+    1
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.7826
+   ],
+   "id": "island-terrain-rock-3",
+   "file": "island/terrain/rock-3.png",
+   "category": "island/terrain",
+   "width": 204,
+   "height": 138,
+   "usage": "Tảng đá lớn (chặn lối, trang trí góc)",
+   "tags": [
+    "terrain",
+    "rock",
+    "placeable"
+   ],
+   "layer": "object",
+   "worldSize": [
+    102,
+    69
+   ],
+   "footprint": [
+    2,
+    1
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.7797
+   ],
+   "id": "island-terrain-rock-mossy",
+   "file": "island/terrain/rock-mossy.png",
+   "category": "island/terrain",
+   "width": 152,
+   "height": 118,
+   "usage": "Đá phủ rêu xanh",
+   "tags": [
+    "terrain",
+    "rock",
+    "placeable"
+   ],
+   "layer": "object",
+   "worldSize": [
+    76,
+    59
+   ],
+   "footprint": [
+    1,
+    1
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "island-terrain-pond",
+   "file": "island/terrain/pond.png",
+   "category": "island/terrain",
+   "width": 584,
+   "height": 348,
+   "usage": "Ao nhỏ có lá súng, cỏ nến và viền đá (lớp mặt đất, origin ở tâm; vẽ dưới vật đứng)",
+   "tags": [
+    "terrain",
+    "water",
+    "ground"
+   ],
+   "layer": "ground",
+   "worldSize": [
+    292,
+    174
+   ],
+   "footprint": [
+    4,
+    3
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.8681
+   ],
+   "id": "island-terrain-plot-empty",
+   "file": "island/terrain/plot-empty.png",
+   "category": "island/terrain",
+   "width": 304,
+   "height": 182,
+   "usage": "Luống vườn 2×1 – đất đã xới, trống",
+   "tags": [
+    "terrain",
+    "garden",
+    "plot",
+    "placeable"
+   ],
+   "layer": "object",
+   "worldSize": [
+    152,
+    91
+   ],
+   "footprint": [
+    2,
+    1
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.8681
+   ],
+   "id": "island-terrain-plot-sprout",
+   "file": "island/terrain/plot-sprout.png",
+   "category": "island/terrain",
+   "width": 304,
+   "height": 182,
+   "usage": "Luống vườn 2×1 – mầm vừa nhú",
+   "tags": [
+    "terrain",
+    "garden",
+    "plot"
+   ],
+   "layer": "object",
+   "worldSize": [
+    152,
+    91
+   ],
+   "footprint": [
+    2,
+    1
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.8681
+   ],
+   "id": "island-terrain-plot-growing",
+   "file": "island/terrain/plot-growing.png",
+   "category": "island/terrain",
+   "width": 304,
+   "height": 182,
+   "usage": "Luống vườn 2×1 – rau đang lớn (cà rốt, bắp cải, củ cải)",
+   "tags": [
+    "terrain",
+    "garden",
+    "plot"
+   ],
+   "layer": "object",
+   "worldSize": [
+    152,
+    91
+   ],
+   "footprint": [
+    2,
+    1
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5192
+   ],
+   "id": "island-terrain-path-stones",
+   "file": "island/terrain/path-stones.png",
+   "category": "island/terrain",
+   "width": 260,
+   "height": 104,
+   "usage": "Đá lát bước chân (decal mặt đất 2×1)",
+   "tags": [
+    "terrain",
+    "path",
+    "ground",
+    "placeable"
+   ],
+   "layer": "ground",
+   "worldSize": [
+    130,
+    52
+   ],
+   "footprint": [
+    2,
+    1
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "island-terrain-path-straight",
+   "file": "island/terrain/path-straight.png",
+   "category": "island/terrain",
+   "width": 256,
+   "height": 128,
+   "usage": "Đường đất thẳng (ngang, nối được 2 đầu; xoay 90° để đi dọc)",
+   "tags": [
+    "terrain",
+    "path",
+    "ground",
+    "tile"
+   ],
+   "layer": "ground",
+   "worldSize": [
+    128,
+    64
+   ],
+   "footprint": [
+    2,
+    1
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "island-terrain-path-curve",
+   "file": "island/terrain/path-curve.png",
+   "category": "island/terrain",
+   "width": 256,
+   "height": 256,
+   "usage": "Đường đất cong 90° (vào từ trái, ra phía dưới)",
+   "tags": [
+    "terrain",
+    "path",
+    "ground",
+    "tile"
+   ],
+   "layer": "ground",
+   "worldSize": [
+    128,
+    128
+   ],
+   "footprint": [
+    2,
+    2
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "island-terrain-path-end",
+   "file": "island/terrain/path-end.png",
+   "category": "island/terrain",
+   "width": 128,
+   "height": 128,
+   "usage": "Đầu đường đất bo tròn (nối bên trái)",
+   "tags": [
+    "terrain",
+    "path",
+    "ground"
+   ],
+   "layer": "ground",
+   "worldSize": [
+    64,
+    64
+   ],
+   "footprint": [
+    1,
+    1
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.4731
+   ],
+   "id": "island-terrain-sand-patch",
+   "file": "island/terrain/sand-patch.png",
+   "category": "island/terrain",
+   "width": 300,
+   "height": 186,
+   "usage": "Mảng cát (decal) có vỏ sò nhỏ",
+   "tags": [
+    "terrain",
+    "sand",
+    "ground",
+    "placeable"
+   ],
+   "layer": "ground",
+   "worldSize": [
+    150,
+    93
+   ],
+   "footprint": [
+    3,
+    2
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5299
+   ],
+   "id": "island-terrain-meadow",
+   "file": "island/terrain/meadow.png",
+   "category": "island/terrain",
+   "width": 456,
+   "height": 234,
+   "usage": "Thảm cỏ hoa dại (decal mặt đất, phủ lên cỏ)",
+   "tags": [
+    "terrain",
+    "flower",
+    "ground",
+    "placeable"
+   ],
+   "layer": "ground",
+   "worldSize": [
+    228,
+    117
+   ],
+   "footprint": [
+    3,
+    2
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.8442
+   ],
+   "id": "island-deco-bench-wood",
+   "file": "island/decorations/bench-wood.png",
+   "category": "island/decorations",
+   "width": 240,
+   "height": 154,
+   "usage": "Ghế băng gỗ công viên (2 người ngồi)",
+   "tags": [
+    "decoration",
+    "placeable",
+    "seat"
+   ],
+   "layer": "object",
+   "worldSize": [
+    120,
+    77
+   ],
+   "footprint": [
+    2,
+    1
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.8537
+   ],
+   "id": "island-deco-bench-garden",
+   "file": "island/decorations/bench-garden.png",
+   "category": "island/decorations",
+   "width": 232,
+   "height": 164,
+   "usage": "Ghế vườn trắng uốn lượn, đệm hồng",
+   "tags": [
+    "decoration",
+    "placeable",
+    "seat"
+   ],
+   "layer": "object",
+   "worldSize": [
+    116,
+    82
+   ],
+   "footprint": [
+    2,
+    1
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.9467
+   ],
+   "id": "island-deco-lamp-street",
+   "file": "island/decorations/lamp-street.png",
+   "category": "island/decorations",
+   "width": 156,
+   "height": 300,
+   "usage": "Đèn đường cổ điển, đèn vàng ấm (quầng sáng vẽ sẵn; ban đêm có thể thêm ánh sáng additive trong Phaser)",
+   "tags": [
+    "decoration",
+    "placeable",
+    "light"
+   ],
+   "layer": "object",
+   "worldSize": [
+    78,
+    150
+   ],
+   "footprint": [
+    1,
+    1
+   ],
+   "lightSource": {
+    "x": 0,
+    "y": -100,
+    "radius": 90,
+    "color": "#fff0b3"
+   },
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.9195
+   ],
+   "id": "island-deco-lamp-mushroom",
+   "file": "island/decorations/lamp-mushroom.png",
+   "category": "island/decorations",
+   "width": 140,
+   "height": 174,
+   "usage": "Đèn vườn hình nấm phát sáng (thấp, dọc lối đi)",
+   "tags": [
+    "decoration",
+    "placeable",
+    "light"
+   ],
+   "layer": "object",
+   "worldSize": [
+    70,
+    87
+   ],
+   "footprint": [
+    1,
+    1
+   ],
+   "lightSource": {
+    "x": 0,
+    "y": -45,
+    "radius": 60,
+    "color": "#fff0b3"
+   },
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.1522,
+    0.9063
+   ],
+   "id": "island-deco-fence-h",
+   "file": "island/decorations/fence-h.png",
+   "category": "island/decorations",
+   "width": 184,
+   "height": 128,
+   "usage": "Hàng rào gỗ trắng – đoạn ngang 1 ô. Origin = chân cột trái; ghép đoạn kế tiếp tại x+64, kết thúc bằng fence-post",
+   "tags": [
+    "decoration",
+    "placeable",
+    "fence",
+    "tile"
+   ],
+   "layer": "object",
+   "worldSize": [
+    92,
+    64
+   ],
+   "footprint": [
+    1,
+    1
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.9333
+   ],
+   "id": "island-deco-fence-v",
+   "file": "island/decorations/fence-v.png",
+   "category": "island/decorations",
+   "width": 60,
+   "height": 240,
+   "usage": "Hàng rào – đoạn dọc (chạy lên trên 1 ô). Origin = chân cột dưới; cột trên ở y-64",
+   "tags": [
+    "decoration",
+    "placeable",
+    "fence",
+    "tile"
+   ],
+   "layer": "object",
+   "worldSize": [
+    30,
+    120
+   ],
+   "footprint": [
+    1,
+    1
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.9063
+   ],
+   "id": "island-deco-fence-post",
+   "file": "island/decorations/fence-post.png",
+   "category": "island/decorations",
+   "width": 60,
+   "height": 128,
+   "usage": "Cột rào đơn (kết thúc / góc hàng rào)",
+   "tags": [
+    "decoration",
+    "placeable",
+    "fence",
+    "tile"
+   ],
+   "layer": "object",
+   "worldSize": [
+    30,
+    64
+   ],
+   "footprint": [
+    1,
+    1
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.1522,
+    0.8889
+   ],
+   "id": "island-deco-fence-gate",
+   "file": "island/decorations/fence-gate.png",
+   "category": "island/decorations",
+   "width": 184,
+   "height": 144,
+   "usage": "Cổng rào (1 ô, ghép như fence-h). Origin = chân cột trái",
+   "tags": [
+    "decoration",
+    "placeable",
+    "fence",
+    "tile"
+   ],
+   "layer": "object",
+   "worldSize": [
+    92,
+    72
+   ],
+   "footprint": [
+    1,
+    1
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.8989
+   ],
+   "id": "island-deco-sign-board",
+   "file": "island/decorations/sign-board.png",
+   "category": "island/decorations",
+   "width": 168,
+   "height": 178,
+   "usage": "Biển gỗ đứng (bảng trống – tên do Phaser vẽ chữ lên)",
+   "tags": [
+    "decoration",
+    "placeable",
+    "sign"
+   ],
+   "layer": "object",
+   "worldSize": [
+    84,
+    89
+   ],
+   "footprint": [
+    1,
+    1
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.9192
+   ],
+   "id": "island-deco-sign-arrow",
+   "file": "island/decorations/sign-arrow.png",
+   "category": "island/decorations",
+   "width": 168,
+   "height": 198,
+   "usage": "Biển chỉ đường 2 mũi tên (trống)",
+   "tags": [
+    "decoration",
+    "placeable",
+    "sign"
+   ],
+   "layer": "object",
+   "worldSize": [
+    84,
+    99
+   ],
+   "footprint": [
+    1,
+    1
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.8952
+   ],
+   "id": "island-deco-bridge-arch",
+   "file": "island/decorations/bridge-arch.png",
+   "category": "island/decorations",
+   "width": 420,
+   "height": 210,
+   "usage": "Cầu gỗ vòm nhỏ (bắc ngang dòng suối chảy dọc). Origin = giữa mép trước",
+   "tags": [
+    "decoration",
+    "placeable",
+    "bridge"
+   ],
+   "layer": "object",
+   "worldSize": [
+    210,
+    105
+   ],
+   "footprint": [
+    3,
+    2
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.8929
+   ],
+   "id": "island-deco-bridge-plank",
+   "file": "island/decorations/bridge-plank.png",
+   "category": "island/decorations",
+   "width": 304,
+   "height": 168,
+   "usage": "Cầu ván phẳng (nhìn từ trên, bắc ngang suối dọc). Origin = giữa mép trước",
+   "tags": [
+    "decoration",
+    "placeable",
+    "bridge",
+    "ground"
+   ],
+   "layer": "ground",
+   "worldSize": [
+    152,
+    84
+   ],
+   "footprint": [
+    2,
+    1
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.9167
+   ],
+   "id": "island-deco-mailbox",
+   "file": "island/decorations/mailbox.png",
+   "category": "island/decorations",
+   "width": 172,
+   "height": 192,
+   "usage": "Hòm thư xanh có cờ đỏ (nơi nhận thư/quà)",
+   "tags": [
+    "decoration",
+    "placeable",
+    "mail"
+   ],
+   "layer": "object",
+   "worldSize": [
+    86,
+    96
+   ],
+   "footprint": [
+    1,
+    1
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.938
+   ],
+   "id": "island-deco-birdhouse",
+   "file": "island/decorations/birdhouse.png",
+   "category": "island/decorations",
+   "width": 144,
+   "height": 258,
+   "usage": "Nhà chim trên cột, có chú chim nhỏ",
+   "tags": [
+    "decoration",
+    "placeable",
+    "animal"
+   ],
+   "layer": "object",
+   "worldSize": [
+    72,
+    129
+   ],
+   "footprint": [
+    1,
+    1
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.9153
+   ],
+   "id": "island-deco-statue-bunny",
+   "file": "island/decorations/statue-bunny.png",
+   "category": "island/decorations",
+   "width": 144,
+   "height": 236,
+   "usage": "Tượng thỏ bằng đá trên bệ (trang trí vườn)",
+   "tags": [
+    "decoration",
+    "placeable",
+    "statue"
+   ],
+   "layer": "object",
+   "worldSize": [
+    72,
+    118
+   ],
+   "footprint": [
+    1,
+    1
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.8772
+   ],
+   "id": "island-deco-fountain",
+   "file": "island/decorations/fountain.png",
+   "category": "island/decorations",
+   "width": 260,
+   "height": 228,
+   "usage": "Đài phun nước đá tròn 2 tầng (nước tĩnh, có thể thêm hạt nước trong Phaser)",
+   "tags": [
+    "decoration",
+    "placeable",
+    "statue",
+    "water"
+   ],
+   "layer": "object",
+   "worldSize": [
+    130,
+    114
+   ],
+   "footprint": [
+    2,
+    2
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.9032
+   ],
+   "id": "island-deco-pet-bed",
+   "file": "island/decorations/pet-bed.png",
+   "category": "island/decorations",
+   "width": 212,
+   "height": 124,
+   "usage": "Đệm nằm thú cưng tròn có gối và hình bàn chân (khu nghỉ của thú cưng)",
+   "tags": [
+    "decoration",
+    "placeable",
+    "pet"
+   ],
+   "layer": "object",
+   "worldSize": [
+    106,
+    62
+   ],
+   "footprint": [
+    2,
+    1
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.8507
+   ],
+   "id": "island-deco-picnic-blanket",
+   "file": "island/decorations/picnic-blanket.png",
+   "category": "island/decorations",
+   "width": 312,
+   "height": 134,
+   "usage": "Thảm picnic ca-rô hồng có giỏ (decal mặt đất + giỏ). Origin = mép trước thảm",
+   "tags": [
+    "decoration",
+    "placeable",
+    "picnic",
+    "ground"
+   ],
+   "layer": "ground",
+   "worldSize": [
+    156,
+    67
+   ],
+   "footprint": [
+    2,
+    1
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.8955
+   ],
+   "id": "island-deco-flower-pot-1",
+   "file": "island/decorations/flower-pot-1.png",
+   "category": "island/decorations",
+   "width": 92,
+   "height": 134,
+   "usage": "Chậu đất nung có tulip",
+   "tags": [
+    "decoration",
+    "placeable",
+    "flower",
+    "pot"
+   ],
+   "layer": "object",
+   "worldSize": [
+    46,
+    67
+   ],
+   "footprint": [
+    1,
+    1
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.8971
+   ],
+   "id": "island-deco-flower-pot-2",
+   "file": "island/decorations/flower-pot-2.png",
+   "category": "island/decorations",
+   "width": 104,
+   "height": 136,
+   "usage": "Chậu sứ xanh có bụi cây tròn",
+   "tags": [
+    "decoration",
+    "placeable",
+    "plant",
+    "pot"
+   ],
+   "layer": "object",
+   "worldSize": [
+    52,
+    68
+   ],
+   "footprint": [
+    1,
+    1
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.9048
+   ],
+   "id": "island-deco-swing",
+   "file": "island/decorations/swing.png",
+   "category": "island/decorations",
+   "width": 284,
+   "height": 252,
+   "usage": "Xích đu khung gỗ chữ A cho bé",
+   "tags": [
+    "decoration",
+    "placeable",
+    "play"
+   ],
+   "layer": "object",
+   "worldSize": [
+    142,
+    126
+   ],
+   "footprint": [
+    2,
+    1
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.9098
+   ],
+   "id": "island-deco-well",
+   "file": "island/decorations/well.png",
+   "category": "island/decorations",
+   "width": 224,
+   "height": 266,
+   "usage": "Giếng đá có mái gỗ, ròng rọc và xô",
+   "tags": [
+    "decoration",
+    "placeable",
+    "water"
+   ],
+   "layer": "object",
+   "worldSize": [
+    112,
+    133
+   ],
+   "footprint": [
+    2,
+    1
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.9439
+   ],
+   "id": "island-deco-lantern-string",
+   "file": "island/decorations/lantern-string.png",
+   "category": "island/decorations",
+   "width": 404,
+   "height": 214,
+   "usage": "Dây đèn lồng giữa 2 cột (lễ hội, sáng ấm)",
+   "tags": [
+    "decoration",
+    "placeable",
+    "light",
+    "festival"
+   ],
+   "layer": "object",
+   "worldSize": [
+    202,
+    107
+   ],
+   "footprint": [
+    3,
+    1
+   ],
+   "format": "png"
+  },
+  {
+   "type": "spritesheet",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.936
+   ],
+   "id": "island-deco-windmill",
+   "file": "island/decorations/windmill.png",
+   "category": "island/decorations",
+   "width": 1600,
+   "height": 500,
+   "usage": "Cối xay gió nhỏ – spritesheet 4 khung cánh quay (vòng lặp liền vì cánh đối xứng 90°)",
+   "tags": [
+    "decoration",
+    "placeable",
+    "animated",
+    "farm"
+   ],
+   "layer": "object",
+   "worldSize": [
+    200,
+    250
+   ],
+   "footprint": [
+    2,
+    2
+   ],
+   "frameWidth": 400,
+   "frameHeight": 500,
+   "frames": 4,
+   "animations": [
+    {
+     "key": "windmill-spin",
+     "frames": [
+      0,
+      1,
+      2,
+      3
+     ],
+     "frameRate": 6,
+     "repeat": -1
+    }
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 1,
+   "origin": [
+    0,
+    0
+   ],
+   "id": "island-terrain-base",
+   "file": "island/terrain/island-base.webp",
+   "category": "island/terrain",
+   "width": 2560,
+   "height": 1600,
+   "usage": "Nền Đảo cá nhân 2560×1600 (biển, bãi cát, vách đất phía trước, mặt cỏ, đường đất vẽ sẵn) – KHÔNG có vật đứng. Đặt tại (0,0), depth thấp nhất",
+   "tags": [
+    "island",
+    "background"
+   ],
+   "layer": "background",
+   "format": "webp"
+  },
+  {
+   "type": "image",
+   "scale": 1,
+   "origin": [
+    0,
+    0
+   ],
+   "id": "island-terrain-grid",
+   "file": "island/terrain/island-grid.png",
+   "category": "island/terrain",
+   "width": 2560,
+   "height": 1600,
+   "usage": "Lưới tham chiếu 64 đơn vị (chấm mờ trong vùng đi lại; ô xây dựng trống tô vàng nhạt). Bật khi ở chế độ xây/trang trí",
+   "tags": [
+    "island",
+    "grid",
+    "overlay"
+   ],
+   "layer": "overlay",
+   "format": "png"
+  },
+  {
+   "type": "json",
+   "scale": 1,
+   "origin": [
+    0,
+    0
+   ],
+   "id": "island-layout",
+   "file": "island/island-layout.json",
+   "category": "island",
+   "width": 0,
+   "height": 0,
+   "usage": "Bố cục ban đầu của Đảo cá nhân (walkArea, buildCells, objects, spawn, petArea, placeable) – giống manifest.data.island",
+   "tags": [
+    "island",
+    "data"
+   ],
+   "format": "json"
+  },
+  {
+   "type": "image",
+   "scale": 1,
+   "origin": [
+    0,
+    0
+   ],
+   "id": "island-terrain-reference",
+   "file": "island/terrain/island-reference.webp",
+   "category": "island/terrain",
+   "width": 2560,
+   "height": 1600,
+   "usage": "Ảnh tham chiếu (chỉ để duyệt): nền + toàn bộ vật trong bố cục ban đầu, sắp chiều sâu theo y. Không dùng trong game",
+   "tags": [
+    "island",
+    "reference"
+   ],
+   "layer": "reference",
+   "format": "webp"
+  }
+ ],
+ "data": {
+  "island": {
+   "width": 2560,
+   "height": 1600,
+   "tile": 64,
+   "terrain": "island-terrain-base",
+   "gridOverlay": "island-terrain-grid",
+   "walkArea": [
+    [
+     354,
+     340
+    ],
+    [
+     539,
+     227
+    ],
+    [
+     832,
+     190
+    ],
+    [
+     1124,
+     210
+    ],
+    [
+     1397,
+     180
+    ],
+    [
+     1690,
+     208
+    ],
+    [
+     1982,
+     247
+    ],
+    [
+     2207,
+     340
+    ],
+    [
+     2308,
+     526
+    ],
+    [
+     2296,
+     760
+    ],
+    [
+     2247,
+     974
+    ],
+    [
+     2129,
+     1140
+    ],
+    [
+     1943,
+     1202
+    ],
+    [
+     1752,
+     1236
+    ],
+    [
+     1756,
+     1320
+    ],
+    [
+     1850,
+     1386
+    ],
+    [
+     1746,
+     1406
+    ],
+    [
+     1742,
+     1572
+    ],
+    [
+     1690,
+     1572
+    ],
+    [
+     1686,
+     1406
+    ],
+    [
+     1590,
+     1386
+    ],
+    [
+     1668,
+     1320
+    ],
+    [
+     1672,
+     1236
+    ],
+    [
+     1787,
+     1224
+    ],
+    [
+     1612,
+     1239
+    ],
+    [
+     1397,
+     1257
+    ],
+    [
+     1154,
+     1268
+    ],
+    [
+     910,
+     1249
+    ],
+    [
+     666,
+     1200
+    ],
+    [
+     461,
+     1103
+    ],
+    [
+     325,
+     939
+    ],
+    [
+     266,
+     724
+    ],
+    [
+     288,
+     506
+    ]
+   ],
+   "buildCells": [
+    [
+     26,
+     4
+    ],
+    [
+     27,
+     4
+    ],
+    [
+     28,
+     4
+    ],
+    [
+     29,
+     4
+    ],
+    [
+     30,
+     4
+    ],
+    [
+     26,
+     5
+    ],
+    [
+     27,
+     5
+    ],
+    [
+     28,
+     5
+    ],
+    [
+     29,
+     5
+    ],
+    [
+     30,
+     5
+    ],
+    [
+     31,
+     5
+    ],
+    [
+     26,
+     6
+    ],
+    [
+     27,
+     6
+    ],
+    [
+     28,
+     6
+    ],
+    [
+     29,
+     6
+    ],
+    [
+     30,
+     6
+    ],
+    [
+     31,
+     6
+    ],
+    [
+     15,
+     16
+    ],
+    [
+     16,
+     16
+    ],
+    [
+     17,
+     16
+    ],
+    [
+     18,
+     16
+    ],
+    [
+     19,
+     16
+    ],
+    [
+     15,
+     17
+    ],
+    [
+     16,
+     17
+    ],
+    [
+     17,
+     17
+    ],
+    [
+     18,
+     17
+    ],
+    [
+     19,
+     17
+    ],
+    [
+     15,
+     18
+    ],
+    [
+     16,
+     18
+    ],
+    [
+     17,
+     18
+    ],
+    [
+     18,
+     18
+    ],
+    [
+     19,
+     18
+    ],
+    [
+     28,
+     13
+    ],
+    [
+     29,
+     13
+    ],
+    [
+     30,
+     13
+    ],
+    [
+     31,
+     13
+    ],
+    [
+     32,
+     13
+    ],
+    [
+     29,
+     14
+    ],
+    [
+     30,
+     14
+    ],
+    [
+     31,
+     14
+    ],
+    [
+     32,
+     14
+    ],
+    [
+     29,
+     15
+    ],
+    [
+     30,
+     15
+    ],
+    [
+     31,
+     15
+    ],
+    [
+     32,
+     15
+    ],
+    [
+     28,
+     16
+    ],
+    [
+     29,
+     16
+    ],
+    [
+     30,
+     16
+    ],
+    [
+     31,
+     16
+    ],
+    [
+     32,
+     16
+    ],
+    [
+     5,
+     10
+    ],
+    [
+     6,
+     10
+    ],
+    [
+     7,
+     10
+    ],
+    [
+     8,
+     10
+    ],
+    [
+     5,
+     11
+    ],
+    [
+     6,
+     11
+    ],
+    [
+     7,
+     11
+    ],
+    [
+     8,
+     11
+    ],
+    [
+     6,
+     12
+    ],
+    [
+     7,
+     12
+    ],
+    [
+     8,
+     12
+    ]
+   ],
+   "objects": [
+    {
+     "asset": "island-building-house-main",
+     "x": 1284,
+     "y": 652,
+     "flipX": false
+    },
+    {
+     "asset": "island-tree-great-tree",
+     "x": 790,
+     "y": 590,
+     "flipX": false
+    },
+    {
+     "asset": "island-terrain-pond",
+     "x": 1930,
+     "y": 660,
+     "flipX": false
+    },
+    {
+     "asset": "island-terrain-plot-sprout",
+     "x": 520,
+     "y": 986,
+     "flipX": false
+    },
+    {
+     "asset": "island-terrain-plot-growing",
+     "x": 662,
+     "y": 986,
+     "flipX": false
+    },
+    {
+     "asset": "island-terrain-plot-empty",
+     "x": 520,
+     "y": 1086,
+     "flipX": false
+    },
+    {
+     "asset": "island-deco-fence-h",
+     "x": 436,
+     "y": 1150,
+     "flipX": false
+    },
+    {
+     "asset": "island-deco-fence-h",
+     "x": 500,
+     "y": 1150,
+     "flipX": false
+    },
+    {
+     "asset": "island-deco-fence-h",
+     "x": 564,
+     "y": 1150,
+     "flipX": false
+    },
+    {
+     "asset": "island-deco-fence-gate",
+     "x": 628,
+     "y": 1150,
+     "flipX": false
+    },
+    {
+     "asset": "island-deco-fence-h",
+     "x": 692,
+     "y": 1150,
+     "flipX": false
+    },
+    {
+     "asset": "island-deco-fence-post",
+     "x": 756,
+     "y": 1150,
+     "flipX": false
+    },
+    {
+     "asset": "island-deco-fence-v",
+     "x": 436,
+     "y": 1150,
+     "flipX": false
+    },
+    {
+     "asset": "island-deco-fence-v",
+     "x": 436,
+     "y": 1086,
+     "flipX": false
+    },
+    {
+     "asset": "island-deco-fence-post",
+     "x": 436,
+     "y": 1022,
+     "flipX": false
+    },
+    {
+     "asset": "island-deco-sign-board",
+     "x": 812,
+     "y": 1012,
+     "flipX": false
+    },
+    {
+     "asset": "island-building-pet-house",
+     "x": 1600,
+     "y": 700,
+     "flipX": false
+    },
+    {
+     "asset": "island-deco-pet-bed",
+     "x": 1516,
+     "y": 760,
+     "flipX": false
+    },
+    {
+     "asset": "island-deco-mailbox",
+     "x": 1150,
+     "y": 708,
+     "flipX": false
+    },
+    {
+     "asset": "island-deco-lamp-street",
+     "x": 1404,
+     "y": 712,
+     "flipX": false
+    },
+    {
+     "asset": "island-deco-lamp-mushroom",
+     "x": 1460,
+     "y": 958,
+     "flipX": false
+    },
+    {
+     "asset": "island-deco-lamp-mushroom",
+     "x": 1640,
+     "y": 1170,
+     "flipX": false
+    },
+    {
+     "asset": "island-deco-bench-wood",
+     "x": 960,
+     "y": 720,
+     "flipX": false
+    },
+    {
+     "asset": "island-deco-flower-pot-1",
+     "x": 1234,
+     "y": 682,
+     "flipX": false
+    },
+    {
+     "asset": "island-deco-flower-pot-2",
+     "x": 1336,
+     "y": 682,
+     "flipX": false
+    },
+    {
+     "asset": "island-deco-birdhouse",
+     "x": 664,
+     "y": 716,
+     "flipX": false
+    },
+    {
+     "asset": "island-tree-pine-1",
+     "x": 420,
+     "y": 470,
+     "flipX": false
+    },
+    {
+     "asset": "island-tree-pine-2",
+     "x": 520,
+     "y": 380,
+     "flipX": false
+    },
+    {
+     "asset": "island-tree-pine-2",
+     "x": 348,
+     "y": 640,
+     "flipX": false
+    },
+    {
+     "asset": "island-tree-blossom",
+     "x": 1586,
+     "y": 446,
+     "flipX": false
+    },
+    {
+     "asset": "island-tree-oak-1",
+     "x": 2200,
+     "y": 470,
+     "flipX": false
+    },
+    {
+     "asset": "island-tree-apple",
+     "x": 2150,
+     "y": 860,
+     "flipX": false
+    },
+    {
+     "asset": "island-tree-oak-2",
+     "x": 1040,
+     "y": 400,
+     "flipX": false
+    },
+    {
+     "asset": "island-tree-palm",
+     "x": 2110,
+     "y": 1290,
+     "flipX": false
+    },
+    {
+     "asset": "island-tree-palm",
+     "x": 300,
+     "y": 1140,
+     "flipX": false
+    },
+    {
+     "asset": "island-plant-bush-1",
+     "x": 1090,
+     "y": 610,
+     "flipX": false
+    },
+    {
+     "asset": "island-plant-bush-3",
+     "x": 1488,
+     "y": 612,
+     "flipX": false
+    },
+    {
+     "asset": "island-plant-bush-2",
+     "x": 2280,
+     "y": 640,
+     "flipX": false
+    },
+    {
+     "asset": "island-plant-bush-1",
+     "x": 1840,
+     "y": 1170,
+     "flipX": false
+    },
+    {
+     "asset": "island-plant-bush-3",
+     "x": 1600,
+     "y": 1236,
+     "flipX": false
+    },
+    {
+     "asset": "island-plant-flower-white",
+     "x": 1800,
+     "y": 1232,
+     "flipX": false
+    },
+    {
+     "asset": "island-plant-flower-pink",
+     "x": 1640,
+     "y": 1252,
+     "flipX": false
+    },
+    {
+     "asset": "island-plant-flower-pink",
+     "x": 1186,
+     "y": 760,
+     "flipX": false
+    },
+    {
+     "asset": "island-plant-flower-yellow",
+     "x": 1390,
+     "y": 770,
+     "flipX": false
+    },
+    {
+     "asset": "island-plant-flower-lavender",
+     "x": 1560,
+     "y": 1080,
+     "flipX": false
+    },
+    {
+     "asset": "island-plant-flower-white",
+     "x": 1004,
+     "y": 958,
+     "flipX": false
+    },
+    {
+     "asset": "island-plant-flower-tulip",
+     "x": 850,
+     "y": 860,
+     "flipX": false
+    },
+    {
+     "asset": "island-plant-flower-blue",
+     "x": 1700,
+     "y": 810,
+     "flipX": false
+    },
+    {
+     "asset": "island-plant-flower-pink",
+     "x": 2070,
+     "y": 760,
+     "flipX": false
+    },
+    {
+     "asset": "island-plant-flower-yellow",
+     "x": 330,
+     "y": 1000,
+     "flipX": false
+    },
+    {
+     "asset": "island-terrain-meadow",
+     "x": 800,
+     "y": 1136,
+     "flipX": false
+    },
+    {
+     "asset": "island-terrain-rock-3",
+     "x": 2010,
+     "y": 1172,
+     "flipX": false
+    },
+    {
+     "asset": "island-terrain-rock-mossy",
+     "x": 300,
+     "y": 884,
+     "flipX": false
+    },
+    {
+     "asset": "island-terrain-rock-2",
+     "x": 1780,
+     "y": 520,
+     "flipX": false
+    },
+    {
+     "asset": "island-terrain-rock-1",
+     "x": 1260,
+     "y": 1020,
+     "flipX": false
+    },
+    {
+     "asset": "island-terrain-rock-1",
+     "x": 2120,
+     "y": 640,
+     "flipX": false
+    },
+    {
+     "asset": "island-plant-grass-1",
+     "x": 1120,
+     "y": 840,
+     "flipX": false
+    },
+    {
+     "asset": "island-plant-grass-2",
+     "x": 1600,
+     "y": 900,
+     "flipX": false
+    },
+    {
+     "asset": "island-plant-grass-3",
+     "x": 760,
+     "y": 760,
+     "flipX": false
+    },
+    {
+     "asset": "island-plant-grass-1",
+     "x": 1764,
+     "y": 1004,
+     "flipX": false
+    },
+    {
+     "asset": "island-plant-grass-2",
+     "x": 880,
+     "y": 1180,
+     "flipX": false
+    },
+    {
+     "asset": "island-plant-grass-3",
+     "x": 1360,
+     "y": 1180,
+     "flipX": false
+    },
+    {
+     "asset": "island-plant-grass-1",
+     "x": 1560,
+     "y": 280,
+     "flipX": false
+    },
+    {
+     "asset": "island-plant-grass-2",
+     "x": 2240,
+     "y": 1060,
+     "flipX": false
+    },
+    {
+     "asset": "island-plant-mushroom-red",
+     "x": 640,
+     "y": 600,
+     "flipX": false
+    },
+    {
+     "asset": "island-plant-mushroom-glow",
+     "x": 980,
+     "y": 560,
+     "flipX": false
+    },
+    {
+     "asset": "env-pier-segment",
+     "x": 1716,
+     "y": 1480,
+     "flipX": false
+    },
+    {
+     "asset": "env-pier-end",
+     "x": 1716,
+     "y": 1596,
+     "flipX": false
+    },
+    {
+     "asset": "env-starfish",
+     "x": 1540,
+     "y": 1400,
+     "flipX": false
+    },
+    {
+     "asset": "env-shells-cluster",
+     "x": 1950,
+     "y": 1370,
+     "flipX": false
+    },
+    {
+     "asset": "env-shell-pink",
+     "x": 760,
+     "y": 1350,
+     "flipX": false
+    },
+    {
+     "asset": "env-sea-rock",
+     "x": 250,
+     "y": 1440,
+     "flipX": false
+    },
+    {
+     "asset": "env-sea-rock",
+     "x": 2420,
+     "y": 300,
+     "flipX": false
+    }
+   ],
+   "spawn": {
+    "avatar": [
+     1284,
+     760
+    ],
+    "pet": [
+     1470,
+     790
+    ]
+   },
+   "petArea": [
+    1516,
+    746
+   ],
+   "placeable": [
+    "island-tree-oak-1",
+    "island-tree-oak-2",
+    "island-tree-pine-1",
+    "island-tree-apple",
+    "island-tree-blossom",
+    "island-tree-palm",
+    "island-tree-magic",
+    "island-plant-bush-1",
+    "island-plant-bush-2",
+    "island-plant-bush-3",
+    "island-plant-flower-pink",
+    "island-plant-flower-yellow",
+    "island-plant-flower-lavender",
+    "island-plant-flower-tulip",
+    "island-plant-flower-blue",
+    "island-plant-mushroom-glow",
+    "island-plant-hedge-small",
+    "island-terrain-rock-2",
+    "island-terrain-plot-empty",
+    "island-deco-bench-wood",
+    "island-deco-lamp-street",
+    "island-deco-lamp-mushroom",
+    "island-deco-fence-h",
+    "island-deco-flower-pot-1",
+    "island-deco-statue-bunny",
+    "island-deco-fountain",
+    "island-deco-birdhouse",
+    "island-deco-swing",
+    "island-deco-picnic-blanket",
+    "island-deco-windmill"
+   ]
+  }
+ }
+}

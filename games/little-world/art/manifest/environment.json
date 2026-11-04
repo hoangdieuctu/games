@@ -1,0 +1,412 @@
+{
+ "group": "environment",
+ "entries": [
+  {
+   "type": "spritesheet",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.904
+   ],
+   "id": "env-waterfall",
+   "file": "environment/waterfall.png",
+   "category": "environment",
+   "width": 1792,
+   "height": 500,
+   "usage": "Thác nước nhỏ đổ từ vách đá xuống hồ – spritesheet 4 khung (dòng nước chảy, bọt trắng). Origin = giữa mép hồ phía trước",
+   "tags": [
+    "environment",
+    "water",
+    "animated"
+   ],
+   "layer": "object",
+   "worldSize": [
+    224,
+    250
+   ],
+   "footprint": [
+    3,
+    3
+   ],
+   "frameWidth": 448,
+   "frameHeight": 500,
+   "frames": 4,
+   "animations": [
+    {
+     "key": "waterfall-flow",
+     "frames": [
+      0,
+      1,
+      2,
+      3
+     ],
+     "frameRate": 8,
+     "repeat": -1
+    }
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "env-river-straight",
+   "file": "environment/river-straight.png",
+   "category": "environment",
+   "width": 256,
+   "height": 256,
+   "usage": "Đoạn suối thẳng (chảy dọc, ghép trên-dưới; xoay 90° để chảy ngang). Decal mặt đất",
+   "tags": [
+    "environment",
+    "water",
+    "river",
+    "tile",
+    "ground"
+   ],
+   "layer": "ground",
+   "worldSize": [
+    128,
+    128
+   ],
+   "footprint": [
+    2,
+    2
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "env-river-curve",
+   "file": "environment/river-curve.png",
+   "category": "environment",
+   "width": 256,
+   "height": 256,
+   "usage": "Đoạn suối cong 90° (vào từ trên, ra bên phải). Decal mặt đất",
+   "tags": [
+    "environment",
+    "water",
+    "river",
+    "tile",
+    "ground"
+   ],
+   "layer": "ground",
+   "worldSize": [
+    128,
+    128
+   ],
+   "footprint": [
+    2,
+    2
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.8763
+   ],
+   "id": "env-coral-pink",
+   "file": "environment/coral-pink.png",
+   "category": "environment",
+   "width": 188,
+   "height": 194,
+   "usage": "San hô nhánh hồng (vùng nước nông/đáy biển)",
+   "tags": [
+    "environment",
+    "ocean",
+    "coral"
+   ],
+   "layer": "object",
+   "worldSize": [
+    94,
+    97
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.8696
+   ],
+   "id": "env-coral-orange",
+   "file": "environment/coral-orange.png",
+   "category": "environment",
+   "width": 208,
+   "height": 184,
+   "usage": "San hô quạt cam + san hô não (đáy biển)",
+   "tags": [
+    "environment",
+    "ocean",
+    "coral"
+   ],
+   "layer": "object",
+   "worldSize": [
+    104,
+    92
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.8681
+   ],
+   "id": "env-coral-lavender",
+   "file": "environment/coral-lavender.png",
+   "category": "environment",
+   "width": 172,
+   "height": 182,
+   "usage": "San hô ống tím lavender (đáy biển)",
+   "tags": [
+    "environment",
+    "ocean",
+    "coral"
+   ],
+   "layer": "object",
+   "worldSize": [
+    86,
+    91
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.7671
+   ],
+   "id": "env-sea-rock",
+   "file": "environment/sea-rock.png",
+   "category": "environment",
+   "width": 232,
+   "height": 146,
+   "usage": "Đá biển nhô lên mặt nước, vòng bọt sóng, rong biển",
+   "tags": [
+    "environment",
+    "ocean",
+    "rock"
+   ],
+   "layer": "object",
+   "worldSize": [
+    116,
+    73
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.4894
+   ],
+   "id": "env-pond-round",
+   "file": "environment/pond-round.png",
+   "category": "environment",
+   "width": 452,
+   "height": 282,
+   "usage": "Ao tròn nhỏ (biến thể 1, chỉ lá súng). Decal mặt đất, origin tâm",
+   "tags": [
+    "environment",
+    "water",
+    "pond",
+    "ground"
+   ],
+   "layer": "ground",
+   "worldSize": [
+    226,
+    141
+   ],
+   "footprint": [
+    3,
+    2
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5033
+   ],
+   "id": "env-pond-long",
+   "file": "environment/pond-long.png",
+   "category": "environment",
+   "width": 640,
+   "height": 306,
+   "usage": "Ao dài hình hạt đậu (biến thể 2). Decal mặt đất, origin tâm",
+   "tags": [
+    "environment",
+    "water",
+    "pond",
+    "ground"
+   ],
+   "layer": "ground",
+   "worldSize": [
+    320,
+    153
+   ],
+   "footprint": [
+    5,
+    2
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    1
+   ],
+   "id": "env-pier-segment",
+   "file": "environment/pier-segment.png",
+   "category": "environment",
+   "width": 160,
+   "height": 256,
+   "usage": "Đoạn cầu cảng gỗ (chạy dọc, ghép nối tiếp mỗi 128 đơn vị theo trục y). Origin = mép dưới giữa",
+   "tags": [
+    "environment",
+    "ocean",
+    "dock",
+    "tile",
+    "ground"
+   ],
+   "layer": "ground",
+   "worldSize": [
+    80,
+    128
+   ],
+   "footprint": [
+    1,
+    2
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.894
+   ],
+   "id": "env-pier-end",
+   "file": "environment/pier-end.png",
+   "category": "environment",
+   "width": 244,
+   "height": 302,
+   "usage": "Đầu cầu cảng: sàn rộng, cọc buộc thuyền, thang xuống nước, phao. Origin = mép dưới giữa (đặt ở đầu xa của cầu)",
+   "tags": [
+    "environment",
+    "ocean",
+    "dock",
+    "ground"
+   ],
+   "layer": "ground",
+   "worldSize": [
+    122,
+    151
+   ],
+   "footprint": [
+    2,
+    2
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5333
+   ],
+   "id": "env-shell-pink",
+   "file": "environment/shell-pink.png",
+   "category": "environment",
+   "width": 64,
+   "height": 60,
+   "usage": "Vỏ sò hồng (decal bãi biển)",
+   "tags": [
+    "environment",
+    "beach",
+    "ground",
+    "placeable"
+   ],
+   "layer": "ground",
+   "worldSize": [
+    32,
+    30
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5366
+   ],
+   "id": "env-starfish",
+   "file": "environment/starfish.png",
+   "category": "environment",
+   "width": 92,
+   "height": 82,
+   "usage": "Sao biển cam (decal bãi biển)",
+   "tags": [
+    "environment",
+    "beach",
+    "ground",
+    "placeable"
+   ],
+   "layer": "ground",
+   "worldSize": [
+    46,
+    41
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.4857
+   ],
+   "id": "env-shells-cluster",
+   "file": "environment/shells-cluster.png",
+   "category": "environment",
+   "width": 144,
+   "height": 70,
+   "usage": "Cụm vỏ ốc, vỏ sò, sỏi trên cát (decal)",
+   "tags": [
+    "environment",
+    "beach",
+    "ground",
+    "placeable"
+   ],
+   "layer": "ground",
+   "worldSize": [
+    72,
+    35
+   ],
+   "format": "png"
+  }
+ ],
+ "data": {}
+}

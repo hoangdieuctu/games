@@ -22,7 +22,7 @@ tools/            bộ gộp mã nguồn
 
 ## Game có thư mục `src/`
 
-`aquarium`, `colorsort`, `spot`: sửa trong `src/`, rồi chạy
+`aquarium`, `colorsort`, `spot`, `little-world`: sửa trong `src/`, rồi chạy
 
 ```
 node games/<tên>/build.mjs
