@@ -69,6 +69,34 @@ document.querySelectorAll<HTMLElement>('.tabs button').forEach((b) => {
 });
 document.getElementById('btn-parent')!.addEventListener('click', () => { Audio.sfx('tap'); Parent.open(); });
 
+// ── toàn màn hình (ẩn nút nếu trình duyệt không hỗ trợ, ví dụ iPhone, hoặc đã mở từ màn hình chính) ──
+{
+  const d: any = document, root: any = document.documentElement;
+  const btn = document.getElementById('btn-fs')!;
+  const fsEl = () => d.fullscreenElement || d.webkitFullscreenElement;
+  const can = !!(root.requestFullscreen || root.webkitRequestFullscreen) && !(window.navigator as any).standalone
+    && !matchMedia('(display-mode: standalone), (display-mode: fullscreen)').matches;
+  btn.hidden = !can;
+  const sync = () => {
+    const on = !!fsEl();
+    btn.classList.toggle('on', on);
+    btn.setAttribute('aria-label', on ? 'Thoát toàn màn hình' : 'Toàn màn hình');
+    btn.title = btn.getAttribute('aria-label')!;
+  };
+  btn.addEventListener('click', () => {
+    Audio.sfx('tap');
+    try {
+      if (fsEl()) (d.exitFullscreen || d.webkitExitFullscreen).call(d);
+      else {
+        const r = (root.requestFullscreen || root.webkitRequestFullscreen).call(root, { navigationUI: 'hide' });
+        Promise.resolve(r).catch(() => {});
+      }
+    } catch (e) { /* trình duyệt từ chối */ }
+  });
+  document.addEventListener('fullscreenchange', sync);
+  document.addEventListener('webkitfullscreenchange', sync);
+}
+
 // Âm thanh chỉ bật sau lần chạm đầu tiên
 window.addEventListener('pointerdown', () => Audio.unlock(), { once: true });
 

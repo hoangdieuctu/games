@@ -145,7 +145,7 @@ export class PatternScene extends MiniGame {
       // gợi ý: chỉ ra phần lặp lại ngay trước ô trống
       const unitLen = this.unitLength();
       const ref = b - unitLen >= 0 ? b - unitLen : b + unitLen;
-      this.miss(img, this.roundMistakes >= 1 ? `Nhìn ô cách ${unitLen} ô phía trước xem, đó là ${this.seq[ref].name}!` : 'Chưa đúng rồi. Nhìn kỹ dãy hình lặp lại nhé!');
+      this.miss(img, this.roundMistakes >= 1 ? `Nhìn ô cách ${unitLen} ô phía trước xem. Đó là ${this.seq[ref].name}!` : 'Chưa đúng rồi. Nhìn kỹ dãy hình lặp lại nhé!');
       if (this.roundMistakes >= 2 && this.cells[ref]) this.pulse(this.cells[ref].img, 1.3);
       this.goHome(img);
     }

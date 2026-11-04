@@ -20,7 +20,11 @@ export const Hud = {
   },
 
   render() {
-    const p = Store.p; if (!p) return;
+    const p = Store.p;
+    // tên game ở giữa thanh trên: "Thế giới của <tên bé>"
+    const sub = document.querySelector('.brand span') as HTMLElement | null;
+    if (sub) sub.textContent = p?.name ? `Thế giới của ${p.name}` : 'Little World';
+    if (!p) return;
     const el = $('#hud');
     el.innerHTML = RES_LIST.map((r) =>
       `<button class="res" data-res="${r}" title="${RES_NAMES[r]}"><img src="${resIcon(r)}" alt=""><b>${p.res[r]}</b></button>`).join('');

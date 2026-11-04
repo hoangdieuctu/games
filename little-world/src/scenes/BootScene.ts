@@ -28,8 +28,10 @@ export function preloadWithProgress(scene: any, queue: () => number, label: stri
   const n = queue();
   if (!n) return;
   Ui.loading(0, label);
-  scene.load.on('progress', (p: number) => Ui.loading(p, label));
-  scene.load.once('complete', () => Ui.loading(null));
+  // chỉ cho lần nạp này: lần nạp lẻ về sau (ví dụ icon phần thưởng) không được bật lại màn tải
+  const onProgress = (p: number) => Ui.loading(p, label);
+  scene.load.on('progress', onProgress);
+  scene.load.once('complete', () => { scene.load.off('progress', onProgress); Ui.loading(null); });
   scene.load.on('loaderror', (f: any) => console.warn('Không tải được', f.key, f.src));
 }
 

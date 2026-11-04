@@ -46,7 +46,10 @@ button { font: inherit; color: inherit; cursor: pointer; }
   background: var(--cream); color: var(--ink); font-size: 30px; font-weight: 900; line-height: 1; box-shadow: var(--shadow); padding-bottom: 3px; }
 .brand { background: var(--cream); border-radius: 999px; padding: 6px 16px 6px 16px; box-shadow: var(--shadow); line-height: 1.05; }
 .brand b { font-family: 'Baloo 2', 'Nunito', sans-serif; font-size: 20px; font-weight: 800; color: #f28a4e; display: block; }
-.brand span { font-size: 11px; font-weight: 800; color: var(--ink2); }
+.brand span { font-size: 11px; font-weight: 800; color: var(--ink2); display: block; max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.brand { text-align: center; }
+/* màn rộng: tên game nằm giữa thanh trên */
+@media (min-width: 1100px) { .brand { position: absolute; left: 50%; top: 0; transform: translateX(-50%); padding: 6px 22px; } .brand span { font-size: 12px; } }
 .tabs { margin-left: auto; display: flex; gap: 4px; background: var(--cream); padding: 5px; border-radius: 999px; box-shadow: var(--shadow); }
 .tabs button { border: 0; background: transparent; padding: 8px 14px; border-radius: 999px; font-weight: 900; font-size: 14px; color: var(--ink2); }
 .tabs button.on { background: var(--yellow); color: var(--ink); box-shadow: inset 0 -3px 0 rgba(0,0,0,.08); }
@@ -56,6 +59,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
   max-height: calc(100vh - 90px); overflow: auto; background: rgba(255,250,242,.96); border-radius: var(--r); box-shadow: var(--shadow);
   padding: 12px; display: flex; flex-direction: column; gap: 10px; border: 3px solid #fff; }
 .panel.map-panel, .panel.island-panel { left: 12px; right: auto; width: min(560px, calc(100vw - 24px)); }
+.panel.map-panel, .panel.island-panel { width: auto; max-width: min(560px, calc(100vw - 24px)); }
 .panel h4 { margin: 4px 2px 0; font-size: 14px; font-weight: 900; display: flex; align-items: center; gap: 6px; }
 .row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
 .btn { border: 0; border-radius: 14px; padding: 9px 13px; background: #fff; font-weight: 900; font-size: 14px; color: var(--ink);
@@ -83,6 +87,16 @@ button { font: inherit; color: inherit; cursor: pointer; }
   font-weight: 900; font-size: 13px; box-shadow: 0 0 0 2px #efe6f7; }
 .pet img { width: 36px; height: 36px; object-fit: contain; }
 .pet.on { background: var(--yellow); box-shadow: 0 0 0 2px #f2c94c; }
+.pet-dock { position: fixed; z-index: 15; right: 12px; bottom: max(12px, env(safe-area-inset-bottom)); display: flex; gap: 6px; padding: 6px;
+  background: rgba(255,250,242,.96); border-radius: 20px; box-shadow: var(--shadow); border: 3px solid #fff; }
+.pet-dock .pet { flex: none; }
+body:not([data-scene="Island"]) .pet-dock { display: none; }
+@media (max-width: 760px) {
+  /* điện thoại: cột ảnh nhỏ ở mép phải, giữa màn hình (tránh bong bóng lời thoại và bảng điều khiển) */
+  .pet-dock { flex-direction: column; bottom: auto; top: 50%; transform: translateY(-50%); right: 8px; padding: 4px; border-radius: 18px; }
+  .pet-dock .pet span { display: none; }
+  .pet-dock .pet { padding: 3px; }
+}
 .palette { display: grid; grid-template-columns: repeat(auto-fill, minmax(58px, 1fr)); gap: 6px; max-height: 190px; overflow: auto; padding: 2px; }
 .palette button { aspect-ratio: 1; border: 0; border-radius: 14px; background: #f3fbef; display: grid; place-items: center; padding: 4px; box-shadow: 0 0 0 2px #e2f1da; }
 .palette button.on { background: var(--yellow); box-shadow: 0 0 0 3px #f2a94c; }
@@ -116,16 +130,18 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .card-text { margin: 0; font-size: 14px; font-weight: 700; }
 
 /* ── hộp thoại xem vùng ── */
-#modal { position: fixed; inset: 0; z-index: 30; background: rgba(60,40,90,.45); display: grid; place-items: center; padding: 16px; }
-.modal-box { position: relative; background: var(--cream); border-radius: 24px; padding: 10px; max-width: min(1100px, 100%); width: 100%; box-shadow: var(--shadow); border: 4px solid #fff; }
+#modal { position: fixed; inset: 0; z-index: 30; background: rgba(60,40,90,.45); display: grid; grid-template-columns: minmax(0, 1fr); place-items: center; padding: 16px; }
+.modal-box { min-width: 0; position: relative; background: var(--cream); border-radius: 24px; padding: 10px; max-width: min(1100px, 100%); width: 100%; box-shadow: var(--shadow); border: 4px solid #fff; }
 .modal-close { position: absolute; top: -14px; right: -10px; width: 40px; height: 40px; border-radius: 50%; border: 0; background: var(--rose); color: #fff; font-weight: 900; font-size: 18px; box-shadow: var(--shadow); }
-.rv-stage { position: relative; border-radius: 16px; overflow: hidden; aspect-ratio: 16/9; background: #dff3fd; }
+.region-view { min-width: 0; }
+/* ảnh cảnh 16:9 vừa cả bề ngang lẫn bề cao màn hình */
+.rv-stage { position: relative; border-radius: 16px; overflow: hidden; aspect-ratio: 16/9; background: #dff3fd;
+  width: min(100%, calc((100vh - 32px - 28px) * 16 / 9)); width: min(100%, calc((100dvh - 32px - 28px) * 16 / 9)); margin: 0 auto; }
 .rv-bg { width: 100%; height: 100%; object-fit: cover; display: block; }
 .rv-gate { position: absolute; left: 50%; bottom: 4%; height: 52%; transform: translateX(-50%); filter: drop-shadow(0 8px 10px rgba(76,56,118,.25)); }
 .rv-title { position: absolute; left: 12px; top: 12px; display: flex; align-items: center; gap: 8px; background: rgba(255,250,242,.92); padding: 4px 14px 4px 4px; border-radius: 999px; font-family: 'Baloo 2', sans-serif; font-weight: 800; font-size: 22px; }
 .rv-title img { width: 44px; height: 44px; }
-.rv-strip { display: flex; gap: 8px; overflow-x: auto; padding: 10px 2px 2px; }
-.rv-strip img { height: 90px; background: #fff; border-radius: 12px; padding: 6px; box-shadow: 0 0 0 2px color-mix(in srgb, var(--c) 40%, #fff); }
+@media (max-width: 760px), (max-height: 500px) { .rv-title { font-size: 16px; top: 8px; left: 8px; } .rv-title img { width: 30px; height: 30px; } }
 
 /* ── thông báo & tải ── */
 #toast { position: fixed; left: 50%; top: 78px; transform: translate(-50%, -20px); z-index: 40; background: var(--ink); color: #fff; font-weight: 800;
@@ -154,6 +170,9 @@ button { font: inherit; color: inherit; cursor: pointer; }
 
 /* ═════════════ Phase 2: gameplay ═════════════ */
 .round-btn { width: 44px; height: 44px; border-radius: 50%; border: 0; background: var(--cream); color: var(--ink2); font-size: 22px; box-shadow: var(--shadow); flex: none; }
+.round-btn svg { display: block; margin: auto; }
+#btn-fs .fs-out, #btn-fs.on .fs-in { display: none; }
+#btn-fs.on .fs-out { display: inline; }
 .hud { display: flex; gap: 4px; background: var(--cream); border-radius: 999px; padding: 4px 8px; box-shadow: var(--shadow); }
 .res { border: 0; background: transparent; display: inline-flex; align-items: center; gap: 2px; padding: 2px 4px; border-radius: 999px; font-weight: 900; font-size: 15px; }
 .res img { width: 28px; height: 28px; object-fit: contain; }
@@ -310,6 +329,7 @@ body[data-scene="Wardrobe"] .guide { bottom: auto; top: 70px; }
     <button data-scene="Wardrobe" data-h="wardrobe">Tủ đồ</button>
   </nav>
   <button class="round-btn" id="btn-parent" aria-label="Góc phụ huynh" title="Góc phụ huynh">⚙</button>
+  <button class="round-btn" id="btn-fs" aria-label="Toàn màn hình" title="Toàn màn hình" hidden><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path class="fs-in" d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/><path class="fs-out" d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg></button>
 </header>
 
 <div id="guide" class="guide" hidden><img alt=""><p></p></div>
@@ -1078,16 +1098,47 @@ return { Store };
 
 /* ══════════ services/Audio.ts ══════════ */
 M.Audio = (function () {
-// ── Âm thanh tự tổng hợp (Web Audio) + lời đọc (Speech Synthesis) ──
+// ── Âm thanh tự tổng hợp (Web Audio) + lời đọc ──
+// Lời đọc: clip giọng nơ-ron sinh sẵn (art/gen-voice.mjs → public/assets/voice/); câu nào chưa có clip
+// thì rơi về Speech Synthesis của máy.
 // Không dùng file nhạc có bản quyền: mọi tiếng đều sinh bằng sóng âm, nhẹ nhàng, không gắt.
 // Chỉ bật sau lần chạm đầu tiên của người chơi (trình duyệt chặn tự phát).
 const { Store } = M.Store;
+const { ASSET_BASE } = M.AssetLoader;
 let ctx                      = null;
 let master                  = null;
 let musicGain                  = null;
 let musicTimer      = null;
 let musicStep = 0;
 let viVoice                              = null;
+let voiceGain                  = null;
+
+// ── giọng đọc sinh sẵn ── (splitSpeech / speechKey phải giống hệt art/gen-voice.mjs)
+const VOICE_DIR = ASSET_BASE + 'voice/';
+const splitSpeech = (t        ) => t.split(/(?<=[.!?…])\s+/).map((s) => s.trim()).filter(Boolean);
+const speechKey = (s        ) => s.normalize('NFC').toLowerCase().replace(/[^\p{L}\p{N}]+/gu, ' ').trim();
+let clips                                = null;
+const buffers = new Map                                     ();
+let speakToken = 0;
+let speaking                          = [];
+fetch(VOICE_DIR + 'index.json').then((r) => r.ok ? r.json() : null).then((j) => { clips = j?.clips || null; }).catch(() => {});
+
+function clipBuffer(file        )                              {
+  let p = buffers.get(file);
+  if (!p) {
+    p = fetch(VOICE_DIR + file).then((r) => r.arrayBuffer())
+      .then((b) => new Promise             ((ok, bad) => ctx .decodeAudioData(b, ok, bad)))
+      .catch(() => { buffers.delete(file); return null; });
+    buffers.set(file, p);
+  }
+  return p;
+}
+function stopSpeaking() {
+  speakToken++;
+  for (const s of speaking) { try { s.stop(); } catch (e) { /* đã dừng */ } }
+  speaking = [];
+  try { if (typeof speechSynthesis !== 'undefined') speechSynthesis.cancel(); } catch (e) { /* */ }
+}
 
 function ensure()                      {
   if (!ctx) {
@@ -1096,6 +1147,7 @@ function ensure()                      {
     ctx = new AC();
     master = ctx .createGain(); master.connect(ctx .destination);
     musicGain = ctx .createGain(); musicGain.gain.value = 0.0; musicGain.connect(master);
+    voiceGain = ctx .createGain(); voiceGain.gain.value = 1.15; voiceGain.connect(master);
     Audio.applySettings();
   }
   if (ctx .state === 'suspended') ctx .resume();
@@ -1193,9 +1245,42 @@ const Audio = {
   },
   stopMusic() { clearInterval(musicTimer); musicTimer = null; },
 
-  /** Đọc câu hướng dẫn (nếu máy có giọng tiếng Việt và phụ huynh bật lời đọc). */
+  /** Đọc câu hướng dẫn bằng clip giọng nơ-ron; thiếu clip thì dùng Speech Synthesis của máy. */
   say(text        ) {
-    if (!Store.settings.voice || !Store.settings.sound || typeof speechSynthesis === 'undefined') return;
+    if (!Store.settings.voice || !Store.settings.sound) return;
+    stopSpeaking();
+    // tên bé do người dùng nhập → clip đọc "bé"
+    const name = Store.p?.name?.trim();
+    const spoken = name ? text.split(name).join('bé') : text;
+    const files = splitSpeech(spoken).map((s) => clips?.[speechKey(s)]);
+    const c = ensure();
+    if (c && files.length && files.every(Boolean)) { this.playClips(files            , text); return; }
+    if (clips) console.warn('[voice] chưa có clip:', splitSpeech(spoken).filter((s) => !clips [speechKey(s)]));
+    this.synth(text);
+  },
+
+  async playClips(files          , text        ) {
+    const token = speakToken;
+    const bufs = await Promise.all(files.map(clipBuffer));
+    if (token !== speakToken || !ctx || !voiceGain) return;
+    if (bufs.some((b) => !b)) { this.synth(text); return; }
+    let t = ctx.currentTime + 0.03;
+    // nhạc nền nhỏ lại trong lúc đọc
+    const total = bufs.reduce((s, b) => s + b .duration + 0.12, 0);
+    if (musicGain && Store.settings.music) {
+      musicGain.gain.setTargetAtTime(0.12, t, 0.08);
+      musicGain.gain.setTargetAtTime(0.32, t + total, 0.4);
+    }
+    for (const b of bufs) {
+      const src = ctx.createBufferSource(); src.buffer = b ;
+      src.connect(voiceGain); src.start(t);
+      speaking.push(src);
+      t += b .duration + 0.12;
+    }
+  },
+
+  synth(text        ) {
+    if (typeof speechSynthesis === 'undefined') return;
     try {
       speechSynthesis.cancel();
       const u = new SpeechSynthesisUtterance(text.replace(/[!?.]+/g, (m) => m[0]));
@@ -1204,6 +1289,7 @@ const Audio = {
       speechSynthesis.speak(u);
     } catch (e) { /* không có giọng đọc: vẫn hiện chữ */ }
   },
+  get hasVoice() { return !!viVoice || !!clips; },
   get hasVoice() { return !!viVoice; },
 };
 return { Audio };
@@ -1232,7 +1318,11 @@ const Hud = {
   },
 
   render() {
-    const p = Store.p; if (!p) return;
+    const p = Store.p;
+    // tên game ở giữa thanh trên: "Thế giới của <tên bé>"
+    const sub = document.querySelector('.brand span')                      ;
+    if (sub) sub.textContent = p?.name ? `Thế giới của ${p.name}` : 'Little World';
+    if (!p) return;
     const el = $('#hud');
     el.innerHTML = RES_LIST.map((r) =>
       `<button class="res" data-res="${r}" title="${RES_NAMES[r]}"><img src="${resIcon(r)}" alt=""><b>${p.res[r]}</b></button>`).join('');
@@ -1762,8 +1852,10 @@ function preloadWithProgress(scene     , queue              , label        ) {
   const n = queue();
   if (!n) return;
   Ui.loading(0, label);
-  scene.load.on('progress', (p        ) => Ui.loading(p, label));
-  scene.load.once('complete', () => Ui.loading(null));
+  // chỉ cho lần nạp này: lần nạp lẻ về sau (ví dụ icon phần thưởng) không được bật lại màn tải
+  const onProgress = (p        ) => Ui.loading(p, label);
+  scene.load.on('progress', onProgress);
+  scene.load.once('complete', () => { scene.load.off('progress', onProgress); Ui.loading(null); });
   scene.load.on('loaderror', (f     ) => console.warn('Không tải được', f.key, f.src));
 }
 
@@ -2357,23 +2449,16 @@ class WorldMapScene extends Phaser.Scene {
   buildPanel() {
     const el = Ui.panel(`
       <div class="row">
-        <button class="btn icon" data-a="zin" aria-label="Phóng to">＋</button>
-        <button class="btn icon" data-a="zout" aria-label="Thu nhỏ">－</button>
         <button class="btn" data-a="fit">Toàn cảnh</button>
         <button class="btn accent" data-a="home">Về đảo</button>
       </div>
-      <div class="chips">${this.world.regions.map((r     ) =>
-        `<button class="chip ${this.unlocked[r.id] ? '' : 'locked'}" data-r="${r.id}" style="--c:${r.color}"><img src="${AssetLoader.url(r.icon)}" alt="">${Ui.esc(r.name)}${this.unlocked[r.id] ? '' : `<img class="mini" src="${AssetLoader.url('world-ui-lock-badge')}" alt="khoá">`}</button>`).join('')}</div>
     `, 'map-panel');
     el.onclick = (e     ) => {
       const b = e.target.closest('button'); if (!b) return;
       Audio.sfx('tap');
       const a = b.dataset.a;
-      if (a === 'zin') this.controls.zoomBy(1.35);
-      else if (a === 'zout') this.controls.zoomBy(1 / 1.35);
-      else if (a === 'fit') { this.select(null); this.controls.flyTo(this.world.width / 2, this.world.height / 2, 1, 600); }
+      if (a === 'fit') { this.select(null); this.controls.flyTo(this.world.width / 2, this.world.height / 2, 1, 600); }
       else if (a === 'home') this.goHome();
-      else if (b.dataset.r) this.select(b.dataset.r, true);
     };
   }
 
@@ -2449,7 +2534,7 @@ class WorldMapScene extends Phaser.Scene {
       const b = e.target.closest('button'); if (!b) return;
       Audio.sfx('tap');
       if (b.dataset.act) {
-        if (!open) { Hud.say(`Cần thêm ${need} ngôi sao để mở ${r.name}.`); return; }
+        if (!open) { Hud.say(`${r.name} chưa mở. Cần thêm ${need} ngôi sao nữa nhé!`); return; }
         location.hash = 'play/' + b.dataset.act;
         return;
       }
@@ -2477,7 +2562,6 @@ class WorldMapScene extends Phaser.Scene {
 
   showRegionView(r     ) {
     const bg = this.world.regions && AssetLoader.url(r.background);
-    const lms = (r.landmarks || []).map((l     ) => `<img src="${AssetLoader.url(l.asset)}" alt="">`).join('');
     Ui.modal(`
       <div class="region-view" style="--c:${r.color}">
         <div class="rv-stage">
@@ -2485,7 +2569,6 @@ class WorldMapScene extends Phaser.Scene {
           <img class="rv-gate" src="${AssetLoader.url(r.entrance)}" alt="">
           <div class="rv-title"><img src="${AssetLoader.url(r.icon)}" alt=""><span>${Ui.esc(r.name)}</span></div>
         </div>
-        <div class="rv-strip">${lms}</div>
       </div>`);
   }
 
@@ -2525,6 +2608,37 @@ const { preloadWithProgress } = M.BootScene;
 const PET_IDS = ['fox', 'bunny', 'bear'];
 const SNAP = 16;
 const FIXED = new Set(['island-building-house-main']);   // nhà chính không cất đi được
+
+// ── lưới đi lại: bé tìm đường vòng qua nhà, cây, đá, hồ… (A* trên ô NAV px) ──
+const NAV = 16;
+const BODY = { rx: 12, ry: 7 };   // nửa bề ngang / bề sâu chân bé
+// đồ thấp, bé bước qua được
+const WALK_THROUGH = /grass|flower-(pink|yellow|lavender|white|tulip|blue)$|mushroom-(red|brown)|lilypad|fence-gate|bridge|picnic|pet-bed|starfish|shell/;
+/** Vùng chân đồ vật trên mặt đất (elip), null = đi qua được. */
+function footprint(o     )                                                            {
+  const id = o.getData('asset'); const e      = AssetLoader.entry(id);
+  if (!e || WALK_THROUGH.test(id)) return null;
+  const tags           = e.tags || [];
+  const [ww, wh] = e.worldSize || [o.displayWidth, o.displayHeight];
+  const fpH = (e.footprint?.[1] || 1) * 64;
+  if (e.layer === 'ground' || tags.includes('ground')) {
+    if (!tags.includes('water')) return null;
+    // hồ, sông: lấy giữa hình
+    const cy = o.y - (o.originY - 0.5) * o.displayHeight;
+    return { cx: o.x, cy, rx: ww * 0.42, ry: wh * 0.36 };
+  }
+  if (tags.includes('tree')) {
+    const big = tags.includes('large');
+    return { cx: o.x, cy: o.y - (big ? 22 : 8), rx: big ? 80 : 22, ry: big ? 34 : 11 };
+  }
+  if (id === 'island-deco-fence-v') return { cx: o.x, cy: o.y - wh * 0.38, rx: 12, ry: wh * 0.4 };
+  if (tags.includes('building')) {
+    const ry = Math.min(fpH * 0.34, wh * 0.3);
+    return { cx: o.x, cy: o.y - ry * 0.85, rx: ww * 0.44, ry };
+  }
+  const ry = Math.max(9, Math.min(wh * 0.28, fpH * 0.3));
+  return { cx: o.x, cy: o.y - ry * 0.6, rx: Math.max(14, ww * 0.42), ry };
+}
 const BLOOMS = ['island-plant-flower-pink', 'island-plant-flower-yellow', 'island-plant-flower-lavender', 'island-plant-flower-tulip'];
 
 class IslandScene extends Phaser.Scene {
@@ -2535,13 +2649,16 @@ class IslandScene extends Phaser.Scene {
   target                                                     = null;
   facing = 'down'; running = false; petBusy = false; dragFrom                                  = null; tapMarker     ;
   plotTimer = 0; shopGroup = 'plant';
+  path                             = [];
+  navW = 0; navH = 0; land                    = null; blocked                    = null;
 
   constructor() { super('Island'); }
 
   preload() {
     preloadWithProgress(this, () => {
       const pets = AssetLoader.data('pets') || {};
-      const ids = [...lookAssetIds(validLook(Store.p?.look)), ...PET_IDS.map((p) => pets[p]?.sheet)];
+      const ids = [...lookAssetIds(validLook(Store.p?.look)), ...PET_IDS.map((p) => pets[p]?.sheet),
+        ...Object.keys(PLOT_HARVEST).map((r) => 'reward-' + r)];   // icon bay lên khi thu hoạch
       return AssetLoader.queueCategories(this, ['island', 'environment']) + AssetLoader.queueIds(this, ids);
     }, 'Đang về đảo của bé…');
   }
@@ -2562,6 +2679,7 @@ class IslandScene extends Phaser.Scene {
       this.grid = this.add.image(0, 0, L.gridOverlay).setOrigin(0, 0).setDisplaySize(L.width, L.height).setDepth(-5).setVisible(false);
     }
     this.walk = new Phaser.Geom.Polygon(L.walkArea.flat());
+    this.buildLand();
 
     // bố cục đã lưu, hoặc bố cục ban đầu (luống đất đang lớn sẵn cho bé thấy ngay)
     let objs              = P.island               ;
@@ -2575,6 +2693,7 @@ class IslandScene extends Phaser.Scene {
       });
     }
     for (const o of objs) this.addObject(o.a, o.x, o.y, !!o.f, o.seed);
+    this.buildNav();
 
     this.selRing = this.add.graphics().setDepth(-1);
     this.tapMarker = this.add.graphics().setDepth(-2);
@@ -2585,7 +2704,7 @@ class IslandScene extends Phaser.Scene {
     this.avatar.container.setInteractive(new Phaser.Geom.Rectangle(-30, -84, 60, 88), Phaser.Geom.Rectangle.Contains);
     this.avatar.container.on('pointerup', () => {
       if (this.mode !== 'play' || this.controls.dragging) return;
-      this.target = null;
+      this.target = null; this.path = [];
       Audio.sfx('pop');
       this.avatar.play('wave', true, () => this.avatar.play('idle-down'));
     });
@@ -2624,7 +2743,7 @@ class IslandScene extends Phaser.Scene {
 
     this.buildPanel();
     this.refreshPlots();
-    this.events.once('shutdown', () => { Ui.clearPanel(); Ui.card(null); });   // không lưu ở đây: lúc tắt scene đồ vật đã bị huỷ
+    this.events.once('shutdown', () => { Ui.clearPanel(); Ui.card(null); this.petDock(null); });   // không lưu ở đây: lúc tắt scene đồ vật đã bị huỷ
 
     if (!P.seenIntro) {
       P.seenIntro = true; Store.commit();
@@ -2712,8 +2831,7 @@ class IslandScene extends Phaser.Scene {
       this.achToast(got);
       this.flyIcons(o.x, o.y - 40, PLOT_HARVEST       );
     } else {
-      const left = Math.ceil((PLOT_GROW_MS[2] - (Date.now() - o.getData('seed'))) / 1000);
-      Hud.say(st === 1 ? `Mầm non đang lớn! Khoảng ${left} giây nữa hoa sẽ nở.` : `Sắp nở rồi! Còn khoảng ${left} giây.`);
+      Hud.say(st === 1 ? 'Mầm non đang lớn! Hoa sẽ nở sớm thôi.' : 'Sắp nở rồi! Chờ thêm chút xíu nhé.');
     }
     this.bounce(o);
     this.refreshPlots();
@@ -2781,6 +2899,7 @@ class IslandScene extends Phaser.Scene {
 
   setMode(m                 ) {
     this.mode = m;
+    this.buildNav();
     this.setPlacing(null);
     this.select(null);
     for (const o of this.objs) this.input.setDraggable(o, m === 'edit');
@@ -2845,15 +2964,130 @@ class IslandScene extends Phaser.Scene {
   }
 
   walkTo(x        , y        , then             ) {
-    if (!this.inside(x, y)) { const c = { x: (x + this.avatar.x) / 2, y: (y + this.avatar.y) / 2 }; if (this.inside(c.x, c.y)) { x = c.x; y = c.y; } else { then?.(); return; } }
-    this.target = { x, y, then };
-    const d = Math.hypot(x - this.avatar.x, y - this.avatar.y);
+    this.buildNav();
+    const route = this.findPath(this.avatar.x, this.avatar.y, x, y);
+    if (!route) { then?.(); return; }
+    const end = route[route.length - 1];
+    // chạm vào chỗ không tới được (giữa nhà, giữa hồ) → đi tới chỗ gần nhất; việc "then" vẫn làm khi tới nơi
+    this.path = route;
+    this.target = { x: end.x, y: end.y, then };
+    let d = 0, px = this.avatar.x, py = this.avatar.y;
+    for (const p of route) { d += Math.hypot(p.x - px, p.y - py); px = p.x; py = p.y; }
     this.running = d > 340;
     this.tapMarker.clear();
-    this.tapMarker.lineStyle(5, 0xffffff, 0.9).strokeEllipse(x, y, 46, 18);
+    this.tapMarker.lineStyle(5, 0xffffff, 0.9).strokeEllipse(end.x, end.y, 46, 18);
     this.tapMarker.setAlpha(1);
     this.tweens.killTweensOf(this.tapMarker);
     this.tweens.add({ targets: this.tapMarker, alpha: 0, duration: 700, delay: 150 });
+  }
+
+  // ───────────── tìm đường ─────────────
+  /** Ô thuộc đất liền (trong walkArea) — tính một lần. */
+  buildLand() {
+    const L = this.L;
+    this.navW = Math.ceil(L.width / NAV); this.navH = Math.ceil(L.height / NAV);
+    const land = this.land = new Uint8Array(this.navW * this.navH);
+    for (let j = 0; j < this.navH; j++) for (let i = 0; i < this.navW; i++) {
+      land[j * this.navW + i] = this.inside((i + 0.5) * NAV, (j + 0.5) * NAV) ? 1 : 0;
+    }
+  }
+  /** Ô bị chặn = ngoài đất liền hoặc nằm dưới chân đồ vật. Dựng lại mỗi lần đi (đồ có thể vừa được dời). */
+  buildNav() {
+    const W = this.navW, H = this.navH;
+    const b = this.blocked = new Uint8Array(W * H);
+    for (let k = 0; k < b.length; k++) b[k] = this.land [k] ? 0 : 1;
+    for (const o of this.objs) {
+      if (!o.active) continue;
+      const f = footprint(o); if (!f) continue;
+      const rx = f.rx + BODY.rx, ry = f.ry + BODY.ry;
+      const i0 = Math.max(0, Math.floor((f.cx - rx) / NAV)), i1 = Math.min(W - 1, Math.floor((f.cx + rx) / NAV));
+      const j0 = Math.max(0, Math.floor((f.cy - ry) / NAV)), j1 = Math.min(H - 1, Math.floor((f.cy + ry) / NAV));
+      for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) {
+        const dx = ((i + 0.5) * NAV - f.cx) / rx, dy = ((j + 0.5) * NAV - f.cy) / ry;
+        if (dx * dx + dy * dy <= 1) b[j * W + i] = 1;
+      }
+    }
+  }
+  isBlocked(x        , y        ) {
+    if (!this.blocked) return false;
+    const i = Math.floor(x / NAV), j = Math.floor(y / NAV);
+    if (i < 0 || j < 0 || i >= this.navW || j >= this.navH) return true;
+    return this.blocked[j * this.navW + i] === 1;
+  }
+  /** Ô trống gần nhất (tìm loang). */
+  nearestFree(c        )         {
+    const b = this.blocked , W = this.navW;
+    if (!b[c]) return c;
+    const seen = new Uint8Array(b.length); const q = [c]; seen[c] = 1;
+    for (let h = 0; h < q.length && h < 20000; h++) {
+      const k = q[h]; if (!b[k]) return k;
+      const i = k % W, j = (k / W) | 0;
+      for (const [di, dj] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+        const ni = i + di, nj = j + dj;
+        if (ni < 0 || nj < 0 || ni >= W || nj >= this.navH) continue;
+        const n = nj * W + ni; if (!seen[n]) { seen[n] = 1; q.push(n); }
+      }
+    }
+    return -1;
+  }
+  /** Đường đi (đã làm mượt) từ (sx,sy) tới gần (tx,ty) nhất có thể. null nếu đứng yên. */
+  findPath(sx        , sy        , tx        , ty        )                                    {
+    const W = this.navW, H = this.navH, b = this.blocked ;
+    const cell = (x        , y        ) => Math.min(H - 1, Math.max(0, Math.floor(y / NAV))) * W + Math.min(W - 1, Math.max(0, Math.floor(x / NAV)));
+    const startRaw = cell(sx, sy);
+    const start = this.nearestFree(startRaw);
+    let goal = this.nearestFree(cell(tx, ty));
+    if (start < 0 || goal < 0) return null;
+    const exact = goal === cell(tx, ty);
+    const gx = goal % W, gy = (goal / W) | 0;
+    const hf = (k        ) => { const dx = Math.abs(k % W - gx), dy = Math.abs(((k / W) | 0) - gy); return Math.max(dx, dy) + 0.414 * Math.min(dx, dy); };
+    // A* với hàng đợi ưu tiên (heap nhị phân)
+    const g = new Float32Array(W * H).fill(Infinity), from = new Int32Array(W * H).fill(-1), closed = new Uint8Array(W * H);
+    const heap                     = [];
+    const push = (f        , k        ) => { heap.push([f, k]); let i = heap.length - 1; while (i > 0) { const p = (i - 1) >> 1; if (heap[p][0] <= heap[i][0]) break; [heap[p], heap[i]] = [heap[i], heap[p]]; i = p; } };
+    const pop = () => { const top = heap[0]; const last = heap.pop() ; if (heap.length) { heap[0] = last; let i = 0; for (;;) { const l = i * 2 + 1, r = l + 1; let m = i; if (l < heap.length && heap[l][0] < heap[m][0]) m = l; if (r < heap.length && heap[r][0] < heap[m][0]) m = r; if (m === i) break; [heap[m], heap[i]] = [heap[i], heap[m]]; i = m; } } return top; };
+    g[start] = 0; push(hf(start), start);
+    let best = start, bestH = hf(start);
+    while (heap.length) {
+      const [, k] = pop();
+      if (closed[k]) continue; closed[k] = 1;
+      const h = hf(k); if (h < bestH) { bestH = h; best = k; }
+      if (k === goal) { best = k; break; }
+      const i = k % W, j = (k / W) | 0;
+      for (let dj = -1; dj <= 1; dj++) for (let di = -1; di <= 1; di++) {
+        if (!di && !dj) continue;
+        const ni = i + di, nj = j + dj;
+        if (ni < 0 || nj < 0 || ni >= W || nj >= H) continue;
+        const n = nj * W + ni; if (b[n] || closed[n]) continue;
+        if (di && dj && (b[j * W + ni] || b[nj * W + i])) continue;   // không cắt góc
+        const ng = g[k] + (di && dj ? 1.414 : 1);
+        if (ng < g[n]) { g[n] = ng; from[n] = k; push(ng + hf(n), n); }
+      }
+    }
+    const cells           = [];
+    for (let k = best; k >= 0; k = from[k]) cells.push(k);
+    cells.reverse();
+    const pts = cells.map((k) => ({ x: (k % W + 0.5) * NAV, y: (((k / W) | 0) + 0.5) * NAV }));
+    if (best === goal && exact) pts[pts.length - 1] = { x: tx, y: ty };
+    if (startRaw === start) pts[0] = { x: sx, y: sy };
+    // làm mượt: bỏ điểm giữa nếu nhìn thẳng thấy điểm sau
+    const out                             = [];
+    let a = 0;
+    while (a < pts.length - 1) {
+      let c = pts.length - 1;
+      while (c > a + 1 && !this.clear(pts[a], pts[c])) c--;
+      out.push(pts[c]); a = c;
+    }
+    return out.length ? out : null;
+  }
+  /** Đoạn thẳng a→b không đi qua ô bị chặn. */
+  clear(a                          , b                          ) {
+    const d = Math.hypot(b.x - a.x, b.y - a.y), n = Math.ceil(d / (NAV / 3));
+    for (let s = 1; s < n; s++) {
+      const t = s / n, x = a.x + (b.x - a.x) * t, y = a.y + (b.y - a.y) * t;
+      if (this.isBlocked(x, y) || this.isBlocked(x + BODY.rx * 0.5, y) || this.isBlocked(x - BODY.rx * 0.5, y)) return false;
+    }
+    return true;
   }
 
   // ───────────── thú cưng ─────────────
@@ -2886,6 +3120,23 @@ class IslandScene extends Phaser.Scene {
     } else if (this.pet.anims.currentAnim?.key !== key) this.pet.play(key);
   }
 
+  /** Chọn bạn đồng hành: góc dưới bên phải, tách khỏi bảng điều khiển để bớt che đảo. */
+  petDock(html               ) {
+    let el = document.getElementById('pet-dock');
+    if (!html) { el?.remove(); return; }
+    if (!el) { el = document.createElement('div'); el.id = 'pet-dock'; el.className = 'pet-dock'; document.body.appendChild(el); }
+    el.innerHTML = html;
+    el.onclick = (e     ) => {
+      const b = e.target.closest('button[data-pet]'); if (!b) return;
+      Audio.sfx('tap');
+      if (b.dataset.pet === this.petId) return;
+      const pets = AssetLoader.data('pets') || {};
+      Store.setPet(b.dataset.pet); this.spawnPet(b.dataset.pet); this.buildPanel();
+      Hud.say(`Chào bạn! Mình là ${pets[b.dataset.pet]?.name}. Cùng chơi nhé!`);
+      this.achToast(Object.keys(Store.p .ach).filter((k) => k === 'new-pet-friend' && Date.now() - Store.p .ach[k] < 2000));
+    };
+  }
+
   // ───────────── bảng điều khiển ─────────────
   buildPanel() {
     const P = Store.p ;
@@ -2899,30 +3150,20 @@ class IslandScene extends Phaser.Scene {
           `<button data-id="${id}" class="${id === this.placing ? 'on' : ''}" title="${Ui.esc(shopItem(id)?.name || id)}"><img src="${AssetLoader.url(id)}" alt=""><i>${n}</i></button>`).join('')}</div>
         <p class="hint">Chọn đồ rồi chạm lên đảo để đặt · kéo đồ trên đảo để di chuyển</p>`
           : '<p class="hint">Túi đang trống — vào Cửa hàng đổi đồ bằng sao, hạt giống, gỗ, đá… kiếm được khi chơi.</p>'}`
-      : `<p class="hint">Chạm mặt đất để bé đi · chạm luống đất để gieo hạt và hái hoa</p>`;
+      : '';
     const el = Ui.panel(`
       <div class="row">
         <div class="seg"><button data-m="play" class="${this.mode === 'play' ? 'on' : ''}">Dạo chơi</button><button data-m="edit" class="${this.mode === 'edit' ? 'on' : ''}">Trang trí</button></div>
-        <button class="btn icon" data-a="zin" aria-label="Phóng to">＋</button>
-        <button class="btn icon" data-a="zout" aria-label="Thu nhỏ">－</button>
         <button class="btn" data-a="ach">Huy hiệu</button>
         <button class="btn accent" data-a="map">Đi chơi</button>
       </div>
-      ${this.mode === 'play' ? `<div class="pets">${petBtns}</div>` : ''}
       ${palette}`, 'island-panel');
+    this.petDock(this.mode === 'play' ? petBtns : null);
     el.onclick = (e     ) => {
       const b = e.target.closest('button'); if (!b) return;
       Audio.sfx('tap');
       if (b.dataset.m) this.setMode(b.dataset.m);
-      else if (b.dataset.pet) {
-        if (b.dataset.pet === this.petId) return;
-        Store.setPet(b.dataset.pet); this.spawnPet(b.dataset.pet); this.buildPanel();
-        Hud.say(`Chào bạn! Mình là ${pets[b.dataset.pet]?.name}. Cùng chơi nhé!`);
-        this.achToast(Object.keys(Store.p .ach).filter((k) => k === 'new-pet-friend' && Date.now() - Store.p .ach[k] < 2000));
-      }
       else if (b.dataset.id) this.setPlacing(this.placing === b.dataset.id ? null : b.dataset.id);
-      else if (b.dataset.a === 'zin') this.controls.zoomBy(1.35);
-      else if (b.dataset.a === 'zout') this.controls.zoomBy(1 / 1.35);
       else if (b.dataset.a === 'map') location.hash = 'map';
       else if (b.dataset.a === 'shop') this.openShop();
       else if (b.dataset.a === 'ach') this.openAchievements();
@@ -2980,10 +3221,15 @@ class IslandScene extends Phaser.Scene {
     if (this.plotTimer > 1000) { this.plotTimer = 0; this.refreshPlots(); }
     const A = this.avatar;
     if (this.target) {
-      const dx = this.target.x - A.x, dy = this.target.y - A.y;
+      const wp = this.path[0] || this.target;
+      const dx = wp.x - A.x, dy = wp.y - A.y;
       const d = Math.hypot(dx, dy);
       const speed = (this.running ? 250 : 140) * dt / 1000;
-      if (d <= speed) {
+      if (d <= speed && this.path.length > 1) {
+        A.setPosition(wp.x, wp.y);
+        this.path.shift();
+      } else if (d <= speed) {
+        this.path = [];
         A.setPosition(this.target.x, this.target.y);
         const then = this.target.then;
         this.target = null;
@@ -3008,7 +3254,12 @@ class IslandScene extends Phaser.Scene {
       const dx = tx - P.x, dy = ty - P.y, d = Math.hypot(dx, dy);
       if (d > 24) {
         const sp = Math.min(d, (d > 120 ? 280 : 150) * dt / 1000);
-        P.x += dx / d * sp; P.y += dy / d * sp;
+        const nx = P.x + dx / d * sp, ny = P.y + dy / d * sp;
+        // trượt dọc theo vật cản; kẹt cả hai phía (đứng sau nhà) thì cứ đi để không bị bỏ lại
+        if (!this.isBlocked(nx, ny) || this.isBlocked(P.x, P.y)) { P.x = nx; P.y = ny; }
+        else if (!this.isBlocked(nx, P.y)) P.x = nx;
+        else if (!this.isBlocked(P.x, ny)) P.y = ny;
+        else if (d > 160) { P.x = nx; P.y = ny; }
         this.petBusy = false;
         if (Math.abs(dx) > Math.abs(dy)) { this.petPlay('walk-side'); P.setFlipX(dx < 0); }
         else { this.petPlay(dy > 0 ? 'walk-front' : 'walk-back'); P.setFlipX(false); }
@@ -3669,7 +3920,7 @@ class CountCollectScene extends MiniGame {
     const total = Math.min(12, this.target + randInt(1, 3));
     const others = shuffle(items.filter((i) => i.id !== this.item.id)).slice(0, 2);
     this.inBasket = [];
-    this.askText = `Hái ${NUM[this.target]} ${this.item.name} bỏ vào giỏ nhé!`;
+    this.askText = `Hái ${this.item.name} bỏ vào giỏ nhé! Cần đủ ${NUM[this.target]}.`;
     this.layer.add(this.label(this.W / 2, this.top + 30, `Hái ${this.target} ${this.item.name}`, 58));
 
     // vùng quả (trên) và giỏ (dưới phải)
@@ -3723,7 +3974,7 @@ class CountCollectScene extends MiniGame {
     const n = this.inBasket.length;
     if (n === this.target) {
       this.good(this.basket.x, this.basket.y - 60);
-      Audio.say(`Đúng rồi! ${NUM[n]} ${this.item.name}!`);
+      Audio.say(`Đúng rồi! Đủ ${NUM[n]} rồi!`);
       this.nextRound(1400);
     } else if (n < this.target) this.miss(this.basket.front, `Trong giỏ mới có ${NUM[n]}. Cần ${NUM[this.target]} cơ, hái thêm nhé!`);
     else this.miss(this.basket.front, `Trong giỏ có ${NUM[n]} rồi, nhiều quá! Chạm vào quả trong giỏ để bỏ bớt nhé.`);
@@ -3753,9 +4004,9 @@ class CountCollectScene extends MiniGame {
         if (this.busy) return;
         if (gi === want) {
           this.good(zone.x, zone.y);
-          Audio.say(`Đúng rồi! ${NUM[groups[gi]]} ${askMore ? 'nhiều hơn' : 'ít hơn'} ${NUM[groups[1 - gi]]}.`);
+          Audio.say(`Đúng rồi! Bên này ${askMore ? 'nhiều hơn' : 'ít hơn'}!`);
           this.nextRound(1600);
-        } else this.miss(plate, `Mình cùng đếm nhé: bên này có ${NUM[n]}, bên kia có ${NUM[groups[1 - gi]]}.`);
+        } else this.miss(plate, `Mình cùng đếm nhé! Bên này có ${NUM[n]}. Bên kia có ${NUM[groups[1 - gi]]}.`);
       });
     });
     this.time.delayedCall(300, () => this.say(this.instruction()));
@@ -3765,7 +4016,7 @@ class CountCollectScene extends MiniGame {
   buildAdd() {
     const it = (this.play.items         )[randInt(0, 7)];
     const a = randInt(1, 5), b = randInt(1, 4), sum = a + b;
-    this.askText = `${NUM[a]} ${it.name} thêm ${NUM[b]} ${it.name} là mấy?`;
+    this.askText = `${NUM[a]} thêm ${NUM[b]} là mấy?`;
     this.layer.add(this.label(this.W / 2, this.top + 30, `${a} + ${b} = ?`, 72));
     const y0 = this.portrait ? this.top + 380 : this.top + 290;
     const gw = this.portrait ? 360 : 460;
@@ -4315,7 +4566,7 @@ class PatternScene extends MiniGame {
       // gợi ý: chỉ ra phần lặp lại ngay trước ô trống
       const unitLen = this.unitLength();
       const ref = b - unitLen >= 0 ? b - unitLen : b + unitLen;
-      this.miss(img, this.roundMistakes >= 1 ? `Nhìn ô cách ${unitLen} ô phía trước xem, đó là ${this.seq[ref].name}!` : 'Chưa đúng rồi. Nhìn kỹ dãy hình lặp lại nhé!');
+      this.miss(img, this.roundMistakes >= 1 ? `Nhìn ô cách ${unitLen} ô phía trước xem. Đó là ${this.seq[ref].name}!` : 'Chưa đúng rồi. Nhìn kỹ dãy hình lặp lại nhé!');
       if (this.roundMistakes >= 2 && this.cells[ref]) this.pulse(this.cells[ref].img, 1.3);
       this.goHome(img);
     }
@@ -4842,6 +5093,34 @@ document.querySelectorAll             ('.tabs button').forEach((b) => {
   });
 });
 document.getElementById('btn-parent') .addEventListener('click', () => { Audio.sfx('tap'); Parent.open(); });
+
+// ── toàn màn hình (ẩn nút nếu trình duyệt không hỗ trợ, ví dụ iPhone, hoặc đã mở từ màn hình chính) ──
+{
+  const d      = document, root      = document.documentElement;
+  const btn = document.getElementById('btn-fs') ;
+  const fsEl = () => d.fullscreenElement || d.webkitFullscreenElement;
+  const can = !!(root.requestFullscreen || root.webkitRequestFullscreen) && !(window.navigator       ).standalone
+    && !matchMedia('(display-mode: standalone), (display-mode: fullscreen)').matches;
+  btn.hidden = !can;
+  const sync = () => {
+    const on = !!fsEl();
+    btn.classList.toggle('on', on);
+    btn.setAttribute('aria-label', on ? 'Thoát toàn màn hình' : 'Toàn màn hình');
+    btn.title = btn.getAttribute('aria-label') ;
+  };
+  btn.addEventListener('click', () => {
+    Audio.sfx('tap');
+    try {
+      if (fsEl()) (d.exitFullscreen || d.webkitExitFullscreen).call(d);
+      else {
+        const r = (root.requestFullscreen || root.webkitRequestFullscreen).call(root, { navigationUI: 'hide' });
+        Promise.resolve(r).catch(() => {});
+      }
+    } catch (e) { /* trình duyệt từ chối */ }
+  });
+  document.addEventListener('fullscreenchange', sync);
+  document.addEventListener('webkitfullscreenchange', sync);
+}
 
 // Âm thanh chỉ bật sau lần chạm đầu tiên
 window.addEventListener('pointerdown', () => Audio.unlock(), { once: true });

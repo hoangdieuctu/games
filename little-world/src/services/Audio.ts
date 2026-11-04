@@ -1,7 +1,10 @@
-// ── Âm thanh tự tổng hợp (Web Audio) + lời đọc (Speech Synthesis) ──
+// ── Âm thanh tự tổng hợp (Web Audio) + lời đọc ──
+// Lời đọc: clip giọng nơ-ron sinh sẵn (art/gen-voice.mjs → public/assets/voice/); câu nào chưa có clip
+// thì rơi về Speech Synthesis của máy.
 // Không dùng file nhạc có bản quyền: mọi tiếng đều sinh bằng sóng âm, nhẹ nhàng, không gắt.
 // Chỉ bật sau lần chạm đầu tiên của người chơi (trình duyệt chặn tự phát).
 import { Store } from './Store.js';
+import { ASSET_BASE } from './AssetLoader.js';
 
 let ctx: AudioContext | null = null;
 let master: GainNode | null = null;
@@ -9,6 +12,34 @@ let musicGain: GainNode | null = null;
 let musicTimer: any = null;
 let musicStep = 0;
 let viVoice: SpeechSynthesisVoice | null = null;
+let voiceGain: GainNode | null = null;
+
+// ── giọng đọc sinh sẵn ── (splitSpeech / speechKey phải giống hệt art/gen-voice.mjs)
+const VOICE_DIR = ASSET_BASE + 'voice/';
+const splitSpeech = (t: string) => t.split(/(?<=[.!?…])\s+/).map((s) => s.trim()).filter(Boolean);
+const speechKey = (s: string) => s.normalize('NFC').toLowerCase().replace(/[^\p{L}\p{N}]+/gu, ' ').trim();
+let clips: Record<string, string> | null = null;
+const buffers = new Map<string, Promise<AudioBuffer | null>>();
+let speakToken = 0;
+let speaking: AudioBufferSourceNode[] = [];
+fetch(VOICE_DIR + 'index.json').then((r) => r.ok ? r.json() : null).then((j) => { clips = j?.clips || null; }).catch(() => {});
+
+function clipBuffer(file: string): Promise<AudioBuffer | null> {
+  let p = buffers.get(file);
+  if (!p) {
+    p = fetch(VOICE_DIR + file).then((r) => r.arrayBuffer())
+      .then((b) => new Promise<AudioBuffer>((ok, bad) => ctx!.decodeAudioData(b, ok, bad)))
+      .catch(() => { buffers.delete(file); return null; });
+    buffers.set(file, p);
+  }
+  return p;
+}
+function stopSpeaking() {
+  speakToken++;
+  for (const s of speaking) { try { s.stop(); } catch (e) { /* đã dừng */ } }
+  speaking = [];
+  try { if (typeof speechSynthesis !== 'undefined') speechSynthesis.cancel(); } catch (e) { /* */ }
+}
 
 function ensure(): AudioContext | null {
   if (!ctx) {
@@ -17,6 +48,7 @@ function ensure(): AudioContext | null {
     ctx = new AC();
     master = ctx!.createGain(); master.connect(ctx!.destination);
     musicGain = ctx!.createGain(); musicGain.gain.value = 0.0; musicGain.connect(master);
+    voiceGain = ctx!.createGain(); voiceGain.gain.value = 1.15; voiceGain.connect(master);
     Audio.applySettings();
   }
   if (ctx!.state === 'suspended') ctx!.resume();
@@ -114,9 +146,42 @@ export const Audio = {
   },
   stopMusic() { clearInterval(musicTimer); musicTimer = null; },
 
-  /** Đọc câu hướng dẫn (nếu máy có giọng tiếng Việt và phụ huynh bật lời đọc). */
+  /** Đọc câu hướng dẫn bằng clip giọng nơ-ron; thiếu clip thì dùng Speech Synthesis của máy. */
   say(text: string) {
-    if (!Store.settings.voice || !Store.settings.sound || typeof speechSynthesis === 'undefined') return;
+    if (!Store.settings.voice || !Store.settings.sound) return;
+    stopSpeaking();
+    // tên bé do người dùng nhập → clip đọc "bé"
+    const name = Store.p?.name?.trim();
+    const spoken = name ? text.split(name).join('bé') : text;
+    const files = splitSpeech(spoken).map((s) => clips?.[speechKey(s)]);
+    const c = ensure();
+    if (c && files.length && files.every(Boolean)) { this.playClips(files as string[], text); return; }
+    if (clips) console.warn('[voice] chưa có clip:', splitSpeech(spoken).filter((s) => !clips![speechKey(s)]));
+    this.synth(text);
+  },
+
+  async playClips(files: string[], text: string) {
+    const token = speakToken;
+    const bufs = await Promise.all(files.map(clipBuffer));
+    if (token !== speakToken || !ctx || !voiceGain) return;
+    if (bufs.some((b) => !b)) { this.synth(text); return; }
+    let t = ctx.currentTime + 0.03;
+    // nhạc nền nhỏ lại trong lúc đọc
+    const total = bufs.reduce((s, b) => s + b!.duration + 0.12, 0);
+    if (musicGain && Store.settings.music) {
+      musicGain.gain.setTargetAtTime(0.12, t, 0.08);
+      musicGain.gain.setTargetAtTime(0.32, t + total, 0.4);
+    }
+    for (const b of bufs) {
+      const src = ctx.createBufferSource(); src.buffer = b!;
+      src.connect(voiceGain); src.start(t);
+      speaking.push(src);
+      t += b!.duration + 0.12;
+    }
+  },
+
+  synth(text: string) {
+    if (typeof speechSynthesis === 'undefined') return;
     try {
       speechSynthesis.cancel();
       const u = new SpeechSynthesisUtterance(text.replace(/[!?.]+/g, (m) => m[0]));
@@ -125,5 +190,6 @@ export const Audio = {
       speechSynthesis.speak(u);
     } catch (e) { /* không có giọng đọc: vẫn hiện chữ */ }
   },
+  get hasVoice() { return !!viVoice || !!clips; },
   get hasVoice() { return !!viVoice; },
 };

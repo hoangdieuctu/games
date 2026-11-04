@@ -184,23 +184,16 @@ export class WorldMapScene extends Phaser.Scene {
   buildPanel() {
     const el = Ui.panel(`
       <div class="row">
-        <button class="btn icon" data-a="zin" aria-label="Phóng to">＋</button>
-        <button class="btn icon" data-a="zout" aria-label="Thu nhỏ">－</button>
         <button class="btn" data-a="fit">Toàn cảnh</button>
         <button class="btn accent" data-a="home">Về đảo</button>
       </div>
-      <div class="chips">${this.world.regions.map((r: any) =>
-        `<button class="chip ${this.unlocked[r.id] ? '' : 'locked'}" data-r="${r.id}" style="--c:${r.color}"><img src="${AssetLoader.url(r.icon)}" alt="">${Ui.esc(r.name)}${this.unlocked[r.id] ? '' : `<img class="mini" src="${AssetLoader.url('world-ui-lock-badge')}" alt="khoá">`}</button>`).join('')}</div>
     `, 'map-panel');
     el.onclick = (e: any) => {
       const b = e.target.closest('button'); if (!b) return;
       Audio.sfx('tap');
       const a = b.dataset.a;
-      if (a === 'zin') this.controls.zoomBy(1.35);
-      else if (a === 'zout') this.controls.zoomBy(1 / 1.35);
-      else if (a === 'fit') { this.select(null); this.controls.flyTo(this.world.width / 2, this.world.height / 2, 1, 600); }
+      if (a === 'fit') { this.select(null); this.controls.flyTo(this.world.width / 2, this.world.height / 2, 1, 600); }
       else if (a === 'home') this.goHome();
-      else if (b.dataset.r) this.select(b.dataset.r, true);
     };
   }
 
@@ -276,7 +269,7 @@ export class WorldMapScene extends Phaser.Scene {
       const b = e.target.closest('button'); if (!b) return;
       Audio.sfx('tap');
       if (b.dataset.act) {
-        if (!open) { Hud.say(`Cần thêm ${need} ngôi sao để mở ${r.name}.`); return; }
+        if (!open) { Hud.say(`${r.name} chưa mở. Cần thêm ${need} ngôi sao nữa nhé!`); return; }
         location.hash = 'play/' + b.dataset.act;
         return;
       }
@@ -304,7 +297,6 @@ export class WorldMapScene extends Phaser.Scene {
 
   showRegionView(r: any) {
     const bg = this.world.regions && AssetLoader.url(r.background);
-    const lms = (r.landmarks || []).map((l: any) => `<img src="${AssetLoader.url(l.asset)}" alt="">`).join('');
     Ui.modal(`
       <div class="region-view" style="--c:${r.color}">
         <div class="rv-stage">
@@ -312,7 +304,6 @@ export class WorldMapScene extends Phaser.Scene {
           <img class="rv-gate" src="${AssetLoader.url(r.entrance)}" alt="">
           <div class="rv-title"><img src="${AssetLoader.url(r.icon)}" alt=""><span>${Ui.esc(r.name)}</span></div>
         </div>
-        <div class="rv-strip">${lms}</div>
       </div>`);
   }
 

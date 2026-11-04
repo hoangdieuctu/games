@@ -35,7 +35,7 @@ export class CountCollectScene extends MiniGame {
     const total = Math.min(12, this.target + randInt(1, 3));
     const others = shuffle(items.filter((i) => i.id !== this.item.id)).slice(0, 2);
     this.inBasket = [];
-    this.askText = `Hái ${NUM[this.target]} ${this.item.name} bỏ vào giỏ nhé!`;
+    this.askText = `Hái ${this.item.name} bỏ vào giỏ nhé! Cần đủ ${NUM[this.target]}.`;
     this.layer.add(this.label(this.W / 2, this.top + 30, `Hái ${this.target} ${this.item.name}`, 58));
 
     // vùng quả (trên) và giỏ (dưới phải)
@@ -89,7 +89,7 @@ export class CountCollectScene extends MiniGame {
     const n = this.inBasket.length;
     if (n === this.target) {
       this.good(this.basket.x, this.basket.y - 60);
-      Audio.say(`Đúng rồi! ${NUM[n]} ${this.item.name}!`);
+      Audio.say(`Đúng rồi! Đủ ${NUM[n]} rồi!`);
       this.nextRound(1400);
     } else if (n < this.target) this.miss(this.basket.front, `Trong giỏ mới có ${NUM[n]}. Cần ${NUM[this.target]} cơ, hái thêm nhé!`);
     else this.miss(this.basket.front, `Trong giỏ có ${NUM[n]} rồi, nhiều quá! Chạm vào quả trong giỏ để bỏ bớt nhé.`);
@@ -119,9 +119,9 @@ export class CountCollectScene extends MiniGame {
         if (this.busy) return;
         if (gi === want) {
           this.good(zone.x, zone.y);
-          Audio.say(`Đúng rồi! ${NUM[groups[gi]]} ${askMore ? 'nhiều hơn' : 'ít hơn'} ${NUM[groups[1 - gi]]}.`);
+          Audio.say(`Đúng rồi! Bên này ${askMore ? 'nhiều hơn' : 'ít hơn'}!`);
           this.nextRound(1600);
-        } else this.miss(plate, `Mình cùng đếm nhé: bên này có ${NUM[n]}, bên kia có ${NUM[groups[1 - gi]]}.`);
+        } else this.miss(plate, `Mình cùng đếm nhé! Bên này có ${NUM[n]}. Bên kia có ${NUM[groups[1 - gi]]}.`);
       });
     });
     this.time.delayedCall(300, () => this.say(this.instruction()));
@@ -131,7 +131,7 @@ export class CountCollectScene extends MiniGame {
   buildAdd() {
     const it = (this.play.items as any[])[randInt(0, 7)];
     const a = randInt(1, 5), b = randInt(1, 4), sum = a + b;
-    this.askText = `${NUM[a]} ${it.name} thêm ${NUM[b]} ${it.name} là mấy?`;
+    this.askText = `${NUM[a]} thêm ${NUM[b]} là mấy?`;
     this.layer.add(this.label(this.W / 2, this.top + 30, `${a} + ${b} = ?`, 72));
     const y0 = this.portrait ? this.top + 380 : this.top + 290;
     const gw = this.portrait ? 360 : 460;

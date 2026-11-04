@@ -8,6 +8,8 @@ Thiết kế gốc: `docs/design-conversation.html` (hội thoại với ChatGPT
 Tất cả hình ảnh được **vẽ bằng code** (SVG sinh từ các script trong `art/`), dùng chung một
 bảng màu và quy chuẩn (`docs/ART_GUIDELINES.md`), rồi xuất ra PNG hoặc WebP cho Phaser.
 Không có ảnh stock, emoji hay ảnh tạo bằng AI.
+Giọng đọc là clip sinh sẵn bằng giọng nơ-ron tiếng Việt (`art/gen-voice.mjs`); câu nào chưa có clip thì dùng giọng đọc của máy.
+Khi sửa/thêm lời thoại trong `src/`, thêm mẫu câu tương ứng vào `art/gen-voice.mjs` rồi chạy lại (console in `[voice] chưa có clip` nếu thiếu).
 
 ## Cấu trúc
 
@@ -61,6 +63,10 @@ export PLAYWRIGHT_CORE=/tmp/lw-tools/node_modules/playwright-core
 node little-world/art/build-all.mjs                  # sinh mọi tài sản + manifest + ASSET_INVENTORY.md
 node little-world/art/gen-icon.mjs                   # icon.png + thumb.webp
 node little-world/build.mjs                          # gộp src → index.html (Node ≥ 22.13, không cần cài gì)
+
+# giọng đọc: mọi câu thú cưng nói → clip giọng nơ-ron vi-VN-HoaiMyNeural (public/assets/voice/)
+python3 -m venv /tmp/lw-tts && /tmp/lw-tts/bin/pip install edge-tts     # một lần, ngoài repo; cần ffmpeg
+EDGE_TTS=/tmp/lw-tts/bin/edge-tts npx -y node@22 little-world/art/gen-voice.mjs   # chỉ sinh câu mới/đổi
 ```
 
 ## Phase 1: những gì đã có và còn thiếu

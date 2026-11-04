@@ -1,6 +1,6 @@
 // Service worker của Thế Giới Nhỏ: lưu đệm trang, tài sản và Phaser để chơi được khi không có mạng.
 // Trang và manifest: mạng trước (luôn lấy bản mới nếu có mạng). Ảnh, font, Phaser: đệm trước.
-const CACHE = 'little-world-v3';
+const CACHE = 'little-world-v4';
 self.addEventListener('install', (e) => { self.skipWaiting(); });
 self.addEventListener('activate', (e) => {
   e.waitUntil(caches.keys().then((ks) => Promise.all(ks.filter((k) => k.startsWith('little-world-') && k !== CACHE).map((k) => caches.delete(k)))).then(() => self.clients.claim()));

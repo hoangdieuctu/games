@@ -17,6 +17,37 @@ declare const Phaser: any;
 const PET_IDS = ['fox', 'bunny', 'bear'];
 const SNAP = 16;
 const FIXED = new Set(['island-building-house-main']);   // nhà chính không cất đi được
+
+// ── lưới đi lại: bé tìm đường vòng qua nhà, cây, đá, hồ… (A* trên ô NAV px) ──
+const NAV = 16;
+const BODY = { rx: 12, ry: 7 };   // nửa bề ngang / bề sâu chân bé
+// đồ thấp, bé bước qua được
+const WALK_THROUGH = /grass|flower-(pink|yellow|lavender|white|tulip|blue)$|mushroom-(red|brown)|lilypad|fence-gate|bridge|picnic|pet-bed|starfish|shell/;
+/** Vùng chân đồ vật trên mặt đất (elip), null = đi qua được. */
+function footprint(o: any): { cx: number; cy: number; rx: number; ry: number } | null {
+  const id = o.getData('asset'); const e: any = AssetLoader.entry(id);
+  if (!e || WALK_THROUGH.test(id)) return null;
+  const tags: string[] = e.tags || [];
+  const [ww, wh] = e.worldSize || [o.displayWidth, o.displayHeight];
+  const fpH = (e.footprint?.[1] || 1) * 64;
+  if (e.layer === 'ground' || tags.includes('ground')) {
+    if (!tags.includes('water')) return null;
+    // hồ, sông: lấy giữa hình
+    const cy = o.y - (o.originY - 0.5) * o.displayHeight;
+    return { cx: o.x, cy, rx: ww * 0.42, ry: wh * 0.36 };
+  }
+  if (tags.includes('tree')) {
+    const big = tags.includes('large');
+    return { cx: o.x, cy: o.y - (big ? 22 : 8), rx: big ? 80 : 22, ry: big ? 34 : 11 };
+  }
+  if (id === 'island-deco-fence-v') return { cx: o.x, cy: o.y - wh * 0.38, rx: 12, ry: wh * 0.4 };
+  if (tags.includes('building')) {
+    const ry = Math.min(fpH * 0.34, wh * 0.3);
+    return { cx: o.x, cy: o.y - ry * 0.85, rx: ww * 0.44, ry };
+  }
+  const ry = Math.max(9, Math.min(wh * 0.28, fpH * 0.3));
+  return { cx: o.x, cy: o.y - ry * 0.6, rx: Math.max(14, ww * 0.42), ry };
+}
 const BLOOMS = ['island-plant-flower-pink', 'island-plant-flower-yellow', 'island-plant-flower-lavender', 'island-plant-flower-tulip'];
 
 export class IslandScene extends Phaser.Scene {
@@ -27,13 +58,16 @@ export class IslandScene extends Phaser.Scene {
   target: { x: number; y: number; then?: () => void } | null = null;
   facing = 'down'; running = false; petBusy = false; dragFrom: { x: number; y: number } | null = null; tapMarker: any;
   plotTimer = 0; shopGroup = 'plant';
+  path: { x: number; y: number }[] = [];
+  navW = 0; navH = 0; land: Uint8Array | null = null; blocked: Uint8Array | null = null;
 
   constructor() { super('Island'); }
 
   preload() {
     preloadWithProgress(this, () => {
       const pets = AssetLoader.data('pets') || {};
-      const ids = [...lookAssetIds(validLook(Store.p?.look)), ...PET_IDS.map((p) => pets[p]?.sheet)];
+      const ids = [...lookAssetIds(validLook(Store.p?.look)), ...PET_IDS.map((p) => pets[p]?.sheet),
+        ...Object.keys(PLOT_HARVEST).map((r) => 'reward-' + r)];   // icon bay lên khi thu hoạch
       return AssetLoader.queueCategories(this, ['island', 'environment']) + AssetLoader.queueIds(this, ids);
     }, 'Đang về đảo của bé…');
   }
@@ -54,6 +88,7 @@ export class IslandScene extends Phaser.Scene {
       this.grid = this.add.image(0, 0, L.gridOverlay).setOrigin(0, 0).setDisplaySize(L.width, L.height).setDepth(-5).setVisible(false);
     }
     this.walk = new Phaser.Geom.Polygon(L.walkArea.flat());
+    this.buildLand();
 
     // bố cục đã lưu, hoặc bố cục ban đầu (luống đất đang lớn sẵn cho bé thấy ngay)
     let objs: IslandObj[] = P.island as IslandObj[];
@@ -67,6 +102,7 @@ export class IslandScene extends Phaser.Scene {
       });
     }
     for (const o of objs) this.addObject(o.a, o.x, o.y, !!o.f, o.seed);
+    this.buildNav();
 
     this.selRing = this.add.graphics().setDepth(-1);
     this.tapMarker = this.add.graphics().setDepth(-2);
@@ -77,7 +113,7 @@ export class IslandScene extends Phaser.Scene {
     this.avatar.container.setInteractive(new Phaser.Geom.Rectangle(-30, -84, 60, 88), Phaser.Geom.Rectangle.Contains);
     this.avatar.container.on('pointerup', () => {
       if (this.mode !== 'play' || this.controls.dragging) return;
-      this.target = null;
+      this.target = null; this.path = [];
       Audio.sfx('pop');
       this.avatar.play('wave', true, () => this.avatar.play('idle-down'));
     });
@@ -116,7 +152,7 @@ export class IslandScene extends Phaser.Scene {
 
     this.buildPanel();
     this.refreshPlots();
-    this.events.once('shutdown', () => { Ui.clearPanel(); Ui.card(null); });   // không lưu ở đây: lúc tắt scene đồ vật đã bị huỷ
+    this.events.once('shutdown', () => { Ui.clearPanel(); Ui.card(null); this.petDock(null); });   // không lưu ở đây: lúc tắt scene đồ vật đã bị huỷ
 
     if (!P.seenIntro) {
       P.seenIntro = true; Store.commit();
@@ -204,8 +240,7 @@ export class IslandScene extends Phaser.Scene {
       this.achToast(got);
       this.flyIcons(o.x, o.y - 40, PLOT_HARVEST as any);
     } else {
-      const left = Math.ceil((PLOT_GROW_MS[2] - (Date.now() - o.getData('seed'))) / 1000);
-      Hud.say(st === 1 ? `Mầm non đang lớn! Khoảng ${left} giây nữa hoa sẽ nở.` : `Sắp nở rồi! Còn khoảng ${left} giây.`);
+      Hud.say(st === 1 ? 'Mầm non đang lớn! Hoa sẽ nở sớm thôi.' : 'Sắp nở rồi! Chờ thêm chút xíu nhé.');
     }
     this.bounce(o);
     this.refreshPlots();
@@ -273,6 +308,7 @@ export class IslandScene extends Phaser.Scene {
 
   setMode(m: 'play' | 'edit') {
     this.mode = m;
+    this.buildNav();
     this.setPlacing(null);
     this.select(null);
     for (const o of this.objs) this.input.setDraggable(o, m === 'edit');
@@ -337,15 +373,130 @@ export class IslandScene extends Phaser.Scene {
   }
 
   walkTo(x: number, y: number, then?: () => void) {
-    if (!this.inside(x, y)) { const c = { x: (x + this.avatar.x) / 2, y: (y + this.avatar.y) / 2 }; if (this.inside(c.x, c.y)) { x = c.x; y = c.y; } else { then?.(); return; } }
-    this.target = { x, y, then };
-    const d = Math.hypot(x - this.avatar.x, y - this.avatar.y);
+    this.buildNav();
+    const route = this.findPath(this.avatar.x, this.avatar.y, x, y);
+    if (!route) { then?.(); return; }
+    const end = route[route.length - 1];
+    // chạm vào chỗ không tới được (giữa nhà, giữa hồ) → đi tới chỗ gần nhất; việc "then" vẫn làm khi tới nơi
+    this.path = route;
+    this.target = { x: end.x, y: end.y, then };
+    let d = 0, px = this.avatar.x, py = this.avatar.y;
+    for (const p of route) { d += Math.hypot(p.x - px, p.y - py); px = p.x; py = p.y; }
     this.running = d > 340;
     this.tapMarker.clear();
-    this.tapMarker.lineStyle(5, 0xffffff, 0.9).strokeEllipse(x, y, 46, 18);
+    this.tapMarker.lineStyle(5, 0xffffff, 0.9).strokeEllipse(end.x, end.y, 46, 18);
     this.tapMarker.setAlpha(1);
     this.tweens.killTweensOf(this.tapMarker);
     this.tweens.add({ targets: this.tapMarker, alpha: 0, duration: 700, delay: 150 });
+  }
+
+  // ───────────── tìm đường ─────────────
+  /** Ô thuộc đất liền (trong walkArea) — tính một lần. */
+  buildLand() {
+    const L = this.L;
+    this.navW = Math.ceil(L.width / NAV); this.navH = Math.ceil(L.height / NAV);
+    const land = this.land = new Uint8Array(this.navW * this.navH);
+    for (let j = 0; j < this.navH; j++) for (let i = 0; i < this.navW; i++) {
+      land[j * this.navW + i] = this.inside((i + 0.5) * NAV, (j + 0.5) * NAV) ? 1 : 0;
+    }
+  }
+  /** Ô bị chặn = ngoài đất liền hoặc nằm dưới chân đồ vật. Dựng lại mỗi lần đi (đồ có thể vừa được dời). */
+  buildNav() {
+    const W = this.navW, H = this.navH;
+    const b = this.blocked = new Uint8Array(W * H);
+    for (let k = 0; k < b.length; k++) b[k] = this.land![k] ? 0 : 1;
+    for (const o of this.objs) {
+      if (!o.active) continue;
+      const f = footprint(o); if (!f) continue;
+      const rx = f.rx + BODY.rx, ry = f.ry + BODY.ry;
+      const i0 = Math.max(0, Math.floor((f.cx - rx) / NAV)), i1 = Math.min(W - 1, Math.floor((f.cx + rx) / NAV));
+      const j0 = Math.max(0, Math.floor((f.cy - ry) / NAV)), j1 = Math.min(H - 1, Math.floor((f.cy + ry) / NAV));
+      for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) {
+        const dx = ((i + 0.5) * NAV - f.cx) / rx, dy = ((j + 0.5) * NAV - f.cy) / ry;
+        if (dx * dx + dy * dy <= 1) b[j * W + i] = 1;
+      }
+    }
+  }
+  isBlocked(x: number, y: number) {
+    if (!this.blocked) return false;
+    const i = Math.floor(x / NAV), j = Math.floor(y / NAV);
+    if (i < 0 || j < 0 || i >= this.navW || j >= this.navH) return true;
+    return this.blocked[j * this.navW + i] === 1;
+  }
+  /** Ô trống gần nhất (tìm loang). */
+  nearestFree(c: number): number {
+    const b = this.blocked!, W = this.navW;
+    if (!b[c]) return c;
+    const seen = new Uint8Array(b.length); const q = [c]; seen[c] = 1;
+    for (let h = 0; h < q.length && h < 20000; h++) {
+      const k = q[h]; if (!b[k]) return k;
+      const i = k % W, j = (k / W) | 0;
+      for (const [di, dj] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+        const ni = i + di, nj = j + dj;
+        if (ni < 0 || nj < 0 || ni >= W || nj >= this.navH) continue;
+        const n = nj * W + ni; if (!seen[n]) { seen[n] = 1; q.push(n); }
+      }
+    }
+    return -1;
+  }
+  /** Đường đi (đã làm mượt) từ (sx,sy) tới gần (tx,ty) nhất có thể. null nếu đứng yên. */
+  findPath(sx: number, sy: number, tx: number, ty: number): { x: number; y: number }[] | null {
+    const W = this.navW, H = this.navH, b = this.blocked!;
+    const cell = (x: number, y: number) => Math.min(H - 1, Math.max(0, Math.floor(y / NAV))) * W + Math.min(W - 1, Math.max(0, Math.floor(x / NAV)));
+    const startRaw = cell(sx, sy);
+    const start = this.nearestFree(startRaw);
+    let goal = this.nearestFree(cell(tx, ty));
+    if (start < 0 || goal < 0) return null;
+    const exact = goal === cell(tx, ty);
+    const gx = goal % W, gy = (goal / W) | 0;
+    const hf = (k: number) => { const dx = Math.abs(k % W - gx), dy = Math.abs(((k / W) | 0) - gy); return Math.max(dx, dy) + 0.414 * Math.min(dx, dy); };
+    // A* với hàng đợi ưu tiên (heap nhị phân)
+    const g = new Float32Array(W * H).fill(Infinity), from = new Int32Array(W * H).fill(-1), closed = new Uint8Array(W * H);
+    const heap: [number, number][] = [];
+    const push = (f: number, k: number) => { heap.push([f, k]); let i = heap.length - 1; while (i > 0) { const p = (i - 1) >> 1; if (heap[p][0] <= heap[i][0]) break; [heap[p], heap[i]] = [heap[i], heap[p]]; i = p; } };
+    const pop = () => { const top = heap[0]; const last = heap.pop()!; if (heap.length) { heap[0] = last; let i = 0; for (;;) { const l = i * 2 + 1, r = l + 1; let m = i; if (l < heap.length && heap[l][0] < heap[m][0]) m = l; if (r < heap.length && heap[r][0] < heap[m][0]) m = r; if (m === i) break; [heap[m], heap[i]] = [heap[i], heap[m]]; i = m; } } return top; };
+    g[start] = 0; push(hf(start), start);
+    let best = start, bestH = hf(start);
+    while (heap.length) {
+      const [, k] = pop();
+      if (closed[k]) continue; closed[k] = 1;
+      const h = hf(k); if (h < bestH) { bestH = h; best = k; }
+      if (k === goal) { best = k; break; }
+      const i = k % W, j = (k / W) | 0;
+      for (let dj = -1; dj <= 1; dj++) for (let di = -1; di <= 1; di++) {
+        if (!di && !dj) continue;
+        const ni = i + di, nj = j + dj;
+        if (ni < 0 || nj < 0 || ni >= W || nj >= H) continue;
+        const n = nj * W + ni; if (b[n] || closed[n]) continue;
+        if (di && dj && (b[j * W + ni] || b[nj * W + i])) continue;   // không cắt góc
+        const ng = g[k] + (di && dj ? 1.414 : 1);
+        if (ng < g[n]) { g[n] = ng; from[n] = k; push(ng + hf(n), n); }
+      }
+    }
+    const cells: number[] = [];
+    for (let k = best; k >= 0; k = from[k]) cells.push(k);
+    cells.reverse();
+    const pts = cells.map((k) => ({ x: (k % W + 0.5) * NAV, y: (((k / W) | 0) + 0.5) * NAV }));
+    if (best === goal && exact) pts[pts.length - 1] = { x: tx, y: ty };
+    if (startRaw === start) pts[0] = { x: sx, y: sy };
+    // làm mượt: bỏ điểm giữa nếu nhìn thẳng thấy điểm sau
+    const out: { x: number; y: number }[] = [];
+    let a = 0;
+    while (a < pts.length - 1) {
+      let c = pts.length - 1;
+      while (c > a + 1 && !this.clear(pts[a], pts[c])) c--;
+      out.push(pts[c]); a = c;
+    }
+    return out.length ? out : null;
+  }
+  /** Đoạn thẳng a→b không đi qua ô bị chặn. */
+  clear(a: { x: number; y: number }, b: { x: number; y: number }) {
+    const d = Math.hypot(b.x - a.x, b.y - a.y), n = Math.ceil(d / (NAV / 3));
+    for (let s = 1; s < n; s++) {
+      const t = s / n, x = a.x + (b.x - a.x) * t, y = a.y + (b.y - a.y) * t;
+      if (this.isBlocked(x, y) || this.isBlocked(x + BODY.rx * 0.5, y) || this.isBlocked(x - BODY.rx * 0.5, y)) return false;
+    }
+    return true;
   }
 
   // ───────────── thú cưng ─────────────
@@ -378,6 +529,23 @@ export class IslandScene extends Phaser.Scene {
     } else if (this.pet.anims.currentAnim?.key !== key) this.pet.play(key);
   }
 
+  /** Chọn bạn đồng hành: góc dưới bên phải, tách khỏi bảng điều khiển để bớt che đảo. */
+  petDock(html: string | null) {
+    let el = document.getElementById('pet-dock');
+    if (!html) { el?.remove(); return; }
+    if (!el) { el = document.createElement('div'); el.id = 'pet-dock'; el.className = 'pet-dock'; document.body.appendChild(el); }
+    el.innerHTML = html;
+    el.onclick = (e: any) => {
+      const b = e.target.closest('button[data-pet]'); if (!b) return;
+      Audio.sfx('tap');
+      if (b.dataset.pet === this.petId) return;
+      const pets = AssetLoader.data('pets') || {};
+      Store.setPet(b.dataset.pet); this.spawnPet(b.dataset.pet); this.buildPanel();
+      Hud.say(`Chào bạn! Mình là ${pets[b.dataset.pet]?.name}. Cùng chơi nhé!`);
+      this.achToast(Object.keys(Store.p!.ach).filter((k) => k === 'new-pet-friend' && Date.now() - Store.p!.ach[k] < 2000));
+    };
+  }
+
   // ───────────── bảng điều khiển ─────────────
   buildPanel() {
     const P = Store.p!;
@@ -391,30 +559,20 @@ export class IslandScene extends Phaser.Scene {
           `<button data-id="${id}" class="${id === this.placing ? 'on' : ''}" title="${Ui.esc(shopItem(id)?.name || id)}"><img src="${AssetLoader.url(id)}" alt=""><i>${n}</i></button>`).join('')}</div>
         <p class="hint">Chọn đồ rồi chạm lên đảo để đặt · kéo đồ trên đảo để di chuyển</p>`
           : '<p class="hint">Túi đang trống — vào Cửa hàng đổi đồ bằng sao, hạt giống, gỗ, đá… kiếm được khi chơi.</p>'}`
-      : `<p class="hint">Chạm mặt đất để bé đi · chạm luống đất để gieo hạt và hái hoa</p>`;
+      : '';
     const el = Ui.panel(`
       <div class="row">
         <div class="seg"><button data-m="play" class="${this.mode === 'play' ? 'on' : ''}">Dạo chơi</button><button data-m="edit" class="${this.mode === 'edit' ? 'on' : ''}">Trang trí</button></div>
-        <button class="btn icon" data-a="zin" aria-label="Phóng to">＋</button>
-        <button class="btn icon" data-a="zout" aria-label="Thu nhỏ">－</button>
         <button class="btn" data-a="ach">Huy hiệu</button>
         <button class="btn accent" data-a="map">Đi chơi</button>
       </div>
-      ${this.mode === 'play' ? `<div class="pets">${petBtns}</div>` : ''}
       ${palette}`, 'island-panel');
+    this.petDock(this.mode === 'play' ? petBtns : null);
     el.onclick = (e: any) => {
       const b = e.target.closest('button'); if (!b) return;
       Audio.sfx('tap');
       if (b.dataset.m) this.setMode(b.dataset.m);
-      else if (b.dataset.pet) {
-        if (b.dataset.pet === this.petId) return;
-        Store.setPet(b.dataset.pet); this.spawnPet(b.dataset.pet); this.buildPanel();
-        Hud.say(`Chào bạn! Mình là ${pets[b.dataset.pet]?.name}. Cùng chơi nhé!`);
-        this.achToast(Object.keys(Store.p!.ach).filter((k) => k === 'new-pet-friend' && Date.now() - Store.p!.ach[k] < 2000));
-      }
       else if (b.dataset.id) this.setPlacing(this.placing === b.dataset.id ? null : b.dataset.id);
-      else if (b.dataset.a === 'zin') this.controls.zoomBy(1.35);
-      else if (b.dataset.a === 'zout') this.controls.zoomBy(1 / 1.35);
       else if (b.dataset.a === 'map') location.hash = 'map';
       else if (b.dataset.a === 'shop') this.openShop();
       else if (b.dataset.a === 'ach') this.openAchievements();
@@ -472,10 +630,15 @@ export class IslandScene extends Phaser.Scene {
     if (this.plotTimer > 1000) { this.plotTimer = 0; this.refreshPlots(); }
     const A = this.avatar;
     if (this.target) {
-      const dx = this.target.x - A.x, dy = this.target.y - A.y;
+      const wp = this.path[0] || this.target;
+      const dx = wp.x - A.x, dy = wp.y - A.y;
       const d = Math.hypot(dx, dy);
       const speed = (this.running ? 250 : 140) * dt / 1000;
-      if (d <= speed) {
+      if (d <= speed && this.path.length > 1) {
+        A.setPosition(wp.x, wp.y);
+        this.path.shift();
+      } else if (d <= speed) {
+        this.path = [];
         A.setPosition(this.target.x, this.target.y);
         const then = this.target.then;
         this.target = null;
@@ -500,7 +663,12 @@ export class IslandScene extends Phaser.Scene {
       const dx = tx - P.x, dy = ty - P.y, d = Math.hypot(dx, dy);
       if (d > 24) {
         const sp = Math.min(d, (d > 120 ? 280 : 150) * dt / 1000);
-        P.x += dx / d * sp; P.y += dy / d * sp;
+        const nx = P.x + dx / d * sp, ny = P.y + dy / d * sp;
+        // trượt dọc theo vật cản; kẹt cả hai phía (đứng sau nhà) thì cứ đi để không bị bỏ lại
+        if (!this.isBlocked(nx, ny) || this.isBlocked(P.x, P.y)) { P.x = nx; P.y = ny; }
+        else if (!this.isBlocked(nx, P.y)) P.x = nx;
+        else if (!this.isBlocked(P.x, ny)) P.y = ny;
+        else if (d > 160) { P.x = nx; P.y = ny; }
         this.petBusy = false;
         if (Math.abs(dx) > Math.abs(dy)) { this.petPlay('walk-side'); P.setFlipX(dx < 0); }
         else { this.petPlay(dy > 0 ? 'walk-front' : 'walk-back'); P.setFlipX(false); }

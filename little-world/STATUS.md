@@ -53,3 +53,14 @@ PLAYWRIGHT_CORE=... node little-world/test/lwplay.mjs 1280 800 d   # chơi thử
 PLAYWRIGHT_CORE=... node little-world/art/build-all.mjs            # sinh lại toàn bộ hình
 ```
 Trong trình duyệt: `__lwStore` (bản lưu), `__lw` (Phaser game) để kiểm thử nhanh.
+
+- **Sau Phase 3 (2026-11-04):**
+  - Nút toàn màn hình (góc phải trên, cạnh ⚙); tự ẩn nếu trình duyệt không hỗ trợ (iPhone) hoặc đã mở từ màn hình chính.
+  - Giọng đọc mới: 753 câu đơn sinh sẵn bằng giọng nơ-ron `vi-VN-HoaiMyNeural` (edge-tts) → `public/assets/voice/*.mp3` + `index.json`.
+    `Audio.say()` tách câu theo . ! ?, phát nối các clip, nhạc nền nhỏ lại khi đọc; tên bé được đọc là "bé"; thiếu clip → Speech Synthesis.
+  - Chọn bạn đồng hành dời ra góc dưới phải (`#pet-dock`); trên điện thoại là cột ảnh nhỏ ở mép phải.
+  - Trò Đếm và hái rút gọn lời thoại cho đỡ tổ hợp (vẫn đọc số): "Hái quả táo bỏ vào giỏ nhé! Cần đủ ba.", "Ba thêm hai là mấy?",
+    "Bên này nhiều hơn!"; mở vùng: "X chưa mở. Cần thêm N ngôi sao nữa nhé!"; quy luật tách hai câu → còn 753 câu cần giọng.
+  - Luống đất đang lớn: thú cưng nói "Hoa sẽ nở sớm thôi" / "Chờ thêm chút xíu nhé" thay vì đọc số giây.
+  - Đảo: bé không đi xuyên vật cản nữa — lưới 16px (đất liền trừ chân nhà, gốc cây, đá, bụi, hồ…; hoa/cỏ/nấm nhỏ đi qua được),
+    tìm đường A* rồi làm mượt; chạm vào giữa nhà/hồ → đi tới chỗ gần nhất. Thú cưng trượt dọc vật cản.
