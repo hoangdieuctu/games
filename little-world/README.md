@@ -1,8 +1,8 @@
 # Thế Giới Nhỏ (Little World)
 
 Game phiêu lưu 2D hoạt hình nguyên bản cho trẻ em, chạy trên Phaser 3. Game được làm qua 4 phase;
-thư mục này hiện có **Phase 1 (hình ảnh, thế giới)** và **Phase 2 (gameplay)**: hồ sơ bé, đảo tự lưu,
-8 hoạt động chơi được, phần thưởng, túi đồ, cửa hàng, luống hoa, huy hiệu, âm thanh và góc phụ huynh.
+thư mục này hiện có **Phase 1 (hình ảnh, thế giới)**, **Phase 2 (gameplay)** và **Phase 3 (thêm hoạt động)**: hồ sơ bé, đảo tự lưu,
+11 hoạt động chơi được (mới: Tìm quy luật, Bé tô màu, Chăm bạn thú), phần thưởng, túi đồ, cửa hàng, luống hoa, huy hiệu, âm thanh và góc phụ huynh.
 Thiết kế gốc: `docs/design-conversation.html` (hội thoại với ChatGPT) và `docs/GAMEPLAY.md`.
 
 Tất cả hình ảnh được **vẽ bằng code** (SVG sinh từ các script trong `art/`), dùng chung một

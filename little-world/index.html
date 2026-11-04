@@ -307,6 +307,8 @@ a.kho-back.kho-back{display:inline-flex!important;align-items:center!important;j
   box-shadow:0 4px 14px rgba(20,8,60,.28)!important;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);cursor:pointer;flex:none!important;box-sizing:border-box!important}
 a.kho-back.kho-back:hover{background:rgba(35,18,77,.75)!important}
 a.kho-back.kho-back:active{transform:scale(.96)}
+/* trong trò chơi đã có nút ✕ về bản đồ */
+body[data-scene="Play"] a.kho-back.kho-back{display:none!important}
 a.kho-back .kb-ar{font-size:22px;line-height:.8;margin-top:-2px}
 @media (max-width:520px){a.kho-back.kb-compact .kb-tx{display:none}a.kho-back.kho-back.kb-compact{padding:7px 13px 9px!important}}
 </style>
@@ -373,8 +375,11 @@ const ACTIVITIES             = [
   { id: 'animal-habitat', scene: 'AnimalMatch', mode: 'habitat', name: 'Nhà của thú', desc: 'Đưa con vật về đúng nơi ở', skill: 'nature', region: 'animal-island', reward: { star: 3, seed: 2 }, rounds: 5 },
   { id: 'memory', scene: 'Memory', name: 'Lật thẻ ghi nhớ', desc: 'Lật thẻ, tìm hai thẻ giống nhau', skill: 'memory', region: 'puzzle-forest', reward: { star: 3, wood: 2 }, rounds: 1 },
   { id: 'shape-puzzle', scene: 'ShapePuzzle', name: 'Ghép hình', desc: 'Kéo mảnh ghép vào đúng bóng', skill: 'logic', region: 'puzzle-forest', reward: { star: 3, wood: 2 }, rounds: 3 },
+  { id: 'pattern', scene: 'Pattern', name: 'Tìm quy luật', desc: 'Xem dãy hình lặp lại, chọn hình còn thiếu', skill: 'logic', region: 'math-mountain', reward: { star: 3, stone: 2 }, rounds: 5 },
   { id: 'count', scene: 'CountCollect', name: 'Đếm và hái', desc: 'Hái đúng số quả, so sánh và cộng', skill: 'math', region: 'math-mountain', reward: { star: 3, stone: 2 }, rounds: 5 },
   { id: 'builder', scene: 'Builder', name: 'Bé xây dựng', desc: 'Xếp khối thành tháp, nhà, cầu', skill: 'creative', region: 'creative-town', reward: { star: 3, wood: 3 }, rounds: 1 },
+  { id: 'coloring', scene: 'Coloring', name: 'Bé tô màu', desc: 'Chọn bút màu và tô bức tranh', skill: 'creative', region: 'creative-town', reward: { star: 3, flower: 2, seed: 1 }, rounds: 1 },
+  { id: 'pet-care', scene: 'PetCare', name: 'Chăm bạn thú', desc: 'Xem bạn thú cần gì và giúp bạn ấy', skill: 'life', region: 'life-skills-village', reward: { star: 3, seed: 2, wood: 1 }, rounds: 5 },
   { id: 'sort-trash', scene: 'Sort', mode: 'trash', name: 'Phân loại rác', desc: 'Bỏ rác vào đúng thùng', skill: 'life', region: 'life-skills-village', reward: { star: 3, seed: 1, flower: 2 }, rounds: 1 },
   { id: 'ocean-clean', scene: 'Sort', mode: 'ocean', name: 'Biển sạch', desc: 'Nhặt rác, giữ lại các bạn biển', skill: 'science', region: 'adventure-ocean', reward: { star: 3, shell: 3 }, rounds: 1 },
 ];
@@ -480,6 +485,9 @@ const ACHIEVEMENTS                = [
   { id: 'math-4', name: 'Nhà toán học', desc: 'Đếm và hái tới cấp 4', icon: 'world-math-mountain-icon' },
   { id: 'builder-3', name: 'Thợ xây tài ba', desc: 'Xây 3 công trình', icon: 'world-creative-town-icon' },
   { id: 'eco-hero', name: 'Bạn của Trái Đất', desc: 'Chơi Phân loại rác và Biển sạch', icon: 'world-adventure-ocean-icon' },
+  { id: 'pattern-4', name: 'Thám tử quy luật', desc: 'Tìm quy luật tới cấp 4', icon: 'shape-star' },
+  { id: 'artist-3', name: 'Hoạ sĩ nhí', desc: 'Tô xong 3 bức tranh', icon: 'reward-flower' },
+  { id: 'pet-care-3', name: 'Bạn thân của thú cưng', desc: 'Chăm bạn thú 3 lần', icon: 'care-food' },
   { id: 'new-pet-friend', name: 'Đổi bạn đồng hành', desc: 'Chọn một bạn thú cưng khác', icon: 'fox-portrait' },
 ];
 
@@ -493,6 +501,192 @@ const PET_LINES = {
 };
 const pick =    (a     )    => a[Math.floor(Math.random() * a.length)];
 return { RES_LIST, RES_NAMES, RES_USE, SKILL_NAMES, ACTIVITIES, actById, REGION_STARS, SHOP, SHOP_GROUPS, shopItem, STARTER_ITEMS, STARTER_RES, PLOT_ASSETS, PLOT_GROW_MS, PLOT_HARVEST, ACHIEVEMENTS, PET_LINES, pick };
+})();
+
+/* ══════════ data/Pictures.ts ══════════ */
+M.Pictures = (function () {
+// ── Tranh tô màu (Bé tô màu) — vẽ bằng hình học trong khung 600×600 ──
+// Mỗi tranh: các vùng tô được (đa giác, xếp từ dưới lên trên) + nét chi tiết không tô (mắt, viền trang trí).
+// `c` = màu trong tranh mẫu (chế độ tô theo mẫu); `opt` = không bắt buộc tô (nền).
+
+                                             
+                                                                                          
+                    
+                                        
+                                                                 
+                                                                                                          
+
+/** Bút màu: tên đọc to + mã màu. */
+const CRAYONS                                                = [
+  { id: 'red', name: 'đỏ', color: 0xf2665e },
+  { id: 'orange', name: 'cam', color: 0xffac6b },
+  { id: 'yellow', name: 'vàng', color: 0xffd96b },
+  { id: 'green', name: 'xanh lá', color: 0x7cc96a },
+  { id: 'mint', name: 'xanh bạc hà', color: 0xa6e3c4 },
+  { id: 'sky', name: 'xanh da trời', color: 0x8fd6f0 },
+  { id: 'blue', name: 'xanh dương', color: 0x6aa8ec },
+  { id: 'purple', name: 'tím', color: 0xb39adb },
+  { id: 'pink', name: 'hồng', color: 0xffb8cb },
+  { id: 'brown', name: 'nâu', color: 0xc99f74 },
+  { id: 'grey', name: 'xám', color: 0xbdb8ca },
+];
+
+// ───── hình học → đa giác ─────
+const rad = (d        ) => (d * Math.PI) / 180;
+function ell(cx        , cy        , rx        , ry        , rot = 0, n = 40)       {
+  const a = rad(rot), ca = Math.cos(a), sa = Math.sin(a);
+  return Array.from({ length: n }, (_, i) => {
+    const t = (i / n) * Math.PI * 2, x = Math.cos(t) * rx, y = Math.sin(t) * ry;
+    return { x: cx + x * ca - y * sa, y: cy + x * sa + y * ca };
+  });
+}
+const circ = (cx        , cy        , r        ) => ell(cx, cy, r, r);
+const poly = (...xy          )       => Array.from({ length: xy.length / 2 }, (_, i) => ({ x: xy[i * 2], y: xy[i * 2 + 1] }));
+function rrect(x        , y        , w        , h        , r        )       {
+  const out       = [];
+  const corner = (cx        , cy        , a0        ) => { for (let i = 0; i <= 6; i++) { const t = rad(a0 + i * 15); out.push({ x: cx + Math.cos(t) * r, y: cy + Math.sin(t) * r }); } };
+  corner(x + w - r, y + r, -90); corner(x + w - r, y + h - r, 0); corner(x + r, y + h - r, 90); corner(x + r, y + r, 180);
+  return out;
+}
+/** Mây / bụi cây: đường viền gợn sóng. */
+function puff(cx        , cy        , rx        , ry        , bumps = 7)       {
+  return Array.from({ length: 70 }, (_, i) => {
+    const t = (i / 70) * Math.PI * 2, k = 1 + 0.12 * Math.abs(Math.sin(t * bumps / 2));
+    return { x: cx + Math.cos(t) * rx * k, y: cy + Math.sin(t) * ry * k };
+  });
+}
+/** Đường sóng nằm ngang từ x0→x1 ở cao độ y, rồi đóng xuống đáy. */
+function waveBand(y        , amp        , n        , bottom = 600)       {
+  const pts       = [];
+  for (let i = 0; i <= 48; i++) { const x = (i / 48) * 600; pts.push({ x, y: y + Math.sin((i / 48) * Math.PI * 2 * n) * amp }); }
+  return [...pts, { x: 600, y: bottom }, { x: 0, y: bottom }];
+}
+const arc = (cx        , cy        , r        , a0        , a1        , n = 12)       =>
+  Array.from({ length: n + 1 }, (_, i) => { const t = rad(a0 + ((a1 - a0) * i) / n); return { x: cx + Math.cos(t) * r, y: cy + Math.sin(t) * r }; });
+const face = (x        , y        , s = 1)           => [
+  { k: 'dot', x: x - 16 * s, y: y - 6 * s, r: 6 * s }, { k: 'dot', x: x + 16 * s, y: y - 6 * s, r: 6 * s },
+  { k: 'dot', x: x - 14 * s, y: y - 8 * s, r: 2 * s, fill: 0xffffff }, { k: 'dot', x: x + 18 * s, y: y - 8 * s, r: 2 * s, fill: 0xffffff },
+  { k: 'line', pts: arc(x, y + 2 * s, 12 * s, 20, 160), w: 4 },
+];
+const bg = (c        )         => ({ id: 'bg', name: 'nền', pts: poly(0, 0, 600, 0, 600, 600, 0, 600), c, opt: true });
+
+const PICTURES            = [
+  {
+    id: 'icecream', name: 'Cây kem', diff: 1,
+    regions: [
+      bg('sky'),
+      { id: 'cone', name: 'ốc quế', pts: poly(215, 300, 385, 300, 300, 570), c: 'brown' },
+      { id: 's1', name: 'viên kem trái', pts: circ(235, 285, 72), c: 'pink' },
+      { id: 's2', name: 'viên kem phải', pts: circ(365, 285, 72), c: 'mint' },
+      { id: 's3', name: 'viên kem trên', pts: circ(300, 195, 78), c: 'yellow' },
+      { id: 'cherry', name: 'quả anh đào', pts: circ(300, 98, 28), c: 'red' },
+    ],
+    details: [
+      { k: 'line', pts: poly(250, 380, 330, 340) }, { k: 'line', pts: poly(265, 440, 355, 365) }, { k: 'line', pts: poly(285, 500, 340, 455) },
+      { k: 'line', pts: poly(350, 380, 270, 340) }, { k: 'line', pts: poly(335, 440, 245, 365) },
+      { k: 'line', pts: [{ x: 300, y: 70 }, { x: 310, y: 45 }, { x: 330, y: 30 }], w: 5 },
+      ...face(300, 200, 1.3),
+    ],
+  },
+  {
+    id: 'fish', name: 'Bạn cá', diff: 1,
+    regions: [
+      bg('sky'),
+      { id: 'sand', name: 'cát', pts: waveBand(530, 10, 2), c: 'yellow' },
+      { id: 'weed', name: 'rong biển', pts: poly(70, 540, 60, 470, 90, 420, 70, 360, 100, 310, 120, 360, 100, 420, 125, 470, 110, 540), c: 'green' },
+      { id: 'tail', name: 'đuôi cá', pts: poly(165, 300, 60, 210, 85, 300, 60, 390), c: 'red' },
+      { id: 'fin', name: 'vây', pts: poly(250, 210, 320, 140, 375, 150, 360, 215), c: 'red' },
+      { id: 'body', name: 'thân cá', pts: ell(310, 300, 165, 105), c: 'orange' },
+      { id: 'stripe', name: 'sọc', pts: ell(255, 300, 24, 92), c: 'yellow' },
+      { id: 'b1', name: 'bong bóng', pts: circ(490, 180, 24), c: 'mint' },
+      { id: 'b2', name: 'bong bóng', pts: circ(525, 115, 17), c: 'mint' },
+      { id: 'b3', name: 'bong bóng', pts: circ(495, 65, 12), c: 'mint' },
+    ],
+    details: [
+      { k: 'dot', x: 400, y: 280, r: 16 }, { k: 'dot', x: 405, y: 274, r: 5, fill: 0xffffff },
+      { k: 'line', pts: arc(430, 320, 18, 20, 120), w: 4 },
+      { k: 'line', pts: arc(330, 300, 40, -50, 50), w: 3 },
+    ],
+  },
+  {
+    id: 'house', name: 'Ngôi nhà', diff: 2,
+    regions: [
+      { id: 'sky', name: 'bầu trời', pts: poly(0, 0, 600, 0, 600, 430, 0, 430), c: 'sky', opt: true },
+      { id: 'grass', name: 'bãi cỏ', pts: waveBand(420, 12, 1.5), c: 'green' },
+      { id: 'sun', name: 'mặt trời', pts: circ(500, 95, 52), c: 'yellow' },
+      { id: 'chimney', name: 'ống khói', pts: poly(370, 150, 420, 150, 420, 240, 370, 240), c: 'brown' },
+      { id: 'roof', name: 'mái nhà', pts: poly(125, 275, 300, 135, 475, 275), c: 'red' },
+      { id: 'wall', name: 'tường nhà', pts: poly(160, 270, 440, 270, 440, 490, 160, 490), c: 'yellow' },
+      { id: 'door', name: 'cửa ra vào', pts: rrect(268, 370, 72, 120, 16), c: 'brown' },
+      { id: 'w1', name: 'cửa sổ', pts: rrect(185, 305, 66, 62, 8), c: 'sky' },
+      { id: 'w2', name: 'cửa sổ', pts: rrect(358, 305, 66, 62, 8), c: 'sky' },
+      { id: 'path', name: 'lối đi', pts: poly(272, 490, 338, 490, 390, 600, 220, 600), c: 'grey' },
+    ],
+    details: [
+      { k: 'line', pts: poly(218, 305, 218, 367) }, { k: 'line', pts: poly(185, 336, 251, 336) },
+      { k: 'line', pts: poly(391, 305, 391, 367) }, { k: 'line', pts: poly(358, 336, 424, 336) },
+      { k: 'dot', x: 325, y: 435, r: 6 },
+      ...[0, 45, 90, 135, 180, 225, 270, 315].map((a)         => ({ k: 'line', pts: [{ x: 500 + Math.cos(rad(a)) * 66, y: 95 + Math.sin(rad(a)) * 66 }, { x: 500 + Math.cos(rad(a)) * 82, y: 95 + Math.sin(rad(a)) * 82 }], w: 5 })),
+    ],
+  },
+  {
+    id: 'boat', name: 'Thuyền buồm', diff: 2,
+    regions: [
+      { id: 'sky', name: 'bầu trời', pts: poly(0, 0, 600, 0, 600, 420, 0, 420), c: 'sky', opt: true },
+      { id: 'sun', name: 'mặt trời', pts: circ(105, 105, 50), c: 'yellow' },
+      { id: 'cloud', name: 'đám mây', pts: puff(440, 110, 95, 42), c: 'grey' },
+      { id: 'sea', name: 'biển', pts: waveBand(440, 14, 3), c: 'blue' },
+      { id: 'mast', name: 'cột buồm', pts: poly(292, 95, 308, 95, 308, 430, 292, 430), c: 'brown' },
+      { id: 'flag', name: 'lá cờ', pts: poly(308, 95, 360, 115, 308, 135), c: 'red' },
+      { id: 'sail1', name: 'cánh buồm lớn', pts: poly(314, 150, 314, 405, 465, 405), c: 'yellow' },
+      { id: 'sail2', name: 'cánh buồm nhỏ', pts: poly(286, 190, 286, 405, 165, 405), c: 'pink' },
+      { id: 'hull', name: 'thân thuyền', pts: poly(140, 420, 460, 420, 405, 505, 195, 505), c: 'red' },
+    ],
+    details: [
+      { k: 'line', pts: arc(80, 560, 30, 200, 340) }, { k: 'line', pts: arc(500, 555, 30, 200, 340) }, { k: 'line', pts: arc(300, 575, 30, 200, 340) },
+      { k: 'line', pts: poly(200, 230, 220, 245, 240, 230), w: 4 }, { k: 'line', pts: poly(500, 230, 515, 242, 530, 230), w: 4 },
+      { k: 'dot', x: 250, y: 462, r: 12, fill: 0xffffff }, { k: 'dot', x: 350, y: 462, r: 12, fill: 0xffffff },
+    ],
+  },
+  {
+    id: 'flower', name: 'Bông hoa', diff: 3,
+    regions: [
+      bg('mint'),
+      { id: 'stem', name: 'thân cây', pts: poly(290, 250, 310, 250, 310, 460, 290, 460), c: 'green' },
+      { id: 'leafL', name: 'lá cây', pts: ell(235, 385, 62, 24, -30), c: 'green' },
+      { id: 'leafR', name: 'lá cây', pts: ell(365, 345, 62, 24, 30), c: 'green' },
+      ...[0, 60, 120, 180, 240, 300].map((a, i)         => ({ id: 'p' + i, name: 'cánh hoa', pts: ell(300 + Math.cos(rad(a - 90)) * 78, 200 + Math.sin(rad(a - 90)) * 78, 58, 36, a - 90), c: i % 2 ? 'purple' : 'pink' })),
+      { id: 'center', name: 'nhụy hoa', pts: circ(300, 200, 48), c: 'yellow' },
+      { id: 'rim', name: 'miệng chậu', pts: rrect(200, 450, 200, 42, 12), c: 'red' },
+      { id: 'pot', name: 'chậu hoa', pts: poly(220, 492, 380, 492, 358, 590, 242, 590), c: 'orange' },
+    ],
+    details: [...face(300, 205, 1)],
+  },
+  {
+    id: 'butterfly', name: 'Con bướm', diff: 3,
+    regions: [
+      bg('sky'),
+      { id: 'wTL', name: 'cánh trên', pts: ell(200, 225, 115, 88, -25), c: 'orange' },
+      { id: 'wTR', name: 'cánh trên', pts: ell(400, 225, 115, 88, 25), c: 'orange' },
+      { id: 'wBL', name: 'cánh dưới', pts: ell(225, 395, 82, 68, 25), c: 'yellow' },
+      { id: 'wBR', name: 'cánh dưới', pts: ell(375, 395, 82, 68, -25), c: 'yellow' },
+      { id: 'sTL', name: 'chấm trên cánh', pts: circ(180, 215, 34), c: 'purple' },
+      { id: 'sTR', name: 'chấm trên cánh', pts: circ(420, 215, 34), c: 'purple' },
+      { id: 'sBL', name: 'chấm trên cánh', pts: circ(220, 400, 24), c: 'pink' },
+      { id: 'sBR', name: 'chấm trên cánh', pts: circ(380, 400, 24), c: 'pink' },
+      { id: 'body', name: 'thân bướm', pts: ell(300, 320, 26, 140), c: 'brown' },
+      { id: 'head', name: 'đầu bướm', pts: circ(300, 165, 40), c: 'brown' },
+    ],
+    details: [
+      { k: 'line', pts: [{ x: 288, y: 130 }, { x: 270, y: 90 }, { x: 245, y: 70 }], w: 5 }, { k: 'dot', x: 243, y: 68, r: 9 },
+      { k: 'line', pts: [{ x: 312, y: 130 }, { x: 330, y: 90 }, { x: 355, y: 70 }], w: 5 }, { k: 'dot', x: 357, y: 68, r: 9 },
+      ...face(300, 168, 0.9),
+      { k: 'line', pts: poly(282, 260, 318, 260) }, { k: 'line', pts: poly(280, 310, 320, 310) }, { k: 'line', pts: poly(282, 360, 318, 360) },
+    ],
+  },
+];
+const crayon = (id        ) => CRAYONS.find((c) => c.id === id) ;
+return { CRAYONS, ell, PICTURES, crayon };
 })();
 
 /* ══════════ services/AssetLoader.ts ══════════ */
@@ -881,6 +1075,9 @@ const Store = {
       'builder-3': (c.builds || 0) >= 3,
       'eco-hero': (p.plays['sort-trash'] || 0) > 0 && (p.plays['ocean-clean'] || 0) > 0,
       'new-pet-friend': (c.petSwitch || 0) >= 1,
+      'pattern-4': (p.level['pattern'] || 0) >= 4 && (p.plays['pattern'] || 0) > 0,
+      'artist-3': (p.plays['coloring'] || 0) >= 3,
+      'pet-care-3': (p.plays['pet-care'] || 0) >= 3,
     };
     const got           = [];
     for (const a of ACHIEVEMENTS) if (rules[a.id] && !p.ach[a.id]) { p.ach[a.id] = Date.now(); got.push(a.id); }
@@ -956,7 +1153,7 @@ const Audio = {
     if (s.music && s.sound) this.startMusic(); else this.stopMusic();
   },
 
-  sfx(name                                                                                                                  ) {
+  sfx(name                                                                                                                                                           ) {
     if (!Store.settings.sound) return;
     const c = ensure(); if (!c) return;
     const t = c.currentTime + 0.01;
@@ -970,6 +1167,10 @@ const Audio = {
       case 'soft': tone(330, t, 0.22, { type: 'sine', vol: 0.14, slide: 0.85 }); break;
       case 'bloop': tone(240, t, 0.25, { type: 'sine', vol: 0.22, slide: 2.2 }); break;
       case 'plant': tone(200, t, 0.15, { type: 'triangle', vol: 0.2, slide: 0.7 }); tone(NOTE(79), t + 0.15, 0.3, { type: 'sine', vol: 0.12 }); break;
+      case 'munch': [0, 0.16, 0.32].forEach((d) => { tone(170, t + d, 0.09, { type: 'square', vol: 0.05, slide: 0.7 }); tone(260, t + d + 0.03, 0.06, { type: 'triangle', vol: 0.1 }); }); break;
+      case 'bubble': for (let i = 0; i < 4; i++) tone(600 + Math.random() * 500, t + i * 0.06, 0.08, { type: 'sine', vol: 0.1, slide: 1.6 }); break;
+      case 'splash': tone(900, t, 0.25, { type: 'sine', vol: 0.12, slide: 0.3 }); tone(300, t + 0.05, 0.3, { type: 'sine', vol: 0.15, slide: 2 }); break;
+      case 'yawn': tone(420, t, 0.7, { type: 'sine', vol: 0.12, slide: 0.55, attack: 0.15 }); break;
       case 'whoosh': {
         const n = c.sampleRate * 0.35; const b = c.createBuffer(1, n, c.sampleRate); const d = b.getChannelData(0);
         for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.sin(Math.PI * i / n) * 0.5;
@@ -982,6 +1183,13 @@ const Audio = {
       case 'reward': [72, 76, 79, 84, 88].forEach((n, i) => tone(NOTE(n), t + i * 0.09, 0.5, { type: 'triangle', vol: 0.16 })); tone(NOTE(96), t + 0.5, 0.6, { type: 'sine', vol: 0.06 }); break;
       case 'unlock': [67, 72, 76, 79, 84].forEach((n, i) => tone(NOTE(n), t + i * 0.12, 0.7, { type: 'sine', vol: 0.15 })); break;
     }
+  },
+
+  /** Một nốt đơn (Hz) — dùng cho trò có nhạc. */
+  tone(freq        , dur = 0.25, vol = 0.12) {
+    if (!Store.settings.sound) return;
+    const c = ensure(); if (!c) return;
+    tone(freq, c.currentTime + 0.01, dur, { type: 'triangle', vol });
   },
 
   startMusic() {
@@ -1848,6 +2056,22 @@ class MiniGame extends Phaser.Scene {
   pulse(obj     , k = 1.08) {
     const s = obj.getData('baseScale') || obj.scale;
     this.tweens.add({ targets: obj, scale: s * k, duration: 160, yoyo: true, ease: 'Quad.easeOut' });
+  }
+
+  /** Nút to bo tròn màu cam (trong vùng chơi). */
+  bigButton(x        , y        , text        , cb            ) {
+    const c = this.add.container(x, y);
+    const w = Math.max(300, text.length * 26 + 80), h = 96;
+    const g = this.add.graphics();
+    g.fillStyle(0xd96f36, 1).fillRoundedRect(-w / 2, -h / 2 + 8, w, h, 48);
+    g.fillStyle(0xffac6b, 1).fillRoundedRect(-w / 2, -h / 2, w, h, 48);
+    g.lineStyle(6, 0xffffff, 1).strokeRoundedRect(-w / 2, -h / 2, w, h, 48);
+    const t = this.add.text(0, -2, text, { fontFamily: FONT, fontSize: '48px', fontStyle: '800', color: '#ffffff' }).setOrigin(0.5);
+    c.add([g, t]); c.setSize(w, h).setInteractive({ useHandCursor: true });
+    c.on('pointerdown', () => c.setScale(0.95));
+    c.on('pointerout', () => c.setScale(1));
+    c.on('pointerup', () => { c.setScale(1); Audio.sfx('tap'); cb(); });
+    return c;
   }
 
   update(_t        , _dt        ) { /* */ }
@@ -3612,21 +3836,6 @@ class CountCollectScene extends MiniGame {
     this.layer.add([back, front]);
     return { x, y, back, front };
   }
-
-  bigButton(x        , y        , text        , cb            ) {
-    const c = this.add.container(x, y);
-    const w = 300, h = 96;
-    const g = this.add.graphics();
-    g.fillStyle(0xd96f36, 1).fillRoundedRect(-w / 2, -h / 2 + 8, w, h, 48);
-    g.fillStyle(0xffac6b, 1).fillRoundedRect(-w / 2, -h / 2, w, h, 48);
-    g.lineStyle(6, 0xffffff, 1).strokeRoundedRect(-w / 2, -h / 2, w, h, 48);
-    const t = this.add.text(0, -2, text, { fontFamily: FONT, fontSize: '48px', fontStyle: '800', color: '#ffffff' }).setOrigin(0.5);
-    c.add([g, t]); c.setSize(w, h).setInteractive({ useHandCursor: true });
-    c.on('pointerdown', () => c.setScale(0.95));
-    c.on('pointerout', () => c.setScale(1));
-    c.on('pointerup', () => { c.setScale(1); Audio.sfx('tap'); cb(); });
-    return c;
-  }
 }
 return { CountCollectScene };
 })();
@@ -3976,10 +4185,614 @@ const cap = (s        ) => s.charAt(0).toUpperCase() + s.slice(1);
 return { SORT_NAMES, SortScene };
 })();
 
+/* ══════════ games/Pattern.ts ══════════ */
+M.Pattern = (function () {
+// ── Hoạt động: Tìm quy luật (Núi Toán Học) — xem dãy hình lặp lại, chọn hình còn thiếu ──
+// Cấp 1: AB, ô trống cuối, 2 lựa chọn · cấp 2: + AAB, 3 lựa chọn · cấp 3: + ABB, ABC
+// cấp 4: ô trống ở giữa dãy, 4 lựa chọn · cấp 5: + AABB, ABCD, hai ô trống.
+const { AssetLoader } = M.AssetLoader;
+const { Audio } = M.Audio;
+const { MiniGame, shuffle, randInt } = M.MiniGame;
+const UNITS                           = {
+  1: ['AB'],
+  2: ['AB', 'AAB'],
+  3: ['AAB', 'ABB', 'ABC'],
+  4: ['AAB', 'ABB', 'ABC', 'AABB'],
+  5: ['ABC', 'AABB', 'ABCD', 'ABBC'],
+};
+// nốt nhạc cho từng chữ trong quy luật: bé "nghe" được nhịp lặp lại
+const PITCH                         = { A: 523, B: 659, C: 784, D: 988 };
+
+                                                
+
+class PatternScene extends MiniGame {
+  seq          = []; letters = ''; blanks           = []; cells        = []; options        = []; cell = 150;
+  constructor() { super('Pattern'); }
+  get play() { return AssetLoader.data('play'); }
+  assets() { const P = this.play; return [...P.items.map((i     ) => i.asset), ...P.shapes.map((s     ) => s.asset), ...P.animals.slice(0, 8).map((a     ) => a.asset)]; }
+  instruction() { return this.blanks.length > 1 ? 'Dãy hình lặp lại theo quy luật. Tìm các hình còn thiếu nhé!' : 'Dãy hình lặp lại theo quy luật. Hình nào còn thiếu nhỉ?'; }
+
+  /** Bộ đồ vật cho một vòng: đồ ăn, hình khối, hoặc bạn thú. */
+  pool()          {
+    const P = this.play;
+    const sets            = [
+      P.items.map((i     ) => ({ asset: i.asset, name: i.name })),
+      P.shapes.filter((s     ) => s.w === s.h).map((s     ) => ({ asset: s.asset, name: s.name.toLowerCase() })),
+      P.animals.slice(0, 8).map((a     ) => ({ asset: a.asset, name: 'bạn ' + a.name.toLowerCase() })),
+    ];
+    return shuffle(sets[this.round % sets.length]);
+  }
+
+  buildRound() {
+    const unit = UNITS[this.level][randInt(0, UNITS[this.level].length - 1)];
+    const kinds = [...new Set(unit.split(''))];
+    const things = this.pool();
+    const map                        = {};
+    kinds.forEach((k, i) => (map[k] = things[i]));
+    const len = Math.max(6, Math.min(unit.length * 3, unit.length >= 4 ? 8 : unit.length * 2 + (this.level >= 3 ? unit.length : 1)));
+    this.letters = Array.from({ length: len }, (_, i) => unit[i % unit.length]).join('');
+    this.seq = this.letters.split('').map((k) => map[k]);
+    // vị trí ô trống
+    if (this.level <= 3) this.blanks = [len - 1];
+    else if (this.level === 4) this.blanks = [randInt(unit.length, len - 1)];
+    else { const a = randInt(unit.length, len - 2); this.blanks = [a, randInt(a + 1, len - 1)]; }
+
+    this.layer.add(this.label(this.W / 2, this.top + 30, this.blanks.length > 1 ? 'Tìm các hình còn thiếu' : 'Hình nào còn thiếu?', 54));
+
+    // dãy hình: một hàng (ngang) hoặc hai hàng (dọc khi dãy dài)
+    const rows = this.portrait && len > 5 ? 2 : 1;
+    const perRow = Math.ceil(len / rows);
+    this.cell = Math.min(180, (this.W - 100) / perRow);
+    const y0 = this.portrait ? this.top + 260 : this.top + 250;
+    const rowGap = this.cell + 30;
+    this.layer.add(this.plate(this.W / 2, y0 + (rows - 1) * rowGap / 2, perRow * this.cell + 50, rows * rowGap + 20, 0xfffaf2, 0.85));
+    this.cells = this.seq.map((t, i) => {
+      const r = Math.floor(i / perRow), c = i % perRow, n = Math.min(perRow, len - r * perRow);
+      const x = this.W / 2 + (c - (n - 1) / 2) * this.cell, y = y0 + r * rowGap;
+      const blank = this.blanks.includes(i);
+      const box = this.add.graphics();
+      this.drawBox(box, x, y, blank);
+      const img = this.fitImage(t.asset, x, y, this.cell * 0.72, this.cell * 0.72);
+      img.setData('i', i);
+      if (blank) img.setVisible(false);
+      else {
+        img.setScale(0);
+        this.tweens.add({ targets: img, scale: img.getData('baseScale'), delay: i * 90, duration: 260, ease: 'Back.easeOut', onStart: () => this.note(this.letters[i], 0.08) });
+      }
+      const q = blank ? this.label(x, y, '?', this.cell * 0.5, '#9b85d9') : null;
+      this.layer.add([box, img, ...(q ? [q] : [])]);
+      return { x, y, box, img, q, filled: !blank };
+    });
+
+    // lựa chọn: các hình trong dãy + hình lạ
+    const nOpt = [2, 3, 3, 4, 4][this.level - 1];
+    const needed = [...new Set(this.blanks.map((b) => this.seq[b]))];
+    const inSeq = kinds.map((k) => map[k]).filter((t) => !needed.includes(t));
+    const extra = things.filter((t) => !kinds.some((k) => map[k] === t));
+    const opts = shuffle([...needed, ...shuffle([...inSeq, ...extra]).slice(0, Math.max(0, nOpt - needed.length))]);
+    const oy = this.portrait ? y0 + rows * rowGap + 260 : this.H - 170;
+    const ow = Math.min(230, (this.W - 120) / opts.length);
+    this.layer.add(this.plate(this.W / 2, oy, opts.length * ow + 40, ow + 20, 0xf3fbef, 0.85));
+    this.options = opts.map((t, i) => {
+      const x = this.W / 2 + (i - (opts.length - 1) / 2) * ow;
+      const img = this.fitImage(t.asset, x, oy, ow * 0.7, ow * 0.7);
+      img.setData({ t, home: { x, y: oy } }).setInteractive({ useHandCursor: true, draggable: true });
+      this.input.setDraggable(img);
+      img.on('pointerup', (p     ) => { if (p.getDistance() < 12) this.choose(img); });
+      img.on('dragstart', () => { if (!this.busy) { Audio.sfx('pop'); this.layer.bringToTop(img); } });
+      img.on('drag', (_p     , px        , py        ) => { if (!this.busy) img.setPosition(px, py); });
+      img.on('dragend', (p     ) => { if (p.getDistance() >= 12) this.dropOn(img); });
+      this.layer.add(img);
+      return img;
+    });
+    this.time.delayedCall(len * 90 + 300, () => this.say(this.instruction()));
+  }
+
+  drawBox(g     , x        , y        , blank         , ok = false) {
+    const s = this.cell * 0.86;
+    g.clear();
+    g.fillStyle(ok ? 0xe3f6d6 : blank ? 0xf1ebfb : 0xffffff, 1).fillRoundedRect(x - s / 2, y - s / 2, s, s, 22);
+    g.lineStyle(5, ok ? 0x7cc96a : blank ? 0xc7b5f0 : 0xeadfce, 1).strokeRoundedRect(x - s / 2, y - s / 2, s, s, 22);
+  }
+
+  note(letter        , vol = 0.12) {
+    if (!this.sys.isActive()) return;
+    Audio.tone(PITCH[letter] || 600, 0.22, vol);
+  }
+
+  /** Ô trống tiếp theo (bé chạm vào lựa chọn thì điền ô này). */
+  nextBlank() { return this.blanks.find((b) => !this.cells[b].filled); }
+
+  choose(img     ) { const b = this.nextBlank(); if (b !== undefined) this.tryFill(img, b); }
+  dropOn(img     ) {
+    const open = this.blanks.filter((b) => !this.cells[b].filled)
+      .map((b) => ({ b, d: Math.hypot(this.cells[b].x - img.x, this.cells[b].y - img.y) })).sort((a, z) => a.d - z.d)[0];
+    if (open && open.d < this.cell) this.tryFill(img, open.b);
+    else this.goHome(img);
+  }
+  goHome(img     ) { const h = img.getData('home'); this.tweens.add({ targets: img, x: h.x, y: h.y, duration: 260, ease: 'Back.easeOut' }); }
+
+  tryFill(img     , b        ) {
+    if (this.busy) return;
+    const want = this.seq[b], got = img.getData('t')         , cell = this.cells[b];
+    if (got === want) {
+      cell.filled = true;
+      this.busy = true;
+      this.tweens.add({ targets: img, x: cell.x, y: cell.y, duration: 240, ease: 'Cubic.easeOut', onComplete: () => {
+        img.setPosition(img.getData('home').x, img.getData('home').y).setScale(0);
+        this.tweens.add({ targets: img, scale: img.getData('baseScale'), duration: 200 });
+        cell.img.setVisible(true); cell.q?.destroy(); this.drawBox(cell.box, cell.x, cell.y, false, true);
+        this.pulse(cell.img, 1.15);
+        this.good(cell.x, cell.y, false);
+        this.busy = false;
+        if (this.nextBlank() === undefined) this.finishRound();
+      } });
+    } else {
+      // gợi ý: chỉ ra phần lặp lại ngay trước ô trống
+      const unitLen = this.unitLength();
+      const ref = b - unitLen >= 0 ? b - unitLen : b + unitLen;
+      this.miss(img, this.roundMistakes >= 1 ? `Nhìn ô cách ${unitLen} ô phía trước xem, đó là ${this.seq[ref].name}!` : 'Chưa đúng rồi. Nhìn kỹ dãy hình lặp lại nhé!');
+      if (this.roundMistakes >= 2 && this.cells[ref]) this.pulse(this.cells[ref].img, 1.3);
+      this.goHome(img);
+    }
+  }
+
+  unitLength() {
+    for (let k = 1; k <= this.letters.length; k++) if (this.letters.split('').every((c, i) => c === this.letters[i % k])) return k;
+    return this.letters.length;
+  }
+
+  /** Cả dãy "hát" lại từng hình, rồi sang vòng mới. */
+  finishRound() {
+    this.busy = true;
+    this.cells.forEach((c, i) => this.time.delayedCall(i * 140, () => { this.note(this.letters[i]); this.pulse(c.img, 1.18); }));
+    if (Math.random() < 0.6) this.say('Đúng quy luật rồi!', false);
+    this.petReact('happy');
+    this.nextRound(this.cells.length * 140 + 700);
+  }
+}
+return { PatternScene };
+})();
+
+/* ══════════ games/Coloring.ts ══════════ */
+M.Coloring = (function () {
+// ── Hoạt động: Bé tô màu (Thị Trấn Sáng Tạo) ──
+// Cấp 1–2: tô tự do — chọn bút, chạm vào ô để tô; tô hết các ô là xong.
+// Cấp 3–5: tô theo mẫu — tranh mẫu nhỏ ở góc, mỗi ô phải đúng màu của mẫu.
+const { Audio } = M.Audio;
+const { Store } = M.Store;
+const { MiniGame } = M.MiniGame;
+const { PICTURES, CRAYONS, crayon, Picture, Region, Detail } = M.Pictures;
+const INK = 0x4b3a5e, BLANK = 0xffffff;
+
+class ColoringScene extends MiniGame {
+  pic          = PICTURES[0];
+  copy = false;
+  color = CRAYONS[2];
+  painted                         = {};
+  regionGfx                      = {};
+  crayonObjs        = [];
+  S = 600; ox = 0; oy = 0; k = 1; maskG      = null;
+  constructor() { super('Coloring'); }
+
+  init(data     ) {
+    super.init(data);
+    this.painted = {}; this.pic = null       ;
+  }
+
+  instruction() {
+    return this.copy ? 'Nhìn tranh mẫu ở góc, chọn bút đúng màu rồi chạm vào từng ô để tô nhé!'
+      : 'Chọn một cây bút màu, rồi chạm vào bức tranh để tô. Bé thích màu nào cũng được!';
+  }
+
+  setup() {
+    this.copy = this.level >= 3;
+    // ưu tiên tranh bé chưa tô gần đây
+    const pool = PICTURES.filter((p) => p.diff <= Math.min(3, Math.ceil(this.level / 2) + (this.level >= 4 ? 1 : 0)));
+    const recent = (Store.p?.history || []).filter((h) => h.act === this.act.id).length;
+    this.pic = pool[(recent + Math.floor(Math.random() * pool.length)) % pool.length];
+  }
+
+  /** Đổi chiều màn hình: giữ màu đã tô. */
+  relayout() { this.startRound(true); }
+
+  buildRound() {
+    this.regionGfx = {}; this.crayonObjs = [];
+    const portrait = this.portrait;
+    const TS = portrait ? 170 : 250;   // cỡ tranh mẫu
+    if (portrait && this.copy) this.layer.add(this.label((this.W - TS - 60) / 2, this.top + 80, `Tô ${this.pic.name.toLowerCase()}\ngiống tranh mẫu`, 46));
+    else this.layer.add(this.label(this.W / 2, this.top + 26, this.copy ? `Tô ${this.pic.name.toLowerCase()} giống tranh mẫu` : `Tô màu ${this.pic.name.toLowerCase()}`, 50));
+
+    // khung tranh
+    if (portrait) {
+      // trên: (tranh mẫu) · giữa: tranh · dưới: một hàng bút, chừa góc dưới cho bạn thú
+      this.oy = this.top + (this.copy ? 250 : 90);
+      this.S = Math.min(this.W - 80, this.H - this.oy - 430);
+      this.ox = (this.W - this.S) / 2;
+    } else {
+      // trái: tranh mẫu (hoặc chỗ trống cho bạn thú) · giữa: tranh · phải: hộp bút
+      const left = this.copy ? 300 : 200, right = 420;
+      this.S = Math.min(this.H - this.top - 110, this.W - left - right - 60);
+      this.ox = left + (this.W - left - right - this.S) / 2; this.oy = this.top + 80;
+    }
+    this.k = this.S / 600;
+    this.layer.add(this.plate(this.ox + this.S / 2, this.oy + this.S / 2, this.S + 36, this.S + 36, 0xffffff, 1, 30));
+    this.maskG?.destroy();
+    const mask = this.maskG = this.make.graphics({}, false).fillStyle(0xffffff).fillRoundedRect(this.ox, this.oy, this.S, this.S, 18);
+    const picBox = this.add.container(0, 0);
+    picBox.setMask(mask.createGeometryMask());
+    this.layer.add(picBox);
+    for (const r of this.pic.regions) {
+      const g = this.add.graphics().setPosition(this.ox, this.oy).setScale(this.k);
+      g.setInteractive(new Phaser.Geom.Polygon(r.pts), Phaser.Geom.Polygon.Contains);
+      g.input.cursor = 'pointer';
+      g.on('pointerup', (p     ) => { if (p.getDistance() < 30) this.paint(r, p); });
+      this.regionGfx[r.id] = g;
+      this.drawRegion(r);
+      picBox.add(g);
+    }
+    const det = this.add.graphics().setPosition(this.ox, this.oy).setScale(this.k);
+    this.drawDetails(det, this.pic.details, 1);
+    picBox.add(det);
+
+    // tranh mẫu
+    if (this.copy) {
+      const ts = TS;
+      const tx = portrait ? this.W - ts - 45 : 45, ty = portrait ? this.top - 10 : this.top + 120;
+      this.layer.add(this.plate(tx + ts / 2, ty + ts / 2 + 22, ts + 24, ts + 70, 0xfffaf2, 1, 22));
+      const t = this.add.graphics().setPosition(tx, ty + 34).setScale(ts / 600);
+      for (const r of this.pic.regions) this.fillPoly(t, r.pts, crayon(r.c).color, 7);
+      this.drawDetails(t, this.pic.details, 1.4);
+      this.layer.add([t, this.label(tx + ts / 2, ty + 12, 'Tranh mẫu', 30)]);
+    }
+
+    // bút màu
+    const n = CRAYONS.length;
+    if (portrait) {
+      const cw = (this.W - 40) / n, y = this.oy + this.S + 170;
+      this.layer.add(this.plate(this.W / 2, y + 10, this.W - 20, 230, 0xfffaf2, 0.9, 30));
+      CRAYONS.forEach((c, i) => this.addCrayon(c, this.W / 2 + (i - (n - 1) / 2) * cw, y, false));
+    } else {
+      const cols = 2, rows = Math.ceil(n / cols), ch = Math.min(112, (this.S + 20) / rows);
+      const cx = this.W - 220, y0 = this.oy + this.S / 2 - ((rows - 1) * ch) / 2;
+      this.layer.add(this.plate(cx, this.oy + this.S / 2, 400, rows * ch + 40, 0xfffaf2, 0.9, 30));
+      CRAYONS.forEach((c, i) => this.addCrayon(c, cx - 90 + (i % cols) * 190 - (i % cols) * 10, y0 + Math.floor(i / cols) * ch, true));
+    }
+    this.selectCrayon(this.color, false);
+    this.time.delayedCall(300, () => this.say(this.instruction()));
+  }
+
+  fillPoly(g     , pts       , color        , lw        ) {
+    g.fillStyle(color, 1).fillPoints(pts, true, true);
+    g.lineStyle(lw, INK, 1).strokePoints(pts, true, true);
+  }
+  drawRegion(r        , flash = false) {
+    const g = this.regionGfx[r.id]; if (!g) return;
+    g.clear();
+    const c = this.painted[r.id];
+    this.fillPoly(g, r.pts, flash ? 0xfff0b3 : c ?? BLANK, 5 / this.k);
+  }
+  drawDetails(g     , ds          , wk        ) {
+    for (const d of ds) {
+      if (d.k === 'line') g.lineStyle((d.w || 4) * wk, INK, 1).strokePoints(d.pts, false, false);
+      else g.fillStyle(d.fill ?? INK, 1).fillCircle(d.x, d.y, d.r);
+    }
+  }
+
+  /** Bút sáp: thân + đầu nhọn, nằm ngang (ngang) hoặc đứng (dọc). */
+  addCrayon(c                                             , x        , y        , horizontal         ) {
+    const box = this.add.container(x, y);
+    const g = this.add.graphics();
+    const dark = Phaser.Display.Color.IntegerToColor(c.color).darken(25).color;
+    if (horizontal) {
+      g.fillStyle(0x4c3876, 0.15).fillRoundedRect(-44, -18, 88, 44, 12);
+      g.fillStyle(c.color, 1).fillRoundedRect(-48, -22, 72, 44, 12);
+      g.fillTriangle(22, -16, 22, 16, 50, 0);
+      g.fillStyle(dark, 1).fillRect(-30, -22, 10, 44).fillRect(-6, -22, 10, 44);
+      g.fillStyle(0xffffff, 0.4).fillRoundedRect(-42, -16, 56, 8, 4);
+      g.lineStyle(4, INK, 1).strokeRoundedRect(-48, -22, 72, 44, 12).strokeTriangle(24, -16, 24, 16, 50, 0);
+      box.setSize(110, 60).setScale(1.3);
+    } else {
+      g.fillStyle(0x4c3876, 0.15).fillRoundedRect(-18, -40, 44, 96, 12);
+      g.fillStyle(c.color, 1).fillRoundedRect(-22, -28, 44, 80, 12);
+      g.fillTriangle(-16, -26, 16, -26, 0, -60);
+      g.fillStyle(dark, 1).fillRect(-22, -6, 44, 10).fillRect(-22, 20, 44, 10);
+      g.fillStyle(0xffffff, 0.4).fillRoundedRect(-16, -20, 8, 64, 4);
+      g.lineStyle(4, INK, 1).strokeRoundedRect(-22, -28, 44, 80, 12).strokeTriangle(-16, -28, 16, -28, 0, -60);
+      box.setSize(70, 130).setScale(1.4);
+    }
+    box.add(g);
+    box.setInteractive({ useHandCursor: true });
+    box.setData({ c, home: { x, y }, horizontal });
+    box.on('pointerup', () => { Audio.sfx('tap'); this.selectCrayon(c); });
+    this.crayonObjs.push(box);
+    this.layer.add(box);
+  }
+  selectCrayon(c                                             , speak = true) {
+    this.color = c;
+    for (const b of this.crayonObjs) {
+      const on = b.getData('c').id === c.id, h = b.getData('home');
+      this.tweens.add({ targets: b, x: h.x - (on && b.getData('horizontal') ? 26 : 0), y: h.y - (on && !b.getData('horizontal') ? 26 : 0), scale: (b.getData('horizontal') ? 1.3 : 1.4) * (on ? 1.15 : 1), duration: 160, ease: 'Back.easeOut' });
+    }
+    if (speak) Audio.say('Màu ' + c.name);
+  }
+
+  paint(r        , p     ) {
+    if (this.busy) return;
+    const want = crayon(r.c);
+    if (this.copy && this.color.id !== want.id) {
+      if (this.painted[r.id] === want.color) return;
+      this.miss(undefined, this.roundMistakes >= 1 ? `Trong tranh mẫu, ${r.name} màu ${want.name}. Chọn bút ${want.name} nhé!` : `Ô này trong tranh mẫu không phải màu ${this.color.name} đâu.`);
+      if (this.roundMistakes >= 2) { const b = this.crayonObjs.find((o) => o.getData('c').id === want.id); if (b) this.tweens.add({ targets: b, angle: { from: -10, to: 10 }, duration: 90, yoyo: true, repeat: 3, onComplete: () => b.setAngle(0) }); }
+      return;
+    }
+    const first = this.painted[r.id] === undefined;
+    this.painted[r.id] = this.color.color;
+    this.drawRegion(r, true);
+    this.time.delayedCall(70, () => this.drawRegion(r));
+    Audio.sfx(first ? 'pop' : 'tap');
+    const wp = this.cameras.main.getWorldPoint(p.x, p.y);
+    this.sparkle(wp.x, wp.y, 6);
+    if (this.isDone()) this.finishPicture();
+  }
+
+  isDone() {
+    return this.pic.regions.filter((r) => !r.opt).every((r) => this.painted[r.id] !== undefined && (!this.copy || this.painted[r.id] === crayon(r.c).color));
+  }
+
+  finishPicture() {
+    this.busy = true;
+    this.say(this.copy ? 'Giống hệt tranh mẫu luôn! Bé tô đẹp quá!' : 'Bức tranh đẹp quá! Bé là hoạ sĩ nhí!');
+    this.good(this.ox + this.S / 2, this.oy + this.S / 2, false);
+    this.time.delayedCall(1300, () => this.complete());
+  }
+
+  hint() {
+    if (!this.copy) { this.say(this.instruction()); return; }
+    const r = this.pic.regions.find((x) => !x.opt && this.painted[x.id] !== crayon(x.c).color);
+    if (!r) return;
+    this.say(`Tô ${r.name} màu ${crayon(r.c).name} nhé!`);
+    let n = 0;
+    this.time.addEvent({ delay: 180, repeat: 5, callback: () => { this.drawRegion(r, n++ % 2 === 0); } });
+  }
+}
+return { ColoringScene };
+})();
+
+/* ══════════ games/PetCare.ts ══════════ */
+M.PetCare = (function () {
+// ── Hoạt động: Chăm bạn thú (Ngôi Làng Kỹ Năng) ──
+// Bạn đồng hành của bé nghĩ trong bong bóng: đói, khát, lấm bùn, buồn ngủ, muốn chơi, lông rối.
+// Bé chọn đúng đồ (kéo vào bạn thú hoặc chạm) — lấm bùn / lông rối thì phải chà, chải cho sạch.
+// Cấp 1: 3 lượt, 3 đồ, nói tên đồ cần · cấp 5: 6 lượt, 6 đồ, chỉ có bong bóng gợi ý.
+const { AssetLoader } = M.AssetLoader;
+const { Audio } = M.Audio;
+const { MiniGame, shuffle, randInt } = M.MiniGame;
+const EASY = ['hungry', 'thirsty', 'sleepy', 'play', 'dirty'];
+
+class PetCareScene extends MiniGame {
+  needs         = []; care       = null       ;
+  phase                              = 'choose';
+  tools        = []; fx     ; spots        = []; bubble     ; scrubber      = null;
+  px = 0; feet = 0; ps = 2.4;
+  constructor() { super('PetCare'); }
+  get careList()         { return AssetLoader.data('play').care; }
+  assets() { return this.careList.flatMap((c) => [c.need, c.tool]); }
+  instruction() {
+    if (this.phase === 'scrub') return this.care.id === 'dirty' ? 'Kéo bọt biển chà lên các vết bùn nhé!' : 'Kéo lược chải lên chỗ lông rối nhé!';
+    return this.care ? `${this.care.say} Bạn ấy cần gì nhỉ? Kéo đồ vào bạn ấy nhé!` : this.act.desc;
+  }
+
+  setup() {
+    this.rounds = [3, 4, 5, 5, 6][this.level - 1];
+    const pool = this.level <= 2 ? this.careList.filter((c) => EASY.includes(c.id)) : this.careList;
+    // không lặp lại nhu cầu liền nhau
+    this.needs = [];
+    while (this.needs.length < this.rounds) {
+      for (const c of shuffle(pool)) if (this.needs.length < this.rounds && this.needs[this.needs.length - 1] !== c) this.needs.push(c);
+    }
+    this.fx = this.add.container(0, 0).setDepth(820);
+    this.updateDots();
+  }
+
+  // bạn thú to ở giữa màn hình (thay cho bạn nhỏ ở góc)
+  placePet() {
+    const s = this.petSprite; if (!s) return;
+    this.ps = this.portrait ? 3.1 : 2.3;
+    this.px = this.portrait ? this.W / 2 - 40 : this.W * 0.4;
+    this.feet = this.portrait ? this.H - 560 : this.H - 250;
+    s.setScale(this.ps).setPosition(this.px, this.feet);
+  }
+  get petH() { return 160 * this.ps; }
+  /** Tâm thân bạn thú (để đặt vết bùn, kiểm tra thả đồ). */
+  get body() { return { x: this.px, y: this.feet - this.petH * 0.4, rx: this.petH * 0.28, ry: this.petH * 0.3 }; }
+
+  buildRound() {
+    this.care = this.needs[this.round];
+    this.phase = 'choose'; this.scrubber = null;
+    this.fx.removeAll(true); this.spots = [];
+    this.tweens.killTweensOf(this.petSprite);
+    this.placePet();
+    this.petPlay('idle-front');
+    this.layer.add(this.label(this.W / 2, this.top + 30, 'Bạn thú cần gì nhỉ?', 54));
+
+    // bong bóng ý nghĩ
+    const b = this.body;
+    const bx = this.px + this.petH * 0.5, by = this.feet - this.petH * 0.98;
+    const g = this.add.graphics();
+    g.fillStyle(0x4c3876, 0.12).fillEllipse(bx + 6, by + 10, 230, 190);
+    g.fillStyle(0xffffff, 1).fillEllipse(bx, by, 230, 190).fillCircle(bx - 110, by + 95, 20).fillCircle(bx - 140, by + 130, 12);
+    g.lineStyle(5, 0xc7b5f0, 1).strokeEllipse(bx, by, 230, 190).strokeCircle(bx - 110, by + 95, 20).strokeCircle(bx - 140, by + 130, 12);
+    const icon = this.fitImage(this.care.need, bx, by, 140, 140);
+    this.bubble = this.add.container(0, 0, [g, icon]);
+    this.bubble.setAlpha(0);
+    this.tweens.add({ targets: this.bubble, alpha: 1, duration: 300, delay: 250 });
+    this.tweens.add({ targets: icon, scale: icon.getData('baseScale') * 1.08, duration: 700, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+    this.layer.add(this.bubble);
+
+    // vết bùn / lông rối trên người bạn thú
+    if (this.care.id === 'dirty' || this.care.id === 'messy') {
+      const n = [3, 4, 5, 5, 6][this.level - 1];
+      for (let i = 0; i < n; i++) {
+        const a = (i / n) * Math.PI * 2 + Math.random() * 0.5, r = 0.35 + Math.random() * 0.55;
+        const x = b.x + Math.cos(a) * b.rx * r, y = b.y + Math.sin(a) * b.ry * r;
+        const sp = this.add.graphics().setPosition(x, y);
+        if (this.care.id === 'dirty') {
+          sp.fillStyle(0x9b7453, 0.92).fillEllipse(0, 0, 54 + Math.random() * 20, 40 + Math.random() * 12).fillCircle(26, -16, 9).fillCircle(-24, 18, 7);
+          sp.fillStyle(0xc99f74, 0.7).fillEllipse(-8, -6, 18, 10);
+        } else {
+          sp.lineStyle(7, 0xb07a4a, 1);
+          sp.beginPath(); sp.moveTo(-28, 4);
+          for (let t = 0; t <= 1.001; t += 0.1) sp.lineTo(-28 + t * 56 + Math.sin(t * 18) * 10, 4 + Math.cos(t * 18) * 14);
+          sp.strokePath();
+        }
+        sp.setData('hp', 1);
+        this.spots.push(sp); this.fx.add(sp);
+      }
+    }
+
+    // khay đồ
+    const nTools = [3, 4, 4, 5, 6][this.level - 1];
+    const others = shuffle(this.careList.filter((c) => c !== this.care)).slice(0, nTools - 1);
+    const list = shuffle([this.care, ...others]);
+    const perRow = this.portrait ? 3 : list.length, rows = Math.ceil(list.length / perRow);
+    const cw = this.portrait ? 250 : Math.min(190, (this.W - 200) / list.length);
+    const ty = this.portrait ? this.H - 250 - (rows - 1) * 200 : this.H - 105;
+    this.layer.add(this.plate(this.W / 2, ty + (rows - 1) * 100, Math.min(perRow, list.length) * cw + 40, rows * 200 - 10, 0xfffaf2, 0.85));
+    this.tools = list.map((c, i) => {
+      const row = Math.floor(i / perRow), col = i % perRow, inRow = Math.min(perRow, list.length - row * perRow);
+      const x = this.W / 2 + (col - (inRow - 1) / 2) * cw, y = ty + row * 200;
+      const t = this.fitImage(c.tool, x, y, 150, 150);
+      t.setData({ c, home: { x, y } }).setInteractive({ useHandCursor: true, draggable: true });
+      this.input.setDraggable(t);
+      t.on('dragstart', () => { if (this.phase !== 'anim') { Audio.sfx('pop'); this.layer.bringToTop(t); } });
+      t.on('drag', (_p     , x2        , y2        ) => { if (this.phase === 'choose' || (this.phase === 'scrub' && t === this.scrubber)) { t.setPosition(x2, y2); if (t === this.scrubber) this.scrub(t); } });
+      t.on('dragend', (p     ) => { if (p.getDistance() >= 14 && this.phase === 'choose') this.give(t, true); });
+      t.on('pointerup', (p     ) => { if (p.getDistance() < 14 && this.phase === 'choose') this.give(t, false); });
+      this.layer.add(t);
+      return t;
+    });
+
+    this.time.delayedCall(500, () => {
+      if (this.level <= 2) this.say(`${this.care.say} Bạn ấy cần ${this.care.tname}.`);
+      else this.say(this.care.say);
+    });
+  }
+
+  goHome(t     ) { const h = t.getData('home'); this.tweens.add({ targets: t, x: h.x, y: h.y, scale: t.getData('baseScale'), duration: 280, ease: 'Back.easeOut' }); }
+
+  /** Bé đưa một món đồ cho bạn thú (dropped = kéo thả; ngược lại là chạm). */
+  give(t     , dropped         ) {
+    const b = this.body;
+    if (dropped && Math.hypot((t.x - b.x) / (b.rx * 1.6), (t.y - b.y) / (b.ry * 1.6)) > 1) { this.goHome(t); return; }
+    const c = t.getData('c')        ;
+    if (c !== this.care) {
+      this.goHome(t);
+      this.miss(this.petSprite, this.level <= 2 || this.roundMistakes >= 1 ? `Không phải ${c.tname} đâu. Bạn ấy cần ${this.care.tname} cơ!` : 'Chưa đúng rồi. Nhìn bong bóng xem bạn ấy cần gì nhé!');
+      if (this.roundMistakes >= 2) { const right = this.tools.find((x) => x.getData('c') === this.care); if (right) this.pulse(right, 1.25); }
+      return;
+    }
+    this.tweens.add({ targets: this.bubble, alpha: 0, duration: 250 });
+    if (c.id === 'dirty' || c.id === 'messy') return this.startScrub(t);
+    this.phase = 'anim';
+    t.disableInteractive();
+    const front = { x: this.px + this.petH * 0.32, y: this.feet - 40 };
+    if (c.id === 'hungry' || c.id === 'thirsty') {
+      this.tweens.add({ targets: t, x: front.x, y: front.y, duration: 380, ease: 'Cubic.easeOut', onComplete: () => {
+        this.petPlay('interact');
+        for (let i = 0; i < 3; i++) this.time.delayedCall(i * 420, () => { Audio.sfx(c.id === 'hungry' ? 'munch' : 'splash'); this.pulse(t, 0.9); });
+        this.time.delayedCall(1400, () => this.tweens.add({ targets: t, alpha: 0, scale: 0.2, duration: 300, onComplete: () => this.cared(t) }));
+      } });
+    } else if (c.id === 'sleepy') {
+      this.tweens.add({ targets: t, x: this.px, y: this.feet + 10, duration: 380, ease: 'Cubic.easeOut', onComplete: () => {
+        Audio.sfx('yawn');
+        const night = this.add.rectangle(this.W / 2, this.H / 2, this.W * 3, this.H * 3, 0x2f2c5d, 0).setDepth(805);
+        this.fx.add(night);
+        this.tweens.add({ targets: night, fillAlpha: 0.5, duration: 500, yoyo: true, hold: 1800 });
+        this.petPlay('idle-back'); this.petSprite.anims.timeScale = 0.4;
+        this.tweens.add({ targets: this.petSprite, scaleY: this.ps * 0.96, duration: 600, yoyo: true, repeat: 1, ease: 'Sine.easeInOut' });
+        for (let i = 0; i < 4; i++) this.time.delayedCall(300 + i * 450, () => {
+          const z = this.label(this.px + 60 + i * 14, this.feet - this.petH * 0.8, 'z', 40 + i * 10, '#9b85d9').setDepth(830);
+          this.fx.add(z);
+          this.tweens.add({ targets: z, y: z.y - 160, x: z.x + 60, alpha: 0, duration: 1400, onComplete: () => z.destroy() });
+        });
+        this.time.delayedCall(2700, () => { this.petSprite.anims.timeScale = 1; this.tweens.add({ targets: t, alpha: 0, duration: 300 }); this.cared(t); });
+      } });
+    } else {
+      // chơi bóng: bóng nảy qua lại, bạn thú nhảy theo
+      const pts = [[this.px + 260, this.feet - 40], [this.px - 220, this.feet - 30], [this.px + 140, this.feet - 20]];
+      this.petPlay('happy');
+      const hop = () => this.tweens.add({ targets: this.petSprite, y: this.feet - 50, duration: 220, yoyo: true, ease: 'Quad.easeOut' });
+      let chain = Promise.resolve();
+      pts.forEach(([x, y], i) => {
+        chain = chain.then(() => new Promise      ((ok) => {
+          const sx = t.x, sy = t.y;
+          this.tweens.addCounter({ from: 0, to: 1, duration: 520, ease: 'Linear', onUpdate: (tw     ) => {
+            const v = tw.getValue(); t.setPosition(sx + (x - sx) * v, sy + (y - sy) * v - Math.sin(v * Math.PI) * 220); t.setAngle(v * 360);
+          }, onComplete: () => { Audio.sfx('pop'); if (i % 2 === 0) hop(); ok(); } });
+        }));
+      });
+      chain.then(() => this.time.delayedCall(200, () => { this.tweens.add({ targets: t, alpha: 0, duration: 300 }); this.cared(t); }));
+    }
+  }
+
+  startScrub(t     ) {
+    this.phase = 'scrub';
+    this.scrubber = t;
+    const b = this.body;
+    this.tweens.add({ targets: t, x: b.x + b.rx * 0.9, y: b.y, scale: t.getData('baseScale') * 0.85, duration: 300, ease: 'Cubic.easeOut' });
+    t.setDepth(840); this.layer.remove(t); this.fx.add(t);
+    this.say(this.instruction());
+  }
+
+  /** Món đồ chà/chải đi qua vết bẩn → vết mờ dần. */
+  scrub(t     ) {
+    const reach = 70 * this.ps / 2.3;
+    let any = false;
+    for (const s of this.spots) {
+      if (s.getData('hp') <= 0 || Math.hypot(s.x - t.x, s.y - t.y) > reach) continue;
+      const hp = s.getData('hp') - (this.level <= 2 ? 0.12 : 0.08);
+      s.setData('hp', hp); s.setAlpha(Math.max(0, hp)); any = true;
+      if (hp <= 0) { this.sparkle(s.x, s.y, 6); Audio.sfx('good'); }
+    }
+    if (any && Math.random() < 0.35) {
+      if (this.care.id === 'dirty') {
+        Audio.sfx('bubble');
+        const bub = this.add.circle(t.x + randInt(-40, 40), t.y + randInt(-30, 30), randInt(8, 18), 0xffffff, 0.85).setStrokeStyle(3, 0xa9c9ec);
+        this.fx.add(bub);
+        this.tweens.add({ targets: bub, y: bub.y - 90, alpha: 0, duration: 900, onComplete: () => bub.destroy() });
+      } else this.sparkle(t.x, t.y, 3);
+    }
+    if (this.spots.every((s) => s.getData('hp') <= 0) && this.phase === 'scrub') {
+      this.phase = 'anim';
+      t.disableInteractive();
+      this.tweens.add({ targets: t, alpha: 0, duration: 300 });
+      this.cared(t);
+    }
+  }
+
+  cared(_t     ) {
+    this.petPlay('happy');
+    this.time.delayedCall(900, () => this.petPlay('idle-front'));
+    this.good(this.px, this.feet - this.petH * 0.6, false);
+    this.say(this.care.done);
+    this.nextRound(1500);
+  }
+
+  hint() {
+    if (this.phase === 'scrub') { this.say(this.instruction()); for (const s of this.spots) if (s.getData('hp') > 0) this.tweens.add({ targets: s, scale: 1.3, duration: 200, yoyo: true }); return; }
+    this.say(`${this.care.say} Bạn ấy cần ${this.care.tname}.`);
+    const right = this.tools.find((x) => x.getData('c') === this.care);
+    if (right) this.pulse(right, 1.25);
+  }
+}
+return { PetCareScene };
+})();
+
 /* ══════════ main.ts ══════════ */
 M.main = (function () {
 // ── Thế Giới Nhỏ (Little World) ──
-// Đảo của bé · Bản đồ 6 vùng · 8 hoạt động · phần thưởng, túi đồ, huy hiệu · góc phụ huynh.
+// Đảo của bé · Bản đồ 6 vùng · 11 hoạt động · phần thưởng, túi đồ, huy hiệu · góc phụ huynh.
 const { BootScene, routeFromHash } = M.BootScene;
 const { HomeScene } = M.HomeScene;
 const { WorldMapScene } = M.WorldMapScene;
@@ -3991,6 +4804,9 @@ const { ShapePuzzleScene } = M.ShapePuzzle;
 const { CountCollectScene } = M.CountCollect;
 const { BuilderScene } = M.Builder;
 const { SortScene } = M.Sort;
+const { PatternScene } = M.Pattern;
+const { ColoringScene } = M.Coloring;
+const { PetCareScene } = M.PetCare;
 const { Store } = M.Store;
 const { Audio } = M.Audio;
 const { Hud } = M.Hud;
@@ -4011,7 +4827,7 @@ const game = new Phaser.Game({
   render: { antialias: true, roundPixels: false, powerPreference: 'high-performance' },
   input: { activePointers: 3 },
   scene: [BootScene, HomeScene, WorldMapScene, IslandScene, WardrobeScene,
-    AnimalMatchScene, MemoryScene, ShapePuzzleScene, CountCollectScene, BuilderScene, SortScene],
+    AnimalMatchScene, MemoryScene, ShapePuzzleScene, CountCollectScene, BuilderScene, SortScene, PatternScene, ColoringScene, PetCareScene],
 });
 
 window.addEventListener('resize', () => {

@@ -16,11 +16,12 @@ const src = (f) => join(dir, 'src', f);
 
 // Thứ tự nạp theo phụ thuộc
 const ORDER = [
-  'data/Content',
+  'data/Content', 'data/Pictures',
   'services/AssetLoader', 'services/Ui', 'services/Store', 'services/Audio', 'services/Hud', 'services/Parent',
   'services/CameraControls', 'services/LayeredAvatar',
   'scenes/BootScene', 'scenes/MiniGame', 'scenes/HomeScene', 'scenes/WorldMapScene', 'scenes/IslandScene', 'scenes/WardrobeScene',
   'games/AnimalMatch', 'games/Memory', 'games/ShapePuzzle', 'games/CountCollect', 'games/Builder', 'games/Sort',
+  'games/Pattern', 'games/Coloring', 'games/PetCare',
   'main',
 ];
 

@@ -32,6 +32,8 @@ a.kho-back.kho-back{display:inline-flex!important;align-items:center!important;j
   box-shadow:0 4px 14px rgba(20,8,60,.28)!important;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);cursor:pointer;flex:none!important;box-sizing:border-box!important}
 a.kho-back.kho-back:hover{background:rgba(35,18,77,.75)!important}
 a.kho-back.kho-back:active{transform:scale(.96)}
+/* trong trò chơi đã có nút ✕ về bản đồ */
+body[data-scene="Play"] a.kho-back.kho-back{display:none!important}
 a.kho-back .kb-ar{font-size:22px;line-height:.8;margin-top:-2px}
 @media (max-width:520px){a.kho-back.kb-compact .kb-tx{display:none}a.kho-back.kho-back.kb-compact{padding:7px 13px 9px!important}}
 </style>

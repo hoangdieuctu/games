@@ -17,6 +17,16 @@ Ghi lại để làm tiếp sau khi tắt máy. Thiết kế gốc: `docs/design
 - Đã kiểm thử trên trình duyệt (1280×800 và 390×844): mọi màn hiện đúng, chơi hết 1 game ra bảng thưởng,
   xây khối có trọng lực, thu hoạch hoa, phụ huynh, tải lại trang vẫn giữ tiến trình. Không có lỗi JS.
 
+- **Phase 3 (thêm hoạt động):**
+  - 3 trò mới (tổng 11): **Tìm quy luật** (Núi Toán Học, `games/Pattern.ts`: AB → ABCD, ô trống giữa dãy, 2 ô trống),
+    **Bé tô màu** (Thị Trấn Sáng Tạo, `games/Coloring.ts` + 6 tranh vẽ bằng đa giác `data/Pictures.ts`; cấp 1–2 tô tự do,
+    cấp 3–5 tô theo tranh mẫu), **Chăm bạn thú** (Ngôi Làng Kỹ Năng, `games/PetCare.ts`: đói/khát/buồn ngủ/muốn chơi,
+    lấm bùn → chà bọt biển, lông rối → chải lược).
+  - 12 hình mới `play/care/*` (đồ chăm thú + biểu tượng nhu cầu) trong `art/lib/play-objects.mjs`; `data.play.care`.
+  - 3 huy hiệu mới (tổng 18), 4 tiếng mới (munch, bubble, splash, yawn), `Audio.tone()`; `bigButton` chuyển vào `MiniGame`.
+  - Sửa: nút "Về kho trò chơi" đè lên thanh trò chơi (ẩn khi đang chơi — đã có nút ✕). Thẻ trang chủ đã cập nhật.
+  - Đã chạy thử tự động cả 3 trò ở 1280×800, 390×844, 768×1024 (cấp 1–5): ra bảng thưởng, không lỗi JS.
+
 ## Việc khác của kho (đã đẩy lên main)
 - Game chuyển từ `/games/<tên>/` lên `/<tên>/` (commit 0968a1a). Mọi game có link về trang chủ (66376ba).
 - Ẩn khỏi trang chủ (bọc `<template data-hidden>` trong `index.html`): spot, aquarium, tetris, umbala,
@@ -26,9 +36,12 @@ Ghi lại để làm tiếp sau khi tắt máy. Thiết kế gốc: `docs/design
 ## Đang dở / làm tiếp
 1. ~~Nút back thống nhất kiểu Xếp Bi~~ — xong cho mọi game (2f633f1) và Thế Giới Nhỏ. Lỗi có sẵn, chưa sửa:
    chữ "TỔNG" của spa tràn màn hình 390px (typhu/typhu6 nay chặn chơi trên điện thoại); ~13 game có hộp thoại mở đầu che nút back.
-2. Cập nhật thẻ trang chủ (`../index.html`): tag "Phase 1" và mô tả → mô tả gameplay mới.
+2. ~~Cập nhật thẻ trang chủ~~ — xong (Phase 3).
 3. Kiểm tra thêm trên iPad dọc (768×1024) các màn chơi; ảnh chụp mới cho `docs/screenshots/`.
-4. Ý tưởng tiếp: thêm hoạt động (tô màu, nấu ăn, chăm thú), bộ sưu tập thú, mùa/ban đêm cho đảo, tiếng Anh.
+4. Ý tưởng tiếp: nấu ăn, bộ sưu tập thú / album tranh đã tô, mùa/ban đêm cho đảo, tiếng Anh.
+5. Build cần Node ≥ 22.13 (máy này có Node 20 → `npx -y node@22 little-world/build.mjs`).
+   Chromium của playwright-core 1.49.1 không còn trong cache; đã dùng playwright-core 1.60.0 + `PLAYWRIGHT_BROWSERS_PATH`
+   trỏ tới thư mục có symlink `chromium_headless_shell-1223` → bản 1228 có sẵn.
 
 ## Lệnh hay dùng
 ```

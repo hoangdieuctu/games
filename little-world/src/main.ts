@@ -1,5 +1,5 @@
 // ── Thế Giới Nhỏ (Little World) ──
-// Đảo của bé · Bản đồ 6 vùng · 8 hoạt động · phần thưởng, túi đồ, huy hiệu · góc phụ huynh.
+// Đảo của bé · Bản đồ 6 vùng · 11 hoạt động · phần thưởng, túi đồ, huy hiệu · góc phụ huynh.
 import { BootScene, routeFromHash } from './scenes/BootScene.js';
 import { HomeScene } from './scenes/HomeScene.js';
 import { WorldMapScene } from './scenes/WorldMapScene.js';
@@ -11,6 +11,9 @@ import { ShapePuzzleScene } from './games/ShapePuzzle.js';
 import { CountCollectScene } from './games/CountCollect.js';
 import { BuilderScene } from './games/Builder.js';
 import { SortScene } from './games/Sort.js';
+import { PatternScene } from './games/Pattern.js';
+import { ColoringScene } from './games/Coloring.js';
+import { PetCareScene } from './games/PetCare.js';
 import { Store } from './services/Store.js';
 import { Audio } from './services/Audio.js';
 import { Hud } from './services/Hud.js';
@@ -34,7 +37,7 @@ const game = new Phaser.Game({
   render: { antialias: true, roundPixels: false, powerPreference: 'high-performance' },
   input: { activePointers: 3 },
   scene: [BootScene, HomeScene, WorldMapScene, IslandScene, WardrobeScene,
-    AnimalMatchScene, MemoryScene, ShapePuzzleScene, CountCollectScene, BuilderScene, SortScene],
+    AnimalMatchScene, MemoryScene, ShapePuzzleScene, CountCollectScene, BuilderScene, SortScene, PatternScene, ColoringScene, PetCareScene],
 });
 
 window.addEventListener('resize', () => {

@@ -517,3 +517,121 @@ SEA('sea-octopus', 'Sinh vật biển: bạch tuộc tím', (doc) => {
   s += mouth({ x: 65, y: 66, s: 1.7, kind: 'smile', lw: 3 }) + blush(36, 68, 7, 4.4, 0.65) + blush(94, 68, 7, 4.4, 0.65);
   return s;
 });
+
+// ═════════════════════════ chăm bạn thú (Phase 3) ═════════════════════════
+// Đồ chăm sóc 120×120 (kéo vào thú cưng) và biểu tượng nhu cầu 100×100 (trong bong bóng ý nghĩ).
+const CARE = (id, usage, draw) => def(id, 'care', 120, 120, usage, draw);
+const NEED = (id, usage, draw) => def(id, 'care', 100, 100, usage, draw);
+const bowl = (doc, c, inner) => {
+  const ln = lineOf(c);
+  let s = shadow(60, 104, 46);
+  s += P('M12,66 L108,66 Q104,98 82,102 L38,102 Q16,98 12,66Z', doc.vgrad(c), ln, LW);
+  s += inner;
+  s += P(ell(60, 66, 48, 12), doc.vgrad(lighten(c, 0.25)), ln, LS) + E(60, 67, 40, 8, darken(c, 0.25), null);
+  s += R(30, 80, 60, 8, 4, '#ffffff', 'none', 0, 'opacity=".35"');
+  return s;
+};
+CARE('care-food', 'Chăm thú: bát thức ăn (hạt)', (doc) => {
+  const c = '#f2665e';
+  let s = bowl(doc, c, '');
+  const r = rng(7);
+  for (let i = 0; i < 16; i++) {
+    const x = 26 + r() * 68, y = 50 + r() * 16 - Math.abs(x - 60) * 0.12;
+    s += E(x, y, 7, 5.4, doc.sphere('#c98c4f', 1), lineOf('#a5754f'), 2, `transform="rotate(${Math.round(r() * 60 - 30)} ${r2(x)} ${r2(y)})"`);
+  }
+  s += P('M40,36 a8,8 0 1 1 10,10 l-6,6 a8,8 0 1 1 -10,-10Z', PAL.white, lineOf(PAL.stone), 2.4, 'transform="rotate(-30 44 40)"');
+  return s;
+});
+CARE('care-water', 'Chăm thú: bát nước', (doc) => {
+  const c = '#6aa8ec';
+  let s = bowl(doc, c, '');
+  s += E(60, 64, 38, 7, doc.linear([[0, PAL.oceanLight], [1, PAL.ocean]]), null);
+  s += E(48, 62, 12, 2.4, '#fff', null, 0, 'opacity=".7"');
+  s += P('M60,14 Q74,34 74,42 Q74,54 60,54 Q46,54 46,42 Q46,34 60,14Z', doc.sphere(PAL.oceanLight, 1.1), lineOf(PAL.ocean), LS);
+  s += gloss(54, 40, 3, 5, 0.7, 0);
+  return s;
+});
+CARE('care-sponge', 'Chăm thú: bọt biển và xà phòng (tắm)', (doc) => {
+  const c = PAL.yellow, ln = lineOf('#e4a63e');
+  let s = shadow(56, 104, 40);
+  s += P('M18,62 Q16,48 30,46 L86,40 Q100,40 100,54 L102,86 Q102,98 88,98 L32,100 Q20,100 20,88Z', doc.vgrad(c), ln, LW);
+  s += P('M18,62 L100,56', 'none', ln, LS);
+  for (const [x, y, r] of [[34, 74, 4], [52, 84, 3], [70, 72, 4.5], [86, 86, 3], [44, 64, 2.6], [80, 64, 2.6]]) s += E(x, y, r, r, '#e4b74a', null);
+  for (const [x, y, r] of [[30, 34, 12], [52, 24, 15], [76, 30, 11], [94, 20, 8]]) {
+    s += E(x, y, r, r, 'rgba(255,255,255,.85)', '#a9c9ec', 2.4) + E(x - r * 0.35, y - r * 0.35, r * 0.28, r * 0.2, '#fff', null);
+  }
+  return s;
+});
+CARE('care-ball', 'Chăm thú: quả bóng (chơi đùa)', (doc) => {
+  let s = shadow(60, 106, 36);
+  const clip = doc.clip(`<circle cx="60" cy="60" r="42"/>`);
+  s += `<circle cx="60" cy="60" r="42" fill="${doc.sphere('#ff8f8f', 1)}"/>`;
+  s += `<g clip-path="${clip}">${P('M10,40 Q60,58 110,40 L110,62 Q60,80 10,62Z', doc.vgrad(PAL.white), 'none', 0)}${P('M10,78 Q60,96 110,78 L110,110 L10,110Z', doc.vgrad('#6aa8ec'), 'none', 0)}</g>`;
+  s += L('M18,46 Q60,62 102,46 M18,66 Q60,82 102,66', lineOf('#ff8f8f'), 2.4, 'opacity=".6"');
+  s += `<circle cx="60" cy="60" r="42" fill="none" stroke="${lineOf('#f2665e')}" stroke-width="${LW}"/>`;
+  s += P(starPath(60, 38, 10, 4.6), PAL.yellow, lineOf('#e4a63e'), 2);
+  s += gloss(42, 36, 10, 6, 0.6);
+  return s;
+});
+CARE('care-pillow', 'Chăm thú: gối và chăn nhỏ (đi ngủ)', (doc) => {
+  const c = PAL.lavender, ln = lineOf(PAL.purple);
+  let s = shadow(60, 104, 48);
+  s += P('M14,56 Q12,34 34,36 Q60,28 86,36 Q108,34 106,56 Q110,76 92,80 Q60,86 28,80 Q10,76 14,56Z', doc.sphere(PAL.white, 0.9), lineOf(PAL.stone), LW);
+  s += L('M34,46 Q60,40 86,46', '#dcd8e6', 2.4);
+  s += P('M8,78 Q30,68 60,72 Q92,68 112,78 L108,100 Q60,108 12,100Z', doc.vgrad(c), ln, LW);
+  for (const x of [30, 60, 90]) s += P(starPath(x, 88, 6, 2.6), PAL.yellowLight, 'none', 0);
+  s += P('M78,14 a14,14 0 1 0 14,18 a11,11 0 1 1 -14,-18Z', doc.sphere(PAL.yellow, 1), lineOf('#e4a63e'), LS);
+  return s;
+});
+CARE('care-brush', 'Chăm thú: lược chải lông', (doc) => {
+  const c = '#7cc96a', ln = lineOf(PAL.leafDark);
+  let s = shadow(60, 106, 42);
+  s += `<g transform="rotate(-24 60 62)">`;
+  s += R(52, 60, 16, 52, 8, doc.vgrad(PAL.woodLight), lineOf(PAL.wood), LW);
+  for (let i = 0; i < 10; i++) s += L(`M${23 + i * 8.2},34 L${23 + i * 8.2},18`, '#8a7fa6', 3.4) + E(23 + i * 8.2, 17, 2.2, 2.2, PAL.pink, null);
+  s += R(14, 30, 92, 34, 16, doc.vgrad(c), ln, LW);
+  s += R(22, 34, 76, 6, 3, '#ffffff', 'none', 0, 'opacity=".35"');
+  s += `</g>`;
+  return s;
+});
+NEED('need-hungry', 'Nhu cầu: đói bụng (đĩa trống)', (doc) => {
+  let s = E(50, 64, 42, 16, doc.vgrad(PAL.white), lineOf(PAL.stone), LW) + E(50, 62, 28, 9, PAL.cream, lineOf(PAL.stone), 2);
+  for (const [x, y] of [[42, 62], [56, 60], [50, 66]]) s += E(x, y, 2.4, 2, '#c98c4f', null);
+  s += L('M18,12 L18,40 M10,12 L10,28 Q10,36 18,36 Q26,36 26,28 L26,12', lineOf(PAL.stone), 4);
+  s += L('M82,12 Q92,24 82,40 L82,12', lineOf(PAL.stone), 4) + L('M82,40 L82,50', lineOf(PAL.stone), 4);
+  return s;
+});
+NEED('need-thirsty', 'Nhu cầu: khát nước (giọt nước)', (doc) => {
+  let s = P('M50,8 Q78,46 78,62 Q78,90 50,90 Q22,90 22,62 Q22,46 50,8Z', doc.sphere(PAL.oceanLight, 1.2), lineOf(PAL.ocean), LW);
+  s += gloss(38, 54, 5, 10, 0.75, 0);
+  s += P('M84,20 Q90,30 90,34 Q90,40 84,40 Q78,40 78,34 Q78,30 84,20Z', PAL.oceanLight, lineOf(PAL.ocean), 2.4);
+  return s;
+});
+NEED('need-dirty', 'Nhu cầu: bị lấm bẩn (vệt bùn)', (doc) => {
+  const c = '#a5754f';
+  let s = P(blob(50, 56, 38, 30, 12, 0.3, 5), doc.vgrad(c), lineOf(c), LW);
+  for (const [x, y, r] of [[14, 22, 7], [86, 24, 6], [88, 86, 5], [20, 88, 4]]) s += E(x, y, r, r * 0.85, doc.vgrad(c), lineOf(c), 2.4);
+  s += gloss(38, 44, 8, 4, 0.4);
+  return s;
+});
+NEED('need-sleepy', 'Nhu cầu: buồn ngủ (trăng và Zzz)', (doc) => {
+  let s = P('M44,14 a36,36 0 1 0 38,52 a28,28 0 1 1 -38,-52Z', doc.sphere(PAL.yellow, 1), lineOf('#e4a63e'), LW);
+  s += L('M64,14 L80,14 L64,30 L80,30', PAL.purple, 4.4) + L('M80,40 L90,40 L80,50 L90,50', PAL.purple, 3.4);
+  s += sparkle(20, 18, 6) ;
+  return s;
+});
+NEED('need-play', 'Nhu cầu: muốn chơi (con diều)', (doc) => {
+  const c = '#ff8f8f';
+  let s = L('M50,64 Q40,78 52,84 Q64,90 54,98', PAL.ink, 2.6);
+  for (const [x, y] of [[44, 76], [58, 88]]) s += P(`M${x},${y} l-7,-4 l0,8Z`, PAL.yellow, lineOf('#e4a63e'), 1.6);
+  s += P('M50,4 L86,34 L50,66 L14,34Z', doc.vgrad(c), lineOf('#f2665e'), LW);
+  s += P('M50,4 L50,66 M14,34 L86,34', 'none', lineOf('#f2665e'), 2.4);
+  s += P('M50,4 L86,34 L50,34Z', 'rgba(255,255,255,.35)', 'none', 0);
+  return s;
+});
+NEED('need-messy', 'Nhu cầu: lông rối (cuộn rối)', (doc) => {
+  const c = '#e0b07a';
+  let s = P(puffPath(50, 54, 38, 32, 9, 0.2, 4), doc.sphere(c, 1), lineOf(c), LW);
+  s += L('M24,50 Q34,30 48,44 Q60,58 70,38 Q80,26 78,50 Q74,72 54,66 Q34,62 40,76 M30,64 Q42,52 52,58', darken(c, 0.28), 3.2);
+  return s;
+});

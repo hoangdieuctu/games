@@ -2,7 +2,7 @@
 
 > Tệp này được sinh tự động bởi `art/build-manifest.mjs` từ manifest — đừng sửa tay.
 
-- Tổng số tài sản: **282**, dung lượng **24.10 MB**
+- Tổng số tài sản: **294**, dung lượng **24.36 MB**
 - Manifest cho Phaser: `public/assets/asset-manifest.json` (nạp bởi `src/services/AssetLoader.ts`)
 - Kích thước là kích thước texture thật (px). `scale` là tỉ lệ hiển thị mặc định (texture @2x → 0.5).
 - Kiểm tra tự động: không có vấn đề (file tồn tại, kích thước khớp, khung spritesheet hợp lệ, tham chiếu đầy đủ)
@@ -247,6 +247,23 @@
 |---|---|---|---|---|---|
 | `card-back` | play/cards/back.png | 320×400 · 41 KB | png | 0.5 · [0.5, 0.5] | Mặt sau thẻ trò lật thẻ ghi nhớ |
 | `card-front` | play/cards/front.png | 320×400 · 10 KB | png | 0.5 · [0.5, 0.5] | Mặt trước thẻ (trống) để đặt hình con vật |
+
+## play/care (12)
+
+| ID | Tệp | Kích thước | Định dạng | Scale · Origin | Công dụng |
+|---|---|---|---|---|---|
+| `care-food` | play/care/care-food.png | 240×240 · 29 KB | png | 0.5 · [0.5, 0.5] | Chăm thú: bát thức ăn (hạt) |
+| `care-water` | play/care/care-water.png | 240×240 · 25 KB | png | 0.5 · [0.5, 0.5] | Chăm thú: bát nước |
+| `care-sponge` | play/care/care-sponge.png | 240×240 · 29 KB | png | 0.5 · [0.5, 0.5] | Chăm thú: bọt biển và xà phòng (tắm) |
+| `care-ball` | play/care/care-ball.png | 240×240 · 29 KB | png | 0.5 · [0.5, 0.5] | Chăm thú: quả bóng (chơi đùa) |
+| `care-pillow` | play/care/care-pillow.png | 240×240 · 27 KB | png | 0.5 · [0.5, 0.5] | Chăm thú: gối và chăn nhỏ (đi ngủ) |
+| `care-brush` | play/care/care-brush.png | 240×240 · 29 KB | png | 0.5 · [0.5, 0.5] | Chăm thú: lược chải lông |
+| `need-hungry` | play/care/need-hungry.png | 200×200 · 13 KB | png | 0.5 · [0.5, 0.5] | Nhu cầu: đói bụng (đĩa trống) |
+| `need-thirsty` | play/care/need-thirsty.png | 200×200 · 17 KB | png | 0.5 · [0.5, 0.5] | Nhu cầu: khát nước (giọt nước) |
+| `need-dirty` | play/care/need-dirty.png | 200×200 · 18 KB | png | 0.5 · [0.5, 0.5] | Nhu cầu: bị lấm bẩn (vệt bùn) |
+| `need-sleepy` | play/care/need-sleepy.png | 200×200 · 12 KB | png | 0.5 · [0.5, 0.5] | Nhu cầu: buồn ngủ (trăng và Zzz) |
+| `need-play` | play/care/need-play.png | 200×200 · 11 KB | png | 0.5 · [0.5, 0.5] | Nhu cầu: muốn chơi (con diều) |
+| `need-messy` | play/care/need-messy.png | 200×200 · 22 KB | png | 0.5 · [0.5, 0.5] | Nhu cầu: lông rối (cuộn rối) |
 
 ## play/habitats (4)
 

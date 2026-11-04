@@ -257,5 +257,21 @@ export class MiniGame extends Phaser.Scene {
     this.tweens.add({ targets: obj, scale: s * k, duration: 160, yoyo: true, ease: 'Quad.easeOut' });
   }
 
+  /** Nút to bo tròn màu cam (trong vùng chơi). */
+  bigButton(x: number, y: number, text: string, cb: () => void) {
+    const c = this.add.container(x, y);
+    const w = Math.max(300, text.length * 26 + 80), h = 96;
+    const g = this.add.graphics();
+    g.fillStyle(0xd96f36, 1).fillRoundedRect(-w / 2, -h / 2 + 8, w, h, 48);
+    g.fillStyle(0xffac6b, 1).fillRoundedRect(-w / 2, -h / 2, w, h, 48);
+    g.lineStyle(6, 0xffffff, 1).strokeRoundedRect(-w / 2, -h / 2, w, h, 48);
+    const t = this.add.text(0, -2, text, { fontFamily: FONT, fontSize: '48px', fontStyle: '800', color: '#ffffff' }).setOrigin(0.5);
+    c.add([g, t]); c.setSize(w, h).setInteractive({ useHandCursor: true });
+    c.on('pointerdown', () => c.setScale(0.95));
+    c.on('pointerout', () => c.setScale(1));
+    c.on('pointerup', () => { c.setScale(1); Audio.sfx('tap'); cb(); });
+    return c;
+  }
+
   update(_t: number, _dt: number) { /* */ }
 }

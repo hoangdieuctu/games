@@ -188,6 +188,9 @@ export const Store = {
       'builder-3': (c.builds || 0) >= 3,
       'eco-hero': (p.plays['sort-trash'] || 0) > 0 && (p.plays['ocean-clean'] || 0) > 0,
       'new-pet-friend': (c.petSwitch || 0) >= 1,
+      'pattern-4': (p.level['pattern'] || 0) >= 4 && (p.plays['pattern'] || 0) > 0,
+      'artist-3': (p.plays['coloring'] || 0) >= 3,
+      'pet-care-3': (p.plays['pet-care'] || 0) >= 3,
     };
     const got: string[] = [];
     for (const a of ACHIEVEMENTS) if (rules[a.id] && !p.ach[a.id]) { p.ach[a.id] = Date.now(); got.push(a.id); }

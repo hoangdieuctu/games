@@ -95,6 +95,15 @@ group.data('play', {
     seaLife: ['sea-crab', 'sea-jellyfish', 'sea-octopus', 'animal-fish', 'animal-turtle'],
     bins: { recycle: 'bin-recycle', organic: 'bin-organic', boat: 'sort-boat' },
   },
+  // chăm bạn thú: nhu cầu → đồ đúng
+  care: [
+    { id: 'hungry', need: 'need-hungry', tool: 'care-food', say: 'Mình đói bụng quá!', tname: 'bát thức ăn', done: 'Ngon quá! Cảm ơn bạn!' },
+    { id: 'thirsty', need: 'need-thirsty', tool: 'care-water', say: 'Mình khát nước!', tname: 'bát nước', done: 'Mát quá đi!' },
+    { id: 'dirty', need: 'need-dirty', tool: 'care-sponge', say: 'Ôi, mình bị lấm bùn rồi!', tname: 'bọt biển', done: 'Sạch thơm rồi!' },
+    { id: 'sleepy', need: 'need-sleepy', tool: 'care-pillow', say: 'Mình buồn ngủ quá…', tname: 'cái gối', done: 'Ngủ một giấc thật ngon!' },
+    { id: 'play', need: 'need-play', tool: 'care-ball', say: 'Mình muốn chơi đùa!', tname: 'quả bóng', done: 'Vui quá! Chơi nữa nhé!' },
+    { id: 'messy', need: 'need-messy', tool: 'care-brush', say: 'Lông mình rối hết rồi!', tname: 'cái lược', done: 'Lông mượt rồi nè!' },
+  ],
 });
 group.write();
 

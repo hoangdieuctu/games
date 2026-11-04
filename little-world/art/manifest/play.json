@@ -1679,6 +1679,282 @@
     130
    ],
    "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "care-food",
+   "file": "play/care/care-food.png",
+   "category": "play/care",
+   "width": 240,
+   "height": 240,
+   "usage": "Chăm thú: bát thức ăn (hạt)",
+   "tags": [
+    "play",
+    "care"
+   ],
+   "worldSize": [
+    120,
+    120
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "care-water",
+   "file": "play/care/care-water.png",
+   "category": "play/care",
+   "width": 240,
+   "height": 240,
+   "usage": "Chăm thú: bát nước",
+   "tags": [
+    "play",
+    "care"
+   ],
+   "worldSize": [
+    120,
+    120
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "care-sponge",
+   "file": "play/care/care-sponge.png",
+   "category": "play/care",
+   "width": 240,
+   "height": 240,
+   "usage": "Chăm thú: bọt biển và xà phòng (tắm)",
+   "tags": [
+    "play",
+    "care"
+   ],
+   "worldSize": [
+    120,
+    120
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "care-ball",
+   "file": "play/care/care-ball.png",
+   "category": "play/care",
+   "width": 240,
+   "height": 240,
+   "usage": "Chăm thú: quả bóng (chơi đùa)",
+   "tags": [
+    "play",
+    "care"
+   ],
+   "worldSize": [
+    120,
+    120
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "care-pillow",
+   "file": "play/care/care-pillow.png",
+   "category": "play/care",
+   "width": 240,
+   "height": 240,
+   "usage": "Chăm thú: gối và chăn nhỏ (đi ngủ)",
+   "tags": [
+    "play",
+    "care"
+   ],
+   "worldSize": [
+    120,
+    120
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "care-brush",
+   "file": "play/care/care-brush.png",
+   "category": "play/care",
+   "width": 240,
+   "height": 240,
+   "usage": "Chăm thú: lược chải lông",
+   "tags": [
+    "play",
+    "care"
+   ],
+   "worldSize": [
+    120,
+    120
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "need-hungry",
+   "file": "play/care/need-hungry.png",
+   "category": "play/care",
+   "width": 200,
+   "height": 200,
+   "usage": "Nhu cầu: đói bụng (đĩa trống)",
+   "tags": [
+    "play",
+    "care"
+   ],
+   "worldSize": [
+    100,
+    100
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "need-thirsty",
+   "file": "play/care/need-thirsty.png",
+   "category": "play/care",
+   "width": 200,
+   "height": 200,
+   "usage": "Nhu cầu: khát nước (giọt nước)",
+   "tags": [
+    "play",
+    "care"
+   ],
+   "worldSize": [
+    100,
+    100
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "need-dirty",
+   "file": "play/care/need-dirty.png",
+   "category": "play/care",
+   "width": 200,
+   "height": 200,
+   "usage": "Nhu cầu: bị lấm bẩn (vệt bùn)",
+   "tags": [
+    "play",
+    "care"
+   ],
+   "worldSize": [
+    100,
+    100
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "need-sleepy",
+   "file": "play/care/need-sleepy.png",
+   "category": "play/care",
+   "width": 200,
+   "height": 200,
+   "usage": "Nhu cầu: buồn ngủ (trăng và Zzz)",
+   "tags": [
+    "play",
+    "care"
+   ],
+   "worldSize": [
+    100,
+    100
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "need-play",
+   "file": "play/care/need-play.png",
+   "category": "play/care",
+   "width": 200,
+   "height": 200,
+   "usage": "Nhu cầu: muốn chơi (con diều)",
+   "tags": [
+    "play",
+    "care"
+   ],
+   "worldSize": [
+    100,
+    100
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "need-messy",
+   "file": "play/care/need-messy.png",
+   "category": "play/care",
+   "width": 200,
+   "height": 200,
+   "usage": "Nhu cầu: lông rối (cuộn rối)",
+   "tags": [
+    "play",
+    "care"
+   ],
+   "worldSize": [
+    100,
+    100
+   ],
+   "format": "png"
   }
  ],
  "data": {
@@ -2049,7 +2325,57 @@
      "organic": "bin-organic",
      "boat": "sort-boat"
     }
-   }
+   },
+   "care": [
+    {
+     "id": "hungry",
+     "need": "need-hungry",
+     "tool": "care-food",
+     "say": "Mình đói bụng quá!",
+     "tname": "bát thức ăn",
+     "done": "Ngon quá! Cảm ơn bạn!"
+    },
+    {
+     "id": "thirsty",
+     "need": "need-thirsty",
+     "tool": "care-water",
+     "say": "Mình khát nước!",
+     "tname": "bát nước",
+     "done": "Mát quá đi!"
+    },
+    {
+     "id": "dirty",
+     "need": "need-dirty",
+     "tool": "care-sponge",
+     "say": "Ôi, mình bị lấm bùn rồi!",
+     "tname": "bọt biển",
+     "done": "Sạch thơm rồi!"
+    },
+    {
+     "id": "sleepy",
+     "need": "need-sleepy",
+     "tool": "care-pillow",
+     "say": "Mình buồn ngủ quá…",
+     "tname": "cái gối",
+     "done": "Ngủ một giấc thật ngon!"
+    },
+    {
+     "id": "play",
+     "need": "need-play",
+     "tool": "care-ball",
+     "say": "Mình muốn chơi đùa!",
+     "tname": "quả bóng",
+     "done": "Vui quá! Chơi nữa nhé!"
+    },
+    {
+     "id": "messy",
+     "need": "need-messy",
+     "tool": "care-brush",
+     "say": "Lông mình rối hết rồi!",
+     "tname": "cái lược",
+     "done": "Lông mượt rồi nè!"
+    }
+   ]
   }
  }
 }

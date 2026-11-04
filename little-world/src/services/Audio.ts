@@ -58,7 +58,7 @@ export const Audio = {
     if (s.music && s.sound) this.startMusic(); else this.stopMusic();
   },
 
-  sfx(name: 'tap' | 'pop' | 'good' | 'soft' | 'reward' | 'flip' | 'snap' | 'place' | 'unlock' | 'whoosh' | 'plant' | 'bloop') {
+  sfx(name: 'tap' | 'pop' | 'good' | 'soft' | 'reward' | 'flip' | 'snap' | 'place' | 'unlock' | 'whoosh' | 'plant' | 'bloop' | 'munch' | 'bubble' | 'splash' | 'yawn') {
     if (!Store.settings.sound) return;
     const c = ensure(); if (!c) return;
     const t = c.currentTime + 0.01;
@@ -72,6 +72,10 @@ export const Audio = {
       case 'soft': tone(330, t, 0.22, { type: 'sine', vol: 0.14, slide: 0.85 }); break;
       case 'bloop': tone(240, t, 0.25, { type: 'sine', vol: 0.22, slide: 2.2 }); break;
       case 'plant': tone(200, t, 0.15, { type: 'triangle', vol: 0.2, slide: 0.7 }); tone(NOTE(79), t + 0.15, 0.3, { type: 'sine', vol: 0.12 }); break;
+      case 'munch': [0, 0.16, 0.32].forEach((d) => { tone(170, t + d, 0.09, { type: 'square', vol: 0.05, slide: 0.7 }); tone(260, t + d + 0.03, 0.06, { type: 'triangle', vol: 0.1 }); }); break;
+      case 'bubble': for (let i = 0; i < 4; i++) tone(600 + Math.random() * 500, t + i * 0.06, 0.08, { type: 'sine', vol: 0.1, slide: 1.6 }); break;
+      case 'splash': tone(900, t, 0.25, { type: 'sine', vol: 0.12, slide: 0.3 }); tone(300, t + 0.05, 0.3, { type: 'sine', vol: 0.15, slide: 2 }); break;
+      case 'yawn': tone(420, t, 0.7, { type: 'sine', vol: 0.12, slide: 0.55, attack: 0.15 }); break;
       case 'whoosh': {
         const n = c.sampleRate * 0.35; const b = c.createBuffer(1, n, c.sampleRate); const d = b.getChannelData(0);
         for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.sin(Math.PI * i / n) * 0.5;
@@ -84,6 +88,13 @@ export const Audio = {
       case 'reward': [72, 76, 79, 84, 88].forEach((n, i) => tone(NOTE(n), t + i * 0.09, 0.5, { type: 'triangle', vol: 0.16 })); tone(NOTE(96), t + 0.5, 0.6, { type: 'sine', vol: 0.06 }); break;
       case 'unlock': [67, 72, 76, 79, 84].forEach((n, i) => tone(NOTE(n), t + i * 0.12, 0.7, { type: 'sine', vol: 0.15 })); break;
     }
+  },
+
+  /** Một nốt đơn (Hz) — dùng cho trò có nhạc. */
+  tone(freq: number, dur = 0.25, vol = 0.12) {
+    if (!Store.settings.sound) return;
+    const c = ensure(); if (!c) return;
+    tone(freq, c.currentTime + 0.01, dur, { type: 'triangle', vol });
   },
 
   startMusic() {

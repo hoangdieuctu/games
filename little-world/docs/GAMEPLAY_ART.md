@@ -26,3 +26,8 @@ dựa vào kích thước chính xác. Kênh màu được lượng tử hoá nh
 | sort | 300×190 (origin [0.5,0.8]) | `sort-boat` | Thuyền dọn biển, mép nước ở 80% chiều cao |
 | sort | 110×110 | `trash-bottle, -can, -paper, -box, -banana-peel, -apple-core, -leaf, -eggshell, -bag` | Rác tái chế / hữu cơ / rác biển |
 | sort | 130×130 | `sea-crab, sea-jellyfish, sea-octopus` | Sinh vật biển (dùng cùng `animal-fish`, `animal-turtle`) |
+| care | 120×120 | `care-food, -water, -sponge, -ball, -pillow, -brush` | Đồ chăm bạn thú (Phase 3); `data.play.care` nối nhu cầu → đồ, câu nói |
+| care | 100×100 | `need-hungry, -thirsty, -dirty, -sleepy, -play, -messy` | Biểu tượng nhu cầu trong bong bóng ý nghĩ |
+
+Tranh tô màu (Bé tô màu) không dùng PNG: vẽ bằng đa giác trong `src/data/Pictures.ts` (khung 600×600),
+mỗi vùng là một Graphics có vùng chạm riêng, nên tô được từng ô và đổi kích thước không bị mờ.

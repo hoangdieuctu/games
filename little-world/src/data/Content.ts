@@ -31,8 +31,11 @@ export const ACTIVITIES: Activity[] = [
   { id: 'animal-habitat', scene: 'AnimalMatch', mode: 'habitat', name: 'Nhà của thú', desc: 'Đưa con vật về đúng nơi ở', skill: 'nature', region: 'animal-island', reward: { star: 3, seed: 2 }, rounds: 5 },
   { id: 'memory', scene: 'Memory', name: 'Lật thẻ ghi nhớ', desc: 'Lật thẻ, tìm hai thẻ giống nhau', skill: 'memory', region: 'puzzle-forest', reward: { star: 3, wood: 2 }, rounds: 1 },
   { id: 'shape-puzzle', scene: 'ShapePuzzle', name: 'Ghép hình', desc: 'Kéo mảnh ghép vào đúng bóng', skill: 'logic', region: 'puzzle-forest', reward: { star: 3, wood: 2 }, rounds: 3 },
+  { id: 'pattern', scene: 'Pattern', name: 'Tìm quy luật', desc: 'Xem dãy hình lặp lại, chọn hình còn thiếu', skill: 'logic', region: 'math-mountain', reward: { star: 3, stone: 2 }, rounds: 5 },
   { id: 'count', scene: 'CountCollect', name: 'Đếm và hái', desc: 'Hái đúng số quả, so sánh và cộng', skill: 'math', region: 'math-mountain', reward: { star: 3, stone: 2 }, rounds: 5 },
   { id: 'builder', scene: 'Builder', name: 'Bé xây dựng', desc: 'Xếp khối thành tháp, nhà, cầu', skill: 'creative', region: 'creative-town', reward: { star: 3, wood: 3 }, rounds: 1 },
+  { id: 'coloring', scene: 'Coloring', name: 'Bé tô màu', desc: 'Chọn bút màu và tô bức tranh', skill: 'creative', region: 'creative-town', reward: { star: 3, flower: 2, seed: 1 }, rounds: 1 },
+  { id: 'pet-care', scene: 'PetCare', name: 'Chăm bạn thú', desc: 'Xem bạn thú cần gì và giúp bạn ấy', skill: 'life', region: 'life-skills-village', reward: { star: 3, seed: 2, wood: 1 }, rounds: 5 },
   { id: 'sort-trash', scene: 'Sort', mode: 'trash', name: 'Phân loại rác', desc: 'Bỏ rác vào đúng thùng', skill: 'life', region: 'life-skills-village', reward: { star: 3, seed: 1, flower: 2 }, rounds: 1 },
   { id: 'ocean-clean', scene: 'Sort', mode: 'ocean', name: 'Biển sạch', desc: 'Nhặt rác, giữ lại các bạn biển', skill: 'science', region: 'adventure-ocean', reward: { star: 3, shell: 3 }, rounds: 1 },
 ];
@@ -138,6 +141,9 @@ export const ACHIEVEMENTS: Achievement[] = [
   { id: 'math-4', name: 'Nhà toán học', desc: 'Đếm và hái tới cấp 4', icon: 'world-math-mountain-icon' },
   { id: 'builder-3', name: 'Thợ xây tài ba', desc: 'Xây 3 công trình', icon: 'world-creative-town-icon' },
   { id: 'eco-hero', name: 'Bạn của Trái Đất', desc: 'Chơi Phân loại rác và Biển sạch', icon: 'world-adventure-ocean-icon' },
+  { id: 'pattern-4', name: 'Thám tử quy luật', desc: 'Tìm quy luật tới cấp 4', icon: 'shape-star' },
+  { id: 'artist-3', name: 'Hoạ sĩ nhí', desc: 'Tô xong 3 bức tranh', icon: 'reward-flower' },
+  { id: 'pet-care-3', name: 'Bạn thân của thú cưng', desc: 'Chăm bạn thú 3 lần', icon: 'care-food' },
   { id: 'new-pet-friend', name: 'Đổi bạn đồng hành', desc: 'Chọn một bạn thú cưng khác', icon: 'fox-portrait' },
 ];
 
