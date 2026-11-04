@@ -1,14 +1,26 @@
 // ── Khởi động: đọc manifest rồi mở màn hình theo #hash ──
+// #home · #island · #map · #map/<vùng> · #wardrobe · #play/<hoạt động>
 import { AssetLoader } from '../services/AssetLoader.js';
+import { Store } from '../services/Store.js';
 import { Ui } from '../services/Ui.js';
+import { actById } from '../data/Content.js';
 
 declare const Phaser: any;
 
-export const SCENES: Record<string, string> = { map: 'WorldMap', island: 'Island', gallery: 'Gallery' };
+export interface Route { key: string; data?: any; }
 
-export function sceneFromHash(): string {
-  const h = location.hash.replace('#', '');
-  return SCENES[h] || 'WorldMap';
+export function routeFromHash(): Route {
+  const [h, arg] = location.hash.replace('#', '').split('/');
+  if (!Store.p) return { key: 'Home' };
+  if (h === 'map') return { key: 'WorldMap', data: { region: arg || null } };
+  if (h === 'wardrobe') return { key: 'Wardrobe' };
+  if (h === 'home') return { key: 'Home' };
+  if (h === 'play' && arg) {
+    const a = actById(arg);
+    if (a && Store.regionOpen(a.region)) return { key: a.scene, data: { act: a.id } };
+    if (a) return { key: 'WorldMap', data: { region: a.region } };
+  }
+  return { key: 'Island' };
 }
 
 /** Gói preload chung: xếp hàng tài sản + thanh tiến trình. */
@@ -29,7 +41,9 @@ export class BootScene extends Phaser.Scene {
   }
   create() {
     AssetLoader.init(this);
-    // ảnh UI dùng chung (nhỏ) nạp sẵn
-    this.scene.start(sceneFromHash());
+    if (Store.p) Store.startSession();
+    const r = routeFromHash();
+    Ui.route = r.key;
+    this.scene.start(r.key, r.data);
   }
 }

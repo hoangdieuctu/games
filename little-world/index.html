@@ -151,6 +151,151 @@ button { font: inherit; color: inherit; cursor: pointer; }
   .opt.col { grid-template-columns: 80px 1fr; }
 }
 @media (max-width: 420px) { .brand { display: none; } .tabs { margin-left: 0; flex: 1; } .tabs button { flex: 1; } }
+
+/* ═════════════ Phase 2: gameplay ═════════════ */
+.round-btn { width: 44px; height: 44px; border-radius: 50%; border: 0; background: var(--cream); color: var(--ink2); font-size: 22px; box-shadow: var(--shadow); flex: none; }
+.hud { display: flex; gap: 4px; background: var(--cream); border-radius: 999px; padding: 4px 8px; box-shadow: var(--shadow); }
+.res { border: 0; background: transparent; display: inline-flex; align-items: center; gap: 2px; padding: 2px 4px; border-radius: 999px; font-weight: 900; font-size: 15px; }
+.res img { width: 28px; height: 28px; object-fit: contain; }
+.res.bump { animation: bump .5s cubic-bezier(.3,1.8,.5,1); }
+@keyframes bump { 40% { transform: scale(1.4); background: var(--yellow); } }
+.tabs { margin-left: auto; }
+body[data-scene="Home"] .topbar .tabs, body[data-scene="Home"] .hud { display: none; }
+body[data-scene="Play"] .tabs, body[data-scene="Play"] .back { display: none; }
+
+/* lời thú cưng */
+.guide { position: fixed; z-index: 25; left: 12px; bottom: max(12px, env(safe-area-inset-bottom)); display: flex; align-items: flex-end; gap: 6px; max-width: min(440px, calc(100vw - 24px)); pointer-events: auto; cursor: pointer; }
+.guide img { width: 72px; height: 72px; flex: none; filter: drop-shadow(0 4px 6px rgba(76,56,118,.25)); }
+.guide p { margin: 0 0 30px; background: #fff; border-radius: 20px 20px 20px 4px; padding: 10px 14px; font-weight: 800; font-size: 17px; box-shadow: var(--shadow); line-height: 1.3; }
+.guide.pop { animation: pop .3s cubic-bezier(.3,1.6,.5,1); }
+body[data-scene="Island"] .guide, body[data-scene="WorldMap"] .guide { bottom: auto; top: 70px; }
+body[data-scene="Play"] .guide { left: auto; right: 12px; bottom: auto; top: 70px; flex-direction: row-reverse; }
+body[data-scene="Play"] .guide p { border-radius: 20px 20px 4px 20px; margin: 0 0 30px; }
+body[data-scene="Play"] .guide img { display: none; }
+body[data-scene="Play"] .guide p { margin: 0; }
+
+.btn.big { padding: 14px 22px; font-size: 18px; border-radius: 18px; }
+.row.center { justify-content: center; }
+.cost { display: inline-flex; gap: 6px; flex-wrap: wrap; font-weight: 900; font-size: 13px; }
+.cost span { display: inline-flex; align-items: center; gap: 1px; }
+.cost img { width: 22px; height: 22px; object-fit: contain; }
+.cost.gain span::before { content: '+'; }
+
+/* màn chào */
+.panel.home-panel { left: 50%; right: auto; bottom: auto; top: 50%; transform: translate(-50%, -50%); width: min(560px, calc(100vw - 24px)); max-height: calc(100vh - 24px); padding: 18px; border-radius: 28px; }
+.home-box { display: grid; gap: 12px; text-align: center; }
+.logo { margin: 0; font-family: 'Baloo 2', sans-serif; font-size: 46px; line-height: 1; color: #f28a4e; text-shadow: 0 3px 0 #fff, 0 6px 0 rgba(76,56,118,.12); }
+.tag { margin: -4px 0 4px; font-weight: 800; color: var(--ink2); }
+.home-box h3 { margin: 4px 0 0; }
+.profiles { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+.prof { border: 0; background: #fff; border-radius: 20px; padding: 10px; width: 120px; display: grid; justify-items: center; gap: 2px; box-shadow: 0 0 0 3px #efe6f7, 0 6px 0 rgba(76,56,118,.1); }
+.prof > img { width: 76px; height: 76px; }
+.prof b { font-size: 17px; }
+.prof span { display: inline-flex; align-items: center; gap: 2px; font-weight: 800; font-size: 13px; color: var(--ink2); }
+.prof span img { width: 18px; }
+.prof.add .plus { font-size: 52px; line-height: 76px; height: 76px; color: var(--orange); font-weight: 900; }
+.field { display: grid; gap: 6px; text-align: left; font-weight: 900; }
+.field input { font: inherit; font-size: 20px; padding: 12px 14px; border-radius: 14px; border: 3px solid #efe6f7; background: #fff; color: var(--ink); }
+.seg.big button { display: grid; padding: 8px 6px; } .seg.big small { font-weight: 700; font-size: 12px; }
+.pet-pick { display: flex; gap: 8px; }
+.pet-pick button { flex: 1; border: 0; background: #fff; border-radius: 18px; padding: 8px; display: grid; justify-items: center; font-weight: 900; box-shadow: 0 0 0 3px #efe6f7; }
+.pet-pick img { width: 72px; height: 72px; }
+.pet-pick button.on { background: var(--yellow); box-shadow: 0 0 0 3px #f2a94c; }
+
+/* bản đồ */
+.chip.locked { opacity: .7; } .chip img.mini { width: 18px; height: 18px; }
+.acts { display: grid; gap: 6px; }
+.act { border: 0; background: #fff; border-radius: 14px; padding: 10px 12px; display: grid; grid-template-columns: 1fr auto; gap: 2px 8px; text-align: left; box-shadow: 0 0 0 2px #efe6f7, inset 0 -3px 0 rgba(76,56,118,.08); }
+.act b { font-size: 17px; } .act span { font-size: 12px; font-weight: 700; color: var(--ink2); }
+.act em { font-style: normal; font-size: 12px; font-weight: 900; color: #f28a4e; align-self: center; }
+.act .cost { grid-column: 1 / -1; }
+.act:not(.off):hover { background: #fff8e6; }
+.act.off { opacity: .55; }
+.need { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; } .need img { width: 22px; }
+
+/* đảo */
+.palette button { position: relative; }
+.palette button i { position: absolute; right: 3px; bottom: 2px; font-style: normal; font-weight: 900; font-size: 12px; background: var(--orange); color: #fff; border-radius: 99px; padding: 0 6px; }
+.modal-wide .modal-box { max-width: min(860px, 100%); max-height: calc(100vh - 32px); overflow: auto; padding: 16px; }
+.shop h2, .achv h2, .parent h2 { margin: 0 0 8px; font-family: 'Baloo 2', sans-serif; }
+.shop-res { display: flex; flex-wrap: wrap; gap: 10px; font-weight: 900; margin-bottom: 8px; }
+.shop-res span { display: inline-flex; align-items: center; gap: 3px; } .shop-res img { width: 26px; }
+.shop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 8px; margin-top: 10px; }
+.shop-item { border: 0; background: #fff; border-radius: 16px; padding: 8px; display: grid; justify-items: center; gap: 4px; box-shadow: 0 0 0 2px #efe6f7; }
+.shop-item img { height: 76px; max-width: 100%; object-fit: contain; }
+.shop-item b { font-size: 13px; } .shop-item i { font-size: 11px; font-weight: 800; color: var(--ink2); font-style: normal; }
+.shop-item.cant { opacity: .5; }
+.ach-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+.ach-card { background: #fff; border-radius: 16px; padding: 10px; display: grid; justify-items: center; text-align: center; gap: 2px; box-shadow: 0 0 0 2px #efe6f7; filter: grayscale(1); opacity: .55; }
+.ach-card.on { filter: none; opacity: 1; box-shadow: 0 0 0 3px var(--yellow); }
+.ach-card img { width: 56px; height: 56px; object-fit: contain; } .ach-card b { font-size: 14px; } .ach-card span { font-size: 12px; font-weight: 700; color: var(--ink2); }
+
+/* thanh trò chơi */
+.panel.game-panel { top: max(10px, env(safe-area-inset-top)); bottom: auto; left: 12px; right: auto; width: auto; max-width: calc(100vw - 24px); padding: 6px; border-radius: 999px; flex-direction: row; flex-wrap: wrap; align-items: center; }
+.game-bar { display: flex; align-items: center; gap: 8px; }
+.gb-title { display: grid; line-height: 1.05; padding-right: 6px; } .gb-title b { font-family: 'Baloo 2', sans-serif; font-size: 20px; } .gb-title span { font-size: 12px; font-weight: 800; color: var(--ink2); }
+.gb-dots { display: flex; gap: 5px; } .gb-dots i { width: 14px; height: 14px; border-radius: 50%; background: #e9def3; } .gb-dots i.on { background: var(--mint); box-shadow: inset 0 0 0 3px #7cc96a; } .gb-dots i.cur { background: var(--yellow); }
+.builder-ex { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; padding: 0 4px; }
+.builder-ex .seg button { padding: 7px 10px; font-size: 13px; }
+
+/* phần thưởng */
+.modal-reward .modal-box { max-width: 520px; text-align: center; padding: 18px 16px; }
+.reward-box h2 { margin: 0 0 6px; font-family: 'Baloo 2', sans-serif; font-size: 36px; color: #f28a4e; }
+.rw-pet { width: 96px; height: 96px; margin-top: -60px; animation: bob 0.8s ease-in-out infinite alternate; }
+.rw-row { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin: 8px 0; }
+.rw { background: #fff; border-radius: 18px; padding: 8px 12px; display: grid; justify-items: center; box-shadow: 0 0 0 3px #ffe7a3; animation: pop .45s cubic-bezier(.3,1.8,.5,1) both; }
+.rw img { width: 64px; height: 64px; } .rw b { font-size: 26px; color: #f28a4e; line-height: 1; } .rw span { font-size: 12px; font-weight: 800; color: var(--ink2); }
+.lvl { font-weight: 800; color: var(--ink2); margin: 4px 0; } .lvl.up { color: #3e9a52; }
+.ach-new { display: flex; gap: 10px; align-items: center; background: #fff8e6; border-radius: 14px; padding: 8px 10px; margin: 6px 0; text-align: left; animation: pop .5s .6s cubic-bezier(.3,1.8,.5,1) both; }
+.ach-new img { width: 48px; height: 48px; object-fit: contain; } .ach-new b { display: block; } .ach-new span { font-size: 13px; font-weight: 700; color: var(--ink2); }
+.reward-box .row { margin-top: 12px; }
+
+/* phụ huynh */
+.parent-gate { text-align: center; padding: 10px; display: grid; gap: 10px; }
+.gate-q { font-size: 44px; font-weight: 900; font-family: 'Baloo 2', sans-serif; }
+.parent { display: grid; gap: 10px; }
+.parent h4 { margin: 10px 0 4px; }
+.stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; }
+.stat-grid div { background: #fff; border-radius: 14px; padding: 10px; display: grid; box-shadow: 0 0 0 2px #efe6f7; }
+.stat-grid b { font-size: 24px; } .stat-grid span { font-size: 12px; font-weight: 700; color: var(--ink2); }
+.bars { display: grid; gap: 4px; }
+.bar-row { display: grid; grid-template-columns: 170px 1fr 30px; align-items: center; gap: 8px; font-size: 13px; font-weight: 800; }
+.bar-row i { display: block; height: 12px; border-radius: 99px; background: linear-gradient(90deg, #ffd96b, #ffac6b); width: var(--w); min-width: 4px; }
+.tbl { width: 100%; border-collapse: collapse; font-size: 13px; background: #fff; border-radius: 12px; overflow: hidden; }
+.tbl th, .tbl td { padding: 6px 8px; text-align: left; border-bottom: 1px solid #f0e8f6; }
+.achs { display: flex; flex-wrap: wrap; gap: 6px; }
+.ach { display: inline-flex; align-items: center; gap: 4px; background: #fff; border-radius: 999px; padding: 3px 10px 3px 3px; font-size: 12px; font-weight: 800; opacity: .45; filter: grayscale(1); }
+.ach.on { opacity: 1; filter: none; box-shadow: 0 0 0 2px var(--yellow); } .ach img { width: 26px; height: 26px; object-fit: contain; }
+.prof-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; background: #fff; border-radius: 14px; padding: 8px; margin-bottom: 6px; box-shadow: 0 0 0 2px #efe6f7; }
+.prof-row.on { box-shadow: 0 0 0 3px var(--yellow); }
+.prof-row > img { width: 44px; height: 44px; } .prof-row > div { display: grid; flex: 1; min-width: 120px; } .prof-row span { font-size: 12px; color: var(--ink2); font-weight: 700; }
+.prof-row select, .tog select { font: inherit; padding: 4px 8px; border-radius: 10px; border: 2px solid #efe6f7; }
+.prof-row em { font-size: 12px; font-weight: 900; color: #3e9a52; font-style: normal; }
+.tog { display: flex; align-items: center; gap: 10px; font-weight: 800; background: #fff; border-radius: 12px; padding: 10px 12px; }
+.tog input[type=checkbox] { width: 22px; height: 22px; accent-color: #f28a4e; }
+.tog input[type=range] { flex: 1; accent-color: #f28a4e; }
+
+@media (max-width: 760px) {
+  .topbar { flex-wrap: wrap; }
+  .brand { display: none; }
+  .hud { order: 5; width: 100%; justify-content: space-around; padding: 2px 4px; }
+  .res img { width: 24px; height: 24px; } .res { font-size: 14px; }
+  .tabs { margin-left: 0; flex: 1; } .tabs button { flex: 1; }
+  .guide p { font-size: 15px; }
+  body[data-scene="Island"] .guide, body[data-scene="WorldMap"] .guide, body[data-scene="Play"] .guide { top: 118px; }
+  body[data-scene="Play"] .guide { top: 70px; }
+  .panel.game-panel { border-radius: 22px; }
+  .gb-title b { font-size: 16px; }
+  .logo { font-size: 38px; }
+  .bar-row { grid-template-columns: 120px 1fr 26px; }
+  .card { top: auto; }
+}
+body[data-scene="Play"] .topbar .brand, body[data-scene="Play"] .hud { display: none !important; }
+body[data-scene="Play"] #btn-parent { margin-left: auto; }
+.act > div { display: grid; gap: 1px; }
+.modal-wide .modal-close { top: 8px; right: 8px; position: sticky; float: right; margin: -6px -6px 0 0; z-index: 2; }
+body[data-scene="Wardrobe"] .guide { bottom: auto; top: 70px; }
+@media (max-width: 760px) { body[data-scene="Wardrobe"] .guide { top: 118px; } }
 </style>
 </head>
 <body>
@@ -158,14 +303,17 @@ button { font: inherit; color: inherit; cursor: pointer; }
 
 <header class="topbar">
   <a class="back" href="../index.html" aria-label="Trò chơi khác">‹</a>
-  <div class="brand"><b>Thế Giới Nhỏ</b><span>Phase 1</span></div>
-  <nav class="tabs">
-    <button data-scene="WorldMap">Bản đồ</button>
-    <button data-scene="Island">Đảo của bé</button>
-    <button data-scene="Gallery">Nhân vật</button>
+  <div class="brand"><b>Thế Giới Nhỏ</b><span>Little World</span></div>
+  <div id="hud" class="hud" hidden></div>
+  <nav class="tabs" hidden>
+    <button data-scene="Island" data-h="island">Đảo</button>
+    <button data-scene="WorldMap" data-h="map">Bản đồ</button>
+    <button data-scene="Wardrobe" data-h="wardrobe">Tủ đồ</button>
   </nav>
+  <button class="round-btn" id="btn-parent" aria-label="Góc phụ huynh" title="Góc phụ huynh">⚙</button>
 </header>
 
+<div id="guide" class="guide" hidden><img alt=""><p></p></div>
 <section id="panel" class="panel" hidden></section>
 <aside id="card" class="card" hidden></aside>
 <div id="modal" hidden></div>
@@ -176,6 +324,163 @@ button { font: inherit; color: inherit; cursor: pointer; }
 <script>(function () {
 'use strict';
 const M = {};
+
+/* ══════════ data/Content.ts ══════════ */
+M.Content = (function () {
+// ── Nội dung game: vùng → hoạt động, giá đồ trên đảo, huy hiệu ──
+// Thêm hoạt động mới: khai báo ở ACTIVITIES (scene + mode) và gắn vào một vùng ở REGION_ACTS.
+
+                                                                          
+const RES_LIST        = ['star', 'seed', 'wood', 'stone', 'flower', 'shell'];
+const RES_NAMES                      = {
+  star: 'Sao', seed: 'Hạt giống', wood: 'Gỗ', stone: 'Đá', flower: 'Hoa', shell: 'Vỏ sò',
+};
+const RES_USE                      = {
+  star: 'Mở vùng đất mới và đồ trang trí đặc biệt',
+  seed: 'Gieo vào luống đất, trồng cây và bụi cỏ',
+  wood: 'Làm nhà, ghế, hàng rào, cầu',
+  stone: 'Lát đường, làm giếng, đài phun nước',
+  flower: 'Trồng hoa và chậu hoa',
+  shell: 'Trang trí bãi biển',
+};
+
+                                                                                             
+const SKILL_NAMES                        = {
+  nature: 'Nhận biết & ngôn ngữ', logic: 'Logic & hình khối', memory: 'Trí nhớ', math: 'Toán học',
+  creative: 'Sáng tạo & không gian', life: 'Kỹ năng sống', science: 'Khám phá & khoa học',
+};
+
+                           
+                                                                       
+                                                                                     
+ 
+
+const ACTIVITIES             = [
+  { id: 'animal-match', scene: 'AnimalMatch', mode: 'find', name: 'Tìm bạn thú', desc: 'Nghe tên và chọn đúng con vật', skill: 'nature', region: 'animal-island', reward: { star: 3, seed: 2 }, rounds: 5 },
+  { id: 'animal-habitat', scene: 'AnimalMatch', mode: 'habitat', name: 'Nhà của thú', desc: 'Đưa con vật về đúng nơi ở', skill: 'nature', region: 'animal-island', reward: { star: 3, seed: 2 }, rounds: 5 },
+  { id: 'memory', scene: 'Memory', name: 'Lật thẻ ghi nhớ', desc: 'Lật thẻ, tìm hai thẻ giống nhau', skill: 'memory', region: 'puzzle-forest', reward: { star: 3, wood: 2 }, rounds: 1 },
+  { id: 'shape-puzzle', scene: 'ShapePuzzle', name: 'Ghép hình', desc: 'Kéo mảnh ghép vào đúng bóng', skill: 'logic', region: 'puzzle-forest', reward: { star: 3, wood: 2 }, rounds: 3 },
+  { id: 'count', scene: 'CountCollect', name: 'Đếm và hái', desc: 'Hái đúng số quả, so sánh và cộng', skill: 'math', region: 'math-mountain', reward: { star: 3, stone: 2 }, rounds: 5 },
+  { id: 'builder', scene: 'Builder', name: 'Bé xây dựng', desc: 'Xếp khối thành tháp, nhà, cầu', skill: 'creative', region: 'creative-town', reward: { star: 3, wood: 3 }, rounds: 1 },
+  { id: 'sort-trash', scene: 'Sort', mode: 'trash', name: 'Phân loại rác', desc: 'Bỏ rác vào đúng thùng', skill: 'life', region: 'life-skills-village', reward: { star: 3, seed: 1, flower: 2 }, rounds: 1 },
+  { id: 'ocean-clean', scene: 'Sort', mode: 'ocean', name: 'Biển sạch', desc: 'Nhặt rác, giữ lại các bạn biển', skill: 'science', region: 'adventure-ocean', reward: { star: 3, shell: 3 }, rounds: 1 },
+];
+const actById = (id        ) => ACTIVITIES.find((a) => a.id === id);
+
+/** Số sao cần để mở vùng (vùng 0 sao mở sẵn). */
+const REGION_STARS                         = {
+  'animal-island': 0, 'puzzle-forest': 0, 'math-mountain': 6, 'creative-town': 12, 'life-skills-village': 20, 'adventure-ocean': 28,
+};
+
+// ───────── giá đồ trên đảo (mua bằng tài nguyên kiếm được khi chơi) ─────────
+                                                
+                                                                                                                             
+const SHOP             = [
+  // hoa & cỏ
+  { asset: 'island-plant-flower-pink', cost: { flower: 1 }, group: 'plant', name: 'Hoa hồng phấn' },
+  { asset: 'island-plant-flower-yellow', cost: { flower: 1 }, group: 'plant', name: 'Hoa vàng' },
+  { asset: 'island-plant-flower-lavender', cost: { flower: 1 }, group: 'plant', name: 'Hoa oải hương' },
+  { asset: 'island-plant-flower-white', cost: { flower: 1 }, group: 'plant', name: 'Hoa cúc trắng' },
+  { asset: 'island-plant-flower-tulip', cost: { flower: 1 }, group: 'plant', name: 'Hoa tulip' },
+  { asset: 'island-plant-flower-blue', cost: { flower: 1 }, group: 'plant', name: 'Hoa xanh' },
+  { asset: 'island-plant-grass-1', cost: { seed: 1 }, group: 'plant', name: 'Bụi cỏ' },
+  { asset: 'island-plant-bush-1', cost: { seed: 2 }, group: 'plant', name: 'Bụi cây' },
+  { asset: 'island-plant-bush-2', cost: { seed: 2 }, group: 'plant', name: 'Bụi quả mọng' },
+  { asset: 'island-plant-bush-3', cost: { seed: 2, flower: 1 }, group: 'plant', name: 'Bụi hoa' },
+  { asset: 'island-plant-hedge-small', cost: { seed: 2 }, group: 'plant', name: 'Bờ rào cây' },
+  { asset: 'island-plant-mushroom-red', cost: { seed: 1 }, group: 'plant', name: 'Nấm đỏ' },
+  { asset: 'island-plant-mushroom-glow', cost: { seed: 2, star: 2 }, group: 'plant', name: 'Nấm phát sáng' },
+  // cây
+  { asset: 'island-tree-oak-1', cost: { seed: 3 }, group: 'tree', name: 'Cây sồi' },
+  { asset: 'island-tree-pine-1', cost: { seed: 3 }, group: 'tree', name: 'Cây thông' },
+  { asset: 'island-tree-apple', cost: { seed: 4 }, group: 'tree', name: 'Cây táo' },
+  { asset: 'island-tree-orange', cost: { seed: 4 }, group: 'tree', name: 'Cây cam' },
+  { asset: 'island-tree-blossom', cost: { seed: 4, flower: 1 }, group: 'tree', name: 'Cây hoa anh đào' },
+  { asset: 'island-tree-palm', cost: { seed: 3, shell: 1 }, group: 'tree', name: 'Cây dừa' },
+  { asset: 'island-tree-magic', cost: { seed: 5, star: 10 }, group: 'tree', name: 'Cây phép màu' },
+  // mặt đất
+  { asset: 'island-terrain-plot-empty', cost: { wood: 1, seed: 1 }, group: 'ground', name: 'Luống đất' },
+  { asset: 'island-terrain-path-stones', cost: { stone: 2 }, group: 'ground', name: 'Đường đá' },
+  { asset: 'island-terrain-rock-2', cost: { stone: 1 }, group: 'ground', name: 'Hòn đá' },
+  { asset: 'island-terrain-rock-mossy', cost: { stone: 1, seed: 1 }, group: 'ground', name: 'Đá rêu' },
+  { asset: 'island-terrain-sand-patch', cost: { shell: 2 }, group: 'ground', name: 'Bãi cát' },
+  { asset: 'island-terrain-meadow', cost: { flower: 3 }, group: 'ground', name: 'Thảm hoa' },
+  { asset: 'env-starfish', cost: { shell: 1 }, group: 'ground', name: 'Sao biển' },
+  { asset: 'env-shells-cluster', cost: { shell: 2 }, group: 'ground', name: 'Vỏ sò' },
+  // đồ trang trí
+  { asset: 'island-deco-fence-h', cost: { wood: 1 }, group: 'deco', name: 'Hàng rào' },
+  { asset: 'island-deco-fence-post', cost: { wood: 1 }, group: 'deco', name: 'Cột rào' },
+  { asset: 'island-deco-bench-wood', cost: { wood: 3 }, group: 'deco', name: 'Ghế gỗ' },
+  { asset: 'island-deco-bench-garden', cost: { wood: 3, flower: 1 }, group: 'deco', name: 'Ghế vườn' },
+  { asset: 'island-deco-lamp-street', cost: { wood: 1, stone: 2 }, group: 'deco', name: 'Đèn đường' },
+  { asset: 'island-deco-lamp-mushroom', cost: { seed: 1, stone: 1 }, group: 'deco', name: 'Đèn nấm' },
+  { asset: 'island-deco-sign-board', cost: { wood: 1 }, group: 'deco', name: 'Bảng gỗ' },
+  { asset: 'island-deco-mailbox', cost: { wood: 2 }, group: 'deco', name: 'Hộp thư' },
+  { asset: 'island-deco-birdhouse', cost: { wood: 2 }, group: 'deco', name: 'Nhà chim' },
+  { asset: 'island-deco-flower-pot-1', cost: { stone: 1, flower: 1 }, group: 'deco', name: 'Chậu hoa' },
+  { asset: 'island-deco-flower-pot-2', cost: { stone: 1, seed: 1 }, group: 'deco', name: 'Chậu cây' },
+  { asset: 'island-deco-picnic-blanket', cost: { flower: 2 }, group: 'deco', name: 'Thảm dã ngoại' },
+  { asset: 'island-deco-pet-bed', cost: { wood: 2 }, group: 'deco', name: 'Ổ thú cưng' },
+  { asset: 'island-deco-swing', cost: { wood: 4 }, group: 'deco', name: 'Xích đu' },
+  { asset: 'island-deco-well', cost: { stone: 4, wood: 1 }, group: 'deco', name: 'Giếng nước' },
+  { asset: 'island-deco-bridge-plank', cost: { wood: 3 }, group: 'deco', name: 'Cầu ván' },
+  { asset: 'island-deco-statue-bunny', cost: { stone: 3, star: 5 }, group: 'deco', name: 'Tượng thỏ' },
+  { asset: 'island-deco-lantern-string', cost: { wood: 2, star: 4 }, group: 'deco', name: 'Dây đèn lồng' },
+  { asset: 'island-deco-fountain', cost: { stone: 5, star: 8 }, group: 'deco', name: 'Đài phun nước' },
+  { asset: 'island-deco-windmill', cost: { wood: 6, star: 12 }, group: 'deco', name: 'Cối xay gió' },
+  // nhà
+  { asset: 'island-building-pet-house', cost: { wood: 3 }, group: 'build', name: 'Nhà thú cưng' },
+  { asset: 'island-building-bunny-hutch', cost: { wood: 4 }, group: 'build', name: 'Chuồng thỏ' },
+  { asset: 'island-building-cottage-1', cost: { wood: 6, stone: 2 }, group: 'build', name: 'Nhà nhỏ đỏ' },
+  { asset: 'island-building-cottage-2', cost: { wood: 6, stone: 2 }, group: 'build', name: 'Nhà nhỏ xanh' },
+  { asset: 'island-building-cottage-3', cost: { wood: 7, stone: 3 }, group: 'build', name: 'Nhà hai tầng' },
+  { asset: 'island-building-greenhouse', cost: { wood: 4, stone: 3, seed: 2 }, group: 'build', name: 'Nhà kính' },
+  { asset: 'island-building-barn', cost: { wood: 8, stone: 2 }, group: 'build', name: 'Nhà kho' },
+  { asset: 'island-building-lighthouse', cost: { stone: 6, shell: 4, star: 10 }, group: 'build', name: 'Hải đăng' },
+];
+const SHOP_GROUPS                                = [['plant', 'Hoa & cỏ'], ['tree', 'Cây'], ['deco', 'Đồ trang trí'], ['build', 'Nhà'], ['ground', 'Mặt đất']];
+const shopItem = (asset        ) => SHOP.find((s) => s.asset === asset);
+
+/** Đồ có sẵn trong túi khi bắt đầu, để bé tập đặt ngay. */
+const STARTER_ITEMS                         = { 'island-plant-flower-pink': 2, 'island-plant-flower-yellow': 1, 'island-deco-bench-wood': 1 };
+const STARTER_RES                               = { seed: 2, wood: 1 };
+
+// ───────── luống đất: gieo hạt → nảy mầm → lớn → nở hoa ─────────
+const PLOT_ASSETS = ['island-terrain-plot-empty', 'island-terrain-plot-sprout', 'island-terrain-plot-growing'];
+const PLOT_GROW_MS = [0, 45_000, 120_000];   // mốc thời gian (sau khi gieo) cho mầm / lớn / nở
+const PLOT_HARVEST                               = { flower: 3, seed: 1 };
+
+// ───────── huy hiệu ─────────
+                                                                                      
+const ACHIEVEMENTS                = [
+  { id: 'first-play', name: 'Bước đầu tiên', desc: 'Chơi xong trò chơi đầu tiên', icon: 'reward-star' },
+  { id: 'plays-10', name: 'Nhà thám hiểm nhỏ', desc: 'Chơi xong 10 lượt', icon: 'world-ui-compass' },
+  { id: 'plays-30', name: 'Nhà thám hiểm lớn', desc: 'Chơi xong 30 lượt', icon: 'world-ui-map-pin' },
+  { id: 'all-regions', name: 'Đi khắp thế giới', desc: 'Chơi ở cả 6 vùng đất', icon: 'world-ui-unlocked-sparkle' },
+  { id: 'stars-50', name: 'Bầu trời sao', desc: 'Nhận tổng cộng 50 sao', icon: 'reward-star' },
+  { id: 'first-place', name: 'Kiến trúc sư', desc: 'Đặt món đồ đầu tiên lên đảo', icon: 'island-deco-bench-wood' },
+  { id: 'place-15', name: 'Đảo thật xinh', desc: 'Đặt 15 món đồ lên đảo', icon: 'island-deco-fountain' },
+  { id: 'harvest-1', name: 'Người làm vườn', desc: 'Thu hoạch luống hoa đầu tiên', icon: 'reward-flower' },
+  { id: 'harvest-5', name: 'Bàn tay xanh', desc: 'Thu hoạch 5 lần', icon: 'reward-seed' },
+  { id: 'animal-friend', name: 'Bạn của muông thú', desc: 'Chơi các trò ở Đảo Động Vật 5 lần', icon: 'world-animal-island-icon' },
+  { id: 'memory-5', name: 'Trí nhớ siêu đỉnh', desc: 'Lật thẻ ở cấp 5', icon: 'world-puzzle-forest-icon' },
+  { id: 'math-4', name: 'Nhà toán học', desc: 'Đếm và hái tới cấp 4', icon: 'world-math-mountain-icon' },
+  { id: 'builder-3', name: 'Thợ xây tài ba', desc: 'Xây 3 công trình', icon: 'world-creative-town-icon' },
+  { id: 'eco-hero', name: 'Bạn của Trái Đất', desc: 'Chơi Phân loại rác và Biển sạch', icon: 'world-adventure-ocean-icon' },
+  { id: 'new-pet-friend', name: 'Đổi bạn đồng hành', desc: 'Chọn một bạn thú cưng khác', icon: 'fox-portrait' },
+];
+
+// ───────── lời thú cưng (ngắn, thân thiện) ─────────
+const PET_LINES = {
+  hello: ['Chào bạn! Hôm nay mình khám phá nhé!', 'Mình nhớ bạn quá! Đi chơi thôi!', 'Ồ, bạn đến rồi! Đảo mình đang chờ đó.'],
+  great: ['Giỏi quá!', 'Đúng rồi!', 'Tuyệt vời!', 'Bạn làm được rồi!', 'Hay quá đi!'],
+  tryAgain: ['Thử lại nhé, không sao đâu!', 'Gần đúng rồi! Thử con khác xem.', 'Mình cùng nhìn kỹ lại nào.'],
+  island: ['Mình trang trí đảo nhé!', 'Chạm vào luống đất để gieo hạt nha.', 'Đảo mình ngày càng xinh!'],
+  map: ['Bạn muốn đi đâu hôm nay?', 'Chạm vào một vùng đất để xem trò chơi nhé.'],
+};
+const pick =    (a     )    => a[Math.floor(Math.random() * a.length)];
+return { RES_LIST, RES_NAMES, RES_USE, SKILL_NAMES, ACTIVITIES, actById, REGION_STARS, SHOP, SHOP_GROUPS, shopItem, STARTER_ITEMS, STARTER_RES, PLOT_ASSETS, PLOT_GROW_MS, PLOT_HARVEST, ACHIEVEMENTS, PET_LINES, pick };
+})();
 
 /* ══════════ services/AssetLoader.ts ══════════ */
 M.AssetLoader = (function () {
@@ -303,7 +608,14 @@ M.Ui = (function () {
 const $ = (sel        ) => document.querySelector(sel)               ;
 
 const Ui = {
+  /** Scene mà đường dẫn hiện tại muốn mở; scene khác tạo xong muộn (đang tải dở) sẽ tự dừng. */
+  route: '',
+  stale(scene     )          {
+    if (Ui.route && Ui.route !== scene.scene.key) { scene.scene.stop(); return true; }
+    return false;
+  },
   setActiveTab(key        ) {
+    document.body.dataset.scene = key;
     document.querySelectorAll             ('.tabs button').forEach((b) => {
       b.classList.toggle('on', b.dataset.scene === key);
     });
@@ -329,16 +641,18 @@ const Ui = {
     return el;
   },
 
-  modal(html               )              {
+  modal(html               , opts                                                            = {})              {
     const el = $('#modal');
-    if (!html) { el.hidden = true; el.innerHTML = ''; return el; }
-    el.innerHTML = `<div class="modal-box">${html}<button class="modal-close" aria-label="Đóng">✕</button></div>`;
+    if (!html) { el.hidden = true; el.innerHTML = ''; el.className = ''; el.onclick = null; return el; }
+    el.className = opts.cls || '';
+    el.innerHTML = `<div class="modal-box">${html}${opts.noClose ? '' : '<button class="modal-close" aria-label="Đóng">✕</button>'}</div>`;
     el.hidden = false;
-    const close = () => Ui.modal(null);
-    el.querySelector('.modal-close') .addEventListener('click', close);
-    el.onclick = (e) => { if (e.target === el) close(); };
+    const close = () => { Ui.modal(null); opts.onClose?.(); };
+    el.querySelector('.modal-close')?.addEventListener('click', close);
+    el.onclick = (e) => { if (e.target === el && !opts.noClose) close(); };
     return el;
   },
+  get modalOpen() { return !$('#modal').hidden; },
 
   toast(msg        , ms = 1800) {
     const el = $('#toast');
@@ -361,6 +675,570 @@ const Ui = {
   },
 };
 return { Ui };
+})();
+
+/* ══════════ services/Store.ts ══════════ */
+M.Store = (function () {
+// ── Lưu tiến trình trên máy (localStorage) ──
+// Một bản lưu chứa nhiều hồ sơ bé. Có số phiên bản; dữ liệu hỏng/thiếu được bỏ qua an toàn.
+const { ACTIVITIES, ACHIEVEMENTS, RES_LIST, STARTER_ITEMS, STARTER_RES, REGION_STARS, actById, Res, Cost } = M.Content;
+const KEY = 'little-world-save';
+const VERSION = 2;
+
+                                                           
+                                                                                           
+                                                                                                    
+                          
+                                                                                         
+                                                                                      
+                                                                                        
+                                                                                      
+                                                                                            
+                                
+                                                                                   
+                                                                                         
+                        
+                                                     
+                     
+ 
+                                                                                                         
+                                                                                                  
+
+const emptyRes = ()                      => Object.fromEntries(RES_LIST.map((r) => [r, 0]))                       ;
+const defaultSettings = ()           => ({ sound: true, music: true, volume: 0.7, voice: true, lang: 'vi' });
+const startLevel = (age         ) => (age === 'toddler' ? 1 : age === 'preschool' ? 2 : 3);
+
+function freshProfile(name        , age         , pet        )          {
+  const res = emptyRes();
+  for (const [k, v] of Object.entries(STARTER_RES)) res[k       ] = v          ;
+  return {
+    id: 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+    name: name.trim().slice(0, 16) || 'Bé', age, pet, look: null, created: Date.now(),
+    res, earned: emptyRes(), items: { ...STARTER_ITEMS }, island: null,
+    level: {}, plays: {}, ach: {}, counters: {}, history: [], sessions: 0, playMs: 0, lastSeen: 0, seenIntro: false,
+  };
+}
+
+/** Sửa một hồ sơ đọc từ bộ nhớ: bổ sung trường thiếu, bỏ giá trị sai kiểu. */
+function repairProfile(p     )                 {
+  if (!p || typeof p !== 'object' || typeof p.id !== 'string') return null;
+  const base = freshProfile(String(p.name || 'Bé'), ['toddler', 'preschool', 'explorer'].includes(p.age) ? p.age : 'preschool', ['fox', 'bunny', 'bear'].includes(p.pet) ? p.pet : 'fox');
+  const num = (o     ) => Object.fromEntries(Object.entries(o && typeof o === 'object' ? o : {}).filter(([, v]) => typeof v === 'number' && isFinite(v          ) && (v          ) >= 0));
+  const out          = {
+    ...base, id: p.id, created: +p.created || Date.now(),
+    look: p.look && typeof p.look === 'object' ? p.look : null,
+    res: { ...emptyRes(), ...num(p.res) }, earned: { ...emptyRes(), ...num(p.earned) },
+    items: num(p.items), level: num(p.level), plays: num(p.plays), ach: num(p.ach), counters: num(p.counters),
+    island: Array.isArray(p.island) ? p.island.filter((o     ) => o && typeof o.a === 'string' && isFinite(o.x) && isFinite(o.y)) : null,
+    history: Array.isArray(p.history) ? p.history.filter((h     ) => h && typeof h.act === 'string').slice(-200) : [],
+    sessions: +p.sessions || 0, playMs: +p.playMs || 0, lastSeen: +p.lastSeen || 0, seenIntro: !!p.seenIntro,
+  };
+  return out;
+}
+
+function load()           {
+  try {
+    const raw = localStorage.getItem(KEY);
+    if (raw) {
+      const s = JSON.parse(raw);
+      if (s && typeof s === 'object' && Array.isArray(s.profiles)) {
+        const profiles = s.profiles.map(repairProfile).filter(Boolean)             ;
+        return {
+          v: VERSION, profiles,
+          current: profiles.some((p) => p.id === s.current) ? s.current : (profiles[0]?.id ?? null),
+          settings: { ...defaultSettings(), ...(s.settings && typeof s.settings === 'object' ? s.settings : {}) },
+        };
+      }
+    }
+  } catch (e) { console.warn('Little World: bản lưu bị hỏng, bắt đầu mới', e); }
+  // Mang diện mạo đã chỉnh ở bản Phase 1 (nếu có) sang hồ sơ đầu tiên
+  return { v: VERSION, current: null, profiles: [], settings: defaultSettings() };
+}
+
+let save           = load();
+let saveTimer      = null;
+const listeners = new Set            ();
+
+function persist() {
+  try { localStorage.setItem(KEY, JSON.stringify(save)); } catch (e) { /* bộ nhớ đầy / chế độ riêng tư: vẫn chơi được */ }
+}
+
+                                                                                                                              
+
+const Store = {
+  get settings()           { return save.settings; },
+  get profiles()            { return save.profiles; },
+  get p()                 { return save.profiles.find((x) => x.id === save.current) || null; },
+
+  /** Lưu ngay (gọi sau thay đổi quan trọng) hoặc gom lại (soon). */
+  commit(soon = false) {
+    if (soon) { clearTimeout(saveTimer); saveTimer = setTimeout(persist, 400); } else persist();
+    for (const f of listeners) f();
+  },
+  onChange(f            ) { listeners.add(f); return () => listeners.delete(f); },
+
+  createProfile(name        , age         , pet        )          {
+    const p = freshProfile(name, age, pet);
+    if (!save.profiles.length) {
+      try { const old = JSON.parse(localStorage.getItem('lw-look') || 'null'); if (old && old.variants) p.look = old; } catch (e) { /* bỏ qua */ }
+    }
+    save.profiles.push(p);
+    save.current = p.id;
+    this.commit();
+    return p;
+  },
+  selectProfile(id        ) { if (save.profiles.some((p) => p.id === id)) { save.current = id; this.commit(); } },
+  deleteProfile(id        ) {
+    save.profiles = save.profiles.filter((p) => p.id !== id);
+    if (save.current === id) save.current = save.profiles[0]?.id ?? null;
+    this.commit();
+  },
+  resetProfile(id        ) {
+    const i = save.profiles.findIndex((p) => p.id === id); if (i < 0) return;
+    const o = save.profiles[i];
+    const n = freshProfile(o.name, o.age, o.pet); n.id = o.id; n.look = o.look; n.seenIntro = true;
+    save.profiles[i] = n; this.commit();
+  },
+  resetAll() { save = { v: VERSION, current: null, profiles: [], settings: defaultSettings() }; this.commit(); },
+
+  startSession() { const p = this.p; if (!p) return; p.sessions++; p.lastSeen = Date.now(); this.commit(); },
+  tickPlaytime(ms        ) { const p = this.p; if (!p) return; p.playMs += ms; p.lastSeen = Date.now(); this.commit(true); },
+
+  // ───── tài nguyên ─────
+  has(cost      )          { const p = this.p; if (!p) return false; return Object.entries(cost).every(([k, v]) => p.res[k       ] >= (v          )); },
+  pay(cost      )          {
+    const p = this.p; if (!p || !this.has(cost)) return false;
+    for (const [k, v] of Object.entries(cost)) p.res[k       ] -= v          ;
+    this.commit(); return true;
+  },
+  give(r      ) {
+    const p = this.p; if (!p) return;
+    for (const [k, v] of Object.entries(r)) { p.res[k       ] += v          ; p.earned[k       ] += v          ; }
+  },
+  addItem(asset        , n = 1) { const p = this.p; if (!p) return; p.items[asset] = (p.items[asset] || 0) + n; if (p.items[asset] <= 0) delete p.items[asset]; this.commit(true); },
+  count(k        , n = 1) { const p = this.p; if (!p) return; p.counters[k] = (p.counters[k] || 0) + n; },
+
+  level(act        )         { const p = this.p; return Math.max(1, Math.min(5, p?.level[act] || (p ? startLevel(p.age) : 1))); },
+  setLevel(act        , l        ) { const p = this.p; if (!p) return; p.level[act] = Math.max(1, Math.min(5, l)); this.commit(); },
+
+  starsTotal()         { return this.p?.earned.star || 0; },
+  regionOpen(id        )          { return this.starsTotal() >= (REGION_STARS[id] ?? 0); },
+
+  /** Kết thúc một hoạt động: phần thưởng + điều chỉnh độ khó + huy hiệu. */
+  finish(actId        , info                                                                     )               {
+    const p = this.p ; const act = actById(actId) ;
+    const before = this.level(actId);
+    const openBefore = Object.keys(REGION_STARS).filter((r) => this.regionOpen(r));
+    let after = before;
+    if (!info.noAdapt) {
+      // Ít nhầm → lên cấp; nhầm nhiều → nhẹ hơn một chút. Không bao giờ "thua".
+      if (info.mistakes <= Math.max(1, Math.floor(info.rounds / 3))) after = Math.min(5, before + 1);
+      else if (info.mistakes >= info.rounds * 2 + 2) after = Math.max(1, before - 1);
+    }
+    p.level[actId] = after;
+    const reward       = { ...act.reward };
+    if (!p.plays[actId]) reward.star = (reward.star || 0) + 2;   // lần đầu chơi: thêm 2 sao
+    this.give(reward);
+    p.plays[actId] = (p.plays[actId] || 0) + 1;
+    p.history.push({ act: actId, t: Date.now(), ms: Math.round(info.ms), level: before, mistakes: info.mistakes });
+    if (p.history.length > 200) p.history.splice(0, p.history.length - 200);
+    if (actId === 'builder') this.count('builds');
+    const newAch = this.checkAchievements();
+    const unlocked = Object.keys(REGION_STARS).filter((r) => this.regionOpen(r) && !openBefore.includes(r));
+    this.commit();
+    return { reward, levelBefore: before, levelAfter: after, newAch, unlocked };
+  },
+
+  /** Kiểm tra & ghi huy hiệu mới. Trả về id các huy hiệu vừa đạt. */
+  checkAchievements()           {
+    const p = this.p; if (!p) return [];
+    const plays = Object.values(p.plays).reduce((a, b) => a + b, 0);
+    const regionsPlayed = new Set(Object.keys(p.plays).filter((k) => p.plays[k] > 0).map((k) => actById(k)?.region));
+    const animalPlays = (p.plays['animal-match'] || 0) + (p.plays['animal-habitat'] || 0);
+    const c = p.counters;
+    const rules                          = {
+      'first-play': plays >= 1, 'plays-10': plays >= 10, 'plays-30': plays >= 30,
+      'all-regions': ACTIVITIES.map((a) => a.region).every((r) => regionsPlayed.has(r)),
+      'stars-50': p.earned.star >= 50,
+      'first-place': (c.placed || 0) >= 1, 'place-15': (c.placed || 0) >= 15,
+      'harvest-1': (c.harvest || 0) >= 1, 'harvest-5': (c.harvest || 0) >= 5,
+      'animal-friend': animalPlays >= 5,
+      'memory-5': (p.level['memory'] || 0) >= 5 && (p.plays['memory'] || 0) > 0,
+      'math-4': (p.level['count'] || 0) >= 4 && (p.plays['count'] || 0) > 0,
+      'builder-3': (c.builds || 0) >= 3,
+      'eco-hero': (p.plays['sort-trash'] || 0) > 0 && (p.plays['ocean-clean'] || 0) > 0,
+      'new-pet-friend': (c.petSwitch || 0) >= 1,
+    };
+    const got           = [];
+    for (const a of ACHIEVEMENTS) if (rules[a.id] && !p.ach[a.id]) { p.ach[a.id] = Date.now(); got.push(a.id); }
+    return got;
+  },
+
+  setIsland(objs             ) { const p = this.p; if (!p) return; p.island = objs; this.commit(true); },
+  setLook(look     ) { const p = this.p; if (!p) return; p.look = look; this.commit(true); },
+  setPet(pet        ) { const p = this.p; if (!p || p.pet === pet) return; p.pet = pet; this.count('petSwitch'); this.checkAchievements(); this.commit(); },
+  setSettings(s                   ) { Object.assign(save.settings, s); this.commit(); },
+};
+return { Store };
+})();
+
+/* ══════════ services/Audio.ts ══════════ */
+M.Audio = (function () {
+// ── Âm thanh tự tổng hợp (Web Audio) + lời đọc (Speech Synthesis) ──
+// Không dùng file nhạc có bản quyền: mọi tiếng đều sinh bằng sóng âm, nhẹ nhàng, không gắt.
+// Chỉ bật sau lần chạm đầu tiên của người chơi (trình duyệt chặn tự phát).
+const { Store } = M.Store;
+let ctx                      = null;
+let master                  = null;
+let musicGain                  = null;
+let musicTimer      = null;
+let musicStep = 0;
+let viVoice                              = null;
+
+function ensure()                      {
+  if (!ctx) {
+    const AC = (window       ).AudioContext || (window       ).webkitAudioContext;
+    if (!AC) return null;
+    ctx = new AC();
+    master = ctx .createGain(); master.connect(ctx .destination);
+    musicGain = ctx .createGain(); musicGain.gain.value = 0.0; musicGain.connect(master);
+    Audio.applySettings();
+  }
+  if (ctx .state === 'suspended') ctx .resume();
+  return ctx;
+}
+
+function tone(freq        , t0        , dur        , { type = 'sine', vol = 0.25, attack = 0.01, slide = 0, dest = null        } = {}) {
+  const c = ctx ; const o = c.createOscillator(); const g = c.createGain();
+  o.type = type                  ;
+  o.frequency.setValueAtTime(freq, t0);
+  if (slide) o.frequency.exponentialRampToValueAtTime(Math.max(40, freq * slide), t0 + dur);
+  g.gain.setValueAtTime(0.0001, t0);
+  g.gain.exponentialRampToValueAtTime(vol, t0 + attack);
+  g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+  o.connect(g); g.connect(dest || master );
+  o.start(t0); o.stop(t0 + dur + 0.05);
+}
+
+const NOTE = (n        ) => 440 * Math.pow(2, (n - 69) / 12);
+// giai điệu nền: ngũ cung Đô trưởng, chậm, như hộp nhạc
+const MELODY = [72, 76, 79, 76, 74, 72, 69, 72, 74, 76, 74, 72, 67, 69, 72, -1];
+const BASS = [48, 48, 45, 45, 43, 43, 45, 45];
+
+function pickVoice() {
+  try {
+    const vs = speechSynthesis.getVoices();
+    viVoice = vs.find((v) => /^vi/i.test(v.lang)) || null;
+  } catch (e) { viVoice = null; }
+}
+if (typeof speechSynthesis !== 'undefined') { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+
+const Audio = {
+  unlock() { ensure(); if (Store.settings.music) this.startMusic(); },
+
+  applySettings() {
+    const s = Store.settings;
+    if (master) master.gain.value = s.sound ? s.volume : 0;
+    if (musicGain && ctx) musicGain.gain.setTargetAtTime(s.music && s.sound ? 0.32 : 0, ctx.currentTime, 0.3);
+    if (s.music && s.sound) this.startMusic(); else this.stopMusic();
+  },
+
+  sfx(name                                                                                                                  ) {
+    if (!Store.settings.sound) return;
+    const c = ensure(); if (!c) return;
+    const t = c.currentTime + 0.01;
+    switch (name) {
+      case 'tap': tone(660, t, 0.08, { type: 'triangle', vol: 0.15 }); break;
+      case 'pop': tone(520, t, 0.12, { type: 'sine', vol: 0.25, slide: 1.8 }); break;
+      case 'flip': tone(380, t, 0.09, { type: 'triangle', vol: 0.14, slide: 1.5 }); break;
+      case 'snap': tone(880, t, 0.07, { type: 'square', vol: 0.06 }); tone(1320, t + 0.05, 0.12, { type: 'sine', vol: 0.18 }); break;
+      case 'place': tone(300, t, 0.12, { type: 'sine', vol: 0.3, slide: 0.6 }); tone(600, t + 0.02, 0.08, { type: 'triangle', vol: 0.08 }); break;
+      case 'good': [72, 76, 79].forEach((n, i) => tone(NOTE(n), t + i * 0.08, 0.25, { type: 'triangle', vol: 0.18 })); break;
+      case 'soft': tone(330, t, 0.22, { type: 'sine', vol: 0.14, slide: 0.85 }); break;
+      case 'bloop': tone(240, t, 0.25, { type: 'sine', vol: 0.22, slide: 2.2 }); break;
+      case 'plant': tone(200, t, 0.15, { type: 'triangle', vol: 0.2, slide: 0.7 }); tone(NOTE(79), t + 0.15, 0.3, { type: 'sine', vol: 0.12 }); break;
+      case 'whoosh': {
+        const n = c.sampleRate * 0.35; const b = c.createBuffer(1, n, c.sampleRate); const d = b.getChannelData(0);
+        for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.sin(Math.PI * i / n) * 0.5;
+        const src = c.createBufferSource(); src.buffer = b;
+        const f = c.createBiquadFilter(); f.type = 'bandpass'; f.frequency.setValueAtTime(400, t); f.frequency.exponentialRampToValueAtTime(2400, t + 0.3);
+        const g = c.createGain(); g.gain.value = 0.25;
+        src.connect(f); f.connect(g); g.connect(master ); src.start(t);
+        break;
+      }
+      case 'reward': [72, 76, 79, 84, 88].forEach((n, i) => tone(NOTE(n), t + i * 0.09, 0.5, { type: 'triangle', vol: 0.16 })); tone(NOTE(96), t + 0.5, 0.6, { type: 'sine', vol: 0.06 }); break;
+      case 'unlock': [67, 72, 76, 79, 84].forEach((n, i) => tone(NOTE(n), t + i * 0.12, 0.7, { type: 'sine', vol: 0.15 })); break;
+    }
+  },
+
+  startMusic() {
+    if (musicTimer || !ctx || !Store.settings.music || !Store.settings.sound) return;
+    const beat = 0.42;
+    let next = ctx.currentTime + 0.1;
+    musicTimer = setInterval(() => {
+      if (!ctx) return;
+      while (next < ctx.currentTime + 0.6) {
+        const m = MELODY[musicStep % MELODY.length];
+        if (m > 0) tone(NOTE(m), next, beat * 1.6, { type: 'sine', vol: 0.1, attack: 0.02, dest: musicGain });
+        if (musicStep % 2 === 0) tone(NOTE(BASS[(musicStep / 2) % BASS.length]), next, beat * 2.2, { type: 'triangle', vol: 0.07, attack: 0.04, dest: musicGain });
+        musicStep++; next += beat;
+      }
+    }, 150);
+    if (musicGain) musicGain.gain.setTargetAtTime(0.32, ctx.currentTime, 0.5);
+  },
+  stopMusic() { clearInterval(musicTimer); musicTimer = null; },
+
+  /** Đọc câu hướng dẫn (nếu máy có giọng tiếng Việt và phụ huynh bật lời đọc). */
+  say(text        ) {
+    if (!Store.settings.voice || !Store.settings.sound || typeof speechSynthesis === 'undefined') return;
+    try {
+      speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text.replace(/[!?.]+/g, (m) => m[0]));
+      u.lang = 'vi-VN'; if (viVoice) u.voice = viVoice;
+      u.rate = 0.92; u.pitch = 1.15; u.volume = Math.min(1, Store.settings.volume + 0.2);
+      speechSynthesis.speak(u);
+    } catch (e) { /* không có giọng đọc: vẫn hiện chữ */ }
+  },
+  get hasVoice() { return !!viVoice; },
+};
+return { Audio };
+})();
+
+/* ══════════ services/Hud.ts ══════════ */
+M.Hud = (function () {
+// ── Thanh tài nguyên, lời thú cưng, bảng phần thưởng ──
+const { AssetLoader } = M.AssetLoader;
+const { Store } = M.Store;
+const { Audio } = M.Audio;
+const { Ui } = M.Ui;
+const { RES_LIST, RES_NAMES, RES_USE, ACHIEVEMENTS, REGION_STARS, pick, PET_LINES } = M.Content;
+const $ = (s        ) => document.querySelector(s)               ;
+const resIcon = (r        ) => AssetLoader.url('reward-' + r);
+const costHtml = (cost                        , cls = 'cost') =>
+  `<span class="${cls}">${Object.entries(cost).filter(([, v]) => v).map(([k, v]) => `<span><img src="${resIcon(k)}" alt="${RES_NAMES[k                          ]}">${v}</span>`).join('')}</span>`;
+
+let guideTimer      = null;
+
+const Hud = {
+  show(on         ) {
+    $('#hud').hidden = !on;
+    ($('.tabs')               ).hidden = !on;
+    if (on) this.render();
+  },
+
+  render() {
+    const p = Store.p; if (!p) return;
+    const el = $('#hud');
+    el.innerHTML = RES_LIST.map((r) =>
+      `<button class="res" data-res="${r}" title="${RES_NAMES[r]}"><img src="${resIcon(r)}" alt=""><b>${p.res[r]}</b></button>`).join('');
+    el.onclick = (e     ) => {
+      const b = e.target.closest('[data-res]'); if (!b) return;
+      const r = b.dataset.res;
+      Audio.sfx('tap');
+      Ui.toast(`${RES_NAMES[r                          ]}: ${RES_USE[r                        ]}`, 2600);
+    };
+  },
+
+  /** Nảy số khi tài nguyên tăng. */
+  bump(r        ) {
+    const b = document.querySelector(`#hud [data-res="${r}"]`)                      ;
+    if (!b) return;
+    b.classList.remove('bump'); void b.offsetWidth; b.classList.add('bump');
+  },
+
+  /** Thú cưng nói một câu (bong bóng + giọng đọc). */
+  say(text        , opts                                   = {}) {
+    const p = Store.p;
+    const el = $('#guide');
+    const img = el.querySelector('img')                    ;
+    const pet = p?.pet || 'fox';
+    img.src = AssetLoader.url(`${pet}-portrait`);
+    (el.querySelector('p')               ).textContent = text;
+    el.hidden = false;
+    // trong trò chơi trên điện thoại: đặt bong bóng ngay dưới thanh điều khiển
+    if (document.body.dataset.scene === 'Play' && window.innerWidth < 760) {
+      const r = ($('#panel')               ).getBoundingClientRect();
+      el.style.top = Math.round(r.bottom + 8) + 'px';
+    } else el.style.top = '';
+    el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop');
+    el.onclick = () => { Audio.say(text); el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop'); };
+    clearTimeout(guideTimer);
+    if (opts.ms !== 0) guideTimer = setTimeout(() => { el.hidden = true; }, opts.ms || Math.max(3500, text.length * 90));
+    if (opts.speak !== false) Audio.say(text);
+  },
+  hideGuide() { clearTimeout(guideTimer); $('#guide').hidden = true; },
+
+  /** Bảng phần thưởng sau khi chơi xong. */
+  rewardModal(res                                                                                                                   ,
+    title        , actions                                                            ) {
+    const items = Object.entries(res.reward).filter(([, v]) => v).map(([k, v], i) =>
+      `<div class="rw" style="animation-delay:${0.15 + i * 0.18}s"><img src="${resIcon(k)}" alt=""><b>+${v}</b><span>${RES_NAMES[k                          ]}</span></div>`).join('');
+    const lvl = res.levelAfter > res.levelBefore ? `<p class="lvl up">Lần sau sẽ khó hơn một chút — cấp ${res.levelAfter}!</p>`
+      : res.levelAfter < res.levelBefore ? `<p class="lvl">Lần sau mình chơi nhẹ nhàng hơn nhé — cấp ${res.levelAfter}.</p>` : '';
+    const ach = res.newAch.map((id) => ACHIEVEMENTS.find((a) => a.id === id)).filter(Boolean).map((a     ) =>
+      `<div class="ach-new"><img src="${AssetLoader.url(a.icon)}" alt=""><div><b>Huy hiệu mới: ${Ui.esc(a.name)}</b><span>${Ui.esc(a.desc)}</span></div></div>`).join('');
+    const regions = (AssetLoader.data('world')?.regions || [])         ;
+    const unl = res.unlocked.map((id) => regions.find((r) => r.id === id)).filter(Boolean).map((r     ) =>
+      `<div class="ach-new"><img src="${AssetLoader.url(r.icon)}" alt=""><div><b>Đã mở vùng đất mới: ${Ui.esc(r.name)}!</b><span>Mở bản đồ để ghé thăm nhé.</span></div></div>`).join('');
+    const p = Store.p ;
+    const el = Ui.modal(`
+      <div class="reward-box">
+        <img class="rw-pet" src="${AssetLoader.url(p.pet + '-portrait')}" alt="">
+        <h2>${Ui.esc(title)}</h2>
+        <div class="rw-row">${items}</div>
+        ${lvl}${unl}${ach}
+        <div class="row center">
+          <button class="btn big" data-a="again">Chơi nữa</button>
+          <button class="btn big accent" data-a="island">Về đảo trang trí</button>
+          <button class="btn big" data-a="map">Bản đồ</button>
+        </div>
+      </div>`, { noClose: true, cls: 'modal-reward' });
+    Audio.sfx('reward');
+    if (res.unlocked.length) setTimeout(() => Audio.sfx('unlock'), 900);
+    setTimeout(() => { for (const k of Object.keys(res.reward)) this.bump(k); }, 400);
+    this.render();
+    el.querySelector('.reward-box') .addEventListener('click', (e     ) => {
+      const a = e.target.closest('button')?.dataset.a; if (!a) return;
+      Audio.sfx('tap'); Ui.modal(null);
+      (actions       )[a]();
+    });
+  },
+
+  regionNeed(id        ) { return Math.max(0, (REGION_STARS[id] ?? 0) - Store.starsTotal()); },
+  hello() { this.say(pick(PET_LINES.hello)); },
+};
+return { resIcon, costHtml, Hud };
+})();
+
+/* ══════════ services/Parent.ts ══════════ */
+M.Parent = (function () {
+// ── Góc phụ huynh: cổng xác nhận người lớn, thống kê, cài đặt, quản lý hồ sơ ──
+// Mọi dữ liệu chỉ nằm trên máy này; không gửi đi đâu cả.
+const { Store, Profile } = M.Store;
+const { Audio } = M.Audio;
+const { Ui } = M.Ui;
+const { AssetLoader } = M.AssetLoader;
+const { ACTIVITIES, ACHIEVEMENTS, SKILL_NAMES, actById, REGION_STARS } = M.Content;
+const fmtMin = (ms        ) => { const m = Math.round(ms / 60000); return m < 60 ? `${m} phút` : `${Math.floor(m / 60)} giờ ${m % 60} phút`; };
+const fmtDate = (t        ) => new Date(t).toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+const AGE_NAMES                         = { toddler: '2–3 tuổi', preschool: '4–5 tuổi', explorer: '6–8 tuổi' };
+
+const Parent = {
+  /** Cổng người lớn: phép nhân nhỏ, trẻ nhỏ khó tự bấm đúng. */
+  open(onDone             ) {
+    const a = 3 + Math.floor(Math.random() * 6), b = 3 + Math.floor(Math.random() * 6), ans = a * b;
+    const opts = new Set        ([ans]);
+    while (opts.size < 4) opts.add(ans + (Math.floor(Math.random() * 13) - 6) || ans + 7);
+    const list = [...opts].sort(() => Math.random() - 0.5);
+    const el = Ui.modal(`
+      <div class="parent-gate">
+        <h2>Dành cho phụ huynh</h2>
+        <p>Để vào, xin chọn kết quả của phép tính:</p>
+        <div class="gate-q">${a} × ${b} = ?</div>
+        <div class="row center">${list.map((n) => `<button class="btn big" data-n="${n}">${n}</button>`).join('')}</div>
+      </div>`, { onClose: onDone });
+    el.querySelector('.parent-gate') .addEventListener('click', (e     ) => {
+      const n = e.target.closest('[data-n]')?.dataset.n; if (n === undefined) return;
+      if (+n === ans) this.dashboard(onDone);
+      else { Audio.sfx('soft'); Ui.toast('Chưa đúng — nhờ bố mẹ giúp nhé'); Ui.modal(null); onDone?.(); }
+    });
+  },
+
+  dashboard(onDone             , tab = 'stats') {
+    const p = Store.p;
+    const tabs = [['stats', 'Hoạt động'], ['profiles', 'Hồ sơ'], ['settings', 'Cài đặt']];
+    let body = '';
+    if (tab === 'stats') body = p ? this.statsHtml(p) : '<p>Chưa có hồ sơ nào.</p>';
+    else if (tab === 'profiles') body = this.profilesHtml();
+    else body = this.settingsHtml();
+    const el = Ui.modal(`
+      <div class="parent">
+        <h2>Góc phụ huynh</h2>
+        <div class="seg wide">${tabs.map(([k, n]) => `<button data-tab="${k}" class="${k === tab ? 'on' : ''}">${n}</button>`).join('')}</div>
+        <div class="parent-body">${body}</div>
+        <p class="hint">Dữ liệu chỉ lưu trên thiết bị này (localStorage), không gửi đi đâu. Số liệu chỉ mô tả hoạt động trong game — không phải đánh giá trí tuệ hay sự phát triển của trẻ.</p>
+      </div>`, { onClose: onDone, cls: 'modal-wide' });
+    el.querySelector('.parent') .addEventListener('click', (e     ) => this.onClick(e, onDone));
+    el.querySelector('.parent') .addEventListener('input', (e     ) => {
+      if (e.target.dataset.set === 'volume') { Store.setSettings({ volume: +e.target.value }); Audio.applySettings(); }
+    });
+  },
+
+  statsHtml(p         )         {
+    const plays = Object.values(p.plays).reduce((a, b) => a + b, 0);
+    const fav = Object.entries(p.plays).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([k, v]) => `${Ui.esc(actById(k)?.name || k)} (${v})`).join(', ') || '—';
+    const regions = (AssetLoader.data('world')?.regions || [])         ;
+    const explored = regions.filter((r) => ACTIVITIES.some((a) => a.region === r.id && p.plays[a.id]));
+    const bySkill                         = {};
+    for (const a of ACTIVITIES) bySkill[a.skill] = (bySkill[a.skill] || 0) + (p.plays[a.id] || 0);
+    const max = Math.max(1, ...Object.values(bySkill));
+    const bars = Object.entries(SKILL_NAMES).map(([k, n]) => `<div class="bar-row"><span>${n}</span><i style="--w:${(bySkill[k] || 0) / max * 100}%"></i><b>${bySkill[k] || 0}</b></div>`).join('');
+    const acts = ACTIVITIES.map((a) => `<tr><td>${Ui.esc(a.name)}</td><td>${p.plays[a.id] || 0}</td><td>${p.plays[a.id] ? 'cấp ' + Store.level(a.id) : '—'}</td></tr>`).join('');
+    const hist = p.history.slice(-12).reverse().map((h) => `<tr><td>${fmtDate(h.t)}</td><td>${Ui.esc(actById(h.act)?.name || h.act)}</td><td>${Math.max(1, Math.round(h.ms / 1000))} giây</td><td>cấp ${h.level}</td></tr>`).join('');
+    const ach = ACHIEVEMENTS.map((a) => `<span class="ach ${p.ach[a.id] ? 'on' : ''}" title="${Ui.esc(a.desc)}"><img src="${AssetLoader.url(a.icon)}" alt="">${Ui.esc(a.name)}</span>`).join('');
+    return `
+      <div class="stat-grid">
+        <div><b>${p.sessions}</b><span>lần mở game</span></div>
+        <div><b>${fmtMin(p.playMs)}</b><span>thời gian chơi (ước tính)</span></div>
+        <div><b>${plays}</b><span>lượt chơi hoàn thành</span></div>
+        <div><b>${explored.length}/${regions.length}</b><span>vùng đất đã khám phá</span></div>
+      </div>
+      <p><b>${Ui.esc(p.name)}</b> · ${AGE_NAMES[p.age]} · Hoạt động bé thích: ${fav}</p>
+      <h4>Hoạt động theo nhóm kỹ năng</h4><div class="bars">${bars}</div>
+      <h4>Các trò chơi</h4><table class="tbl"><tr><th>Trò chơi</th><th>Lượt</th><th>Độ khó hiện tại</th></tr>${acts}</table>
+      <h4>Gần đây</h4>${hist ? `<table class="tbl"><tr><th>Lúc</th><th>Trò chơi</th><th>Thời gian</th><th>Độ khó</th></tr>${hist}</table>` : '<p>Chưa có.</p>'}
+      <h4>Huy hiệu</h4><div class="achs">${ach}</div>`;
+  },
+
+  profilesHtml()         {
+    const cur = Store.p?.id;
+    const rows = Store.profiles.map((p) => `
+      <div class="prof-row ${p.id === cur ? 'on' : ''}">
+        <img src="${AssetLoader.url(p.pet + '-portrait')}" alt="">
+        <div><b>${Ui.esc(p.name)}</b><span>${AGE_NAMES[p.age]} · ${p.earned.star} sao</span></div>
+        <select data-age="${p.id}">${Object.entries(AGE_NAMES).map(([k, n]) => `<option value="${k}" ${k === p.age ? 'selected' : ''}>${n}</option>`).join('')}</select>
+        ${p.id === cur ? '<em>đang chơi</em>' : `<button class="btn small" data-use="${p.id}">Chọn</button>`}
+        <button class="btn small" data-reset="${p.id}">Chơi lại từ đầu</button>
+        <button class="btn small danger" data-del="${p.id}">Xoá</button>
+      </div>`).join('');
+    return `${rows || '<p>Chưa có hồ sơ.</p>'}
+      <div class="row"><button class="btn accent" data-a="new">Thêm bé mới</button></div>
+      <p class="hint">Độ tuổi chỉ dùng để chọn độ khó ban đầu; game tự điều chỉnh theo cách bé chơi.</p>`;
+  },
+
+  settingsHtml()         {
+    const s = Store.settings;
+    const t = (k        , on         , name        ) => `<label class="tog"><input type="checkbox" data-set="${k}" ${on ? 'checked' : ''}><span>${name}</span></label>`;
+    return `
+      <div class="opts">
+        ${t('sound', s.sound, 'Âm thanh')}
+        ${t('music', s.music, 'Nhạc nền')}
+        ${t('voice', s.voice, 'Đọc hướng dẫn bằng giọng nói' + (Audio.hasVoice ? '' : ' (máy này chưa có giọng tiếng Việt)'))}
+        <label class="tog"><span>Âm lượng</span><input type="range" min="0" max="1" step="0.05" value="${s.volume}" data-set="volume"></label>
+        <label class="tog"><span>Ngôn ngữ</span><select data-set="lang"><option value="vi" selected>Tiếng Việt</option></select></label>
+      </div>
+      <div class="row"><button class="btn danger" data-a="wipe">Xoá toàn bộ dữ liệu trên máy</button></div>`;
+  },
+
+  onClick(e     , onDone             ) {
+    const t = e.target;
+    const d = t.closest('[data-tab],[data-use],[data-del],[data-reset],[data-a]')?.dataset;
+    if (t.matches('input[type=checkbox]')) { Store.setSettings({ [t.dataset.set]: t.checked }       ); Audio.applySettings(); return; }
+    if (t.matches('select[data-age]')) {
+      t.onchange = () => { const p = Store.profiles.find((x) => x.id === t.dataset.age); if (p) { p.age = t.value; Store.commit(); } };
+      return;
+    }
+    if (!d) return;
+    if (d.tab) { this.dashboard(onDone, d.tab); return; }
+    if (d.use) { Store.selectProfile(d.use); Ui.modal(null); location.hash = 'island'; window.dispatchEvent(new Event('lw-profile')); return; }
+    if (d.reset) { if (confirm('Chơi lại từ đầu cho hồ sơ này? Đảo, đồ và sao sẽ được làm mới.')) { Store.resetProfile(d.reset); window.dispatchEvent(new Event('lw-profile')); this.dashboard(onDone, 'profiles'); } return; }
+    if (d.del) { if (confirm('Xoá hồ sơ này khỏi máy?')) { Store.deleteProfile(d.del); window.dispatchEvent(new Event('lw-profile')); this.dashboard(onDone, 'profiles'); } return; }
+    if (d.a === 'new') { Ui.modal(null); location.hash = 'home'; window.dispatchEvent(new CustomEvent('lw-new-profile')); return; }
+    if (d.a === 'wipe') { if (confirm('Xoá toàn bộ hồ sơ và tiến trình trên máy này?')) { Store.resetAll(); Ui.modal(null); location.hash = 'home'; window.dispatchEvent(new Event('lw-profile')); } }
+  },
+  _unused: REGION_STARS,
+};
+return { Parent };
 })();
 
 /* ══════════ services/CameraControls.ts ══════════ */
@@ -636,19 +1514,42 @@ class LayeredAvatar {
   setScale(s        ) { this.container.setScale(s); }
   destroy() { this.container.destroy(); }
 }
-return { avatarConfig, defaultLook, lookAssetIds, allAvatarAssetIds, LayeredAvatar };
+
+/** Diện mạo đã lưu (có thể cũ/hỏng) → diện mạo hợp lệ với manifest hiện tại. */
+function validLook(s     )             {
+  const d = defaultLook();
+  try {
+    if (s && s.variants && s.colors) {
+      const cfg = avatarConfig();
+      const ok = cfg.layers.every((L     ) => !(L.slot in s.variants) || s.variants[L.slot] === null || L.variants.some((v     ) => v.id === s.variants[L.slot]));
+      if (ok) return { variants: { ...d.variants, ...s.variants }, colors: { ...d.colors, ...s.colors } };
+    }
+  } catch (e) { /* bỏ qua */ }
+  return d;
+}
+return { avatarConfig, defaultLook, lookAssetIds, allAvatarAssetIds, LayeredAvatar, validLook };
 })();
 
 /* ══════════ scenes/BootScene.ts ══════════ */
 M.BootScene = (function () {
 // ── Khởi động: đọc manifest rồi mở màn hình theo #hash ──
+// #home · #island · #map · #map/<vùng> · #wardrobe · #play/<hoạt động>
 const { AssetLoader } = M.AssetLoader;
+const { Store } = M.Store;
 const { Ui } = M.Ui;
-const SCENES                         = { map: 'WorldMap', island: 'Island', gallery: 'Gallery' };
-
-function sceneFromHash()         {
-  const h = location.hash.replace('#', '');
-  return SCENES[h] || 'WorldMap';
+const { actById } = M.Content;
+function routeFromHash()        {
+  const [h, arg] = location.hash.replace('#', '').split('/');
+  if (!Store.p) return { key: 'Home' };
+  if (h === 'map') return { key: 'WorldMap', data: { region: arg || null } };
+  if (h === 'wardrobe') return { key: 'Wardrobe' };
+  if (h === 'home') return { key: 'Home' };
+  if (h === 'play' && arg) {
+    const a = actById(arg);
+    if (a && Store.regionOpen(a.region)) return { key: a.scene, data: { act: a.id } };
+    if (a) return { key: 'WorldMap', data: { region: a.region } };
+  }
+  return { key: 'Island' };
 }
 
 /** Gói preload chung: xếp hàng tài sản + thanh tiến trình. */
@@ -669,24 +1570,402 @@ class BootScene extends Phaser.Scene {
   }
   create() {
     AssetLoader.init(this);
-    // ảnh UI dùng chung (nhỏ) nạp sẵn
-    this.scene.start(sceneFromHash());
+    if (Store.p) Store.startSession();
+    const r = routeFromHash();
+    Ui.route = r.key;
+    this.scene.start(r.key, r.data);
   }
 }
-return { SCENES, sceneFromHash, preloadWithProgress, BootScene };
+return { routeFromHash, preloadWithProgress, BootScene };
 })();
 
-/* ══════════ scenes/WorldMapPreviewScene.ts ══════════ */
-M.WorldMapPreviewScene = (function () {
-// ── Màn 1: Xem trước bản đồ thế giới ──
-// Phóng to / kéo, rê chuột hoặc chạm để làm nổi vùng, hiện tên vùng, khoá/mở khoá thử.
+/* ══════════ scenes/MiniGame.ts ══════════ */
+M.MiniGame = (function () {
+// ── Khung chung cho mọi mini-game ──
+// Không gian thiết kế cố định (1600×900 ngang / 900×1600 dọc), camera tự co giãn cho vừa màn hình.
+// Mỗi game chỉ cần: buildRound(), và gọi good()/miss()/nextRound()/complete().
 const { AssetLoader } = M.AssetLoader;
+const { Store } = M.Store;
+const { Audio } = M.Audio;
+const { Hud } = M.Hud;
+const { Ui } = M.Ui;
+const { actById, Activity, pick, PET_LINES } = M.Content;
+const { preloadWithProgress } = M.BootScene;
+const FONT = '"Baloo 2", Nunito, sans-serif';
+const shuffle =    (a     )      => { const b = a.slice(); for (let i = b.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [b[i], b[j]] = [b[j], b[i]]; } return b; };
+const randInt = (a        , b        ) => a + Math.floor(Math.random() * (b - a + 1));
+
+class MiniGame extends Phaser.Scene {
+  act           = null       ;
+  mode = '';
+  level = 1;
+  round = 0;
+  rounds = 5;
+  mistakes = 0;
+  roundMistakes = 0;
+  startedAt = 0;
+  W = 1600; H = 900; portrait = false;
+  bg     ; bgKey = '';
+  layer     ;            // container cho nội dung của vòng hiện tại
+  dots     ;
+  busy = false;
+  done = false;
+  petSprite     ;
+
+  init(data     ) {
+    this.act = actById(data?.act) || actById('animal-match') ;
+    this.mode = this.act.mode || '';
+    this.level = Store.level(this.act.id);
+    this.rounds = this.act.rounds;
+    this.round = 0; this.mistakes = 0; this.roundMistakes = 0; this.done = false; this.busy = false;
+    this.W = 0; this.H = 0; this.portrait = false;
+  }
+
+  /** Tài sản riêng của game (id). */
+  assets()           { return []; }
+
+  preload() {
+    const region = (AssetLoader.data('world')?.regions || []).find((r     ) => r.id === this.act.region);
+    this.bgKey = region?.background || '';
+    const pets = AssetLoader.data('pets') || {};
+    const pet = Store.p?.pet || 'fox';
+    preloadWithProgress(this, () => AssetLoader.queueIds(this, [this.bgKey, pets[pet]?.sheet, ...this.assets()]), 'Đang chuẩn bị trò chơi…');
+  }
+
+  create() {
+    if (Ui.stale(this)) return;
+    Ui.setActiveTab('Play');
+    AssetLoader.createAnimations(this);
+    this.cameras.main.setBackgroundColor('#dff3fd');
+    if (this.bgKey && this.textures.exists(this.bgKey)) this.bg = this.add.image(0, 0, this.bgKey).setDepth(-100);
+    this.layer = this.add.container(0, 0);
+    this.dots = this.add.container(0, 0).setDepth(900);
+    this.spawnPet();
+    this.fit();
+    this.scale.on('resize', this.onResize, this);
+    this.events.once('shutdown', () => { this.scale.off('resize', this.onResize, this); Ui.clearPanel(); Hud.hideGuide(); });
+    this.buildBar();
+    this.startedAt = Date.now();
+    this.setup();
+    this.startRound();
+  }
+
+  /** Gọi một lần trước vòng đầu (tuỳ game). */
+  setup() { /* */ }
+  buildRound() { /* game ghi đè */ }
+
+  // ───────── bố cục ─────────
+  fit() {
+    const sw = this.scale.width, sh = this.scale.height;
+    const portrait = sh > sw * 1.1;
+    const changed = portrait !== this.portrait;
+    this.portrait = portrait;
+    // không gian thiết kế co theo tỉ lệ màn hình (ngang: cao 900; dọc: rộng 900)
+    const ar = sw / sh, clamp = (v        , lo        , hi        ) => Math.max(lo, Math.min(hi, v));
+    const W = portrait ? 900 : Math.round(clamp(900 * ar, 1300, 2000)), H = portrait ? Math.round(clamp(900 / ar, 1350, 2000)) : 900;
+    // chỉ dựng lại khi đổi đáng kể (thanh địa chỉ điện thoại ẩn/hiện thì không)
+    const changed2 = Math.abs(W - this.W) > this.W * 0.1 || Math.abs(H - this.H) > this.H * 0.1;
+    if (!changed && !changed2 && this.layer) { this.applyCam(sw, sh); return false; }
+    this.W = W; this.H = H;
+    this.applyCam(sw, sh);
+    return changed || changed2;
+  }
+  applyCam(sw        , sh        ) {
+    const cam = this.cameras.main;
+    const z = Math.min(sw / this.W, sh / this.H);
+    cam.setZoom(z);
+    cam.centerOn(this.W / 2, this.H / 2);
+    if (this.bg) {
+      // ảnh nền phủ kín cả phần thừa ngoài không gian thiết kế
+      const vw = sw / z, vh = sh / z;
+      const s = Math.max(vw / this.bg.width, vh / this.bg.height);
+      this.bg.setScale(s).setPosition(this.W / 2, this.H / 2);
+    }
+    this.placePet();
+  }
+  onResize() { if (this.fit() && !this.done) this.relayout(); }
+  /** Đổi chiều màn hình: dựng lại vòng hiện tại. */
+  relayout() { this.startRound(true); }
+
+  /** Toạ độ trên cùng của vùng chơi (dưới thanh trên của trang). */
+  get top() { return this.portrait ? 290 : 120; }
+
+  // ───────── thanh điều khiển (DOM) ─────────
+  buildBar() {
+    const el = Ui.panel(`
+      <div class="game-bar">
+        <button class="btn icon" data-a="exit" aria-label="Thoát">✕</button>
+        <div class="gb-title"><b>${Ui.esc(this.act.name)}</b><span>Cấp ${this.level}</span></div>
+        <div class="gb-dots"></div>
+        <button class="btn icon" data-a="hint" aria-label="Gợi ý">?</button>
+      </div>`, 'game-panel');
+    el.onclick = (e     ) => {
+      const a = e.target.closest('button')?.dataset.a;
+      if (a === 'exit') { Audio.sfx('tap'); this.exit(); }
+      else if (a === 'hint') { Audio.sfx('tap'); this.hint(); }
+    };
+    this.updateDots();
+  }
+  updateDots() {
+    const d = document.querySelector('.gb-dots'); if (!d) return;
+    if (this.rounds <= 1) { d.innerHTML = ''; return; }
+    d.innerHTML = Array.from({ length: this.rounds }, (_, i) => `<i class="${i < this.round ? 'on' : i === this.round ? 'cur' : ''}"></i>`).join('');
+  }
+
+  exit() { location.hash = 'map/' + this.act.region; }
+  hint() { this.say(this.instruction()); }
+  instruction()         { return this.act.desc; }
+
+  // ───────── vòng chơi ─────────
+  startRound(same = false) {
+    if (!same) this.roundMistakes = 0;
+    this.busy = false;
+    this.tweens.killTweensOf(this.layer.list);
+    this.layer.removeAll(true);
+    this.input.setDraggable && this.layer.list.forEach(() => 0);
+    this.buildRound();
+    this.updateDots();
+  }
+
+  nextRound(delay = 900) {
+    this.busy = true;
+    this.time.delayedCall(delay, () => {
+      this.round++;
+      if (this.round >= this.rounds) this.complete();
+      else this.startRound();
+    });
+  }
+
+  /** Bé làm đúng: lấp lánh + tiếng vui + thú cưng khen. */
+  good(x        , y        , praise = true) {
+    Audio.sfx('good');
+    this.sparkle(x, y);
+    if (praise) { this.petReact('happy'); if (Math.random() < 0.6) this.say(pick(PET_LINES.great), false); }
+  }
+  /** Bé chọn chưa đúng: không phạt, chỉ lắc nhẹ + gợi ý. */
+  miss(obj      , hint         ) {
+    this.mistakes++; this.roundMistakes++;
+    Audio.sfx('soft');
+    if (obj) {
+      const x0 = obj.x;
+      this.tweens.add({ targets: obj, x: x0 + 12, duration: 60, yoyo: true, repeat: 2, onComplete: () => (obj.x = x0) });
+    }
+    if (hint) this.say(hint);
+    else if (this.roundMistakes === 2) this.say(pick(PET_LINES.tryAgain));
+  }
+
+  complete(extra                        = {}) {
+    if (this.done) return;
+    this.done = true;
+    this.petReact('celebrate');
+    this.confetti();
+    const res = Store.finish(this.act.id, { mistakes: this.mistakes, ms: Date.now() - this.startedAt, rounds: this.rounds, ...extra });
+    this.time.delayedCall(900, () => {
+      Hud.rewardModal(res, pick(['Bé giỏi quá!', 'Hoàn thành rồi!', 'Tuyệt vời!']), {
+        again: () => this.scene.restart({ act: this.act.id }),
+        island: () => { location.hash = 'island'; },
+        map: () => { location.hash = 'map/' + this.act.region; },
+      });
+    });
+  }
+
+  say(text        , speak = true) { Hud.say(text, { speak }); }
+
+  // ───────── thú cưng ở góc ─────────
+  spawnPet() {
+    const pets = AssetLoader.data('pets') || {};
+    const id = Store.p?.pet || 'fox';
+    const P = pets[id];
+    if (!P || !this.textures.exists(P.sheet)) return;
+    this.petSprite = this.add.sprite(0, 0, P.sheet).setOrigin(0.5, 0.92).setDepth(800);
+    this.petSprite.setData('id', id);
+    this.petPlay('greet', true);
+    this.petSprite.setInteractive({ pixelPerfect: true, alphaTolerance: 40, useHandCursor: true });
+    this.petSprite.on('pointerup', () => { this.petPlay('interact', true); this.hint(); });
+  }
+  placePet() {
+    if (!this.petSprite) return;
+    const s = this.portrait ? 1.0 : 1.1;
+    this.petSprite.setScale(s).setPosition(this.portrait ? 110 : 120, this.H - 20);
+  }
+  petPlay(anim        , once = false) {
+    const s = this.petSprite; if (!s) return;
+    const key = `${s.getData('id')}-${anim}`;
+    if (!this.anims.exists(key)) return;
+    s.play(key);
+    if (once) s.once('animationcomplete', () => this.petPlay('idle-front'));
+  }
+  petReact(anim                       ) { this.petPlay(anim === 'happy' ? 'happy' : 'celebrate', true); if (anim === 'happy') this.time.delayedCall(900, () => this.petPlay('idle-front')); }
+
+  // ───────── hiệu ứng ─────────
+  sparkle(x        , y        , n = 10) {
+    for (let i = 0; i < n; i++) {
+      const a = (Math.PI * 2 * i) / n + Math.random() * 0.4;
+      const g = this.add.star(x, y, 5, 6, 14, [0xffd96b, 0xffffff, 0xffb8cb, 0xa6e3c4][i % 4]).setDepth(950);
+      this.tweens.add({ targets: g, x: x + Math.cos(a) * (70 + Math.random() * 50), y: y + Math.sin(a) * (70 + Math.random() * 50), angle: 180, alpha: 0, scale: 0.4, duration: 650, ease: 'Cubic.easeOut', onComplete: () => g.destroy() });
+    }
+  }
+  confetti() {
+    for (let i = 0; i < 60; i++) {
+      const x = Math.random() * this.W, c = [0xffd96b, 0xffac6b, 0xffb8cb, 0xa6e3c4, 0xc7b5f0, 0x8fd6f0][i % 6];
+      const r = this.add.rectangle(x, -20 - Math.random() * 200, 14, 22, c).setDepth(960).setAngle(Math.random() * 180);
+      this.tweens.add({ targets: r, y: this.H + 40, angle: r.angle + 360 + Math.random() * 360, x: x + (Math.random() - 0.5) * 200, duration: 1600 + Math.random() * 1200, ease: 'Sine.easeIn', onComplete: () => r.destroy() });
+    }
+  }
+
+  /** Khung bo tròn nền trắng mờ (dùng cho thẻ, khay). */
+  plate(x        , y        , w        , h        , color = 0xfffaf2, alpha = 0.92, r = 28) {
+    const g = this.add.graphics();
+    g.fillStyle(0x4c3876, 0.14).fillRoundedRect(x - w / 2 + 4, y - h / 2 + 8, w, h, r);
+    g.fillStyle(color, alpha).fillRoundedRect(x - w / 2, y - h / 2, w, h, r);
+    g.lineStyle(5, 0xffffff, 1).strokeRoundedRect(x - w / 2, y - h / 2, w, h, r);
+    return g;
+  }
+  label(x        , y        , text        , size = 44, color = '#4b3a5e') {
+    return this.add.text(x, y, text, { fontFamily: FONT, fontSize: size + 'px', fontStyle: '800', color, stroke: '#ffffff', strokeThickness: Math.round(size / 6), align: 'center', wordWrap: { width: this.W - 120 } }).setOrigin(0.5);
+  }
+  /** Ảnh vừa khít một ô w×h (giữ tỉ lệ). */
+  fitImage(key        , x        , y        , w        , h        ) {
+    const img = this.add.image(x, y, key);
+    const s = Math.min(w / img.width, h / img.height);
+    img.setScale(s);
+    img.setData('baseScale', s);
+    return img;
+  }
+  pulse(obj     , k = 1.08) {
+    const s = obj.getData('baseScale') || obj.scale;
+    this.tweens.add({ targets: obj, scale: s * k, duration: 160, yoyo: true, ease: 'Quad.easeOut' });
+  }
+
+  update(_t        , _dt        ) { /* */ }
+}
+return { FONT, shuffle, randInt, MiniGame };
+})();
+
+/* ══════════ scenes/HomeScene.ts ══════════ */
+M.HomeScene = (function () {
+// ── Màn chào: chọn hồ sơ bé hoặc tạo hồ sơ mới (tên, độ tuổi, bạn đồng hành) ──
+const { AssetLoader } = M.AssetLoader;
+const { Store, AgeBand } = M.Store;
+const { Audio } = M.Audio;
+const { Hud } = M.Hud;
+const { Ui } = M.Ui;
+const { preloadWithProgress } = M.BootScene;
+const AGES                              = [['toddler', '2–3 tuổi', 'Bé xíu'], ['preschool', '4–5 tuổi', 'Mầm non'], ['explorer', '6–8 tuổi', 'Nhà thám hiểm']];
+
+class HomeScene extends Phaser.Scene {
+  bg     ; form = { name: '', age: 'preschool'           , pet: 'fox' }; creating = false;
+  constructor() { super('Home'); }
+
+  preload() {
+    preloadWithProgress(this, () => AssetLoader.queueIds(this, ['world-map-base', 'world-map-home-island', 'cloud-1', 'world-map-cloud-1', 'world-map-cloud-2']), 'Đang mở Thế Giới Nhỏ…');
+  }
+
+  create(data     ) {
+    if (Ui.stale(this)) return;
+    Ui.setActiveTab('Home');
+    Hud.show(false); Hud.hideGuide();
+    this.cameras.main.setBackgroundColor('#5ab4e0');
+    const W = AssetLoader.data('world');
+    if (this.textures.exists(W.background)) {
+      this.bg = this.add.image(0, 0, W.background).setOrigin(0, 0).setDisplaySize(W.width, W.height);
+      this.layout();
+      this.tweens.add({ targets: this.cameras.main, scrollX: '+=220', duration: 26000, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+    }
+    for (const k of ['world-map-cloud-1', 'world-map-cloud-2']) {
+      if (!this.textures.exists(k)) continue;
+      const c = this.add.image(Math.random() * W.width, 300 + Math.random() * 1200, k).setScale(0.8).setAlpha(0.95);
+      this.tweens.add({ targets: c, x: c.x + 900, duration: 40000, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+    }
+    this.scale.on('resize', this.layout, this);
+    this.events.once('shutdown', () => { this.scale.off('resize', this.layout, this); Ui.clearPanel(); });
+    this.creating = !!data?.create || !Store.profiles.length;
+    this.render();
+  }
+
+  layout() {
+    const W = AssetLoader.data('world');
+    const z = Math.max(this.scale.width / W.width, this.scale.height / W.height) * 1.25;
+    this.cameras.main.setZoom(z);
+    this.cameras.main.centerOn(W.homeIsland.x, W.homeIsland.y);
+  }
+
+  render() {
+    const pets = AssetLoader.data('pets') || {};
+    const portrait = (id        ) => AssetLoader.url(`${id}-portrait`);
+    let html        ;
+    if (!this.creating) {
+      html = `
+        <div class="home-box">
+          <h1 class="logo">Thế Giới Nhỏ</h1>
+          <p class="tag">Khám phá · Học hỏi · Sáng tạo · Lớn lên</p>
+          <h3>Ai đang chơi nào?</h3>
+          <div class="profiles">${Store.profiles.map((p) => `
+            <button class="prof" data-id="${p.id}"><img src="${portrait(p.pet)}" alt=""><b>${Ui.esc(p.name)}</b><span><img src="${AssetLoader.url('reward-star')}" alt="">${p.earned.star}</span></button>`).join('')}
+            <button class="prof add" data-a="new"><span class="plus">+</span><b>Thêm bé</b></button>
+          </div>
+        </div>`;
+    } else {
+      const f = this.form;
+      html = `
+        <div class="home-box">
+          <h1 class="logo">Thế Giới Nhỏ</h1>
+          <p class="tag">Một hòn đảo nhỏ đang chờ bé!</p>
+          <label class="field"><span>Tên của bé</span><input id="pname" maxlength="16" placeholder="Ví dụ: Bông" value="${Ui.esc(f.name)}" autocomplete="off"></label>
+          <div class="field"><span>Bé mấy tuổi?</span><div class="seg wide big">${AGES.map(([k, a, n]) => `<button data-age="${k}" class="${f.age === k ? 'on' : ''}"><b>${a}</b><small>${n}</small></button>`).join('')}</div></div>
+          <div class="field"><span>Chọn bạn đồng hành</span><div class="pet-pick">${['fox', 'bunny', 'bear'].map((id) => `
+            <button data-pet="${id}" class="${f.pet === id ? 'on' : ''}"><img src="${portrait(id)}" alt=""><b>${Ui.esc(pets[id]?.name || id)}</b></button>`).join('')}</div>
+            <p class="hint">${Ui.esc(pets[f.pet]?.personality || '')}</p></div>
+          <div class="row center">
+            ${Store.profiles.length ? '<button class="btn big ghost" data-a="cancel">Quay lại</button>' : ''}
+            <button class="btn big accent" data-a="go">Bắt đầu phiêu lưu!</button>
+          </div>
+        </div>`;
+    }
+    const el = Ui.panel(html, 'home-panel');
+    const name = el.querySelector('#pname')                           ;
+    if (name) name.oninput = () => { this.form.name = name.value; };
+    el.onclick = (e     ) => {
+      const b = e.target.closest('button'); if (!b) return;
+      Audio.unlock(); Audio.sfx('tap');
+      const d = b.dataset;
+      if (d.id) { Store.selectProfile(d.id); this.enter(); }
+      else if (d.a === 'new') { this.creating = true; this.form = { name: '', age: 'preschool', pet: 'fox' }; this.render(); }
+      else if (d.a === 'cancel') { this.creating = false; this.render(); }
+      else if (d.age) { this.form.age = d.age; this.render(); }
+      else if (d.pet) { this.form.pet = d.pet; Audio.sfx('pop'); this.render(); }
+      else if (d.a === 'go') {
+        Store.createProfile(this.form.name || 'Bé', this.form.age, this.form.pet);
+        this.enter();
+      }
+    };
+  }
+
+  enter() {
+    Store.startSession();
+    Ui.clearPanel();
+    window.dispatchEvent(new Event('lw-profile'));
+    location.hash = 'island';
+  }
+}
+return { HomeScene };
+})();
+
+/* ══════════ scenes/WorldMapScene.ts ══════════ */
+M.WorldMapScene = (function () {
+// ── Bản đồ thế giới: 6 vùng đất, mỗi vùng có các trò chơi ──
+// Vùng mở dần theo số sao bé nhận được. Vùng khoá vẫn nhìn thấy và xem trước được.
+const { AssetLoader } = M.AssetLoader;
+const { Store } = M.Store;
+const { Audio } = M.Audio;
+const { Hud, resIcon, costHtml } = M.Hud;
+const { ACTIVITIES, REGION_STARS, PET_LINES, pick } = M.Content;
 const { CameraControls } = M.CameraControls;
 const { Ui } = M.Ui;
 const { preloadWithProgress } = M.BootScene;
 const hexInt = (h        ) => parseInt(String(h || '#ffffff').replace('#', ''), 16);
 
-class WorldMapPreviewScene extends Phaser.Scene {
+class WorldMapScene extends Phaser.Scene {
   world     ;
   controls     ;
   polys                      = {};
@@ -711,8 +1990,13 @@ class WorldMapPreviewScene extends Phaser.Scene {
     }, 'Đang mở bản đồ thế giới…');
   }
 
+  focus                = null;
+  init(data     ) { this.focus = data?.region || null; }
+
   create() {
+    if (Ui.stale(this)) return;
     Ui.setActiveTab('WorldMap');
+    Hud.show(true);
     AssetLoader.createAnimations(this);
     const W = this.world = AssetLoader.data('world');
     this.cameras.main.setBackgroundColor('#5ab4e0');
@@ -727,7 +2011,7 @@ class WorldMapPreviewScene extends Phaser.Scene {
     // công trình từng vùng
     for (const r of W.regions) {
       this.polys[r.id] = new Phaser.Geom.Polygon(r.polygon.flat());
-      this.unlocked[r.id] = !!r.unlocked;
+      this.unlocked[r.id] = Store.regionOpen(r.id);
       for (const lm of r.landmarks || []) {
         if (!this.textures.exists(lm.asset)) continue;
         const s = AssetLoader.sprite(this, lm.asset, lm.x, lm.y);
@@ -779,6 +2063,32 @@ class WorldMapPreviewScene extends Phaser.Scene {
     this.buildPanel();
     Ui.card(null);
     this.events.once('shutdown', () => { Ui.card(null); Ui.clearPanel(); });
+
+    // vùng vừa mở khoá (chưa xem): mây tan + lấp lánh
+    const p = Store.p ;
+    const fresh = W.regions.filter((r     ) => this.unlocked[r.id] && REGION_STARS[r.id] > 0 && !p.counters['seen-' + r.id]);
+    if (this.focus) this.time.delayedCall(50, () => this.select(this.focus, true));
+    else if (fresh.length) {
+      const r = fresh[0];
+      for (const x of fresh) p.counters['seen-' + x.id] = 1;
+      Store.commit();
+      for (const o of this.overlays[r.id] || []) o.setVisible(true);
+      this.time.delayedCall(400, () => { this.select(r.id, true); this.time.delayedCall(700, () => this.revealRegion(r)); });
+    } else this.time.delayedCall(300, () => Hud.say(pick(PET_LINES.map)));
+  }
+
+  revealRegion(r     ) {
+    Audio.sfx('unlock');
+    for (const p of this.overlays[r.id] || []) {
+      this.tweens.add({ targets: p, alpha: 0, scale: p.scale * 1.2, duration: 900, onComplete: () => p.setVisible(false) });
+    }
+    if (this.textures.exists('world-ui-unlocked-sparkle')) {
+      const c = r.label || r.center;
+      const s = AssetLoader.image(this, 'world-ui-unlocked-sparkle', c[0], c[1] - 60).setDepth(5900).setAlpha(0);
+      const sc = s.scale; s.setScale(sc * 0.4);
+      this.tweens.add({ targets: s, alpha: 1, scale: sc * 1.6, duration: 500, ease: 'Back.easeOut', yoyo: true, hold: 700, onComplete: () => s.destroy() });
+    }
+    Hud.say(`Vùng ${r.name} đã mở! Mình vào chơi nhé!`);
   }
 
   // ───────────── dựng ─────────────
@@ -829,23 +2139,19 @@ class WorldMapPreviewScene extends Phaser.Scene {
         <button class="btn icon" data-a="zin" aria-label="Phóng to">＋</button>
         <button class="btn icon" data-a="zout" aria-label="Thu nhỏ">－</button>
         <button class="btn" data-a="fit">Toàn cảnh</button>
-        <button class="btn" data-a="labels">Ẩn tên vùng</button>
-        <button class="btn accent" data-a="home">Đảo của bé</button>
+        <button class="btn accent" data-a="home">Về đảo</button>
       </div>
       <div class="chips">${this.world.regions.map((r     ) =>
-        `<button class="chip" data-r="${r.id}" style="--c:${r.color}"><img src="${AssetLoader.url(r.icon)}" alt="">${Ui.esc(r.name)}</button>`).join('')}</div>
+        `<button class="chip ${this.unlocked[r.id] ? '' : 'locked'}" data-r="${r.id}" style="--c:${r.color}"><img src="${AssetLoader.url(r.icon)}" alt="">${Ui.esc(r.name)}${this.unlocked[r.id] ? '' : `<img class="mini" src="${AssetLoader.url('world-ui-lock-badge')}" alt="khoá">`}</button>`).join('')}</div>
     `, 'map-panel');
     el.onclick = (e     ) => {
       const b = e.target.closest('button'); if (!b) return;
+      Audio.sfx('tap');
       const a = b.dataset.a;
       if (a === 'zin') this.controls.zoomBy(1.35);
       else if (a === 'zout') this.controls.zoomBy(1 / 1.35);
       else if (a === 'fit') { this.select(null); this.controls.flyTo(this.world.width / 2, this.world.height / 2, 1, 600); }
-      else if (a === 'labels') {
-        this.showLabels = !this.showLabels;
-        b.textContent = this.showLabels ? 'Ẩn tên vùng' : 'Hiện tên vùng';
-        for (const l of Object.values(this.labels)) (l       ).setVisible(this.showLabels);
-      } else if (a === 'home') this.goHome();
+      else if (a === 'home') this.goHome();
       else if (b.dataset.r) this.select(b.dataset.r, true);
     };
   }
@@ -897,22 +2203,37 @@ class WorldMapPreviewScene extends Phaser.Scene {
 
   showRegionCard(r     ) {
     const open = this.unlocked[r.id];
+    const p = Store.p ;
+    const acts = ACTIVITIES.filter((x) => x.region === r.id);
+    const need = Hud.regionNeed(r.id);
+    const list = acts.map((x) => `
+      <button class="act ${open ? '' : 'off'}" data-act="${x.id}">
+        <div><b>${Ui.esc(x.name)}</b><span>${Ui.esc(x.desc)}</span></div>
+        <em>${p.plays[x.id] ? `Cấp ${Store.level(x.id)} · ${p.plays[x.id]} lượt` : 'Mới!'}</em>
+        ${costHtml(x.reward       , 'cost gain')}
+      </button>`).join('');
     const el = Ui.card(`
       <div class="card-head" style="--c:${r.color}">
         <img class="card-icon" src="${AssetLoader.url(r.icon)}" alt="">
         <div><h3>${Ui.esc(r.name)}</h3><p>${Ui.esc(r.nameEn || '')}</p></div>
         <span class="badge ${open ? 'open' : 'locked'}">${open ? 'Đã mở' : 'Đang khoá'}</span>
       </div>
-      <div class="card-art"><img src="${AssetLoader.url(r.entrance)}" alt="Cổng vào ${Ui.esc(r.name)}"></div>
+      ${open ? '' : `<p class="card-text need">Cần thêm <b>${need}</b> <img src="${resIcon('star')}" alt="sao"> để mở. Chơi ở các vùng khác để nhận sao nhé!</p>`}
+      <div class="acts">${list}</div>
       <div class="row">
-        <button class="btn accent" data-a="view">Xem vùng</button>
-        <button class="btn" data-a="lock">${open ? 'Khoá lại (thử)' : 'Mở khoá (thử)'}</button>
+        <button class="btn" data-a="view">Xem cảnh vùng</button>
         <button class="btn ghost" data-a="close">Đóng</button>
       </div>`);
     el.onclick = (e     ) => {
-      const a = e.target.closest('button')?.dataset.a;
+      const b = e.target.closest('button'); if (!b) return;
+      Audio.sfx('tap');
+      if (b.dataset.act) {
+        if (!open) { Hud.say(`Cần thêm ${need} ngôi sao để mở ${r.name}.`); return; }
+        location.hash = 'play/' + b.dataset.act;
+        return;
+      }
+      const a = b.dataset.a;
       if (a === 'close') this.select(null);
-      else if (a === 'lock') this.toggleLock(r);
       else if (a === 'view') this.showRegionView(r);
     };
   }
@@ -932,24 +2253,6 @@ class WorldMapPreviewScene extends Phaser.Scene {
   }
 
   goHome() { location.hash = 'island'; }
-
-  toggleLock(r     ) {
-    const open = !this.unlocked[r.id];
-    this.unlocked[r.id] = open;
-    for (const p of this.overlays[r.id] || []) {
-      if (open) this.tweens.add({ targets: p, alpha: 0, scale: p.scale * 1.15, duration: 600, onComplete: () => { p.setVisible(false); p.setAlpha(1); p.setScale(p.scale / 1.15); } });
-      else { p.setVisible(true); p.setAlpha(0); this.tweens.add({ targets: p, alpha: 1, duration: 500 }); }
-    }
-    if (open && this.textures.exists('ui-unlocked-sparkle')) {
-      const c = r.label || r.center;
-      const s = AssetLoader.image(this, 'ui-unlocked-sparkle', c[0], c[1] - 60).setDepth(5900).setAlpha(0);
-      const sc = s.scale;
-      s.setScale(sc * 0.4);
-      this.tweens.add({ targets: s, alpha: 1, scale: sc * 1.4, duration: 450, ease: 'Back.easeOut', yoyo: true, hold: 500, onComplete: () => s.destroy() });
-    }
-    Ui.toast(open ? `Đã mở khoá ${r.name}!` : `${r.name} đã khoá lại`);
-    this.showRegionCard(r);
-  }
 
   showRegionView(r     ) {
     const bg = this.world.regions && AssetLoader.url(r.background);
@@ -980,60 +2283,57 @@ class WorldMapPreviewScene extends Phaser.Scene {
     this.t += dt;
   }
 }
-return { WorldMapPreviewScene };
+return { WorldMapScene };
 })();
 
-/* ══════════ scenes/IslandPreviewScene.ts ══════════ */
-M.IslandPreviewScene = (function () {
-// ── Màn 2: Xem trước đảo của bé ──
-// Dạo chơi: chạm mặt đất để bé đi tới, thú cưng đi theo.
-// Sắp xếp: kéo thả đồ vật, chọn đồ trong túi đồ rồi chạm để đặt, lật / cất đồ.
+/* ══════════ scenes/IslandScene.ts ══════════ */
+M.IslandScene = (function () {
+// ── Đảo của bé ──
+// Dạo chơi: chạm mặt đất để bé đi, chạm luống đất để gieo hạt / thu hoạch hoa.
+// Trang trí: lấy đồ trong túi đặt lên đảo, kéo để di chuyển, lật, cất lại vào túi.
+// Cửa hàng: đổi tài nguyên (kiếm được khi chơi) lấy đồ mới. Mọi thay đổi tự lưu.
 const { AssetLoader } = M.AssetLoader;
 const { CameraControls } = M.CameraControls;
-const { LayeredAvatar, defaultLook, lookAssetIds } = M.LayeredAvatar;
+const { LayeredAvatar, validLook, lookAssetIds } = M.LayeredAvatar;
+const { Store, IslandObj } = M.Store;
+const { Audio } = M.Audio;
+const { Hud, costHtml, resIcon } = M.Hud;
 const { Ui } = M.Ui;
+const { SHOP, SHOP_GROUPS, shopItem, PLOT_ASSETS, PLOT_GROW_MS, PLOT_HARVEST, ACHIEVEMENTS, PET_LINES, RES_NAMES, pick } = M.Content;
 const { preloadWithProgress } = M.BootScene;
 const PET_IDS = ['fox', 'bunny', 'bear'];
 const SNAP = 16;
+const FIXED = new Set(['island-building-house-main']);   // nhà chính không cất đi được
+const BLOOMS = ['island-plant-flower-pink', 'island-plant-flower-yellow', 'island-plant-flower-lavender', 'island-plant-flower-tulip'];
 
-class IslandPreviewScene extends Phaser.Scene {
-  L     ;
-  controls     ;
-  walk     ;
-  grid     ;
-  avatar     ;
-  pet     ;
-  petId = 'fox';
+class IslandScene extends Phaser.Scene {
+  L     ; controls     ; walk     ; grid     ; avatar     ; pet     ; petId = 'fox';
   objs        = [];
   mode                  = 'play';
-  selected      = null;
-  selRing     ;
-  placing                = null;
-  ghost      = null;
-  target                                  = null;
-  facing = 'down';
-  running = false;
-  petBusy = false;
-  dragFrom                                  = null;
-  tapMarker     ;
+  selected      = null; selRing     ; placing                = null; ghost      = null;
+  target                                                     = null;
+  facing = 'down'; running = false; petBusy = false; dragFrom                                  = null; tapMarker     ;
+  plotTimer = 0; shopGroup = 'plant';
 
   constructor() { super('Island'); }
 
   preload() {
     preloadWithProgress(this, () => {
       const pets = AssetLoader.data('pets') || {};
-      const ids = [
-        ...lookAssetIds(defaultLook()),
-        ...PET_IDS.map((p) => pets[p]?.sheet),
-      ];
+      const ids = [...lookAssetIds(validLook(Store.p?.look)), ...PET_IDS.map((p) => pets[p]?.sheet)];
       return AssetLoader.queueCategories(this, ['island', 'environment']) + AssetLoader.queueIds(this, ids);
-    }, 'Đang ghé thăm đảo của bé…');
+    }, 'Đang về đảo của bé…');
   }
 
   create() {
+    if (Ui.stale(this)) return;
     Ui.setActiveTab('Island');
+    Hud.show(true);
     AssetLoader.createAnimations(this);
     const L = this.L = AssetLoader.data('island');
+    const P = Store.p ;
+    this.petId = P.pet;
+    this.objs = []; this.mode = 'play'; this.placing = null; this.selected = null;
     this.cameras.main.setBackgroundColor('#5ab4e0');
 
     this.add.image(0, 0, L.terrain).setOrigin(0, 0).setDisplaySize(L.width, L.height).setDepth(-10);
@@ -1042,19 +2342,30 @@ class IslandPreviewScene extends Phaser.Scene {
     }
     this.walk = new Phaser.Geom.Polygon(L.walkArea.flat());
 
-    for (const o of L.objects) this.addObject(o.asset, o.x, o.y, !!o.flipX);
+    // bố cục đã lưu, hoặc bố cục ban đầu (luống đất đang lớn sẵn cho bé thấy ngay)
+    let objs              = P.island               ;
+    if (!objs) {
+      const now = Date.now();
+      objs = L.objects.map((o     ) => {
+        const r            = { a: o.asset, x: o.x, y: o.y, f: !!o.flipX };
+        if (o.asset === 'island-terrain-plot-sprout') { r.a = 'island-terrain-plot-empty'; r.seed = now - 20_000; }
+        if (o.asset === 'island-terrain-plot-growing') { r.a = 'island-terrain-plot-empty'; r.seed = now - PLOT_GROW_MS[2] + 15_000; }
+        return r;
+      });
+    }
+    for (const o of objs) this.addObject(o.a, o.x, o.y, !!o.f, o.seed);
 
     this.selRing = this.add.graphics().setDepth(-1);
     this.tapMarker = this.add.graphics().setDepth(-2);
 
-    // bé + thú cưng
     const [ax, ay] = L.spawn.avatar;
-    this.avatar = new LayeredAvatar(this, ax, ay);
+    this.avatar = new LayeredAvatar(this, ax, ay, validLook(P.look));
     this.avatar.container.setSize(60, 90);
     this.avatar.container.setInteractive(new Phaser.Geom.Rectangle(-30, -84, 60, 88), Phaser.Geom.Rectangle.Contains);
     this.avatar.container.on('pointerup', () => {
       if (this.mode !== 'play' || this.controls.dragging) return;
       this.target = null;
+      Audio.sfx('pop');
       this.avatar.play('wave', true, () => this.avatar.play('idle-down'));
     });
     this.spawnPet(this.petId);
@@ -1067,7 +2378,6 @@ class IslandPreviewScene extends Phaser.Scene {
     this.cameras.main.setZoom(this.controls.minZoom * (this.scale.width > this.scale.height ? 1.35 : 1));
     this.cameras.main.centerOn(ax, ay - 120);
 
-    // kéo thả đồ (chế độ sắp xếp)
     this.input.on('gameobjectdown', (_p     , obj     ) => {
       if (this.mode !== 'edit' || !obj.getData('placed') || this.placing) return;
       this.controls.locked = true;
@@ -1077,69 +2387,164 @@ class IslandPreviewScene extends Phaser.Scene {
     this.input.on('drag', (_p     , obj     , dx        , dy        ) => {
       if (this.mode !== 'edit' || !obj.getData('placed')) return;
       obj.setPosition(Math.round(dx / SNAP) * SNAP, Math.round(dy / SNAP) * SNAP);
-      obj.setDepth(obj.y);
+      obj.setDepth(this.depthOf(obj));
       obj.setTint(this.inside(obj.x, obj.y) ? 0xffffff : 0xff9b9b);
+      this.syncBloom(obj);
       this.drawSelection();
     });
     this.input.on('dragend', (_p     , obj     ) => {
       obj.clearTint();
       if (!this.inside(obj.x, obj.y) && this.dragFrom) {
-        this.tweens.add({ targets: obj, x: this.dragFrom.x, y: this.dragFrom.y, duration: 220, ease: 'Back.easeOut', onUpdate: () => this.drawSelection(), onComplete: () => obj.setDepth(obj.y) });
+        this.tweens.add({ targets: obj, x: this.dragFrom.x, y: this.dragFrom.y, duration: 220, ease: 'Back.easeOut', onUpdate: () => { this.drawSelection(); this.syncBloom(obj); }, onComplete: () => { obj.setDepth(this.depthOf(obj)); this.syncBloom(obj); } });
         Ui.toast('Chỉ đặt được trên đất của đảo');
-      } else {
-        this.bounce(obj);
-      }
+      } else { this.bounce(obj); Audio.sfx('place'); this.save(); }
     });
-    this.input.on('pointerup', () => { setTimeout(() => { this.controls.locked = false; }, 0); });
+    this.input.on('pointerup', () => { setTimeout(() => { if (this.controls) this.controls.locked = false; }, 0); });
 
     this.buildPanel();
-    this.events.once('shutdown', () => { Ui.clearPanel(); Ui.card(null); });
+    this.refreshPlots();
+    this.events.once('shutdown', () => { Ui.clearPanel(); Ui.card(null); });   // không lưu ở đây: lúc tắt scene đồ vật đã bị huỷ
+
+    if (!P.seenIntro) {
+      P.seenIntro = true; Store.commit();
+      const pets = AssetLoader.data('pets') || {};
+      this.time.delayedCall(600, () => Hud.say(`Chào ${P.name}! Mình là ${pets[this.petId]?.name || 'bạn đồng hành'}. Đây là đảo của chúng mình!`));
+      this.time.delayedCall(5200, () => Hud.say('Mở Bản đồ để chơi trò chơi, nhận sao và đồ xây đảo nhé!'));
+    } else this.time.delayedCall(500, () => Hud.say(pick([...PET_LINES.hello, ...PET_LINES.island])));
   }
 
   // ───────────── đồ vật ─────────────
-  addObject(asset        , x        , y        , flipX = false) {
+  depthOf(o     ) { const a = o.getData('asset'); const e = AssetLoader.entry(a); return (e?.tags || []).includes('ground') || PLOT_ASSETS.includes(a) ? -3 + o.y / 10000 : o.y; }
+
+  addObject(asset        , x        , y        , flipX = false, seed         ) {
     if (!this.textures.exists(asset)) return null;
     const s = AssetLoader.sprite(this, asset, x, y);
-    s.setDepth(y).setFlipX(flipX);
+    s.setFlipX(flipX);
     s.setData('placed', true).setData('asset', asset);
+    if (seed) s.setData('seed', seed);
+    s.setDepth(this.depthOf(s));
     s.setInteractive({ pixelPerfect: true, alphaTolerance: 40, draggable: false, useHandCursor: false });
+    if (this.mode === 'edit') this.input.setDraggable(s, true);
     this.objs.push(s);
     return s;
   }
 
-  inside(x        , y        ) { return Phaser.Geom.Polygon.Contains(this.walk, x, y); }
+  save() {
+    Store.setIsland(this.objs.filter((o) => o.active).map((o) => {
+      const r            = { a: o.getData('asset'), x: Math.round(o.x), y: Math.round(o.y) };
+      if (o.flipX) r.f = true;
+      if (o.getData('seed')) r.seed = o.getData('seed');
+      return r;
+    }));
+  }
 
+  inside(x        , y        ) { return Phaser.Geom.Polygon.Contains(this.walk, x, y); }
   bounce(obj     ) {
     const sy = obj.scaleY;
     this.tweens.add({ targets: obj, scaleY: sy * 0.9, duration: 90, yoyo: true, ease: 'Quad.easeOut', onComplete: () => obj.setScale(obj.scaleX, sy) });
   }
 
+  // ───────────── luống đất ─────────────
+  isPlot(o     ) { return PLOT_ASSETS.includes(o.getData('asset')); }
+  plotStage(o     )         {
+    const seed = o.getData('seed'); if (!seed) return 0;
+    const t = Date.now() - seed;
+    return t >= PLOT_GROW_MS[2] ? 3 : t >= PLOT_GROW_MS[1] ? 2 : 1;
+  }
+  refreshPlots() {
+    for (const o of this.objs) if (o.active && this.isPlot(o)) {
+      const st = this.plotStage(o);
+      const want = st === 0 ? 'island-terrain-plot-empty' : st === 1 ? 'island-terrain-plot-sprout' : 'island-terrain-plot-growing';
+      if (o.texture.key !== want && this.textures.exists(want)) { o.setTexture(want); o.setData('asset', 'island-terrain-plot-empty'); }
+      const ready = st === 3;
+      if (ready && !o.getData('bloom')) {
+        const bloom = BLOOMS.slice(0, 3).map((k, i) => this.add.image(0, 0, k).setScale(0.42).setOrigin(0.5, 0.9));
+        const spark = this.textures.exists('world-ui-unlocked-sparkle') ? this.add.image(0, 0, 'world-ui-unlocked-sparkle').setScale(0.22) : null;
+        if (spark) this.tweens.add({ targets: spark, scale: 0.28, angle: 20, duration: 700, yoyo: true, repeat: -1 });
+        o.setData('bloom', { flowers: bloom, spark });
+        this.syncBloom(o);
+      } else if (!ready && o.getData('bloom')) {
+        const b = o.getData('bloom'); b.flowers.forEach((f     ) => f.destroy()); b.spark?.destroy(); o.setData('bloom', null);
+      }
+    }
+  }
+  syncBloom(o     ) {
+    const b = o.getData('bloom'); if (!b) return;
+    b.flowers.forEach((f     , i        ) => f.setPosition(o.x + (i - 1) * 42, o.y - 6 + (i % 2) * 8).setDepth(o.y + 1 + i));
+    b.spark?.setPosition(o.x, o.y - 80).setDepth(o.y + 10);
+  }
+  tapPlot(o     ) {
+    const st = this.plotStage(o);
+    if (st === 0) {
+      if (!Store.pay({ seed: 1 })) { Hud.say('Mình hết hạt giống rồi. Chơi ở Đảo Động Vật để nhận thêm nhé!'); return; }
+      o.setData('seed', Date.now());
+      Audio.sfx('plant'); Hud.bump('seed'); Hud.render();
+      Hud.say('Gieo hạt rồi! Chờ một chút, hoa sẽ nở nhé.');
+    } else if (st === 3) {
+      o.setData('seed', null);
+      Store.give(PLOT_HARVEST); Store.count('harvest');
+      const got = Store.checkAchievements(); Store.commit();
+      Audio.sfx('reward');
+      for (const k of Object.keys(PLOT_HARVEST)) Hud.bump(k);
+      Hud.render();
+      Hud.say(`Thu hoạch được ${PLOT_HARVEST.flower} bông hoa và ${PLOT_HARVEST.seed} hạt giống!`);
+      this.achToast(got);
+      this.flyIcons(o.x, o.y - 40, PLOT_HARVEST       );
+    } else {
+      const left = Math.ceil((PLOT_GROW_MS[2] - (Date.now() - o.getData('seed'))) / 1000);
+      Hud.say(st === 1 ? `Mầm non đang lớn! Khoảng ${left} giây nữa hoa sẽ nở.` : `Sắp nở rồi! Còn khoảng ${left} giây.`);
+    }
+    this.bounce(o);
+    this.refreshPlots();
+    this.save();
+  }
+
+  flyIcons(x        , y        , r                        ) {
+    let i = 0;
+    for (const [k, v] of Object.entries(r)) for (let n = 0; n < v; n++) {
+      const key = 'reward-' + k;
+      if (!this.textures.exists(key)) { AssetLoader.loadNow(this, [key], () => {}); continue; }
+      const s = this.add.image(x, y, key).setScale(0.4).setDepth(99990);
+      this.tweens.add({ targets: s, y: y - 120 - Math.random() * 40, x: x + (i++ - 2) * 30, alpha: 0, duration: 900, ease: 'Cubic.easeOut', onComplete: () => s.destroy() });
+    }
+  }
+
+  achToast(ids          ) {
+    ids.forEach((id, i) => {
+      const a = ACHIEVEMENTS.find((x) => x.id === id); if (!a) return;
+      this.time.delayedCall(900 + i * 2200, () => { Audio.sfx('unlock'); Ui.toast(`Huy hiệu mới: ${a.name}!`, 2600); });
+    });
+  }
+
+  // ───────────── chọn & sửa ─────────────
   select(obj     ) {
     this.selected = obj;
     this.drawSelection();
     if (!obj) { Ui.card(null); return; }
-    const e = AssetLoader.entry(obj.getData('asset'));
+    const asset = obj.getData('asset');
+    const name = shopItem(asset)?.name || AssetLoader.entry(asset)?.usage || asset;
+    const fixed = FIXED.has(asset);
     const el = Ui.card(`
-      <div class="card-head" style="--c:#a6e3c4"><img class="card-icon sq" src="${AssetLoader.url(obj.getData('asset'))}" alt="">
-      <div><h3>${Ui.esc(e?.usage || obj.getData('asset'))}</h3><p>${Ui.esc(e?.category || '')}</p></div></div>
+      <div class="card-head" style="--c:#a6e3c4"><img class="card-icon sq" src="${AssetLoader.url(asset)}" alt="">
+      <div><h3>${Ui.esc(name)}</h3><p>Kéo để di chuyển</p></div></div>
       <div class="row">
         <button class="btn" data-a="flip">Lật</button>
-        <button class="btn" data-a="dup">Nhân bản</button>
-        <button class="btn danger" data-a="del">Cất đi</button>
+        ${fixed ? '' : '<button class="btn danger" data-a="store">Cất vào túi</button>'}
         <button class="btn ghost" data-a="close">Xong</button>
-      </div>`, );
+      </div>`);
     el.onclick = (ev     ) => {
       const a = ev.target.closest('button')?.dataset.a;
       if (!a || !this.selected) return;
+      Audio.sfx('tap');
       const o = this.selected;
-      if (a === 'flip') { o.setFlipX(!o.flipX); this.bounce(o); }
-      else if (a === 'dup') {
-        const n = this.addObject(o.getData('asset'), o.x + 64, o.y + 32, o.flipX);
-        if (n) { if (this.mode === 'edit') this.input.setDraggable(n, true); this.select(n); this.bounce(n); }
-      } else if (a === 'del') {
+      if (a === 'flip') { o.setFlipX(!o.flipX); this.bounce(o); this.save(); }
+      else if (a === 'store') {
         this.objs = this.objs.filter((x) => x !== o);
+        const b = o.getData('bloom'); if (b) { b.flowers.forEach((f     ) => f.destroy()); b.spark?.destroy(); }
+        Store.addItem(asset);
         this.tweens.add({ targets: o, alpha: 0, scale: o.scale * 0.6, duration: 200, onComplete: () => o.destroy() });
         this.select(null);
+        this.save(); this.buildPanel();
       } else if (a === 'close') this.select(null);
     };
   }
@@ -1153,14 +2558,14 @@ class IslandPreviewScene extends Phaser.Scene {
     g.lineStyle(3, 0xffac6b, 1).strokeEllipse(o.x, o.y, w + 10, w * 0.36 + 6);
   }
 
-  // ───────────── chế độ ─────────────
   setMode(m                 ) {
     this.mode = m;
     this.setPlacing(null);
     this.select(null);
     for (const o of this.objs) this.input.setDraggable(o, m === 'edit');
-    if (this.grid) this.grid.setVisible(m === 'edit' || this.grid.getData('forced'));
+    if (this.grid) this.grid.setVisible(m === 'edit');
     this.buildPanel();
+    if (m === 'edit') Hud.say(Object.keys(Store.p .items).length ? 'Chọn đồ trong túi rồi chạm lên đảo để đặt nhé!' : 'Túi đang trống. Bấm "Cửa hàng" để đổi đồ mới nhé!');
   }
 
   setPlacing(id               ) {
@@ -1188,18 +2593,39 @@ class IslandPreviewScene extends Phaser.Scene {
       if (this.placing) {
         const sx = Math.round(x / SNAP) * SNAP, sy = Math.round(y / SNAP) * SNAP;
         if (!this.inside(sx, sy)) { Ui.toast('Chỉ đặt được trên đất của đảo'); return; }
-        const o = this.addObject(this.placing, sx, sy);
-        if (o) { this.input.setDraggable(o, true); this.bounce(o); }
+        const id = this.placing;
+        const P = Store.p ;
+        if (!P.items[id]) { this.setPlacing(null); return; }
+        const o = this.addObject(id, sx, sy);
+        if (o) {
+          this.bounce(o); Audio.sfx('place');
+          Store.addItem(id, -1); Store.count('placed');
+          const got = Store.checkAchievements(); Store.commit();
+          this.achToast(got);
+          this.save();
+          if (!P.items[id]) this.setPlacing(null);
+          this.buildPanel();
+        }
         return;
       }
-      // chạm vào chỗ trống → bỏ chọn
       const hit = this.input.hitTestPointer(this.input.activePointer).filter((o     ) => o.getData && o.getData('placed'));
       if (!hit.length) this.select(null);
       return;
     }
-    // dạo chơi: đi tới điểm chạm
+    // dạo chơi: chạm luống đất → đi tới rồi gieo / thu hoạch
+    const hits = this.input.hitTestPointer(this.input.activePointer).filter((o     ) => o.getData && o.getData('placed'));
+    const plot = hits.find((o     ) => this.isPlot(o)) || this.objs.find((o) => o.active && this.isPlot(o) && Math.abs(o.x - x) < 75 && Math.abs(o.y - y) < 45);
+    if (plot) {
+      this.walkTo(plot.x - 90, plot.y + 10, () => { this.facing = 'side'; this.avatar.setFlip(false); this.avatar.play('interact', true, () => this.avatar.play('idle-side')); this.tapPlot(plot); });
+      return;
+    }
     if (!this.inside(x, y)) { Ui.toast('Bé không bơi được đâu!'); return; }
-    this.target = { x, y };
+    this.walkTo(x, y);
+  }
+
+  walkTo(x        , y        , then             ) {
+    if (!this.inside(x, y)) { const c = { x: (x + this.avatar.x) / 2, y: (y + this.avatar.y) / 2 }; if (this.inside(c.x, c.y)) { x = c.x; y = c.y; } else { then?.(); return; } }
+    this.target = { x, y, then };
     const d = Math.hypot(x - this.avatar.x, y - this.avatar.y);
     this.running = d > 340;
     this.tapMarker.clear();
@@ -1219,12 +2645,13 @@ class IslandPreviewScene extends Phaser.Scene {
     this.petId = id;
     const s = this.pet = this.add.sprite(pos.x, pos.y, P.sheet);
     s.setOrigin(...(P.origin || [0.5, 0.92])).setScale(P.scale ?? 0.5);
-    s.setData('cfg', P);
     this.petPlay('greet', () => this.petPlay('idle-front'));
     s.setInteractive({ pixelPerfect: true, alphaTolerance: 40 });
     s.on('pointerup', () => {
       if (this.mode !== 'play' || this.controls.dragging) return;
+      Audio.sfx('bloop');
       this.petPlay(Math.random() < 0.5 ? 'interact' : 'happy', () => this.petPlay('idle-front'));
+      Hud.say(pick([...PET_LINES.island, ...PET_LINES.hello]));
     });
   }
 
@@ -1240,42 +2667,96 @@ class IslandPreviewScene extends Phaser.Scene {
 
   // ───────────── bảng điều khiển ─────────────
   buildPanel() {
-    const L = this.L;
+    const P = Store.p ;
     const pets = AssetLoader.data('pets') || {};
-    const petBtns = PET_IDS.filter((p) => pets[p]).map((p) => {
-      const portrait = AssetLoader.entry(`${p}-portrait`) ? AssetLoader.url(`${p}-portrait`) : '';
-      return `<button class="pet ${p === this.petId ? 'on' : ''}" data-pet="${p}" title="${Ui.esc(pets[p].name || p)}">${portrait ? `<img src="${portrait}" alt="">` : ''}<span>${Ui.esc(pets[p].name || p)}</span></button>`;
-    }).join('');
+    const petBtns = PET_IDS.filter((p) => pets[p]).map((p) =>
+      `<button class="pet ${p === this.petId ? 'on' : ''}" data-pet="${p}" title="${Ui.esc(pets[p].name || p)}"><img src="${AssetLoader.url(`${p}-portrait`)}" alt=""><span>${Ui.esc(pets[p].name || p)}</span></button>`).join('');
+    const inv = Object.entries(P.items).filter(([id, n]) => n > 0 && AssetLoader.entry(id));
     const palette = this.mode === 'edit'
-      ? `<div class="palette">${(L.placeable || []).filter((id        ) => AssetLoader.entry(id)).map((id        ) =>
-        `<button data-id="${id}" class="${id === this.placing ? 'on' : ''}" title="${Ui.esc(AssetLoader.entry(id)?.usage || id)}"><img src="${AssetLoader.url(id)}" alt=""></button>`).join('')}</div>
-        <p class="hint">Kéo đồ để di chuyển · chọn đồ bên trên rồi chạm lên đảo để đặt</p>`
-      : `<p class="hint">Chạm mặt đất để bé đi · chạm bé hoặc thú cưng để chào</p>`;
+      ? `<h4>Túi đồ <button class="btn small accent" data-a="shop">Cửa hàng</button></h4>
+        ${inv.length ? `<div class="palette">${inv.map(([id, n]) =>
+          `<button data-id="${id}" class="${id === this.placing ? 'on' : ''}" title="${Ui.esc(shopItem(id)?.name || id)}"><img src="${AssetLoader.url(id)}" alt=""><i>${n}</i></button>`).join('')}</div>
+        <p class="hint">Chọn đồ rồi chạm lên đảo để đặt · kéo đồ trên đảo để di chuyển</p>`
+          : '<p class="hint">Túi đang trống — vào Cửa hàng đổi đồ bằng sao, hạt giống, gỗ, đá… kiếm được khi chơi.</p>'}`
+      : `<p class="hint">Chạm mặt đất để bé đi · chạm luống đất để gieo hạt và hái hoa</p>`;
     const el = Ui.panel(`
       <div class="row">
-        <div class="seg"><button data-m="play" class="${this.mode === 'play' ? 'on' : ''}">Dạo chơi</button><button data-m="edit" class="${this.mode === 'edit' ? 'on' : ''}">Sắp xếp</button></div>
-        <button class="btn" data-a="grid">Lưới</button>
+        <div class="seg"><button data-m="play" class="${this.mode === 'play' ? 'on' : ''}">Dạo chơi</button><button data-m="edit" class="${this.mode === 'edit' ? 'on' : ''}">Trang trí</button></div>
         <button class="btn icon" data-a="zin" aria-label="Phóng to">＋</button>
         <button class="btn icon" data-a="zout" aria-label="Thu nhỏ">－</button>
-        <button class="btn" data-a="map">Bản đồ</button>
+        <button class="btn" data-a="ach">Huy hiệu</button>
+        <button class="btn accent" data-a="map">Đi chơi</button>
       </div>
-      <div class="pets">${petBtns}</div>
+      ${this.mode === 'play' ? `<div class="pets">${petBtns}</div>` : ''}
       ${palette}`, 'island-panel');
     el.onclick = (e     ) => {
       const b = e.target.closest('button'); if (!b) return;
+      Audio.sfx('tap');
       if (b.dataset.m) this.setMode(b.dataset.m);
-      else if (b.dataset.pet) { this.spawnPet(b.dataset.pet); this.buildPanel(); }
+      else if (b.dataset.pet) {
+        if (b.dataset.pet === this.petId) return;
+        Store.setPet(b.dataset.pet); this.spawnPet(b.dataset.pet); this.buildPanel();
+        Hud.say(`Chào bạn! Mình là ${pets[b.dataset.pet]?.name}. Cùng chơi nhé!`);
+        this.achToast(Object.keys(Store.p .ach).filter((k) => k === 'new-pet-friend' && Date.now() - Store.p .ach[k] < 2000));
+      }
       else if (b.dataset.id) this.setPlacing(this.placing === b.dataset.id ? null : b.dataset.id);
-      else if (b.dataset.a === 'grid' && this.grid) { const v = !this.grid.visible; this.grid.setVisible(v).setData('forced', v); }
       else if (b.dataset.a === 'zin') this.controls.zoomBy(1.35);
       else if (b.dataset.a === 'zout') this.controls.zoomBy(1 / 1.35);
       else if (b.dataset.a === 'map') location.hash = 'map';
+      else if (b.dataset.a === 'shop') this.openShop();
+      else if (b.dataset.a === 'ach') this.openAchievements();
     };
+  }
+
+  openShop() {
+    const P = Store.p ;
+    const items = SHOP.filter((s) => s.group === this.shopGroup && AssetLoader.entry(s.asset));
+    const el = Ui.modal(`
+      <div class="shop">
+        <h2>Cửa hàng của đảo</h2>
+        <div class="shop-res">${Object.entries(P.res).map(([k, v]) => `<span><img src="${resIcon(k)}" alt="">${v} ${RES_NAMES[k                          ]}</span>`).join('')}</div>
+        <div class="seg wide">${SHOP_GROUPS.map(([g, n]) => `<button data-g="${g}" class="${g === this.shopGroup ? 'on' : ''}">${n}</button>`).join('')}</div>
+        <div class="shop-grid">${items.map((s) => {
+          const ok = Store.has(s.cost);
+          return `<button class="shop-item ${ok ? '' : 'cant'}" data-buy="${s.asset}"><img src="${AssetLoader.url(s.asset)}" alt=""><b>${Ui.esc(s.name)}</b>${costHtml(s.cost       )}${P.items[s.asset] ? `<i>Trong túi: ${P.items[s.asset]}</i>` : ''}</button>`;
+        }).join('')}</div>
+        <p class="hint">Mọi thứ đều đổi bằng phần thưởng bé tự kiếm khi chơi. Không có mua bằng tiền thật.</p>
+      </div>`, { cls: 'modal-wide', onClose: () => this.buildPanel() });
+    el.querySelector('.shop') .addEventListener('click', (e     ) => {
+      const b = e.target.closest('button'); if (!b) return;
+      if (b.dataset.g) { Audio.sfx('tap'); this.shopGroup = b.dataset.g; this.openShop(); return; }
+      if (b.dataset.buy) {
+        const s = shopItem(b.dataset.buy) ;
+        if (!Store.pay(s.cost)) {
+          Audio.sfx('soft');
+          const miss = Object.entries(s.cost).filter(([k, v]) => P.res[k                      ] < (v          )).map(([k, v]) => `${(v          ) - P.res[k                      ]} ${RES_NAMES[k                          ].toLowerCase()}`).join(', ');
+          Ui.toast(`Cần thêm ${miss}`, 2200);
+          return;
+        }
+        Audio.sfx('reward');
+        Store.addItem(s.asset);
+        Hud.render();
+        Ui.toast(`Đã cho ${s.name} vào túi!`);
+        this.openShop();
+      }
+    });
+  }
+
+  openAchievements() {
+    const P = Store.p ;
+    const got = ACHIEVEMENTS.filter((a) => P.ach[a.id]).length;
+    Ui.modal(`
+      <div class="achv">
+        <h2>Huy hiệu của ${Ui.esc(P.name)} <small>${got}/${ACHIEVEMENTS.length}</small></h2>
+        <div class="ach-grid">${ACHIEVEMENTS.map((a) => `<div class="ach-card ${P.ach[a.id] ? 'on' : ''}"><img src="${AssetLoader.url(a.icon)}" alt=""><b>${Ui.esc(a.name)}</b><span>${Ui.esc(a.desc)}</span></div>`).join('')}</div>
+      </div>`, { cls: 'modal-wide' });
   }
 
   // ───────────── vòng lặp ─────────────
   update(_t        , dt        ) {
     if (!this.avatar) return;
+    this.plotTimer += dt;
+    if (this.plotTimer > 1000) { this.plotTimer = 0; this.refreshPlots(); }
     const A = this.avatar;
     if (this.target) {
       const dx = this.target.x - A.x, dy = this.target.y - A.y;
@@ -1283,9 +2764,11 @@ class IslandPreviewScene extends Phaser.Scene {
       const speed = (this.running ? 250 : 140) * dt / 1000;
       if (d <= speed) {
         A.setPosition(this.target.x, this.target.y);
+        const then = this.target.then;
         this.target = null;
         A.play(`idle-${this.facing}`);
-        if (!this.petBusy && Math.random() < 0.35) this.petPlay('happy', () => this.petPlay('idle-front'));
+        if (then) then();
+        else if (!this.petBusy && Math.random() < 0.35) this.petPlay('happy', () => this.petPlay('idle-front'));
       } else {
         A.setPosition(A.x + dx / d * speed, A.y + dy / d * speed);
         if (Math.abs(dx) > Math.abs(dy) * 1.1) { this.facing = 'side'; A.setFlip(dx < 0); }
@@ -1296,7 +2779,6 @@ class IslandPreviewScene extends Phaser.Scene {
     A.container.setDepth(A.y);
     A.update(dt);
 
-    // thú cưng đi theo, đứng chếch phía sau bé
     const P = this.pet;
     if (P) {
       const side = A.flip ? 1 : -1;
@@ -1318,15 +2800,18 @@ class IslandPreviewScene extends Phaser.Scene {
     }
   }
 }
-return { IslandPreviewScene };
+return { IslandScene };
 })();
 
-/* ══════════ scenes/CharacterGalleryScene.ts ══════════ */
-M.CharacterGalleryScene = (function () {
-// ── Màn 3: Phòng trưng bày nhân vật ──
-// Bé (4 góc nhìn + animation + tuỳ biến từng lớp) và ba thú cưng (animation).
+/* ══════════ scenes/WardrobeScene.ts ══════════ */
+M.WardrobeScene = (function () {
+// ── Tủ đồ: tuỳ biến bé (tóc, da, quần áo, phụ kiện) và chọn bạn đồng hành ──
+// Diện mạo lưu vào hồ sơ bé, dùng trên đảo và bản đồ.
 const { AssetLoader } = M.AssetLoader;
-const { LayeredAvatar, avatarConfig, defaultLook, allAvatarAssetIds, AvatarLook } = M.LayeredAvatar;
+const { LayeredAvatar, avatarConfig, defaultLook, allAvatarAssetIds, AvatarLook, validLook } = M.LayeredAvatar;
+const { Store } = M.Store;
+const { Audio } = M.Audio;
+const { Hud } = M.Hud;
 const { Ui } = M.Ui;
 const { preloadWithProgress } = M.BootScene;
 const PET_IDS = ['fox', 'bunny', 'bear'];
@@ -1340,7 +2825,7 @@ const ANIM_NAMES                         = {
 };
 const COLOR_SLOTS                             = [['skin', 'Màu da', 'skin'], ['hair', 'Màu tóc', 'hair'], ['top', 'Màu áo', 'cloth'], ['bottom', 'Màu quần/váy', 'cloth'], ['shoes', 'Màu giày', 'shoes']];
 
-class CharacterGalleryScene extends Phaser.Scene {
+class WardrobeScene extends Phaser.Scene {
   look             = null       ;
   hero     ;
   views        = [];
@@ -1351,7 +2836,7 @@ class CharacterGalleryScene extends Phaser.Scene {
   petAnim                         = { fox: 'idle-front', bunny: 'idle-front', bear: 'idle-front' };
   labels        = [];
 
-  constructor() { super('Gallery'); }
+  constructor() { super('Wardrobe'); }
 
   preload() {
     preloadWithProgress(this, () => {
@@ -1361,7 +2846,10 @@ class CharacterGalleryScene extends Phaser.Scene {
   }
 
   create() {
-    Ui.setActiveTab('Gallery');
+    if (Ui.stale(this)) return;
+    Ui.setActiveTab('Wardrobe');
+    Hud.show(true);
+    this.time.delayedCall(400, () => Hud.say('Bé muốn mặc gì hôm nay? Chạm các nút để đổi nhé!'));
     AssetLoader.createAnimations(this);
     this.cameras.main.setBackgroundColor('#fff3dc');
     this.bg = this.add.graphics().setDepth(-10);
@@ -1380,7 +2868,7 @@ class CharacterGalleryScene extends Phaser.Scene {
       if (!P || !this.textures.exists(P.sheet)) continue;
       const s = this.add.sprite(0, 0, P.sheet).setOrigin(...(P.origin || [0.5, 0.92]));
       s.setInteractive({ pixelPerfect: true, alphaTolerance: 40, useHandCursor: true });
-      s.on('pointerup', () => this.playPet(p, 'greet'));
+      s.on('pointerup', () => { Audio.sfx('bloop'); this.playPet(p, 'greet'); });
       this.pets[p] = s;
       this.playPet(p, 'idle-front');
     }
@@ -1393,18 +2881,8 @@ class CharacterGalleryScene extends Phaser.Scene {
   }
 
   // ───────────── diện mạo ─────────────
-  loadLook()             {
-    try {
-      const s = JSON.parse(localStorage.getItem('lw-look') || 'null');
-      if (s && s.variants && s.colors) {
-        const cfg = avatarConfig();
-        const ok = cfg.layers.every((L     ) => !(L.slot in s.variants) || s.variants[L.slot] === null || L.variants.some((v     ) => v.id === s.variants[L.slot]));
-        if (ok) return { variants: { ...defaultLook().variants, ...s.variants }, colors: { ...defaultLook().colors, ...s.colors } };
-      }
-    } catch (e) { /* bỏ qua */ }
-    return defaultLook();
-  }
-  saveLook() { try { localStorage.setItem('lw-look', JSON.stringify(this.look)); } catch (e) { /* bỏ qua */ } }
+  loadLook()             { return validLook(Store.p?.look); }
+  saveLook() { Store.setLook(this.look); }
 
   applyLook() {
     this.hero.setLook(this.look);
@@ -1520,7 +2998,8 @@ class CharacterGalleryScene extends Phaser.Scene {
         const P = pets[p];
         const portrait = AssetLoader.entry(`${p}-portrait`) ? `<img src="${AssetLoader.url(`${p}-portrait`)}" alt="">` : '';
         const anims = Object.keys(P.anims).map((k) => `<button class="chip ${k === this.petAnim[p] ? 'on' : ''}" data-pet="${p}" data-anim="${k}">${Ui.esc(ANIM_NAMES[k] || k)}</button>`).join('');
-        return `<div class="petcard">${portrait}<div><h4>${Ui.esc(P.name || p)}</h4><p>${Ui.esc(P.personality || '')}</p></div></div><div class="chips">${anims}</div>`;
+        const mine = Store.p?.pet === p;
+        return `<div class="petcard">${portrait}<div><h4>${Ui.esc(P.name || p)} ${mine ? '<span class="badge open">Bạn đồng hành</span>' : `<button class="btn small accent" data-choose="${p}">Chọn bạn này</button>`}</h4><p>${Ui.esc(P.personality || '')}</p></div></div><div class="chips">${anims}</div>`;
       }).join('') + `<div class="row"><button class="btn accent" data-a="allcele">Cả ba cùng ăn mừng</button><button class="btn" data-a="allgreet">Cả ba cùng chào</button></div>`;
     }
     const el = Ui.panel(`
@@ -1529,7 +3008,9 @@ class CharacterGalleryScene extends Phaser.Scene {
     el.onclick = (e     ) => {
       const b = e.target.closest('button'); if (!b) return;
       const d = b.dataset;
+      Audio.sfx('tap');
       if (d.tab) { this.tab = d.tab; this.buildPanel(); return; }
+      if (d.choose) { Store.setPet(d.choose); this.playPet(d.choose, 'celebrate'); Hud.say(`Chào bạn! Mình là ${pets[d.choose]?.name}. Từ giờ mình đi cùng bạn nhé!`); this.buildPanel(); return; }
       if (d.pet && d.anim) { this.playPet(d.pet, d.anim); this.buildPanel(); return; }
       if (d.anim) {
         const a = cfg.anims[d.anim];
@@ -1571,17 +3052,936 @@ function matchingHairBack(cfg     , frontId               )                {
   const back = cfg.layers.find((L     ) => L.slot === 'hairBack');
   return back.variants.some((v     ) => v.id === want) ? want : null;
 }
-return { CharacterGalleryScene };
+return { WardrobeScene };
+})();
+
+/* ══════════ games/AnimalMatch.ts ══════════ */
+M.AnimalMatch = (function () {
+// ── Game 1: Tìm bạn thú (chọn đúng con vật) / Nhà của thú (đưa thú về đúng nơi ở) ──
+// Cấp 1–5: số lựa chọn 2 → 3 → 4 → 6; cấp 5 chỉ nghe tiếng kêu.
+const { AssetLoader } = M.AssetLoader;
+const { Audio } = M.Audio;
+const { MiniGame, shuffle } = M.MiniGame;
+class AnimalMatchScene extends MiniGame {
+  target      = null;
+  constructor() { super('AnimalMatch'); }
+
+  get play() { return AssetLoader.data('play'); }
+  assets() {
+    const P = this.play;
+    return [...P.animals.map((a     ) => a.asset), ...P.habitats.map((h     ) => h.asset), P.cards?.front || 'card-front'];
+  }
+  instruction() {
+    if (!this.target) return this.act.desc;
+    if (this.mode === 'habitat') return `${this.target.name} sống ở đâu nhỉ? Kéo bạn ấy về nhà nhé.`;
+    return this.level >= 5 ? `Con nào kêu "${this.target.sound}"?` : `Con ${this.target.name.toLowerCase()} đâu rồi?`;
+  }
+
+  buildRound() {
+    if (this.mode === 'habitat') this.buildHabitat(); else this.buildFind();
+  }
+
+  // ───── Tìm bạn thú ─────
+  buildFind() {
+    const P = this.play;
+    const n = [2, 3, 4, 6, 6][this.level - 1];
+    const pool = shuffle(P.animals         );
+    const choices = pool.slice(0, n);
+    this.target = choices[Math.floor(Math.random() * n)];
+    const top = this.top;
+    const q = this.label(this.W / 2, top + 30, this.level >= 5 ? `Con nào kêu "${this.target.sound}"?` : `Con ${this.target.name.toLowerCase()} đâu?`, this.portrait ? 54 : 58);
+    this.layer.add(q);
+    // loa: đọc lại
+    const spk = this.add.circle(q.x + q.width / 2 + 50, q.y, 32, 0xffd96b).setStrokeStyle(5, 0xffffff).setInteractive({ useHandCursor: true });
+    const spkT = this.label(spk.x, spk.y - 2, '♪', 40);
+    spk.on('pointerup', () => { Audio.sfx('tap'); this.say(this.instruction()); });
+    this.layer.add([spk, spkT]);
+
+    const cols = this.portrait ? (n <= 2 ? 1 : 2) : Math.min(n, n === 6 ? 3 : n);
+    const rows = Math.ceil(n / cols);
+    const areaT = top + 110, areaB = this.H - (this.portrait ? 220 : 60);
+    const cw = Math.min(this.portrait ? 380 : 330, (this.W - 140) / cols), ch = Math.min(cw * 1.15, (areaB - areaT) / rows - 20);
+    choices.forEach((a     , i        ) => {
+      const c = i % cols, r = Math.floor(i / cols);
+      const rowCount = Math.min(cols, n - r * cols);
+      const x = this.W / 2 + (c - (rowCount - 1) / 2) * (cw + 24);
+      const y = areaT + (r + 0.5) * ((areaB - areaT) / rows);
+      const card = this.add.container(x, y);
+      const plate = this.plate(0, 0, cw, ch, 0xfffaf2, 0.95);
+      const img = this.fitImage(a.asset, 0, -14, cw * 0.82, ch * 0.72);
+      const name = this.label(0, ch / 2 - 34, this.level <= 2 ? a.name : '', 34);
+      card.add([plate, img, name]);
+      card.setSize(cw, ch).setInteractive({ useHandCursor: true });
+      card.setScale(0);
+      this.tweens.add({ targets: card, scale: 1, duration: 320, delay: i * 70, ease: 'Back.easeOut' });
+      card.on('pointerup', () => this.pickFind(card, a, img));
+      this.layer.add(card);
+    });
+    this.time.delayedCall(250, () => this.say(this.instruction()));
+  }
+
+  pickFind(card     , a     , img     ) {
+    if (this.busy) return;
+    if (a.id === this.target.id) {
+      this.busy = true;
+      this.good(card.x, card.y);
+      Audio.say(`Đúng rồi! Con ${a.name.toLowerCase()} kêu ${a.sound}!`);
+      this.tweens.add({ targets: card, scale: 1.15, duration: 220, yoyo: true, repeat: 1, ease: 'Quad.easeOut' });
+      this.tweens.add({ targets: img, angle: { from: -8, to: 8 }, duration: 160, yoyo: true, repeat: 3 });
+      for (const o of this.layer.list) if (o !== card && o.input) this.tweens.add({ targets: o, alpha: 0.35, duration: 250 });
+      this.nextRound(1500);
+    } else {
+      this.miss(card, `Đây là con ${a.name.toLowerCase()}. Tìm con ${this.target.name.toLowerCase()} nhé!`);
+    }
+  }
+
+  // ───── Nhà của thú ─────
+  buildHabitat() {
+    const P = this.play;
+    const nh = [2, 2, 3, 4, 4][this.level - 1];
+    const habitats = shuffle(P.habitats         ).slice(0, nh);
+    const cand = shuffle((P.animals         ).filter((a) => habitats.some((h) => h.id === a.habitat)));
+    this.target = cand[0];
+    const top = this.top;
+    this.layer.add(this.label(this.W / 2, top + 30, `${this.target.name} sống ở đâu?`, 56));
+
+    const homes        = [];
+    const hw = this.portrait ? 380 : Math.min(340, (this.W - 120) / nh - 20), hh = hw * 0.66;
+    habitats.forEach((h     , i        ) => {
+      let x, y;
+      if (this.portrait) { x = this.W / 2 + ((i % 2) - (Math.min(2, nh) - 1) / 2) * (hw + 24); y = this.H - 260 - (Math.floor(i / 2)) * (hh + 70) - (nh > 2 ? 0 : 0); if (nh <= 2) y = this.H - 300; }
+      else { x = this.W / 2 + (i - (nh - 1) / 2) * (hw + 30); y = this.H - hh / 2 - 70; }
+      const c = this.add.container(x, y);
+      const img = this.fitImage(h.asset, 0, 0, hw, hh);
+      const t = this.label(0, hh / 2 + 26, h.name, 32);
+      c.add([img, t]);
+      c.setData('h', h).setData('w', hw).setData('hh', hh);
+      this.layer.add(c);
+      homes.push(c);
+    });
+
+    const ay = this.portrait ? top + 330 : top + 230;
+    const animal = this.fitImage(this.target.asset, this.W / 2, ay, 260, 260);
+    animal.setInteractive({ draggable: true, useHandCursor: true });
+    this.input.setDraggable(animal);
+    this.layer.add(animal);
+    this.tweens.add({ targets: animal, y: ay - 14, duration: 700, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+    const home0 = { x: animal.x, y: ay };
+    const hit = (x        , y        ) => homes.find((c) => Math.abs(x - c.x) < c.getData('w') / 2 && Math.abs(y - c.y) < c.getData('hh') / 2 + 30);
+
+    animal.on('dragstart', () => { this.tweens.killTweensOf(animal); animal.setScale(animal.getData('baseScale') * 1.1); Audio.sfx('pop'); });
+    animal.on('drag', (_p     , x        , y        ) => {
+      animal.setPosition(x, y);
+      for (const c of homes) c.setScale(c === hit(x, y) ? 1.06 : 1);
+    });
+    animal.on('dragend', () => {
+      animal.setScale(animal.getData('baseScale'));
+      const c = hit(animal.x, animal.y);
+      for (const h of homes) h.setScale(1);
+      if (c && c.getData('h').id === this.target.habitat) {
+        this.busy = true;
+        animal.disableInteractive();
+        this.tweens.add({ targets: animal, x: c.x, y: c.y - 10, scale: animal.getData('baseScale') * 0.7, duration: 300, ease: 'Back.easeOut' });
+        this.good(c.x, c.y);
+        Audio.say(`Đúng rồi! ${this.target.name} sống ở ${c.getData('h').name.toLowerCase()}.`);
+        this.nextRound(1500);
+      } else {
+        if (c) this.miss(c, `${this.target.name} không sống ở ${c.getData('h').name.toLowerCase()} đâu. Thử nơi khác nhé!`);
+        this.tweens.add({ targets: animal, x: home0.x, y: home0.y, duration: 300, ease: 'Back.easeOut' });
+      }
+    });
+    this.time.delayedCall(250, () => this.say(this.instruction()));
+  }
+}
+return { AnimalMatchScene };
+})();
+
+/* ══════════ games/Memory.ts ══════════ */
+M.Memory = (function () {
+// ── Game 2: Lật thẻ ghi nhớ ──
+// Cấp 1–5: 2, 3, 4, 6, 8 cặp. Không có đồng hồ đếm ngược.
+const { AssetLoader } = M.AssetLoader;
+const { Audio } = M.Audio;
+const { MiniGame, shuffle } = M.MiniGame;
+class MemoryScene extends MiniGame {
+  open        = [];
+  found = 0;
+  pairs = 2;
+  constructor() { super('Memory'); }
+
+  get play() { return AssetLoader.data('play'); }
+  assets() { const P = this.play; return [...P.animals.map((a     ) => a.asset), 'card-back', 'card-front']; }
+  instruction() { return 'Lật hai thẻ. Nếu giống nhau là tìm được một cặp!'; }
+
+  buildRound() {
+    this.pairs = [2, 3, 4, 6, 8][this.level - 1];
+    this.open = []; this.found = 0;
+    const animals = shuffle(this.play.animals         ).slice(0, this.pairs);
+    const deck = shuffle([...animals, ...animals]);
+    const n = deck.length;
+    let cols        ;
+    if (this.portrait) cols = n <= 4 ? 2 : n <= 12 ? 3 : 4;
+    else cols = n <= 4 ? n : n <= 6 ? 3 : n <= 8 ? 4 : n <= 12 ? 4 : 6;
+    const rows = Math.ceil(n / cols);
+    const top = this.top + 20, bottom = this.H - (this.portrait ? 200 : 40);
+    const availH = bottom - top, availW = this.W - (this.portrait ? 80 : 300);
+    const ch = Math.min(260, availH / rows - 18), cw = Math.min(ch * 0.8, availW / cols - 18);
+    const chh = cw / 0.8;
+    deck.forEach((a     , i        ) => {
+      const c = i % cols, r = Math.floor(i / cols);
+      const rowCount = Math.min(cols, n - r * cols);
+      const x = this.W / 2 + (c - (rowCount - 1) / 2) * (cw + 18) + (this.portrait ? 0 : 60);
+      const y = top + availH / 2 + (r - (rows - 1) / 2) * (chh + 18);
+      const card = this.add.container(x, y);
+      const back = this.add.image(0, 0, 'card-back').setDisplaySize(cw, chh);
+      const front = this.add.image(0, 0, 'card-front').setDisplaySize(cw, chh).setVisible(false);
+      const pic = this.fitImage(a.asset, 0, 0, cw * 0.86, chh * 0.75).setVisible(false);
+      card.add([back, front, pic]);
+      card.setData({ a, back, front, pic, up: false, done: false });
+      card.setSize(cw, chh).setInteractive({ useHandCursor: true });
+      card.on('pointerup', () => this.flip(card));
+      card.setScale(0);
+      this.tweens.add({ targets: card, scale: 1, duration: 300, delay: i * 40, ease: 'Back.easeOut' });
+      this.layer.add(card);
+    });
+    // cấp 1: cho xem trước các thẻ một chút
+    if (this.level === 1) this.time.delayedCall(700, () => {
+      for (const c of this.layer.list) this.show(c, true);
+      this.time.delayedCall(1500, () => { for (const c of this.layer.list) this.show(c, false); });
+    });
+    this.time.delayedCall(300, () => this.say(this.instruction()));
+  }
+
+  show(card     , up         ) {
+    card.setData('up', up);
+    this.tweens.add({
+      targets: card, scaleX: 0, duration: 120, ease: 'Quad.easeIn',
+      onComplete: () => {
+        card.getData('back').setVisible(!up);
+        card.getData('front').setVisible(up);
+        card.getData('pic').setVisible(up);
+        this.tweens.add({ targets: card, scaleX: 1, duration: 140, ease: 'Quad.easeOut' });
+      },
+    });
+  }
+
+  flip(card     ) {
+    if (this.busy || card.getData('up') || card.getData('done') || this.open.length >= 2) return;
+    Audio.sfx('flip');
+    this.show(card, true);
+    this.open.push(card);
+    if (this.open.length < 2) return;
+    const [a, b] = this.open;
+    this.busy = true;
+    if (a.getData('a').id === b.getData('a').id) {
+      this.time.delayedCall(350, () => {
+        for (const c of [a, b]) {
+          c.setData('done', true);
+          this.tweens.add({ targets: c, scale: 1.12, duration: 160, yoyo: true });
+        }
+        this.good((a.x + b.x) / 2, (a.y + b.y) / 2, false);
+        Audio.say(a.getData('a').name);
+        this.open = []; this.busy = false;
+        this.found++;
+        if (this.found >= this.pairs) this.time.delayedCall(700, () => this.complete());
+      });
+    } else {
+      this.mistakes += 0.5; // nhớ dần là chuyện bình thường: lật sai chỉ tính nửa lần
+      this.time.delayedCall(900, () => {
+        Audio.sfx('soft');
+        this.show(a, false); this.show(b, false);
+        this.open = []; this.busy = false;
+      });
+    }
+  }
+
+  complete() {
+    // lật sai trong game trí nhớ là bình thường; chuẩn hoá theo số cặp
+    this.mistakes = Math.max(0, Math.round(this.mistakes - this.pairs * 0.75));
+    super.complete();
+  }
+}
+return { MemoryScene };
+})();
+
+/* ══════════ games/ShapePuzzle.ts ══════════ */
+M.ShapePuzzle = (function () {
+// ── Game 3: Ghép hình — kéo mảnh vào đúng bóng trên khay gỗ ──
+// Cấp 1–5: 2 → 6 mảnh; cấp cao có hình gần giống nhau (tròn/bầu dục, vuông/chữ nhật/thoi).
+const { AssetLoader } = M.AssetLoader;
+const { Audio } = M.Audio;
+const { MiniGame, shuffle } = M.MiniGame;
+const EASY = ['circle', 'square', 'triangle', 'star', 'heart'];
+
+class ShapePuzzleScene extends MiniGame {
+  left = 0;
+  slots        = [];
+  constructor() { super('ShapePuzzle'); }
+  get play() { return AssetLoader.data('play'); }
+  assets() { const P = this.play; return [...P.shapes.map((s     ) => s.asset), P.board || 'play-board-wood']; }
+  instruction() { return 'Kéo từng mảnh vào cái bóng giống nó nhé!'; }
+
+  buildRound() {
+    const P = this.play;
+    const n = [2, 3, 4, 5, 6][this.level - 1];
+    const all = P.shapes         ;
+    const pool = this.level <= 2 ? all.filter((s) => EASY.includes(s.id)) : all;
+    const shapes = shuffle(pool).slice(0, n);
+    this.left = n; this.slots = [];
+
+    // khay gỗ
+    const bw = this.portrait ? 820 : 900, bh = this.portrait ? Math.min(640, this.H - this.top - 540) : 560;
+    const bx = this.portrait ? this.W / 2 : this.W / 2 + 170, by = this.portrait ? this.top + 60 + bh / 2 : this.top + 30 + bh / 2 + 40;
+    const board = this.add.image(bx, by, P.board || 'play-board-wood').setDisplaySize(bw, bh);
+    this.layer.add(board);
+    const cols = n <= 2 ? 2 : n <= 4 ? 2 : 3, rows = Math.ceil(n / cols);
+    const cell = Math.min((bw - 80) / cols, (bh - 80) / rows);
+    const k = Math.min(1, (cell - 30) / 200);
+    shuffle(shapes).forEach((s     , i        ) => {
+      const c = i % cols, r = Math.floor(i / cols);
+      const rowCount = Math.min(cols, n - r * cols);
+      const x = bx + (c - (rowCount - 1) / 2) * cell, y = by + (r - (rows - 1) / 2) * cell;
+      const sil = this.add.image(x, y, s.asset).setDisplaySize(s.w * k, s.h * k).setTintFill(0x7a5a8c).setAlpha(0.32);
+      sil.setData({ s, filled: false });
+      this.slots.push(sil);
+      this.layer.add(sil);
+    });
+
+    // các mảnh ghép: bên trái (ngang) hoặc bên dưới (dọc)
+    const pieces = shuffle(shapes);
+    if (this.portrait) this.layer.add(this.plate(this.W / 2, by + bh / 2 + 140 + (Math.ceil(n / 3) - 1) * 105, this.W - 60, Math.ceil(n / 3) * 210 + 20, 0xfffaf2, 0.8));
+    else this.layer.add(this.plate(n <= 3 ? 250 : 310, this.top + 40 + (this.H - this.top - 220) / 2 + 20, n <= 3 ? 240 : 430, this.H - this.top - 200, 0xfffaf2, 0.8));
+    pieces.forEach((s     , i        ) => {
+      let x        , y        ;
+      if (this.portrait) {
+        const pc = Math.min(3, n), pr = Math.ceil(n / pc);
+        const c = i % pc, r = Math.floor(i / pc);
+        x = this.W / 2 + (c - (Math.min(pc, n - r * pc) - 1) / 2) * 250;
+        y = by + bh / 2 + 140 + r * 210 - (pr > 1 ? 0 : 0);
+      } else {
+        const pc = n <= 3 ? 1 : 2;
+        const c = i % pc, r = Math.floor(i / pc), pr = Math.ceil(n / pc);
+        x = pc === 1 ? 250 : 210 + c * 200;
+        y = this.top + 60 + (r + 0.5) * ((this.H - this.top - 260) / pr) + 20;
+      }
+      const piece = this.add.image(x, y, s.asset).setDisplaySize(s.w * k * 0.95, s.h * k * 0.95);
+      piece.setData({ s, home: { x, y }, base: piece.scale });
+      piece.setInteractive({ draggable: true, useHandCursor: true, pixelPerfect: false });
+      this.input.setDraggable(piece);
+      piece.setAngle(-8 + Math.random() * 16);
+      this.layer.add(piece);
+      piece.on('dragstart', () => { if (this.busy) return; Audio.sfx('pop'); piece.setScale(piece.getData('base') * 1.1).setAngle(0); this.layer.bringToTop(piece); });
+      piece.on('drag', (_p     , px        , py        ) => piece.setPosition(px, py));
+      piece.on('dragend', () => this.drop(piece, k));
+    });
+    this.time.delayedCall(300, () => this.say(this.instruction()));
+  }
+
+  drop(piece     , k        ) {
+    const s = piece.getData('s');
+    const near = this.slots.filter((sl) => !sl.getData('filled')).map((sl) => ({ sl, d: Math.hypot(sl.x - piece.x, sl.y - piece.y) }))
+      .sort((a, b) => a.d - b.d)[0];
+    const reach = 110 * Math.max(0.7, k) + (this.level <= 2 ? 40 : 0);
+    if (near && near.d < reach && near.sl.getData('s').id === s.id) {
+      const sl = near.sl;
+      sl.setData('filled', true);
+      piece.disableInteractive();
+      this.tweens.add({ targets: piece, x: sl.x, y: sl.y, scaleX: sl.scaleX, scaleY: sl.scaleY, angle: 0, duration: 200, ease: 'Back.easeOut' });
+      Audio.sfx('snap');
+      this.good(sl.x, sl.y, false);
+      Audio.say(s.name);
+      this.tweens.add({ targets: sl, alpha: 0, duration: 200 });
+      if (--this.left <= 0) {
+        this.good(this.W / 2, this.H / 2);
+        this.nextRound(1200);
+      }
+      return;
+    }
+    // sai hoặc thả ra ngoài: mảnh quay về chỗ cũ
+    if (near && near.d < reach) {
+      this.miss(undefined, this.roundMistakes >= 1 ? `Mảnh này là ${s.name.toLowerCase()}. Tìm cái bóng giống nó nhé!` : undefined);
+      if (this.roundMistakes >= 2) {
+        const right = this.slots.find((sl) => !sl.getData('filled') && sl.getData('s').id === s.id);
+        if (right) this.tweens.add({ targets: right, alpha: 0.7, duration: 300, yoyo: true, repeat: 2 });
+      }
+    }
+    const h = piece.getData('home');
+    this.tweens.add({ targets: piece, x: h.x, y: h.y, scale: piece.getData('base'), duration: 280, ease: 'Back.easeOut' });
+  }
+}
+return { ShapePuzzleScene };
+})();
+
+/* ══════════ games/CountCollect.ts ══════════ */
+M.CountCollect = (function () {
+// ── Game 4: Đếm và hái — hái đúng số quả, so sánh hai nhóm, phép cộng nhỏ ──
+// Cấp 1: 1–3 · cấp 2: 2–5 · cấp 3: 4–7 (lẫn quả khác) · cấp 4: + so sánh · cấp 5: + phép cộng.
+const { AssetLoader } = M.AssetLoader;
+const { Audio } = M.Audio;
+const { MiniGame, shuffle, randInt, FONT } = M.MiniGame;
+const NUM = ['không', 'một', 'hai', 'ba', 'bốn', 'năm', 'sáu', 'bảy', 'tám', 'chín', 'mười'];
+
+class CountCollectScene extends MiniGame {
+  kind                                = 'collect';
+  target = 0; item     ; inBasket        = []; basket     ; countText     ; askText = '';
+  constructor() { super('CountCollect'); }
+  get play() { return AssetLoader.data('play'); }
+  assets() { return (this.play.items         ).map((i) => i.asset); }
+  instruction() { return this.askText || this.act.desc; }
+
+  buildRound() {
+    const kinds                                    =
+      this.level <= 3 ? ['collect'] : this.level === 4 ? ['collect', 'compare', 'collect', 'compare', 'collect'] : ['collect', 'compare', 'add', 'compare', 'add'];
+    this.kind = kinds[this.round % kinds.length];
+    if (this.kind === 'collect') this.buildCollect();
+    else if (this.kind === 'compare') this.buildCompare();
+    else this.buildAdd();
+  }
+
+  // ───── hái đúng số ─────
+  buildCollect() {
+    const items = this.play.items         ;
+    const [lo, hi] = [[1, 3], [2, 5], [4, 7], [3, 8], [4, 9]][this.level - 1];
+    this.target = randInt(lo, hi);
+    this.item = items[randInt(0, items.length - 1)];
+    const extra = this.level >= 3 ? randInt(2, 4) : 0;
+    const total = Math.min(12, this.target + randInt(1, 3));
+    const others = shuffle(items.filter((i) => i.id !== this.item.id)).slice(0, 2);
+    this.inBasket = [];
+    this.askText = `Hái ${NUM[this.target]} ${this.item.name} bỏ vào giỏ nhé!`;
+    this.layer.add(this.label(this.W / 2, this.top + 30, `Hái ${this.target} ${this.item.name}`, 58));
+
+    // vùng quả (trên) và giỏ (dưới phải)
+    const field = this.portrait ? { x: 70, y: this.top + 110, w: this.W - 140, h: Math.min(640, this.H - this.top - 110 - 520) } : { x: 300, y: this.top + 90, w: 820, h: 560 };
+    this.layer.add(this.plate(field.x + field.w / 2, field.y + field.h / 2, field.w, field.h, 0xf3fbef, 0.85));
+    const spots = this.scatter(field, total + extra, 120);
+    const list = shuffle([...Array(total).fill(this.item), ...Array.from({ length: extra }, (_, i) => others[i % others.length])]);
+    list.forEach((it, i) => {
+      const [x, y] = spots[i];
+      const s = this.fitImage(it.asset, x, y, 104, 104);
+      s.setData({ it, home: { x, y } }).setInteractive({ useHandCursor: true });
+      s.setScale(0); this.tweens.add({ targets: s, scale: s.getData('baseScale'), delay: i * 40, duration: 250, ease: 'Back.easeOut' });
+      s.on('pointerup', () => this.toggle(s));
+      this.layer.add(s);
+    });
+
+    const bx = this.portrait ? this.W / 2 : 1320, by = this.portrait ? field.y + field.h + 230 : this.top + 360;
+    this.basket = this.drawBasket(bx, by);
+    this.countText = this.add.text(bx, by + 140, '0', { fontFamily: FONT, fontSize: '72px', fontStyle: '800', color: '#f28a4e', stroke: '#ffffff', strokeThickness: 12 }).setOrigin(0.5);
+    this.layer.add(this.countText);
+    const ok = this.bigButton(bx, by + (this.portrait ? 250 : 250), 'Xong rồi!', () => this.checkCollect());
+    this.layer.add(ok);
+    this.time.delayedCall(300, () => this.say(this.instruction()));
+  }
+
+  toggle(s     ) {
+    if (this.busy) return;
+    const i = this.inBasket.indexOf(s);
+    if (i >= 0) {
+      this.inBasket.splice(i, 1);
+      const h = s.getData('home');
+      this.tweens.add({ targets: s, x: h.x, y: h.y, duration: 260, ease: 'Back.easeOut' });
+      Audio.sfx('soft');
+    } else {
+      if (s.getData('it').id !== this.item.id) { this.miss(s, `Đó là ${s.getData('it').name}. Mình cần ${this.item.name} cơ!`); return; }
+      this.inBasket.push(s);
+      const k = this.inBasket.length - 1;
+      const bx = this.basket.x + ((k % 5) - 2) * 44, by = this.basket.y - 50 - Math.floor(k / 5) * 34;
+      this.layer.bringToTop(s);
+      this.tweens.add({ targets: s, x: bx, y: by, duration: 320, ease: 'Cubic.easeOut' });
+      Audio.sfx('pop');
+      Audio.say(NUM[this.inBasket.length] || String(this.inBasket.length));
+    }
+    this.countText.setText(String(this.inBasket.length));
+    this.pulse(this.countText, 1.25);
+    this.layer.bringToTop(this.basket.front);
+  }
+
+  checkCollect() {
+    if (this.busy) return;
+    const n = this.inBasket.length;
+    if (n === this.target) {
+      this.good(this.basket.x, this.basket.y - 60);
+      Audio.say(`Đúng rồi! ${NUM[n]} ${this.item.name}!`);
+      this.nextRound(1400);
+    } else if (n < this.target) this.miss(this.basket.front, `Trong giỏ mới có ${NUM[n]}. Cần ${NUM[this.target]} cơ, hái thêm nhé!`);
+    else this.miss(this.basket.front, `Trong giỏ có ${NUM[n]} rồi, nhiều quá! Chạm vào quả trong giỏ để bỏ bớt nhé.`);
+  }
+
+  // ───── so sánh hai nhóm ─────
+  buildCompare() {
+    const items = shuffle(this.play.items         );
+    const a = randInt(1, this.level >= 5 ? 9 : 6);
+    let b = randInt(1, this.level >= 5 ? 9 : 6); if (b === a) b = a + (a > 3 ? -randInt(1, 2) : randInt(1, 2));
+    const askMore = Math.random() < 0.6;
+    this.askText = askMore ? 'Bên nào nhiều hơn?' : 'Bên nào ít hơn?';
+    this.layer.add(this.label(this.W / 2, this.top + 30, this.askText, 58));
+    const groups = [a, b];
+    const want = askMore ? (a > b ? 0 : 1) : (a < b ? 0 : 1);
+    groups.forEach((n, gi) => {
+      const f = this.portrait
+        ? { x: 80, y: this.top + 110 + gi * 560, w: this.W - 160, h: 500 }
+        : { x: gi === 0 ? 170 : 870, y: this.top + 110, w: 560, h: 560 };
+      const plate = this.plate(f.x + f.w / 2, f.y + f.h / 2, f.w, f.h, 0xfffaf2, 0.92);
+      const zone = this.add.zone(f.x + f.w / 2, f.y + f.h / 2, f.w, f.h).setInteractive({ useHandCursor: true });
+      this.layer.add([plate, zone]);
+      const it = items[gi];
+      const spots = this.scatter({ x: f.x + 20, y: f.y + 20, w: f.w - 40, h: f.h - 40 }, n, 115);
+      for (const [x, y] of spots) this.layer.add(this.fitImage(it.asset, x, y, 100, 100));
+      zone.on('pointerup', () => {
+        if (this.busy) return;
+        if (gi === want) {
+          this.good(zone.x, zone.y);
+          Audio.say(`Đúng rồi! ${NUM[groups[gi]]} ${askMore ? 'nhiều hơn' : 'ít hơn'} ${NUM[groups[1 - gi]]}.`);
+          this.nextRound(1600);
+        } else this.miss(plate, `Mình cùng đếm nhé: bên này có ${NUM[n]}, bên kia có ${NUM[groups[1 - gi]]}.`);
+      });
+    });
+    this.time.delayedCall(300, () => this.say(this.instruction()));
+  }
+
+  // ───── phép cộng ─────
+  buildAdd() {
+    const it = (this.play.items         )[randInt(0, 7)];
+    const a = randInt(1, 5), b = randInt(1, 4), sum = a + b;
+    this.askText = `${NUM[a]} ${it.name} thêm ${NUM[b]} ${it.name} là mấy?`;
+    this.layer.add(this.label(this.W / 2, this.top + 30, `${a} + ${b} = ?`, 72));
+    const y0 = this.portrait ? this.top + 380 : this.top + 290;
+    const gw = this.portrait ? 360 : 460;
+    [a, b].forEach((n, gi) => {
+      const cx = this.portrait ? this.W / 2 + (gi === 0 ? -200 : 200) : this.W / 2 + (gi === 0 ? -330 : 330);
+      this.layer.add(this.plate(cx, y0, gw, 360, 0xfffaf2, 0.9));
+      const spots = this.scatter({ x: cx - gw / 2 + 20, y: y0 - 160, w: gw - 40, h: 320 }, n, 110);
+      for (const [x, y] of spots) this.layer.add(this.fitImage(it.asset, x, y, 96, 96));
+    });
+    this.layer.add(this.label(this.W / 2, y0, '+', 110));
+    const opts = shuffle([sum, sum + 1, Math.max(1, sum - 1) === sum ? sum + 2 : Math.max(1, sum - 1)].filter((v, i, arr) => arr.indexOf(v) === i));
+    while (opts.length < 3) opts.push(sum + opts.length + 1);
+    opts.forEach((v, i) => {
+      const bx = this.W / 2 + (i - 1) * 240, by = this.portrait ? this.H - 380 : this.H - 150;
+      const c = this.add.container(bx, by);
+      const g = this.add.circle(0, 0, 90, 0xffd96b).setStrokeStyle(8, 0xffffff);
+      const t = this.add.text(0, -4, String(v), { fontFamily: FONT, fontSize: '96px', fontStyle: '800', color: '#4b3a5e' }).setOrigin(0.5);
+      c.add([g, t]); c.setSize(180, 180).setInteractive({ useHandCursor: true });
+      c.on('pointerup', () => {
+        if (this.busy) return;
+        if (v === sum) { this.good(bx, by); Audio.say(`${NUM[a]} thêm ${NUM[b]} là ${NUM[sum]}!`); this.nextRound(1600); }
+        else this.miss(c, 'Mình cùng đếm tất cả các quả nhé!');
+      });
+      this.layer.add(c);
+    });
+    this.time.delayedCall(300, () => this.say(this.instruction()));
+  }
+
+  // ───── tiện ích ─────
+  scatter(f                                                , n        , gap        )                     {
+    const pts                     = [];
+    for (let tries = 0; pts.length < n && tries < 4000; tries++) {
+      const x = f.x + 60 + Math.random() * (f.w - 120), y = f.y + 60 + Math.random() * (f.h - 120);
+      const g = tries > 2500 ? gap * 0.7 : gap;
+      if (pts.every(([px, py]) => Math.hypot(px - x, py - y) > g)) pts.push([x, y]);
+    }
+    while (pts.length < n) pts.push([f.x + f.w / 2 + (pts.length % 4) * 30, f.y + f.h / 2]);
+    return pts;
+  }
+
+  drawBasket(x        , y        ) {
+    const back = this.add.graphics();
+    back.fillStyle(0x99643f, 1).fillEllipse(x, y - 40, 260, 70);
+    const front = this.add.graphics();
+    front.fillStyle(0x4c3876, 0.15).fillEllipse(x + 6, y + 78, 250, 40);
+    front.fillStyle(0xcf9161, 1).lineStyle(6, 0x99643f, 1);
+    front.beginPath(); front.moveTo(x - 130, y - 40); front.lineTo(x + 130, y - 40); front.lineTo(x + 100, y + 70); front.lineTo(x - 100, y + 70); front.closePath(); front.fillPath(); front.strokePath();
+    front.lineStyle(4, 0xe6b386, 1);
+    for (let i = -2; i <= 2; i++) { front.lineBetween(x + i * 44, y - 34, x + i * 36, y + 64); }
+    front.lineBetween(x - 118, y - 2, x + 118, y - 2); front.lineBetween(x - 108, y + 34, x + 108, y + 34);
+    front.lineStyle(10, 0x99643f, 1).strokeEllipse(x, y - 40, 260, 40);
+    this.layer.add([back, front]);
+    return { x, y, back, front };
+  }
+
+  bigButton(x        , y        , text        , cb            ) {
+    const c = this.add.container(x, y);
+    const w = 300, h = 96;
+    const g = this.add.graphics();
+    g.fillStyle(0xd96f36, 1).fillRoundedRect(-w / 2, -h / 2 + 8, w, h, 48);
+    g.fillStyle(0xffac6b, 1).fillRoundedRect(-w / 2, -h / 2, w, h, 48);
+    g.lineStyle(6, 0xffffff, 1).strokeRoundedRect(-w / 2, -h / 2, w, h, 48);
+    const t = this.add.text(0, -2, text, { fontFamily: FONT, fontSize: '48px', fontStyle: '800', color: '#ffffff' }).setOrigin(0.5);
+    c.add([g, t]); c.setSize(w, h).setInteractive({ useHandCursor: true });
+    c.on('pointerdown', () => c.setScale(0.95));
+    c.on('pointerout', () => c.setScale(1));
+    c.on('pointerup', () => { c.setScale(1); Audio.sfx('tap'); cb(); });
+    return c;
+  }
+}
+return { CountCollectScene };
+})();
+
+/* ══════════ games/Builder.ts ══════════ */
+M.Builder = (function () {
+// ── Game 5: Bé xây dựng — xếp khối có trọng lực (Matter.js có sẵn trong Phaser) ──
+// Không có một đáp án đúng duy nhất. Thử thách tuỳ chọn: tháp chạm cờ, nhà có mái, tự do.
+const { AssetLoader } = M.AssetLoader;
+const { Audio } = M.Audio;
+const { Ui } = M.Ui;
+const { MiniGame, FONT } = M.MiniGame;
+const K = 1.35;   // phóng to khối cho tay bé dễ cầm
+const CHALLENGES = [
+  { id: 'tower', name: 'Tháp chạm cờ', say: 'Xây một cái tháp thật cao, chạm tới lá cờ nhé!' },
+  { id: 'house', name: 'Ngôi nhà có mái', say: 'Xây một ngôi nhà, nhớ đặt mái nhà lên trên cùng nhé!' },
+  { id: 'free', name: 'Tự do sáng tạo', say: 'Bé muốn xây gì cũng được! Xong thì bấm "Xong rồi" nhé.' },
+];
+
+class BuilderScene extends MiniGame {
+  ground     ; tray        = []; blocks        = []; dragging      = null; dragDef      = null;
+  challenge = 'tower'; flagY = 0; flag     ; trayRect = { x: 0, y: 0, w: 0, h: 0 }; achieved = false; stableT = 0; placed = 0;
+  constructor() { super({ key: 'Builder', physics: { default: 'matter', matter: { gravity: { y: 1.1 }, enableSleeping: true } } }); }
+
+  get play() { return AssetLoader.data('play'); }
+  placePet() { if (this.petSprite) this.petSprite.setScale(this.portrait ? 0.9 : 1).setPosition(this.portrait ? this.W - 90 : this.W - 230, this.H - (this.portrait ? 300 : 70)); }
+  assets() { const P = this.play; return [...P.blocks.map((b     ) => b.asset), P.ground || 'block-ground']; }
+  instruction() { return CHALLENGES.find((c) => c.id === this.challenge) .say; }
+
+  setup() {
+    this.placed = 0;
+    this.input.on('pointermove', (p     ) => this.moveDrag(p));
+    this.input.on('pointerup', (p     ) => this.endDrag(p));
+    this.events.on('update', () => this.checkGoal());
+  }
+
+  relayout() {
+    // đổi chiều màn hình: giữ nguyên công trình là khó → dựng lại sân, xoá khối
+    this.startRound(true);
+  }
+
+  buildRound() {
+    for (const b of this.blocks) b.destroy();
+    this.blocks = [];
+    this.matter.world.setBounds(0, -2000, this.W, this.H + 2000 - (this.portrait ? 300 : 70), 64, true, true, false, false);
+    // mặt đất
+    const gy = this.H - (this.portrait ? 300 : 70);
+    const groundImg = this.add.image(this.W / 2, gy, this.play.ground || 'block-ground').setOrigin(0.5, 0);
+    groundImg.setDisplaySize(this.W + 40, 60 * 1.2 * (this.W / 1200));
+    this.layer.add(groundImg);
+    this.ground = this.matter.add.rectangle(this.W / 2, gy + 200, this.W + 400, 400, { isStatic: true, friction: 1 });
+    this.layer.add(this.add.rectangle(this.W / 2, gy + 30 + 400, this.W + 40, 800, 0x9b7453).setOrigin(0.5, 0));
+
+    // khay khối
+    const defs = this.play.blocks         ;
+    this.tray = [];
+    if (this.portrait) this.trayRect = { x: 20, y: gy + 50, w: this.W - 40, h: 230 };
+    else this.trayRect = { x: 20, y: this.top + 10, w: 230, h: gy - this.top - 20 };
+    const R = this.trayRect;
+    this.layer.add(this.plate(R.x + R.w / 2, R.y + R.h / 2, R.w, R.h, 0xfffaf2, 0.9));
+    const cols = this.portrait ? 7 : 2, rows = Math.ceil(defs.length / cols);
+    defs.forEach((d     , i        ) => {
+      const c = i % cols, r = Math.floor(i / cols);
+      const cw = R.w / cols, ch = R.h / rows;
+      const x = R.x + cw * (c + 0.5), y = R.y + ch * (r + 0.5);
+      const img = this.fitImage(d.asset, x, y, cw - 16, ch - 14);
+      img.setInteractive({ useHandCursor: true }).setData('def', d);
+      img.on('pointerdown', (p     ) => this.startDrag(p, d, null));
+      this.layer.add(img);
+      this.tray.push(img);
+    });
+
+    // cờ đích (thử thách tháp)
+    this.flagY = gy - (this.portrait ? 640 : 470);
+    const fx = this.portrait ? this.W - 90 : this.W - 110;
+    const flag = this.add.container(0, 0);
+    const pole = this.add.rectangle(fx, (this.flagY + gy) / 2, 8, gy - this.flagY, 0x99643f);
+    const cloth = this.add.triangle(fx + 4, this.flagY + 22, 0, 0, 0, 44, 64, 22, 0xf58aa8).setOrigin(0, 0.5);
+    const line = this.add.graphics();
+    line.lineStyle(4, 0xffffff, 0.8);
+    for (let x = R.x + R.w + 20; x < fx - 10; x += 36) line.lineBetween(x, this.flagY, x + 18, this.flagY);
+    flag.add([line, pole, cloth]);
+    this.flag = flag;
+    this.layer.add(flag);
+    this.tweens.add({ targets: cloth, scaleX: 0.85, duration: 500, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+    this.flag.setVisible(this.challenge === 'tower');
+    this.achieved = false;
+    this.buildBarExtras();
+    this.time.delayedCall(300, () => this.say(this.instruction()));
+  }
+
+  buildBarExtras() {
+    const p = document.getElementById('panel'); if (!p) return;
+    let ex = p.querySelector('.builder-ex')               ;
+    if (!ex) { ex = document.createElement('div'); ex.className = 'builder-ex'; p.appendChild(ex); }
+    ex.innerHTML = `<div class="seg">${CHALLENGES.map((c) => `<button data-ch="${c.id}" class="${c.id === this.challenge ? 'on' : ''}">${Ui.esc(c.name)}</button>`).join('')}</div>
+      <button class="btn" data-b="clear">Dọn hết</button><button class="btn accent" data-b="done">Xong rồi!</button>`;
+    ex.onclick = (e     ) => {
+      const b = e.target.closest('button'); if (!b) return;
+      Audio.sfx('tap');
+      if (b.dataset.ch) { this.challenge = b.dataset.ch; this.achieved = false; this.flag.setVisible(this.challenge === 'tower'); this.buildBarExtras(); this.say(this.instruction()); }
+      else if (b.dataset.b === 'clear') { for (const k of this.blocks) k.destroy(); this.blocks = []; this.achieved = false; }
+      else if (b.dataset.b === 'done') this.finishBuild();
+    };
+  }
+
+  finishBuild() {
+    if (this.done) return;
+    if (this.blocks.length < 3) { this.say('Đặt thêm vài khối nữa rồi bấm "Xong rồi" nhé!'); return; }
+    this.complete({ noAdapt: true });
+  }
+
+  // ───── kéo thả ─────
+  startDrag(p     , def     , from     ) {
+    if (this.done || this.dragging) return;
+    const w = this.cameras.main.getWorldPoint(p.x, p.y);
+    if (from) { from.destroy(); this.blocks = this.blocks.filter((b) => b !== from); }
+    const img = this.add.image(w.x, w.y, def.asset).setScale(0.5 * K).setDepth(500).setAlpha(0.92);
+    this.dragging = img; this.dragDef = def;
+    Audio.sfx('pop');
+  }
+  moveDrag(p     ) {
+    if (!this.dragging) return;
+    const w = this.cameras.main.getWorldPoint(p.x, p.y);
+    this.dragging.setPosition(w.x, w.y);
+    this.dragging.setTint(this.inTray(w.x, w.y) ? 0xff9b9b : 0xffffff);
+  }
+  endDrag(_p     ) {
+    if (!this.dragging) return;
+    const img = this.dragging, def = this.dragDef;
+    this.dragging = null; this.dragDef = null;
+    const { x, y } = img; img.destroy();
+    if (this.inTray(x, y)) { Audio.sfx('soft'); return; }   // thả lại vào khay = cất đi
+    this.spawnBlock(def, x, y);
+  }
+  inTray(x        , y        ) { const R = this.trayRect; return x > R.x && x < R.x + R.w && y > R.y && y < R.y + R.h; }
+
+  spawnBlock(def     , x        , y        ) {
+    const opts      = { friction: 0.9, frictionStatic: 1, restitution: 0.02, density: 0.002, chamfer: def.body === 'rect' ? { radius: 3 } : undefined };
+    const tw = def.w * 2, th = def.h * 2;   // kích thước texture (@2x)
+    if (def.body === 'triangle') opts.shape = { type: 'fromVerts', verts: [{ x: 0, y: th }, { x: tw / 2, y: 0 }, { x: tw, y: th }] };
+    else if (def.body === 'semicircle') {
+      const verts = []; for (let i = 0; i <= 12; i++) { const a = Math.PI * i / 12; verts.push({ x: tw / 2 - Math.cos(a) * tw / 2, y: th - Math.sin(a) * th }); }
+      opts.shape = { type: 'fromVerts', verts };
+    }
+    const b = this.matter.add.image(x, y, def.asset, undefined, opts);
+    b.setScale(0.5 * K);
+    if (opts.shape) {
+      // Matter đặt thân theo trọng tâm → dời điểm neo ảnh cho khớp
+      const body = b.body;
+      const cx = (body.bounds.min.x + body.bounds.max.x) / 2, cy = (body.bounds.min.y + body.bounds.max.y) / 2;
+      const dx = body.position.x - cx, dy = body.position.y - cy;
+      b.setOrigin(0.5 + dx / b.displayWidth, 0.5 + dy / b.displayHeight);
+    }
+    b.setData('def', def);
+    b.setInteractive({ useHandCursor: true });
+    b.on('pointerdown', (p     ) => this.startDrag(p, def, b));
+    this.blocks.push(b);
+    this.placed++;
+    Audio.sfx('place');
+  }
+
+  // ───── kiểm tra thử thách ─────
+  checkGoal() {
+    if (this.done || this.achieved || this.dragging || this.challenge === 'free') return;
+    const resting = this.blocks.filter((b) => b.body && b.body.speed < 0.15);
+    if (resting.length !== this.blocks.length || !this.blocks.length) { this.stableT = 0; return; }
+    let ok = false;
+    if (this.challenge === 'tower') ok = this.blocks.some((b) => b.body.bounds.min.y <= this.flagY);
+    else if (this.challenge === 'house') {
+      const roofs = this.blocks.filter((b) => b.getData('def').body !== 'rect');
+      const gy = this.H - (this.portrait ? 300 : 70);
+      ok = roofs.some((r) => {
+        const below = this.blocks.filter((b) => b !== r && b.getData('def').body === 'rect' && Math.abs(b.x - r.x) < r.displayWidth * 0.6 && b.y > r.y);
+        return below.length >= 2 && r.body.bounds.max.y < gy - 80;
+      });
+    }
+    if (ok) {
+      this.stableT += this.game.loop.delta;
+      if (this.stableT > 900) {
+        this.achieved = true;
+        const top = this.blocks.reduce((a, b) => (b.y < a.y ? b : a));
+        this.good(top.x, top.y - 40);
+        this.confetti();
+        this.say(this.challenge === 'tower' ? 'Oa, tháp cao chạm tới cờ rồi!' : 'Ngôi nhà đẹp quá! Có cả mái nữa!');
+        const t = this.add.text(this.W / 2, this.top + 40, '★ Hoàn thành thử thách! ★', { fontFamily: FONT, fontSize: '54px', fontStyle: '800', color: '#f28a4e', stroke: '#fff', strokeThickness: 10 }).setOrigin(0.5).setDepth(900);
+        this.tweens.add({ targets: t, scale: { from: 0.4, to: 1 }, duration: 400, ease: 'Back.easeOut' });
+        this.time.delayedCall(2600, () => t.destroy());
+      }
+    } else this.stableT = 0;
+  }
+}
+return { BuilderScene };
+})();
+
+/* ══════════ games/Sort.ts ══════════ */
+M.Sort = (function () {
+// ── Hoạt động thêm: Phân loại rác (Ngôi Làng Kỹ Năng) · Biển sạch (Đại Dương Khám Phá) ──
+// Một scene, hai bộ nội dung — thêm bộ mới chỉ cần thêm mode.
+const { AssetLoader } = M.AssetLoader;
+const { Audio } = M.Audio;
+const { MiniGame, shuffle } = M.MiniGame;
+const SORT_NAMES                         = {
+  'trash-bottle': 'chai nhựa', 'trash-can': 'lon nước', 'trash-paper': 'giấy vụn', 'trash-box': 'hộp giấy',
+  'trash-banana-peel': 'vỏ chuối', 'trash-apple-core': 'lõi táo', 'trash-leaf': 'lá khô', 'trash-eggshell': 'vỏ trứng', 'trash-bag': 'túi ni lông',
+  'sea-crab': 'bạn cua', 'sea-jellyfish': 'bạn sứa', 'sea-octopus': 'bạn bạch tuộc', 'animal-fish': 'bạn cá', 'animal-turtle': 'bạn rùa',
+};
+
+class SortScene extends MiniGame {
+  queue           = []; current      = null; bins        = []; left = 0; floaters        = []; boat     ;
+  constructor() { super('Sort'); }
+  get play() { return AssetLoader.data('play'); }
+  assets() {
+    const S = this.play.sort;
+    return [...S.recycle, ...S.organic, ...S.oceanTrash, ...S.seaLife, 'bin-recycle', 'bin-organic', 'sort-boat'];
+  }
+  instruction() {
+    return this.mode === 'ocean' ? 'Chạm vào rác để nhặt lên thuyền. Các bạn sinh vật biển thì để yên nhé!'
+      : 'Rác tái chế bỏ thùng xanh dương, rác hữu cơ bỏ thùng xanh lá nhé!';
+  }
+
+  buildRound() { if (this.mode === 'ocean') this.buildOcean(); else this.buildTrash(); }
+
+  // ───── phân loại rác ─────
+  buildTrash() {
+    const S = this.play.sort;
+    const n = [4, 6, 8, 10, 12][this.level - 1];
+    const pool = [...S.recycle, ...S.organic];
+    this.queue = shuffle(Array.from({ length: n }, (_, i) => pool[i % pool.length]));
+    this.left = n;
+    this.layer.add(this.label(this.W / 2, this.top + 30, 'Bỏ rác vào đúng thùng', 54));
+    const by = this.H - (this.portrait ? 260 : 60);
+    const defs = [
+      { key: 'bin-recycle', kind: 'recycle', name: 'Tái chế', x: this.W / 2 - (this.portrait ? 220 : 330) },
+      { key: 'bin-organic', kind: 'organic', name: 'Hữu cơ', x: this.W / 2 + (this.portrait ? 220 : 330) },
+    ];
+    this.bins = defs.map((d) => {
+      const img = this.fitImage(d.key, d.x, by, 300, 360).setOrigin(0.5, 0.95);
+      const t = this.label(d.x, by + 30, d.name, 40);
+      this.layer.add([img, t]);
+      return { ...d, img };
+    });
+    // hình nhỏ minh hoạ dưới mỗi thùng (cấp thấp)
+    if (this.level <= 2) {
+      this.layer.add(this.fitImage(S.recycle[0], defs[0].x + 110, by - 300, 70, 70));
+      this.layer.add(this.fitImage(S.organic[0], defs[1].x + 110, by - 300, 70, 70));
+    }
+    this.nextItem();
+    this.time.delayedCall(300, () => this.say(this.instruction()));
+  }
+
+  nextItem() {
+    const key = this.queue.shift();
+    if (!key) { this.complete(); return; }
+    const S = this.play.sort;
+    const kind = S.recycle.includes(key) ? 'recycle' : 'organic';
+    const x = this.W / 2, y = this.portrait ? this.top + 380 : this.top + 240;
+    const it = this.fitImage(key, x, y, 200, 200);
+    it.setData({ key, kind, home: { x, y } });
+    it.setInteractive({ draggable: true, useHandCursor: true });
+    this.input.setDraggable(it);
+    it.setScale(0);
+    this.tweens.add({ targets: it, scale: it.getData('baseScale'), duration: 300, ease: 'Back.easeOut' });
+    it.on('drag', (_p     , px        , py        ) => { it.setPosition(px, py); for (const b of this.bins) b.img.setScale(b.img.getData('baseScale') * (this.overBin(it) === b ? 1.08 : 1)); });
+    it.on('dragstart', () => Audio.sfx('pop'));
+    it.on('dragend', () => this.dropItem(it));
+    this.layer.add(it);
+    this.current = it;
+    if (this.level <= 2) this.time.delayedCall(400, () => Audio.say(SORT_NAMES[key]));
+  }
+  overBin(it     ) { return this.bins.find((b) => Math.abs(it.x - b.x) < 150 && it.y > b.img.y - 380 && it.y < b.img.y + 20); }
+
+  dropItem(it     ) {
+    const b = this.overBin(it);
+    for (const x of this.bins) x.img.setScale(x.img.getData('baseScale'));
+    if (b && b.kind === it.getData('kind')) {
+      it.disableInteractive();
+      this.tweens.add({ targets: it, x: b.x, y: b.img.y - 250, scale: 0.1, duration: 280, ease: 'Quad.easeIn', onComplete: () => it.destroy() });
+      this.tweens.add({ targets: b.img, scaleY: b.img.getData('baseScale') * 0.92, duration: 100, yoyo: true, delay: 250 });
+      this.good(b.x, b.img.y - 280, Math.random() < 0.4);
+      this.left--;
+      this.time.delayedCall(500, () => this.nextItem());
+    } else {
+      if (b) {
+        const name = SORT_NAMES[it.getData('key')];
+        this.miss(b.img, it.getData('kind') === 'recycle' ? `${cap(name)} tái chế được, bỏ thùng xanh dương nhé!` : `${cap(name)} là rác hữu cơ, bỏ thùng xanh lá nhé!`);
+      }
+      const h = it.getData('home');
+      this.tweens.add({ targets: it, x: h.x, y: h.y, duration: 300, ease: 'Back.easeOut' });
+    }
+  }
+
+  // ───── biển sạch ─────
+  buildOcean() {
+    const S = this.play.sort;
+    const nT = [4, 5, 6, 8, 10][this.level - 1], nL = [2, 3, 4, 5, 6][this.level - 1];
+    this.left = nT;
+    this.layer.add(this.label(this.W / 2, this.top + 30, 'Nhặt hết rác dưới biển', 54));
+    const bx = this.portrait ? this.W / 2 : this.W - 230, byy = this.portrait ? this.H - 250 : this.H - 140;
+    this.boat = this.fitImage('sort-boat', bx, byy, 380, 240);
+    this.layer.add(this.boat);
+    this.tweens.add({ targets: this.boat, y: byy - 8, angle: 2, duration: 1300, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+    const things = shuffle([
+      ...Array.from({ length: nT }, (_, i) => ({ key: S.oceanTrash[i % S.oceanTrash.length], trash: true })),
+      ...Array.from({ length: nL }, (_, i) => ({ key: S.seaLife[i % S.seaLife.length], trash: false })),
+    ]);
+    const area = this.portrait ? { x: 60, y: this.top + 120, w: this.W - 120, h: this.H - this.top - 520 } : { x: 300, y: this.top + 110, w: this.W - 700, h: this.H - this.top - 200 };
+    const pts                     = [];
+    for (let t = 0; pts.length < things.length && t < 3000; t++) {
+      const x = area.x + Math.random() * area.w, y = area.y + Math.random() * area.h;
+      if (pts.every(([a, b]) => Math.hypot(a - x, b - y) > (t > 2000 ? 100 : 150))) pts.push([x, y]);
+    }
+    things.forEach((th, i) => {
+      const [x, y] = pts[i] || [area.x + area.w / 2, area.y + area.h / 2];
+      const s = this.fitImage(th.key, x, y, th.trash ? 140 : 170, th.trash ? 140 : 170);
+      s.setData(th).setInteractive({ useHandCursor: true });
+      s.setAngle(th.trash ? Math.random() * 40 - 20 : 0);
+      this.tweens.add({ targets: s, y: y - 18, x: x + (Math.random() - 0.5) * 30, duration: 1400 + Math.random() * 900, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+      s.on('pointerup', () => this.tapOcean(s));
+      this.layer.add(s);
+    });
+    this.time.delayedCall(300, () => this.say(this.instruction()));
+  }
+
+  tapOcean(s     ) {
+    if (this.busy) return;
+    if (s.getData('trash')) {
+      s.disableInteractive();
+      this.tweens.killTweensOf(s);
+      Audio.sfx('whoosh');
+      this.tweens.add({ targets: s, x: this.boat.x + (Math.random() - 0.5) * 80, y: this.boat.y - 40, scale: s.getData('baseScale') * 0.4, angle: 360, duration: 520, ease: 'Cubic.easeIn', onComplete: () => { s.destroy(); this.sparkle(this.boat.x, this.boat.y - 40, 6); } });
+      Audio.sfx('pop');
+      if (--this.left <= 0) {
+        this.busy = true;
+        this.time.delayedCall(700, () => { this.say('Biển sạch rồi! Các bạn sinh vật biển cảm ơn bạn!'); this.complete(); });
+      }
+    } else {
+      // không phạt: bạn sinh vật biển vẫy chào
+      this.mistakes += 0.5;
+      Audio.sfx('bloop');
+      this.tweens.add({ targets: s, angle: { from: -12, to: 12 }, duration: 120, yoyo: true, repeat: 3, onComplete: () => s.setAngle(0) });
+      this.say(`Mình là ${SORT_NAMES[s.getData('key')]}, mình sống ở biển! Hãy nhặt rác thôi nhé.`);
+    }
+  }
+}
+const cap = (s        ) => s.charAt(0).toUpperCase() + s.slice(1);
+return { SORT_NAMES, SortScene };
 })();
 
 /* ══════════ main.ts ══════════ */
 M.main = (function () {
-// ── Little World — Phase 1: bản demo hình ảnh ──
-// Ba màn: Bản đồ thế giới (#map), Đảo của bé (#island), Phòng nhân vật (#gallery).
-const { BootScene, sceneFromHash } = M.BootScene;
-const { WorldMapPreviewScene } = M.WorldMapPreviewScene;
-const { IslandPreviewScene } = M.IslandPreviewScene;
-const { CharacterGalleryScene } = M.CharacterGalleryScene;
+// ── Thế Giới Nhỏ (Little World) ──
+// Đảo của bé · Bản đồ 6 vùng · 8 hoạt động · phần thưởng, túi đồ, huy hiệu · góc phụ huynh.
+const { BootScene, routeFromHash } = M.BootScene;
+const { HomeScene } = M.HomeScene;
+const { WorldMapScene } = M.WorldMapScene;
+const { IslandScene } = M.IslandScene;
+const { WardrobeScene } = M.WardrobeScene;
+const { AnimalMatchScene } = M.AnimalMatch;
+const { MemoryScene } = M.Memory;
+const { ShapePuzzleScene } = M.ShapePuzzle;
+const { CountCollectScene } = M.CountCollect;
+const { BuilderScene } = M.Builder;
+const { SortScene } = M.Sort;
+const { Store } = M.Store;
+const { Audio } = M.Audio;
+const { Hud } = M.Hud;
+const { Parent } = M.Parent;
 const { Ui } = M.Ui;
 // Vẽ canvas theo điểm ảnh thật của màn hình (nét trên retina), hiển thị thu lại bằng zoom.
 const DPR = Math.min(2, window.devicePixelRatio || 1);
@@ -1597,7 +3997,8 @@ const game = new Phaser.Game({
   scale: { mode: Phaser.Scale.NONE, zoom: 1 / DPR },
   render: { antialias: true, roundPixels: false, powerPreference: 'high-performance' },
   input: { activePointers: 3 },
-  scene: [BootScene, WorldMapPreviewScene, IslandPreviewScene, CharacterGalleryScene],
+  scene: [BootScene, HomeScene, WorldMapScene, IslandScene, WardrobeScene,
+    AnimalMatchScene, MemoryScene, ShapePuzzleScene, CountCollectScene, BuilderScene, SortScene],
 });
 
 window.addEventListener('resize', () => {
@@ -1606,29 +4007,42 @@ window.addEventListener('resize', () => {
   game.scale.setZoom(1 / DPR);
 });
 
-function goTo(key        ) {
-  const running = game.scene.getScenes(true).map((s     ) => s.scene.key).filter((k        ) => k !== 'Boot');
-  if (running.includes(key)) return;
-  Ui.card(null); Ui.modal(null);
-  for (const k of running) game.scene.stop(k);
-  if (game.scene.getScene('Boot')?.sys.settings.status >= Phaser.Scenes.RUNNING || game.scene.isActive('Boot')) game.scene.stop('Boot');
-  game.scene.start(key);
+let current = '';
+function go() {
+  if (!game.cache.json.exists('lw-manifest')) return;    // Boot chưa xong
+  const r = routeFromHash();
+  const key = r.key + JSON.stringify(r.data || {});
+  if (key === current) return;
+  current = key;
+  Ui.route = r.key;
+  Ui.card(null); Ui.modal(null); Hud.hideGuide();
+  for (const s of game.scene.getScenes(true)) game.scene.stop(s.scene.key);
+  game.scene.start(r.key, r.data);
 }
-
-window.addEventListener('hashchange', () => {
-  // chỉ chuyển khi manifest đã sẵn sàng (Boot xong)
-  if (game.cache.json.exists('lw-manifest')) goTo(sceneFromHash());
-});
+window.addEventListener('hashchange', go);
+window.addEventListener('lw-profile', () => { current = ''; Hud.render(); go(); });
 
 document.querySelectorAll             ('.tabs button').forEach((b) => {
   b.addEventListener('click', () => {
-    const h = ({ WorldMap: 'map', Island: 'island', Gallery: 'gallery' }       )[b.dataset.scene          ];
-    if (location.hash.replace('#', '') === h) goTo(b.dataset.scene          );
-    else location.hash = h;
+    Audio.sfx('tap');
+    if (location.hash.replace('#', '') === b.dataset.h) { current = ''; go(); } else location.hash = b.dataset.h          ;
   });
 });
+document.getElementById('btn-parent') .addEventListener('click', () => { Audio.sfx('tap'); Parent.open(); });
+
+// Âm thanh chỉ bật sau lần chạm đầu tiên
+window.addEventListener('pointerdown', () => Audio.unlock(), { once: true });
+
+// Ước tính thời gian chơi (chỉ khi trang đang hiển thị)
+setInterval(() => { if (document.visibilityState === 'visible' && Store.p) Store.tickPlaytime(15000); }, 15000);
+
+// Chơi ngoại tuyến sau lần tải đầu tiên
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+  navigator.serviceWorker.register('sw.js').catch(() => { /* không bắt buộc */ });
+}
 
 (window       ).__lw = game; // tiện cho kiểm thử
+(window       ).__lwStore = Store;
 return {  };
 })();
 })();</script>

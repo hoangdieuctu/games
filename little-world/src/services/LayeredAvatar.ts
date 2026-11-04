@@ -150,3 +150,16 @@ export class LayeredAvatar {
   setScale(s: number) { this.container.setScale(s); }
   destroy() { this.container.destroy(); }
 }
+
+/** Diện mạo đã lưu (có thể cũ/hỏng) → diện mạo hợp lệ với manifest hiện tại. */
+export function validLook(s: any): AvatarLook {
+  const d = defaultLook();
+  try {
+    if (s && s.variants && s.colors) {
+      const cfg = avatarConfig();
+      const ok = cfg.layers.every((L: any) => !(L.slot in s.variants) || s.variants[L.slot] === null || L.variants.some((v: any) => v.id === s.variants[L.slot]));
+      if (ok) return { variants: { ...d.variants, ...s.variants }, colors: { ...d.colors, ...s.colors } };
+    }
+  } catch (e) { /* bỏ qua */ }
+  return d;
+}

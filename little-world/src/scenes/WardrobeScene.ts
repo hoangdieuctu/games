@@ -1,7 +1,10 @@
-// ── Màn 3: Phòng trưng bày nhân vật ──
-// Bé (4 góc nhìn + animation + tuỳ biến từng lớp) và ba thú cưng (animation).
+// ── Tủ đồ: tuỳ biến bé (tóc, da, quần áo, phụ kiện) và chọn bạn đồng hành ──
+// Diện mạo lưu vào hồ sơ bé, dùng trên đảo và bản đồ.
 import { AssetLoader } from '../services/AssetLoader.js';
-import { LayeredAvatar, avatarConfig, defaultLook, allAvatarAssetIds, AvatarLook } from '../services/LayeredAvatar.js';
+import { LayeredAvatar, avatarConfig, defaultLook, allAvatarAssetIds, AvatarLook, validLook } from '../services/LayeredAvatar.js';
+import { Store } from '../services/Store.js';
+import { Audio } from '../services/Audio.js';
+import { Hud } from '../services/Hud.js';
 import { Ui } from '../services/Ui.js';
 import { preloadWithProgress } from './BootScene.js';
 
@@ -18,7 +21,7 @@ const ANIM_NAMES: Record<string, string> = {
 };
 const COLOR_SLOTS: [string, string, string][] = [['skin', 'Màu da', 'skin'], ['hair', 'Màu tóc', 'hair'], ['top', 'Màu áo', 'cloth'], ['bottom', 'Màu quần/váy', 'cloth'], ['shoes', 'Màu giày', 'shoes']];
 
-export class CharacterGalleryScene extends Phaser.Scene {
+export class WardrobeScene extends Phaser.Scene {
   look: AvatarLook = null as any;
   hero: any;
   views: any[] = [];
@@ -29,7 +32,7 @@ export class CharacterGalleryScene extends Phaser.Scene {
   petAnim: Record<string, string> = { fox: 'idle-front', bunny: 'idle-front', bear: 'idle-front' };
   labels: any[] = [];
 
-  constructor() { super('Gallery'); }
+  constructor() { super('Wardrobe'); }
 
   preload() {
     preloadWithProgress(this, () => {
@@ -39,7 +42,10 @@ export class CharacterGalleryScene extends Phaser.Scene {
   }
 
   create() {
-    Ui.setActiveTab('Gallery');
+    if (Ui.stale(this)) return;
+    Ui.setActiveTab('Wardrobe');
+    Hud.show(true);
+    this.time.delayedCall(400, () => Hud.say('Bé muốn mặc gì hôm nay? Chạm các nút để đổi nhé!'));
     AssetLoader.createAnimations(this);
     this.cameras.main.setBackgroundColor('#fff3dc');
     this.bg = this.add.graphics().setDepth(-10);
@@ -58,7 +64,7 @@ export class CharacterGalleryScene extends Phaser.Scene {
       if (!P || !this.textures.exists(P.sheet)) continue;
       const s = this.add.sprite(0, 0, P.sheet).setOrigin(...(P.origin || [0.5, 0.92]));
       s.setInteractive({ pixelPerfect: true, alphaTolerance: 40, useHandCursor: true });
-      s.on('pointerup', () => this.playPet(p, 'greet'));
+      s.on('pointerup', () => { Audio.sfx('bloop'); this.playPet(p, 'greet'); });
       this.pets[p] = s;
       this.playPet(p, 'idle-front');
     }
@@ -71,18 +77,8 @@ export class CharacterGalleryScene extends Phaser.Scene {
   }
 
   // ───────────── diện mạo ─────────────
-  loadLook(): AvatarLook {
-    try {
-      const s = JSON.parse(localStorage.getItem('lw-look') || 'null');
-      if (s && s.variants && s.colors) {
-        const cfg = avatarConfig();
-        const ok = cfg.layers.every((L: any) => !(L.slot in s.variants) || s.variants[L.slot] === null || L.variants.some((v: any) => v.id === s.variants[L.slot]));
-        if (ok) return { variants: { ...defaultLook().variants, ...s.variants }, colors: { ...defaultLook().colors, ...s.colors } };
-      }
-    } catch (e) { /* bỏ qua */ }
-    return defaultLook();
-  }
-  saveLook() { try { localStorage.setItem('lw-look', JSON.stringify(this.look)); } catch (e) { /* bỏ qua */ } }
+  loadLook(): AvatarLook { return validLook(Store.p?.look); }
+  saveLook() { Store.setLook(this.look); }
 
   applyLook() {
     this.hero.setLook(this.look);
@@ -198,7 +194,8 @@ export class CharacterGalleryScene extends Phaser.Scene {
         const P = pets[p];
         const portrait = AssetLoader.entry(`${p}-portrait`) ? `<img src="${AssetLoader.url(`${p}-portrait`)}" alt="">` : '';
         const anims = Object.keys(P.anims).map((k) => `<button class="chip ${k === this.petAnim[p] ? 'on' : ''}" data-pet="${p}" data-anim="${k}">${Ui.esc(ANIM_NAMES[k] || k)}</button>`).join('');
-        return `<div class="petcard">${portrait}<div><h4>${Ui.esc(P.name || p)}</h4><p>${Ui.esc(P.personality || '')}</p></div></div><div class="chips">${anims}</div>`;
+        const mine = Store.p?.pet === p;
+        return `<div class="petcard">${portrait}<div><h4>${Ui.esc(P.name || p)} ${mine ? '<span class="badge open">Bạn đồng hành</span>' : `<button class="btn small accent" data-choose="${p}">Chọn bạn này</button>`}</h4><p>${Ui.esc(P.personality || '')}</p></div></div><div class="chips">${anims}</div>`;
       }).join('') + `<div class="row"><button class="btn accent" data-a="allcele">Cả ba cùng ăn mừng</button><button class="btn" data-a="allgreet">Cả ba cùng chào</button></div>`;
     }
     const el = Ui.panel(`
@@ -207,7 +204,9 @@ export class CharacterGalleryScene extends Phaser.Scene {
     el.onclick = (e: any) => {
       const b = e.target.closest('button'); if (!b) return;
       const d = b.dataset;
+      Audio.sfx('tap');
       if (d.tab) { this.tab = d.tab; this.buildPanel(); return; }
+      if (d.choose) { Store.setPet(d.choose); this.playPet(d.choose, 'celebrate'); Hud.say(`Chào bạn! Mình là ${pets[d.choose]?.name}. Từ giờ mình đi cùng bạn nhé!`); this.buildPanel(); return; }
       if (d.pet && d.anim) { this.playPet(d.pet, d.anim); this.buildPanel(); return; }
       if (d.anim) {
         const a = cfg.anims[d.anim];

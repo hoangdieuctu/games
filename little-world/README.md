@@ -1,8 +1,9 @@
 # Thế Giới Nhỏ (Little World)
 
 Game phiêu lưu 2D hoạt hình nguyên bản cho trẻ em, chạy trên Phaser 3. Game được làm qua 4 phase;
-thư mục này hiện chứa **Phase 1: hình ảnh và dựng thế giới**. Phase này chưa có mini-game,
-phần thưởng hay túi đồ.
+thư mục này hiện có **Phase 1 (hình ảnh, thế giới)** và **Phase 2 (gameplay)**: hồ sơ bé, đảo tự lưu,
+8 hoạt động chơi được, phần thưởng, túi đồ, cửa hàng, luống hoa, huy hiệu, âm thanh và góc phụ huynh.
+Thiết kế gốc: `docs/design-conversation.html` (hội thoại với ChatGPT) và `docs/GAMEPLAY.md`.
 
 Tất cả hình ảnh được **vẽ bằng code** (SVG sinh từ các script trong `art/`), dùng chung một
 bảng màu và quy chuẩn (`docs/ART_GUIDELINES.md`), rồi xuất ra PNG hoặc WebP cho Phaser.
@@ -34,7 +35,7 @@ Phaser tải ảnh bằng XHR, nên **không mở được bằng file://**. C�
 
 ```
 python3 -m http.server 8000      # ở thư mục gốc repo
-# rồi mở http://localhost:8000/games/little-world/#map   (#island, #gallery)
+# rồi mở http://localhost:8000/little-world/   (#island, #map, #wardrobe, #play/<hoạt động>)
 ```
 
 Demo có ba màn:

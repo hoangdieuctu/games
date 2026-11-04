@@ -1,6 +1,10 @@
-// ── Màn 1: Xem trước bản đồ thế giới ──
-// Phóng to / kéo, rê chuột hoặc chạm để làm nổi vùng, hiện tên vùng, khoá/mở khoá thử.
+// ── Bản đồ thế giới: 6 vùng đất, mỗi vùng có các trò chơi ──
+// Vùng mở dần theo số sao bé nhận được. Vùng khoá vẫn nhìn thấy và xem trước được.
 import { AssetLoader } from '../services/AssetLoader.js';
+import { Store } from '../services/Store.js';
+import { Audio } from '../services/Audio.js';
+import { Hud, resIcon, costHtml } from '../services/Hud.js';
+import { ACTIVITIES, REGION_STARS, PET_LINES, pick } from '../data/Content.js';
 import { CameraControls } from '../services/CameraControls.js';
 import { Ui } from '../services/Ui.js';
 import { preloadWithProgress } from './BootScene.js';
@@ -9,7 +13,7 @@ declare const Phaser: any;
 
 const hexInt = (h: string) => parseInt(String(h || '#ffffff').replace('#', ''), 16);
 
-export class WorldMapPreviewScene extends Phaser.Scene {
+export class WorldMapScene extends Phaser.Scene {
   world: any;
   controls: any;
   polys: Record<string, any> = {};
@@ -34,8 +38,13 @@ export class WorldMapPreviewScene extends Phaser.Scene {
     }, 'Đang mở bản đồ thế giới…');
   }
 
+  focus: string | null = null;
+  init(data: any) { this.focus = data?.region || null; }
+
   create() {
+    if (Ui.stale(this)) return;
     Ui.setActiveTab('WorldMap');
+    Hud.show(true);
     AssetLoader.createAnimations(this);
     const W = this.world = AssetLoader.data('world');
     this.cameras.main.setBackgroundColor('#5ab4e0');
@@ -50,7 +59,7 @@ export class WorldMapPreviewScene extends Phaser.Scene {
     // công trình từng vùng
     for (const r of W.regions) {
       this.polys[r.id] = new Phaser.Geom.Polygon(r.polygon.flat());
-      this.unlocked[r.id] = !!r.unlocked;
+      this.unlocked[r.id] = Store.regionOpen(r.id);
       for (const lm of r.landmarks || []) {
         if (!this.textures.exists(lm.asset)) continue;
         const s = AssetLoader.sprite(this, lm.asset, lm.x, lm.y);
@@ -102,6 +111,32 @@ export class WorldMapPreviewScene extends Phaser.Scene {
     this.buildPanel();
     Ui.card(null);
     this.events.once('shutdown', () => { Ui.card(null); Ui.clearPanel(); });
+
+    // vùng vừa mở khoá (chưa xem): mây tan + lấp lánh
+    const p = Store.p!;
+    const fresh = W.regions.filter((r: any) => this.unlocked[r.id] && REGION_STARS[r.id] > 0 && !p.counters['seen-' + r.id]);
+    if (this.focus) this.time.delayedCall(50, () => this.select(this.focus, true));
+    else if (fresh.length) {
+      const r = fresh[0];
+      for (const x of fresh) p.counters['seen-' + x.id] = 1;
+      Store.commit();
+      for (const o of this.overlays[r.id] || []) o.setVisible(true);
+      this.time.delayedCall(400, () => { this.select(r.id, true); this.time.delayedCall(700, () => this.revealRegion(r)); });
+    } else this.time.delayedCall(300, () => Hud.say(pick(PET_LINES.map)));
+  }
+
+  revealRegion(r: any) {
+    Audio.sfx('unlock');
+    for (const p of this.overlays[r.id] || []) {
+      this.tweens.add({ targets: p, alpha: 0, scale: p.scale * 1.2, duration: 900, onComplete: () => p.setVisible(false) });
+    }
+    if (this.textures.exists('world-ui-unlocked-sparkle')) {
+      const c = r.label || r.center;
+      const s = AssetLoader.image(this, 'world-ui-unlocked-sparkle', c[0], c[1] - 60).setDepth(5900).setAlpha(0);
+      const sc = s.scale; s.setScale(sc * 0.4);
+      this.tweens.add({ targets: s, alpha: 1, scale: sc * 1.6, duration: 500, ease: 'Back.easeOut', yoyo: true, hold: 700, onComplete: () => s.destroy() });
+    }
+    Hud.say(`Vùng ${r.name} đã mở! Mình vào chơi nhé!`);
   }
 
   // ───────────── dựng ─────────────
@@ -152,23 +187,19 @@ export class WorldMapPreviewScene extends Phaser.Scene {
         <button class="btn icon" data-a="zin" aria-label="Phóng to">＋</button>
         <button class="btn icon" data-a="zout" aria-label="Thu nhỏ">－</button>
         <button class="btn" data-a="fit">Toàn cảnh</button>
-        <button class="btn" data-a="labels">Ẩn tên vùng</button>
-        <button class="btn accent" data-a="home">Đảo của bé</button>
+        <button class="btn accent" data-a="home">Về đảo</button>
       </div>
       <div class="chips">${this.world.regions.map((r: any) =>
-        `<button class="chip" data-r="${r.id}" style="--c:${r.color}"><img src="${AssetLoader.url(r.icon)}" alt="">${Ui.esc(r.name)}</button>`).join('')}</div>
+        `<button class="chip ${this.unlocked[r.id] ? '' : 'locked'}" data-r="${r.id}" style="--c:${r.color}"><img src="${AssetLoader.url(r.icon)}" alt="">${Ui.esc(r.name)}${this.unlocked[r.id] ? '' : `<img class="mini" src="${AssetLoader.url('world-ui-lock-badge')}" alt="khoá">`}</button>`).join('')}</div>
     `, 'map-panel');
     el.onclick = (e: any) => {
       const b = e.target.closest('button'); if (!b) return;
+      Audio.sfx('tap');
       const a = b.dataset.a;
       if (a === 'zin') this.controls.zoomBy(1.35);
       else if (a === 'zout') this.controls.zoomBy(1 / 1.35);
       else if (a === 'fit') { this.select(null); this.controls.flyTo(this.world.width / 2, this.world.height / 2, 1, 600); }
-      else if (a === 'labels') {
-        this.showLabels = !this.showLabels;
-        b.textContent = this.showLabels ? 'Ẩn tên vùng' : 'Hiện tên vùng';
-        for (const l of Object.values(this.labels)) (l as any).setVisible(this.showLabels);
-      } else if (a === 'home') this.goHome();
+      else if (a === 'home') this.goHome();
       else if (b.dataset.r) this.select(b.dataset.r, true);
     };
   }
@@ -220,22 +251,37 @@ export class WorldMapPreviewScene extends Phaser.Scene {
 
   showRegionCard(r: any) {
     const open = this.unlocked[r.id];
+    const p = Store.p!;
+    const acts = ACTIVITIES.filter((x) => x.region === r.id);
+    const need = Hud.regionNeed(r.id);
+    const list = acts.map((x) => `
+      <button class="act ${open ? '' : 'off'}" data-act="${x.id}">
+        <div><b>${Ui.esc(x.name)}</b><span>${Ui.esc(x.desc)}</span></div>
+        <em>${p.plays[x.id] ? `Cấp ${Store.level(x.id)} · ${p.plays[x.id]} lượt` : 'Mới!'}</em>
+        ${costHtml(x.reward as any, 'cost gain')}
+      </button>`).join('');
     const el = Ui.card(`
       <div class="card-head" style="--c:${r.color}">
         <img class="card-icon" src="${AssetLoader.url(r.icon)}" alt="">
         <div><h3>${Ui.esc(r.name)}</h3><p>${Ui.esc(r.nameEn || '')}</p></div>
         <span class="badge ${open ? 'open' : 'locked'}">${open ? 'Đã mở' : 'Đang khoá'}</span>
       </div>
-      <div class="card-art"><img src="${AssetLoader.url(r.entrance)}" alt="Cổng vào ${Ui.esc(r.name)}"></div>
+      ${open ? '' : `<p class="card-text need">Cần thêm <b>${need}</b> <img src="${resIcon('star')}" alt="sao"> để mở. Chơi ở các vùng khác để nhận sao nhé!</p>`}
+      <div class="acts">${list}</div>
       <div class="row">
-        <button class="btn accent" data-a="view">Xem vùng</button>
-        <button class="btn" data-a="lock">${open ? 'Khoá lại (thử)' : 'Mở khoá (thử)'}</button>
+        <button class="btn" data-a="view">Xem cảnh vùng</button>
         <button class="btn ghost" data-a="close">Đóng</button>
       </div>`);
     el.onclick = (e: any) => {
-      const a = e.target.closest('button')?.dataset.a;
+      const b = e.target.closest('button'); if (!b) return;
+      Audio.sfx('tap');
+      if (b.dataset.act) {
+        if (!open) { Hud.say(`Cần thêm ${need} ngôi sao để mở ${r.name}.`); return; }
+        location.hash = 'play/' + b.dataset.act;
+        return;
+      }
+      const a = b.dataset.a;
       if (a === 'close') this.select(null);
-      else if (a === 'lock') this.toggleLock(r);
       else if (a === 'view') this.showRegionView(r);
     };
   }
@@ -255,24 +301,6 @@ export class WorldMapPreviewScene extends Phaser.Scene {
   }
 
   goHome() { location.hash = 'island'; }
-
-  toggleLock(r: any) {
-    const open = !this.unlocked[r.id];
-    this.unlocked[r.id] = open;
-    for (const p of this.overlays[r.id] || []) {
-      if (open) this.tweens.add({ targets: p, alpha: 0, scale: p.scale * 1.15, duration: 600, onComplete: () => { p.setVisible(false); p.setAlpha(1); p.setScale(p.scale / 1.15); } });
-      else { p.setVisible(true); p.setAlpha(0); this.tweens.add({ targets: p, alpha: 1, duration: 500 }); }
-    }
-    if (open && this.textures.exists('ui-unlocked-sparkle')) {
-      const c = r.label || r.center;
-      const s = AssetLoader.image(this, 'ui-unlocked-sparkle', c[0], c[1] - 60).setDepth(5900).setAlpha(0);
-      const sc = s.scale;
-      s.setScale(sc * 0.4);
-      this.tweens.add({ targets: s, alpha: 1, scale: sc * 1.4, duration: 450, ease: 'Back.easeOut', yoyo: true, hold: 500, onComplete: () => s.destroy() });
-    }
-    Ui.toast(open ? `Đã mở khoá ${r.name}!` : `${r.name} đã khoá lại`);
-    this.showRegionCard(r);
-  }
 
   showRegionView(r: any) {
     const bg = this.world.regions && AssetLoader.url(r.background);

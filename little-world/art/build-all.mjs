@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 // Sinh lại TOÀN BỘ tài sản hình ảnh rồi gộp manifest:
-//   PLAYWRIGHT_CORE=/path/to/playwright-core node little-world/art/build-all.mjs [world|island|characters ...]
+//   PLAYWRIGHT_CORE=/path/to/playwright-core node little-world/art/build-all.mjs [world|island|characters|play ...]
 import { spawnSync } from 'node:child_process';
 import { join } from 'node:path';
 import { ART_DIR } from './lib/manifest.mjs';
 
-const all = ['world', 'island', 'characters'];
+const all = ['world', 'island', 'characters', 'play'];
 const pick = process.argv.slice(2).filter((a) => all.includes(a));
 for (const g of pick.length ? pick : all) {
   console.log(`\n── gen-${g} ──`);

@@ -1,9 +1,20 @@
-// ── Little World — Phase 1: bản demo hình ảnh ──
-// Ba màn: Bản đồ thế giới (#map), Đảo của bé (#island), Phòng nhân vật (#gallery).
-import { BootScene, sceneFromHash } from './scenes/BootScene.js';
-import { WorldMapPreviewScene } from './scenes/WorldMapPreviewScene.js';
-import { IslandPreviewScene } from './scenes/IslandPreviewScene.js';
-import { CharacterGalleryScene } from './scenes/CharacterGalleryScene.js';
+// ── Thế Giới Nhỏ (Little World) ──
+// Đảo của bé · Bản đồ 6 vùng · 8 hoạt động · phần thưởng, túi đồ, huy hiệu · góc phụ huynh.
+import { BootScene, routeFromHash } from './scenes/BootScene.js';
+import { HomeScene } from './scenes/HomeScene.js';
+import { WorldMapScene } from './scenes/WorldMapScene.js';
+import { IslandScene } from './scenes/IslandScene.js';
+import { WardrobeScene } from './scenes/WardrobeScene.js';
+import { AnimalMatchScene } from './games/AnimalMatch.js';
+import { MemoryScene } from './games/Memory.js';
+import { ShapePuzzleScene } from './games/ShapePuzzle.js';
+import { CountCollectScene } from './games/CountCollect.js';
+import { BuilderScene } from './games/Builder.js';
+import { SortScene } from './games/Sort.js';
+import { Store } from './services/Store.js';
+import { Audio } from './services/Audio.js';
+import { Hud } from './services/Hud.js';
+import { Parent } from './services/Parent.js';
 import { Ui } from './services/Ui.js';
 
 declare const Phaser: any;
@@ -22,7 +33,8 @@ const game = new Phaser.Game({
   scale: { mode: Phaser.Scale.NONE, zoom: 1 / DPR },
   render: { antialias: true, roundPixels: false, powerPreference: 'high-performance' },
   input: { activePointers: 3 },
-  scene: [BootScene, WorldMapPreviewScene, IslandPreviewScene, CharacterGalleryScene],
+  scene: [BootScene, HomeScene, WorldMapScene, IslandScene, WardrobeScene,
+    AnimalMatchScene, MemoryScene, ShapePuzzleScene, CountCollectScene, BuilderScene, SortScene],
 });
 
 window.addEventListener('resize', () => {
@@ -31,26 +43,39 @@ window.addEventListener('resize', () => {
   game.scale.setZoom(1 / DPR);
 });
 
-function goTo(key: string) {
-  const running = game.scene.getScenes(true).map((s: any) => s.scene.key).filter((k: string) => k !== 'Boot');
-  if (running.includes(key)) return;
-  Ui.card(null); Ui.modal(null);
-  for (const k of running) game.scene.stop(k);
-  if (game.scene.getScene('Boot')?.sys.settings.status >= Phaser.Scenes.RUNNING || game.scene.isActive('Boot')) game.scene.stop('Boot');
-  game.scene.start(key);
+let current = '';
+function go() {
+  if (!game.cache.json.exists('lw-manifest')) return;    // Boot chưa xong
+  const r = routeFromHash();
+  const key = r.key + JSON.stringify(r.data || {});
+  if (key === current) return;
+  current = key;
+  Ui.route = r.key;
+  Ui.card(null); Ui.modal(null); Hud.hideGuide();
+  for (const s of game.scene.getScenes(true)) game.scene.stop(s.scene.key);
+  game.scene.start(r.key, r.data);
 }
-
-window.addEventListener('hashchange', () => {
-  // chỉ chuyển khi manifest đã sẵn sàng (Boot xong)
-  if (game.cache.json.exists('lw-manifest')) goTo(sceneFromHash());
-});
+window.addEventListener('hashchange', go);
+window.addEventListener('lw-profile', () => { current = ''; Hud.render(); go(); });
 
 document.querySelectorAll<HTMLElement>('.tabs button').forEach((b) => {
   b.addEventListener('click', () => {
-    const h = ({ WorldMap: 'map', Island: 'island', Gallery: 'gallery' } as any)[b.dataset.scene as string];
-    if (location.hash.replace('#', '') === h) goTo(b.dataset.scene as string);
-    else location.hash = h;
+    Audio.sfx('tap');
+    if (location.hash.replace('#', '') === b.dataset.h) { current = ''; go(); } else location.hash = b.dataset.h as string;
   });
 });
+document.getElementById('btn-parent')!.addEventListener('click', () => { Audio.sfx('tap'); Parent.open(); });
+
+// Âm thanh chỉ bật sau lần chạm đầu tiên
+window.addEventListener('pointerdown', () => Audio.unlock(), { once: true });
+
+// Ước tính thời gian chơi (chỉ khi trang đang hiển thị)
+setInterval(() => { if (document.visibilityState === 'visible' && Store.p) Store.tickPlaytime(15000); }, 15000);
+
+// Chơi ngoại tuyến sau lần tải đầu tiên
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+  navigator.serviceWorker.register('sw.js').catch(() => { /* không bắt buộc */ });
+}
 
 (window as any).__lw = game; // tiện cho kiểm thử
+(window as any).__lwStore = Store;

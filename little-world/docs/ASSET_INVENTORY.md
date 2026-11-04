@@ -2,7 +2,7 @@
 
 > Tệp này được sinh tự động bởi `art/build-manifest.mjs` từ manifest — đừng sửa tay.
 
-- Tổng số tài sản: **209**, dung lượng **21.93 MB**
+- Tổng số tài sản: **282**, dung lượng **24.10 MB**
 - Manifest cho Phaser: `public/assets/asset-manifest.json` (nạp bởi `src/services/AssetLoader.ts`)
 - Kích thước là kích thước texture thật (px). `scale` là tỉ lệ hiển thị mặc định (texture @2x → 0.5).
 - Kiểm tra tự động: không có vấn đề (file tồn tại, kích thước khớp, khung spritesheet hợp lệ, tham chiếu đầy đủ)
@@ -201,6 +201,119 @@
 | `island-tree-palm` | island/trees/palm.png | 468×438 · 88 KB | png | 0.5 · [0.5, 0.9269] | Cây dừa (bãi biển), lá xoè, có trái dừa (đế 1×1 ô) |
 | `island-tree-great-tree` | island/trees/great-tree.png | 800×812 · 288 KB | png | 0.5 · [0.5, 0.9212] | Cây cổ thụ lớn thân thiện của đảo: tán to, sàn nhà cây nhỏ, xích đu – điểm nhấn bên trái nhà (đế 3×2 ô) |
 | `island-tree-magic` | island/trees/magic-tree.png | 392×470 · 142 KB | png | 0.5 · [0.5, 0.9277] | Cây phép thuật: tán tím lavender phát sáng nhẹ, quả cầu sáng – vật hiếm/phần thưởng (đế 1×1 ô) |
+
+## play/animals (16)
+
+| ID | Tệp | Kích thước | Định dạng | Scale · Origin | Công dụng |
+|---|---|---|---|---|---|
+| `animal-cat` | play/animals/cat.png | 400×400 · 50 KB | png | 0.5 · [0.5, 0.5] | Con vật: Mèo |
+| `animal-dog` | play/animals/dog.png | 400×400 · 49 KB | png | 0.5 · [0.5, 0.5] | Con vật: Chó |
+| `animal-cow` | play/animals/cow.png | 400×400 · 43 KB | png | 0.5 · [0.5, 0.5] | Con vật: Bò |
+| `animal-pig` | play/animals/pig.png | 400×400 · 45 KB | png | 0.5 · [0.5, 0.5] | Con vật: Heo |
+| `animal-duck` | play/animals/duck.png | 400×400 · 36 KB | png | 0.5 · [0.5, 0.5] | Con vật: Vịt |
+| `animal-chick` | play/animals/chick.png | 400×400 · 40 KB | png | 0.5 · [0.5, 0.5] | Con vật: Gà con |
+| `animal-sheep` | play/animals/sheep.png | 400×400 · 45 KB | png | 0.5 · [0.5, 0.5] | Con vật: Cừu |
+| `animal-horse` | play/animals/horse.png | 400×400 · 50 KB | png | 0.5 · [0.5, 0.5] | Con vật: Ngựa |
+| `animal-rabbit` | play/animals/rabbit.png | 400×400 · 49 KB | png | 0.5 · [0.5, 0.5] | Con vật: Thỏ |
+| `animal-frog` | play/animals/frog.png | 400×400 · 43 KB | png | 0.5 · [0.5, 0.5] | Con vật: Ếch |
+| `animal-fish` | play/animals/fish.png | 400×400 · 40 KB | png | 0.5 · [0.5, 0.5] | Con vật: Cá |
+| `animal-turtle` | play/animals/turtle.png | 400×400 · 46 KB | png | 0.5 · [0.5, 0.5] | Con vật: Rùa |
+| `animal-elephant` | play/animals/elephant.png | 400×400 · 51 KB | png | 0.5 · [0.5, 0.5] | Con vật: Voi |
+| `animal-lion` | play/animals/lion.png | 400×400 · 61 KB | png | 0.5 · [0.5, 0.5] | Con vật: Sư tử |
+| `animal-monkey` | play/animals/monkey.png | 400×400 · 51 KB | png | 0.5 · [0.5, 0.5] | Con vật: Khỉ |
+| `animal-owl` | play/animals/owl.png | 400×400 · 48 KB | png | 0.5 · [0.5, 0.5] | Con vật: Cú mèo |
+
+## play/blocks (13)
+
+| ID | Tệp | Kích thước | Định dạng | Scale · Origin | Công dụng |
+|---|---|---|---|---|---|
+| `block-cube-red` | play/blocks/cube-red.png | 128×128 · 8 KB | png | 0.5 · [0.5, 0.5] | Khối vuông đỏ 64×64 |
+| `block-cube-yellow` | play/blocks/cube-yellow.png | 128×128 · 7 KB | png | 0.5 · [0.5, 0.5] | Khối vuông vàng 64×64 |
+| `block-cube-blue` | play/blocks/cube-blue.png | 128×128 · 8 KB | png | 0.5 · [0.5, 0.5] | Khối vuông xanh dương 64×64 |
+| `block-cube-green` | play/blocks/cube-green.png | 128×128 · 9 KB | png | 0.5 · [0.5, 0.5] | Khối vuông xanh lá 64×64 |
+| `block-plank` | play/blocks/plank.png | 384×64 · 8 KB | png | 0.5 · [0.5, 0.5] | Thanh gỗ dài 192×32 (làm sàn, cầu) |
+| `block-pillar-orange` | play/blocks/pillar-orange.png | 64×256 · 3 KB | png | 0.5 · [0.5, 0.5] | Cột cam 32×128 |
+| `block-pillar-purple` | play/blocks/pillar-purple.png | 64×256 · 3 KB | png | 0.5 · [0.5, 0.5] | Cột tím 32×128 |
+| `block-roof-red` | play/blocks/roof-red.png | 256×128 · 11 KB | png | 0.5 · [0.5, 0.5] | Mái tam giác đỏ 128×64 |
+| `block-roof-blue` | play/blocks/roof-blue.png | 256×128 · 12 KB | png | 0.5 · [0.5, 0.5] | Mái tam giác xanh 128×64 |
+| `block-dome-yellow` | play/blocks/dome-yellow.png | 256×128 · 14 KB | png | 0.5 · [0.5, 0.5] | Mái vòm nửa tròn vàng 128×64 |
+| `block-window` | play/blocks/window.png | 128×128 · 6 KB | png | 0.5 · [0.5, 0.5] | Khối tường có cửa sổ 64×64 |
+| `block-door` | play/blocks/door.png | 128×192 · 12 KB | png | 0.5 · [0.5, 0.5] | Khối tường có cửa ra vào 64×96 |
+| `block-ground` | play/blocks/ground.png | 2400×120 · 34 KB | png | 0.5 · [0.5, 0.5] | Dải đất cỏ làm nền cho trò xây dựng (mép trên phẳng ở y=0) |
+
+## play/cards (2)
+
+| ID | Tệp | Kích thước | Định dạng | Scale · Origin | Công dụng |
+|---|---|---|---|---|---|
+| `card-back` | play/cards/back.png | 320×400 · 41 KB | png | 0.5 · [0.5, 0.5] | Mặt sau thẻ trò lật thẻ ghi nhớ |
+| `card-front` | play/cards/front.png | 320×400 · 10 KB | png | 0.5 · [0.5, 0.5] | Mặt trước thẻ (trống) để đặt hình con vật |
+
+## play/habitats (4)
+
+| ID | Tệp | Kích thước | Định dạng | Scale · Origin | Công dụng |
+|---|---|---|---|---|---|
+| `habitat-farm` | play/habitats/farm.png | 720×480 · 81 KB | png | 0.5 · [0.5, 0.5] | Thẻ môi trường: nông trại (chuồng, hàng rào, cánh đồng) |
+| `habitat-pond` | play/habitats/pond.png | 720×480 · 71 KB | png | 0.5 · [0.5, 0.5] | Thẻ môi trường: ao hồ (mặt nước, lau sậy, lá súng) |
+| `habitat-forest` | play/habitats/forest.png | 720×480 · 133 KB | png | 0.5 · [0.5, 0.5] | Thẻ môi trường: khu rừng (nhiều cây, nấm) |
+| `habitat-savanna` | play/habitats/savanna.png | 720×480 · 89 KB | png | 0.5 · [0.5, 0.5] | Thẻ môi trường: đồng cỏ châu Phi (cỏ vàng, cây keo, mặt trời) |
+
+## play/items (8)
+
+| ID | Tệp | Kích thước | Định dạng | Scale · Origin | Công dụng |
+|---|---|---|---|---|---|
+| `item-apple` | play/items/apple.png | 240×240 · 19 KB | png | 0.5 · [0.5, 0.5] | Quả táo đỏ (đếm, thu thập) |
+| `item-orange` | play/items/orange.png | 240×240 · 20 KB | png | 0.5 · [0.5, 0.5] | Quả cam (đếm, thu thập) |
+| `item-banana` | play/items/banana.png | 240×240 · 13 KB | png | 0.5 · [0.5, 0.5] | Quả chuối (đếm, thu thập) |
+| `item-strawberry` | play/items/strawberry.png | 240×240 · 18 KB | png | 0.5 · [0.5, 0.5] | Quả dâu tây (đếm, thu thập) |
+| `item-carrot` | play/items/carrot.png | 240×240 · 16 KB | png | 0.5 · [0.5, 0.5] | Củ cà rốt (đếm, thu thập) |
+| `item-star` | play/items/star.png | 240×240 · 19 KB | png | 0.5 · [0.5, 0.5] | Ngôi sao vàng (đếm, thu thập) |
+| `item-flower` | play/items/flower.png | 240×240 · 22 KB | png | 0.5 · [0.5, 0.5] | Bông hoa hồng (đếm, thu thập) |
+| `item-mushroom` | play/items/mushroom.png | 240×240 · 17 KB | png | 0.5 · [0.5, 0.5] | Cây nấm đỏ chấm trắng (đếm, thu thập) |
+
+## play/rewards (6)
+
+| ID | Tệp | Kích thước | Định dạng | Scale · Origin | Công dụng |
+|---|---|---|---|---|---|
+| `reward-star` | play/rewards/star.png | 192×192 · 14 KB | png | 0.5 · [0.5, 0.5] | Biểu tượng phần thưởng: sao |
+| `reward-seed` | play/rewards/seed.png | 192×192 · 16 KB | png | 0.5 · [0.5, 0.5] | Biểu tượng phần thưởng: hạt giống (gói hạt) |
+| `reward-wood` | play/rewards/wood.png | 192×192 · 12 KB | png | 0.5 · [0.5, 0.5] | Biểu tượng phần thưởng: gỗ (bó khúc gỗ) |
+| `reward-stone` | play/rewards/stone.png | 192×192 · 13 KB | png | 0.5 · [0.5, 0.5] | Biểu tượng phần thưởng: đá (đống đá) |
+| `reward-flower` | play/rewards/flower.png | 192×192 · 18 KB | png | 0.5 · [0.5, 0.5] | Biểu tượng phần thưởng: hoa |
+| `reward-shell` | play/rewards/shell.png | 192×192 · 12 KB | png | 0.5 · [0.5, 0.5] | Biểu tượng phần thưởng: vỏ sò |
+
+## play/shapes (9)
+
+| ID | Tệp | Kích thước | Định dạng | Scale · Origin | Công dụng |
+|---|---|---|---|---|---|
+| `shape-circle` | play/shapes/circle.png | 320×320 · 41 KB | png | 0.5 · [0.5, 0.5] | Mảnh ghép hình tròn (đỏ) |
+| `shape-square` | play/shapes/square.png | 320×320 · 35 KB | png | 0.5 · [0.5, 0.5] | Mảnh ghép hình vuông (xanh dương) |
+| `shape-triangle` | play/shapes/triangle.png | 320×320 · 23 KB | png | 0.5 · [0.5, 0.5] | Mảnh ghép hình tam giác (vàng) |
+| `shape-rectangle` | play/shapes/rectangle.png | 400×240 · 31 KB | png | 0.5 · [0.5, 0.5] | Mảnh ghép hình chữ nhật (xanh lá) |
+| `shape-star` | play/shapes/star.png | 320×320 · 33 KB | png | 0.5 · [0.5, 0.5] | Mảnh ghép ngôi sao (cam) |
+| `shape-heart` | play/shapes/heart.png | 320×320 · 37 KB | png | 0.5 · [0.5, 0.5] | Mảnh ghép trái tim (hồng) |
+| `shape-oval` | play/shapes/oval.png | 360×260 · 35 KB | png | 0.5 · [0.5, 0.5] | Mảnh ghép hình bầu dục (tím lavender) |
+| `shape-diamond` | play/shapes/diamond.png | 320×320 · 22 KB | png | 0.5 · [0.5, 0.5] | Mảnh ghép hình thoi (xanh bạc hà) |
+| `play-board-wood` | play/shapes/board-wood.png | 2000×1240 · 138 KB | png | 0.5 · [0.5, 0.5] | Khay gỗ để đặt ô bóng của trò ghép hình |
+
+## play/sort (15)
+
+| ID | Tệp | Kích thước | Định dạng | Scale · Origin | Công dụng |
+|---|---|---|---|---|---|
+| `bin-recycle` | play/sort/recycle.png | 320×380 · 29 KB | png | 0.5 · [0.5, 0.95] | Thùng rác tái chế (xanh dương) |
+| `bin-organic` | play/sort/organic.png | 320×380 · 30 KB | png | 0.5 · [0.5, 0.95] | Thùng rác hữu cơ (xanh lá) |
+| `sort-boat` | play/sort/boat.png | 600×380 · 45 KB | png | 0.5 · [0.5, 0.8] | Thuyền dọn biển có lưới (mép nước ở 80% chiều cao) |
+| `trash-bottle` | play/sort/bottle.png | 220×220 · 14 KB | png | 0.5 · [0.5, 0.5] | Rác: chai nhựa (tái chế) |
+| `trash-can` | play/sort/can.png | 220×220 · 13 KB | png | 0.5 · [0.5, 0.5] | Rác: lon nước (tái chế) |
+| `trash-paper` | play/sort/paper.png | 220×220 · 13 KB | png | 0.5 · [0.5, 0.5] | Rác: giấy vo tròn (tái chế) |
+| `trash-box` | play/sort/box.png | 220×220 · 11 KB | png | 0.5 · [0.5, 0.5] | Rác: hộp giấy các-tông (tái chế) |
+| `trash-banana-peel` | play/sort/banana-peel.png | 220×220 · 14 KB | png | 0.5 · [0.5, 0.5] | Rác: vỏ chuối (hữu cơ) |
+| `trash-apple-core` | play/sort/apple-core.png | 220×220 · 13 KB | png | 0.5 · [0.5, 0.5] | Rác: lõi táo (hữu cơ) |
+| `trash-leaf` | play/sort/leaf.png | 220×220 · 15 KB | png | 0.5 · [0.5, 0.5] | Rác: lá khô (hữu cơ) |
+| `trash-eggshell` | play/sort/eggshell.png | 220×220 · 13 KB | png | 0.5 · [0.5, 0.5] | Rác: vỏ trứng (hữu cơ) |
+| `trash-bag` | play/sort/bag.png | 220×220 · 10 KB | png | 0.5 · [0.5, 0.5] | Rác: túi ni-lông (rác biển) |
+| `sea-crab` | play/sort/crab.png | 260×260 · 26 KB | png | 0.5 · [0.5, 0.5] | Sinh vật biển: cua đỏ |
+| `sea-jellyfish` | play/sort/jellyfish.png | 260×260 · 21 KB | png | 0.5 · [0.5, 0.5] | Sinh vật biển: sứa hồng |
+| `sea-octopus` | play/sort/octopus.png | 260×260 · 24 KB | png | 0.5 · [0.5, 0.5] | Sinh vật biển: bạch tuộc tím |
 
 ## regions/adventure-ocean (8)
 

@@ -1,0 +1,2055 @@
+{
+ "group": "play",
+ "entries": [
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "animal-cat",
+   "file": "play/animals/cat.png",
+   "category": "play/animals",
+   "width": 400,
+   "height": 400,
+   "usage": "Con vật: Mèo",
+   "tags": [
+    "play",
+    "animals"
+   ],
+   "worldSize": [
+    200,
+    200
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "animal-dog",
+   "file": "play/animals/dog.png",
+   "category": "play/animals",
+   "width": 400,
+   "height": 400,
+   "usage": "Con vật: Chó",
+   "tags": [
+    "play",
+    "animals"
+   ],
+   "worldSize": [
+    200,
+    200
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "animal-cow",
+   "file": "play/animals/cow.png",
+   "category": "play/animals",
+   "width": 400,
+   "height": 400,
+   "usage": "Con vật: Bò",
+   "tags": [
+    "play",
+    "animals"
+   ],
+   "worldSize": [
+    200,
+    200
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "animal-pig",
+   "file": "play/animals/pig.png",
+   "category": "play/animals",
+   "width": 400,
+   "height": 400,
+   "usage": "Con vật: Heo",
+   "tags": [
+    "play",
+    "animals"
+   ],
+   "worldSize": [
+    200,
+    200
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "animal-duck",
+   "file": "play/animals/duck.png",
+   "category": "play/animals",
+   "width": 400,
+   "height": 400,
+   "usage": "Con vật: Vịt",
+   "tags": [
+    "play",
+    "animals"
+   ],
+   "worldSize": [
+    200,
+    200
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "animal-chick",
+   "file": "play/animals/chick.png",
+   "category": "play/animals",
+   "width": 400,
+   "height": 400,
+   "usage": "Con vật: Gà con",
+   "tags": [
+    "play",
+    "animals"
+   ],
+   "worldSize": [
+    200,
+    200
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "animal-sheep",
+   "file": "play/animals/sheep.png",
+   "category": "play/animals",
+   "width": 400,
+   "height": 400,
+   "usage": "Con vật: Cừu",
+   "tags": [
+    "play",
+    "animals"
+   ],
+   "worldSize": [
+    200,
+    200
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "animal-horse",
+   "file": "play/animals/horse.png",
+   "category": "play/animals",
+   "width": 400,
+   "height": 400,
+   "usage": "Con vật: Ngựa",
+   "tags": [
+    "play",
+    "animals"
+   ],
+   "worldSize": [
+    200,
+    200
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "animal-rabbit",
+   "file": "play/animals/rabbit.png",
+   "category": "play/animals",
+   "width": 400,
+   "height": 400,
+   "usage": "Con vật: Thỏ",
+   "tags": [
+    "play",
+    "animals"
+   ],
+   "worldSize": [
+    200,
+    200
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "animal-frog",
+   "file": "play/animals/frog.png",
+   "category": "play/animals",
+   "width": 400,
+   "height": 400,
+   "usage": "Con vật: Ếch",
+   "tags": [
+    "play",
+    "animals"
+   ],
+   "worldSize": [
+    200,
+    200
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "animal-fish",
+   "file": "play/animals/fish.png",
+   "category": "play/animals",
+   "width": 400,
+   "height": 400,
+   "usage": "Con vật: Cá",
+   "tags": [
+    "play",
+    "animals"
+   ],
+   "worldSize": [
+    200,
+    200
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "animal-turtle",
+   "file": "play/animals/turtle.png",
+   "category": "play/animals",
+   "width": 400,
+   "height": 400,
+   "usage": "Con vật: Rùa",
+   "tags": [
+    "play",
+    "animals"
+   ],
+   "worldSize": [
+    200,
+    200
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "animal-elephant",
+   "file": "play/animals/elephant.png",
+   "category": "play/animals",
+   "width": 400,
+   "height": 400,
+   "usage": "Con vật: Voi",
+   "tags": [
+    "play",
+    "animals"
+   ],
+   "worldSize": [
+    200,
+    200
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "animal-lion",
+   "file": "play/animals/lion.png",
+   "category": "play/animals",
+   "width": 400,
+   "height": 400,
+   "usage": "Con vật: Sư tử",
+   "tags": [
+    "play",
+    "animals"
+   ],
+   "worldSize": [
+    200,
+    200
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "animal-monkey",
+   "file": "play/animals/monkey.png",
+   "category": "play/animals",
+   "width": 400,
+   "height": 400,
+   "usage": "Con vật: Khỉ",
+   "tags": [
+    "play",
+    "animals"
+   ],
+   "worldSize": [
+    200,
+    200
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "animal-owl",
+   "file": "play/animals/owl.png",
+   "category": "play/animals",
+   "width": 400,
+   "height": 400,
+   "usage": "Con vật: Cú mèo",
+   "tags": [
+    "play",
+    "animals"
+   ],
+   "worldSize": [
+    200,
+    200
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "habitat-farm",
+   "file": "play/habitats/farm.png",
+   "category": "play/habitats",
+   "width": 720,
+   "height": 480,
+   "usage": "Thẻ môi trường: nông trại (chuồng, hàng rào, cánh đồng)",
+   "tags": [
+    "play",
+    "habitats"
+   ],
+   "worldSize": [
+    360,
+    240
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "habitat-pond",
+   "file": "play/habitats/pond.png",
+   "category": "play/habitats",
+   "width": 720,
+   "height": 480,
+   "usage": "Thẻ môi trường: ao hồ (mặt nước, lau sậy, lá súng)",
+   "tags": [
+    "play",
+    "habitats"
+   ],
+   "worldSize": [
+    360,
+    240
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "habitat-forest",
+   "file": "play/habitats/forest.png",
+   "category": "play/habitats",
+   "width": 720,
+   "height": 480,
+   "usage": "Thẻ môi trường: khu rừng (nhiều cây, nấm)",
+   "tags": [
+    "play",
+    "habitats"
+   ],
+   "worldSize": [
+    360,
+    240
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "habitat-savanna",
+   "file": "play/habitats/savanna.png",
+   "category": "play/habitats",
+   "width": 720,
+   "height": 480,
+   "usage": "Thẻ môi trường: đồng cỏ châu Phi (cỏ vàng, cây keo, mặt trời)",
+   "tags": [
+    "play",
+    "habitats"
+   ],
+   "worldSize": [
+    360,
+    240
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "item-apple",
+   "file": "play/items/apple.png",
+   "category": "play/items",
+   "width": 240,
+   "height": 240,
+   "usage": "Quả táo đỏ (đếm, thu thập)",
+   "tags": [
+    "play",
+    "items"
+   ],
+   "worldSize": [
+    120,
+    120
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "item-orange",
+   "file": "play/items/orange.png",
+   "category": "play/items",
+   "width": 240,
+   "height": 240,
+   "usage": "Quả cam (đếm, thu thập)",
+   "tags": [
+    "play",
+    "items"
+   ],
+   "worldSize": [
+    120,
+    120
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "item-banana",
+   "file": "play/items/banana.png",
+   "category": "play/items",
+   "width": 240,
+   "height": 240,
+   "usage": "Quả chuối (đếm, thu thập)",
+   "tags": [
+    "play",
+    "items"
+   ],
+   "worldSize": [
+    120,
+    120
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "item-strawberry",
+   "file": "play/items/strawberry.png",
+   "category": "play/items",
+   "width": 240,
+   "height": 240,
+   "usage": "Quả dâu tây (đếm, thu thập)",
+   "tags": [
+    "play",
+    "items"
+   ],
+   "worldSize": [
+    120,
+    120
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "item-carrot",
+   "file": "play/items/carrot.png",
+   "category": "play/items",
+   "width": 240,
+   "height": 240,
+   "usage": "Củ cà rốt (đếm, thu thập)",
+   "tags": [
+    "play",
+    "items"
+   ],
+   "worldSize": [
+    120,
+    120
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "item-star",
+   "file": "play/items/star.png",
+   "category": "play/items",
+   "width": 240,
+   "height": 240,
+   "usage": "Ngôi sao vàng (đếm, thu thập)",
+   "tags": [
+    "play",
+    "items"
+   ],
+   "worldSize": [
+    120,
+    120
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "item-flower",
+   "file": "play/items/flower.png",
+   "category": "play/items",
+   "width": 240,
+   "height": 240,
+   "usage": "Bông hoa hồng (đếm, thu thập)",
+   "tags": [
+    "play",
+    "items"
+   ],
+   "worldSize": [
+    120,
+    120
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "item-mushroom",
+   "file": "play/items/mushroom.png",
+   "category": "play/items",
+   "width": 240,
+   "height": 240,
+   "usage": "Cây nấm đỏ chấm trắng (đếm, thu thập)",
+   "tags": [
+    "play",
+    "items"
+   ],
+   "worldSize": [
+    120,
+    120
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "shape-circle",
+   "file": "play/shapes/circle.png",
+   "category": "play/shapes",
+   "width": 320,
+   "height": 320,
+   "usage": "Mảnh ghép hình tròn (đỏ)",
+   "tags": [
+    "play",
+    "shapes"
+   ],
+   "worldSize": [
+    160,
+    160
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "shape-square",
+   "file": "play/shapes/square.png",
+   "category": "play/shapes",
+   "width": 320,
+   "height": 320,
+   "usage": "Mảnh ghép hình vuông (xanh dương)",
+   "tags": [
+    "play",
+    "shapes"
+   ],
+   "worldSize": [
+    160,
+    160
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "shape-triangle",
+   "file": "play/shapes/triangle.png",
+   "category": "play/shapes",
+   "width": 320,
+   "height": 320,
+   "usage": "Mảnh ghép hình tam giác (vàng)",
+   "tags": [
+    "play",
+    "shapes"
+   ],
+   "worldSize": [
+    160,
+    160
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "shape-rectangle",
+   "file": "play/shapes/rectangle.png",
+   "category": "play/shapes",
+   "width": 400,
+   "height": 240,
+   "usage": "Mảnh ghép hình chữ nhật (xanh lá)",
+   "tags": [
+    "play",
+    "shapes"
+   ],
+   "worldSize": [
+    200,
+    120
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "shape-star",
+   "file": "play/shapes/star.png",
+   "category": "play/shapes",
+   "width": 320,
+   "height": 320,
+   "usage": "Mảnh ghép ngôi sao (cam)",
+   "tags": [
+    "play",
+    "shapes"
+   ],
+   "worldSize": [
+    160,
+    160
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "shape-heart",
+   "file": "play/shapes/heart.png",
+   "category": "play/shapes",
+   "width": 320,
+   "height": 320,
+   "usage": "Mảnh ghép trái tim (hồng)",
+   "tags": [
+    "play",
+    "shapes"
+   ],
+   "worldSize": [
+    160,
+    160
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "shape-oval",
+   "file": "play/shapes/oval.png",
+   "category": "play/shapes",
+   "width": 360,
+   "height": 260,
+   "usage": "Mảnh ghép hình bầu dục (tím lavender)",
+   "tags": [
+    "play",
+    "shapes"
+   ],
+   "worldSize": [
+    180,
+    130
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "shape-diamond",
+   "file": "play/shapes/diamond.png",
+   "category": "play/shapes",
+   "width": 320,
+   "height": 320,
+   "usage": "Mảnh ghép hình thoi (xanh bạc hà)",
+   "tags": [
+    "play",
+    "shapes"
+   ],
+   "worldSize": [
+    160,
+    160
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "play-board-wood",
+   "file": "play/shapes/board-wood.png",
+   "category": "play/shapes",
+   "width": 2000,
+   "height": 1240,
+   "usage": "Khay gỗ để đặt ô bóng của trò ghép hình",
+   "tags": [
+    "play",
+    "shapes"
+   ],
+   "worldSize": [
+    1000,
+    620
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "block-cube-red",
+   "file": "play/blocks/cube-red.png",
+   "category": "play/blocks",
+   "width": 128,
+   "height": 128,
+   "usage": "Khối vuông đỏ 64×64",
+   "tags": [
+    "play",
+    "blocks"
+   ],
+   "worldSize": [
+    64,
+    64
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "block-cube-yellow",
+   "file": "play/blocks/cube-yellow.png",
+   "category": "play/blocks",
+   "width": 128,
+   "height": 128,
+   "usage": "Khối vuông vàng 64×64",
+   "tags": [
+    "play",
+    "blocks"
+   ],
+   "worldSize": [
+    64,
+    64
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "block-cube-blue",
+   "file": "play/blocks/cube-blue.png",
+   "category": "play/blocks",
+   "width": 128,
+   "height": 128,
+   "usage": "Khối vuông xanh dương 64×64",
+   "tags": [
+    "play",
+    "blocks"
+   ],
+   "worldSize": [
+    64,
+    64
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "block-cube-green",
+   "file": "play/blocks/cube-green.png",
+   "category": "play/blocks",
+   "width": 128,
+   "height": 128,
+   "usage": "Khối vuông xanh lá 64×64",
+   "tags": [
+    "play",
+    "blocks"
+   ],
+   "worldSize": [
+    64,
+    64
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "block-plank",
+   "file": "play/blocks/plank.png",
+   "category": "play/blocks",
+   "width": 384,
+   "height": 64,
+   "usage": "Thanh gỗ dài 192×32 (làm sàn, cầu)",
+   "tags": [
+    "play",
+    "blocks"
+   ],
+   "worldSize": [
+    192,
+    32
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "block-pillar-orange",
+   "file": "play/blocks/pillar-orange.png",
+   "category": "play/blocks",
+   "width": 64,
+   "height": 256,
+   "usage": "Cột cam 32×128",
+   "tags": [
+    "play",
+    "blocks"
+   ],
+   "worldSize": [
+    32,
+    128
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "block-pillar-purple",
+   "file": "play/blocks/pillar-purple.png",
+   "category": "play/blocks",
+   "width": 64,
+   "height": 256,
+   "usage": "Cột tím 32×128",
+   "tags": [
+    "play",
+    "blocks"
+   ],
+   "worldSize": [
+    32,
+    128
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "block-roof-red",
+   "file": "play/blocks/roof-red.png",
+   "category": "play/blocks",
+   "width": 256,
+   "height": 128,
+   "usage": "Mái tam giác đỏ 128×64",
+   "tags": [
+    "play",
+    "blocks"
+   ],
+   "worldSize": [
+    128,
+    64
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "block-roof-blue",
+   "file": "play/blocks/roof-blue.png",
+   "category": "play/blocks",
+   "width": 256,
+   "height": 128,
+   "usage": "Mái tam giác xanh 128×64",
+   "tags": [
+    "play",
+    "blocks"
+   ],
+   "worldSize": [
+    128,
+    64
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "block-dome-yellow",
+   "file": "play/blocks/dome-yellow.png",
+   "category": "play/blocks",
+   "width": 256,
+   "height": 128,
+   "usage": "Mái vòm nửa tròn vàng 128×64",
+   "tags": [
+    "play",
+    "blocks"
+   ],
+   "worldSize": [
+    128,
+    64
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "block-window",
+   "file": "play/blocks/window.png",
+   "category": "play/blocks",
+   "width": 128,
+   "height": 128,
+   "usage": "Khối tường có cửa sổ 64×64",
+   "tags": [
+    "play",
+    "blocks"
+   ],
+   "worldSize": [
+    64,
+    64
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "block-door",
+   "file": "play/blocks/door.png",
+   "category": "play/blocks",
+   "width": 128,
+   "height": 192,
+   "usage": "Khối tường có cửa ra vào 64×96",
+   "tags": [
+    "play",
+    "blocks"
+   ],
+   "worldSize": [
+    64,
+    96
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "block-ground",
+   "file": "play/blocks/ground.png",
+   "category": "play/blocks",
+   "width": 2400,
+   "height": 120,
+   "usage": "Dải đất cỏ làm nền cho trò xây dựng (mép trên phẳng ở y=0)",
+   "tags": [
+    "play",
+    "blocks"
+   ],
+   "worldSize": [
+    1200,
+    60
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "card-back",
+   "file": "play/cards/back.png",
+   "category": "play/cards",
+   "width": 320,
+   "height": 400,
+   "usage": "Mặt sau thẻ trò lật thẻ ghi nhớ",
+   "tags": [
+    "play",
+    "cards"
+   ],
+   "worldSize": [
+    160,
+    200
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "card-front",
+   "file": "play/cards/front.png",
+   "category": "play/cards",
+   "width": 320,
+   "height": 400,
+   "usage": "Mặt trước thẻ (trống) để đặt hình con vật",
+   "tags": [
+    "play",
+    "cards"
+   ],
+   "worldSize": [
+    160,
+    200
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "reward-star",
+   "file": "play/rewards/star.png",
+   "category": "play/rewards",
+   "width": 192,
+   "height": 192,
+   "usage": "Biểu tượng phần thưởng: sao",
+   "tags": [
+    "play",
+    "rewards"
+   ],
+   "worldSize": [
+    96,
+    96
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "reward-seed",
+   "file": "play/rewards/seed.png",
+   "category": "play/rewards",
+   "width": 192,
+   "height": 192,
+   "usage": "Biểu tượng phần thưởng: hạt giống (gói hạt)",
+   "tags": [
+    "play",
+    "rewards"
+   ],
+   "worldSize": [
+    96,
+    96
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "reward-wood",
+   "file": "play/rewards/wood.png",
+   "category": "play/rewards",
+   "width": 192,
+   "height": 192,
+   "usage": "Biểu tượng phần thưởng: gỗ (bó khúc gỗ)",
+   "tags": [
+    "play",
+    "rewards"
+   ],
+   "worldSize": [
+    96,
+    96
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "reward-stone",
+   "file": "play/rewards/stone.png",
+   "category": "play/rewards",
+   "width": 192,
+   "height": 192,
+   "usage": "Biểu tượng phần thưởng: đá (đống đá)",
+   "tags": [
+    "play",
+    "rewards"
+   ],
+   "worldSize": [
+    96,
+    96
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "reward-flower",
+   "file": "play/rewards/flower.png",
+   "category": "play/rewards",
+   "width": 192,
+   "height": 192,
+   "usage": "Biểu tượng phần thưởng: hoa",
+   "tags": [
+    "play",
+    "rewards"
+   ],
+   "worldSize": [
+    96,
+    96
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "reward-shell",
+   "file": "play/rewards/shell.png",
+   "category": "play/rewards",
+   "width": 192,
+   "height": 192,
+   "usage": "Biểu tượng phần thưởng: vỏ sò",
+   "tags": [
+    "play",
+    "rewards"
+   ],
+   "worldSize": [
+    96,
+    96
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.95
+   ],
+   "id": "bin-recycle",
+   "file": "play/sort/recycle.png",
+   "category": "play/sort",
+   "width": 320,
+   "height": 380,
+   "usage": "Thùng rác tái chế (xanh dương)",
+   "tags": [
+    "play",
+    "sort"
+   ],
+   "worldSize": [
+    160,
+    190
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.95
+   ],
+   "id": "bin-organic",
+   "file": "play/sort/organic.png",
+   "category": "play/sort",
+   "width": 320,
+   "height": 380,
+   "usage": "Thùng rác hữu cơ (xanh lá)",
+   "tags": [
+    "play",
+    "sort"
+   ],
+   "worldSize": [
+    160,
+    190
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.8
+   ],
+   "id": "sort-boat",
+   "file": "play/sort/boat.png",
+   "category": "play/sort",
+   "width": 600,
+   "height": 380,
+   "usage": "Thuyền dọn biển có lưới (mép nước ở 80% chiều cao)",
+   "tags": [
+    "play",
+    "sort"
+   ],
+   "worldSize": [
+    300,
+    190
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "trash-bottle",
+   "file": "play/sort/bottle.png",
+   "category": "play/sort",
+   "width": 220,
+   "height": 220,
+   "usage": "Rác: chai nhựa (tái chế)",
+   "tags": [
+    "play",
+    "sort"
+   ],
+   "worldSize": [
+    110,
+    110
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "trash-can",
+   "file": "play/sort/can.png",
+   "category": "play/sort",
+   "width": 220,
+   "height": 220,
+   "usage": "Rác: lon nước (tái chế)",
+   "tags": [
+    "play",
+    "sort"
+   ],
+   "worldSize": [
+    110,
+    110
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "trash-paper",
+   "file": "play/sort/paper.png",
+   "category": "play/sort",
+   "width": 220,
+   "height": 220,
+   "usage": "Rác: giấy vo tròn (tái chế)",
+   "tags": [
+    "play",
+    "sort"
+   ],
+   "worldSize": [
+    110,
+    110
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "trash-box",
+   "file": "play/sort/box.png",
+   "category": "play/sort",
+   "width": 220,
+   "height": 220,
+   "usage": "Rác: hộp giấy các-tông (tái chế)",
+   "tags": [
+    "play",
+    "sort"
+   ],
+   "worldSize": [
+    110,
+    110
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "trash-banana-peel",
+   "file": "play/sort/banana-peel.png",
+   "category": "play/sort",
+   "width": 220,
+   "height": 220,
+   "usage": "Rác: vỏ chuối (hữu cơ)",
+   "tags": [
+    "play",
+    "sort"
+   ],
+   "worldSize": [
+    110,
+    110
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "trash-apple-core",
+   "file": "play/sort/apple-core.png",
+   "category": "play/sort",
+   "width": 220,
+   "height": 220,
+   "usage": "Rác: lõi táo (hữu cơ)",
+   "tags": [
+    "play",
+    "sort"
+   ],
+   "worldSize": [
+    110,
+    110
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "trash-leaf",
+   "file": "play/sort/leaf.png",
+   "category": "play/sort",
+   "width": 220,
+   "height": 220,
+   "usage": "Rác: lá khô (hữu cơ)",
+   "tags": [
+    "play",
+    "sort"
+   ],
+   "worldSize": [
+    110,
+    110
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "trash-eggshell",
+   "file": "play/sort/eggshell.png",
+   "category": "play/sort",
+   "width": 220,
+   "height": 220,
+   "usage": "Rác: vỏ trứng (hữu cơ)",
+   "tags": [
+    "play",
+    "sort"
+   ],
+   "worldSize": [
+    110,
+    110
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "trash-bag",
+   "file": "play/sort/bag.png",
+   "category": "play/sort",
+   "width": 220,
+   "height": 220,
+   "usage": "Rác: túi ni-lông (rác biển)",
+   "tags": [
+    "play",
+    "sort"
+   ],
+   "worldSize": [
+    110,
+    110
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "sea-crab",
+   "file": "play/sort/crab.png",
+   "category": "play/sort",
+   "width": 260,
+   "height": 260,
+   "usage": "Sinh vật biển: cua đỏ",
+   "tags": [
+    "play",
+    "sort"
+   ],
+   "worldSize": [
+    130,
+    130
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "sea-jellyfish",
+   "file": "play/sort/jellyfish.png",
+   "category": "play/sort",
+   "width": 260,
+   "height": 260,
+   "usage": "Sinh vật biển: sứa hồng",
+   "tags": [
+    "play",
+    "sort"
+   ],
+   "worldSize": [
+    130,
+    130
+   ],
+   "format": "png"
+  },
+  {
+   "type": "image",
+   "scale": 0.5,
+   "origin": [
+    0.5,
+    0.5
+   ],
+   "id": "sea-octopus",
+   "file": "play/sort/octopus.png",
+   "category": "play/sort",
+   "width": 260,
+   "height": 260,
+   "usage": "Sinh vật biển: bạch tuộc tím",
+   "tags": [
+    "play",
+    "sort"
+   ],
+   "worldSize": [
+    130,
+    130
+   ],
+   "format": "png"
+  }
+ ],
+ "data": {
+  "play": {
+   "animals": [
+    {
+     "id": "cat",
+     "asset": "animal-cat",
+     "name": "Mèo",
+     "habitat": "farm",
+     "sound": "meo meo"
+    },
+    {
+     "id": "dog",
+     "asset": "animal-dog",
+     "name": "Chó",
+     "habitat": "farm",
+     "sound": "gâu gâu"
+    },
+    {
+     "id": "cow",
+     "asset": "animal-cow",
+     "name": "Bò",
+     "habitat": "farm",
+     "sound": "ò ò"
+    },
+    {
+     "id": "pig",
+     "asset": "animal-pig",
+     "name": "Heo",
+     "habitat": "farm",
+     "sound": "ụt ịt"
+    },
+    {
+     "id": "duck",
+     "asset": "animal-duck",
+     "name": "Vịt",
+     "habitat": "pond",
+     "sound": "cạp cạp"
+    },
+    {
+     "id": "chick",
+     "asset": "animal-chick",
+     "name": "Gà con",
+     "habitat": "farm",
+     "sound": "chíp chíp"
+    },
+    {
+     "id": "sheep",
+     "asset": "animal-sheep",
+     "name": "Cừu",
+     "habitat": "farm",
+     "sound": "be be"
+    },
+    {
+     "id": "horse",
+     "asset": "animal-horse",
+     "name": "Ngựa",
+     "habitat": "farm",
+     "sound": "hí hí"
+    },
+    {
+     "id": "rabbit",
+     "asset": "animal-rabbit",
+     "name": "Thỏ",
+     "habitat": "forest",
+     "sound": "chụt chụt"
+    },
+    {
+     "id": "frog",
+     "asset": "animal-frog",
+     "name": "Ếch",
+     "habitat": "pond",
+     "sound": "ộp ộp"
+    },
+    {
+     "id": "fish",
+     "asset": "animal-fish",
+     "name": "Cá",
+     "habitat": "pond",
+     "sound": "lắc lắc đuôi"
+    },
+    {
+     "id": "turtle",
+     "asset": "animal-turtle",
+     "name": "Rùa",
+     "habitat": "pond",
+     "sound": "bò chậm chậm"
+    },
+    {
+     "id": "elephant",
+     "asset": "animal-elephant",
+     "name": "Voi",
+     "habitat": "savanna",
+     "sound": "phù phù"
+    },
+    {
+     "id": "lion",
+     "asset": "animal-lion",
+     "name": "Sư tử",
+     "habitat": "savanna",
+     "sound": "gừ gừ"
+    },
+    {
+     "id": "monkey",
+     "asset": "animal-monkey",
+     "name": "Khỉ",
+     "habitat": "forest",
+     "sound": "khẹc khẹc"
+    },
+    {
+     "id": "owl",
+     "asset": "animal-owl",
+     "name": "Cú mèo",
+     "habitat": "forest",
+     "sound": "cú cú"
+    }
+   ],
+   "habitats": [
+    {
+     "id": "farm",
+     "asset": "habitat-farm",
+     "name": "Nông trại"
+    },
+    {
+     "id": "pond",
+     "asset": "habitat-pond",
+     "name": "Ao hồ"
+    },
+    {
+     "id": "forest",
+     "asset": "habitat-forest",
+     "name": "Khu rừng"
+    },
+    {
+     "id": "savanna",
+     "asset": "habitat-savanna",
+     "name": "Đồng cỏ"
+    }
+   ],
+   "items": [
+    {
+     "id": "apple",
+     "asset": "item-apple",
+     "name": "quả táo"
+    },
+    {
+     "id": "orange",
+     "asset": "item-orange",
+     "name": "quả cam"
+    },
+    {
+     "id": "banana",
+     "asset": "item-banana",
+     "name": "quả chuối"
+    },
+    {
+     "id": "strawberry",
+     "asset": "item-strawberry",
+     "name": "quả dâu"
+    },
+    {
+     "id": "carrot",
+     "asset": "item-carrot",
+     "name": "củ cà rốt"
+    },
+    {
+     "id": "star",
+     "asset": "item-star",
+     "name": "ngôi sao"
+    },
+    {
+     "id": "flower",
+     "asset": "item-flower",
+     "name": "bông hoa"
+    },
+    {
+     "id": "mushroom",
+     "asset": "item-mushroom",
+     "name": "cây nấm"
+    }
+   ],
+   "shapes": [
+    {
+     "id": "circle",
+     "asset": "shape-circle",
+     "name": "Hình tròn",
+     "w": 160,
+     "h": 160
+    },
+    {
+     "id": "square",
+     "asset": "shape-square",
+     "name": "Hình vuông",
+     "w": 160,
+     "h": 160
+    },
+    {
+     "id": "triangle",
+     "asset": "shape-triangle",
+     "name": "Hình tam giác",
+     "w": 160,
+     "h": 160
+    },
+    {
+     "id": "rectangle",
+     "asset": "shape-rectangle",
+     "name": "Hình chữ nhật",
+     "w": 200,
+     "h": 120
+    },
+    {
+     "id": "star",
+     "asset": "shape-star",
+     "name": "Ngôi sao",
+     "w": 160,
+     "h": 160
+    },
+    {
+     "id": "heart",
+     "asset": "shape-heart",
+     "name": "Trái tim",
+     "w": 160,
+     "h": 160
+    },
+    {
+     "id": "oval",
+     "asset": "shape-oval",
+     "name": "Hình bầu dục",
+     "w": 180,
+     "h": 130
+    },
+    {
+     "id": "diamond",
+     "asset": "shape-diamond",
+     "name": "Hình thoi",
+     "w": 160,
+     "h": 160
+    }
+   ],
+   "board": "play-board-wood",
+   "blocks": [
+    {
+     "id": "cube-red",
+     "asset": "block-cube-red",
+     "w": 64,
+     "h": 64,
+     "body": "rect"
+    },
+    {
+     "id": "cube-yellow",
+     "asset": "block-cube-yellow",
+     "w": 64,
+     "h": 64,
+     "body": "rect"
+    },
+    {
+     "id": "cube-blue",
+     "asset": "block-cube-blue",
+     "w": 64,
+     "h": 64,
+     "body": "rect"
+    },
+    {
+     "id": "cube-green",
+     "asset": "block-cube-green",
+     "w": 64,
+     "h": 64,
+     "body": "rect"
+    },
+    {
+     "id": "plank",
+     "asset": "block-plank",
+     "w": 192,
+     "h": 32,
+     "body": "rect"
+    },
+    {
+     "id": "pillar-orange",
+     "asset": "block-pillar-orange",
+     "w": 32,
+     "h": 128,
+     "body": "rect"
+    },
+    {
+     "id": "pillar-purple",
+     "asset": "block-pillar-purple",
+     "w": 32,
+     "h": 128,
+     "body": "rect"
+    },
+    {
+     "id": "roof-red",
+     "asset": "block-roof-red",
+     "w": 128,
+     "h": 64,
+     "body": "triangle"
+    },
+    {
+     "id": "roof-blue",
+     "asset": "block-roof-blue",
+     "w": 128,
+     "h": 64,
+     "body": "triangle"
+    },
+    {
+     "id": "dome-yellow",
+     "asset": "block-dome-yellow",
+     "w": 128,
+     "h": 64,
+     "body": "semicircle"
+    },
+    {
+     "id": "window",
+     "asset": "block-window",
+     "w": 64,
+     "h": 64,
+     "body": "rect"
+    },
+    {
+     "id": "door",
+     "asset": "block-door",
+     "w": 64,
+     "h": 96,
+     "body": "rect"
+    }
+   ],
+   "ground": "block-ground",
+   "cards": {
+    "back": "card-back",
+    "front": "card-front"
+   },
+   "rewards": {
+    "star": "reward-star",
+    "seed": "reward-seed",
+    "wood": "reward-wood",
+    "stone": "reward-stone",
+    "flower": "reward-flower",
+    "shell": "reward-shell"
+   },
+   "sort": {
+    "recycle": [
+     "trash-bottle",
+     "trash-can",
+     "trash-paper",
+     "trash-box"
+    ],
+    "organic": [
+     "trash-banana-peel",
+     "trash-apple-core",
+     "trash-leaf",
+     "trash-eggshell"
+    ],
+    "oceanTrash": [
+     "trash-bottle",
+     "trash-can",
+     "trash-bag"
+    ],
+    "seaLife": [
+     "sea-crab",
+     "sea-jellyfish",
+     "sea-octopus",
+     "animal-fish",
+     "animal-turtle"
+    ],
+    "bins": {
+     "recycle": "bin-recycle",
+     "organic": "bin-organic",
+     "boat": "sort-boat"
+    }
+   }
+  }
+ }
+}
