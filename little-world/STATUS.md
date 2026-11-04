@@ -24,9 +24,8 @@ Ghi lại để làm tiếp sau khi tắt máy. Thiết kế gốc: `docs/design
 - Icon Sinh Tử Môn = vũ khí mặc định Kiếm Đơn (7fa531c).
 
 ## Đang dở / làm tiếp
-1. **Thống nhất nút back theo kiểu Xếp Bi (colorsort) cho mọi game** — đang giao cho agent phụ lúc tắt máy.
-   Kiểm tra `git log` xem đã có commit "Thống nhất nút về trang chủ…" chưa; nếu chưa, làm lại.
-   Sau đó áp dụng cùng nút cho Thế Giới Nhỏ (hiện là nút ‹ tròn ở `src/page.html`, `.back` trong `src/style.css`).
+1. ~~Nút back thống nhất kiểu Xếp Bi~~ — xong cho mọi game (2f633f1) và Thế Giới Nhỏ. Lỗi có sẵn, chưa sửa:
+   thanh trên của typhu/typhu6 và chữ "TỔNG" của spa tràn màn hình 390px; ~13 game có hộp thoại mở đầu che nút back.
 2. Cập nhật thẻ trang chủ (`../index.html`): tag "Phase 1" và mô tả → mô tả gameplay mới.
 3. Kiểm tra thêm trên iPad dọc (768×1024) các màn chơi; ảnh chụp mới cho `docs/screenshots/`.
 4. Ý tưởng tiếp: thêm hoạt động (tô màu, nấu ăn, chăm thú), bộ sưu tập thú, mùa/ban đêm cho đảo, tiếng Anh.
