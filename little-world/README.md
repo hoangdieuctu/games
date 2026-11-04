@@ -1,4 +1,4 @@
-# Little World — Thế Giới Nhỏ
+# Thế Giới Nhỏ (Little World)
 
 Game phiêu lưu 2D hoạt hình nguyên bản cho trẻ em, chạy trên Phaser 3. Game được làm qua 4 phase;
 thư mục này hiện chứa **Phase 1: hình ảnh và dựng thế giới**. Phase này chưa có mini-game,
