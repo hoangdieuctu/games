@@ -650,6 +650,33 @@ a.kho-back .kb-ar{font-size:22px;line-height:.8;margin-top:-2px}
 </style>
 </head>
 <body>
+<!-- Chặn chơi trên điện thoại: bàn cờ cần màn hình lớn (máy tính / máy tính bảng) -->
+<style>
+#mobile-block{position:fixed;inset:0;z-index:2147483000;display:none;place-items:center;padding:24px;box-sizing:border-box;
+  background:linear-gradient(160deg,#2a1a5e,#5b2a86);color:#fff;font-family:'Baloo 2','Nunito',system-ui,sans-serif;text-align:center}
+#mobile-block .mb-box{max-width:340px;display:grid;gap:14px;justify-items:center}
+#mobile-block .mb-icon{width:96px;height:96px;border-radius:22px;box-shadow:0 8px 24px rgba(0,0,0,.35)}
+#mobile-block h1{margin:0;font-size:26px;line-height:1.15}
+#mobile-block p{margin:0;font-size:16px;line-height:1.45;color:#e6dcff}
+html.is-phone #mobile-block{display:grid}
+html.is-phone body{overflow:hidden}
+</style>
+<div id="mobile-block" role="alert">
+  <div class="mb-box">
+    <img class="mb-icon" src="icon.png" alt="">
+    <h1>Cờ Tỷ Phú 6 người chưa chơi được trên điện thoại</h1>
+    <p>Bàn cờ cần màn hình lớn hơn. Hãy mở trò chơi này trên máy tính hoặc máy tính bảng (iPad) nhé!</p>
+    <a class="kho-back" href="../index.html" aria-label="Về kho trò chơi"><span class="kb-ar">‹</span><span class="kb-tx">Về kho trò chơi</span></a>
+  </div>
+</div>
+<script>
+// Điện thoại = cạnh ngắn của màn hình dưới 600px (iPad và máy tính vẫn chơi bình thường)
+(function () {
+  var phone = Math.min(screen.width, screen.height) < 600;
+  if (phone) document.documentElement.classList.add('is-phone');
+})();
+</script>
+
 
 <div class="stage" id="stage">
 <header class="top">

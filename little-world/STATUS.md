@@ -25,7 +25,7 @@ Ghi lại để làm tiếp sau khi tắt máy. Thiết kế gốc: `docs/design
 
 ## Đang dở / làm tiếp
 1. ~~Nút back thống nhất kiểu Xếp Bi~~ — xong cho mọi game (2f633f1) và Thế Giới Nhỏ. Lỗi có sẵn, chưa sửa:
-   thanh trên của typhu/typhu6 và chữ "TỔNG" của spa tràn màn hình 390px; ~13 game có hộp thoại mở đầu che nút back.
+   chữ "TỔNG" của spa tràn màn hình 390px (typhu/typhu6 nay chặn chơi trên điện thoại); ~13 game có hộp thoại mở đầu che nút back.
 2. Cập nhật thẻ trang chủ (`../index.html`): tag "Phase 1" và mô tả → mô tả gameplay mới.
 3. Kiểm tra thêm trên iPad dọc (768×1024) các màn chơi; ảnh chụp mới cho `docs/screenshots/`.
 4. Ý tưởng tiếp: thêm hoạt động (tô màu, nấu ăn, chăm thú), bộ sưu tập thú, mùa/ban đêm cho đảo, tiếng Anh.
