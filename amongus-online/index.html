@@ -45,6 +45,7 @@ button:disabled { opacity: .35; cursor: default; }
 .role-tag.crew { color: #8fe3ff; }
 .role-tag.ghost { color: #cbd5e1; }
 .role-tag.sheriff { color: #ffd23f; border-color: rgba(255,210,63,.55); }
+.role-tag.jester { color: #d58cff; border-color: rgba(200,120,255,.55); }
 /* ── nhiệm vụ & tiến độ ── */
 .prog { position: fixed; z-index: 5; top: calc(env(safe-area-inset-top, 0px) + 54px); left: 50%; transform: translateX(-50%); width: min(60vw, 420px); height: 18px; border-radius: 999px; background: rgba(0,0,0,.5); border: 2px solid rgba(255,255,255,.35); overflow: hidden; }
 .prog i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #3ddc84, #8fe3ff); transition: width .4s; }
@@ -119,7 +120,7 @@ button:disabled { opacity: .35; cursor: default; }
 /* ── lộ vai ── */
 .reveal { text-align: center; color: #fff; }
 .reveal h2 { font-size: 40px; letter-spacing: 2px; text-shadow: 0 0 30px currentColor; animation: pop .5s cubic-bezier(.2,1.4,.5,1); }
-.reveal.imp h2 { color: #ff4d4d; } .reveal.crew h2 { color: #8fe3ff; } .reveal.sheriff h2 { color: #ffd23f; }
+.reveal.imp h2 { color: #ff4d4d; } .reveal.crew h2 { color: #8fe3ff; } .reveal.sheriff h2 { color: #ffd23f; } .reveal.jester h2 { color: #d58cff; }
 .reveal p { font-size: 16px; font-weight: 700; color: #cbd5e1; margin-top: 6px; }
 .reveal .beans { display: flex; justify-content: center; gap: 8px; margin: 18px 0 6px; flex-wrap: wrap; }
 .reveal canvas { width: 64px; height: 76px; }
@@ -157,7 +158,7 @@ button:disabled { opacity: .35; cursor: default; }
 .eject canvas { position: absolute; z-index: 1; width: 90px; height: 108px; left: -120px; top: 40%; animation: flyby 4s linear forwards; }
 @keyframes flyby { from { transform: translateX(0) rotate(0); } to { transform: translateX(calc(100vw + 240px)) rotate(720deg); } }
 /* ── kết quả ── */
-.res h2 { font-size: 32px; } .res.imp h2 { color: #ff4d4d; } .res.crew h2 { color: #8fe3ff; }
+.res h2 { font-size: 32px; } .res.imp h2 { color: #ff4d4d; } .res.crew h2 { color: #8fe3ff; } .res.jester h2 { color: #d58cff; }
 .res .why { text-align: center; color: #cbd5e1; font-weight: 700; }
 .res .beans { display: flex; justify-content: center; gap: 6px; margin: 14px 0 4px; flex-wrap: wrap; }
 .res .beans div { display: flex; flex-direction: column; align-items: center; font-size: 11px; font-weight: 700; color: #cbd5e1; width: 58px; }
@@ -365,7 +366,8 @@ button:disabled { opacity: .35; cursor: default; }
     <div class="label">Vai của bạn</div>
     <div class="seg" id="suRole"></div>
     <label class="check"><input type="checkbox" id="suConfirm"> Công bố vai người bị đẩy ra ngoài</label>
-    <label class="check"><input type="checkbox" id="suSheriff"> Có Cảnh sát trưởng 🔫</label>
+    <label class="check"><input type="checkbox" id="suSheriff"> Có Cảnh sát trưởng</label>
+    <label class="check"><input type="checkbox" id="suJester"> Có Kẻ Pha Trò (từ 6 người)</label>
     <button class="go" id="bStart">Chơi với máy</button>
     <button class="online-btn" id="bOnline">🌐 Chơi online với bạn bè</button>
     <p class="rule">Phi hành đoàn làm xong hết nhiệm vụ hoặc đẩy hết Kẻ Giả Mạo ra ngoài thì thắng. Kẻ Giả Mạo thắng khi số người còn sống bằng số kẻ giả mạo, lò phản ứng nổ, cạn oxy, hoặc <b>hết giờ</b> mà nhiệm vụ chưa xong.</p>
@@ -447,7 +449,8 @@ button:disabled { opacity: .35; cursor: default; }
       <div class="label">Voice chat khi đang chơi</div>
       <div class="seg" id="lbVoice"></div>
       <label class="check"><input type="checkbox" id="lbConfirm"> Công bố vai người bị đẩy ra ngoài</label>
-      <label class="check"><input type="checkbox" id="lbSheriff"> Có Cảnh sát trưởng 🔫</label>
+      <label class="check"><input type="checkbox" id="lbSheriff"> Có Cảnh sát trưởng</label>
+      <label class="check"><input type="checkbox" id="lbJester"> Có Kẻ Pha Trò (từ 6 người)</label>
       <div class="row"><button id="lbCancel">Huỷ phòng</button><button class="go" id="lbStart">Bắt đầu</button></div>
       <p class="rule center" id="lbHint"></p>
     </div>
@@ -467,6 +470,7 @@ button:disabled { opacity: .35; cursor: default; }
       <li><b>Phi hành đoàn</b> 👩‍🚀: đi khắp phi thuyền làm các <b>nhiệm vụ</b> (nối dây, quẹt thẻ, nhập mã, bật cầu dao, tải dữ liệu, lặp chuỗi đèn, bắn thiên thạch). Thanh tiến độ trên cùng đầy là <b>thắng</b>; <b>hết giờ</b> (⏱ trên thanh, đồng hồ dừng khi họp) mà chưa xong thì Kẻ Giả Mạo thắng. Thấy xác thì bấm <b>📢 Báo</b>; đứng cạnh bàn tròn ở Nhà Ăn có thể bấm <b>Dùng</b> để <b>họp khẩn cấp</b> (1 lần mỗi ván).</li>
       <li><b>Kẻ Giả Mạo</b> 🔪: giả vờ làm nhiệm vụ, <b>giết</b> khi ở gần người khác và không ai nhìn thấy (hồi 25 giây), chui <b>ống thông gió</b> để đi nhanh, <b>phá hoại</b>: tắt đèn (mọi người chỉ thấy rất gần) lò phản ứng (phi hành đoàn phải tới Lò sửa trong 30 giây, không kịp là thua) hoặc <b>cạn oxy</b> (phải nhập mã ở <b>cả hai</b> nơi — phòng Oxy và Hành Chính — trong 40 giây).</li>
       <li><b>Cảnh sát trưởng</b> 🔫 (bật trong cài đặt): một phi hành gia bí mật có <b>1 viên đạn</b>. Đứng gần ai đó thì bấm <b>Bắn</b>: trúng Kẻ Giả Mạo thì hắn chết; bắn nhầm người tốt thì cả hai cùng chết. Cả tàu nghe tiếng súng.</li>
+      <li><b>Kẻ Pha Trò</b> 🃏 (bật trong cài đặt, từ 6 người): phe riêng, chỉ có nhiệm vụ giả. Thắng một mình nếu bị mọi người <b>bỏ phiếu đẩy ra ngoài</b> — bị giết hay bị Cảnh sát trưởng bắn thì thua (Cảnh sát trưởng bắn Kẻ Pha Trò cũng là bắn nhầm).</li>
       <li><b>Họp</b>: mọi người bàn luận rồi bỏ phiếu. Ai nhiều phiếu nhất bị <b>đẩy ra ngoài</b> (hoà phiếu hoặc phiếu trắng nhiều nhất thì không ai bị đẩy). Người chơi máy nhớ ai đứng cạnh xác, ai chui ống gió, ai giết trước mắt họ — và sẽ tố cáo trong cuộc họp. Bạn bấm <b>📢</b> cạnh tên ai để tố cáo người đó, bấm <b>✔</b> để bỏ phiếu.</li>
       <li><b>Tầm nhìn</b> 👁️: chỉ thấy những gì nhìn thẳng tới được — tường, thùng hàng, động cơ… che khuất người phía sau. Đèn tắt thì tầm nhìn còn rất ngắn. Phi thuyền rộng, mũi tên vàng ở mép màn hình chỉ tới nhiệm vụ của bạn.</li>
       <li>Chết rồi vẫn thành <b>ma</b> 👻: đi xuyên tường, làm nốt nhiệm vụ giúp đồng đội, nhưng không báo, không bỏ phiếu được.</li>
@@ -632,7 +636,7 @@ const SPEED = 175, BOT_SPEED = 140, VIS_CREW = 640, VIS_IMP = 720, VIS_DARK = 14
 let P = []; // người chơi: {id, name, ci, bot, imp, dead, x, y, ...}
 let me = null, bodies = [], phase = 'setup', tStart = 0, sabo = null, saboCd = 0, emergencyLeft = 1, meeting = null, hud = {}, cam = { x: 1000, y: 300 }, zoom = 1, mapOpen = false, winner = null;
 let muted = store.get('amongusol.mute', false);
-let setup = Object.assign({ name: '', ci: 0, bots: 7, imps: 2, role: 'random', confirm: true, sheriff: true }, store.get('amongusol.setup', {}));
+let setup = Object.assign({ name: '', ci: 0, bots: 7, imps: 2, role: 'random', confirm: true, sheriff: true, jester: true }, store.get('amongusol.setup', {}));
 // online (xem phần "chơi online" cuối file): chủ phòng chạy luật + máy chơi, khách chỉ tự đi lại và gửi hành động lên
 const isHost = () => net.on && net.host, isGuest = () => net.on && !net.host;
 const TIME_OPTS = [[5, '5 phút'], [8, '8 phút'], [12, '12 phút']], TIME_DEF = 8;
@@ -646,7 +650,7 @@ const confirmOn = () => (net.on ? !!S.confirm : setup.confirm);
 
 function newPlayer(id, name, ci, bot) {
   return { id, name, ci, bot, imp: false, dead: false, ejected: false, x: BUTTON.x, y: BUTTON.y, vx: 0, vy: 0, dir: 1, anim: 0, tasks: [], path: [], target: null, state: 'idle', timer: 0, think: Math.random(),
-    sus: {}, saw: [], killCd: 10, sheriff: false, ammo: 0, shootCd: SHOOT_CD, vent: -1, ventT: 0, emergency: 1, lastRooms: [], fix: false, remote: false, cid: null, tx: BUTTON.x, ty: BUTTON.y };
+    sus: {}, saw: [], killCd: 10, sheriff: false, jester: false, ammo: 0, shootCd: SHOOT_CD, vent: -1, ventT: 0, emergency: 1, lastRooms: [], fix: false, remote: false, cid: null, tx: BUTTON.x, ty: BUTTON.y };
 }
 function startGame() {
   const n = setup.bots + 1, imps = Math.min(setup.imps, Math.floor((n - 1) / 2));
@@ -656,15 +660,22 @@ function startGame() {
   me = P[0];
   // chia vai
   let pool = shuffle(P.map(p => p.id));
-  if (setup.role === 'imp') pool = [0, ...pool.filter(i => i)]; else if (setup.role === 'crew' || setup.role === 'sheriff') pool = pool.filter(i => i);
+  if (setup.role === 'imp') pool = [0, ...pool.filter(i => i)]; else if (setup.role !== 'random') pool = pool.filter(i => i);
   for (let k = 0; k < imps; k++) P[pool[k]].imp = true;
+  if (setup.jester || setup.role === 'jester') pickJester(setup.role === 'jester' ? me : null, setup.role === 'sheriff' ? me : null);
   if (setup.sheriff || setup.role === 'sheriff') pickSheriff(setup.role === 'sheriff' ? me : null);
   beginRound();
 }
 // Cảnh sát trưởng: một phi hành gia ngẫu nhiên (hoặc người được chỉ định), có 1 viên đạn
 function pickSheriff(who) {
-  const crew = P.filter(p => !p.imp); if (crew.length < 2) return;
-  const s = who && !who.imp ? who : pick(crew); s.sheriff = true; s.ammo = 1;
+  const crew = P.filter(p => !p.imp && !p.jester); if (crew.length < 2) return;
+  const s = who && !who.imp && !who.jester ? who : pick(crew); s.sheriff = true; s.ammo = 1;
+}
+// Kẻ Pha Trò: phe riêng, thắng khi bị bỏ phiếu đẩy ra ngoài (cần từ 6 người, trừ khi chọn sẵn vai này)
+function pickJester(who, avoid) {
+  if (!who && P.length < 6) return;
+  const c = P.filter(p => !p.imp && p !== avoid); if (c.length < 3) return;
+  (who && !who.imp ? who : pick(c)).jester = true;
 }
 // chung cho chơi với máy và chủ phòng online: chia nhiệm vụ, xếp chỗ, lộ vai
 function beginRound() {
@@ -684,8 +695,8 @@ function beginRound() {
 }
 const alive = () => P.filter(p => !p.dead);
 const impsAlive = () => alive().filter(p => p.imp);
-const taskTotal = () => P.filter(p => !p.imp).reduce((a, p) => a + p.tasks.length, 0);
-const taskDone = () => P.filter(p => !p.imp).reduce((a, p) => a + p.tasks.filter(t => t.done).length, 0);
+const taskTotal = () => P.filter(p => !p.imp && !p.jester).reduce((a, p) => a + p.tasks.length, 0);
+const taskDone = () => P.filter(p => !p.imp && !p.jester).reduce((a, p) => a + p.tasks.filter(t => t.done).length, 0);
 const visOf = p => (p.dead ? 9999 : p.imp ? VIS_IMP : sabo && sabo.kind === 'lights' ? VIS_DARK : VIS_CREW);
 // máy giữ tầm nhìn cũ (hẹp hơn người) để kẻ giả mạo máy vẫn có cơ hội ra tay
 const botVis = p => (p.dead ? 9999 : p.imp ? 390 : sabo && sabo.kind === 'lights' ? 100 : 280);
@@ -696,22 +707,23 @@ function checkWin() {
   if (isGuest()) return false;
   if (phase !== 'play' && phase !== 'meeting') return false;
   const imps = impsAlive().length, crew = alive().length - imps;
+  const jw = P.find(p => p.jester && p.ejected); if (jw) return endGame('jester', `${jw.name} là Kẻ Pha Trò — đã lừa cả tàu đẩy mình ra ngoài!`);
   if (taskTotal() && taskDone() >= taskTotal()) return endGame('crew', 'Phi hành đoàn đã hoàn thành toàn bộ nhiệm vụ!');
   if (imps === 0) return endGame('crew', 'Toàn bộ Kẻ Giả Mạo đã bị đẩy ra ngoài!');
   if (imps >= crew) return endGame('imp', 'Kẻ Giả Mạo đã áp đảo phi hành đoàn.');
   return false;
 }
 function endGame(side, why) {
-  if (isHost()) { lastOver = { t: 'over', side, why, imps: P.filter(p => p.imp).map(p => p.id), sh: P.filter(p => p.sheriff).map(p => p.id) }; netBroadcast(lastOver); }
+  if (isHost()) { lastOver = { t: 'over', side, why, imps: P.filter(p => p.imp).map(p => p.id), sh: P.filter(p => p.sheriff).map(p => p.id), jt: P.filter(p => p.jester).map(p => p.id) }; netBroadcast(lastOver); }
   phase = 'over'; winner = side;
   closeTask(); $('meetSheet').hidden = true; $('ejectScene').hidden = true; $('saboPop').hidden = true;
-  const meWon = side === 'imp' ? me.imp : !me.imp;
+  const meWon = side === 'jester' ? me.jester : side === 'imp' ? me.imp : !me.imp && !me.jester;
   const box = $('resBox'); box.className = 'panel dark res ' + side;
-  $('rsTitle').textContent = side === 'crew' ? (meWon ? '🎉 Phi hành đoàn thắng!' : '👩‍🚀 Phi hành đoàn thắng') : (meWon ? '🔪 Kẻ Giả Mạo thắng!' : '💀 Kẻ Giả Mạo thắng');
+  $('rsTitle').textContent = side === 'jester' ? (meWon ? '🃏 Bạn thắng — Kẻ Pha Trò!' : '🃏 Kẻ Pha Trò thắng') : side === 'crew' ? (meWon ? '🎉 Phi hành đoàn thắng!' : '👩‍🚀 Phi hành đoàn thắng') : (meWon ? '🔪 Kẻ Giả Mạo thắng!' : '💀 Kẻ Giả Mạo thắng');
   $('rsWhy').textContent = why + (meWon ? ' Bạn thắng!' : ' Bạn thua rồi.');
   const b = $('rsBeans'); b.innerHTML = '';
-  for (const p of P) { const d = document.createElement('div'); d.appendChild(beanCanvas(p.ci, 44, 52, p.dead)); const s = document.createElement('span'); s.textContent = p.name; if (p.imp) { s.className = 'i'; s.textContent += ' 🔪'; } else if (p.sheriff) s.textContent += ' 🔫'; d.appendChild(s); b.appendChild(d); }
-  (side === 'crew') === !me.imp ? playFanfare() : playSad();
+  for (const p of P) { const d = document.createElement('div'); d.appendChild(beanCanvas(p.ci, 44, 52, p.dead)); const s = document.createElement('span'); s.textContent = p.name; if (p.imp) { s.className = 'i'; s.textContent += ' 🔪'; } else if (p.sheriff) s.textContent += ' 🔫'; else if (p.jester) s.textContent += ' 🃏'; d.appendChild(s); b.appendChild(d); }
+  meWon ? playFanfare() : playSad();
   setTimeout(() => { $('resultSheet').hidden = false; }, 400);
   if (net.on) onlineOverUi();
   syncHud();
@@ -720,7 +732,7 @@ function endGame(side, why) {
 
 // ── hạn nhiệm vụ: phi hành gia (người thật) còn nhiệm vụ mà quá IDLE_T giây không làm xong cái nào
 // thì thua (chơi với máy) hoặc bị loại (online). Đồng hồ dừng trong lúc họp; sửa phá hoại cũng tính.
-const idleOn = p => !!p && !p.dead && !p.imp && !p.bot && p.tasks.some(t => !t.done);
+const idleOn = p => !!p && !p.dead && !p.imp && !p.jester && !p.bot && p.tasks.some(t => !t.done);
 const idleReset = p => { p.idleT = 0; p.idleWarn = false; };
 function idleTick(dt) {
   for (const p of isGuest() ? [me] : P) {
@@ -741,11 +753,12 @@ function idleOut(p) {
 // ═══════════════════════════ lộ vai ═══════════════════════════
 function showReveal() {
   const box = $('roleBox'), imps = P.filter(p => p.imp);
-  box.className = 'reveal ' + (me.imp ? 'imp' : me.sheriff ? 'crew sheriff' : 'crew');
+  box.className = 'reveal ' + (me.imp ? 'imp' : me.jester ? 'jester' : me.sheriff ? 'crew sheriff' : 'crew');
   box.innerHTML = '';
-  const h = document.createElement('h2'); h.textContent = me.imp ? 'KẺ GIẢ MẠO' : me.sheriff ? 'CẢNH SÁT TRƯỞNG' : 'PHI HÀNH GIA'; box.appendChild(h);
+  const h = document.createElement('h2'); h.textContent = me.imp ? 'KẺ GIẢ MẠO' : me.jester ? 'KẺ PHA TRÒ' : me.sheriff ? 'CẢNH SÁT TRƯỞNG' : 'PHI HÀNH GIA'; box.appendChild(h);
   const p = document.createElement('p');
   p.textContent = me.imp ? (imps.length > 1 ? `Đồng bọn của bạn: ${imps.filter(q => q !== me).map(q => q.name).join(', ')}. Giết lén, phá hoại, đừng để bị bắt!` : 'Bạn một mình. Giết lén, phá hoại, đừng để bị bắt!')
+    : me.jester ? `Phe riêng của bạn 🃏: hãy khiến mọi người bỏ phiếu đẩy bạn ra ngoài! Bị giết hay bị bắn là thua. Nhiệm vụ của bạn chỉ là giả.`
     : me.sheriff ? `Bạn là phi hành gia có 1 viên đạn 🔫. Bắn trúng Kẻ Giả Mạo thì hắn chết — bắn nhầm người tốt thì bạn chết theo! Có ${impN} Kẻ Giả Mạo trong số ${P.length} người.`
     : `Có ${impN} Kẻ Giả Mạo trong số ${P.length} người. Làm nhiệm vụ và tìm ra chúng!`;
   box.appendChild(p);
@@ -755,7 +768,7 @@ function showReveal() {
   const nm = document.createElement('p'); nm.textContent = (me.imp ? imps : P).map(q => q.name).join(' · '); nm.style.fontSize = '13px'; box.appendChild(nm);
   $('roleSheet').hidden = false;
   playReveal(me.imp);
-  setTimeout(() => { if (phase === 'reveal') { $('roleSheet').hidden = true; phase = 'play'; tStart = performance.now(); toast(me.imp ? 'Giả vờ làm nhiệm vụ, giết khi không ai thấy!' : me.sheriff ? '🔫 Làm nhiệm vụ, chỉ bắn khi thật chắc chắn!' : 'Đi làm nhiệm vụ. Thấy xác thì bấm Báo!'); syncHud(); } }, 3200);
+  setTimeout(() => { if (phase === 'reveal') { $('roleSheet').hidden = true; phase = 'play'; tStart = performance.now(); toast(me.imp ? 'Giả vờ làm nhiệm vụ, giết khi không ai thấy!' : me.jester ? '🃏 Tỏ ra khả nghi để bị bỏ phiếu — nhưng đừng để bị giết!' : me.sheriff ? '🔫 Làm nhiệm vụ, chỉ bắn khi thật chắc chắn!' : 'Đi làm nhiệm vụ. Thấy xác thì bấm Báo!'); syncHud(); } }, 3200);
 }
 
 // ═══════════════════════════ điều khiển ═══════════════════════════
@@ -1025,6 +1038,8 @@ function buildChat() {
   for (const w of bots) { if (!w.near || !w.near.length) continue; const o = P[pick(w.near)]; w.near = []; if (!o.dead && Math.random() < 0.7) say(w, `${o.name} đứng ngay cạnh xác ở ${m.room}...`, () => { for (const q of bots) if (q !== w && !q.imp) q.sus[o.id] = (q.sus[o.id] || 0) + 20; }); }
   // ngoại phạm: hai máy vừa ở cùng phòng
   for (const w of shuffle(bots).slice(0, 2)) { const r = w.lastRooms[w.lastRooms.length - 1]; if (!r) continue; const o = alive().find(q => q !== w && q.lastRooms.length && q.lastRooms[q.lastRooms.length - 1].id === r.id); if (o && !w.imp) say(w, `Tôi ở ${ROOMS.find(x => x.id === r.id).name} với ${o.name}, ${o === me ? 'bạn ấy' : o.name} ổn.`, () => { for (const q of bots) if (!q.imp) q.sus[o.id] = Math.max(0, (q.sus[o.id] || 0) - 20); }); }
+  const jb = bots.find(b => b.jester);
+  if (jb && Math.random() < 0.75) say(jb, pick(['Hehe… biết đâu tôi là Kẻ Giả Mạo thật 😏', 'Tôi chẳng làm nhiệm vụ nào cả, thì sao nào?', 'Bỏ phiếu cho tôi đi, dám không?', 'Lúc nãy tôi đứng gần xác thật đấy.', 'Tôi không nói tôi ở đâu đâu.']), () => { for (const o of bots) if (o !== jb) o.sus[jb.id] = (o.sus[jb.id] || 0) + 35; });
   const fillers = ['Chưa đủ bằng chứng, bỏ phiếu trắng đi.', 'Ai ở phòng Điện lúc nãy?', 'Mất điện tôi chẳng thấy gì cả.', 'Tôi làm nhiệm vụ ở Kho suốt.', 'Nghi quá... mọi người lúc nãy ở đâu?', 'Đừng bỏ phiếu bừa nhé.'];
   for (const w of shuffle(bots).slice(0, 2)) if (!L.some(l => l.p === w)) say(w, pick(fillers));
   m.lines = L.slice(0, 7);
@@ -1171,19 +1186,19 @@ function finishVotes() {
   let top = -1, tv = -1, tie = false;
   for (const [k, n] of Object.entries(tally)) { if (n > tv) { tv = n; top = +k; tie = false; } else if (n === tv) tie = true; }
   const ej = top >= 0 && !tie ? P[top] : null, n = impsAlive().length - (ej && ej.imp ? 1 : 0);
-  if (isHost()) netBroadcast({ t: 'reveal', votes: m.votes, ej: ej ? ej.id : -1, tie, imp: !!(ej && ej.imp && confirmOn()), n });
+  if (isHost()) netBroadcast({ t: 'reveal', votes: m.votes, ej: ej ? ej.id : -1, tie, imp: !!(ej && ej.imp && confirmOn()), jt: !!(ej && ej.jester && confirmOn()), n });
   renderMeeting(true);
   setTimeout(() => {
     $('meetSheet').hidden = true;
     if (ej) { ej.dead = true; ej.ejected = true; }
-    showEject(ej, tie, ej && ej.imp, n);
+    showEject(ej, tie, ej && ej.imp, n, ej && ej.jester);
   }, 1800);
 }
-function showEject(ej, tie, isImp, n) {
+function showEject(ej, tie, isImp, n, isJ) {
   const sc = $('ejectScene'); sc.hidden = false;
   sc.querySelectorAll('canvas').forEach(c => c.remove());
   if (ej) {
-    $('ejTxt').textContent = confirmOn() ? `${ej.name} ${isImp ? 'là Kẻ Giả Mạo.' : 'không phải Kẻ Giả Mạo.'}` : `${ej.name} đã bị đẩy ra ngoài.`;
+    $('ejTxt').textContent = confirmOn() ? `${ej.name} ${isImp ? 'là Kẻ Giả Mạo.' : isJ ? 'là Kẻ Pha Trò 🃏 — hắn cười lớn!' : 'không phải Kẻ Giả Mạo.'}` : `${ej.name} đã bị đẩy ra ngoài.`;
     sc.appendChild(beanCanvas(ej.ci, 90, 108));
     playWhoosh();
   } else $('ejTxt').textContent = tie ? 'Hoà phiếu — không ai bị đẩy ra.' : 'Không ai bị đẩy ra ngoài.';
@@ -1246,7 +1261,7 @@ function meetingTick(dt) {
 let taskCur = null; // {id, kind:'task'|'fix'}
 function openTask(t) {
   const T = TASKS[t.id]; taskCur = { id: t.id, kind: 'task' };
-  $('tkTitle').textContent = `${T.n} · ${T.room}`; $('tkSub').textContent = me.imp ? 'Giả vờ làm nhiệm vụ (không tính tiến độ)' : 'Hoàn thành để tăng tiến độ phi hành đoàn';
+  $('tkTitle').textContent = `${T.n} · ${T.room}`; $('tkSub').textContent = me.imp || me.jester ? 'Giả vờ làm nhiệm vụ (không tính tiến độ)' : 'Hoàn thành để tăng tiến độ phi hành đoàn';
   buildMini(T.t); $('taskSheet').hidden = false; playPop();
 }
 function openFix(id) {
@@ -1261,7 +1276,7 @@ $('tkClose').onclick = closeTask;
 function miniDone() {
   if (!taskCur) return;
   if (taskCur.kind === 'fix') { idleReset(me); if (isGuest()) netSend({ t: 'fix', s: taskCur.st }); else fixSabotage(taskCur.st); }
-  else { const t = me.tasks.find(x => x.id === taskCur.id); if (t && !me.imp) { t.done = true; idleReset(me); if (isGuest()) netSend({ t: 'task', id: t.id }); toast('✅ Xong nhiệm vụ!'); } else toast(me.imp ? '🎭 Giả vờ xong rồi' : '✅ Xong'); }
+  else { const t = me.tasks.find(x => x.id === taskCur.id); if (t && !me.imp && !me.jester) { t.done = true; idleReset(me); if (isGuest()) netSend({ t: 'task', id: t.id }); toast('✅ Xong nhiệm vụ!'); } else toast(me.imp || me.jester ? '🎭 Giả vờ xong rồi' : '✅ Xong'); }
   playTaskDone(); closeTask(); syncHud(); checkWin();
 }
 function buildMini(type, opt = {}) {
@@ -1744,9 +1759,9 @@ function syncHud() {
   if (!inPlay) return;
   const pct = isGuest() ? netProg : hostPct();
   $('prog').firstElementChild.style.width = pct + '%'; progLabel(pct);
-  const rt = $('roleTag'); rt.className = 'role-tag ' + (me.dead ? 'ghost' : me.imp ? 'imp' : me.sheriff ? 'crew sheriff' : 'crew'); rt.textContent = me.dead ? '👻 Ma' + (me.imp ? ' (Kẻ Giả Mạo)' : me.sheriff ? ' (Cảnh sát trưởng)' : '') : me.imp ? '🔪 Kẻ Giả Mạo' : me.sheriff ? '🔫 Cảnh sát trưởng' : '👩‍🚀 Phi hành gia';
+  const rt = $('roleTag'); rt.className = 'role-tag ' + (me.dead ? 'ghost' : me.imp ? 'imp' : me.jester ? 'jester' : me.sheriff ? 'crew sheriff' : 'crew'); rt.textContent = me.dead ? '👻 Ma' + (me.imp ? ' (Kẻ Giả Mạo)' : me.sheriff ? ' (Cảnh sát trưởng)' : me.jester ? ' (Kẻ Pha Trò)' : '') : me.imp ? '🔪 Kẻ Giả Mạo' : me.jester ? '🃏 Kẻ Pha Trò' : me.sheriff ? '🔫 Cảnh sát trưởng' : '👩‍🚀 Phi hành gia';
   const tk = $('tasks'); tk.className = 'tasks' + (me.imp ? ' imp' : ''); tk.innerHTML = '';
-  const h = document.createElement('h3'); h.textContent = me.imp ? 'Nhiệm vụ giả (ngụy trang)' : `Nhiệm vụ của bạn · ${me.tasks.filter(t => t.done).length}/${me.tasks.length}`; tk.appendChild(h);
+  const h = document.createElement('h3'); h.textContent = me.imp || me.jester ? 'Nhiệm vụ giả (ngụy trang)' : `Nhiệm vụ của bạn · ${me.tasks.filter(t => t.done).length}/${me.tasks.length}`; tk.appendChild(h);
   for (const t of me.tasks) { const T = TASKS[t.id], d = document.createElement('div'); d.className = t.done ? 'done' : ''; d.innerHTML = `<span>${t.done ? '✅' : '▫️'} ${T.n}</span><small>${T.room}</small>`; tk.appendChild(d); }
   if (me.imp && !me.dead) { const d = document.createElement('div'); d.className = 'hot'; d.textContent = `🔪 Giết: ${me.killCd > 0 ? Math.ceil(me.killCd) + 's' : 'sẵn sàng'}`; tk.appendChild(d); }
   if (me.sheriff && !me.dead) { const d = document.createElement('div'); d.className = 'hot gun'; d.textContent = gunLabel(); tk.appendChild(d); }
@@ -1939,13 +1954,14 @@ function renderSetup() {
   seg($('suBots'), [[4, '4'], [5, '5'], [6, '6'], [7, '7'], [8, '8'], [9, '9']], setup.bots, v => { setup.bots = v; if (setup.imps > Math.floor(v / 2)) setup.imps = 1; });
   seg($('suImps'), [[1, '1 kẻ'], [2, '2 kẻ']].filter(([v]) => v <= Math.floor(setup.bots / 2)), setup.imps, v => { setup.imps = v; });
   seg($('suTime'), TIME_OPTS, timeMin(), v => { setup.time = v; });
-  seg($('suRole'), [['random', 'Ngẫu nhiên'], ['crew', 'Phi hành gia'], ['sheriff', 'Cảnh sát'], ['imp', 'Kẻ giả mạo']], setup.role, v => { setup.role = v; });
-  $('suSheriff').checked = setup.sheriff !== false;
+  seg($('suRole'), [['random', 'Ngẫu nhiên'], ['crew', 'Phi hành gia'], ['sheriff', 'Cảnh sát'], ['jester', 'Pha Trò'], ['imp', 'Kẻ giả mạo']], setup.role, v => { setup.role = v; });
+  $('suSheriff').checked = setup.sheriff !== false; $('suJester').checked = setup.jester !== false;
   $('suConfirm').checked = !!setup.confirm;
 }
 $('suName').oninput = () => { setup.name = $('suName').value.replace(/\s+/g, ' ').trim().slice(0, 12); };
 $('suConfirm').onchange = () => { setup.confirm = $('suConfirm').checked; };
 $('suSheriff').onchange = () => { setup.sheriff = $('suSheriff').checked; };
+$('suJester').onchange = () => { setup.jester = $('suJester').checked; };
 $('bStart').onclick = () => { store.set('amongusol.setup', setup); audio(); startGame(); };
 const openSetup = () => { renderSetup(); $('setupSheet').hidden = false; };
 $('bNew').onclick = () => { if (net.on) return askLeave(); if (phase === 'play' && !confirmNew) { confirmNew = setTimeout(() => { confirmNew = 0; }, 2500); toast('Bấm ↻ lần nữa để bỏ ván này'); return; } clearTimeout(confirmNew); confirmNew = 0; $('resultSheet').hidden = true; $('meetSheet').hidden = true; $('ejectScene').hidden = true; closeTask(); phase = 'setup'; openSetup(); };
@@ -1974,7 +1990,7 @@ const PEER_OPTS = { debug: 0, config: { sdpSemantics: 'unified-plan', iceServers
 const HB_MS = 2000, HB_DEAD = 8000, HB_DROP = 20000, LOBBY_GRACE = 15000, REJOIN_MAX = 20, REJOIN_MS = 3000;
 const DOTS = '<span class="dots"><span>.</span><span>.</span><span>.</span></span>';
 let net = freshNet();
-let M = [], S = { bots: 3, imps: 1, confirm: true, voice: 'meet', sheriff: true }, lastOver = null, myId = -1;
+let M = [], S = { bots: 3, imps: 1, confirm: true, voice: 'meet', sheriff: true, jester: true }, lastOver = null, myId = -1;
 function randCode() { return Array.from(crypto.getRandomValues(new Uint8Array(6)), b => 'abcdefghijkmnpqrstuvwxyz23456789'[b % 32]).join(''); }
 const myCid = (() => {
   try { let v = sessionStorage.getItem('amongusol.cid'); if (!v) { v = randCode() + randCode(); sessionStorage.setItem('amongusol.cid', v); } return v; }
@@ -2123,15 +2139,15 @@ function renderLobby() {
     seg($('lbImps'), [[1, '1 kẻ'], [2, '2 kẻ'], [3, '3 kẻ']].filter(([v]) => v === 1 || v <= Math.floor((total - 1) / 2)), S.imps, v => { S.imps = v; });
     seg($('lbTime'), TIME_OPTS, timeMin(), v => { S.time = v; });
     seg($('lbVoice'), [['meet', '🔇 Chỉ khi họp'], ['near', '🔉 Nghe người ở gần']], S.voice, v => { S.voice = v; });
-    $('lbConfirm').checked = !!S.confirm; $('lbSheriff').checked = !!S.sheriff;
+    $('lbConfirm').checked = !!S.confirm; $('lbSheriff').checked = !!S.sheriff; $('lbJester').checked = !!S.jester;
     const guests = humans.filter(m => !m.host), notReady = guests.filter(m => !m.ready).length;
     $('lbStart').disabled = total < 4 || notReady > 0;
-    $('lbHint').textContent = total < 4 ? 'Cần ít nhất 4 người chơi (thêm máy cho đủ cũng được).' : notReady ? `Chờ ${notReady} người bấm Sẵn sàng.` : `${total} người chơi · ${S.imps} Kẻ Giả Mạo${S.sheriff ? ' · có Cảnh sát trưởng' : ''} · ${timeMin()} phút · sẵn sàng!`;
+    $('lbHint').textContent = total < 4 ? 'Cần ít nhất 4 người chơi (thêm máy cho đủ cũng được).' : notReady ? `Chờ ${notReady} người bấm Sẵn sàng.` : `${total} người chơi · ${S.imps} Kẻ Giả Mạo${S.sheriff ? ' · có Cảnh sát trưởng' : ''}${S.jester && total >= 6 ? ' · có Kẻ Pha Trò' : ''} · ${timeMin()} phút · sẵn sàng!`;
   } else {
     const rd = !!(mine && mine.ready);
     $('lbReady').textContent = rd ? '↩️ Chưa xong' : '✅ Sẵn sàng'; $('lbReady').classList.toggle('go', !rd); $('lbReady').disabled = !mine;
     $('lbGuestHint').innerHTML = (rd ? `Đã sẵn sàng · chờ chủ phòng bắt đầu${DOTS}` : 'Chọn tên, màu áo rồi bấm <b>Sẵn sàng</b>.')
-      + `<br>Phòng: ${S.imps} Kẻ Giả Mạo${S.sheriff ? ' · có Cảnh sát trưởng 🔫' : ''} · ván ${timeMin()} phút · ${S.voice === 'near' ? 'đang chơi nghe được người ở gần' : 'đang chơi im lặng, nói khi họp'}.`;
+      + `<br>Phòng: ${S.imps} Kẻ Giả Mạo${S.sheriff ? ' · có Cảnh sát trưởng 🔫' : ''}${S.jester ? ' · có Kẻ Pha Trò 🃏' : ''} · ván ${timeMin()} phút · ${S.voice === 'near' ? 'đang chơi nghe được người ở gần' : 'đang chơi im lặng, nói khi họp'}.`;
   }
   paintTalk();
 }
@@ -2150,6 +2166,8 @@ $('lbName').oninput = () => {
 };
 $('lbName').onkeydown = e => e.stopPropagation();
 $('lbConfirm').onchange = () => { S.confirm = $('lbConfirm').checked; roomChanged(); };
+$('lbSheriff').onchange = () => { S.sheriff = $('lbSheriff').checked; roomChanged(); };
+$('lbJester').onchange = () => { S.jester = $('lbJester').checked; roomChanged(); };
 $('lbReady').onclick = () => { const m = myMem(); if (!m) return; m.ready = !m.ready; netSend({ t: 'ready', v: m.ready }); renderLobby(); playPop(); };
 $('lbStart').onclick = () => hostStartGame();
 $('lbCancel').onclick = () => leaveOnline();
@@ -2163,7 +2181,7 @@ $('lbShare').onclick = () => navigator.share({ title: 'Kẻ Giả Mạo Online',
 async function hostOnline(tries = 0) {
   const code = randCode(), n = startNet(true, code);
   M = [{ cid: myCid, name: myName() || 'Chủ phòng', ci: setup.ci, host: true, ready: true, online: true }];
-  S = Object.assign({}, S, { imps: setup.imps, confirm: setup.confirm, sheriff: setup.sheriff !== false, bots: Math.min(setup.bots, 3), time: TIME_OPTS.some(o => o[0] === setup.time) ? setup.time : TIME_DEF });
+  S = Object.assign({}, S, { imps: setup.imps, confirm: setup.confirm, sheriff: setup.sheriff !== false, jester: setup.jester !== false, bots: Math.min(setup.bots, 3), time: TIME_OPTS.some(o => o[0] === setup.time) ? setup.time : TIME_DEF });
   netSheet('🌐', 'Tạo phòng', `Đang tạo phòng${DOTS}`, [[{ label: 'Huỷ', fn: () => leaveOnline() }]]);
   try { await loadPeerJs(); } catch (e) { if (net === n) netFail('Không tải được', 'Không tải được phần chơi online. Kiểm tra mạng rồi thử lại nhé.', () => hostOnline()); return; }
   if (net !== n) return;
@@ -2290,7 +2308,7 @@ function hostMsg(c, d) {
     case 'sabo': if (phase === 'play' && p.imp && !p.dead && SABO_KINDS.includes(d.kind)) doSabotage(d.kind, p); return;
     case 'fix': { const id = saboLeft().includes(d.s) ? d.s : saboLeft().length === 1 ? saboLeft()[0] : null; if (phase === 'play' && id && !p.dead && dist(ps, FIX[id]) < USE_RANGE + 70) { idleReset(p); fixSabotage(id); } return; }
     case 'shoot': { const v = P[d.v]; if (phase === 'play' && p.sheriff && p.ammo > 0 && !p.dead && p.shootCd <= 1 && p.vent < 0 && v && v !== p && !v.dead && dist(ps, v) < KILL_RANGE + 60) shoot(p, v); return; }
-    case 'task': { const t = p.tasks.find(x => x.id === d.id); if (t && !p.imp && (phase === 'play' || phase === 'meeting')) { t.done = true; idleReset(p); syncHud(); checkWin(); } return; }
+    case 'task': { const t = p.tasks.find(x => x.id === d.id); if (t && !p.imp && !p.jester && (phase === 'play' || phase === 'meeting')) { t.done = true; idleReset(p); syncHud(); checkWin(); } return; }
     case 'vote': if (phase === 'meeting' && meeting && meeting.phaseV !== 'done') { if (d.p === -2) { cancelVote(p); return; } const t = d.p === -1 ? null : P[d.p]; if (d.p === -1 || (t && !t.dead)) castVote(p, t); } return;
     case 'acc': { const t = P[d.p]; if (phase === 'meeting' && t && t !== p) accuse(p, t); return; }
     case 'say': { const tx = String(d.text || '').replace(/\s+/g, ' ').trim().slice(0, 80); if (phase === 'meeting' && meeting && !p.dead && tx) addChat(p, tx); return; }
@@ -2308,6 +2326,7 @@ function hostStartGame() {
   for (let k = 0; k < S.bots; k++) P.push(newPlayer(P.length, names[k] || 'Máy ' + (k + 1), cols[k], true));
   const imps = Math.max(1, Math.min(S.imps, Math.floor((P.length - 1) / 2)));
   for (const id of shuffle(P.map(p => p.id)).slice(0, imps)) P[id].imp = true;
+  if (S.jester) pickJester(null, null);
   if (S.sheriff) pickSheriff(null);
   me = P[0]; lastOver = null;
   for (const p of P) p.emergency = 1;
@@ -2326,7 +2345,7 @@ function fullFor(p) {
   return {
     t: 'full', id: p.id, ph: phase, S, impN,
     P: P.map(q => ({ id: q.id, name: q.name, ci: q.ci, cid: q.cid, imp: see && q.imp, dead: q.dead, ej: q.ejected, x: Math.round(q.x), y: Math.round(q.y), dir: q.dir })),
-    tasks: p.tasks, em: p.emergency, kc: p.killCd, sh: p.sheriff ? 1 : 0, am: p.ammo, scd: p.shootCd, sabo: sabo ? { kind: sabo.kind, t: sabo.t, left: saboLeft() } : null, sc: saboCd,
+    tasks: p.tasks, em: p.emergency, kc: p.killCd, sh: p.sheriff ? 1 : 0, jt: p.jester ? 1 : 0, am: p.ammo, scd: p.shootCd, sabo: sabo ? { kind: sabo.kind, t: sabo.t, left: saboLeft() } : null, sc: saboCd,
     b: bodies.map(b => [b.id, Math.round(b.x), Math.round(b.y)]), pr: hostPct(), gl: gameLeft,
     m: m ? { pr: progShown, r: m.reporter.id, v: m.victim ? m.victim.id : -1, room: m.room, t: m.t, phaseV: m.phaseV === 'done' ? 'vote' : m.phaseV, talkT: m.talkT, voteT: m.voteT, voted: Object.keys(m.votes).map(Number), my: m.votes[p.id] } : null,
   };
@@ -2474,7 +2493,7 @@ function guestMsg(d) {
       m.votes = {}; for (const [k, v] of Object.entries(d.votes || {})) m.votes[k] = v;
       m.phaseV = 'done'; renderMeeting(true);
       const ej = d.ej >= 0 ? P[d.ej] : null;
-      setTimeout(() => { if (meeting !== m) return; $('meetSheet').hidden = true; if (ej) { ej.dead = true; ej.ejected = true; if (d.imp) ej.imp = true; } showEject(ej, d.tie, d.imp, d.n); }, 1800);
+      setTimeout(() => { if (meeting !== m) return; $('meetSheet').hidden = true; if (ej) { ej.dead = true; ej.ejected = true; if (d.imp) ej.imp = true; if (d.jt) ej.jester = true; } showEject(ej, d.tie, d.imp, d.n, d.jt); }, 1800);
       return;
     }
     case 'meetEnd': {
@@ -2487,6 +2506,7 @@ function guestMsg(d) {
     case 'over': {
       for (const id of d.imps || []) if (P[id]) P[id].imp = true;
       for (const id of d.sh || []) if (P[id]) P[id].sheriff = true;
+      for (const id of d.jt || []) if (P[id]) P[id].jester = true;
       $('ejectScene').hidden = true; $('meetSheet').hidden = true;
       endGame(d.side, String(d.why || '')); return;
     }
@@ -2498,7 +2518,7 @@ function applyFull(d) {
   P = d.P.map(q => { const p = Object.assign(newPlayer(q.id, q.name, q.ci, false), { cid: q.cid, imp: !!q.imp, dead: !!q.dead, ejected: !!q.ej, dir: q.dir || 1 }); place(p, q.x, q.y); return p; });
   me = P[d.id];
   me.tasks = Array.isArray(d.tasks) ? d.tasks : []; me.emergency = d.em | 0; me.killCd = +d.kc || 0;
-  me.sheriff = !!d.sh; me.ammo = d.am | 0; me.shootCd = +d.scd || 0;
+  me.sheriff = !!d.sh; me.jester = !!d.jt; me.ammo = d.am | 0; me.shootCd = +d.scd || 0;
   sabo = d.sabo && SABO_KINDS.includes(d.sabo.kind) ? { kind: d.sabo.kind, t: d.sabo.t, left: Array.isArray(d.sabo.left) ? d.sabo.left : SABO_FIX[d.sabo.kind].slice() } : null; saboCd = +d.sc || 0; netProg = d.pr | 0;
   gameLeft = Number.isFinite(+d.gl) ? +d.gl : timeMin() * 60; timeWarn = gameLeft <= 60 ? 1 : 0;
   bodies = (d.b || []).map(([id, x, y]) => ({ id, x, y, ci: P[id] ? P[id].ci : 0, t: 0 }));
