@@ -880,7 +880,8 @@ function shoot(s, v) {
   syncHud(); checkWin();
 }
 function shotFx(s, v, ok) {
-  playShot(); killFx(s, v); if (!ok) killFx(null, s);
+  playShot(); killFx(s, v, { gun: true, text: 'BẠN ĐÃ BỊ BẮN' }); if (!ok) killFx(null, s, { noScene: true });
+  if (!ok && s === me) showKillScene(s.ci, v.ci, { gun: true, text: 'BẮN NHẦM NGƯỜI TỐT' });
   if (s === me) toast(ok ? `Trúng rồi! ${v.name} là Kẻ Giả Mạo.` : `💀 ${v.name} không phải Kẻ Giả Mạo — bạn đã chết vì bắn nhầm.`, 3500);
   else if (v === me) toast(me.imp ? '💀 Bạn bị Cảnh sát trưởng bắn hạ!' : '💀 Bạn bị Cảnh sát trưởng bắn nhầm!', 3500);
   else toast('Một tiếng súng vang lên trên tàu!');
@@ -1483,7 +1484,7 @@ function fxStep(dt) {
 }
 const footT = new Map(); // chân bước tạo bụi
 // hiệu ứng khi có người bị giết (chạy trên mọi máy)
-function killFx(k, v) {
+function killFx(k, v, opt = {}) {
   bodyBorn.set(v.id, performance.now());
   const seen = me.dead || v === me || k === me || (dist(me, v) < visOf(me) && losClear(me, v));
   if (!seen) return;
@@ -1495,23 +1496,29 @@ function killFx(k, v) {
   flash = v === me ? 1 : k === me ? .7 : .35; flashCol = '200,0,20';
   shake = v === me || k === me ? 16 : 6;
   playKill(v === me || k === me);
-  if (v === me) showKillScene(k ? k.ci : 0, v.ci);
+  if (v === me && !opt.noScene) showKillScene(k ? k.ci : 0, v.ci, opt);
 }
 // cảnh bị giết: dải điện ảnh, kẻ giết lao tới đâm, nạn nhân gục xuống
-function showKillScene(kci, vci) {
-  const sc = $('killScene'), c = $('ksCv'); sc.hidden = false; sc.classList.remove('go'); void sc.offsetWidth; sc.classList.add('go');
+// opt.gun: Cảnh sát trưởng bắn (đứng yên, súng, lửa đầu nòng) · opt.text: dòng chữ dưới cảnh
+function showKillScene(kci, vci, opt = {}) {
+  const sc = $('killScene'), c = $('ksCv'), gun = !!opt.gun; sc.querySelector('.ks-txt').textContent = opt.text || 'BẠN ĐÃ BỊ GIẾT'; sc.hidden = false; sc.classList.remove('go'); void sc.offsetWidth; sc.classList.add('go');
   const W = c.clientWidth || innerWidth, H = c.clientHeight || 260, d = devicePixelRatio || 1; c.width = W * d; c.height = H * d;
   const x = c.getContext('2d'), t0 = performance.now(), parts = [];
   const s = H / 100, gy = H * .78;
   const frame = now => {
     const t = (now - t0) / 1000; if (t > 2.6) { sc.hidden = true; return; }
     x.setTransform(d, 0, 0, d, 0, 0); x.clearRect(0, 0, W, H);
-    const kx = W * (.12 + Math.min(1, t / .35) * .26) + (t > .35 && t < .5 ? Math.sin(t * 90) * 4 : 0), vx = W * .64;
+    const kx = gun ? W * .2 - (t > .35 && t < .5 ? 6 : 0) : W * (.12 + Math.min(1, t / .35) * .26) + (t > .35 && t < .5 ? Math.sin(t * 90) * 4 : 0), vx = W * .64;
     // kẻ giết + dao
-    drawBean(x, kx, gy, COLORS[kci][1], 1, t < .35 ? t * 30 : 0, { s });
+    drawBean(x, kx, gy, COLORS[kci][1], 1, !gun && t < .35 ? t * 30 : 0, { s });
+    if (gun) { // súng giơ ngang, nổ ở 0.35s: lửa đầu nòng + vệt đạn
+      x.save(); x.translate(kx + 16 * s, gy - 24 * s); x.fillStyle = '#2b2f3a'; x.fillRect(0, -3 * s, 22 * s, 6 * s); x.fillRect(2 * s, 0, 6 * s, 10 * s); x.restore();
+      if (t > .33 && t < .45) { const mx = kx + 40 * s, my = gy - 24 * s; x.fillStyle = '#ffd23f'; x.beginPath(); x.arc(mx, my, 9 * s, 0, Math.PI * 2); x.fill(); x.strokeStyle = 'rgba(255,240,180,.9)'; x.lineWidth = 3; x.beginPath(); x.moveTo(mx, my); x.lineTo(vx - 14 * s, gy - 26 * s); x.stroke(); }
+    } else {
     x.save(); x.translate(kx + 16 * s, gy - 22 * s); x.rotate(t < .35 ? -0.6 : t < .5 ? 0.5 : 0.2);
     x.fillStyle = '#5b3a1e'; x.fillRect(-4 * s, -2 * s, 8 * s, 4 * s); x.fillStyle = '#e5e7eb'; x.beginPath(); x.moveTo(4 * s, -3 * s); x.lineTo(30 * s, 0); x.lineTo(4 * s, 3 * s); x.closePath(); x.fill();
     x.restore();
+    }
     // nạn nhân
     if (t < .45) drawBean(x, vx + (t > .35 ? (t - .35) * 80 : 0), gy, COLORS[vci][1], -1, 0, { s });
     else drawBean(x, vx + 20, gy, COLORS[vci][1], 1, 0, { s, dead: true });
@@ -1519,7 +1526,7 @@ function showKillScene(kci, vci) {
     x.fillStyle = '#c4001d';
     for (const p of parts) { p.x += p.vx / 60; p.y += p.vy / 60; p.vy += 18; if (p.y > gy) { p.y = gy; p.vx *= .5; p.vy = 0; } x.beginPath(); x.arc(p.x, p.y, p.r, 0, Math.PI * 2); x.fill(); }
     // vệt chém
-    if (t > .38 && t < .62) { const k = (t - .38) / .24; x.strokeStyle = `rgba(255,255,255,${1 - k})`; x.lineWidth = 10 * (1 - k) + 2; x.beginPath(); x.arc(vx, gy - 28 * s, 46 * s, -2.4 + k * .4, -0.3 + k * .4); x.stroke(); }
+    if (!gun && t > .38 && t < .62) { const k = (t - .38) / .24; x.strokeStyle = `rgba(255,255,255,${1 - k})`; x.lineWidth = 10 * (1 - k) + 2; x.beginPath(); x.arc(vx, gy - 28 * s, 46 * s, -2.4 + k * .4, -0.3 + k * .4); x.stroke(); }
     requestAnimationFrame(frame);
   };
   requestAnimationFrame(frame);
