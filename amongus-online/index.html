@@ -469,8 +469,8 @@ button:disabled { opacity: .35; cursor: default; }
     <ol class="rules">
       <li><b>Phi hành đoàn</b> 👩‍🚀: đi khắp phi thuyền làm các <b>nhiệm vụ</b> (nối dây, quẹt thẻ, nhập mã, bật cầu dao, tải dữ liệu, lặp chuỗi đèn, bắn thiên thạch). Thanh tiến độ trên cùng đầy là <b>thắng</b>; <b>hết giờ</b> (⏱ trên thanh, đồng hồ dừng khi họp) mà chưa xong thì Kẻ Giả Mạo thắng. Thấy xác thì bấm <b>📢 Báo</b>; đứng cạnh bàn tròn ở Nhà Ăn có thể bấm <b>Dùng</b> để <b>họp khẩn cấp</b> (1 lần mỗi ván).</li>
       <li><b>Kẻ Giả Mạo</b> 🔪: giả vờ làm nhiệm vụ, <b>giết</b> khi ở gần người khác và không ai nhìn thấy (hồi 25 giây), chui <b>ống thông gió</b> để đi nhanh, <b>phá hoại</b>: tắt đèn (mọi người chỉ thấy rất gần) lò phản ứng (phi hành đoàn phải tới Lò sửa trong 30 giây, không kịp là thua) hoặc <b>cạn oxy</b> (phải nhập mã ở <b>cả hai</b> nơi — phòng Oxy và Hành Chính — trong 40 giây).</li>
-      <li><b>Cảnh sát trưởng</b> 🔫 (bật trong cài đặt): một phi hành gia bí mật có <b>1 viên đạn</b>. Đứng gần ai đó thì bấm <b>Bắn</b>: trúng Kẻ Giả Mạo thì hắn chết; bắn nhầm người tốt thì cả hai cùng chết. Cả tàu nghe tiếng súng.</li>
-      <li><b>Kẻ Pha Trò</b> 🃏 (bật trong cài đặt, từ 6 người): phe riêng, chỉ có nhiệm vụ giả. Thắng một mình nếu bị mọi người <b>bỏ phiếu đẩy ra ngoài</b> — bị giết hay bị Cảnh sát trưởng bắn thì thua (Cảnh sát trưởng bắn Kẻ Pha Trò cũng là bắn nhầm).</li>
+      <li><b>Cảnh sát trưởng</b> (bật trong cài đặt): một phi hành gia bí mật có <b>1 viên đạn</b>. Đứng gần ai đó thì bấm <b>Bắn</b>: trúng Kẻ Giả Mạo thì hắn chết; bắn nhầm người tốt thì cả hai cùng chết. Cả tàu nghe tiếng súng.</li>
+      <li><b>Kẻ Pha Trò</b> (bật trong cài đặt, từ 6 người): phe riêng, chỉ có nhiệm vụ giả. Thắng một mình nếu bị mọi người <b>bỏ phiếu đẩy ra ngoài</b> — bị giết hay bị Cảnh sát trưởng bắn thì thua (Cảnh sát trưởng bắn Kẻ Pha Trò cũng là bắn nhầm).</li>
       <li><b>Họp</b>: mọi người bàn luận rồi bỏ phiếu. Ai nhiều phiếu nhất bị <b>đẩy ra ngoài</b> (hoà phiếu hoặc phiếu trắng nhiều nhất thì không ai bị đẩy). Người chơi máy nhớ ai đứng cạnh xác, ai chui ống gió, ai giết trước mắt họ — và sẽ tố cáo trong cuộc họp. Bạn bấm <b>📢</b> cạnh tên ai để tố cáo người đó, bấm <b>✔</b> để bỏ phiếu.</li>
       <li><b>Tầm nhìn</b> 👁️: chỉ thấy những gì nhìn thẳng tới được — tường, thùng hàng, động cơ… che khuất người phía sau. Đèn tắt thì tầm nhìn còn rất ngắn. Phi thuyền rộng, mũi tên vàng ở mép màn hình chỉ tới nhiệm vụ của bạn.</li>
       <li>Chết rồi vẫn thành <b>ma</b> 👻: đi xuyên tường, làm nốt nhiệm vụ giúp đồng đội, nhưng không báo, không bỏ phiếu được.</li>
@@ -719,7 +719,7 @@ function endGame(side, why) {
   closeTask(); $('meetSheet').hidden = true; $('ejectScene').hidden = true; $('saboPop').hidden = true;
   const meWon = side === 'jester' ? me.jester : side === 'imp' ? me.imp : !me.imp && !me.jester;
   const box = $('resBox'); box.className = 'panel dark res ' + side;
-  $('rsTitle').textContent = side === 'jester' ? (meWon ? '🃏 Bạn thắng — Kẻ Pha Trò!' : '🃏 Kẻ Pha Trò thắng') : side === 'crew' ? (meWon ? '🎉 Phi hành đoàn thắng!' : '👩‍🚀 Phi hành đoàn thắng') : (meWon ? '🔪 Kẻ Giả Mạo thắng!' : '💀 Kẻ Giả Mạo thắng');
+  $('rsTitle').textContent = side === 'jester' ? (meWon ? 'Bạn thắng — Kẻ Pha Trò!' : 'Kẻ Pha Trò thắng') : side === 'crew' ? (meWon ? '🎉 Phi hành đoàn thắng!' : '👩‍🚀 Phi hành đoàn thắng') : (meWon ? '🔪 Kẻ Giả Mạo thắng!' : '💀 Kẻ Giả Mạo thắng');
   $('rsWhy').textContent = why + (meWon ? ' Bạn thắng!' : ' Bạn thua rồi.');
   const b = $('rsBeans'); b.innerHTML = '';
   for (const p of P) { const d = document.createElement('div'); d.appendChild(beanCanvas(p.ci, 44, 52, p.dead)); const s = document.createElement('span'); s.textContent = p.name; if (p.imp) { s.className = 'i'; s.textContent += ' 🔪'; } else if (p.sheriff) s.textContent += ' 🔫'; else if (p.jester) s.textContent += ' 🃏'; d.appendChild(s); b.appendChild(d); }
@@ -758,8 +758,8 @@ function showReveal() {
   const h = document.createElement('h2'); h.textContent = me.imp ? 'KẺ GIẢ MẠO' : me.jester ? 'KẺ PHA TRÒ' : me.sheriff ? 'CẢNH SÁT TRƯỞNG' : 'PHI HÀNH GIA'; box.appendChild(h);
   const p = document.createElement('p');
   p.textContent = me.imp ? (imps.length > 1 ? `Đồng bọn của bạn: ${imps.filter(q => q !== me).map(q => q.name).join(', ')}. Giết lén, phá hoại, đừng để bị bắt!` : 'Bạn một mình. Giết lén, phá hoại, đừng để bị bắt!')
-    : me.jester ? `Phe riêng của bạn 🃏: hãy khiến mọi người bỏ phiếu đẩy bạn ra ngoài! Bị giết hay bị bắn là thua. Nhiệm vụ của bạn chỉ là giả.`
-    : me.sheriff ? `Bạn là phi hành gia có 1 viên đạn 🔫. Bắn trúng Kẻ Giả Mạo thì hắn chết — bắn nhầm người tốt thì bạn chết theo! Có ${impN} Kẻ Giả Mạo trong số ${P.length} người.`
+    : me.jester ? `Phe riêng của bạn: hãy khiến mọi người bỏ phiếu đẩy bạn ra ngoài! Bị giết hay bị bắn là thua. Nhiệm vụ của bạn chỉ là giả.`
+    : me.sheriff ? `Bạn là phi hành gia có 1 viên đạn. Bắn trúng Kẻ Giả Mạo thì hắn chết — bắn nhầm người tốt thì bạn chết theo! Có ${impN} Kẻ Giả Mạo trong số ${P.length} người.`
     : `Có ${impN} Kẻ Giả Mạo trong số ${P.length} người. Làm nhiệm vụ và tìm ra chúng!`;
   box.appendChild(p);
   const bs = document.createElement('div'); bs.className = 'beans';
@@ -768,7 +768,7 @@ function showReveal() {
   const nm = document.createElement('p'); nm.textContent = (me.imp ? imps : P).map(q => q.name).join(' · '); nm.style.fontSize = '13px'; box.appendChild(nm);
   $('roleSheet').hidden = false;
   playReveal(me.imp);
-  setTimeout(() => { if (phase === 'reveal') { $('roleSheet').hidden = true; phase = 'play'; tStart = performance.now(); toast(me.imp ? 'Giả vờ làm nhiệm vụ, giết khi không ai thấy!' : me.jester ? '🃏 Tỏ ra khả nghi để bị bỏ phiếu — nhưng đừng để bị giết!' : me.sheriff ? '🔫 Làm nhiệm vụ, chỉ bắn khi thật chắc chắn!' : 'Đi làm nhiệm vụ. Thấy xác thì bấm Báo!'); syncHud(); } }, 3200);
+  setTimeout(() => { if (phase === 'reveal') { $('roleSheet').hidden = true; phase = 'play'; tStart = performance.now(); toast(me.imp ? 'Giả vờ làm nhiệm vụ, giết khi không ai thấy!' : me.jester ? 'Tỏ ra khả nghi để bị bỏ phiếu — nhưng đừng để bị giết!' : me.sheriff ? 'Làm nhiệm vụ, chỉ bắn khi thật chắc chắn!' : 'Đi làm nhiệm vụ. Thấy xác thì bấm Báo!'); syncHud(); } }, 3200);
 }
 
 // ═══════════════════════════ điều khiển ═══════════════════════════
@@ -881,9 +881,9 @@ function shoot(s, v) {
 }
 function shotFx(s, v, ok) {
   playShot(); killFx(s, v); if (!ok) killFx(null, s);
-  if (s === me) toast(ok ? `🎯 Trúng rồi! ${v.name} là Kẻ Giả Mạo.` : `💀 ${v.name} không phải Kẻ Giả Mạo — bạn đã chết vì bắn nhầm.`, 3500);
+  if (s === me) toast(ok ? `Trúng rồi! ${v.name} là Kẻ Giả Mạo.` : `💀 ${v.name} không phải Kẻ Giả Mạo — bạn đã chết vì bắn nhầm.`, 3500);
   else if (v === me) toast(me.imp ? '💀 Bạn bị Cảnh sát trưởng bắn hạ!' : '💀 Bạn bị Cảnh sát trưởng bắn nhầm!', 3500);
-  else toast('🔫 Một tiếng súng vang lên trên tàu!');
+  else toast('Một tiếng súng vang lên trên tàu!');
 }
 function witnessVent(p) { if (isGuest()) return; for (const w of alive()) if (w !== p && !w.imp && sees(w, p, 0.9)) { w.saw.push({ k: p.id, room: roomName(p.x, p.y), kind: 'vent' }); w.sus[p.id] = (w.sus[p.id] || 0) + 200; } }
 function doSabotage(kind, by) {
@@ -1198,7 +1198,7 @@ function showEject(ej, tie, isImp, n, isJ) {
   const sc = $('ejectScene'); sc.hidden = false;
   sc.querySelectorAll('canvas').forEach(c => c.remove());
   if (ej) {
-    $('ejTxt').textContent = confirmOn() ? `${ej.name} ${isImp ? 'là Kẻ Giả Mạo.' : isJ ? 'là Kẻ Pha Trò 🃏 — hắn cười lớn!' : 'không phải Kẻ Giả Mạo.'}` : `${ej.name} đã bị đẩy ra ngoài.`;
+    $('ejTxt').textContent = confirmOn() ? `${ej.name} ${isImp ? 'là Kẻ Giả Mạo.' : isJ ? 'là Kẻ Pha Trò — hắn cười lớn!' : 'không phải Kẻ Giả Mạo.'}` : `${ej.name} đã bị đẩy ra ngoài.`;
     sc.appendChild(beanCanvas(ej.ci, 90, 108));
     playWhoosh();
   } else $('ejTxt').textContent = tie ? 'Hoà phiếu — không ai bị đẩy ra.' : 'Không ai bị đẩy ra ngoài.';
@@ -2147,7 +2147,7 @@ function renderLobby() {
     const rd = !!(mine && mine.ready);
     $('lbReady').textContent = rd ? '↩️ Chưa xong' : '✅ Sẵn sàng'; $('lbReady').classList.toggle('go', !rd); $('lbReady').disabled = !mine;
     $('lbGuestHint').innerHTML = (rd ? `Đã sẵn sàng · chờ chủ phòng bắt đầu${DOTS}` : 'Chọn tên, màu áo rồi bấm <b>Sẵn sàng</b>.')
-      + `<br>Phòng: ${S.imps} Kẻ Giả Mạo${S.sheriff ? ' · có Cảnh sát trưởng 🔫' : ''}${S.jester ? ' · có Kẻ Pha Trò 🃏' : ''} · ván ${timeMin()} phút · ${S.voice === 'near' ? 'đang chơi nghe được người ở gần' : 'đang chơi im lặng, nói khi họp'}.`;
+      + `<br>Phòng: ${S.imps} Kẻ Giả Mạo${S.sheriff ? ' · có Cảnh sát trưởng' : ''}${S.jester ? ' · có Kẻ Pha Trò' : ''} · ván ${timeMin()} phút · ${S.voice === 'near' ? 'đang chơi nghe được người ở gần' : 'đang chơi im lặng, nói khi họp'}.`;
   }
   paintTalk();
 }
