@@ -90,49 +90,72 @@ export class AnimalMatchScene extends MiniGame {
     this.layer.add(this.label(this.W / 2, top + 30, `${this.target.name} sống ở đâu?`, 56));
 
     const homes: any[] = [];
-    const hw = this.portrait ? 380 : Math.min(340, (this.W - 120) / nh - 20), hh = hw * 0.66;
-    habitats.forEach((h: any, i: number) => {
-      let x, y;
-      if (this.portrait) { x = this.W / 2 + ((i % 2) - (Math.min(2, nh) - 1) / 2) * (hw + 24); y = this.H - 260 - (Math.floor(i / 2)) * (hh + 70) - (nh > 2 ? 0 : 0); if (nh <= 2) y = this.H - 300; }
-      else { x = this.W / 2 + (i - (nh - 1) / 2) * (hw + 30); y = this.H - hh / 2 - 70; }
-      const c = this.add.container(x, y);
-      const img = this.fitImage(h.asset, 0, 0, hw, hh);
-      const t = this.label(0, hh / 2 + 26, h.name, 32);
-      c.add([img, t]);
-      c.setData('h', h).setData('w', hw).setData('hh', hh);
-      this.layer.add(c);
-      homes.push(c);
-    });
-
-    const ay = this.portrait ? top + 330 : top + 230;
-    const animal = this.fitImage(this.target.asset, this.W / 2, ay, 260, 260);
-    animal.setInteractive({ draggable: true, useHandCursor: true });
-    this.input.setDraggable(animal);
-    this.layer.add(animal);
-    this.tweens.add({ targets: animal, y: ay - 14, duration: 700, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
-    const home0 = { x: animal.x, y: ay };
-    const hit = (x: number, y: number) => homes.find((c) => Math.abs(x - c.x) < c.getData('w') / 2 && Math.abs(y - c.y) < c.getData('hh') / 2 + 30);
-
-    animal.on('dragstart', () => { this.tweens.killTweensOf(animal); animal.setScale(animal.getData('baseScale') * 1.1); Audio.sfx('pop'); });
-    animal.on('drag', (_p: any, x: number, y: number) => {
-      animal.setPosition(x, y);
-      for (const c of homes) c.setScale(c === hit(x, y) ? 1.06 : 1);
-    });
-    animal.on('dragend', () => {
-      animal.setScale(animal.getData('baseScale'));
-      const c = hit(animal.x, animal.y);
-      for (const h of homes) h.setScale(1);
-      if (c && c.getData('h').id === this.target.habitat) {
+    let dragging = false;
+    let animal: any = null, home0 = { x: 0, y: 0 };
+    const bob = () => this.tweens.add({ targets: animal, y: home0.y - 14, duration: 700, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+    const choose = (c: any) => {
+      if (this.busy || !animal) return;
+      if (c.getData('h').id === this.target.habitat) {
         this.busy = true;
+        this.tweens.killTweensOf(animal);
         animal.disableInteractive();
+        for (const h of homes) h.disableInteractive();
         this.tweens.add({ targets: animal, x: c.x, y: c.y - 10, scale: animal.getData('baseScale') * 0.7, duration: 300, ease: 'Back.easeOut' });
         this.good(c.x, c.y);
         Audio.say(`Đúng rồi! ${this.target.name} sống ở ${c.getData('h').name.toLowerCase()}.`);
         this.nextRound(1500);
       } else {
-        if (c) this.miss(c, `${this.target.name} không sống ở ${c.getData('h').name.toLowerCase()} đâu. Thử nơi khác nhé!`);
-        this.tweens.add({ targets: animal, x: home0.x, y: home0.y, duration: 300, ease: 'Back.easeOut' });
+        this.miss(c, `${this.target.name} không sống ở ${c.getData('h').name.toLowerCase()} đâu. Thử nơi khác nhé!`);
+        this.tweens.killTweensOf(animal);
+        this.tweens.add({ targets: animal, x: home0.x, y: home0.y, duration: 300, ease: 'Back.easeOut', onComplete: bob });
       }
+    };
+    // chừa góc dưới trái cho thú cưng đồng hành
+    const left = 250, right = 30, cx = this.portrait ? this.W / 2 : (left + this.W - right) / 2;
+    const hw = this.portrait ? 380 : Math.min(340, (this.W - left - right) / nh - 30), hh = hw * 0.66;
+    habitats.forEach((h: any, i: number) => {
+      let x, y;
+      if (this.portrait) {
+        const row = Math.floor(i / 2), inRow = Math.min(2, nh - row * 2);
+        x = cx + ((i % 2) - (inRow - 1) / 2) * (hw + 24);
+        y = this.H - 340 - row * (hh + 70);
+      } else { x = cx + (i - (nh - 1) / 2) * (hw + 30); y = this.H - hh / 2 - 70; }
+      const c = this.add.container(x, y);
+      const img = this.fitImage(h.asset, 0, 0, hw, hh);
+      const t = this.label(0, hh / 2 + 26, h.name, 32);
+      c.add([img, t]);
+      c.setData('h', h).setData('w', hw).setData('hh', hh);
+      // bấm thẳng vào nơi ở cũng chọn được (không chỉ kéo thả)
+      c.setSize(hw, hh + 60).setInteractive({ useHandCursor: true });
+      c.on('pointerup', () => { if (!dragging) choose(c); });
+      this.layer.add(c);
+      homes.push(c);
+    });
+
+    const ay = this.portrait ? top + 330 : top + 230;
+    animal = this.fitImage(this.target.asset, this.W / 2, ay, 260, 260);
+    animal.setInteractive({ draggable: true, useHandCursor: true });
+    this.input.setDraggable(animal);
+    this.layer.add(animal);
+    home0 = { x: animal.x, y: ay };
+    bob();
+    const hit = (x: number, y: number) => homes.find((c) => Math.abs(x - c.x) < c.getData('w') / 2 && Math.abs(y - c.y) < c.getData('hh') / 2 + 30);
+
+    animal.on('dragstart', () => { if (this.busy) return; dragging = true; this.tweens.killTweensOf(animal); animal.setScale(animal.getData('baseScale') * 1.1); Audio.sfx('pop'); });
+    animal.on('drag', (_p: any, x: number, y: number) => {
+      if (this.busy) return;
+      animal.setPosition(x, y);
+      for (const c of homes) c.setScale(c === hit(x, y) ? 1.06 : 1);
+    });
+    animal.on('dragend', () => {
+      // để pointerup của nơi ở (phát ngay sau) không chọn lần nữa
+      this.time.delayedCall(0, () => { dragging = false; });
+      if (this.busy) return;
+      animal.setScale(animal.getData('baseScale'));
+      const c = hit(animal.x, animal.y);
+      for (const h of homes) h.setScale(1);
+      if (c) choose(c);
+      else { this.tweens.add({ targets: animal, x: home0.x, y: home0.y, duration: 300, ease: 'Back.easeOut', onComplete: bob }); }
     });
     this.time.delayedCall(250, () => this.say(this.instruction()));
   }
