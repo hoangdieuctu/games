@@ -62,7 +62,6 @@ html, body {
   padding: 0 24px;
   transition: transform .12s;
   user-select: none;
-  cursor: default;
   animation: pop-in .4s cubic-bezier(.34,1.56,.64,1);
 }
 @keyframes pop-in {
@@ -80,6 +79,13 @@ html, body {
   animation: dot-in .3s both;
 }
 @keyframes dot-in { from { transform: scale(0); } to { transform: scale(1); } }
+.dot.lit { animation: dot-lit .45s cubic-bezier(.34,1.56,.64,1); box-shadow: 0 0 0 5px rgba(255,255,255,.9), 0 0 14px rgba(0,0,0,.25); }
+@keyframes dot-lit { 0% { transform: scale(1); } 50% { transform: scale(1.5); } 100% { transform: scale(1.15); } }
+.big-number.say { animation: num-say .5s cubic-bezier(.34,1.56,.64,1); }
+@keyframes num-say { 50% { transform: scale(1.15); } }
+.big-number, .dots-row { cursor: pointer; }
+.pick-label { cursor: pointer; }
+.pick-label .replay { font-size: .8em; vertical-align: middle; }
 
 .btn-ready {
   margin-top: 12px;
@@ -259,7 +265,85 @@ const COLORS = [
 
 const EMOJIS = ['🌟','🦊','🐰','🦁','🐸','🦋','🐳','🦄','🐣','🌈','⭐'];
 
+// VOICE-BEGIN — art/gen-voice.mjs đọc đúng đoạn này để sinh voice/<khoá>.mp3; sửa câu thì chạy lại script.
+const NUM_WORDS = ['không', 'một', 'hai', 'ba', 'bốn', 'năm', 'sáu', 'bảy', 'tám', 'chín', 'mười'];
+const VOICE_LINES = { intro: 'Hãy tìm số này nhé!' };
+for (let n = 1; n <= 10; n++) {
+  const w = NUM_WORDS[n], W = w.charAt(0).toUpperCase() + w.slice(1);
+  VOICE_LINES['count-' + n] = W + '!';                                 // đếm từng chấm
+  VOICE_LINES['num-' + n]   = `Số ${w}!`;
+  VOICE_LINES['pick-' + n]  = `Bấm vào số ${w} nào!`;
+  VOICE_LINES['wrong-' + n] = `Đây là số ${w}. Thử lại nhé!`;
+  VOICE_LINES['win-' + n]   = `Giỏi lắm! Con đã tìm được số ${w}!`;
+}
+// VOICE-END
+
 let targetNumber = 1;
+
+/* ── Giọng đọc: clip mp3 giọng nơ-ron sinh sẵn (art/gen-voice.mjs → voice/), thiếu clip thì dùng giọng máy ── */
+const SILENT_MP3 = 'data:audio/mpeg;base64,SUQzBAAAAAAAIlRTU0UAAAAOAAADTGF2ZjYyLjMuMTAwAAAAAAAAAAAAAAD/84TAAAAAAAAAAAAASW5mbwAAAA8AAAAFAAACoABtbW1tbW1tbW1tbW1tbW1tbW1tkpKSkpKSkpKSkpKSkpKSkpKSkpK2tra2tra2tra2tra2tra2tra2ttvb29vb29vb29vb29vb29vb29vb//////////////////////////8AAAAATGF2YzYyLjExAAAAAAAAAAAAAAAAJARQAAAAAAAAAqC9P8gWAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD/80TEAAAAA0gAAAAATEFNRTMuMTAwVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVMQU1FMy7/80TEUwAAA0gAAAAAMTAwVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVMQU1FMy7/80TEpgAAA0gAAAAAMTAwVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVX/80TErAAAA0gAAAAAVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVX/80TErAAAA0gAAAAAVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVU=';
+const Speech = {
+  // một thẻ <audio> dùng lại cho mọi câu: iOS chỉ cho phát tự động trên thẻ đã từng phát trong một cú chạm
+  el: new Audio(), unlocked: false, token: 0, pending: null,
+  synth: 'speechSynthesis' in window, voice: null,
+
+  unlock() {
+    if (this.pending) { const f = this.pending; this.pending = null; this.unlocked = true; f(); return; }
+    if (this.unlocked) return;
+    this.unlocked = true;
+    if (this.el.src && !this.el.paused) return;
+    this.el.src = SILENT_MP3;
+    const p = this.el.play(); if (p && p.catch) p.catch(() => {});
+  },
+  loadVoice() {
+    if (!this.synth) return;
+    this.voice = speechSynthesis.getVoices().find((v) => /^vi/i.test(v.lang)) || null;
+  },
+  // Phát lần lượt các khoá; onEach(i) gọi khi bắt đầu câu thứ i. replay: chạy lại cả chuỗi nếu trình duyệt chặn tự phát.
+  play(keys, { onEach, onEnd, replay, gap = 0 } = {}) {
+    this.cancel();
+    const my = this.token;
+    const step = (i) => {
+      if (my !== this.token) return;
+      if (i >= keys.length) { if (onEnd) onEnd(); return; }
+      if (onEach) onEach(i);
+      const key = keys[i], text = VOICE_LINES[key];
+      let done = false, fell = false;
+      const next = () => { if (done || my !== this.token) return; done = true; if (gap) setTimeout(() => step(i + 1), gap); else step(i + 1); };
+      const fallback = () => { if (fell || done || my !== this.token) return; fell = true; this.speak(text, next); };
+      const el = this.el;
+      el.onended = next; el.onerror = fallback;
+      el.src = `voice/${key}.mp3`;
+      const p = el.play();
+      if (p && p.catch) p.catch((e) => {
+        if (e && e.name === 'NotAllowedError' && replay) { this.token++; this.pending = replay; return; }
+        fallback();
+      });
+    };
+    step(0);
+  },
+  speak(text, finish) {
+    if (!this.synth) { setTimeout(finish, 300); return; }
+    if (!this.voice) this.loadVoice();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = this.voice ? this.voice.lang : 'vi-VN';
+    if (this.voice) u.voice = this.voice;
+    u.rate = 0.9; u.pitch = 1.1;
+    let fin = false; const once = () => { if (!fin) { fin = true; finish(); } };
+    u.onend = u.onerror = once;
+    try { speechSynthesis.resume(); } catch (e) {}
+    speechSynthesis.speak(u);
+    setTimeout(once, 1500 + text.length * 110);
+  },
+  cancel() {
+    this.token++; this.pending = null;
+    const el = this.el; el.onended = el.onerror = null;
+    try { el.pause(); } catch (e) {}
+    if (this.synth) try { speechSynthesis.cancel(); } catch (e) {}
+  },
+};
+if (Speech.synth) { Speech.loadVoice(); speechSynthesis.onvoiceschanged = () => Speech.loadVoice(); }
+document.addEventListener('pointerdown', () => Speech.unlock(), { capture: true });
 
 // ── Web Audio for simple tones ──
 let audioCtx;
@@ -322,6 +406,24 @@ function startGame() {
   hide('screen-win');
   hide('screen-pick');
   show('screen-show');
+  announce();
+}
+
+// "Hãy tìm số này nhé!" rồi đếm từng chấm "Một! Hai! Ba!" và đọc "Số ba!"
+function announce() {
+  const dots = [...document.querySelectorAll('#dots-row .dot')];
+  dots.forEach(d => d.classList.remove('lit'));
+  const keys = ['intro'];
+  for (let i = 1; i <= targetNumber; i++) keys.push('count-' + i);
+  keys.push('num-' + targetNumber);
+  Speech.play(keys, {
+    replay: announce, gap: 280,
+    onEach: (i) => {
+      const d = dots[i - 1];
+      if (i >= 1 && d) { d.classList.remove('lit'); void d.offsetWidth; d.classList.add('lit'); }
+      if (i === keys.length - 1) { const disp = document.getElementById('target-display'); disp.classList.remove('say'); void disp.offsetWidth; disp.classList.add('say'); }
+    },
+  });
 }
 
 function goToPick() {
@@ -342,19 +444,22 @@ function goToPick() {
   });
 
   const label = document.getElementById('pick-label');
-  label.innerHTML = `Bấm vào số <strong>${targetNumber}</strong> nào!`;
+  label.innerHTML = `Bấm vào số <strong>${targetNumber}</strong> nào! <span class="replay" aria-label="Nghe lại">🔊</span>`;
 
   show('screen-pick');
+  Speech.play(['pick-' + targetNumber]);
 }
 
 function pickNumber(n, btn) {
   if (n === targetNumber) {
     btn.classList.add('correct');
+    Speech.cancel();
     playCorrect();
     setTimeout(showWin, 600);
   } else {
     btn.classList.add('wrong');
     playWrong();
+    setTimeout(() => Speech.play(['wrong-' + n]), 250);
   }
 }
 
@@ -370,6 +475,7 @@ function showWin() {
 
   launchConfetti();
   show('screen-win');
+  Speech.play(['win-' + targetNumber]);
 }
 
 function launchConfetti() {
@@ -389,6 +495,11 @@ function launchConfetti() {
   // clean up after animation
   setTimeout(() => { wrap.innerHTML = ''; }, 2500);
 }
+
+// chạm vào số to / chấm để nghe đếm lại; chạm 🔊 để nghe lại câu hỏi
+document.getElementById('target-display').addEventListener('click', announce);
+document.getElementById('dots-row').addEventListener('click', announce);
+document.getElementById('pick-label').addEventListener('click', () => Speech.play(['pick-' + targetNumber]));
 
 // ── start ──
 startGame();
