@@ -882,8 +882,64 @@ function playWin(big) {
   });
 }
 function playSad() { const t = sndT(); if (t) [392, 349.2, 311.1].forEach((f, i) => tone(t + i * 0.16, f, 0.12, 0.3, 'triangle')); }
+// ── lời hô: clip mp3 giọng nơ-ron sinh sẵn (art/gen-voice.mjs → voice/<ghế>/<loại>-<i>.mp3) ──
+// Mỗi ghế (Hổ, Cáo, Gấu Trúc, Ếch) một giọng riêng; mỗi loại có vài câu, bốc ngẫu nhiên cho đỡ nhàm.
+// VOICE-BEGIN — art/gen-voice.mjs đọc đúng đoạn này; sửa câu thì chạy lại script.
+const VOICE_LINES = {
+  pass:    ['Bỏ!', 'Qua!', 'Bỏ nha!', 'Thôi, bỏ!', 'Nhường đó!'],
+  heo:     ['Heo nè!', 'Heo đây!'],
+  pairHeo: ['Đôi heo nè!', 'Đôi heo luôn!'],
+  triple:  ['Sám cô nè!'],
+  quad:    ['Tứ quý nè!', 'Tứ quý luôn nha!'],
+  dseq3:   ['Ba đôi thông nè!'],
+  dseq4:   ['Bốn đôi thông nè!'],
+  dseq5:   ['Năm đôi thông luôn!'],
+  cutHeo:  ['Chặt heo nè!', 'Heo này của tui!', 'Chặt heo luôn!'],
+  cutPair: ['Chặt đôi heo luôn!'],
+  cutBomb: ['Chặt chồng nè!', 'Chặt luôn nha!'],
+  ouch:    ['Ối, heo của tui!', 'Trời ơi!', 'Ui da!', 'Á, đau quá!'],
+  first:   ['Về nhất rồi nha!', 'Hết bài, nhất nè!', 'Yeah, về nhất!'],
+  out:     ['Hết bài!', 'Về rồi nha!'],
+  cong:    ['Cóng rồi!', 'Ơ, cóng mất rồi!'],
+  lose:    ['Thua rồi!', 'Thua rồi, ván sau gỡ!', 'Huhu, thua rồi!'],
+  thoi:    ['Thối heo rồi!', 'Trời, thối heo!'],
+  toi:     ['Tới trắng nè!', 'Tới trắng luôn nha!'],
+};
+// VOICE-END
+const Voice = {
+  // một thẻ <audio> dùng lại: iOS chỉ cho phát tự động trên thẻ đã từng phát trong một cú chạm
+  el: new Audio(), unlocked: false, token: 0, prio: -1,
+  unlock() {
+    if (this.unlocked) return;
+    this.unlocked = true;
+    if (this.el.src && !this.el.paused) return;
+    this.el.src = 'data:audio/mpeg;base64,SUQzBAAAAAAAIlRTU0UAAAAOAAADTGF2ZjYyLjMuMTAwAAAAAAAAAAAAAAD/84TAAAAAAAAAAAAASW5mbwAAAA8AAAAFAAACoABtbW1tbW1tbW1tbW1tbW1tbW1tkpKSkpKSkpKSkpKSkpKSkpKSkpK2tra2tra2tra2tra2tra2tra2ttvb29vb29vb29vb29vb29vb29vb//////////////////////////8AAAAATGF2YzYyLjExAAAAAAAAAAAAAAAAJARQAAAAAAAAAqC9P8gWAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD/80TEAAAAA0gAAAAATEFNRTMuMTAwVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVMQU1FMy7/80TEUwAAA0gAAAAAMTAwVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVMQU1FMy7/80TEpgAAA0gAAAAAMTAwVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVX/80TErAAAA0gAAAAAVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVX/80TErAAAA0gAAAAAVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVU=';
+    const p = this.el.play(); if (p && p.catch) p.catch(() => {});
+  },
+  // seq: [[ghế, loại], …] phát nối nhau. prio: câu đang phát có ưu tiên cao hơn thì câu mới bị bỏ qua
+  // (để "Bỏ!" không cắt ngang "Chặt heo nè!")
+  say(seq, prio = 0) {
+    if (muted || !seq.length) return;
+    const el = this.el;
+    if (!el.paused && !el.ended && this.prio > prio) return;
+    const my = ++this.token; this.prio = prio;
+    const step = (i) => {
+      if (my !== this.token) return;
+      if (i >= seq.length) { this.prio = -1; return; }
+      const [s, cat] = seq[i], list = VOICE_LINES[cat];
+      if (!list || !(s >= 0)) { step(i + 1); return; }
+      el.onended = el.onerror = () => step(i + 1);
+      el.src = `voice/${s % NSEAT}/${cat}-${Math.floor(Math.random() * list.length)}.mp3`;
+      const p = el.play(); if (p && p.catch) p.catch(() => { if (my === this.token) this.prio = -1; });
+    };
+    step(0);
+  },
+  stop() { this.token++; this.prio = -1; const el = this.el; el.onended = el.onerror = null; try { el.pause(); } catch (e) {} },
+};
+document.addEventListener('pointerdown', () => { if (!muted) Voice.unlock(); }, true);
+
 function syncMute() { $('bMute').textContent = muted ? '🔇' : '🔊'; }
-$('bMute').onclick = () => { muted = !muted; store.set('tienlen.mute', muted); syncMute(); if (!muted) audio(); };
+$('bMute').onclick = () => { muted = !muted; store.set('tienlen.mute', muted); syncMute(); if (!muted) audio(); else Voice.stop(); };
 syncMute();
 </script>
 
@@ -1191,7 +1247,7 @@ function animate(ev, before) {
     cards.forEach((c, i) => flyFrom(c, mid, 350 + i * 55));
     for (let i = 0; i < 13; i += 2) setTimeout(playDeal, 350 + i * 55);
     for (const b of $('seats').querySelectorAll('.backs')) b.animate([{ opacity: 0, transform: 'scale(.4)' }, { opacity: 1, transform: 'none' }], { duration: 500, delay: 400, fill: 'backwards' });
-    if (ev.toi !== undefined) setTimeout(() => { floatText('pow', 'TỚI TRẮNG!', centerOf($('table'))); playWin(ev.toi === me); }, 350 + 13 * 55 + 300);
+    if (ev.toi !== undefined) setTimeout(() => { floatText('pow', 'TỚI TRẮNG!', centerOf($('table'))); playWin(ev.toi === me); Voice.say([[ev.toi, 'toi']], 3); }, 350 + 13 * 55 + 300);
   } else if (ev.type === 'play') {
     const grp = $('pile').lastElementChild;
     const src = ev.s !== me && seatEl(ev.s) ? centerOf(seatEl(ev.s)) : null;
@@ -1215,14 +1271,37 @@ function animate(ev, before) {
     }
     if (ev.out) setTimeout(() => { if (ev.s === me) playWin(ev.out === 1); else playTurn(); }, 520);
     if (ev.cong && ev.cong.includes(me)) setTimeout(playSad, 900);
+    sayPlay(ev);
   } else if (ev.type === 'pass') {
     playKnock();
+    Voice.say([[ev.s, 'pass']], 0);
   }
   if (ev.end) setTimeout(() => {
     if (!V || !V.hand || !V.hand.result) return;
     const w = V.hand.result.order[0];
     if (w === me) playWin(true); else if (me >= 0 && V.hand.cards[me]) playSad();
+    // người bét hô "Thua rồi!" (còn heo trên tay thì "Thối heo rồi!")
+    const R = V.hand.result, last = R.order[R.order.length - 1];
+    if (R.toi < 0 && last !== undefined) Voice.say([[last, /thối heo/.test(R.notes[last] || '') ? 'thoi' : 'lose']], 3);
   }, animMs(ev));
+}
+// lời hô khi đánh bài: chặt heo, tứ quý, đôi thông, heo, về nhất, cóng…
+function sayPlay(ev) {
+  const seq = [];
+  let prio = 1;
+  if (ev.cut) {
+    const o = ev.cut.over || '';
+    seq.push([ev.s, o === 'đôi heo' ? 'cutPair' : /^heo/.test(o) ? 'cutHeo' : 'cutBomb'], [ev.cut.from, 'ouch']);
+    prio = 3;
+  } else {
+    const k = comboOf(ev.cards);
+    const cat = !k ? null : isHeo(k) ? (k.t === 'pair' ? 'pairHeo' : 'heo') : k.t === 'quad' ? 'quad' : k.t === 'triple' ? 'triple'
+      : k.t === 'dseq' ? 'dseq' + Math.min(5, k.n / 2) : null;
+    if (cat) seq.push([ev.s, cat]);
+  }
+  if (ev.out) { seq.push([ev.s, ev.out === 1 ? 'first' : 'out']); prio = Math.max(prio, 2); }
+  if (Array.isArray(ev.cong) && ev.cong.length) { seq.push([ev.cong[0], 'cong']); prio = Math.max(prio, 2); }
+  if (seq.length) setTimeout(() => Voice.say(seq, prio), ev.cut ? 420 : 330);
 }
 
 function describe(ev) {
