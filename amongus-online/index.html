@@ -362,7 +362,7 @@ button:disabled { opacity: .35; cursor: default; }
     <div class="seg" id="suRole"></div>
     <label class="check"><input type="checkbox" id="suConfirm"> Công bố vai người bị đẩy ra ngoài</label>
     <button class="go" id="bStart">Chơi với máy</button>
-    <button class="online-btn" id="bOnline">🌐 Chơi online với bạn bè · có voice chat</button>
+    <button class="online-btn" id="bOnline">🌐 Chơi online với bạn bè</button>
     <p class="rule">Phi hành đoàn làm xong hết nhiệm vụ hoặc đẩy hết Kẻ Giả Mạo ra ngoài thì thắng. Kẻ Giả Mạo thắng khi số người còn sống bằng số kẻ giả mạo, lò phản ứng nổ, hoặc <b>hết giờ</b> mà nhiệm vụ chưa xong.</p>
   </div>
 </div>
@@ -519,7 +519,12 @@ const OBST = [
 // lưới 10px: 0 ngoài tàu · 1 sàn · 2 vật thấp · 3 vật cao (che tầm nhìn)
 const GC = 10, GW = MAP_W / GC, GH = MAP_H / GC, GRID = new Uint8Array(GW * GH);
 for (const r of WALK) for (let j = r[1] / GC; j < (r[1] + r[3]) / GC; j++) for (let i = r[0] / GC; i < (r[0] + r[2]) / GC; i++) GRID[j * GW + i] = 1;
-for (const o of OBST) for (let j = o[1] / GC; j < (o[1] + o[3]) / GC; j++) for (let i = o[0] / GC; i < (o[0] + o[2]) / GC; i++) GRID[j * GW + i] = o[4] ? 3 : 2;
+// vật vẽ nhô mặt trên lên trên chân vật (vật cao 30px, vật thấp 12px) → chiếm cả phần đó: không đi lên mặt bàn được,
+// bóng tối đổ từ đúng mép vật nhìn thấy
+for (const o of OBST) for (let j = o[5] === 'btn' ? o[1] / GC : Math.floor((o[1] - (o[4] ? 30 : 12) + 5) / GC); j < (o[1] + o[3]) / GC; j++) for (let i = o[0] / GC; i < (o[0] + o[2]) / GC; i++) {
+  if (j < o[1] / GC && GRID[j * GW + i] !== 1) continue; // phần mặt trên nhô lên chỉ chiếm sàn, không đè tường
+  GRID[j * GW + i] = o[4] ? 3 : 2;
+}
 const cellAt = (x, y) => (x < 0 || y < 0 || x >= MAP_W || y >= MAP_H ? 0 : GRID[((y / GC) | 0) * GW + ((x / GC) | 0)]);
 const inRect = (x, y, r) => x >= r[0] && x <= r[0] + r[2] && y >= r[1] && y <= r[1] + r[3];
 const walkable = (x, y) => cellAt(x, y) === 1;
@@ -1442,9 +1447,15 @@ function showKillScene(kci, vci) {
   requestAnimationFrame(frame);
 }
 
-// đa giác tầm nhìn: bắn tia từ mắt ra mọi hướng, dừng ở tường / vật cao (lấn vào 12px để thấy mặt tường)
-// lớp mờ vẽ ở độ phân giải thấp (FOG_K) rồi phóng lên: mép bóng tự mềm, không răng cưa / nhấp nháy khi đi
+// đa giác tầm nhìn: bắn tia từ chân ra mọi hướng, dừng ở tường / vật cao rồi lấn vào để thấy trọn mặt tường / vật
+// lớp mờ vẽ ở độ phân giải thấp (FOG_K) rồi phóng lên: mép bóng mềm, nhẹ máy
 const fogCv = document.createElement('canvas'), fg = fogCv.getContext('2d'), FOG_K = .3, RAYS = 900, RCOS = [], RSIN = [];
+// mặt nạ khoảng trống đi lại được (1 điểm ảnh = 1 ô lưới): bóng tối chỉ phủ lên đó — tường, vũ trụ, đồ vật để nguyên
+const floorCv = document.createElement('canvas');
+{ floorCv.width = GW; floorCv.height = GH; const x = floorCv.getContext('2d'), im = x.createImageData(GW, GH);
+  for (let k = 0; k < GW * GH; k++) if (GRID[k] === 1) { im.data[k * 4] = 3; im.data[k * 4 + 1] = 5; im.data[k * 4 + 2] = 12; im.data[k * 4 + 3] = 255; }
+  x.putImageData(im, 0, 0); }
+const WALL_FACE = 34, WALL_EDGE = 7; // mặt tường phía trên sàn cao 34px; viền tường hai bên / phía dưới ~6–8px
 for (let k = 0; k < RAYS; k++) { RCOS.push(Math.cos(k / RAYS * Math.PI * 2)); RSIN.push(Math.sin(k / RAYS * Math.PI * 2)); }
 // dò tia theo từng ô lưới (DDA): điểm chạm tường chính xác nên mép bóng thẳng và đứng yên khi nhân vật di chuyển
 function castRay(cx, cy, dx, dy, r) {
@@ -1454,10 +1465,26 @@ function castRay(cx, cy, dx, dy, r) {
   let tx = adx > 1e-9 ? (sx > 0 ? (ix + 1) * GC - cx : cx - ix * GC) / adx : Infinity;
   let ty = ady > 1e-9 ? (sy > 0 ? (iy + 1) * GC - cy : cy - iy * GC) / ady : Infinity;
   for (;;) {
-    let t; if (tx < ty) { t = tx; tx += tdx; ix += sx; } else { t = ty; ty += tdy; iy += sy; }
+    let t, ySide;
+    if (tx < ty) { t = tx; tx += tdx; ix += sx; ySide = false; } else { t = ty; ty += tdy; iy += sy; ySide = true; }
     if (t >= r) return r;
     if (ix < 0 || iy < 0 || ix >= GW || iy >= GH) return t;
-    const c = GRID[iy * GW + ix]; if (c === 0 || c === 3) return Math.min(r, t + 12); // lấn vào để thấy mặt tường
+    const c = GRID[iy * GW + ix];
+    if (c !== 0 && c !== 3) continue;
+    // lấn vào một độ sâu cố định tính VUÔNG GÓC với mặt vừa chạm (không phải dọc theo tia) → mép sáng là đường thẳng
+    // song song với tường ở mọi góc nhìn: tường phía trên lộ trọn mặt tường cao 34px, hai bên / phía dưới lộ viền.
+    // Vật cao: soi trọn cả khối. Đi từng bước dọc tia, gặp ô không còn chắn thì dừng (không xuyên sang phòng khác).
+    // (đi tiếp theo từng ô lưới như trên — chỉ vài bước mỗi tia, không dò từng pixel)
+    let te = c === 3 ? t + 300 : ySide ? t + (sy < 0 ? WALL_FACE : WALL_EDGE) / Math.max(ady, .08) : t + WALL_EDGE / Math.max(adx, .08);
+    te = Math.min(te, t + 300, r);
+    for (;;) {
+      const tn = Math.min(tx, ty);           // ra khỏi ô hiện tại tại tn
+      if (tn >= te) return te;
+      if (tx < ty) { tx += tdx; ix += sx; } else { ty += tdy; iy += sy; }
+      if (ix < 0 || iy < 0 || ix >= GW || iy >= GH) return tn;
+      const k = GRID[iy * GW + ix];
+      if (c === 3 ? k !== 3 : (k !== 0 && k !== 3)) return tn;
+    }
   }
 }
 function visPoly(cx, cy, r) {
@@ -1467,6 +1494,12 @@ function visPoly(cx, cy, r) {
 }
 let stars = Array.from({ length: 220 }, () => [Math.random(), Math.random(), Math.random() * 1.6 + .3, Math.random() < .5 ? .15 : .35]);
 const seesMe = q => me.dead || (dist(me, q) <= visOf(me) * 1.02 && losClear(me, q));
+// thân + tên một người chơi (đã ở toạ độ thế giới)
+function drawPlayerTop(p, bob, moving) {
+  drawBean(ctx, p.x, p.y + bob, COLORS[p.ci][1], p.dir, moving ? p.anim : 0, { ghost: p.dead });
+  ctx.font = '700 13px "Baloo 2", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom'; ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(0,0,0,.7)'; ctx.fillStyle = p.imp && (me.imp || me.dead) ? '#ff6b6b' : '#fff';
+  ctx.strokeText(p.name, p.x, p.y - 48 + bob); ctx.fillText(p.name, p.x, p.y - 48 + bob);
+}
 function render() {
   const W = innerWidth, H = innerHeight, d = devicePixelRatio || 1, now = performance.now();
   ctx.setTransform(d, 0, 0, d, 0, 0);
@@ -1528,6 +1561,7 @@ function render() {
     else drawBean(ctx, b.x, b.y, col, 1, 0, { dead: true, s: age < .5 ? 1 + (.5 - age) : 1 });
   }
   // người chơi (gần → xa theo y để đè đúng); khuất tường hoặc ngoài tầm nhìn thì không vẽ
+  const shown = []; // người đang thấy: vẽ lại đè lên lớp bóng tối (tia bắn từ chân nên đầu có thể lọt vào vùng tối)
   for (const p of P.slice().sort((a, b) => a.y - b.y)) {
     const wasVent = p._vent; p._vent = p.vent;
     if (wasVent !== undefined && (wasVent >= 0) !== (p.vent >= 0)) { const vi = p.vent >= 0 ? p.vent : VENTS.findIndex(v => Math.hypot(v[0] - p.x, v[1] - p.y) < 60); if (vi >= 0 && (p === me || seesMe(p))) { ventFx.push({ v: vi, t: now }); burst(VENTS[vi][0], VENTS[vi][1], 12, { col: '#9aa6bd', v0: 30, v1: 110, r0: 3, r1: 6, l0: .3, l1: .6 }); if (p !== me) playVent(); } }
@@ -1538,9 +1572,7 @@ function render() {
     if (!p.dead) { ctx.fillStyle = 'rgba(0,0,0,.32)'; ctx.beginPath(); ctx.ellipse(p.x, p.y + 6, 16, 6, 0, 0, Math.PI * 2); ctx.fill(); }
     if (moving && !p.dead) { const ft = footT.get(p.id) || 0; if (now - ft > 220) { footT.set(p.id, now); burst(p.x - p.dir * 6, p.y + 6, 2, { col: 'rgba(200,210,230,.5)', v0: 10, v1: 30, r0: 2, r1: 4, l0: .3, l1: .5 }); } }
     const bob = p.dead ? Math.sin(now / 300 + p.id) * 4 : moving ? -Math.abs(Math.sin(p.anim)) * 3 : Math.sin(now / 600 + p.id) * .6;
-    drawBean(ctx, p.x, p.y + bob, COLORS[p.ci][1], p.dir, moving ? p.anim : 0, { ghost: p.dead });
-    ctx.font = '700 13px "Baloo 2", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom'; ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(0,0,0,.7)'; ctx.fillStyle = p.imp && (me.imp || me.dead) ? '#ff6b6b' : '#fff';
-    ctx.strokeText(p.name, p.x, p.y - 48 + bob); ctx.fillText(p.name, p.x, p.y - 48 + bob);
+    drawPlayerTop(p, bob, moving); shown.push([p, bob, moving]);
     if (net.on && talkingNow(p)) { ctx.font = '16px sans-serif'; ctx.fillText('🔊', p.x, p.y - 64 + bob); }
   }
   // hạt hiệu ứng
@@ -1559,13 +1591,20 @@ function render() {
     const fw = Math.ceil(W * FOG_K), fh = Math.ceil(H * FOG_K);
     if (fogCv.width !== fw || fogCv.height !== fh) { fogCv.width = fw; fogCv.height = fh; }
     fg.setTransform(FOG_K, 0, 0, FOG_K, 0, 0); fg.globalCompositeOperation = 'source-over'; fg.clearRect(0, 0, W, H);
-    fg.fillStyle = dark ? 'rgba(3,5,12,.97)' : 'rgba(3,5,12,.58)'; fg.fillRect(0, 0, W, H); // chỗ khuất chỉ phủ mờ, mất điện mới tối hẳn
-    fg.globalCompositeOperation = 'destination-out';
     fg.translate(ox, oy); fg.scale(zoom, zoom);
+    // chỉ phủ trên khoảng trống đi lại được (tường, vũ trụ, đồ vật để nguyên); chỗ khuất phủ mờ nhẹ, mất điện mới tối hẳn
+    fg.imageSmoothingEnabled = false; fg.globalAlpha = dark ? .9 : .4;
+    fg.drawImage(floorCv, 0, 0, MAP_W, MAP_H);
+    fg.globalAlpha = 1;
+    fg.globalCompositeOperation = 'destination-out';
     const pts = visPoly(me.x, me.y, r), g = fg.createRadialGradient(me.x, me.y, r * (dark ? .62 : .88), me.x, me.y, r);
     g.addColorStop(0, 'rgba(0,0,0,1)'); g.addColorStop(1, 'rgba(0,0,0,0)');
     fg.fillStyle = g; fg.beginPath(); fg.moveTo(pts[0], pts[1]); for (let k = 2; k < pts.length; k += 2) fg.lineTo(pts[k], pts[k + 1]); fg.closePath(); fg.fill();
     ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'low'; ctx.drawImage(fogCv, 0, 0, W, H);
+    // người đang thấy (kể cả mình) vẽ lại đè lên bóng tối: chỉ thân người sáng, sàn quanh vẫn tối như cũ
+    ctx.save(); ctx.translate(ox, oy); ctx.scale(zoom, zoom);
+    for (const [p, bob, moving] of shown) drawPlayerTop(p, bob, moving);
+    ctx.restore();
   }
   // báo động lò: cả màn hình nhấp nháy đỏ
   if (sabo && sabo.kind === 'reactor' && phase === 'play') { ctx.fillStyle = `rgba(255,0,0,${.08 + .1 * Math.max(0, Math.sin(now / 160))})`; ctx.fillRect(0, 0, W, H); }
