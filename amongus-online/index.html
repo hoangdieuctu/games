@@ -557,7 +557,7 @@ const BUTTON = { x: 1320, y: 310 }; // bàn họp khẩn cấp
 // chỗ sửa phá hoại (trạm); cạn oxy phải sửa ở cả hai trạm
 const FIX = { lights: { x: 820, y: 1530, room: 'Điện' }, reactor: { x: 310, y: 900, room: 'Lò Phản Ứng' }, o2a: { x: 2000, y: 590, room: 'Oxy' }, o2b: { x: 1210, y: 880, room: 'Hành Chính' } };
 const SABO_FIX = { lights: ['lights'], reactor: ['reactor'], o2: ['o2a', 'o2b'] };
-const SABO_KINDS = ['lights', 'reactor', 'o2'], O2_T = 40, SHOOT_CD = 15;
+const SABO_KINDS = ['lights', 'reactor', 'o2'], O2_T = 40, SHOOT_CD = 15, SHOOT_RANGE = 170; // súng bắn xa hơn dao (KILL_RANGE) nhưng vẫn phải thấy rõ
 const FIX_ICON = { lights: '💡', reactor: '☢️', o2a: '🫁', o2b: '🫁' };
 const timedSabo = () => !!sabo && (sabo.kind === 'reactor' || sabo.kind === 'o2'); // phá hoại có đếm ngược, hết giờ thì thua
 const saboT0 = kind => (kind === 'o2' ? O2_T : REACTOR_T);
@@ -818,7 +818,7 @@ function nearby() {
   o.vent = me.imp && !me.dead ? VENTS.findIndex(v => Math.hypot(v[0] - me.x, v[1] - me.y) < 50) : -1;
   o.button = !me.dead && dist(me, BUTTON) < 110 && me.emergency > 0 && !sabo;
   o.fix = !me.dead ? saboLeft().find(id => dist(me, FIX[id]) < USE_RANGE + 20) || null : null;
-  o.target = me.sheriff && !me.dead && me.ammo > 0 && me.vent < 0 ? alive().filter(q => q !== me && q.vent < 0 && dist(me, q) < KILL_RANGE && losClear(me, q)).sort((a, b) => dist(me, a) - dist(me, b))[0] : null;
+  o.target = me.sheriff && !me.dead && me.ammo > 0 && me.vent < 0 ? alive().filter(q => q !== me && q.vent < 0 && dist(me, q) < SHOOT_RANGE && losClear(me, q)).sort((a, b) => dist(me, a) - dist(me, b))[0] : null;
   return o;
 }
 function doUse() {
@@ -960,7 +960,7 @@ function botThink(b) {
   // Cảnh sát trưởng máy: chỉ bắn người mình rất nghi (thấy giết, chui ống gió, hoặc bị nhân chứng tố cáo)
   if (b.sheriff && b.ammo > 0 && b.shootCd <= 0) {
     const t = alive().filter(q => q !== b && q.vent < 0 && (b.sus[q.id] || 0) >= 140 && dist(b, q) < 320 && losClear(b, q)).sort((x, y) => dist(b, x) - dist(b, y))[0];
-    if (t) { if (dist(b, t) < KILL_RANGE - 10) shoot(b, t); else goTo(b, t, 'hunt'); return; }
+    if (t) { if (dist(b, t) < SHOOT_RANGE - 10) shoot(b, t); else goTo(b, t, 'hunt'); return; }
   }
   // thấy xác → báo (kẻ giả mạo thỉnh thoảng cũng tự báo để tỏ ra vô tội)
   const body = bodies.find(d => dist(b, d) < 160 && now - d.t > 700 && losClear(b, d));
@@ -2314,7 +2314,7 @@ function hostMsg(c, d) {
     case 'emerg': if (phase === 'play' && !p.dead && !sabo && p.emergency > 0 && dist(ps, BUTTON) < 160) { p.emergency--; startMeeting(p, null); } return;
     case 'sabo': if (phase === 'play' && p.imp && !p.dead && SABO_KINDS.includes(d.kind)) doSabotage(d.kind, p); return;
     case 'fix': { const id = saboLeft().includes(d.s) ? d.s : saboLeft().length === 1 ? saboLeft()[0] : null; if (phase === 'play' && id && !p.dead && dist(ps, FIX[id]) < USE_RANGE + 70) { idleReset(p); fixSabotage(id); } return; }
-    case 'shoot': { const v = P[d.v]; if (phase === 'play' && p.sheriff && p.ammo > 0 && !p.dead && p.shootCd <= 1 && p.vent < 0 && v && v !== p && !v.dead && dist(ps, v) < KILL_RANGE + 60) shoot(p, v); return; }
+    case 'shoot': { const v = P[d.v]; if (phase === 'play' && p.sheriff && p.ammo > 0 && !p.dead && p.shootCd <= 1 && p.vent < 0 && v && v !== p && !v.dead && dist(ps, v) < SHOOT_RANGE + 60 && losClear(ps, v)) shoot(p, v); return; }
     case 'task': { const t = p.tasks.find(x => x.id === d.id); if (t && !p.imp && !p.jester && (phase === 'play' || phase === 'meeting')) { t.done = true; idleReset(p); syncHud(); checkWin(); } return; }
     case 'vote': if (phase === 'meeting' && meeting && meeting.phaseV !== 'done') { if (d.p === -2) { cancelVote(p); return; } const t = d.p === -1 ? null : P[d.p]; if (d.p === -1 || (t && !t.dead)) castVote(p, t); } return;
     case 'acc': { const t = P[d.p]; if (phase === 'meeting' && t && t !== p) accuse(p, t); return; }
