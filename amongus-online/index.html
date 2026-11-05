@@ -1121,7 +1121,7 @@ function showEject(ej, tie, isImp, n) {
     sc.appendChild(beanCanvas(ej.ci, 90, 108));
     playWhoosh();
   } else $('ejTxt').textContent = tie ? 'Hoà phiếu — không ai bị đẩy ra.' : 'Không ai bị đẩy ra ngoài.';
-  $('ejSub').textContent = `${n} Kẻ Giả Mạo còn lại.`;
+  $('ejSub').textContent = confirmOn() ? `${n} Kẻ Giả Mạo còn lại.` : '';
   if (!isGuest()) setTimeout(() => { sc.hidden = true; endMeeting(); }, 4200); // khách chờ chủ phòng báo hết họp
 }
 function endMeeting() {
