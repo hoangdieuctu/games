@@ -19,9 +19,11 @@
 // và biểu tượng đã thêm vào màn hình chính được chuyển sang chỗ mới — giữ nguyên
 // ?… và #room=… để link mời vào phòng chơi cũ vẫn dùng được.
 (function () {
-  var FILES = ['amongus-online', 'animals', 'battleship', 'bubbles', 'cangua', 'caro', 'dichua',
+  var FILES = ['amongus', 'animals', 'battleship', 'bubbles', 'cangua', 'caro', 'dichua',
     'duaxe', 'fish', 'flags', 'jewel', 'matching', 'numbers', 'tienlen', 'typhu', 'typhu6', 'xito'];
   var DIRS = ['colorsort', 'tiger'];
+  // Thư mục đã đổi tên: tên cũ → tên mới.
+  var RENAMED = { 'amongus-online': 'amongus' };
 
   var parts = location.pathname.split('/');
   // Trang dự án trên github.io nằm dưới /<tên-repo>/; tên miền riêng thì nằm ngay ở gốc.
@@ -32,6 +34,8 @@
   var target = null;
 
   var m = /^([a-z0-9-]+)\.html$/.exec(first);
+  if (m && RENAMED[m[1]]) m[1] = RENAMED[m[1]];
+  if (RENAMED[first]) { DIRS.push(RENAMED[first]); first = RENAMED[first]; }
   if (m && FILES.indexOf(m[1]) >= 0 && rest.length === 1) {
     target = base + m[1] + '/index.html';
   } else if (DIRS.indexOf(first) >= 0) {

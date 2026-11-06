@@ -9,7 +9,6 @@ index.html        trang chủ
 icon.png          icon trang chủ khi thêm vào màn hình chính
 <tên>/            mỗi game một thư mục, mở bằng index.html
 shared/sounds/    âm thanh dùng chung
-tools/            bộ gộp mã nguồn
 404.html          chuyển link cũ sang chỗ mới
 ```
 

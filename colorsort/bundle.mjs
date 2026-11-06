@@ -1,6 +1,6 @@
-// ── Bộ gộp dùng chung: gộp <game>/src/ thành một tệp <game>/index.html tự chứa ──
+// ── Bộ gộp: gộp colorsort/src/ thành một tệp colorsort/index.html tự chứa ──
 //
-// Mỗi game có build.mjs riêng chỉ khai báo thứ tự nạp rồi gọi bundle():
+// build.mjs khai báo thứ tự nạp rồi gọi bundle():
 //
 //   node colorsort/build.mjs
 //
@@ -8,11 +8,9 @@
 // nháy đúp vào tệp thì không mẩu mã nào chạy. Gộp hết vào một tệp thì nháy đúp,
 // gửi AirDrop sang iPad hay đưa lên web đều chạy.
 //
-// Hai kiểu mã nguồn:
-//   mode: 'module' — các tệp là ES module. Mỗi module thành một hàm tự gọi, trả về
-//                    đúng những thứ nó `export`; `import` đổi thành lấy từ bảng M.
-//   mode: 'script' — các tệp là script thường, chỉ nối lại theo thứ tự.
-// Cả hai đều bọc trong một IIFE 'use strict'. Thứ tự nạp phải theo phụ thuộc.
+// Các tệp trong src/ là ES module. Mỗi module thành một hàm tự gọi, trả về đúng
+// những thứ nó `export`; `import` đổi thành lấy từ bảng M. Tất cả bọc trong một
+// IIFE 'use strict'. Thứ tự nạp phải theo phụ thuộc.
 //
 // src/page.html chứa ba chỗ giữ chỗ: /*__ICON__*/ (icon.png dạng data URI),
 // /*__CSS__*/ (src/style.css) và /*__JS__*/ (mã đã gộp).
@@ -64,16 +62,13 @@ function transformModule(name, code) {
  * @param {object} opt
  * @param {string}   opt.dir    thư mục game (chứa src/, icon.png, index.html)
  * @param {string[]} opt.order  tên các tệp trong src/ (không có .js), theo thứ tự nạp
- * @param {'module'|'script'} [opt.mode='module']
  */
-export function bundle({ dir, order, mode = 'module' }) {
+export function bundle({ dir, order }) {
   const game = basename(dir);
   const src = (f) => join(dir, 'src', f);
   const read = (n) => readFileSync(src(`${n}.js`), 'utf8');
 
-  const js = mode === 'script'
-    ? `(function () {\n'use strict';\n${order.map((n) => `/* ══════════ ${n}.js ══════════ */\n${read(n)}`).join('\n\n')}\n})();`
-    : `(function () {\n'use strict';\nconst M = {};\n\n${order.map((n) => transformModule(n, read(n))).join('\n\n')}\n})();`;
+  const js = `(function () {\n'use strict';\nconst M = {};\n\n${order.map((n) => transformModule(n, read(n))).join('\n\n')}\n})();`;
 
   // Biên dịch thử (không chạy): thà build hỏng còn hơn xuất ra tệp index.html chết.
   try {
