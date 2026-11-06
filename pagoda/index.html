@@ -391,6 +391,8 @@ textarea.field { resize: none; min-height: 76px; line-height: 1.45; }
 .people { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; margin-top: 8px; }
 .people span { background: #fffaf0; border: 1px solid var(--line); border-radius: 99px; padding: 4px 10px; font-size: 12.5px; font-weight: 700; }
 .people i { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 5px; vertical-align: 0; }
+.people .kick { font: inherit; font-size: 11.5px; font-weight: 800; color: #c0392b; background: #fdecea; border: 0; border-radius: 99px; padding: 2px 8px; margin: -2px -6px -2px 6px; cursor: pointer; }
+.people .kick.armed { color: #fff; background: #c0392b; }
 
 /* công đức */
 .box-anim { height: 120px; position: relative; display: grid; place-items: end center; margin: 4px 0 8px; }
@@ -3903,6 +3905,7 @@ function updateHud() {
   $('bSound').textContent = AU.on ? '🔊' : '🔇';
   const n = net.on ? remotes.size + 1 : 0;
   $('peopleTxt').hidden = !net.on; $('peopleTxt').textContent = `👥 ${n} người`;
+  if (net.on && q('#nPeople')) renderPeople();
 }
 let actSig = '';
 function renderActions(force) {
@@ -4558,9 +4561,14 @@ function openHelp() {
 // cho mọi người, chuyển tiếp ev kèm from, và gửi welcome (ảnh chụp cảnh) cho khách mới.
 const PEERJS_URL = 'https://cdn.jsdelivr.net/npm/peerjs@1.5.5/dist/peerjs.min.js';
 const ROOM_PREFIX = 'dichua-annhien-';
-const freshNet = () => ({ on: false, host: false, code: null, peer: null, conn: null, conns: new Map(), myId: 'me', seq: 0, sendT: 0, lastSt: '', timer: 0 });
+const freshNet = () => ({ on: false, host: false, code: null, peer: null, conn: null, conns: new Map(), myId: 'me', seq: 0, sendT: 0, lastSt: '', timer: 0, banned: new Set() });
 let net = freshNet();
 function randCode() { return Array.from(crypto.getRandomValues(new Uint8Array(6)), b => 'abcdefghijkmnpqrstuvwxyz23456789'[b % 32]).join(''); }
+// mã máy của khách (giữ qua lần tải lại) để chủ phòng chặn người đã bị mời ra
+const myCid = (() => {
+  try { let v = sessionStorage.getItem('dichua.cid'); if (!v) { v = randCode() + randCode(); sessionStorage.setItem('dichua.cid', v); } return v; }
+  catch (e) { return randCode() + randCode(); }
+})();
 function loadPeerJs() {
   if (window.Peer) return Promise.resolve();
   return new Promise((ok, bad) => { const s = document.createElement('script'); s.src = PEERJS_URL; s.onload = ok; s.onerror = () => { s.remove(); bad(new Error('peerjs')); }; document.head.appendChild(s); });
@@ -4672,17 +4680,32 @@ function openNetMenu(val = '') {
   q('#nJoin').onclick = go;
   q('#nCode').onkeydown = e => { e.stopPropagation(); if (e.key === 'Enter') go(); };
 }
+// danh sách người trong phòng; chủ phòng có nút mời ra cạnh từng người
+// (bấm một lần để hỏi lại, bấm lần nữa trong 4 giây mới mời ra)
+let kickArmed = null, kickT = 0;
+function renderPeople() {
+  const box = q('#nPeople'); if (!box) return;
+  box.innerHTML = [`<span><i style="background:#ffe08a"></i>${esc(me.name)} (bạn)</span>`, ...[...remotes.values()].map(r => `<span><i style="background:${r.look.robe.c}"></i>${esc(r.name)}`
+    + (net.host ? `<button class="kick${kickArmed === r.id ? ' armed' : ''}" data-id="${esc(r.id)}">${kickArmed === r.id ? 'Mời ra?' : '✕ Mời ra'}</button>` : '') + '</span>')].join('');
+  for (const b of box.querySelectorAll('.kick')) b.onclick = () => {
+    const id = b.dataset.id;
+    clearTimeout(kickT);
+    if (kickArmed === id) { kickArmed = null; hostKick(id); return; }
+    kickArmed = id; renderPeople();
+    kickT = setTimeout(() => { kickArmed = null; renderPeople(); }, 4000);
+  };
+}
 function openRoomInfo() {
-  const people = [`<span><i style="background:#ffe08a"></i>${esc(me.name)} (bạn)</span>`, ...[...remotes.values()].map(r => `<span><i style="background:${r.look.robe.c}"></i>${esc(r.name)}</span>`)].join('');
   openSheet(`<h2>Phòng ${net.host ? 'của bạn' : 'đi chùa'}</h2><div class="sub">${net.host ? 'Gửi mã hoặc link này cho bạn bè để cùng vào chùa.' : 'Bạn đang đi chùa cùng mọi người.'}</div>
     <div class="code-big">${showCode(net.code)}</div>
-    <div class="people">${people}</div>
+    <div class="people" id="nPeople"></div>
     <div class="row"><button class="btn gold" id="nCopy">🔗 Sao chép link mời</button>${navigator.share ? '<button class="btn alt" id="nShare">📤 Chia sẻ</button>' : ''}</div>
     <div class="row"><button class="btn alt" id="nLeave">Rời phòng</button></div>
     <div class="note">${net.host ? 'Bạn là chủ phòng: nếu bạn thoát, phòng sẽ đóng.' : ''}</div>`);
   q('#nCopy').onclick = async () => { try { await navigator.clipboard.writeText(inviteUrl()); q('#nCopy').textContent = '✓ Đã sao chép'; } catch (e) { prompt('Sao chép link này:', inviteUrl()); } };
   if (q('#nShare')) q('#nShare').onclick = () => navigator.share({ title: 'Đi chùa online cùng mình', text: `Vào ${TEMPLE.name} đi chùa cùng mình nhé 🙏`, url: inviteUrl() }).catch(() => {});
   q('#nLeave').onclick = () => { leaveOnline(); closeSheet(); toast('Bạn đã rời phòng, tiếp tục đi chùa một mình.'); };
+  renderPeople();
 }
 function netStatus(emoji, title, msg, retry) {
   openSheet(`<div style="text-align:center;font-size:40px">${emoji}</div><h2>${title}</h2><div class="sub">${msg}</div>
@@ -4742,6 +4765,9 @@ function hostMsg(c, d) {
   if (!d || typeof d !== 'object') return;
   if (d.t === 'hello') {
     if (net.conns.has(c)) return;
+    const cid = String(d.cid || '').slice(0, 40);
+    if (cid && net.banned.has(cid)) { try { c.send({ t: 'kicked' }); } catch (e) {} setTimeout(() => { try { c.close(); } catch (e) {} }, 500); return; }
+    c._cid = cid;
     if (net.conns.size >= 11) { try { c.send({ t: 'full' }); } catch (e) {} setTimeout(() => c.close(), 400); return; }
     const id = 'g' + net.nextId++, name = cleanText(d.name, 16) || 'Bạn ' + id.slice(1);
     net.conns.set(c, id);
@@ -4759,6 +4785,23 @@ function hostMsg(c, d) {
   else if (d.t === 'ev' && typeof d.k === 'string') { applyEv(id, d); broadcast(Object.assign({}, d, { from: id }), c); }
   else if (d.t === 'bye') c.close();
 }
+// chủ phòng mời một người ra: chặn luôn mã máy đó để không tự vào lại
+function hostKick(id) {
+  if (!net.on || !net.host || id === net.myId) return;
+  let hit = false;
+  for (const [c, cid] of net.conns) if (cid === id) {
+    hit = true;
+    if (c._cid) net.banned.add(c._cid);
+    net.conns.delete(c);
+    try { c.send({ t: 'kicked' }); } catch (e) {}
+    setTimeout(() => { try { c.close(); } catch (e) {} }, 500);
+  }
+  if (!hit) return;
+  const r = remotes.get(id); remotes.delete(id);
+  broadcast({ t: 'leave', id });
+  if (r) toast(`🚪 Đã mời ${esc(r.name)} ra khỏi phòng.`);
+  updateHud();
+}
 async function joinOnline(code) {
   const n = startNet(false, code);
   netStatus('🌐', 'Đang vào phòng', `Đang tìm phòng <b>${showCode(code)}</b>…`);
@@ -4770,7 +4813,7 @@ async function joinOnline(code) {
   peer.on('open', () => {
     if (net !== n) return;
     const c = peer.connect(ROOM_PREFIX + code, { reliable: true });
-    c.on('open', () => { if (net !== n) return c.close(); clearTimeout(n.timer); n.conn = c; c.send({ t: 'hello', name: me.name, look: myLook() }); });
+    c.on('open', () => { if (net !== n) return c.close(); clearTimeout(n.timer); n.conn = c; c.send({ t: 'hello', cid: myCid, name: me.name, look: myLook() }); });
     c.on('data', d => { if (net === n && n.conn === c) guestMsg(d); });
     const lost = () => {
       if (net !== n || n.conn !== c) return;
@@ -4805,6 +4848,12 @@ function guestMsg(d) {
   } else if (d.t === 'ev' && typeof d.k === 'string') { if (String(d.from) !== net.myId) applyEv(String(d.from), d); }
   else if (d.t === 'tod' && Number.isInteger(d.i)) { if (d.i !== todIdx) { setTod(d.i, true); toast(`${TODS[todIdx].ic} Chủ phòng đã chuyển sang ${TODS[todIdx].n.toLowerCase()}`, 2200); } }
   else if (d.t === 'full') netStatus('🙏', 'Phòng đã đủ người', 'Phòng này đã đủ 12 người. Bạn có thể tạo phòng riêng nhé.', null);
+  else if (d.t === 'kicked') {
+    net.conn = null; remotes.clear(); updateHud();
+    openSheet(`<div style="text-align:center;font-size:40px">🚪</div><h2>Bạn đã bị mời ra</h2><div class="sub">Chủ phòng đã mời bạn ra khỏi phòng.</div>
+      <div class="row"><button class="btn" id="nSolo">Đi chùa một mình</button></div>`, { sticky: true, onClose: () => leaveOnline() });
+    q('#nSolo').onclick = () => closeSheet();
+  }
   else if (d.t === 'bye') net.closed = true;
 }
 

@@ -235,6 +235,8 @@ button:disabled { opacity: .35; cursor: default; }
 .mem .tag { font-size: 12px; font-weight: 800; color: var(--muted); background: #e2e8f0; border-radius: 999px; padding: 1px 8px; white-space: nowrap; }
 .mem .tag.ok { color: #116b32; background: #c9f2d7; } .mem .tag.wait { color: #8a5a00; background: #ffeec2; }
 .mem .mic { font-size: 14px; }
+.mem .kick { font-size: 12px; font-weight: 800; color: #c0392b; background: #fdecea; border-radius: 999px; padding: 3px 10px; flex: 0 0 auto; white-space: nowrap; }
+.mem .kick.armed { color: #fff; background: #c0392b; }
 .mem.empty { opacity: .55; } .mem.empty .nm { font-weight: 600; font-style: italic; }
 .talk { border-color: #3ddc84 !important; box-shadow: 0 0 0 3px rgba(61,220,132,.35); }
 .colors button:disabled { opacity: .25; transform: scale(.8); }
@@ -1988,7 +1990,7 @@ $('taskSheet').onclick = e => { if (e.target === $('taskSheet')) closeTask(); };
 const PEERJS_URL = 'https://cdn.jsdelivr.net/npm/peerjs@1.5.5/dist/peerjs.min.js';
 const ROOM_PREFIX = 'kegiamao-vibe-';
 const MAX_P = 10; // tổng người + máy trong một ván
-const freshNet = () => ({ on: false, host: false, code: null, peer: null, conn: null, conns: new Map(), timer: 0, left: false, dup: false, seen: new Map(), heard: 0, hbAt: 0, hbOk: false, hbT: 0, snapAt: 0, posAt: 0, posKey: '', again: 0 });
+const freshNet = () => ({ on: false, host: false, code: null, peer: null, conn: null, conns: new Map(), timer: 0, left: false, dup: false, seen: new Map(), heard: 0, hbAt: 0, hbOk: false, hbT: 0, snapAt: 0, posAt: 0, posKey: '', again: 0, kicked: false, banned: new Set() });
 const PEER_OPTS = { debug: 0, config: { sdpSemantics: 'unified-plan', iceServers: [
   { urls: ['stun:stun.l.google.com:19302', 'stun:stun.cloudflare.com:3478'] },
   { urls: ['turn:eu-0.turn.peerjs.com:3478', 'turn:us-0.turn.peerjs.com:3478', 'turn:eu-0.turn.peerjs.com:3478?transport=tcp', 'turn:us-0.turn.peerjs.com:3478?transport=tcp'], username: 'peerjs', credential: 'peerjsp' },
@@ -2127,6 +2129,7 @@ function renderLobby() {
     if (m.vc) { const mi = document.createElement('span'); mi.className = 'mic'; mi.textContent = m.mic ? '🎤' : '🔈'; mi.title = m.mic ? 'Đang mở mic' : 'Chỉ nghe'; row.appendChild(mi); }
     const tag = m.host ? ['chủ phòng', ''] : m.online === false ? ['mất kết nối', 'wait'] : m.wait ? ['chờ ván sau', 'wait'] : m.ready ? ['✅ sẵn sàng', 'ok'] : ['chưa sẵn sàng', 'wait'];
     const t = document.createElement('span'); t.className = 'tag ' + tag[1]; t.textContent = tag[0]; row.appendChild(t);
+    if (host && !m.host && m.cid !== myCid) row.appendChild(kickBtn(m.cid));
     box.appendChild(row);
   }
   for (let k = 0; k < nb; k++) { const row = document.createElement('div'); row.className = 'mem empty'; row.innerHTML = '<span class="nm">🤖 Máy chơi</span>'; box.appendChild(row); }
@@ -2157,6 +2160,20 @@ function renderLobby() {
       + `<br>Phòng: ${S.imps} Kẻ Giả Mạo${S.sheriff ? ' · có Cảnh sát trưởng' : ''}${S.jester ? ' · có Kẻ Pha Trò' : ''} · ván ${timeMin()} phút · ${S.voice === 'near' ? 'đang chơi nghe được người ở gần' : 'đang chơi im lặng, nói khi họp'}.`;
   }
   paintTalk();
+}
+// nút mời ra: bấm một lần để hỏi lại, bấm lần nữa trong 4 giây mới mời ra
+let kickArmed = null, kickT = 0;
+function kickBtn(cid) {
+  const b = document.createElement('button');
+  b.className = 'kick' + (kickArmed === cid ? ' armed' : '');
+  b.textContent = kickArmed === cid ? 'Mời ra?' : '✕ Mời ra';
+  b.onclick = () => {
+    clearTimeout(kickT);
+    if (kickArmed === cid) { kickArmed = null; hostKick(cid); return; }
+    kickArmed = cid; renderLobby();
+    kickT = setTimeout(() => { kickArmed = null; renderLobby(); }, 4000);
+  };
+  return b;
 }
 function fixS() { const humans = M.filter(m => m.online !== false).length; S.bots = Math.max(0, Math.min(S.bots, MAX_P - humans)); const total = humans + S.bots; if (S.imps > 1 && S.imps > Math.floor((total - 1) / 2)) S.imps = Math.max(1, Math.floor((total - 1) / 2)); }
 const roomMsg = () => ({ t: 'room', M: M.map(m => ({ cid: m.cid, name: m.name, ci: m.ci, host: !!m.host, ready: !!m.ready, online: m.online !== false, wait: !!m.wait, vc: !!m.vc, mic: !!m.mic, pid: m.pid || null })), S, ph: phase === 'lobby' ? 'lobby' : 'game' });
@@ -2255,6 +2272,26 @@ function memberLost(cid) {
   }
   roomChanged();
 }
+// chủ phòng mời một người ra: chặn luôn mã máy đó để không tự vào lại;
+// đang trong ván thì như khách mất kết nối — máy chơi thay tới hết ván
+function hostKick(cid) {
+  if (!isHost() || !cid || cid === myCid) return;
+  const m = M.find(x => x.cid === cid); if (!m || m.host) return;
+  net.banned.add(cid);
+  for (const [c, id] of net.conns) if (id === cid) {
+    net.conns.delete(c); net.seen.delete(c);
+    try { c.send({ t: 'kicked' }); } catch (e) {}
+    setTimeout(() => { try { c.close(); } catch (e) {} }, 500);
+  }
+  if (m.pid) { const vc = VC.calls.get(m.pid); if (vc) { try { vc.close(); } catch (e) {} vcDrop(m.pid, vc); } }
+  M = M.filter(x => x !== m);
+  const p = P.find(q => q.cid === cid && q.remote);
+  if (phase !== 'lobby' && p && !p.bot) {
+    Object.assign(p, { bot: true, path: [], state: 'idle', target: null, vx: 0, vy: 0, vent: -1, voteAt: meeting ? meeting.t + 4 : 0 });
+    if (phase === 'play' || phase === 'meeting') toast(`🚪 ${p.name} đã bị mời ra — máy chơi thay`);
+  }
+  fixS(); roomChanged();
+}
 function freeColor(want, cid) {
   const taken = M.filter(m => m.cid !== cid).map(m => m.ci);
   if (okColor(want) && !taken.includes(want)) return want;
@@ -2265,6 +2302,7 @@ function hostMsg(c, d) {
   if (!d || typeof d !== 'object') return;
   if (d.t === 'hello') {
     const cid = String(d.cid || '').slice(0, 40); if (!cid) return;
+    if (net.banned.has(cid)) { try { c.send({ t: 'kicked' }); } catch (e) {} setTimeout(() => { try { c.close(); } catch (e) {} }, 500); return; }
     for (const [oc, ocid] of net.conns) if (ocid === cid && oc !== c) { net.conns.delete(oc); try { oc.send({ t: 'dup' }); } catch (e) {} setTimeout(() => { try { oc.close(); } catch (e) {} }, 500); }
     let m = M.find(x => x.cid === cid);
     if (!m) {
@@ -2414,7 +2452,7 @@ async function joinOnline(code, again = 0) {
       guestMsg(d);
     });
     const lost = () => {
-      if (net !== n || n.conn !== c) return;
+      if (net !== n || n.conn !== c || n.kicked) return;
       n.conn = null;
       if (n.left) { netFail('Phòng đã đóng', 'Chủ phòng đã rời đi nên phòng đóng lại.', null); return; }
       if (n.dup) { netFail('Đã vào từ nơi khác', 'Bạn vừa vào phòng này từ một tab khác, nên tab này dừng lại.', retry); return; }
@@ -2425,7 +2463,7 @@ async function joinOnline(code, again = 0) {
   });
   peer.on('disconnected', () => { setTimeout(() => { if (net === n && !peer.destroyed && peer.disconnected) peer.reconnect(); }, 1500); });
   peer.on('error', err => {
-    if (net !== n || n.conn) return;
+    if (net !== n || n.conn || n.kicked) return;
     clearTimeout(n.timer);
     if (again && rejoin()) return;
     if (err.type === 'peer-unavailable') netSheet('😕', 'Không tìm thấy phòng', `Không có phòng nào mang mã <b>${showCode(code)}</b>. Kiểm tra lại mã, hoặc chủ phòng đã thoát.`,
@@ -2456,6 +2494,17 @@ function guestMsg(d) {
     }
     case 'full': hideNetSheet(); applyFull(d); voiceFlag(); return;
     case 'dup': net.dup = true; return;
+    case 'kicked': {
+      const n = net; n.kicked = true; n.conn = null;
+      clearTimeout(n.timer); clearInterval(n.hbT);
+      voiceLeave();
+      if (n.peer) try { n.peer.destroy(); } catch (e) {}
+      syncVoiceUi();
+      for (const id of ['meetSheet', 'taskSheet', 'roleSheet']) $(id).hidden = true;
+      $('ejectScene').hidden = true;
+      netSheet('🚪', 'Bạn đã bị mời ra', 'Chủ phòng đã mời bạn ra khỏi phòng.', [[{ label: 'Chơi với máy', go: true, fn: () => leaveOnline() }]]);
+      return;
+    }
     case 'bye': net.left = true; return;
     case 'room': {
       if (!Array.isArray(d.M)) return;

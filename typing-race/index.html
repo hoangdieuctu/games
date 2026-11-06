@@ -253,6 +253,8 @@ body.racing .dock { display: none; }
 .lseat .mini svg { width: 100%; height: 100%; overflow: visible; }
 .lseat .nm { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .lseat .tg { font-size: 12px; font-weight: 700; color: var(--muted); background: #eef2f7; border-radius: 999px; padding: 1px 8px; white-space: nowrap; }
+.lseat .kick { font-size: 12px; font-weight: 800; color: #c0392b; background: #fdecea; border-radius: 999px; padding: 3px 10px; flex: 0 0 auto; white-space: nowrap; }
+.lseat .kick.armed { color: #fff; background: #c0392b; }
 .plist { max-height: 210px; overflow-y: auto; }
 
 /* kết quả */
@@ -1132,7 +1134,7 @@ $('lbGarage').onclick = () => openGarage(false);
 // Không giới hạn số người; ai vào giữa cuộc đua thì xem, lượt sau mới đua.
 const PEERJS_URL = 'https://cdn.jsdelivr.net/npm/peerjs@1.5.5/dist/peerjs.min.js';
 const ROOM_PREFIX = 'duaxe-vibe-';
-const freshNet = () => ({ on: false, host: false, code: null, peer: null, conn: null, conns: new Map(), timer: 0, left: false });
+const freshNet = () => ({ on: false, host: false, code: null, peer: null, conn: null, conns: new Map(), timer: 0, left: false, banned: new Set() });
 let net = freshNet();
 function randCode() { return Array.from(crypto.getRandomValues(new Uint8Array(6)), b => 'abcdefghijkmnpqrstuvwxyz23456789'[b % 32]).join(''); }
 const myCid = (() => {
@@ -1275,6 +1277,7 @@ function hostMsg(c, d) {
   if (d.t === 'hello') {
     const cid = String(d.cid || '').slice(0, 40);
     if (!cid || cid === myCid) return;
+    if (net.banned.has(cid)) { try { c.send({ t: 'kicked' }); } catch (e) {} setTimeout(() => { try { c.close(); } catch (e) {} }, 500); return; }
     for (const [oc, ocid] of net.conns) if (ocid === cid && oc !== c) { net.conns.delete(oc); try { oc.close(); } catch (e) {} }
     net.conns.set(c, cid);
     let p = G.players.find(x => x.id === cid);
@@ -1300,6 +1303,20 @@ function hostMsg(c, d) {
     Object.assign(p, sanitizeLook(d)); flush();
   } else if (d.t === 'cheer' && typeof d.e === 'string') doCheer(p.id, d.e);
   else if (d.t === 'bye') { p.online = false; flush(); }
+}
+// chủ phòng mời một người ra: chặn luôn mã máy đó để không tự vào lại;
+// đang đua thì coi như mất kết nối để cuộc đua vẫn kết thúc bình thường
+function hostKick(cid) {
+  const i = G ? G.players.findIndex(p => p.id === cid && !p.bot) : -1;
+  if (!net.on || !net.host || cid === myCid || i < 0) return;
+  net.banned.add(cid);
+  for (const [c, id] of net.conns) if (id === cid) {
+    net.conns.delete(c);
+    try { c.send({ t: 'kicked' }); } catch (e) {}
+    setTimeout(() => { try { c.close(); } catch (e) {} }, 500);
+  }
+  if (G.phase === 'lobby' || G.phase === 'done') G.players.splice(i, 1); else G.players[i].online = false;
+  flush();
 }
 
 // ── khách ──
@@ -1362,6 +1379,10 @@ function guestMsg(d) {
     if (first && !store.get('duaxe.me', null)) openGarage(false); // lần đầu vào: chọn xe trước
   }
   else if (d.t === 'cheer' && typeof d.id === 'string' && typeof d.e === 'string' && (CHEERS.includes(d.e) || CHEER_TXT.includes(d.e))) showCheer(d.id, d.e);
+  else if (d.t === 'kicked') {
+    net.conn = null;
+    netSheet('🚪', 'Bạn đã bị mời ra', 'Chủ phòng đã mời bạn ra khỏi phòng.', [[{ label: 'Đua với máy', go: true, fn: () => leaveOnline() }]]);
+  }
   else if (d.t === 'bye') net.left = true;
 }
 
@@ -1403,15 +1424,23 @@ function syncLobby(force) {
   const humans = S.players.filter(p => !p.bot);
   $('lbPlTitle').textContent = `Tay đua (${S.players.length})`;
   const box = $('lbPlayers');
-  box.innerHTML = '';
-  for (const p of S.players) {
-    const row = document.createElement('div');
-    row.className = 'lseat';
-    row.innerHTML = `<span class="mini">${carSVG(p.car, p.color, p.ch)}</span><span class="nm"></span>`;
-    row.querySelector('.nm').textContent = p.id === myId() ? p.name + ' (bạn)' : p.name;
-    const tag = p.bot ? 'máy' : p.id === myCid && net.host ? 'chủ phòng' : p.online === false ? 'mất kết nối' : p.late ? 'vào sau' : '';
-    if (tag) { const t = document.createElement('span'); t.className = 'tg'; t.textContent = tag; row.appendChild(t); }
-    box.appendChild(row);
+  const rows = S.players.map(p => ({ p,
+    tag: p.bot ? 'máy' : p.id === myCid && net.host ? 'chủ phòng' : p.online === false ? 'mất kết nối' : p.late ? 'vào sau' : '',
+    kick: net.on && net.host && !p.bot && p.id !== myCid && [...net.conns.values()].includes(p.id) }));
+  // đang đua thì trạng thái gửi đi liên tục: chỉ vẽ lại danh sách khi có gì đổi để nút Mời ra bấm được
+  const key = JSON.stringify([myId(), kickArmed, rows.map(r => [r.p.id, r.p.name, r.p.car, r.p.color, r.p.ch, r.tag, r.kick])]);
+  if (force || box.dataset.k !== key) {
+    box.dataset.k = key;
+    box.innerHTML = '';
+    for (const { p, tag, kick } of rows) {
+      const row = document.createElement('div');
+      row.className = 'lseat';
+      row.innerHTML = `<span class="mini">${carSVG(p.car, p.color, p.ch)}</span><span class="nm"></span>`;
+      row.querySelector('.nm').textContent = p.id === myId() ? p.name + ' (bạn)' : p.name;
+      if (tag) { const t = document.createElement('span'); t.className = 'tg'; t.textContent = tag; row.appendChild(t); }
+      if (kick) row.appendChild(kickBtn(p.id));
+      box.appendChild(row);
+    }
   }
   if (host) {
     $('lbStart').disabled = !editable;
@@ -1423,6 +1452,20 @@ function syncLobby(force) {
     $('lbGuestMsg').innerHTML = S.phase === 'lobby' ? 'Chờ chủ phòng bắt đầu' + DOTS : 'Cuộc đua đang diễn ra.';
     $('lbClose').hidden = S.phase === 'lobby';
   }
+}
+// nút mời ra: bấm một lần để hỏi lại, bấm lần nữa trong 4 giây mới mời ra
+let kickArmed = null, kickT = 0;
+function kickBtn(id) {
+  const b = document.createElement('button');
+  b.className = 'kick' + (kickArmed === id ? ' armed' : '');
+  b.textContent = kickArmed === id ? 'Mời ra?' : '✕ Mời ra';
+  b.onclick = () => {
+    clearTimeout(kickT);
+    if (kickArmed === id) { kickArmed = null; hostKick(id); return; }
+    kickArmed = id; syncLobby();
+    kickT = setTimeout(() => { kickArmed = null; syncLobby(); }, 4000);
+  };
+  return b;
 }
 $('lbCode').onclick = async () => {
   try { await navigator.clipboard.writeText(showCode(net.code)); } catch (e) {}

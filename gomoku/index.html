@@ -178,6 +178,9 @@ button:disabled { opacity: .4; cursor: default; }
   font: 600 14px/1.3 system-ui, sans-serif; text-align: center; outline: none;
   user-select: all; -webkit-user-select: all;
 }
+.panel .kick-row { display: flex; justify-content: center; margin-top: 12px; }
+.panel .kick { font-size: 13px; font-weight: 800; color: #c0392b; background: #fdecea; border-radius: 999px; padding: 5px 14px; }
+.panel .kick.armed { color: #fff; background: #c0392b; }
 .panel .note { margin-top: 10px; font-size: 13px; color: #c0392b; text-align: center; line-height: 1.4; }
 .room-code { display: block; width: 100%; margin-top: 14px; padding: 8px 12px 6px; border-radius: 14px; border: 2px dashed var(--line); background: #f5f8fc; color: var(--ink); text-align: center; }
 .room-code b { display: block; font: 800 34px/1.1 'Baloo 2', system-ui, sans-serif; letter-spacing: .18em; padding-left: .18em; }
@@ -801,7 +804,8 @@ function setStatus() {
   if (over) {
     s.innerHTML = over === 'draw' ? 'Hoà! Bàn cờ đã kín.' : over === human ? '🎉 Bạn thắng rồi!' : net.on ? 'Đối thủ thắng ván này.' : 'Máy thắng ván này.';
   } else if (net.on) {
-    if (!net.conn) s.innerHTML = `<span>${net.host ? (moves.length ? `Đối thủ đã rời, đang chờ vào lại${dots}` : `Đang chờ bạn vào phòng${dots}`) : 'Chưa kết nối với đối thủ.'}</span>`;
+    if (!net.conn && net.note) s.innerHTML = `<span class="say">${net.note}</span>`;
+    else if (!net.conn) s.innerHTML = `<span>${net.host ? (moves.length ? `Đối thủ đã rời, đang chờ vào lại${dots}` : `Đang chờ bạn vào phòng${dots}`) : 'Chưa kết nối với đối thủ.'}</span>`;
     else if (net.note) s.innerHTML = `<span class="say">${net.note}</span>`;
     else if (turn() === human) s.innerHTML = `${iconSvg(human)}<span>Đến lượt bạn</span>`;
     else s.innerHTML = `${iconSvg(ai)}<span>Đối thủ đang nghĩ${dots}</span>`;
@@ -1049,11 +1053,11 @@ $('zFit').onclick = () => { if (view.s >= FULL) defaultView(); else { view.s = F
 // hai bên lệch nhau (mất tin, vào lại giữa ván) thì chủ phòng gửi lại cả bàn.
 //
 // Tin nhắn: state {moves, hostX, score} chủ → khách · move {q, n} hai chiều
-// (n = số nước trước nước này) · hello / new khách → chủ · full, bye.
+// (n = số nước trước nước này) · hello {cid} / new khách → chủ · full, kicked, bye.
 const PEERJS_URL = 'https://cdn.jsdelivr.net/npm/peerjs@1.5.5/dist/peerjs.min.js';
 const ROOM_PREFIX = 'caro-vibe-';
 const freshNet = () => ({ on: false, host: false, code: null, peer: null, conn: null, hostX: true,
-  score: { w: 0, l: 0, d: 0 }, note: '', sheetClosable: false, timer: 0 });
+  score: { w: 0, l: 0, d: 0 }, note: '', sheetClosable: false, timer: 0, guestCid: '', banned: new Set() });
 let net = freshNet();
 
 function loadPeerJs() {
@@ -1065,6 +1069,11 @@ function loadPeerJs() {
   });
 }
 const randCode = () => Array.from(crypto.getRandomValues(new Uint8Array(6)), b => 'abcdefghijkmnpqrstuvwxyz23456789'[b % 32]).join('');
+// mã riêng của tab này: chủ phòng nhận ra người đã bị mời ra để không cho vào lại
+const myCid = (() => {
+  try { let v = sessionStorage.getItem('caro.cid'); if (!v) { v = randCode() + randCode(); sessionStorage.setItem('caro.cid', v); } return v; }
+  catch (e) { return randCode() + randCode(); }
+})();
 const inviteUrl = () => location.href.split('#')[0] + '#room=' + net.code;
 const showCode = c => String(c || '').toUpperCase();
 // mã phòng người chơi gõ vào: không phân biệt hoa thường, bỏ khoảng trắng/gạch; dán cả link mời cũng được
@@ -1125,11 +1134,41 @@ function showInvite() {
   if (!net.on || !net.host || !net.code) return;
   const first = [{ label: 'Copy link', go: true, fn: copyInvite }];
   if (navigator.share) first.push({ label: 'Chia sẻ', fn: () => navigator.share({ title: 'Cờ Caro', text: 'Vào chơi cờ caro với mình nhé!', url: inviteUrl() }).catch(() => {}) });
+  const rows = [first, [{ label: 'Để sau', fn: hideNetSheet }, { label: 'Huỷ phòng', fn: () => leaveOnline() }]];
+  if (net.conn) { const r = document.createElement('div'); r.className = 'kick-row'; r.appendChild(kickBtn()); rows.unshift(r); }
   netSheet('🔗', 'Mời bạn chơi', net.conn ? 'Đối thủ đang ở trong phòng.' : `Gửi mã phòng hoặc link cho bạn. Bạn ấy bấm 🌐 Chơi online rồi nhập mã, hoặc mở link là vào chơi ngay. Đang chờ${DOTS}`, {
     link: true, closable: true,
     note: location.protocol === 'file:' ? 'Bạn đang mở file trên máy nên link này chỉ dùng được trên máy này. Hãy gửi mã phòng cho bạn nhé.' : '',
-    rows: [first, [{ label: 'Để sau', fn: hideNetSheet }, { label: 'Huỷ phòng', fn: () => leaveOnline() }]],
+    rows,
   });
+}
+// nút mời ra: bấm một lần để hỏi lại, bấm lần nữa trong 4 giây mới mời ra
+let kickT = 0;
+function kickBtn() {
+  const b = document.createElement('button');
+  b.className = 'kick'; b.textContent = '✕ Mời ra';
+  b.onclick = () => {
+    clearTimeout(kickT);
+    if (b.classList.contains('armed')) { hostKick(); return; }
+    b.classList.add('armed'); b.textContent = 'Mời ra?';
+    kickT = setTimeout(() => { b.classList.remove('armed'); b.textContent = '✕ Mời ra'; }, 4000);
+  };
+  return b;
+}
+// chủ phòng mời đối thủ ra: chặn mã máy đó, xoá ván và mở phòng chờ người khác vào
+function hostKick() {
+  if (!net.on || !net.host || !net.conn) return;
+  const c = net.conn, n = net;
+  if (n.guestCid) n.banned.add(n.guestCid);
+  n.conn = null; n.guestCid = '';
+  try { c.send({ t: 'kicked' }); } catch (e) {}
+  setTimeout(() => { try { c.close(); } catch (e) {} }, 500);
+  n.score = { w: 0, l: 0, d: 0 }; n.hostX = true; human = 1; ai = 2;
+  n.note = 'Đã mời bạn kia ra khỏi phòng.';
+  loadMoves([]);
+  hideNetSheet();
+  clearTimeout(kickT);
+  kickT = setTimeout(() => { if (net === n && n.note === 'Đã mời bạn kia ra khỏi phòng.') { n.note = ''; setStatus(); } }, 3000);
 }
 // 🌐 Chơi online: tạo phòng mới, hoặc gõ mã phòng bạn bè gửi để vào
 function onlineMenu(val = '') {
@@ -1245,11 +1284,15 @@ function bindConn(n, c) {
   c.on('open', () => {
     if (net !== n) return c.close();
     clearTimeout(n.timer);
+    if (n.host) return; // chủ phòng chờ lời chào (có mã máy) rồi mới cho vào
     n.conn = c;
-    if (n.host) { hideNetSheet(); n.note = 'Đối thủ đã vào phòng 👋'; sendState(); setStatus(); }
-    else c.send({ t: 'hello' });
+    c.send({ t: 'hello', cid: myCid });
   });
-  c.on('data', d => { if (net === n && n.conn === c) onNetMsg(d); });
+  c.on('data', d => {
+    if (net !== n) return;
+    if (n.conn === c) onNetMsg(d);
+    else if (n.host && d && d.t === 'hello') admit(n, c, String(d.cid || '').slice(0, 40));
+  });
   const lost = () => {
     if (net !== n || n.conn !== c) return;
     n.conn = null; n.note = '';
@@ -1259,6 +1302,14 @@ function bindConn(n, c) {
   };
   c.on('close', lost);
   c.on('error', lost);
+}
+
+function admit(n, c, cid) {
+  const reject = t => { try { c.send({ t }); } catch (e) {} setTimeout(() => c.close(), 500); };
+  if (cid && n.banned.has(cid)) return reject('kicked');
+  if (n.conn) return reject('full');
+  n.conn = c; n.guestCid = cid;
+  hideNetSheet(); n.note = 'Đối thủ đã vào phòng 👋'; sendState(); setStatus();
 }
 
 function sendState() { netSend({ t: 'state', moves, hostX: net.hostX, score: net.score }); }
@@ -1295,6 +1346,12 @@ function onNetMsg(d) {
       break;
     case 'full':
       if (!net.host) { const c = net.code; net.conn = null; netFail('Phòng đã đủ người', 'Phòng này đã có hai người chơi rồi.', () => joinOnline(c)); }
+      break;
+    case 'kicked':
+      if (!net.host) {
+        net.conn = null; setStatus();
+        netSheet('🚪', 'Bạn đã bị mời ra', 'Chủ phòng đã mời bạn ra khỏi phòng.', { rows: [[{ label: 'Chơi với máy', go: true, fn: () => leaveOnline() }]] });
+      }
       break;
     case 'bye': net.left = true; break;
   }

@@ -260,6 +260,8 @@ button:disabled { opacity: .4; cursor: default; }
 .lseat .nm { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .lseat .nm.empty { color: var(--muted); font-weight: 600; }
 .lseat .tg { font-size: 12px; font-weight: 700; color: var(--muted); background: #eef2f7; border-radius: 999px; padding: 1px 8px; }
+.lseat .kick { font-size: 12px; font-weight: 800; color: #c0392b; background: #fdecea; border-radius: 999px; padding: 3px 10px; flex: 0 0 auto; }
+.lseat .kick.armed { color: #fff; background: #c0392b; }
 .panel .go { display: block; width: 100%; margin-top: 18px; background: var(--ink); color: #fff; border-radius: 14px; padding: 12px; font-weight: 800; font-size: 18px; }
 .panel .rule { margin-top: 12px; font-size: 13px; color: var(--muted); line-height: 1.45; }
 .panel .rule.center { text-align: center; }
@@ -1354,7 +1356,7 @@ function show(v, ev) {
 const PEERJS_URL = 'https://cdn.jsdelivr.net/npm/peerjs@1.5.5/dist/peerjs.min.js';
 const ROOM_PREFIX = 'tienlen-vibe-';
 const JOIN_ORDER = [2, 1, 3]; // khách đầu tiên ngồi đối diện chủ phòng
-const freshNet = () => ({ on: false, host: false, code: null, peer: null, conn: null, conns: new Map(), seat: -1, timer: 0, left: false });
+const freshNet = () => ({ on: false, host: false, code: null, peer: null, conn: null, conns: new Map(), seat: -1, timer: 0, left: false, banned: new Set() });
 let net = freshNet();
 function randCode() { return Array.from(crypto.getRandomValues(new Uint8Array(6)), b => 'abcdefghijkmnpqrstuvwxyz23456789'[b % 32]).join(''); }
 const myCid = (() => {
@@ -1495,6 +1497,7 @@ function hostMsg(c, d) {
   if (d.t === 'hello') {
     const cid = String(d.cid || '').slice(0, 40), name = cleanName(d.name);
     if (!cid) return;
+    if (net.banned.has(cid)) { try { c.send({ t: 'kicked' }); } catch (e) {} setTimeout(() => c.close(), 500); return; }
     for (const [oc, ocid] of net.conns) if (ocid === cid && oc !== c) { net.conns.delete(oc); try { oc.close(); } catch (e) {} }
     net.conns.set(c, cid);
     let s = G.seats.findIndex(x => x && x.cid === cid);
@@ -1519,6 +1522,20 @@ function hostMsg(c, d) {
   else if (d.t === 'pass') doPass(s);
   else if (d.t === 'name' && G.phase === 'lobby') { const nm = cleanName(d.name); if (nm) { G.seats[s].name = nm; commit({ type: 'lobby' }); } }
   else if (d.t === 'bye') { G.seats[s].online = false; commit({ type: 'lobby' }); }
+}
+// chủ phòng mời một người ra: chặn luôn mã máy đó để không tự vào lại;
+// đang chơi thì máy đánh thay ghế đó (giữ nguyên tiền/bài của ghế)
+function hostKick(s) {
+  const x = G && G.seats[s];
+  if (!net.on || !net.host || s === net.seat || !x || x.type !== 'human' || !x.remote) return;
+  net.banned.add(x.cid);
+  for (const [c, cid] of net.conns) if (cid === x.cid) {
+    net.conns.delete(c);
+    try { c.send({ t: 'kicked' }); } catch (e) {}
+    setTimeout(() => { try { c.close(); } catch (e) {} }, 500);
+  }
+  G.seats[s] = G.phase === 'lobby' ? null : { type: 'bot', name: 'Máy ' + ANIMALS[s] };
+  commit({ type: 'lobby' });
 }
 function hostStart() {
   const fill = $('lbFill').checked;
@@ -1605,6 +1622,10 @@ function guestMsg(d) {
     show(d.G, first ? null : ev);
     if (first && V.phase === 'lobby') openLobby();
   }
+  else if (d.t === 'kicked') {
+    net.conn = null;
+    netSheet('🚪', 'Bạn đã bị mời ra', 'Chủ phòng đã mời bạn ra khỏi phòng.', [[{ label: 'Chơi với máy', go: true, fn: () => leaveOnline() }]]);
+  }
   else if (d.t === 'full') { const c = net.code; net.conn = null; netFail('Phòng đã đủ người', 'Phòng này đã có 4 người chơi rồi.', () => joinOnline(c)); }
   else if (d.t === 'bye') net.left = true;
 }
@@ -1643,6 +1664,7 @@ function syncLobby(force) {
       nm.textContent = k === net.seat ? x.name + ' (bạn)' : x.name;
       const tag = x.type === 'bot' ? 'máy' : k === 0 ? 'chủ phòng' : x.online === false ? 'mất kết nối' : '';
       if (tag) { const t = document.createElement('span'); t.className = 'tg'; t.textContent = tag; row.appendChild(t); }
+      if (net.host && k !== net.seat && x.type === 'human' && x.remote) row.appendChild(kickBtn(k));
     } else { nm.textContent = lobby ? (fill && net.host ? 'Máy sẽ chơi' : 'Đang chờ…') : 'Trống'; nm.classList.add('empty'); }
     box.appendChild(row);
   }
@@ -1654,6 +1676,20 @@ function syncLobby(force) {
       : humans < 2 && !fill ? 'Cần ít nhất 2 người (hoặc cho máy chơi cùng) để bắt đầu.' : `${humans} người đã sẵn sàng.`;
     $('lbCancel').textContent = lobby ? 'Huỷ phòng' : 'Đóng';
   }
+}
+// nút mời ra: bấm một lần để hỏi lại, bấm lần nữa trong 4 giây mới mời ra
+let kickArmed = -1, kickT = 0;
+function kickBtn(k) {
+  const b = document.createElement('button');
+  b.className = 'kick' + (kickArmed === k ? ' armed' : '');
+  b.textContent = kickArmed === k ? 'Mời ra?' : '✕ Mời ra';
+  b.onclick = () => {
+    clearTimeout(kickT);
+    if (kickArmed === k) { kickArmed = -1; hostKick(k); return; }
+    kickArmed = k; syncLobby();
+    kickT = setTimeout(() => { kickArmed = -1; syncLobby(); }, 4000);
+  };
+  return b;
 }
 $('lbCode').onclick = async () => {
   try { await navigator.clipboard.writeText(showCode(net.code)); } catch (e) {}

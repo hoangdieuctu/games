@@ -468,6 +468,8 @@ button:disabled { opacity: .4; cursor: default; }
 .seat .tag { font-size: 12px; font-weight: 700; color: var(--muted); background: #eef2f7; border-radius: 999px; padding: 1px 8px; white-space: nowrap; }
 .seat .tag.ok { color: #1e7a3c; background: #eafaf0; }
 .seat .tag.wait { color: #c0392b; background: #fdecea; }
+.seat .kick { font-size: 12px; font-weight: 800; color: #c0392b; background: #fdecea; border-radius: 999px; padding: 3px 10px; flex: 0 0 auto; white-space: nowrap; }
+.seat .kick.armed { color: #fff; background: #c0392b; }
 #lbReady.on { background: #eafaf0; color: #1e7a3c; }
 .panel .go { display: block; width: 100%; margin-top: 18px; background: var(--ink); color: #fff; border-radius: 14px; padding: 12px; font-weight: 800; font-size: 18px; }
 .panel .rule { margin-top: 12px; font-size: 13px; color: var(--muted); line-height: 1.45; }
@@ -4736,7 +4738,7 @@ if (window.ResizeObserver) { const ro = new ResizeObserver(() => fit()); for (co
 const PEERJS_URL = 'https://cdn.jsdelivr.net/npm/peerjs@1.5.5/dist/peerjs.min.js';
 const ROOM_PREFIX = 'typhu6-vibe-';
 const JOIN_ORDER = [3, 1, 4, 2, 5]; // khách vào ngồi so le quanh bàn
-const freshNet = () => ({ on: false, host: false, code: null, peer: null, conn: null, conns: new Map(), seat: -1, timer: 0, left: false, dup: false, seen: new Map(), heard: 0, hbAt: 0, hbOk: false, hbT: 0 });
+const freshNet = () => ({ on: false, host: false, code: null, peer: null, conn: null, conns: new Map(), seat: -1, timer: 0, left: false, dup: false, seen: new Map(), heard: 0, hbAt: 0, hbOk: false, hbT: 0, banned: new Set() });
 // nhiều STUN + TURN cả UDP lẫn TCP: hai bên khác mạng (4G, wifi công ty chặn UDP...) vẫn tìm được đường nối
 const PEER_OPTS = { debug: 0, config: { sdpSemantics: 'unified-plan', iceServers: [
   { urls: ['stun:stun.l.google.com:19302', 'stun:stun.cloudflare.com:3478'] },
@@ -4966,6 +4968,8 @@ function hostMsg(c, d) {
   if (d.t === 'hello') {
     const cid = String(d.cid || '').slice(0, 40), name = cleanName(d.name);
     if (!cid) return;
+    // người đã bị mời ra: báo rồi đóng luôn (trước cả bước nhận lại ghế theo tên)
+    if (net.banned.has(cid)) { try { c.send({ t: 'kicked' }); } catch (e) {} setTimeout(() => { try { c.close(); } catch (e) {} }, 500); return; }
     for (const [oc, ocid] of net.conns) if (ocid === cid && oc !== c) { net.conns.delete(oc); try { oc.send({ t: 'dup' }); } catch (e) {} setTimeout(() => { try { oc.close(); } catch (e) {} }, 500); }
     net.conns.set(c, cid);
     let s = G.seats.findIndex(x => x && x.cid === cid), joined = null;
@@ -5031,6 +5035,23 @@ function hostMsg(c, d) {
       case 'jailpay': return doJailPay(s); case 'jailcard': return doJailCard(s);
     }
   }
+}
+// chủ phòng mời một người ra: chặn luôn mã máy đó để không tự vào lại; đang chơi thì máy đánh thay ghế đó
+// (ghế thành ghế máy hẳn nên không ai nhận lại được theo tên)
+function hostKick(s) {
+  const x = G && G.seats[s];
+  if (!net.on || !net.host || s === net.seat || !x || x.type !== 'human' || !x.remote) return;
+  net.banned.add(x.cid);
+  for (const [c, cid] of [...net.conns]) if (cid === x.cid) {
+    net.conns.delete(c); net.seen.delete(c);
+    try { c.send({ t: 'kicked' }); } catch (e) {}
+    setTimeout(() => { try { c.close(); } catch (e) {} }, 500);
+  }
+  const vc = x.pid && VC.calls.get(x.pid);
+  if (vc) { try { vc.close(); } catch (e) {} vcDrop(x.pid, vc); }
+  if (G.phase === 'lobby') G.seats[s] = null;
+  else G.seats[s] = { type: 'bot', name: 'Máy ' + COLORS[colIdx(s)].name, char: G.pl[s].char || x.char || null, color: x.color };
+  commit({ type: 'lobby' });
 }
 function hostStart() {
   const fill = $('lbFill').checked;
@@ -5165,6 +5186,10 @@ function guestMsg(d) {
     else if (fresh) voiceFlag(); // báo lại cờ mic của mình cho chủ phòng (mới mở lại thì chủ phòng chưa biết)
   }
   else if (d.t === 'full') { const c = net.code; net.conn = null; netFail('Phòng đã đủ người', 'Phòng này đã có 6 người chơi rồi.', () => joinOnline(c)); }
+  else if (d.t === 'kicked') {
+    net.conn = null; VC.wantMic = false; voiceLeave();
+    netSheet('🚪', 'Bạn đã bị mời ra', 'Chủ phòng đã mời bạn ra khỏi phòng.', [[{ label: 'Chơi với máy', go: true, fn: () => leaveOnline() }]]);
+  }
   else if (d.t === 'bye') net.left = true;
   else if (d.t === 'dup') net.dup = true;
   else if (d.t === 'emo') { if (Number.isInteger(d.s) && d.s !== net.seat) showEmote(d.s, d.e); }
@@ -5240,6 +5265,7 @@ function syncLobby(force) {
       const tag = x.type === 'bot' ? 'máy' : k === 0 ? 'chủ phòng' : x.online === false ? 'mất kết nối' : lobbyGuest ? (x.ready ? '✅ sẵn sàng' : 'chưa sẵn sàng') : '';
       if (tag) { const t = document.createElement('span'); t.className = 'tag' + (lobbyGuest ? (x.ready ? ' ok' : ' wait') : ''); t.textContent = tag; row.appendChild(t); }
       if (showChar) { const pc = document.createElement('span'); pc.className = 'pick-char'; pc.appendChild(chibiSvg(x.char)); row.appendChild(pc); }
+      if (net.host && k !== net.seat && x.type === 'human' && x.remote) row.appendChild(kickBtn(k));
     } else { nm.textContent = G.phase === 'lobby' ? (fill && net.host ? 'Máy sẽ chơi' : 'Đang chờ…') : 'Trống'; nm.classList.add('empty'); }
     box.appendChild(row);
   }
@@ -5276,6 +5302,20 @@ function syncLobby(force) {
     $('lbReady').disabled = net.seat < 0;
     $('lbGuestHint').innerHTML = rd ? `Đã sẵn sàng · chờ chủ phòng bắt đầu${DOTS}` : (G.charRand ? 'Chọn tên, màu xong' : 'Chọn tên, nhân vật, màu xong') + ' thì bấm <b>Sẵn sàng</b> — mọi người sẵn sàng rồi chủ phòng mới bắt đầu được.' + (G.charRand ? ' Nhân vật được chia <b>ngẫu nhiên</b> lúc vào ván 🎲' : '') + (G.noEv ? ' Phòng này <b>tắt</b> sự kiện chung.' : ' Phòng này <b>bật</b> sự kiện chung 📢');
   }
+}
+// nút mời ra: bấm một lần để hỏi lại, bấm lần nữa trong 4 giây mới mời ra
+let kickArmed = -1, kickT = 0;
+function kickBtn(k) {
+  const b = document.createElement('button');
+  b.className = 'kick' + (kickArmed === k ? ' armed' : '');
+  b.textContent = kickArmed === k ? 'Mời ra?' : '✕ Mời ra';
+  b.onclick = () => {
+    clearTimeout(kickT);
+    if (kickArmed === k) { kickArmed = -1; hostKick(k); return; }
+    kickArmed = k; syncLobby();
+    kickT = setTimeout(() => { kickArmed = -1; syncLobby(); }, 4000);
+  };
+  return b;
 }
 $('lbReady').onclick = () => {
   if (!net.on || net.host || !G || G.phase !== 'lobby' || net.seat < 0 || !G.seats[net.seat]) return;
