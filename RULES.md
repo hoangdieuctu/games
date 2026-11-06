@@ -11,3 +11,4 @@
 11. Game online luôn có tính năng count down 30s, nếu người chơi AFK thì máy chơi thay
 12. Game online thì chủ phòng có thể kick người chơi ra
 13. Game online, người chơi cần sẵn sàng thì chủ phòng mới có thể bắt đầu
+14. Các game offline cần lưu trạng thái ở browser để lần sau chơi tiếp
