@@ -1,5 +1,0 @@
-Âm thanh dùng trong Cờ Tỷ Phú (tycoon/). Các tiếng ngoài danh sách dưới được tự tổng hợp
-bằng Web Audio.
-
-dice-roll.mp3  Ghép từ dice-shake-1, dice-throw-3, die-throw-1 trong bộ "Casino Audio"
-               của Kenney (www.kenney.nl) — CC0 1.0. Cắt, trộn và chuẩn hoá âm lượng bằng ffmpeg.
