@@ -5,3 +5,4 @@
 5. Các game phải có icon để share vào màn hình iPad
 6. Mỗi game hãy tách html, css và js ra từng file riêng
 7. Sau khi thay đổi phải test lại tính năng cũ đảm bảo không bug
+8. Đảm bảo mỗi folder game có thể chạy độc lập, không có import từ folder trên

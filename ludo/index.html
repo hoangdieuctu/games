@@ -886,8 +886,8 @@ function setDie(i, v, roll) {
 // bằng Web Audio cho khỏi trễ. Chưa nạp được (mở bằng file://, mất mạng) thì
 // dùng tiếng tự tổng hợp bên dưới thay thế ──
 let actx = null, muted = store.get('cangua.mute', false), noiseBuf = null;
-const SFX_FILES = { dice: '../shared/sounds/dice-roll.mp3', neigh: '../shared/sounds/neigh.mp3',
-  hoof1: '../shared/sounds/hoof-1.mp3', hoof2: '../shared/sounds/hoof-2.mp3', hoof3: '../shared/sounds/hoof-3.mp3' };
+const SFX_FILES = { dice: 'sounds/dice-roll.mp3', neigh: 'sounds/neigh.mp3',
+  hoof1: 'sounds/hoof-1.mp3', hoof2: 'sounds/hoof-2.mp3', hoof3: 'sounds/hoof-3.mp3' };
 const sfx = {};
 let sfxLoading = false;
 function audio() {

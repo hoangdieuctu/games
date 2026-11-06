@@ -7,8 +7,7 @@ Trang web tĩnh, chạy trên GitHub Pages. Mở `index.html` để vào trang c
 ```
 index.html        trang chủ
 icon.png          icon trang chủ khi thêm vào màn hình chính
-<tên>/            mỗi game một thư mục, mở bằng index.html
-shared/sounds/    âm thanh dùng chung
+<tên>/            mỗi game một thư mục độc lập (kèm âm thanh, ảnh riêng), mở bằng index.html
 404.html          chuyển link cũ sang chỗ mới
 ```
 
