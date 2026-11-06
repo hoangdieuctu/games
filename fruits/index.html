@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-CBV0HJRM37"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-CBV0HJRM37');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-title" content="100 Trái Cây">
+<link rel="apple-touch-icon" href="icon.png">
+<title>100 Trái Cây</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23ff9f1a'/%3E%3Ctext x='16' y='23' text-anchor='middle' font-size='20'%3E🍉%3C/text%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="screen" id="screen-browse">
+  <div class="browse-header">
+    <div class="browse-title">🍉 100 Trái Cây</div>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end;">
+      <button class="sound-toggle" id="sound-toggle" onclick="toggleSound()">🔊 Đọc tên</button>
+      <button class="sound-toggle" id="lang-toggle" onclick="toggleLang()">🗣 EN+VI</button>
+      <button class="sound-toggle" id="auto-toggle" onclick="toggleAutoPlay()">⏭ Tự động</button>
+      <div class="browse-count" id="browse-count">100 quả</div>
+    </div>
+  </div>
+  <div class="cat-tabs" id="cat-tabs"></div>
+  <div class="fruit-grid" id="fruit-grid"></div>
+</div>
+
+<div id="modal" class="hidden" onclick="handleModalBg(event)">
+  <div class="modal-card" onclick="event.stopPropagation()">
+    <div class="auto-bar hidden" id="auto-bar"><i></i></div>
+    <div class="modal-img-area" id="modal-img-area"></div>
+    <div class="modal-body">
+      <div class="name-row">
+        <div class="modal-vi" id="modal-vi"></div>
+        <div class="speak-btns">
+          <button class="btn-speak" id="btn-speak-en" onclick="speakCurrent('en')">🔊 English</button>
+          <button class="btn-speak" id="btn-speak-vi" onclick="speakCurrent('vi')">🔊 Tiếng Việt</button>
+        </div>
+      </div>
+      <div class="modal-en" id="modal-en"></div>
+      <div class="modal-desc" id="modal-desc"></div>
+      <div class="modal-info">
+        <div class="info-item"><div class="info-label">📍 Vùng trồng</div><div class="info-value" id="modal-origin"></div></div>
+        <div class="info-item"><div class="info-label">📅 Mùa</div><div class="info-value" id="modal-season"></div></div>
+        <div class="info-item"><div class="info-label">😋 Hương vị</div><div class="info-value" id="modal-taste"></div></div>
+        <div class="info-item"><div class="info-label">⭐ Đặc điểm</div><div class="info-value" id="modal-fact"></div></div>
+      </div>
+      <div class="modal-story" id="modal-story"></div>
+      <div class="modal-tag"  id="modal-tag"></div>
+      <div class="modal-nav">
+        <button class="btn-nav" onclick="nav(-1)">◀ Trước</button>
+        <button class="btn-nav" onclick="nav(1)">Tiếp ▶</button>
+      </div>
+      <button class="btn-close" onclick="closeModal()">Đóng ✕</button>
+    </div>
+  </div>
+</div>
+
+<script src="data.js"></script>
+<script src="game.js"></script>
+</body>
+</html>
