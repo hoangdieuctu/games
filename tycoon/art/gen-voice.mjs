@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Sinh lời hô (giọng nơ-ron tiếng Việt) cho các khoảnh khắc trong Cờ Tỷ Phú — cùng cách làm với Thế Giới Nhỏ:
-//   node typhu/art/gen-voice.mjs            # chỉ sinh clip còn thiếu
-//   node typhu/art/gen-voice.mjs --force    # sinh lại tất cả
+//   node tycoon/art/gen-voice.mjs            # chỉ sinh clip còn thiếu
+//   node tycoon/art/gen-voice.mjs --force    # sinh lại tất cả
 //
 // Cần edge-tts (giọng Microsoft Neural vi-VN) và ffmpeg, cài ngoài repo:
 //   python3 -m venv /tmp/typhu-tts && /tmp/typhu-tts/bin/pip install edge-tts
@@ -9,7 +9,7 @@
 //
 // Mỗi khoảnh khắc có vài câu (xen giọng nữ HoaiMy và giọng nam NamMinh), game chọn ngẫu nhiên một câu.
 // Câu ngắn, chỉ nói nội dung, không thêm từ cảm thán; cảm xúc thể hiện bằng tốc độ và cao độ giọng.
-// Kết quả: typhu/voice/<khoảnh khắc>-<số>.mp3 và typhu/voice/index.json ({ khoảnh khắc: [tệp...] }).
+// Kết quả: tycoon/voice/<khoảnh khắc>-<số>.mp3 và tycoon/voice/index.json ({ khoảnh khắc: [tệp...] }).
 import { writeFileSync, existsSync, mkdirSync, readdirSync, unlinkSync, statSync, rmSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -88,4 +88,4 @@ const used = new Set(Object.values(index).flat());
 for (const f of readdirSync(OUT)) if (f.endsWith('.mp3') && !used.has(f)) unlinkSync(join(OUT, f));
 writeFileSync(join(OUT, 'index.json'), JSON.stringify(index));
 const bytes = [...used].reduce((s, f) => s + statSync(join(OUT, f)).size, 0);
-console.log(`xong: ${used.size} clip, ${fail} lỗi, ${(bytes / 1024).toFixed(0)} KB → typhu/voice/`);
+console.log(`xong: ${used.size} clip, ${fail} lỗi, ${(bytes / 1024).toFixed(0)} KB → tycoon/voice/`);

@@ -1,14 +1,14 @@
 #!/usr/bin/env node
 // Sinh lời hô (giọng nơ-ron tiếng Việt) cho Tiến Lên Miền Nam — cùng cách làm với Thế Giới Nhỏ:
-//   node tienlen/art/gen-voice.mjs            # chỉ sinh clip còn thiếu
-//   node tienlen/art/gen-voice.mjs --force    # sinh lại tất cả
+//   node thirteen/art/gen-voice.mjs            # chỉ sinh clip còn thiếu
+//   node thirteen/art/gen-voice.mjs --force    # sinh lại tất cả
 //
 // Cần edge-tts (giọng Microsoft Neural) và ffmpeg, cài ngoài repo:
 //   python3 -m venv /tmp/tl-tts && /tmp/tl-tts/bin/pip install edge-tts
 //   export EDGE_TTS=/tmp/tl-tts/bin/edge-tts
 //
-// Câu hô lấy từ đoạn VOICE-BEGIN … VOICE-END trong tienlen/index.html (bảng VOICE_LINES).
-// Mỗi ghế một giọng vui nhộn riêng → tienlen/voice/<ghế>/<loại>-<i>.mp3
+// Câu hô lấy từ đoạn VOICE-BEGIN … VOICE-END trong thirteen/index.html (bảng VOICE_LINES).
+// Mỗi ghế một giọng vui nhộn riêng → thirteen/voice/<ghế>/<loại>-<i>.mp3
 import { readFileSync, existsSync, mkdirSync, readdirSync, unlinkSync, statSync, rmSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -31,7 +31,7 @@ const SEATS = [
 
 const html = readFileSync(join(dir, 'index.html'), 'utf8');
 const m = html.match(/\/\/ VOICE-BEGIN[^\n]*\n([\s\S]*?)\/\/ VOICE-END/);
-if (!m) throw new Error('Không tìm thấy đoạn VOICE-BEGIN … VOICE-END trong tienlen/index.html');
+if (!m) throw new Error('Không tìm thấy đoạn VOICE-BEGIN … VOICE-END trong thirteen/index.html');
 const LINES = Function(m[1] + '\nreturn VOICE_LINES;')();
 
 const jobs = [], keep = SEATS.map(() => new Set());
@@ -82,4 +82,4 @@ SEATS.forEach((_, s) => {
     if (f.endsWith('.mp3')) { bytes += statSync(p).size; n++; }
   }
 });
-console.log(`xong: ${done} mới, ${fail} lỗi; ${n} clip, ${(bytes / 1024).toFixed(0)} KB → tienlen/voice/`);
+console.log(`xong: ${done} mới, ${fail} lỗi; ${n} clip, ${(bytes / 1024).toFixed(0)} KB → thirteen/voice/`);
