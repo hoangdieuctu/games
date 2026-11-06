@@ -2355,91 +2355,6 @@ function setView(mode, k) {
   if (G) paint();
 }
 const lvName = (i, lv) => LEVELS[lv].name;
-function shapeKit(B) {
-  const S = '#3a2a1a';
-  const P = (pts, fill, sw = .6, st = S) => el('polygon', { points: pts.map(p => p.join(',')).join(' '), fill, stroke: st, 'stroke-width': sw, 'stroke-linejoin': 'round' }, B);
-  P.B = B;
-  const R = (x, y, w, h, fill, sw = .6) => el('rect', { x, y, width: w, height: h, fill, stroke: sw ? S : 'none', 'stroke-width': sw }, B);
-  const Pa = (d, fill, st = S, sw = .6) => el('path', { d, fill, stroke: st, 'stroke-width': sw, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' }, B);
-  const Ci = (cx, cy, r, fill, st = 'none', sw = .6) => el('circle', { cx, cy, r, fill, stroke: st, 'stroke-width': sw }, B);
-  const Ln = (x1, y1, x2, y2, st = S, sw = .6) => el('line', { x1, y1, x2, y2, stroke: st, 'stroke-width': sw, 'stroke-linecap': 'round' }, B);
-  const water = () => el('ellipse', { cx: 0, cy: 4.5, rx: 12, ry: 2.6, fill: '#5dade2', stroke: '#2e86c1', 'stroke-width': .6 }, B);
-  const eave = (y, w, h, fill) => P([[-w, y - 2.2], [-w * .78, y], [w * .78, y], [w, y - 2.2], [w * .55, y - h], [-w * .55, y - h]], fill); // mái cong vểnh hai đầu
-  const T = (x, y, s, fill, size, extra = {}) => txt(x, y, 'sq-big', s, B, Object.assign({ fill, style: `font-size:${size}px;letter-spacing:0` }, extra));
-  return { P, R, Pa, Ci, Ln, water, eave, T };
-}
-// công trình đứng ở bốn ô góc (chỉ bàn 3D): vẽ nhìn thẳng, chân ở y = 0, rộng khoảng ±16, cao tới khoảng −40
-const CORNER_3D = {
-  start: { at: [34, 34], draw: ({ P, R, Pa, Ci, Ln, T }) => {
-    el('ellipse', { cx: 0, cy: 0, rx: 18, ry: 3.5, fill: 'rgba(0,0,0,.18)' }, P.B);
-    // cổng xuất phát: hai trụ sọc đỏ trắng, băng rôn, cờ ca rô
-    for (const x of [-15, 11]) {
-      R(x, -26, 4, 26, '#fff'); for (let k = 0; k < 4; k++) R(x, -26 + k * 6.5, 4, 3.2, '#e53935', 0);
-      Ln(x + 2, -26, x + 2, -36, '#5d6d7e', .8);
-      const f = el('g', { transform: `translate(${x + 2} -36)` }, P.B);
-      for (let c = 0; c < 3; c++) for (let w = 0; w < 2; w++) el('rect', { x: c * 2.4, y: w * 2.4, width: 2.4, height: 2.4, fill: (c + w) % 2 ? '#23324a' : '#fff' }, f);
-      el('rect', { x: 0, y: 0, width: 7.2, height: 4.8, fill: 'none', stroke: '#23324a', 'stroke-width': .4 }, f);
-    }
-    R(-17, -31, 34, 9, '#e53935', .8); R(-17, -31, 34, 9, 'none', .8);
-    Pa('M-17 -31 H17', 'none', '#ffd23f', 1.2);
-    T(0, -26.3, 'BẮT ĐẦU', '#fff', 6.4);
-    // đồng xu lương bay trên cổng
-    Ci(0, -38, 4.2, '#ffd23f', '#b8860b', .7); T(0, -37.8, '$', '#b8860b', 5.5);
-  } },
-  island: { at: [8, 44], draw: ({ P, R, Pa, Ci, Ln, T }) => {
-    // mỏm đá, hải đăng sọc đỏ, cây dừa
-    Pa('M-18 1 Q-16 -6 -8 -6 Q-2 -9 4 -6 Q12 -6 15 1 Z', '#8d7b68');
-    Pa('M-14 -2 Q-10 -5 -5 -4', 'none', '#6d5c4a', .6);
-    P([[-7, -6], [1, -6], [-.5, -30], [-5.5, -30]], '#fff');
-    for (const [y0, y1] of [[-12, -16], [-21, -25]]) { const w = y => 4 + (y + 6) * (2.5 / 24); P([[-3 - w(y0), y0], [-3 + w(y0), y0], [-3 + w(y1), y1], [-3 - w(y1), y1]], '#e53935', .4); }
-    R(-7, -31.5, 8, 1.5, '#5d6d7e', .4);
-    R(-6, -36, 6, 4.5, '#ffe066', .5);
-    P([[-7, -36], [1, -36], [-3, -41]], '#c0392b');
-    el('polygon', { points: '-6,-34 -22,-40 -22,-30', fill: '#ffe066', opacity: .3 }, P.B);
-    el('polygon', { points: '0,-34 16,-40 16,-30', fill: '#ffe066', opacity: .3 }, P.B);
-    // cây dừa
-    Pa('M9 -6 Q8 -18 12 -27', 'none', '#8b5a2b', 1.8);
-    for (const d of ['M12 -27 Q5 -31 1 -26', 'M12 -27 Q18 -32 22 -26', 'M12 -27 Q10 -34 5 -35', 'M12 -27 Q16 -35 21 -34', 'M12 -27 Q13 -23 17 -20'])
-      Pa(d, 'none', '#2e9d4f', 2);
-    Ci(11, -26, 1.2, '#6b4423'); Ci(13, -25.5, 1.2, '#6b4423');
-  } },
-  festival: { at: [34, 34], draw: ({ P, R, Pa, Ci, Ln, T }) => {
-    el('ellipse', { cx: 0, cy: 0, rx: 19, ry: 3.5, fill: 'rgba(0,0,0,.25)' }, P.B);
-    // khung sân khấu, rèm đỏ, loa, micro, bảng tên
-    R(-17, -3, 34, 3, '#8e44ad', .6);
-    Pa('M-14 -3 L-14 -27 Q-9 -20 -6 -27 Q-3 -20 0 -27 Q3 -20 6 -27 Q9 -20 14 -27 L14 -3 Z', '#2d1b4e');
-    Pa('M-14 -27 Q-8 -24 -9 -3 L-14 -3 Z', '#c0392b'); Pa('M14 -27 Q8 -24 9 -3 L14 -3 Z', '#c0392b');
-    for (const x of [-16, 14]) R(x, -32, 2, 29, '#95a5a6', .5);
-    R(-17, -36, 34, 8, '#8e44ad', .7); T(0, -31.7, 'NHẠC HỘI', '#ffd23f', 5.8);
-    for (let k = 0; k < 7; k++) Ci(-13.5 + k * 4.5, -37.2, .9, k % 2 ? '#ff6fa3' : '#ffd23f');
-    for (const x of [-21, 15]) { R(x, -12, 6, 12, '#2c3e50', .5); Ci(x + 3, -8.5, 1.8, '#7f8c8d'); Ci(x + 3, -3.5, 2.2, '#7f8c8d'); }
-    Ln(0, -3, 0, -14, '#bdc3c7', .8); Ci(0, -15.5, 1.8, '#5d6d7e', '#23324a', .4);
-    T(-7, -18, '♪', '#ffd23f', 7); T(7, -21, '♫', '#ff6fa3', 7);
-  } },
-  bus: { at: [34, 34], draw: ({ P, R, Pa, Ci, Ln, T }) => {
-    el('ellipse', { cx: -2, cy: 0, rx: 19, ry: 3.5, fill: 'rgba(0,0,0,.2)' }, P.B);
-    // xe buýt xanh nhìn ngang, đầu xe bên phải
-    Pa('M-19 -2 L-19 -17 Q-19 -19 -17 -19 L7 -19 Q10 -19 10.5 -16 L11 -2 Z', '#27ae60');
-    R(-19, -8, 30, 2.2, '#f1c40f', 0);
-    for (let k = 0; k < 4; k++) R(-17 + k * 5.6, -16.5, 4.4, 6, '#bfe6f5', .4);
-    Pa('M5.5 -16.5 L9.6 -16.5 L10 -10.5 L5.5 -10.5 Z', '#bfe6f5', '#3a2a1a', .4);
-    R(-17, -21, 12, 2, '#1e7a3c', .4);
-    for (const x of [-13, 4]) { Ci(x, -2, 3, '#2c3e50'); Ci(x, -2, 1.2, '#bdc3c7'); }
-    Ci(10.6, -4, .9, '#ffe066');
-    // biển trạm
-    Ln(15, 0, 15, -30, '#5d6d7e', 1);
-    R(9, -40, 16, 10, '#1e7a3c', .6); T(17, -36.8, 'BẾN', '#fff', 4.6); T(17, -32.4, 'XE', '#fff', 4.6);
-  } },
-};
-// dựng công trình ô góc i (bàn 3D); công trình đứng ở góc phía sau ô để không che quân
-function drawCorner3D(i) {
-  const def = CORNER_3D[SQ[i].t];
-  if (!def) return;
-  const [X, Y] = proj(...toB(i, def.at[0] - CORNER / 2, def.at[1] - CORNER / 2));
-  const B = el('g', { transform: `translate(${X} ${Y}) scale(1.55)`, class: 'corner3d' }, $('gIcons'));
-  const k = shapeKit(B); k.P.B = B;
-  def.draw(k);
-}
 function buildBoard() {
   for (const id of ['gBase', 'gCenter', 'gSides', 'gBoard', 'gLift', 'gIcons', 'gOwn', 'gOwnB', 'gPick', 'gPickB']) $(id).innerHTML = '';
   sqEls.length = 0; fitLater.length = 0; liftDrawn = -1;
@@ -2493,17 +2408,13 @@ function drawCorner(i, sg) {
   const poly = (pts, attrs) => el('polygon', Object.assign({ points: pts.map(([a, b]) => `${X + a},${Y + b}`).join(' ') }, attrs), sg);
   const rect = (x, y, w, h, attrs) => el('rect', Object.assign({ x: X + x, y: Y + y, width: w, height: h }, attrs), sg);
   // quân đứng ở hàng y ≈ 74–76 (CORNER_TOK), nên hình vẽ dồn lên phần trên ô
-  // bàn 3D: tên và biểu tượng chuyển lên công trình đứng (drawCorner3D), mặt ô chỉ còn nền
+  // bàn 3D: không dựng công trình to (che ô bên); mặt ô chỉ còn nền và hình vẽ
   const flat = MODE === 'flat';
-  if (!flat) drawCorner3D(i);
+  // ô góc không ghi tên (chữ che ô bên / che quân); nhận ra bằng hình vẽ và biểu tượng, bấm vào ô để xem mô tả
   if (q.t === 'start') {
     bg('#fdecea');
     // tia nắng toả từ mũi tên
     for (let k = 0; k < 7; k++) { const a = -Math.PI / 2 + (k - 3) * .42; poly([[47, 38], [47 + Math.cos(a - .12) * 60, 38 + Math.sin(a - .12) * 60], [47 + Math.cos(a + .12) * 60, 38 + Math.sin(a + .12) * 60]], { fill: '#f9cfc9', opacity: .7 }); }
-    if (flat) {
-      rect(8, 5, 78, 20, { rx: 10, fill: '#e53935', stroke: '#fff', 'stroke-width': 2 });
-      txt(cx, Y + 15.5, 'sq-big', 'BẮT ĐẦU', sg, { fill: '#fff', style: 'font-size:14px' });
-    }
     poly([[9, 38], [29, 27], [29, 32], [85, 32], [85, 44], [29, 44], [29, 49]], { fill: '#ffd23f', stroke: '#e53935', 'stroke-width': 2.5, 'stroke-linejoin': 'round' });
     txt(X + 57, Y + 38.5, 'sq-big', `+${fmt(SALARY)}`, sg, { fill: '#c0392b', style: 'font-size:11.5px' });
     // vạch xuất phát ca rô
@@ -2512,9 +2423,6 @@ function drawCorner(i, sg) {
     bg('#a8dcef');
     for (const [wx, wy] of [[3, 30], [3, 50], [82, 34], [82, 54]]) el('path', { d: `M${X + wx} ${Y + wy} q2.5 -2.5 5 0 t5 0`, fill: 'none', stroke: '#fff', 'stroke-width': 1.5, 'stroke-linecap': 'round', opacity: .8 }, sg);
     el('ellipse', { cx, cy: Y + 74, rx: 44, ry: 17, fill: '#f6e2a8', stroke: '#e8c97a', 'stroke-width': 1.5 }, sg); // bãi cát chỗ khách ghé thăm đứng
-    // biển tên gỗ
-    rect(14, 3, 54, 14, { rx: 4, fill: '#8b5a2b', stroke: '#5a3a1a', 'stroke-width': 1.5 });
-    txt(X + 41, Y + 10.5, 'sq-big', 'CÔN ĐẢO', sg, { fill: '#fff', style: 'font-size:11.5px' });
     // buồng giam canh giữa ô (quân bị giam đứng ở y = 39)
     rect(14, 20, 66, 38, { rx: 4, fill: '#f1e4c3', stroke: '#5d6d7e', 'stroke-width': 2.5 });
     rect(14, 20, 66, 5, { fill: '#5d6d7e' });
@@ -2532,15 +2440,12 @@ function drawCorner(i, sg) {
     txt(X + 15, Y + 30, 'sq-icon', '♪', sg, { fill: '#ff6fa3', style: 'font-size:15px;font-weight:900' });
     txt(X + 80, Y + 34, 'sq-icon', '♫', sg, { fill: '#ffd23f', style: 'font-size:15px;font-weight:900' });
     if (flat) billC(cx, Y + 24, 'sq-icon', '🎤', gi, { style: 'font-size:28px' });
-    if (flat) txt(cx, Y + 47, 'sq-big', 'NHẠC HỘI', sg, { fill: '#ffd23f', stroke: '#2d1b4e', 'stroke-width': 3, 'paint-order': 'stroke', style: 'font-size:15px' });
   } else {
     bg('#dff3e4');
     // mái chờ xe: hai cột, ghế, biển tên làm mái
     if (flat) {
       for (const px of [18, 76]) el('line', { x1: X + px, y1: Y + 16, x2: X + px, y2: Y + 51, stroke: '#5d6d7e', 'stroke-width': 2.2 }, sg);
       rect(24, 44, 46, 3.5, { rx: 1, fill: '#8b5a2b' });
-      rect(12, 3, 70, 15, { rx: 4, fill: '#1e7a3c', stroke: '#fff', 'stroke-width': 1.5 });
-      txt(cx, Y + 11, 'sq-big', 'BẾN XE', sg, { fill: '#fff', style: 'font-size:12.5px' });
     }
     // lề đường và mặt đường nơi quân đứng
     rect(TI, 51, r.w - 2 * TI, 3, { fill: '#bdc3c7' });
@@ -2758,7 +2663,7 @@ function drawFireworks(i) {
 // nhà cửa 3D (isometric 2:1): tường và mái lấy màu người chơi sở hữu, nền lô đất
 // tô màu nhân vật; mỗi cấp một khối dáng riêng, có số cấp ở góc
 function drawBuilding(g, lv, cx, cy, owner, charId, i, mine) {
-  const B = el('g', { transform: `translate(${cx} ${cy})` }, g);
+  const B = el('g', { transform: `translate(${cx} ${cy})`, 'data-bi': i }, g);
   const main = col(owner).main, lite = mix(main, '#fff', .45), dark = mix(main, '#000', .32), line = mix(main, '#000', .5);
   el('ellipse', { cx: 0, cy: 11.5, rx: 12, ry: 3, fill: 'rgba(35,50,74,.18)' }, B); // bóng đổ
   const poly = (pts, fill, st = line, sw = .7) => el('polygon', { points: pts.map(p => p.join(',')).join(' '), fill, stroke: st, 'stroke-width': sw, 'stroke-linejoin': 'round' }, B);
@@ -3617,6 +3522,67 @@ function pow(x, y, s, color) {
   el('polygon', { points: star.join(' '), fill: '#ffd23f', stroke: '#f26b1d', 'stroke-width': 3, 'stroke-linejoin': 'round' }, g);
   txt(x, y, 'pow-text', s, g, { fill: color, stroke: '#fff', 'stroke-width': 4, transform: `rotate(-10 ${x} ${y})` });
 }
+// lên Biểu tượng: công trình mọc dần từ nền giữa giàn giáo + cần cẩu, bụi tung, búa gõ; xây xong thì cột sáng vàng
+// phóng lên, sóng toả dưới chân, pháo sao màu chủ và chữ BIỂU TƯỢNG!
+const LM_RISE_MS = 1400, LM_MS = LM_RISE_MS + 1300;
+function landmarkRise(i, s, tok) {
+  const [x, y0] = bandPt(i), y = y0 - 11 + liftDz(i), c = colorOf(s);
+  const B = $('gBuild').querySelector(`[data-bi="${i}"]`);
+  let inner = null;
+  if (B) {
+    inner = el('g', {}, null);
+    while (B.firstChild) inner.appendChild(B.firstChild);
+    B.appendChild(inner);
+    inner.style.transformBox = 'fill-box'; inner.style.transformOrigin = '50% 100%';
+    inner.animate([{ transform: 'scale(.9, 0)', opacity: .4 }, { transform: 'scale(1, .3)', opacity: 1, offset: .2 }, { transform: 'scale(1, .38)', offset: .32 },
+      { transform: 'scale(1, .66)', offset: .5 }, { transform: 'scale(1, .72)', offset: .62 }, { transform: 'scale(1.05, 1.12)', offset: .86 }, { transform: 'none' }],
+      { duration: LM_RISE_MS, easing: 'ease-out', fill: 'backwards' });
+  }
+  // giàn giáo bao quanh và cần cẩu vàng đứng cạnh, móc cẩu kéo lên kéo xuống
+  const site = fx('g', { transform: `translate(${x} ${y})`, class: 'fx' }, LM_RISE_MS + 300);
+  const scaf = el('g', { stroke: '#8d6e4a', 'stroke-width': 1.3, opacity: .85 }, site);
+  for (const vx of [-13, -4.5, 4.5, 13]) el('line', { x1: vx, y1: 13, x2: vx, y2: -34 }, scaf);
+  for (let hy = 8; hy >= -32; hy -= 8) el('line', { x1: -14, y1: hy, x2: 14, y2: hy }, scaf);
+  el('line', { x1: -13, y1: 8, x2: 4.5, y2: -24, 'stroke-width': .8 }, scaf);
+  const crane = el('g', { stroke: '#8a6500', 'stroke-width': .8, 'stroke-linejoin': 'round' }, site);
+  el('rect', { x: 18, y: -58, width: 4, height: 72, fill: '#f5b301' }, crane);
+  for (let k = 0; k < 8; k++) el('line', { x1: 18, y1: -58 + k * 9, x2: 22, y2: -49 + k * 9 }, crane);
+  el('rect', { x: -16, y: -61, width: 46, height: 4, fill: '#f5b301' }, crane);
+  el('rect', { x: 24, y: -60, width: 7, height: 7, fill: '#4b5563', stroke: '#1f2937' }, crane);
+  el('polygon', { points: '18,-61 20,-70 22,-61', fill: '#f5b301' }, crane);
+  const hook = el('g', {}, site);
+  el('line', { x1: -6, y1: -57, x2: -6, y2: -36, stroke: '#374151', 'stroke-width': 1 }, hook);
+  el('rect', { x: -12, y: -36, width: 12, height: 6, rx: 1, fill: c, stroke: mix(c, '#000', .4), 'stroke-width': .8 }, hook);
+  hook.animate([{ transform: 'translateY(0)' }, { transform: 'translateY(-14px)' }, { transform: 'translateY(0)' }], { duration: LM_RISE_MS / 2, iterations: 2, easing: 'ease-in-out' });
+  site.animate([{ opacity: 0 }, { opacity: 1, offset: .08 }, { opacity: 1, offset: .85 }, { opacity: 0 }], { duration: LM_RISE_MS + 250, fill: 'forwards' });
+  // búa gõ, tia lửa, bụi tung ở chân công trình
+  for (let k = 0; k < 4; k++) setTimeout(() => {
+    if (tok !== animTok) return;
+    playBuild(3);
+    burst(x + (Math.random() - .5) * 16, y - 6 - k * 7, 6, ['#ffd23f', '#fff', '#f97316'], 22, '✦');
+    for (let d = 0; d < 3; d++) fx('circle', { cx: x + (Math.random() - .5) * 34, cy: y + 9, r: 6 + Math.random() * 5, fill: 'rgba(150,135,110,.45)', class: 'fx puff' }, 550);
+  }, k * 330);
+  setTimeout(() => {
+    if (tok !== animTok) return;
+    playFanfare(); setTimeout(playParty, 250);
+    if (!document.getElementById('lmBeam')) {
+      const gr = el('linearGradient', { id: 'lmBeam', x1: 0, y1: 0, x2: 0, y2: 1 }, defs);
+      el('stop', { offset: 0, 'stop-color': '#fff6c2', 'stop-opacity': 0 }, gr);
+      el('stop', { offset: .6, 'stop-color': '#ffe066', 'stop-opacity': .55 }, gr);
+      el('stop', { offset: 1, 'stop-color': '#ffd23f', 'stop-opacity': .9 }, gr);
+    }
+    const beam = fx('rect', { x: x - 15, y: y - 260, width: 30, height: 270, rx: 15, fill: 'url(#lmBeam)', class: 'fx' }, 1300);
+    beam.animate([{ transform: 'scaleX(.15)', opacity: 0 }, { transform: 'scaleX(1)', opacity: 1, offset: .2 }, { transform: 'scaleX(1.7)', opacity: 0 }], { duration: 1250, easing: 'ease-out', fill: 'forwards' });
+    for (let k = 0; k < 3; k++) {
+      const ring = fx('ellipse', { cx: x, cy: y + 6, rx: 18, ry: 9, fill: 'none', stroke: k === 1 ? '#ffd23f' : c, 'stroke-width': 4, class: 'fx' }, 1300);
+      ring.animate([{ transform: 'scale(.6)', opacity: 1 }, { transform: 'scale(4.2)', opacity: 0 }], { duration: 900, delay: k * 170, easing: 'ease-out', fill: 'both' });
+    }
+    if (inner) inner.animate([{ transform: 'none' }, { transform: 'scale(1.18)', offset: .35 }, { transform: 'none' }], { duration: 500, easing: 'ease-out' });
+    burst(x, y - 20, 18, [c, '#ffd23f', '#fff'], 80);
+    setTimeout(() => { if (tok === animTok) burst(x, y - 34, 14, ['#ffd23f', c], 60, '✦'); }, 260);
+    pow(x, y - 78, '🗼 BIỂU TƯỢNG!', c);
+  }, LM_RISE_MS);
+}
 function shakeBoard() { const b = $('board'); b.classList.remove('shake'); void b.getBoundingClientRect(); b.classList.add('shake'); }
 function flashSquare(i, color, ms = 800) {
   const r = rectOf(i), w = fx('g', { transform: ISO(0) }, ms);
@@ -3783,7 +3749,9 @@ async function rideBus(s, from, n, tok, onStart) {
   const seat = el('g', { transform: 'translate(-2 -6)' }, body);
   seat.appendChild(g); g.style.transition = 'none'; g.style.transform = 'none';
   txt(0, -6, 'sq-icon', '🚌', body, { style: 'font-size:34px' });
-  const getOff = () => { home.insertBefore(g, next && next.parentNode === home ? next : null); g.style.transition = ''; };
+  // nhãn tên nằm trong quân: xe lật ngang thì lật ngược nhãn lại cho chữ không bị ngược
+  const tname = g.querySelector('.tname');
+  const getOff = () => { home.insertBefore(g, next && next.parentNode === home ? next : null); g.style.transition = ''; if (tname) tname.style.transform = ''; };
   const [sx, sy] = tokenXY(from, s, false);
   for (let k = 0; k < 4; k++) exhaust(sx + (Math.random() - .5) * 16, sy + 6, bus);
   const ms = busMs(n);
@@ -3804,6 +3772,7 @@ async function rideBus(s, from, n, tok, onStart) {
     const bob = t > 0.02 && t < 0.98 ? Math.sin(now / 40) * 1.3 : 0;
     bus.setAttribute('transform', `translate(${x} ${y})`);
     body.setAttribute('transform', `translate(0 ${bob}) rotate(${ang}) scale(${face} 1)`);
+    if (tname) tname.style.transform = `translateY(-88px) scale(${face}, 1)`;
     if (now - lastPuff > 60 && t < 0.97) { lastPuff = now; exhaust(x + face * 17, y + 4 + bob, bus); }
   };
   await new Promise(res => {
@@ -3834,7 +3803,7 @@ function stepMs(st) {
     case 'busStop': return 600; case 'busGo': return 300; case 'busNoCash': return 300;
     case 'home': return st.can ? 0 : 300; case 'homePay': return 1000; case 'interest': return 900; case 'bonus': return 700; case 'rentX2': return 900; case 'norent': return 350; case 'useFree': return 800; case 'charmFree': return 900; case 'useHalf': return 600;
     case 'pay': return 800; case 'rob': return 1100; case 'debt': return 600; case 'card': return 2700; case 'spyDraw': return 700; case 'hold': return 600; case 'nothing': return 400;
-    case 'build': return 850; case 'buyTour': return 750; case 'takeover': case 'hack': return 1000; case 'skip': return 250;
+    case 'build': return st.to === 5 ? LM_MS : 850; case 'buyTour': return 750; case 'takeover': case 'hack': return 1000; case 'skip': return 250;
     case 'liftOffer': return 500; case 'liftNone': return 300; case 'lift': return 1500; case 'noCash': return 1100; case 'festNone': return 300; case 'festival': return 1000;
     case 'casinoSkip': return 300; case 'casino': return 1900; case 'join': return 1200;
     case 'pickCity': return 400; case 'pickSkip': return 250; case 'swap': return 1000; case 'forceSell': return 900; case 'destroy': return 900;
@@ -3981,8 +3950,8 @@ async function animateStep(st, tok) {
     case 'build': {
       const [x, y] = bandPt(st.i), [tx, ty] = tokenPt(s);
       drawOwnership(); drawBuild();
-      playBuild(st.to === 5 ? 5 : 3); if (st.to === 5) setTimeout(playFanfare, 450);
-      floatText(x, y - 8, LEVELS[st.to].icon, '#2e9d4f', 1000, 24);
+      if (st.to === 5) landmarkRise(st.i, s, tok);
+      else { playBuild(3); floatText(x, y - 8, LEVELS[st.to].icon, '#2e9d4f', 1000, 24); }
       cardMoney(s, -(st.cost));
       flashSquare(st.i, colorOf(s));
       if (st.from === 0) burst(x, y, 10, [colorOf(s), '#ffd23f', '#fff'], 40);

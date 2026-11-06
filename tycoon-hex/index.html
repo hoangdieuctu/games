@@ -2698,7 +2698,7 @@ function drawFireworks(i) {
 // nhà cửa 3D (isometric 2:1): tường và mái lấy màu người chơi sở hữu, nền lô đất
 // tô màu nhân vật; mỗi cấp một khối dáng riêng, có số cấp ở góc
 function drawBuilding(g, lv, cx, cy, owner, charId, i, mine) {
-  const B = el('g', { transform: `translate(${cx} ${cy})` }, g);
+  const B = el('g', { transform: `translate(${cx} ${cy})`, 'data-bi': i }, g);
   const main = col(owner).main, lite = mix(main, '#fff', .45), dark = mix(main, '#000', .32), line = mix(main, '#000', .5);
   el('ellipse', { cx: 0, cy: 11.5, rx: 12, ry: 3, fill: 'rgba(35,50,74,.18)' }, B); // bóng đổ
   const poly = (pts, fill, st = line, sw = .7) => el('polygon', { points: pts.map(p => p.join(',')).join(' '), fill, stroke: st, 'stroke-width': sw, 'stroke-linejoin': 'round' }, B);
@@ -3480,6 +3480,67 @@ function pow(x, y, s, color) {
   el('polygon', { points: star.join(' '), fill: '#ffd23f', stroke: '#f26b1d', 'stroke-width': 3, 'stroke-linejoin': 'round' }, g);
   txt(x, y, 'pow-text', s, g, { fill: color, stroke: '#fff', 'stroke-width': 4, transform: `rotate(-10 ${x} ${y})` });
 }
+// lên Biểu tượng: công trình mọc dần từ nền giữa giàn giáo + cần cẩu, bụi tung, búa gõ; xây xong thì cột sáng vàng
+// phóng lên, sóng toả dưới chân, pháo sao màu chủ và chữ BIỂU TƯỢNG!
+const LM_RISE_MS = 1400, LM_MS = LM_RISE_MS + 1300;
+function landmarkRise(i, s, tok) {
+  const [x, y0] = bandPt(i), y = y0 - 11 + liftDz(i), c = colorOf(s);
+  const B = $('gBuild').querySelector(`[data-bi="${i}"]`);
+  let inner = null;
+  if (B) {
+    inner = el('g', {}, null);
+    while (B.firstChild) inner.appendChild(B.firstChild);
+    B.appendChild(inner);
+    inner.style.transformBox = 'fill-box'; inner.style.transformOrigin = '50% 100%';
+    inner.animate([{ transform: 'scale(.9, 0)', opacity: .4 }, { transform: 'scale(1, .3)', opacity: 1, offset: .2 }, { transform: 'scale(1, .38)', offset: .32 },
+      { transform: 'scale(1, .66)', offset: .5 }, { transform: 'scale(1, .72)', offset: .62 }, { transform: 'scale(1.05, 1.12)', offset: .86 }, { transform: 'none' }],
+      { duration: LM_RISE_MS, easing: 'ease-out', fill: 'backwards' });
+  }
+  // giàn giáo bao quanh và cần cẩu vàng đứng cạnh, móc cẩu kéo lên kéo xuống
+  const site = fx('g', { transform: `translate(${x} ${y})`, class: 'fx' }, LM_RISE_MS + 300);
+  const scaf = el('g', { stroke: '#8d6e4a', 'stroke-width': 1.3, opacity: .85 }, site);
+  for (const vx of [-13, -4.5, 4.5, 13]) el('line', { x1: vx, y1: 13, x2: vx, y2: -34 }, scaf);
+  for (let hy = 8; hy >= -32; hy -= 8) el('line', { x1: -14, y1: hy, x2: 14, y2: hy }, scaf);
+  el('line', { x1: -13, y1: 8, x2: 4.5, y2: -24, 'stroke-width': .8 }, scaf);
+  const crane = el('g', { stroke: '#8a6500', 'stroke-width': .8, 'stroke-linejoin': 'round' }, site);
+  el('rect', { x: 18, y: -58, width: 4, height: 72, fill: '#f5b301' }, crane);
+  for (let k = 0; k < 8; k++) el('line', { x1: 18, y1: -58 + k * 9, x2: 22, y2: -49 + k * 9 }, crane);
+  el('rect', { x: -16, y: -61, width: 46, height: 4, fill: '#f5b301' }, crane);
+  el('rect', { x: 24, y: -60, width: 7, height: 7, fill: '#4b5563', stroke: '#1f2937' }, crane);
+  el('polygon', { points: '18,-61 20,-70 22,-61', fill: '#f5b301' }, crane);
+  const hook = el('g', {}, site);
+  el('line', { x1: -6, y1: -57, x2: -6, y2: -36, stroke: '#374151', 'stroke-width': 1 }, hook);
+  el('rect', { x: -12, y: -36, width: 12, height: 6, rx: 1, fill: c, stroke: mix(c, '#000', .4), 'stroke-width': .8 }, hook);
+  hook.animate([{ transform: 'translateY(0)' }, { transform: 'translateY(-14px)' }, { transform: 'translateY(0)' }], { duration: LM_RISE_MS / 2, iterations: 2, easing: 'ease-in-out' });
+  site.animate([{ opacity: 0 }, { opacity: 1, offset: .08 }, { opacity: 1, offset: .85 }, { opacity: 0 }], { duration: LM_RISE_MS + 250, fill: 'forwards' });
+  // búa gõ, tia lửa, bụi tung ở chân công trình
+  for (let k = 0; k < 4; k++) setTimeout(() => {
+    if (tok !== animTok) return;
+    playBuild(3);
+    burst(x + (Math.random() - .5) * 16, y - 6 - k * 7, 6, ['#ffd23f', '#fff', '#f97316'], 22, '✦');
+    for (let d = 0; d < 3; d++) fx('circle', { cx: x + (Math.random() - .5) * 34, cy: y + 9, r: 6 + Math.random() * 5, fill: 'rgba(150,135,110,.45)', class: 'fx puff' }, 550);
+  }, k * 330);
+  setTimeout(() => {
+    if (tok !== animTok) return;
+    playFanfare(); setTimeout(playParty, 250);
+    if (!document.getElementById('lmBeam')) {
+      const gr = el('linearGradient', { id: 'lmBeam', x1: 0, y1: 0, x2: 0, y2: 1 }, defs);
+      el('stop', { offset: 0, 'stop-color': '#fff6c2', 'stop-opacity': 0 }, gr);
+      el('stop', { offset: .6, 'stop-color': '#ffe066', 'stop-opacity': .55 }, gr);
+      el('stop', { offset: 1, 'stop-color': '#ffd23f', 'stop-opacity': .9 }, gr);
+    }
+    const beam = fx('rect', { x: x - 15, y: y - 260, width: 30, height: 270, rx: 15, fill: 'url(#lmBeam)', class: 'fx' }, 1300);
+    beam.animate([{ transform: 'scaleX(.15)', opacity: 0 }, { transform: 'scaleX(1)', opacity: 1, offset: .2 }, { transform: 'scaleX(1.7)', opacity: 0 }], { duration: 1250, easing: 'ease-out', fill: 'forwards' });
+    for (let k = 0; k < 3; k++) {
+      const ring = fx('ellipse', { cx: x, cy: y + 6, rx: 18, ry: 9, fill: 'none', stroke: k === 1 ? '#ffd23f' : c, 'stroke-width': 4, class: 'fx' }, 1300);
+      ring.animate([{ transform: 'scale(.6)', opacity: 1 }, { transform: 'scale(4.2)', opacity: 0 }], { duration: 900, delay: k * 170, easing: 'ease-out', fill: 'both' });
+    }
+    if (inner) inner.animate([{ transform: 'none' }, { transform: 'scale(1.18)', offset: .35 }, { transform: 'none' }], { duration: 500, easing: 'ease-out' });
+    burst(x, y - 20, 18, [c, '#ffd23f', '#fff'], 80);
+    setTimeout(() => { if (tok === animTok) burst(x, y - 34, 14, ['#ffd23f', c], 60, '✦'); }, 260);
+    pow(x, y - 78, '🗼 BIỂU TƯỢNG!', c);
+  }, LM_RISE_MS);
+}
 function shakeBoard() { const b = $('board'); b.classList.remove('shake'); void b.getBoundingClientRect(); b.classList.add('shake'); }
 function flashSquare(i, color, ms = 800) {
   const r = rectOf(i), w = fx('g', { transform: ISO(0) }, ms);
@@ -3646,7 +3707,9 @@ async function rideBus(s, from, n, tok, onStart) {
   const seat = el('g', { transform: 'translate(-2 -6)' }, body);
   seat.appendChild(g); g.style.transition = 'none'; g.style.transform = 'none';
   txt(0, -6, 'sq-icon', '🚌', body, { style: 'font-size:34px' });
-  const getOff = () => { home.insertBefore(g, next && next.parentNode === home ? next : null); g.style.transition = ''; };
+  // nhãn tên nằm trong quân: xe lật ngang thì lật ngược nhãn lại cho chữ không bị ngược
+  const tname = g.querySelector('.tname');
+  const getOff = () => { home.insertBefore(g, next && next.parentNode === home ? next : null); g.style.transition = ''; if (tname) tname.style.transform = ''; };
   const [sx, sy] = tokenXY(from, s, false);
   for (let k = 0; k < 4; k++) exhaust(sx + (Math.random() - .5) * 16, sy + 6, bus);
   const ms = busMs(n);
@@ -3667,6 +3730,7 @@ async function rideBus(s, from, n, tok, onStart) {
     const bob = t > 0.02 && t < 0.98 ? Math.sin(now / 40) * 1.3 : 0;
     bus.setAttribute('transform', `translate(${x} ${y})`);
     body.setAttribute('transform', `translate(0 ${bob}) rotate(${ang}) scale(${face} 1)`);
+    if (tname) tname.style.transform = `translateY(-88px) scale(${face}, 1)`;
     if (now - lastPuff > 60 && t < 0.97) { lastPuff = now; exhaust(x + face * 17, y + 4 + bob, bus); }
   };
   await new Promise(res => {
@@ -3697,7 +3761,7 @@ function stepMs(st) {
     case 'busStop': return 600; case 'busGo': return 300; case 'busNoCash': return 300;
     case 'home': return st.can ? 0 : 300; case 'homePay': return 1000; case 'interest': return 900; case 'bonus': return 700; case 'rentX2': return 900; case 'norent': return 350; case 'useFree': return 800; case 'charmFree': return 900; case 'useHalf': return 600;
     case 'pay': return 800; case 'rob': return 1100; case 'debt': return 600; case 'card': return 2700; case 'spyDraw': return 700; case 'hold': return 600; case 'nothing': return 400;
-    case 'build': return 850; case 'buyTour': return 750; case 'takeover': case 'hack': return 1000; case 'skip': return 250;
+    case 'build': return st.to === 5 ? LM_MS : 850; case 'buyTour': return 750; case 'takeover': case 'hack': return 1000; case 'skip': return 250;
     case 'liftOffer': return 500; case 'liftNone': return 300; case 'lift': return 1500; case 'noCash': return 1100; case 'festNone': return 300; case 'festival': return 1000;
     case 'casinoSkip': return 300; case 'casino': return 1900; case 'join': return 1200;
     case 'pickCity': return 400; case 'pickSkip': return 250; case 'swap': return 1000; case 'forceSell': return 900; case 'destroy': return 900;
@@ -3843,8 +3907,8 @@ async function animateStep(st, tok) {
     case 'build': {
       const [x, y] = bandPt(st.i), [tx, ty] = tokenPt(s);
       drawOwnership(); drawBuild();
-      playBuild(st.to === 5 ? 5 : 3); if (st.to === 5) setTimeout(playFanfare, 450);
-      floatText(x, y - 8, LEVELS[st.to].icon, '#2e9d4f', 1000, 24);
+      if (st.to === 5) landmarkRise(st.i, s, tok);
+      else { playBuild(3); floatText(x, y - 8, LEVELS[st.to].icon, '#2e9d4f', 1000, 24); }
       cardMoney(s, -(st.cost));
       flashSquare(st.i, colorOf(s));
       if (st.from === 0) burst(x, y, 10, [colorOf(s), '#ffd23f', '#fff'], 40);
