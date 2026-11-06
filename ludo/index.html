@@ -882,7 +882,7 @@ function setDie(i, v, roll) {
   else { D.die.classList.remove('hop'); void D.die.offsetWidth; D.die.classList.add('hop'); }
 }
 
-// ── âm thanh: bản ghi thật trong sounds/ (CC0, xem sounds/CREDITS.txt), nạp
+// ── âm thanh: bản ghi thật trong sounds/, nạp
 // bằng Web Audio cho khỏi trễ. Chưa nạp được (mở bằng file://, mất mạng) thì
 // dùng tiếng tự tổng hợp bên dưới thay thế ──
 let actx = null, muted = store.get('cangua.mute', false), noiseBuf = null;
