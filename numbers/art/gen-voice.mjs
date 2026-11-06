@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Sinh giọng đọc tiếng Việt (giọng nơ-ron) cho Học Đếm Số — cùng cách làm với Thế Giới Nhỏ:
+// Sinh giọng đọc tiếng Việt + tiếng Anh (giọng nơ-ron) cho Học Đếm Số — cùng cách làm với Thế Giới Nhỏ:
 //   node numbers/art/gen-voice.mjs            # chỉ sinh clip còn thiếu
 //   node numbers/art/gen-voice.mjs --force    # sinh lại tất cả
 //
@@ -7,7 +7,7 @@
 //   python3 -m venv /tmp/num-tts && /tmp/num-tts/bin/pip install edge-tts
 //   export EDGE_TTS=/tmp/num-tts/bin/edge-tts
 //
-// Câu đọc lấy thẳng từ đoạn VOICE-BEGIN … VOICE-END trong numbers/index.html (bảng VOICE_LINES),
+// Câu đọc lấy thẳng từ đoạn VOICE-BEGIN … VOICE-END trong numbers/game.js (bảng VOICE_LINES),
 // nên sửa câu ở đó rồi chạy lại script này. Kết quả: numbers/voice/<khoá>.mp3
 import { readFileSync, existsSync, mkdirSync, readdirSync, unlinkSync, statSync, rmSync } from 'node:fs';
 import { dirname, join } from 'node:path';
@@ -22,10 +22,12 @@ const EDGE = process.env.EDGE_TTS || 'edge-tts';
 const force = process.argv.includes('--force');
 // giọng vui tươi cho trẻ nhỏ: chậm hơn một chút, cao giọng
 const V = { voice: 'vi-VN-HoaiMyNeural', rate: '-5%', pitch: '+25Hz' };
+// khoá "en-…" (Tập Đếm tiếng Anh): giọng bé gái tiếng Anh, đọc chậm cho trẻ
+const V_EN = { voice: 'en-US-AnaNeural', rate: '-10%', pitch: '+0Hz' };
 
-const html = readFileSync(join(dir, 'index.html'), 'utf8');
+const html = readFileSync(join(dir, 'game.js'), 'utf8');
 const m = html.match(/\/\/ VOICE-BEGIN[^\n]*\n([\s\S]*?)\/\/ VOICE-END/);
-if (!m) throw new Error('Không tìm thấy đoạn VOICE-BEGIN … VOICE-END trong numbers/index.html');
+if (!m) throw new Error('Không tìm thấy đoạn VOICE-BEGIN … VOICE-END trong numbers/game.js');
 const LINES = Function(m[1] + '\nreturn VOICE_LINES;')();
 
 mkdirSync(OUT, { recursive: true });
@@ -42,7 +44,8 @@ for (const [k, text] of todo) {
     try {
       // dịch vụ hay trả về rỗng ngẫu nhiên (nhất là câu ngắn) → thử lại nhiều lần; lần thử lẻ bỏ dấu cuối
       const say = attempt % 2 ? text.replace(/[.!?…]+$/, '') : text;
-      await run(EDGE, ['--voice', V.voice, `--rate=${V.rate}`, `--pitch=${V.pitch}`, '--text', say, '--write-media', raw]);
+      const v = k.startsWith('en-') ? V_EN : V;
+      await run(EDGE, ['--voice', v.voice, `--rate=${v.rate}`, `--pitch=${v.pitch}`, '--text', say, '--write-media', raw]);
       // mono 24 kHz 48 kbps, cắt lặng đầu/cuối (để đếm "Một! Hai! Ba!" liền nhịp), nâng dải cao cho giọng sáng, chuẩn hoá độ to
       await run('ffmpeg', ['-y', '-loglevel', 'error', '-i', raw, '-af',
         'silenceremove=start_periods=1:start_threshold=-50dB,areverse,silenceremove=start_periods=1:start_threshold=-50dB,areverse,apad=pad_dur=0.12,highshelf=f=3500:g=2,loudnorm=I=-16:TP=-1.5',
