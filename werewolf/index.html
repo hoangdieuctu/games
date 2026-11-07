@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-CBV0HJRM37"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-CBV0HJRM37');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-title" content="Ma Sói Online">
+<meta name="theme-color" content="#0b1022">
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="icon" type="image/png" href="icon.png">
+<title>Ma Sói Online</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display+SC:wght@700;900&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="sky" aria-hidden="true"><div class="moon"></div><div class="stars"></div><div class="fog f1"></div><div class="fog f2"></div></div>
+
+<header class="top">
+  <div class="ttl" id="topTitle">Ma Sói Online</div>
+  <button class="tbtn" id="bVoice" hidden>🎤</button>
+  <button class="tbtn" id="bLang" title="Language">VI</button>
+  <button class="tbtn" id="bRules" title="Luật chơi">📖</button>
+  <button class="tbtn" id="bSettings" title="Cài đặt">⚙️</button>
+  <button class="tbtn" id="bLeave" hidden>🚪</button>
+</header>
+
+<!-- MENU -->
+<main class="scr" id="scrMenu">
+  <div class="logo">
+    <div class="logo-card" id="logoCard"></div>
+    <h1 data-t="title">Ma Sói Online</h1>
+    <p class="tag" data-t="tagline"></p>
+  </div>
+  <div class="menu">
+    <button class="mbtn go" id="mContinue" hidden><b data-t="menuContinue"></b><small id="mContinueSub"></small></button>
+    <button class="mbtn go" id="mOffline"><b data-t="menuOffline"></b><small data-t="menuOfflineSub"></small></button>
+    <button class="mbtn go" id="mOnline"><b data-t="menuOnline"></b><small data-t="menuOnlineSub"></small></button>
+    <div class="mrow">
+      <button class="mbtn sm" id="mHistory" data-t="menuHistory"></button>
+      <button class="mbtn sm" id="mRules" data-t="menuRules"></button>
+      <button class="mbtn sm" id="mSettings" data-t="menuSettings"></button>
+    </div>
+  </div>
+</main>
+
+<!-- CHƠI VỚI MÁY: thiết lập -->
+<main class="scr" id="scrSetup" hidden>
+  <div class="panel wide">
+    <h2 data-t="menuOffline"></h2>
+    <label class="fld"><span data-t="yourName"></span><input id="suName" maxlength="14" autocomplete="off"></label>
+    <div class="fld"><span data-t="players"></span>
+      <div class="stepper"><button id="suMinus">−</button><b id="suN">8</b><button id="suPlus">+</button></div>
+    </div>
+    <div id="suDeck"></div>
+    <div class="row end"><button class="btn" id="suBack" data-t="back"></button><button class="btn go" id="suStart" data-t="start"></button></div>
+  </div>
+</main>
+
+<!-- PHÒNG CHỜ ONLINE -->
+<main class="scr" id="scrLobby" hidden>
+  <div class="panel wide">
+    <h2 data-t="lobby"></h2>
+    <div id="lbHostBox" class="codebox">
+      <button class="code" id="lbCode"><b id="lbCodeTxt"></b><small id="lbCodeTip" data-t="roomCode"></small></button>
+      <div class="row"><input id="lbLink" readonly><button class="btn sm" id="lbCopy" data-t="copyLink"></button><button class="btn sm" id="lbShare" data-t="share"></button></div>
+      <p class="note" id="lbNote" data-t="fileNote"></p>
+    </div>
+    <label class="fld"><span data-t="yourName"></span><input id="lbName" maxlength="14" autocomplete="off"></label>
+    <h3 id="lbCount"></h3>
+    <div class="members" id="lbMembers"></div>
+    <div id="lbHostCtl">
+      <div class="fld"><span data-t="totalPlayers"></span>
+        <div class="stepper"><button id="lbMinus">−</button><b id="lbN">8</b><button id="lbPlus">+</button></div>
+      </div>
+    </div>
+    <div id="lbDeck"></div>
+    <p class="hint" id="lbHint"></p>
+    <div class="row end">
+      <button class="btn" id="lbLeave" data-t="leave"></button>
+      <button class="btn go" id="lbReady" hidden></button>
+      <button class="btn go" id="lbStart" data-t="start"></button>
+    </div>
+  </div>
+</main>
+
+<!-- VÁN CHƠI -->
+<main class="scr" id="scrGame" hidden>
+  <div class="hud">
+    <div class="phase" id="hPhase"><span class="pico" id="hIco">🌙</span><span><b id="hDay"></b><small id="hTitle"></small></span></div>
+    <div class="timer" id="hTimer"><svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="17" class="bg"/><circle cx="20" cy="20" r="17" class="fg" id="hRing"/></svg><b id="hSec"></b></div>
+  </div>
+  <div class="table" id="table">
+    <div class="square" id="square"></div>
+    <div class="seats" id="seats"></div>
+    <div class="center" id="center"><div class="cicon" id="cIcon"></div><div class="ctext" id="cText"></div></div>
+  </div>
+  <div class="dock">
+    <button class="mycard" id="myCard" title=""></button>
+    <div class="act" id="act"></div>
+  </div>
+  <div class="feedbox">
+    <div class="tabs"><button class="on" data-tab="feed" data-t="feed"></button><button data-tab="chat" data-t="chat" id="tabChat"></button></div>
+    <div class="feed" id="feed"></div>
+    <div class="feed" id="chat" hidden></div>
+    <form class="say" id="sayForm"><input id="sayIn" maxlength="120" autocomplete="off" enterkeyhint="send"><button class="btn sm">➤</button></form>
+  </div>
+</main>
+
+<!-- lớp phủ -->
+<div class="ov" id="ovCard" hidden><div class="ovp cardp"><div class="flip" id="flip"><div class="face back" id="flipBack"></div><div class="face front" id="flipFront"></div></div><p class="note" id="flipHint"></p><button class="btn go" id="flipOk"></button></div></div>
+<div class="ov" id="ovMorning" hidden><div class="ovp"><div class="sunrise"></div><h2 id="mnTitle"></h2><div class="deaths" id="mnList"></div><p class="growl" id="mnGrowl" hidden></p></div></div>
+<div class="ov" id="ovVerdict" hidden><div class="ovp"><h2 data-t="verdictTitle"></h2><div class="tally" id="vdTally"></div><p class="vdtxt" id="vdText"></p><div class="deaths" id="vdList"></div></div></div>
+<div class="ov" id="ovOver" hidden><div class="ovp wide"><h2 id="ovWin"></h2><p class="big" id="ovYou"></p><h3 data-t="allCards"></h3><div class="allcards" id="ovCards"></div><div class="row end" id="ovBtns"></div></div></div>
+<div class="ov" id="ovHistory" hidden><div class="ovp wide"><h2 data-t="history"></h2><div id="hiBody"></div><div class="row end"><button class="btn" id="hiClear" data-t="clearHistory"></button><button class="btn go" id="hiClose" data-t="close"></button></div></div></div>
+<div class="ov" id="ovRules" hidden><div class="ovp wide"><h2 data-t="rules"></h2><div id="ruBody"></div><div class="row end"><button class="btn go" id="ruClose" data-t="close"></button></div></div></div>
+<div class="ov" id="ovSettings" hidden><div class="ovp"><h2 data-t="settings"></h2>
+  <div class="opts">
+    <label class="chk"><input type="checkbox" id="stSfx"><span data-t="sfx"></span></label>
+    <label class="chk"><input type="checkbox" id="stMusic"><span data-t="music"></span></label>
+    <label class="chk"><input type="checkbox" id="stNarr"><span data-t="narrator"></span></label>
+    <label class="fld"><span data-t="volume"></span><input type="range" id="stVol" min="0" max="100"></label>
+    <label class="chk"><input type="checkbox" id="stMotion"><span data-t="motion"></span></label>
+    <div class="fld"><span data-t="language"></span><div class="seg" id="stLang"><button data-v="vi">Tiếng Việt</button><button data-v="en">English</button></div></div>
+  </div>
+  <div class="row end"><button class="btn go" id="stClose" data-t="close"></button></div></div></div>
+<div class="ov" id="ovRole" hidden><div class="ovp cardp"><div id="roleBig"></div><button class="btn go" id="roleClose" data-t="close"></button></div></div>
+<div class="ov top" id="ovNet" hidden><div class="ovp" id="netPanel"></div></div>
+<div class="toasts" id="toasts"></div>
+<div class="fade" id="fade" hidden></div>
+
+<script src="roles.js"></script>
+<script src="i18n.js"></script>
+<script src="cards.js"></script>
+<script src="engine.js"></script>
+<script src="audio.js"></script>
+<script src="ui.js"></script>
+<script src="net.js"></script>
+</body>
+</html>
