@@ -27,3 +27,5 @@ node <tên>/build.mjs
 ```
 
 Đừng sửa trực tiếp `index.html` của các game này.
+
+Version 1
