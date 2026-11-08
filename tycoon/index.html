@@ -990,7 +990,9 @@ const fmt = n => '$' + Math.round(Math.abs(n)).toLocaleString('vi-VN');
 const LENS = [{ key: 'short', label: 'Ngắn', rounds: 15, time: '20–30 phút' }, { key: 'mid', label: 'Vừa', rounds: 25, time: '40–60 phút' }, { key: 'long', label: 'Dài', rounds: 40, time: 'hơn 1 giờ' }];
 const lenHint = k => { const L = LENS.find(x => x.key === k) || LENS[1]; return `Thắng ngay khi đối thủ phá sản hết, đủ ${GROUP_WIN} nhóm màu, cả một hàng, 5 điểm du lịch hoặc ${LANDMARK_WIN} Biểu tượng. Hết ${L.rounds} vòng thì ai giàu nhất thắng. Khoảng ${L.time}.`; };
 
-// ── nhân vật: mỗi người một kỹ năng (nhóm giảm tiền / tăng tiền / di chuyển / phá đối thủ / may mắn) ──
+// ── nhân vật: mỗi người một kỹ năng (nhóm giảm tiền / tăng tiền / di chuyển / phá đối thủ / phòng thủ / may mắn) ──
+// số liệu kỹ năng của Nhà Đầu Tư, Thu Ngân, Nhà Sưu Tầm, Luật Sư, Người Bảo Hiểm, Cảnh Sát, Nhà Báo
+const INVESTOR_RATE = 0.8, CASHIER_CUT = 0.2, COLLECTOR_OFF = 0.3, COLLECTOR_BONUS = 100, LAWYER_FINE = 100, INSURE_CASH = 500, POLICE_CHANCE = 0.25, SCOOP_PAY = 100;
 const CHARS = [
   { id: 'mc', name: 'Siêu MC', skill: 'Lương qua Bắt Đầu gấp đôi', group: 'tăng tiền', skin: '#ffd9b3', hair: '#2b2118', style: 'quiff', acc: 'mic', outfit: '#1e6fd8', bg: '#dbeafe' },
   { id: 'boss', name: 'Ông Trùm', skill: 'Mua và xây nhà rẻ hơn 15%', group: 'giảm tiền', skin: '#f3c9a3', hair: '#6b4a2a', style: 'short', acc: 'glasses', outfit: '#23324a', bg: '#e5e7eb' },
@@ -1014,6 +1016,14 @@ const CHARS = [
   { id: 'spy', name: 'Gián Điệp', skill: 'Rút thẻ Cơ Hội được xem 2 thẻ và chọn 1', group: 'may mắn', skin: '#f1c7a0', hair: '#1f1a17', style: 'spy', acc: 'shades', outfit: '#1f2937', bg: '#e2e8f0' },
   { id: 'banker', name: 'Chủ Ngân Hàng', skill: 'Đầu mỗi lượt nhận lãi 1% tiền mặt đang có', group: 'tăng tiền', skin: '#f6d6bd', hair: '#6b7280', style: 'banker', acc: 'coin', outfit: '#1e3a8a', bg: '#dbeafe' },
   { id: 'chef', name: 'Vua Bếp', skill: 'Bắt đầu ván với thêm 40% tiền khởi đầu', group: 'tăng tiền', skin: '#ffd9b3', hair: '#4b3621', style: 'toque', acc: 'spoon', outfit: '#ffffff', bg: '#fff1f2' },
+  { id: 'investor', name: 'Nhà Đầu Tư', skill: `Mua lại thành phố đối thủ chỉ trả ${INVESTOR_RATE * 100}% giá, mua xong được lên ngay 1 cấp miễn phí`, group: 'giảm tiền', skin: '#f6d1b0', hair: '#2b2118', style: 'investor', acc: 'chart', outfit: '#334155', bg: '#e0f2fe' },
+  { id: 'cashier', name: 'Thu Ngân', skill: `Đối thủ nộp thuế: nhận ngay ${CASHIER_CUT * 100}% số thuế đó (phần còn lại vào Quỹ Thuế)`, group: 'tăng tiền', skin: '#ffe0c7', hair: '#7c2d12', style: 'cashier', acc: 'register', outfit: '#dc2626', bg: '#fee2e2' },
+  { id: 'collector', name: 'Nhà Sưu Tầm', skill: `Lên Biểu tượng rẻ hơn ${COLLECTOR_OFF * 100}%; qua Bắt Đầu nhận thêm $${COLLECTOR_BONUS} cho mỗi Biểu tượng đang có`, group: 'tăng tiền', skin: '#f3cfae', hair: '#9ca3af', style: 'collector', acc: 'vase', outfit: '#7c3aed', bg: '#f3e8ff' },
+  { id: 'lawyer', name: 'Luật Sư', skill: `Thành phố không bị ép bán hay đổi; ai dùng thẻ nhắm vào thì bị phạt $${LAWYER_FINE} trả cho mình`, group: 'phòng thủ', skin: '#f1c7a0', hair: '#1f1a17', style: 'lawyer', acc: 'scale', outfit: '#111827', bg: '#f1f5f9' },
+  { id: 'insurer', name: 'Người Bảo Hiểm', skill: `Phá sản lần đầu được bảo hiểm cứu: trả đủ nợ thay, giữ lại ô đất rẻ nhất và nhận $${INSURE_CASH} làm lại`, group: 'phòng thủ', skin: '#ffd9b3', hair: '#4b3621', style: 'insurer', acc: 'umbrella', outfit: '#0369a1', bg: '#e0f2fe' },
+  { id: 'pilot', name: 'Phi Công', skill: 'Qua Bắt Đầu: lượt sau được bay miễn phí tới một điểm du lịch bất kỳ', group: 'di chuyển', skin: '#f6d1b0', hair: '#3b2a1e', style: 'pilot', acc: 'plane', outfit: '#1e3a8a', bg: '#dbeafe' },
+  { id: 'police', name: 'Cảnh Sát', skill: `Đi ngang qua hoặc dừng ở ô có đối thủ đứng: ${POLICE_CHANCE * 100}% bắt họ ra Côn Đảo (mỗi vòng tối đa 1 lần)`, group: 'phá đối thủ', skin: '#eec39a', hair: '#1f1a17', style: 'police', acc: 'whistle', outfit: '#1d4ed8', bg: '#dbeafe' },
+  { id: 'journalist', name: 'Nhà Báo', skill: `Vào đất đối thủ đang mở lễ hội: hủy lễ hội đó trước khi trả phí và nhận $${SCOOP_PAY} nhuận bút`, group: 'phá đối thủ', skin: '#ffe3cc', hair: '#b45309', style: 'journalist', acc: 'camera', outfit: '#65a30d', bg: '#ecfccb' },
 ];
 const charOf = id => CHARS.find(c => c.id === id) || CHARS[0];
 const hasSkill = (G, s, id) => !!G.seats[s] && G.pl[s].char === id;
@@ -1148,12 +1158,14 @@ const active = G => SEATS.filter(s => G.seats[s] && !G.pl[s].out);
 function levelCost(i, lv, G, s) {
   let c = SQ[i].base * LEVELS[lv].cost;
   if (G && s !== undefined && s >= 0 && hasSkill(G, s, 'boss')) c *= 0.85;
+  if (G && s !== undefined && s >= 0 && lv === 5 && hasSkill(G, s, 'collector')) c *= 1 - COLLECTOR_OFF; // Nhà Sưu Tầm: Biểu tượng rẻ hơn
   if (evOn(G, 'stimulus')) c *= 0.7;
   return r10(c);
 }
 const cumCost = (i, from, to, G, s) => { let v = 0; for (let k = from + 1; k <= to; k++) v += levelCost(i, k, G, s); return v; };
 const invested = (G, i) => (SQ[i].t === 'tour' ? SQ[i].price : cumCost(i, 0, G.props[i].lv));
-const takeoverPrice = (G, i) => invested(G, i); // mua lại đúng bằng số vốn chủ đã bỏ ra
+// mua lại đúng bằng số vốn chủ đã bỏ ra; Nhà Đầu Tư (người mua s) chỉ trả INVESTOR_RATE
+const takeoverPrice = (G, i, s) => (s !== undefined && s >= 0 && hasSkill(G, s, 'investor') ? r10(invested(G, i) * INVESTOR_RATE) : invested(G, i));
 const sellValue = (G, i) => invested(G, i) / 2;
 // điểm du lịch càng xa ô Bắt Đầu càng đắt, phí tham quan càng cao
 const tourPrice = (G, s, i) => r10(SQ[i].price * (hasSkill(G, s, 'tourist') ? 0.7 : 1) * (evOn(G, 'stimulus') ? 0.7 : 1));
@@ -1230,7 +1242,7 @@ function botBuyLevel(G, s, i, from) {
   return best;
 }
 function botWantsTakeover(G, s, i) {
-  const price = takeoverPrice(G, i), P = G.pl[s], q = SQ[i];
+  const price = takeoverPrice(G, i, s), P = G.pl[s], q = SQ[i];
   if (P.cash - price < 300) return false;
   const completes = GROUP_IDX[q.g].every(j => j === i || G.props[j].owner === s);
   const breaks = ownsGroup(G, G.props[i].owner, q.g);
@@ -1246,7 +1258,10 @@ function botPickTarget(G, s, kind, opts) {
       case 'lift': return rentBase(G, i) + invested(G, i) * 0.1; // nhắc ô đang thu phí cao nhất
       case 'upgrade': { const lv = p.lv, c = levelCost(i, lv + 1, G, s); return c <= P.cash - reserve(G) ? (SQ[i].base * (LEVELS[lv + 1].rent - LEVELS[lv].rent)) / c : -1; }
       case 'swapMine': return -invested(G, i);
-      case 'swapTheirs': case 'forceSell': case 'destroy': case 'plague': case 'blackout': return rentBase(G, i) + invested(G, i) * 0.2 + netWorth(G, p.owner) * 0.05;
+      // thành phố của Luật Sư không ép bán / đổi được, còn bị phạt: chỉ chọn khi không còn chỗ nào khác
+      case 'swapTheirs': case 'forceSell': if (hasSkill(G, p.owner, 'lawyer')) return 0; // fallthrough
+      case 'destroy': case 'plague': case 'blackout': return rentBase(G, i) + invested(G, i) * 0.2 + netWorth(G, p.owner) * 0.05;
+      case 'fly': return p.owner < 0 ? (P.cash >= tourPrice(G, s, i) + 150 ? 50 + 40 * countOwned(G, s, TOURS) : -1) : p.owner === s ? 10 : -1;
       case 'bus': {
         if (i === P.pos || !isProp(i)) return -1;
         if (q.t === 'tour') return p.owner < 0 && P.cash >= tourPrice(G, s, i) + 200 ? 50 + 40 * countOwned(G, s, TOURS) : -1;
@@ -1456,8 +1471,58 @@ function moveBy(s, n, steps, how) {
   steps.push({ k: 'move', s, from, to, n, passGo, salary, how, fly: how === 'fly' });
   if (passGo && hasSkill(G, s, 'wizard') && Math.random() < 0.5) hex(s, steps);
   if (passGo && hasSkill(G, s, 'robin')) robin(s, steps);
+  // Nhà Sưu Tầm: qua Bắt Đầu nhận thêm tiền cho mỗi Biểu tượng
+  if (passGo && hasSkill(G, s, 'collector')) { const amt = COLLECTOR_BONUS * landmarks(G, s); if (amt > 0) { P.cash += amt; steps.push({ k: 'collect', s, amt, n: amt / COLLECTOR_BONUS }); } }
+  // Phi Công: qua Bắt Đầu thì lượt sau được bay tới một điểm du lịch
+  if (passGo && hasSkill(G, s, 'pilot') && !P.fly) { P.fly = true; steps.push({ k: 'flyTicket', s }); }
+  if (hasSkill(G, s, 'police') && n !== 0) police(s, from, n, steps);
   if (hasSkill(G, s, 'robber')) rob(s, steps);
   land(s, steps);
+}
+// Phi Công bay thẳng tới ô i (không đi qua Bắt Đầu nên không nhận lương)
+function flyTo(s, i, steps) {
+  const P = G.pl[s], from = P.pos;
+  P.pos = i;
+  steps.push({ k: 'move', s, from, to: i, n: 0, passGo: false, salary: 0, how: 'fly', fly: true });
+  land(s, steps);
+}
+// Cảnh Sát: đối thủ đứng ở các ô vừa đi qua (kể cả ô dừng) có POLICE_CHANCE bị bắt ra Côn Đảo; mỗi vòng tối đa 1 lần
+function police(s, from, n, steps) {
+  const P = G.pl[s];
+  if (P.copRound === G.round) return;
+  const dir = n < 0 ? -1 : 1, passed = new Set();
+  for (let k = 1; k <= Math.abs(n); k++) passed.add(((from + dir * k) % N + N) % N);
+  const vs = active(G).filter(v => v !== s && !G.pl[v].jail && passed.has(G.pl[v].pos));
+  for (const v of vs.sort(() => Math.random() - 0.5)) {
+    if (Math.random() >= POLICE_CHANCE) continue;
+    const V = G.pl[v];
+    V.pos = ISLAND_POS; V.jail = 1; V.bus = false; P.copRound = G.round;
+    steps.push({ k: 'arrest', s, v });
+    return;
+  }
+}
+// Nhà Báo vào đất đối thủ đang có lễ hội: hủy lễ hội trước khi tính phí, nhận nhuận bút từ ngân hàng
+function scoop(s, i, steps) {
+  const p = G.props[i];
+  if (!hasSkill(G, s, 'journalist') || !p.fest || p.owner < 0 || p.owner === s) return;
+  p.fest = 0; G.pl[s].cash += SCOOP_PAY;
+  steps.push({ k: 'scoop', s, i, o: p.owner, amt: SCOOP_PAY });
+}
+// Luật Sư: thẻ ép bán / đổi thành phố nhắm vào đất của o bị chặn, người dùng thẻ s bị phạt (tối đa số tiền đang có)
+function lawyerBlock(s, o, i, steps) {
+  if (!hasSkill(G, o, 'lawyer')) return false;
+  const amt = Math.max(0, Math.min(LAWYER_FINE, G.pl[s].cash));
+  G.pl[s].cash -= amt; G.pl[o].cash += amt;
+  steps.push({ k: 'lawyer', s: o, i, by: s, amt });
+  return true;
+}
+// thuế s vừa nộp amt: Thu Ngân (đối thủ) lấy CASHIER_CUT, phần còn lại vào Quỹ Thuế; trả về bước hoạt hoạ (nếu có)
+function taxIn(s, amt) {
+  const c = active(G).find(o => o !== s && hasSkill(G, o, 'cashier'));
+  const cut = c === undefined ? 0 : r10(amt * CASHIER_CUT);
+  if (cut > 0) G.pl[c].cash += cut;
+  G.pot = (G.pot || 0) + amt - cut;
+  return cut > 0 ? { k: 'taxCut', s: c, from: s, amt: cut } : null;
 }
 // Pháp Sư: gây dịch bệnh ở một thành phố đối thủ ngẫu nhiên (ưu tiên ô chưa bị dịch), khiên vẫn chặn được
 function hex(s, steps) {
@@ -1507,6 +1572,7 @@ function land(s, steps) {
         if (can && P.cash < need) { homePay(s, i, steps); if (P.cash < need) steps.push({ k: 'noCash', s, i, need, mode: 'upgrade' }); else { G.step = 'visit'; G.visit = { i, mode: 'upgrade' }; steps.push({ k: 'home', s, i, can }); } }
         else { homePay(s, i, steps); if (can) { G.step = 'visit'; G.visit = { i, mode: 'upgrade' }; } steps.push({ k: 'home', s, i, can }); }
       } else {
+        scoop(s, i, steps);
         // Hacker: 10% chiếm luôn thành phố, khỏi trả phí; khiên của chủ chặn được
         const o = p.owner;
         if (hasSkill(G, s, 'hacker') && canTakeover(G, s, i) && Math.random() < 0.1 && !shielded(o, i, steps)) {
@@ -1531,7 +1597,7 @@ function land(s, steps) {
           break;
         }
         if (G.step !== 'debt' && canTakeover(G, s, i)) {
-          const need = takeoverPrice(G, i);
+          const need = takeoverPrice(G, i, s);
           if (P.cash >= need) { G.step = 'visit'; G.visit = { i, mode: 'takeover' }; steps.push({ k: 'takeoverOffer', s, i }); }
           else steps.push({ k: 'noCash', s, i, need, mode: 'takeover' });
         }
@@ -1545,7 +1611,7 @@ function land(s, steps) {
         else { G.step = 'visit'; G.visit = { i, mode: 'tour' }; steps.push({ k: 'offer', s, i }); }
       }
       else {
-        if (p.owner !== s) payRent(s, i, steps);
+        if (p.owner !== s) { scoop(s, i, steps); payRent(s, i, steps); }
         else { homePay(s, i, steps); steps.push({ k: 'home', s, i, can: false }); }
         // có người ghé (kể cả chủ) thì phí lần sau tăng; người trả phí phá sản thì đất vẫn của chủ nên vẫn tính
         if (p.owner >= 0) { p.visits = (p.visits || 0) + 1; steps.push({ k: 'tourUp', s, i, v: p.visits, amt: rentBase(G, i) }); }
@@ -1592,16 +1658,23 @@ function payRent(s, i, steps) {
 // s trả amt cho to (-1 ngân hàng); thiếu thì vào bước nợ
 function charge(s, to, amt, why, steps, i) {
   const P = G.pl[s];
-  if (P.cash >= amt) { P.cash -= amt; if (to >= 0) G.pl[to].cash += amt; else if (why === 'tax') G.pot = (G.pot || 0) + amt; steps.push({ k: 'pay', s, to, amt, why, i }); return; }
+  if (P.cash >= amt) {
+    P.cash -= amt;
+    const cut = to < 0 && why === 'tax' ? taxIn(s, amt) : null;
+    if (to >= 0) G.pl[to].cash += amt;
+    steps.push({ k: 'pay', s, to, amt, why, i }); if (cut) steps.push(cut);
+    return;
+  }
   steps.push({ k: 'debt', s, to, amt, why, i });
   // bán hết đất cũng không đủ thì phá sản ngay, không bắt bán từng ô
-  if (liquid(G, s) < amt) { liquidate(s, to >= 0 ? to : -1, steps); return; }
+  if (liquid(G, s) < amt) { liquidate(s, to >= 0 ? to : -1, steps, amt, why, i); return; }
   G.step = 'debt'; G.debt = { to, amt, why, i };
 }
 // phá sản: bán từng ô đất cho ngân hàng (nửa vốn, mỗi ô một bước để hoạt hoạ lần lượt),
 // tiền thu được cùng tiền mặt trả cho chủ nợ (nợ ngân hàng thì mất), người chơi rời ván
-function liquidate(s, to, steps) {
+function liquidate(s, to, steps, amt, why, i) {
   const P = G.pl[s];
+  if (hasSkill(G, s, 'insurer') && !P.insured && amt > 0) { insure(s, to, steps, amt, why, i); return; }
   let sold = 0, n = 0;
   for (const i of PROPS) {
     if (G.props[i].owner !== s) continue;
@@ -1615,6 +1688,27 @@ function liquidate(s, to, steps) {
   steps.push({ k: 'bankrupt', s, to, was: [], n, cash, sold, paid });
   const act = active(G);
   if (act.length <= 1) { G.phase = 'over'; G.winner = act[0] ?? s; G.winHow = 'last'; G.turn = G.winner; G.step = 'end'; steps.push({ k: 'won', s: G.winner, how: 'last' }); }
+}
+// Người Bảo Hiểm phá sản lần đầu: ngân hàng mua lại mọi ô đất trừ ô rẻ nhất, tiền mặt trả nợ trước,
+// bảo hiểm trả nốt phần còn thiếu cho chủ nợ, rồi tặng INSURE_CASH để chơi tiếp
+function insure(s, to, steps, amt, why, at) {
+  const P = G.pl[s];
+  P.insured = true;
+  const mine = PROPS.filter(i => G.props[i].owner === s);
+  const keep = mine.length ? mine.reduce((a, b) => (invested(G, b) < invested(G, a) ? b : a)) : -1;
+  for (const i of mine) {
+    if (i === keep) continue;
+    const v = sellValue(G, i);
+    steps.push({ k: 'sell', s, i, amt: v, auto: true, was: { ...G.props[i] } });
+    P.cash += v; resetProp(i);
+  }
+  const own = Math.min(P.cash, amt), cover = amt - own;
+  P.cash -= own;
+  if (to >= 0) G.pl[to].cash += amt; else if (why === 'tax') G.pot = (G.pot || 0) + amt;
+  if (own > 0) steps.push({ k: 'pay', s, to, amt: own, why, i: at });
+  P.cash += INSURE_CASH;
+  G.debt = null; G.visit = null; G.pick = null; G.again = false; G.step = 'roll';
+  steps.push({ k: 'insure', s, to, cover, gift: INSURE_CASH, keep, tax: to < 0 && why === 'tax' });
 }
 function toIsland(s, steps) { const P = G.pl[s]; P.pos = ISLAND_POS; P.jail = 1; G.again = false; steps.push({ k: 'island', s }); }
 function pickOpts(s, kind) {
@@ -1630,6 +1724,7 @@ function pickOpts(s, kind) {
     case 'destroy': return CITIES.filter(i => others(i) && G.props[i].lv >= 2 && G.props[i].lv < 5);
     case 'lift': return PROPS.filter(i => G.props[i].owner === s && G.lift !== i);
     case 'bus': return ALL.filter(i => i !== P.pos);
+    case 'fly': return TOURS.filter(i => i !== P.pos);
   }
   return [];
 }
@@ -1709,6 +1804,12 @@ function doPick(s, i) {
       moveTo(s, i, steps, 'bus');
       break;
     }
+    case 'fly': {
+      P.fly = false; G.pick = null; G.step = 'roll'; G.again = false;
+      steps.push({ k: 'flyGo', s, i });
+      flyTo(s, i, steps);
+      break;
+    }
     case 'festival': case 'festivalFree': {
       const fee = pk.kind === 'festival' ? festFee(s) : 0;
       if (P.cash < fee) return;
@@ -1731,7 +1832,7 @@ function doPick(s, i) {
     case 'swapTheirs': {
       const mine = pk.data.mine, o = G.props[i].owner;
       G.pick = null; G.step = 'roll';
-      if (G.props[mine].owner !== s || shielded(o, i, steps)) break;
+      if (G.props[mine].owner !== s || lawyerBlock(s, o, i, steps) || shielded(o, i, steps)) break;
       G.props[mine].owner = o; G.props[i].owner = s;
       steps.push({ k: 'swap', s, mine, theirs: i, o });
       break;
@@ -1739,7 +1840,7 @@ function doPick(s, i) {
     case 'forceSell': {
       const o = G.props[i].owner;
       G.pick = null; G.step = 'roll';
-      if (shielded(o, i, steps)) break;
+      if (lawyerBlock(s, o, i, steps) || shielded(o, i, steps)) break;
       const amt = sellValue(G, i);
       G.pl[o].cash += amt; resetProp(i);
       steps.push({ k: 'forceSell', s, i, o, amt });
@@ -1777,7 +1878,7 @@ function doPickSkip(s) {
   if (!okTurn(s, ['pick']) || !G.pick || !G.pick.optional) return;
   const kind = G.pick.kind;
   G.pick = null; G.step = 'roll';
-  if (kind === 'bus') { G.pl[s].bus = false; commit({ type: 'turn', s, steps: [{ k: 'pickSkip', s, kind }] }); return; }
+  if (kind === 'bus' || kind === 'fly') { G.pl[s][kind] = false; commit({ type: 'turn', s, steps: [{ k: 'pickSkip', s, kind }] }); return; }
   finish(s, [{ k: 'pickSkip', s, kind }]);
 }
 // mua / nâng cấp thành phố lên cấp lv
@@ -1802,10 +1903,11 @@ function doBuyTour(s) {
 }
 function doTakeover(s) {
   if (!okTurn(s, ['visit']) || !G.visit || G.visit.mode !== 'takeover') return;
-  const i = G.visit.i, p = G.props[i], P = G.pl[s], o = p.owner, price = takeoverPrice(G, i);
+  const i = G.visit.i, p = G.props[i], P = G.pl[s], o = p.owner, price = takeoverPrice(G, i, s);
   if (!canTakeover(G, s, i) || P.cash < price) return;
   P.cash -= price; G.pl[o].cash += price; p.owner = s;
   const steps = [{ k: 'takeover', s, i, o, price }];
+  if (hasSkill(G, s, 'investor') && p.lv < Math.min(4, maxLevel(G, s, i))) { p.lv++; steps.push({ k: 'build', s, i, from: p.lv - 1, to: p.lv, cost: 0, free: true }); }
   if (p.lv < maxLevel(G, s, i)) G.visit = { i, mode: 'upgrade' }; else { G.visit = null; G.step = 'roll'; }
   finish(s, steps);
 }
@@ -1837,9 +1939,13 @@ function doPayDebt(s) {
   if (!okTurn(s, ['debt'])) return;
   const D = G.debt, P = G.pl[s];
   if (P.cash < D.amt) return;
-  P.cash -= D.amt; if (D.to >= 0) G.pl[D.to].cash += D.amt; else if (D.why === 'tax') G.pot = (G.pot || 0) + D.amt;
+  P.cash -= D.amt;
+  const cut = D.to < 0 && D.why === 'tax' ? taxIn(s, D.amt) : null;
+  if (D.to >= 0) G.pl[D.to].cash += D.amt;
   G.debt = null; G.step = 'roll';
-  finish(s, [{ k: 'pay', s, to: D.to, amt: D.amt, why: D.why, i: D.i }]);
+  const steps = [{ k: 'pay', s, to: D.to, amt: D.amt, why: D.why, i: D.i }];
+  if (cut) steps.push(cut);
+  finish(s, steps);
 }
 function doSell(s, i) {
   if (!okTurn(s, ['debt']) || !PROPS.includes(i) || G.props[i].owner !== s) return;
@@ -1851,7 +1957,7 @@ function doBankrupt(s) {
   // đang nợ thì được chọn phá sản bất cứ lúc nào, kể cả khi bán đất vẫn đủ trả
   if (!okTurn(s, ['debt'])) return;
   const steps = [];
-  liquidate(s, G.debt.to >= 0 ? G.debt.to : -1, steps);
+  liquidate(s, G.debt.to >= 0 ? G.debt.to : -1, steps, G.debt.amt, G.debt.why, G.debt.i);
   finish(s, steps);
 }
 function doEnd(s) {
@@ -1887,6 +1993,7 @@ function nextTurn(steps) {
     if (P.cash < busFee(t)) { P.bus = false; G.step = 'roll'; steps.push({ k: 'busNoCash', s: t }); }
     else setPick(t, 'bus', pickOpts(t, 'bus'), true);
   }
+  else if (P.fly && !G.pl[t].jail) { const opts = pickOpts(t, 'fly'); if (opts.length) setPick(t, 'fly', opts, true); else { P.fly = false; G.step = 'roll'; } }
   else G.step = 'roll';
 }
 // đầu vòng mới: sự kiện đã đủ EV_ROUNDS vòng thì kết thúc (chưa đủ thì giữ nguyên); vòng 5, 10, 15... thì có thể xảy ra sự kiện mới cho cả phòng
@@ -2083,7 +2190,7 @@ const mix = (hex, to, t) => {
 
 // ── nhân vật chibi: đầu to, mỗi người một tạo hình riêng (mũ, tóc, trang phục, đạo cụ); khung -24..24 ──
 // chỗ tay phải cầm đồ vật của từng nhân vật (bản đủ tay chân); không có thì tay buông xuôi
-const CHIBI_HAND = { mc: [15.5, 10], fairy: [14.5, 3.5], detective: [22.5, 5.5], landlord: [17.5, 7], gambler: [16, 3.5], chef: [15.6, 11], charmer: [15.5, 9], wizard: [19.5, 5], spy: [15, 6], banker: [14.5, 6.5], robber: [16.5, 11] };
+const CHIBI_HAND = { mc: [15.5, 10], fairy: [14.5, 3.5], detective: [22.5, 5.5], landlord: [17.5, 7], gambler: [16, 3.5], chef: [15.6, 11], charmer: [15.5, 9], wizard: [19.5, 5], spy: [15, 6], banker: [14.5, 6.5], robber: [16.5, 11], investor: [15, 8], collector: [16, 9], lawyer: [17, 8], insurer: [17, 6], police: [15.5, 6], journalist: [15, 9], cashier: [15, 10] };
 function chibiInto(g, ch, full = false) {
   const P = (d, f, st, sw = 1) => el('path', { d, fill: f, stroke: st || (f === 'none' ? 'none' : mix(f === '#ffffff' ? '#cccccc' : f, '#000', .3)), 'stroke-width': sw, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' }, g);
   const R = (x, y, w, h, f, rx = 0, st = 'none', sw = 1) => el('rect', { x, y, width: w, height: h, rx, fill: f, stroke: st, 'stroke-width': sw }, g);
@@ -2279,6 +2386,63 @@ function chibiInto(g, ch, full = false) {
       head(); P('M-14 -8 Q-15 -16 -9 -18 L-9 -6 Z M14 -8 Q15 -16 9 -18 L9 -6 Z', ch.hair);
       P('M-16 -12 Q-4 -34 18 -16 Q4 -19 -16 -12 Z', '#166534', '#052e16'); P('M6 -21 Q16 -34 24 -30 Q16 -26 9 -19 Z', '#e8323c', '#991b1b');
       eyes(); brows(); cheeks(); mouth('grin');
+      break;
+    case 'investor': // tóc vuốt gọn, vest xám xanh, cà vạt xanh, bảng biểu đồ đi lên
+      body('#334155', true); P('M-2.5 7 L0 19 L2.5 7 Z', '#0ea5e9', '#0369a1');
+      head(); cap(); P('M-14 -9 Q-14 -25 2 -24 Q14 -22 14 -10 Q9 -17 1 -17 Q-8 -16 -14 -9 Z', ch.hair, '#000');
+      eyes(); brows(); cheeks(); mouth('grin');
+      R(13, -6, 13, 13, '#ffffff', 1.5, '#94a3b8'); P('M15 4 L18.5 0 L21 2 L24.5 -3.5', 'none', '#16a34a', 1.6); P('M22 -3.8 L24.8 -3.8 L24.8 -1', 'none', '#16a34a', 1.4);
+      break;
+    case 'cashier': // tóc buộc đuôi ngựa, nón lưỡi trai đỏ, tạp dề, cầm hoá đơn
+      P('M10 -14 Q22 -12 18 4 Q15 -4 9 -8 Z', ch.hair, hairD);
+      body('#dc2626'); R(-8, 9, 16, 11, '#ffffff', 2, '#e5e7eb'); R(-3, 12, 6, 3, '#fde68a', .8);
+      head(); cap(); P('M-14 -11 Q-13 -24 0 -24 Q13 -24 14 -11 Z', '#dc2626', '#991b1b'); P('M-14 -11 Q-22 -11 -21 -8 L-11 -9 Z', '#b91c1c', '#991b1b');
+      eyes('lash'); cheeks(); mouth();
+      R(13, -1, 9, 13, '#f8fafc', 1, '#94a3b8'); P('M15 2 L20 2 M15 5 L20 5 M15 8 L18.5 8', 'none', '#94a3b8', 1);
+      break;
+    case 'collector': // tóc bạc, kính một tròng, áo khoác nhung tím, ôm bình gốm
+      body('#7c3aed', true); P('M-2.5 7 L0 12 L2.5 7 Z', '#facc15');
+      head(); P('M-14 -6 Q-15 -16 -9 -19 Q0 -23 9 -19 Q15 -16 14 -6 Q10 -15 0 -15 Q-10 -15 -14 -6 Z', ch.hair, '#6b7280');
+      eyes(); Cc(5.5, -6, 4.2, 'none', '#d4a017', 1.4); P('M9.5 -4 Q11 2 9 8', 'none', '#d4a017', .8);
+      brows(); stache('#d1d5db'); mouth('small');
+      P('M14 -1 Q12 -5 15 -7 L21 -7 Q24 -5 22 -1 Q26 6 21 12 L15 12 Q10 6 14 -1 Z', '#38bdf8', '#0369a1'); P('M13.5 4 Q18 6.5 22.5 4', 'none', '#ffffff', 1.4); R(14.5, -9, 7, 2.5, '#0369a1', 1);
+      break;
+    case 'lawyer': // tóc rẽ ngôi gọn, vest đen sơ mi trắng cà vạt đỏ, cán cân công lý
+      body('#111827', true); P('M-2.5 7 L0 19 L2.5 7 Z', '#b91c1c', '#7f1d1d');
+      head(); cap(); P('M-14 -9 Q-15 -24 -3 -24 L-2 -17 Q-9 -16 -14 -9 Z M-2 -24 Q14 -24 14 -9 Q10 -17 -1 -17 Z', ch.hair, '#000');
+      eyes(); brows(true); mouth('small');
+      P('M19 -14 L19 8 M13 -11 L25 -11', 'none', '#d4a017', 1.6); P('M13 -11 L11 -4 M13 -11 L15 -4 M25 -11 L23 -4 M25 -11 L27 -4', 'none', '#d4a017', .7);
+      P('M10.5 -4 Q13 -1 15.5 -4 Z', '#facc15', '#b8860b', .6); P('M22.5 -4 Q25 -1 27.5 -4 Z', '#facc15', '#b8860b', .6); R(16, 7, 6, 2.5, '#d4a017', 1);
+      break;
+    case 'insurer': // tóc chải gọn, áo sơ mi xanh, cà vạt sọc, cầm ô xanh
+      body('#0369a1', true); P('M-2.5 7 L0 19 L2.5 7 Z', '#facc15', '#b8860b'); P('M-1.5 10 L1.5 11.5 M-1.5 14 L1.5 15.5', 'none', '#0369a1', .8);
+      head(); cap(); P('M-14 -9 Q-13 -24 1 -24 Q13 -23 14 -9 Q12 -16 4 -18 Q-2 -14 -14 -9 Z', ch.hair, '#000');
+      eyes('happy'); brows(); cheeks(); mouth('grin');
+      P('M17 12 L17 -12', 'none', '#374151', 1.6); P('M17 12 Q17 15 14.5 14', 'none', '#374151', 1.6);
+      P('M5 -12 Q17 -28 29 -12 Q26 -14.5 23 -12 Q20 -14.5 17 -12 Q14 -14.5 11 -12 Q8 -14.5 5 -12 Z', '#38bdf8', '#0369a1');
+      break;
+    case 'pilot': // mũ phi công có cánh vàng, kính phi công, áo khoác xanh lon vai vàng, khăn trắng
+      body('#1e3a8a'); P('M-16 10 L-9 8 L-9 11 L-16 13 Z M16 10 L9 8 L9 11 L16 13 Z', '#facc15', '#b8860b', .6); P('M-7 7 Q0 13 7 7 L5 11 Q0 15 -5 11 Z', '#ffffff', '#cbd5e1');
+      head(); cap();
+      P('M-14 -10 Q-14 -27 0 -27 Q14 -27 14 -10 Z', '#1e3a8a', '#172554'); R(-15, -13, 30, 4, '#111827', 2); P('M-6 -21 L0 -18 L6 -21 L3 -17 L-3 -17 Z', '#facc15', '#b8860b', .6);
+      R(-12, -10, 10.5, 7, '#92400e', 3.5, '#78350f'); R(1.5, -10, 10.5, 7, '#92400e', 3.5, '#78350f'); P('M-1.5 -7 L1.5 -7', 'none', '#78350f', 1.4); P('M-10 -8.5 L-6 -8.5 M3.5 -8.5 L7.5 -8.5', 'none', 'rgba(255,255,255,.55)', 1.1);
+      cheeks(); mouth('grin');
+      P('M15 -3 L27 -7 L27 -5 L22 -3 L24 2 L22 2 L19 -2 L15 -1 Z', '#e5e7eb', '#64748b', .8);
+      break;
+    case 'police': // mũ kê-pi xanh huy hiệu vàng, đồng phục xanh, còi bạc
+      body('#1d4ed8', true); Cc(-8, 13, 2.4, '#facc15', '#b8860b'); P('M-16 10 L-11 9 M16 10 L11 9', 'none', '#facc15', 1.6); for (const y of [11, 15]) Cc(0, y, 1, '#facc15');
+      head(); cap();
+      P('M-14 -12 Q-16 -26 0 -27 Q16 -26 14 -12 Z', '#1e3a8a', '#172554'); R(-14.5, -15, 29, 4, '#111827', 1.5); el('ellipse', { cx: 0, cy: -11.5, rx: 15, ry: 2.6, fill: '#111827' }, g);
+      P('M0 -24 L2.6 -21 L0 -18 L-2.6 -21 Z', '#facc15', '#b8860b', .6);
+      eyes(); brows(true); mouth('small');
+      R(13, 3, 7, 4.5, '#cbd5e1', 2, '#64748b'); Cc(19, 5.2, 3, '#e2e8f0', '#64748b'); P('M13 5 Q8 4 5 8', 'none', '#e8323c', .9);
+      break;
+    case 'journalist': // tóc xoăn nâu, mũ nồi, áo ghi-lê xanh lá, thẻ báo chí, máy ảnh
+      body('#65a30d'); P('M-6 7 L-3 20 M6 7 L3 20', 'none', '#f8fafc', 2.4); R(-11, 11, 7, 5, '#ffffff', 1, '#64748b'); txt(-7.5, 15, 'sq-price', 'PRESS', g, { fill: '#111827', style: 'font-size:2.6px;font-weight:900' });
+      head(); cap(); for (const [x, y] of [[-13, -9], [-10, -14], [13, -9], [10, -14]]) Cc(x, y, 3.5, ch.hair, hairD);
+      el('ellipse', { cx: -2, cy: -21, rx: 13, ry: 5.5, fill: '#334155', stroke: '#1e293b', 'stroke-width': 1 }, g); Cc(-2, -26.5, 1.6, '#334155');
+      eyes(); brows(); cheeks(); mouth('open');
+      R(12, -2, 13, 9, '#1f2937', 1.5, '#111'); Cc(18.5, 2.5, 3.2, '#60a5fa', '#111'); R(13.5, -4, 4, 2, '#1f2937', .5); Cc(23, 0, .9, '#facc15');
       break;
     default: body(ch.outfit); head(); cap(); eyes(); mouth();
   }
@@ -3278,6 +3442,7 @@ function voiceFor(st) {
     case 'buyTour': return ['tour', 1, 0];
     case 'takeover': return ['takeover', 2, 0];
     case 'hack': return ['hack', 2, 0];
+    case 'arrest': return ['island', 2, 0];
     case 'pay': return st.why === 'rent' && st.amt >= 600 ? ['bigRent', 1, 0] : null;
     case 'debt': return ['debt', 2, 0];
     case 'pot': return ['pot', 2, 0];
@@ -3319,7 +3484,7 @@ let viewPot = null, viewOut = null, viewProps = {};
 let shownSnap = null, viewPl = {}, viewTurnNo = null;
 const snapOf = g => (g && Array.isArray(g.props) && Array.isArray(g.pl) ? {
   props: g.props.map(p => p && { ...p }), turnNo: g.turnNo,
-  pl: g.pl.map(P => P && { hold: { ...P.hold }, jail: P.jail, bus: P.bus, laps: P.laps }),
+  pl: g.pl.map(P => P && { hold: { ...P.hold }, jail: P.jail, bus: P.bus, fly: P.fly, laps: P.laps }),
 } : null);
 const shownOut = s => (busy() && viewOut ? viewOut[s] : G.pl[s].out);
 const shownProp = i => (busy() && viewProps[i]) || G.props[i];
@@ -3356,6 +3521,7 @@ function initView(steps, base) {
       // bước 'bankrupt' có was là mảng; bước 'sell' tự động có was là ô cũ (object) → không duyệt được
       for (const [i] of Array.isArray(st.was) ? st.was : []) sqs.add(i);
       if (Number.isInteger(st.s)) seats.add(st.s);
+      if (st.k === 'arrest') seats.add(st.v);
     }
     for (const i of PROPS) if (base.props[i] && sqs.has(i)) viewProps[i] = { ...base.props[i] };
     base.pl.forEach((x, s) => { if (x && seats.has(s)) viewPl[s] = { ...x, hold: { ...x.hold } }; });
@@ -3364,6 +3530,8 @@ function initView(steps, base) {
   for (const st of steps) {
     if (st.k === 'pay' && st.to < 0 && st.why === 'tax') viewPot -= st.amt;
     else if (st.k === 'pot') viewPot += st.amt;
+    else if (st.k === 'taxCut') viewPot += st.amt; // phần Thu Ngân lấy không vào quỹ
+    else if (st.k === 'insure' && st.tax) viewPot -= st.cover;
     else if (st.k === 'bankrupt') { viewOut[st.s] = false; for (const [i, p] of st.was || []) viewProps[i] = p; }
     else if (st.k === 'sell' && st.was) viewProps[st.i] = st.was;
   }
@@ -3385,6 +3553,9 @@ function moneyDelta(st) {
     case 'forceSell': out.push([st.o, st.amt]); break;
     case 'luck': case 'homePay': case 'interest': case 'pot': case 'bonus': case 'evGift': out.push([s, st.amt]); break;
     case 'gift': out.push([s, -st.amt], [st.to, st.amt]); break;
+    case 'collect': case 'scoop': case 'taxCut': out.push([s, st.amt]); break;
+    case 'lawyer': if (st.amt) out.push([s, st.amt], [st.by, -st.amt]); break;
+    case 'insure': out.push([s, st.gift]); if (st.to >= 0 && st.cover) out.push([st.to, st.cover]); break;
   }
   return out;
 }
@@ -3392,16 +3563,17 @@ function applyMoney(st) {
   const d = moneyDelta(st);
   if (!d.length || !viewCash) return;
   for (const [s, v] of d) { viewCash[s] += v; cashFx[s] = { v, t: Date.now() }; }
-  if (viewPot !== null) { if (st.k === 'pay' && st.to < 0 && st.why === 'tax') viewPot += st.amt; else if (st.k === 'pot') viewPot -= st.amt; }
+  if (viewPot !== null) { if (st.k === 'pay' && st.to < 0 && st.why === 'tax') viewPot += st.amt; else if (st.k === 'pot' || st.k === 'taxCut') viewPot -= st.amt; else if (st.k === 'insure' && st.tax) viewPot += st.cover; }
   renderPlayers(); renderCenter();
 }
 // tới bước nào thì hiện thay đổi của bước đó: đất về trạng thái mới, thẻ / Côn Đảo / vé xe cộng trừ dần
 function revealStep(st) {
   const sq = { build: [st.i], buyTour: [st.i], takeover: [st.i], hack: [st.i], tourUp: [st.i], plague: [st.i], blackout: [st.i],
-    destroy: [st.i], forceSell: [st.i], sell: [st.i], festival: [st.i, ...(st.prev || [])], swap: [st.mine, st.theirs] }[st.k];
+    destroy: [st.i], forceSell: [st.i], sell: [st.i], festival: [st.i, ...(st.prev || [])], swap: [st.mine, st.theirs], scoop: [st.i] }[st.k];
   if (sq) for (const i of sq) delete viewProps[i];
   if (st.k === 'cure' && viewProps[st.i]) { viewProps[st.i].plague = 0; viewProps[st.i].blackout = 0; }
   if (st.k === 'lift') viewLift = null;
+  if (st.k === 'arrest' && viewPl[st.v]) { viewPl[st.v].jail = 1; viewPl[st.v].bus = false; }
   const V = viewPl[st.s];
   if (!V) return;
   const dec = k => { V.hold[k] = Math.max(0, (V.hold[k] || 0) - 1); };
@@ -3417,7 +3589,9 @@ function revealStep(st) {
     case 'island': V.jail = 1; break;
     case 'busStop': V.bus = true; break;
     case 'busGo': case 'busNoCash': V.bus = false; break;
-    case 'pickSkip': if (st.kind === 'bus') V.bus = false; break;
+    case 'pickSkip': if (st.kind === 'bus') V.bus = false; if (st.kind === 'fly') V.fly = false; break;
+    case 'flyTicket': V.fly = true; break;
+    case 'flyGo': V.fly = false; break;
     case 'move': if (st.passGo) V.laps++; break;
     case 'bankrupt': V.hold = freshHold(); break;
   }
@@ -3811,6 +3985,8 @@ function stepMs(st) {
     case 'won': case 'timeup': return 900;
     case 'event': return EV_MS; case 'evEnd': return 700; case 'evGift': return 350;
     case 'chars': return 2600; case 'luck': return 1100; case 'pot': return 1300; case 'gift': return 1000;
+    case 'collect': return 900; case 'flyTicket': return 700; case 'flyGo': return 400; case 'arrest': return 1100; case 'scoop': return 1100;
+    case 'lawyer': return 1100; case 'insure': return 1400; case 'taxCut': return 800;
     default: return 0;
   }
 }
@@ -4035,6 +4211,36 @@ async function animateStep(st, tok) {
       await sleep(400); drawOwnership(); await sleep(ms - 400); return;
     }
     case 'shield': { const [x, y] = centerOf(st.i); pow(x, y - 20, '🛡️', '#1e6fd8'); playPop(); await sleep(ms); return; }
+    case 'collect': { const [x, y] = tokenPt(s); floatText(x, y - 24, `🏺 +${fmt(st.amt)}`, '#7c3aed', 1000, 20); cardMoney(s, st.amt); playCoin(true); await sleep(ms); return; }
+    case 'flyTicket': { const [x, y] = tokenPt(s); floatText(x, y - 20, '✈️ vé bay', '#1e3a8a', 1000, 20); playPop(); await sleep(ms); return; }
+    case 'flyGo': { const [x, y] = tokenPt(s); floatText(x, y - 36, '✈️', '#1e3a8a', 1000, 24); playWhoosh(0.4); await sleep(ms); return; }
+    case 'arrest': {
+      const v = st.v, [px, py] = tokenPt(s), from = tokenPt(v), to = tokenXY(ISLAND_POS, v, true);
+      pow(px, py - 34, '🚨 BẮT!', '#1d4ed8'); playJail(); shakeBoard();
+      await sleep(350); if (tok !== animTok) return;
+      await flyToken(v, from, to, { ms: 550, height: 120, spin: 360 });
+      fx('circle', { cx: to[0], cy: to[1] + 8, r: 16, fill: 'rgba(120,110,95,.35)', class: 'fx puff' }, 550);
+      await sleep(ms - 900); return;
+    }
+    case 'scoop': {
+      const [x, y] = centerOf(st.i), [tx, ty] = tokenPt(s);
+      playAlert(); pow(x, y - 30, '📰 TIN NÓNG!', '#65a30d'); flashSquare(st.i, '#6b7a90');
+      await sleep(400); drawOwnership(); floatText(tx, ty - 24, `📰 +${fmt(st.amt)}`, '#2e9d4f', 1000, 20); cardMoney(s, st.amt); playCoin(true);
+      await sleep(ms - 400); return;
+    }
+    case 'lawyer': {
+      const [x, y] = centerOf(st.i);
+      pow(x, y - 24, '⚖️ BÁC BỎ!', '#111827'); playAlert();
+      if (st.amt) { cardMoney(st.by, -st.amt); setTimeout(() => { cardMoney(s, st.amt); playCoin(true); }, 260); }
+      await sleep(ms); return;
+    }
+    case 'insure': {
+      const [x, y] = tokenPt(s);
+      pow(x, y - 34, '☂️ BẢO HIỂM!', '#0369a1'); playParty(); burst(x, y, 10, ['#38bdf8', '#fff', '#0369a1'], 45);
+      cardMoney(s, st.gift); if (st.to >= 0 && st.cover) setTimeout(() => { cardMoney(st.to, st.cover); playCoin(true, true); }, 300);
+      await sleep(400); drawOwnership(); drawBuild(); await sleep(ms - 400); return;
+    }
+    case 'taxCut': { const [x, y] = tokenPt(s); floatText(x, y - 24, `🧾 +${fmt(st.amt)}`, '#dc2626', 1000, 20); cardMoney(s, st.amt); playCoin(true); await sleep(ms); return; }
     case 'taxFree': { const [x, y] = tokenPt(s); floatText(x, y - 20, '🕵️ miễn thuế', '#2e9d4f', 1000, 18); playPop(); await sleep(ms); return; }
     case 'afk': { const [x, y] = tokenPt(s); pow(x, y - 36, '⏳ MÁY ĐÁNH THAY', '#6b7a90'); renderPlayers(); await sleep(ms); return; }
     case 'join': { const [x, y] = tokenPt(s); pow(x, y - 36, '🙋 VÀO THAY MÁY', '#1e6fd8'); playParty(); renderPlayers(); if (s !== mySeat()) toast(`🙋 ${who(s)} vào chơi, thay cho ${st.bot}`); await sleep(ms); return; }
@@ -4129,7 +4335,7 @@ function stepText(st) {
     case 'busNoCash': return `${w} không đủ tiền mua vé xe`;
     case 'offer': return SQ[st.i].t === 'tour' ? `${tourIcon(st.i)} ${w} đến ${nm(st.i)} — điểm du lịch chưa có chủ` : `${w} đến ${nm(st.i)} — đất trống, có thể mua`;
     case 'home': return st.can ? `${w} về ${nm(st.i)} của mình — có thể nâng cấp` : `${w} về thăm ${nm(st.i)} của mình`;
-    case 'takeoverOffer': return `${w} có thể mua lại ${nm(st.i)} với giá ${fmt(takeoverPrice(G, st.i))}`;
+    case 'takeoverOffer': return `${w} có thể mua lại ${nm(st.i)} với giá ${fmt(takeoverPrice(G, st.i, s))}`;
     case 'norent': return `${w} vào ${nm(st.i)} nhưng không mất phí${G.props[st.i] && effectOn(G, st.i, 'plague') ? ' (dịch bệnh)' : SQ[st.i].t === 'tour' && evOn(G, 'storm') ? ' (bão, đóng cửa)' : ''}`;
     case 'charmFree': return `🌹 Lãng Tử ${w} được ${who(st.o)} mời vào chơi, khỏi trả ${fmt(st.amt)} ở ${nm(st.i)}`;
     case 'useFree': return `🎫 ${w} dùng vé miễn phí, khỏi trả ${fmt(st.amt)} ở ${nm(st.i)}`;
@@ -4151,7 +4357,7 @@ function stepText(st) {
     case 'card': return `❓ Cơ Hội: ${CARDS[st.c].text}`;
     case 'hold': return st.full ? `${w} đã có đủ ${PARITY_MAX} ${HOLD_INFO[st.h][1].toLowerCase()} — không nhận thêm` : `${w} nhận ${HOLD_INFO[st.h][0]} ${HOLD_INFO[st.h][1].toLowerCase()}`;
     case 'nothing': return `Thẻ không có tác dụng lúc này`;
-    case 'build': return st.from === 0 ? `🏠 ${w} mua ${nm(st.i)} và xây ${lvName(st.i, st.to)} (${fmt(st.cost)})` : `🔨 ${w} nâng ${nm(st.i)} lên ${lvName(st.i, st.to)} (${fmt(st.cost)})`;
+    case 'build': if (st.free) return `📈 Nhà Đầu Tư ${w} nâng ${nm(st.i)} lên ${lvName(st.i, st.to)} miễn phí`; return st.from === 0 ? `🏠 ${w} mua ${nm(st.i)} và xây ${lvName(st.i, st.to)} (${fmt(st.cost)})` : `🔨 ${w} nâng ${nm(st.i)} lên ${lvName(st.i, st.to)} (${fmt(st.cost)})`;
     case 'buyTour': return `${tourIcon(st.i)} ${w} mua điểm du lịch ${nm(st.i)} (${fmt(st.cost)}) · đã có ${st.n}/5`;
     case 'takeover': return `💰 ${w} mua lại ${nm(st.i)} từ ${other(st.o)} với giá ${fmt(st.price)}!`;
     case 'noCash': return `💸 ${w} không đủ tiền ${st.mode === 'takeover' ? 'mua lại' : st.mode === 'upgrade' ? 'nâng cấp' : 'mua'} ${nm(st.i)} (cần ${fmt(st.need)}, có ${fmt(G.pl[s].cash)})`;
@@ -4168,7 +4374,7 @@ function stepText(st) {
     case 'festival': return `🎉 ${w} mở lễ hội ở ${nm(st.i)} — phí tham quan giờ ×${st.mult}${st.prev && st.prev.length ? ` · ${st.prev.map(nm).join(', ')} hết lễ hội, phí về như cũ` : ''}`;
     case 'startUp': return `🏁 ${w} dừng đúng Bắt Đầu — được nâng cấp một thành phố`;
     case 'pickCity': return `${w} chọn ${nm(st.i)}`;
-    case 'pickSkip': return st.kind === 'bus' ? `${w} bỏ vé xe, tung xúc xắc` : `${w} bỏ qua`;
+    case 'pickSkip': return st.kind === 'bus' ? `${w} bỏ vé xe, tung xúc xắc` : st.kind === 'fly' ? `${w} không bay, tung xúc xắc` : `${w} bỏ qua`;
     case 'swap': return `🔁 ${w} đổi ${nm(st.mine)} lấy ${nm(st.theirs)} của ${other(st.o)}`;
     case 'forceSell': return `📉 ${other(st.o)} bị ép bán ${nm(st.i)} (nhận ${fmt(st.amt)})`;
     case 'destroy': if (st.rev) return `🔨 Kẻ Báo Thù ${w} đập ${nm(st.i)} của ${other(st.o)} xuống ${LEVELS[st.lv].name}!`; return `🧨 ${w} phá ${nm(st.i)} của ${other(st.o)} xuống ${LEVELS[st.lv].name}`;
@@ -4177,6 +4383,14 @@ function stepText(st) {
       return `🔌 ${nm(st.i)} của ${other(st.o)} mất điện — phí còn một nửa 5 lượt`;
     case 'cure': return `${st.fx.includes('plague') ? '✨' : '💡'} ${w} ghé ${nm(st.i)} — ${st.fx.map(k => (k === 'plague' ? 'hết dịch bệnh' : 'có điện lại')).join(' và ')}, thu phí bình thường`;
     case 'shield': return `🛡️ Khiên của ${w} chặn được thẻ xấu nhắm vào ${nm(st.i)}`;
+    case 'collect': return `🏺 Nhà Sưu Tầm ${w} có ${st.n} Biểu tượng — nhận thêm ${fmt(st.amt)}`;
+    case 'flyTicket': return `✈️ Phi Công ${w} qua Bắt Đầu — lượt sau được bay tới một điểm du lịch`;
+    case 'flyGo': return `✈️ ${w} bay tới ${nm(st.i)}`;
+    case 'arrest': return `🚨 Cảnh Sát ${w} bắt ${other(st.v)} ra Côn Đảo!`;
+    case 'scoop': return `📰 Nhà Báo ${w} đưa tin, lễ hội ở ${nm(st.i)} của ${other(st.o)} bị hủy — nhận nhuận bút ${fmt(st.amt)}`;
+    case 'lawyer': return `⚖️ Luật Sư ${w} bác bỏ thẻ nhắm vào ${nm(st.i)}${st.amt ? ` — ${other(st.by)} bị phạt ${fmt(st.amt)}` : ''}`;
+    case 'insure': return `☂️ Bảo hiểm cứu ${w} khỏi phá sản${st.cover ? ` — trả thay ${fmt(st.cover)}${st.to >= 0 ? ' cho ' + other(st.to) : ''}` : ''}${st.keep >= 0 ? `, giữ lại ${nm(st.keep)}` : ''}, tặng ${fmt(st.gift)} làm lại`;
+    case 'taxCut': return `🧾 Thu Ngân ${w} nhận ${fmt(st.amt)} từ tiền thuế của ${other(st.from)}`;
     case 'taxFree': return st.ev ? `🎁 Đang Miễn Thuế — ${w} không phải nộp thuế` : `🕵️ Thám Tử ${w} được miễn thuế`;
     case 'afk': return `⏳ ${w} vắng mặt quá ${AFK_MS / 1000} giây — máy đánh thay hết lượt này`;
     case 'back': return `✋ ${w} đã quay lại, tự chơi tiếp`;
@@ -4334,6 +4548,8 @@ function renderPlayers() {
     const props = document.createElement('div'); props.className = 'pl-props';
     if (P.jail && !out) { const b = document.createElement('span'); b.className = 'badge'; b.textContent = `🏝️ Côn Đảo · còn ${Math.max(1, 4 - P.jail)} lượt`; props.appendChild(b); }
     if (P.bus && !out) { const b = document.createElement('span'); b.className = 'badge'; b.textContent = '🚌 lượt sau đi xe'; props.appendChild(b); }
+    if (P.fly && !P.bus && !out) { const b = document.createElement('span'); b.className = 'badge'; b.textContent = '✈️ lượt sau bay tới điểm du lịch'; props.appendChild(b); }
+    if (P.char === 'insurer' && !G.pl[s].insured && !out) { const b = document.createElement('span'); b.className = 'badge'; b.textContent = '☂️ còn bảo hiểm phá sản'; props.appendChild(b); }
     if (x.afk && !out) { const b = document.createElement('span'); b.className = 'badge'; b.textContent = '⏳ vắng mặt · máy đánh thay'; props.appendChild(b); }
     const hold = document.createElement('span'); hold.className = 'hold';
     for (const k of Object.keys(HOLD_INFO)) if (P.hold[k] && k !== 'parity') { const h = document.createElement('span'); h.textContent = HOLD_INFO[k][0] + (P.hold[k] > 1 ? P.hold[k] : ''); h.title = HOLD_INFO[k][1]; hold.appendChild(h); }
@@ -4401,7 +4617,7 @@ function renderDice() {
 const DOTS = '<span class="dots"><span>.</span><span>.</span><span>.</span></span>';
 const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
 const PICK_TEXT = {
-  bus: 'Chọn ô muốn bắt xe tới', festival: 'Chọn thành phố hoặc điểm du lịch của bạn để mở lễ hội', festivalFree: 'Chọn thành phố hoặc điểm du lịch của bạn để mở lễ hội miễn phí',
+  bus: 'Chọn ô muốn bắt xe tới', fly: 'Chọn điểm du lịch muốn bay tới ✈️ (miễn phí)', festival: 'Chọn thành phố hoặc điểm du lịch của bạn để mở lễ hội', festivalFree: 'Chọn thành phố hoặc điểm du lịch của bạn để mở lễ hội miễn phí',
   upgrade: 'Chọn thành phố muốn nâng cấp', swapMine: 'Chọn thành phố của bạn đem đổi', swapTheirs: 'Chọn thành phố của đối thủ muốn lấy',
   forceSell: 'Chọn thành phố đối thủ phải bán', destroy: 'Chọn thành phố đối thủ để phá một cấp', plague: 'Chọn thành phố đối thủ để gây dịch bệnh', blackout: 'Chọn thành phố đối thủ để cắt điện',
   lift: `Chọn ô đất của bạn để nhắc lên 🏗️ — phí ×${LIFT_MULT}, ô đang được nhắc sẽ hạ xuống`,
@@ -4420,7 +4636,7 @@ function renderStatus() {
     else if (G.step === 'jail') main = `${cap(nm)} đang ở Côn Đảo — ${jailFee(t) ? 'nộp ' + fmt(jailFee(t)) : 'ra miễn phí'}, dùng thẻ, hoặc tung đôi`;
     else if (G.step === 'visit') {
       const v = G.visit, q = SQ[v.i];
-      main = v.mode === 'buy' ? `Mua ${q.name}? Chọn cấp nhà — xây cao thì thu phí khách càng nhiều` : v.mode === 'upgrade' ? `Nâng cấp ${q.name}? Chọn cấp mới` : v.mode === 'tour' ? `Mua điểm du lịch ${q.name}?` : `Mua lại ${q.name} của ${who(G.props[v.i].owner)} với giá ${fmt(takeoverPrice(G, v.i))}?`;
+      main = v.mode === 'buy' ? `Mua ${q.name}? Chọn cấp nhà — xây cao thì thu phí khách càng nhiều` : v.mode === 'upgrade' ? `Nâng cấp ${q.name}? Chọn cấp mới` : v.mode === 'tour' ? `Mua điểm du lịch ${q.name}?` : `Mua lại ${q.name} của ${who(G.props[v.i].owner)} với giá ${fmt(takeoverPrice(G, v.i, t))}?`;
     }
     else if (G.step === 'pick') main = PICK_TEXT[G.pick.kind] + (G.pick.kind === 'bus' && busFee(t) ? ` (vé ${fmt(busFee(t))})` : G.pick.kind === 'festival' && festFee(t) ? ` (${fmt(festFee(t))})` : '');
     else if (G.step === 'casino') main = `Đặt ${fmt(CASINO_BET)}: Chẵn hay Lẻ (×${casinoX(2)}), hay Đôi (×${casinoX(6)})?`;
@@ -4456,7 +4672,7 @@ function renderActions() {
       box.appendChild(btn(`${tourIcon(G.visit.i)} Mua · ${fmt(tourPrice(G, t, G.visit.i))}`, 'primary', () => act('buyTour'), P.cash < tourPrice(G, t, G.visit.i)));
       box.appendChild(btn('Không mua', '', () => act('skip')));
     } else {
-      box.appendChild(btn(`💰 Mua lại · ${fmt(takeoverPrice(G, i))}`, 'primary', () => act('takeover'), P.cash < takeoverPrice(G, i)));
+      box.appendChild(btn(`💰 Mua lại · ${fmt(takeoverPrice(G, i, t))}`, 'primary', () => act('takeover'), P.cash < takeoverPrice(G, i, t)));
       box.appendChild(btn('Thôi', '', () => act('skip')));
     }
   } else if (G.step === 'roll' || G.step === 'jail') {
@@ -4472,7 +4688,7 @@ function renderActions() {
       if (P.hold.jail) box.appendChild(btn('🔓 Dùng thẻ ra tù', '', () => act('jailcard')));
     }
   } else if (G.step === 'pick') {
-    if (G.pick.optional) box.appendChild(btn(G.pick.kind === 'bus' ? '🎲 Không đi xe, tung xúc xắc' : 'Bỏ qua', '', () => act('pickSkip')));
+    if (G.pick.optional) box.appendChild(btn(G.pick.kind === 'bus' ? '🎲 Không đi xe, tung xúc xắc' : G.pick.kind === 'fly' ? '🎲 Không bay, tung xúc xắc' : 'Bỏ qua', '', () => act('pickSkip')));
   } else if (G.step === 'casino') {
     box.appendChild(btn(`Chẵn ×${casinoX(2)}`, '', () => act('casino', { choice: 'even' })));
     box.appendChild(btn(`Lẻ ×${casinoX(2)}`, '', () => act('casino', { choice: 'odd' })));
