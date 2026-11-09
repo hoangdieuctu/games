@@ -936,6 +936,13 @@ const COLORS = [
 // màu của ghế s: người chơi tự chọn (seats[s].color), chưa có thì theo thứ tự ghế
 const colIdx = s => { const c = G && G.seats[s] ? G.seats[s].color : null; return Number.isInteger(c) && COLORS[c] ? c : s; };
 const col = s => COLORS[colIdx(s)];
+// tên máy: tên người như Ma Sói, xáo một lần mỗi lần mở trang (xem trước và vào ván cùng tên), không trùng tên người chơi
+const BOT_NAMES = (a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; })(
+  ['An', 'Bình', 'Chi', 'Dũng', 'Giang', 'Hà', 'Hải', 'Hoa', 'Khang', 'Lan', 'Linh', 'Long', 'Mai', 'Minh', 'Nam', 'Ngọc', 'Phúc', 'Quân', 'Sơn', 'Thảo', 'Trang', 'Tú', 'Vy', 'Yến']);
+function botName(seats, k) {
+  const used = new Set(seats.filter((x, j) => x && j !== k && x.name).map(x => x.name.trim().toLowerCase()));
+  return BOT_NAMES.find(n => !used.has(n.toLowerCase())) || 'Máy ' + (k + 1);
+}
 // chia màu đầu ván: người giữ màu đã chọn (không trùng), máy và người chưa chọn lấy màu còn trống
 function assignColors(seats) {
   const used = new Set();
@@ -947,8 +954,10 @@ function assignColors(seats) {
     if (!x || x.color !== null) return;
     x.color = [k, ...COLORS.keys()].find(c => !used.has(c));
     used.add(x.color);
-    if (x.type === 'bot') x.name = 'Máy ' + COLORS[x.color].name;
   });
+  // đặt lại tên máy theo thứ tự ghế (sau tên người để không trùng)
+  seats.forEach(x => { if (x && x.type === 'bot') x.name = null; });
+  seats.forEach((x, k) => { if (x && x.type === 'bot') x.name = botName(seats, k); });
 }
 const GROUPS = [
   { name: 'Xanh da trời', color: '#7cc8ea', light: true },
@@ -1395,7 +1404,7 @@ function firstTurn(seats) {
 function seatsFromSetup() {
   return setup.map((t, k) => t === 'you' ? { type: 'human', name: nameOf(0), me: true, char: store.get('typhu.char', 'mc'), color: setupColors[0] }
     : t === 'human' ? { type: 'human', name: nameOf(k), char: setupChars[k] || null, color: setupColors[k] }
-    : t === 'bot' ? { type: 'bot', name: 'Máy ' + COLORS[k].name, char: null } : null);
+    : t === 'bot' ? { type: 'bot', name: null, char: null } : null); // tên máy: assignColors đặt
 }
 
 // ── ai được đi ──
@@ -5453,12 +5462,12 @@ function hostKick(s) {
   const vc = x.pid && VC.calls.get(x.pid);
   if (vc) { try { vc.close(); } catch (e) {} vcDrop(x.pid, vc); }
   if (G.phase === 'lobby') G.seats[s] = null;
-  else G.seats[s] = { type: 'bot', name: 'Máy ' + COLORS[colIdx(s)].name, char: G.pl[s].char || x.char || null, color: x.color };
+  else G.seats[s] = { type: 'bot', name: botName(G.seats, s), char: G.pl[s].char || x.char || null, color: x.color };
   commit({ type: 'lobby' });
 }
 function hostStart() {
   const fill = $('lbFill').checked;
-  const seats = G.seats.map((x, k) => x ? Object.assign({}, x) : fill ? { type: 'bot', name: 'Máy ' + COLORS[k].name, char: null } : null);
+  const seats = G.seats.map((x, k) => x ? Object.assign({}, x) : fill ? { type: 'bot', name: null, char: null } : null); // tên máy: assignColors đặt
   if (seats.filter(Boolean).length < 2) return;
   if (seats.some(x => x && x.remote && (!x.ready || x.online === false))) return; // mọi khách phải bấm Sẵn sàng (và đang kết nối)
   if (G.charRand) for (const x of seats) if (x) x.char = null; // nhân vật ngẫu nhiên: freshGame chia lại, không trùng nhau
