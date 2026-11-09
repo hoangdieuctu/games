@@ -992,6 +992,7 @@ const lenHint = k => { const L = LENS.find(x => x.key === k) || LENS[1]; return 
 
 // ── nhân vật: mỗi người một kỹ năng (nhóm giảm tiền / tăng tiền / di chuyển / phá đối thủ / phòng thủ / may mắn) ──
 // số liệu kỹ năng của Nhà Đầu Tư, Thu Ngân, Nhà Sưu Tầm, Luật Sư, Người Bảo Hiểm, Cảnh Sát, Nhà Báo
+const BANKER_RATE = 0.04, BANKER_CAP = 100;
 const INVESTOR_RATE = 0.9, CASHIER_CUT = 0.2, COLLECTOR_OFF = 0.3, COLLECTOR_BONUS = 100, LAWYER_FINE = 100, INSURE_CASH = 500, POLICE_CHANCE = 0.25, SCOOP_PAY = 100;
 const CHARS = [
   { id: 'mc', name: 'Siêu MC', skill: 'Lương qua Bắt Đầu gấp đôi', group: 'tăng tiền', skin: '#ffd9b3', hair: '#2b2118', style: 'quiff', acc: 'mic', outfit: '#1e6fd8', bg: '#dbeafe' },
@@ -1014,7 +1015,7 @@ const CHARS = [
   { id: 'avenger', name: 'Kẻ Báo Thù', skill: 'Trả phí tham quan xong: 40% đập một cấp nhà và đòi lại nửa phí', group: 'phá đối thủ', skin: '#eec39a', hair: '#7f1d1d', style: 'bandana', acc: 'hammer', outfit: '#111827', bg: '#fee2e2' },
   { id: 'robin', name: 'Hiệp Đạo', skill: 'Qua Bắt Đầu: lấy 8% tiền mặt của đối thủ giàu nhất (nếu họ giàu hơn mình)', group: 'phá đối thủ', skin: '#f6d1b0', hair: '#92400e', style: 'feather', acc: 'bow', outfit: '#15803d', bg: '#ecfccb' },
   { id: 'spy', name: 'Gián Điệp', skill: 'Rút thẻ Cơ Hội được xem 2 thẻ và chọn 1', group: 'may mắn', skin: '#f1c7a0', hair: '#1f1a17', style: 'spy', acc: 'shades', outfit: '#1f2937', bg: '#e2e8f0' },
-  { id: 'banker', name: 'Chủ Ngân Hàng', skill: 'Đầu mỗi lượt nhận lãi 1% tiền mặt đang có', group: 'tăng tiền', skin: '#f6d6bd', hair: '#6b7280', style: 'banker', acc: 'coin', outfit: '#1e3a8a', bg: '#dbeafe' },
+  { id: 'banker', name: 'Chủ Ngân Hàng', skill: `Đầu mỗi lượt nhận lãi ${BANKER_RATE * 100}% tiền mặt đang có (tối đa $${BANKER_CAP}); sự kiện Ngân Hàng Chia Lãi nhận gấp đôi`, group: 'tăng tiền', skin: '#f6d6bd', hair: '#6b7280', style: 'banker', acc: 'coin', outfit: '#1e3a8a', bg: '#dbeafe' },
   { id: 'chef', name: 'Vua Bếp', skill: 'Bắt đầu ván với thêm 40% tiền khởi đầu', group: 'tăng tiền', skin: '#ffd9b3', hair: '#4b3621', style: 'toque', acc: 'spoon', outfit: '#ffffff', bg: '#fff1f2' },
   { id: 'investor', name: 'Nhà Đầu Tư', skill: `Mua lại thành phố đối thủ chỉ trả ${INVESTOR_RATE * 100}% giá, mua xong được lên ngay 1 cấp miễn phí`, group: 'giảm tiền', skin: '#f6d1b0', hair: '#2b2118', style: 'investor', acc: 'chart', outfit: '#334155', bg: '#e0f2fe' },
   { id: 'cashier', name: 'Thu Ngân', skill: `Đối thủ nộp thuế: nhận ngay ${CASHIER_CUT * 100}% số thuế đó (phần còn lại vào Quỹ Thuế)`, group: 'tăng tiền', skin: '#ffe0c7', hair: '#7c2d12', style: 'cashier', acc: 'register', outfit: '#dc2626', bg: '#fee2e2' },
@@ -1984,10 +1985,10 @@ function nextTurn(steps) {
   }
   G.turn = t;
   const P = G.pl[t];
-  // Chủ Ngân Hàng: đầu lượt nhận lãi 1% tiền mặt
-  if (hasSkill(G, t, 'banker')) { const amt = r10(P.cash * 0.01); if (amt > 0) { P.cash += amt; steps.push({ k: 'interest', s: t, amt }); } }
-  // sự kiện Ngân Hàng Chia Lãi
-  if (evOn(G, 'bank')) { const amt = r10(P.cash * EV_INTEREST); if (amt > 0) { P.cash += amt; steps.push({ k: 'interest', s: t, amt, ev: true }); } }
+  // Chủ Ngân Hàng: đầu lượt nhận lãi BANKER_RATE tiền mặt, tối đa BANKER_CAP
+  if (hasSkill(G, t, 'banker')) { const amt = Math.min(BANKER_CAP, r10(P.cash * BANKER_RATE)); if (amt > 0) { P.cash += amt; steps.push({ k: 'interest', s: t, amt }); } }
+  // sự kiện Ngân Hàng Chia Lãi (Chủ Ngân Hàng nhận gấp đôi)
+  if (evOn(G, 'bank')) { const amt = r10(P.cash * EV_INTEREST * (hasSkill(G, t, 'banker') ? 2 : 1)); if (amt > 0) { P.cash += amt; steps.push({ k: 'interest', s: t, amt, ev: true }); } }
   if (P.jail) { if (P.jail > 3) { P.jail = 0; G.step = 'roll'; steps.push({ k: 'released', s: t }); } else G.step = 'jail'; }
   else if (P.bus) {
     if (P.cash < busFee(t)) { P.bus = false; G.step = 'roll'; steps.push({ k: 'busNoCash', s: t }); }
