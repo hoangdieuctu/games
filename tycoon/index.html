@@ -991,9 +991,9 @@ const LENS = [{ key: 'short', label: 'Ngắn', rounds: 15, time: '20–30 phút'
 const lenHint = k => { const L = LENS.find(x => x.key === k) || LENS[1]; return `Thắng ngay khi đối thủ phá sản hết, đủ ${GROUP_WIN} nhóm màu, cả một hàng, 5 điểm du lịch hoặc ${LANDMARK_WIN} Biểu tượng. Hết ${L.rounds} vòng thì ai giàu nhất thắng. Khoảng ${L.time}.`; };
 
 // ── nhân vật: mỗi người một kỹ năng (nhóm giảm tiền / tăng tiền / di chuyển / phá đối thủ / phòng thủ / may mắn) ──
-// số liệu kỹ năng của Nhà Đầu Tư, Thu Ngân, Nhà Sưu Tầm, Luật Sư, Người Bảo Hiểm, Cảnh Sát, Nhà Báo
+// số liệu kỹ năng của Nhà Đầu Tư, Thu Ngân, Nhà Sưu Tầm, Luật Sư, Người Bảo Hiểm, Cảnh Sát, Nhà Báo, Kiến Trúc Sư
 const BANKER_RATE = 0.04, BANKER_CAP = 100;
-const INVESTOR_RATE = 0.9, CASHIER_CUT = 0.2, COLLECTOR_OFF = 0.3, COLLECTOR_BONUS = 100, LAWYER_FINE = 100, INSURE_CASH = 500, POLICE_CHANCE = 0.25, SCOOP_PAY = 100;
+const INVESTOR_RATE = 0.9, CASHIER_CUT = 0.2, COLLECTOR_OFF = 0.3, COLLECTOR_BONUS = 100, LAWYER_FINE = 100, INSURE_CASH = 500, POLICE_CHANCE = 0.25, SCOOP_PAY = 100, MAGNET_RANGE = 3;
 const CHARS = [
   { id: 'mc', name: 'Siêu MC', skill: 'Lương qua Bắt Đầu gấp đôi', group: 'tăng tiền', skin: '#ffd9b3', hair: '#2b2118', style: 'quiff', acc: 'mic', outfit: '#1e6fd8', bg: '#dbeafe' },
   { id: 'boss', name: 'Ông Trùm', skill: 'Mua và xây nhà rẻ hơn 15%', group: 'giảm tiền', skin: '#f3c9a3', hair: '#6b4a2a', style: 'short', acc: 'glasses', outfit: '#23324a', bg: '#e5e7eb' },
@@ -1025,6 +1025,7 @@ const CHARS = [
   { id: 'pilot', name: 'Phi Công', skill: 'Cứ 2 lần qua Bắt Đầu: lượt sau được bay miễn phí tới một điểm du lịch bất kỳ', group: 'di chuyển', skin: '#f6d1b0', hair: '#3b2a1e', style: 'pilot', acc: 'plane', outfit: '#1e3a8a', bg: '#dbeafe' },
   { id: 'police', name: 'Cảnh Sát', skill: `Đi ngang qua hoặc dừng ở ô có đối thủ đứng: ${POLICE_CHANCE * 100}% bắt họ ra Côn Đảo (mỗi vòng tối đa 1 lần)`, group: 'phá đối thủ', skin: '#eec39a', hair: '#1f1a17', style: 'police', acc: 'whistle', outfit: '#1d4ed8', bg: '#dbeafe' },
   { id: 'journalist', name: 'Nhà Báo', skill: `Vào đất đối thủ đang mở lễ hội: hủy lễ hội đó trước khi trả phí và nhận $${SCOOP_PAY} nhuận bút`, group: 'phá đối thủ', skin: '#ffe3cc', hair: '#b45309', style: 'journalist', acc: 'camera', outfit: '#65a30d', bg: '#ecfccb' },
+  { id: 'architect', name: 'Kiến Trúc Sư', skill: `Vừa lên Biểu tượng: khai trương hút mọi đối thủ đứng trong vòng ${MAGNET_RANGE} ô về Biểu tượng đó và thu phí tham quan (thiếu thì lấy hết tiền mặt)`, group: 'phá đối thủ', skin: '#f3cfae', hair: '#1f1a17', style: 'architect', acc: 'blueprint', outfit: '#ea580c', bg: '#ffedd5' },
 ];
 const charOf = id => CHARS.find(c => c.id === id) || CHARS[0];
 const hasSkill = (G, s, id) => !!G.seats[s] && G.pl[s].char === id;
@@ -1502,6 +1503,17 @@ function police(s, from, n, steps) {
     return;
   }
 }
+// Kiến Trúc Sư vừa lên Biểu tượng ở ô i: đối thủ đứng trong vòng MAGNET_RANGE ô (hai phía, không tính người ở Côn Đảo)
+// bị hút về ô đó và trả phí tham quan; không đủ tiền thì trả hết tiền mặt, không bị phá sản (họ đang không tới lượt)
+function magnet(s, i, steps) {
+  const near = v => { const d = Math.abs(G.pl[v].pos - i); return Math.min(d, N - d) <= MAGNET_RANGE; };
+  const vs = active(G).filter(v => v !== s && !G.pl[v].jail && near(v)).sort((a, b) => Math.abs(G.pl[a].pos - i) - Math.abs(G.pl[b].pos - i));
+  for (const v of vs) {
+    const V = G.pl[v], from = V.pos, amt = Math.min(V.cash, rentFor(G, i, v));
+    V.pos = i; V.bus = false; V.cash -= amt; G.pl[s].cash += amt;
+    steps.push({ k: 'pull', s, v, i, from, amt });
+  }
+}
 // Nhà Báo vào đất đối thủ đang có lễ hội: hủy lễ hội trước khi tính phí, nhận nhuận bút từ ngân hàng
 function scoop(s, i, steps) {
   const p = G.props[i];
@@ -1892,7 +1904,9 @@ function doBuy(s, lv) {
   if (P.cash < cost) return;
   P.cash -= cost; p.owner = s; p.lv = lv;
   G.visit = null; G.step = 'roll';
-  finish(s, [{ k: 'build', s, i, from, to: lv, cost }]);
+  const steps = [{ k: 'build', s, i, from, to: lv, cost }];
+  if (lv === 5 && hasSkill(G, s, 'architect')) magnet(s, i, steps);
+  finish(s, steps);
 }
 function doBuyTour(s) {
   if (!okTurn(s, ['visit']) || !G.visit || G.visit.mode !== 'tour') return;
@@ -2191,7 +2205,7 @@ const mix = (hex, to, t) => {
 
 // ── nhân vật chibi: đầu to, mỗi người một tạo hình riêng (mũ, tóc, trang phục, đạo cụ); khung -24..24 ──
 // chỗ tay phải cầm đồ vật của từng nhân vật (bản đủ tay chân); không có thì tay buông xuôi
-const CHIBI_HAND = { mc: [15.5, 10], fairy: [14.5, 3.5], detective: [22.5, 5.5], landlord: [17.5, 7], gambler: [16, 3.5], chef: [15.6, 11], charmer: [15.5, 9], wizard: [19.5, 5], spy: [15, 6], banker: [14.5, 6.5], robber: [16.5, 11], investor: [15, 8], collector: [16, 9], lawyer: [17, 8], insurer: [17, 6], police: [15.5, 6], journalist: [15, 9], cashier: [15, 10] };
+const CHIBI_HAND = { mc: [15.5, 10], fairy: [14.5, 3.5], detective: [22.5, 5.5], landlord: [17.5, 7], gambler: [16, 3.5], chef: [15.6, 11], charmer: [15.5, 9], wizard: [19.5, 5], spy: [15, 6], banker: [14.5, 6.5], robber: [16.5, 11], investor: [15, 8], collector: [16, 9], lawyer: [17, 8], insurer: [17, 6], police: [15.5, 6], journalist: [15, 9], cashier: [15, 10], architect: [17, 9] };
 function chibiInto(g, ch, full = false) {
   const P = (d, f, st, sw = 1) => el('path', { d, fill: f, stroke: st || (f === 'none' ? 'none' : mix(f === '#ffffff' ? '#cccccc' : f, '#000', .3)), 'stroke-width': sw, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' }, g);
   const R = (x, y, w, h, f, rx = 0, st = 'none', sw = 1) => el('rect', { x, y, width: w, height: h, rx, fill: f, stroke: st, 'stroke-width': sw }, g);
@@ -2444,6 +2458,15 @@ function chibiInto(g, ch, full = false) {
       el('ellipse', { cx: -2, cy: -21, rx: 13, ry: 5.5, fill: '#334155', stroke: '#1e293b', 'stroke-width': 1 }, g); Cc(-2, -26.5, 1.6, '#334155');
       eyes(); brows(); cheeks(); mouth('open');
       R(12, -2, 13, 9, '#1f2937', 1.5, '#111'); Cc(18.5, 2.5, 3.2, '#60a5fa', '#111'); R(13.5, -4, 4, 2, '#1f2937', .5); Cc(23, 0, .9, '#facc15');
+      break;
+    case 'architect': // mũ bảo hộ vàng, áo phản quang cam sọc bạc, bút chì sau tai, cuộn bản vẽ xanh
+      body('#ea580c'); P('M-15.5 13 L15.5 13 L15.5 15.5 L-15.5 15.5 Z', '#e5e7eb', '#9ca3af', .5); P('M-6 7 L-6 20 M6 7 L6 20', 'none', '#e5e7eb', 2.2);
+      head(); cap();
+      P('M-15 -10 Q-15 -27 0 -27 Q15 -27 15 -10 Z', '#facc15', '#ca8a04'); R(-17, -12, 34, 3.5, '#eab308', 1.5, '#ca8a04'); P('M0 -27 L0 -12 M-7 -25 L-6 -12 M7 -25 L6 -12', 'none', '#ca8a04', 1);
+      P('M14 -10 L19 -16', 'none', '#f59e0b', 2); P('M19 -16 L20 -17.3', 'none', '#fca5a5', 2);
+      eyes(); brows(); cheeks(); mouth('grin');
+      P('M12 3 L25 -5 L27.5 -1 L14.5 7 Z', '#3b82f6', '#1d4ed8'); el('ellipse', { cx: 26.2, cy: -3, rx: 1.6, ry: 2.4, fill: '#bfdbfe', stroke: '#1d4ed8', 'stroke-width': .6, transform: 'rotate(-32 26.2 -3)' }, g);
+      P('M15 2.5 L23 -2.5 M16 5 L24 0', 'none', '#bfdbfe', .6);
       break;
     default: body(ch.outfit); head(); cap(); eyes(); mouth();
   }
@@ -3444,6 +3467,7 @@ function voiceFor(st) {
     case 'takeover': return ['takeover', 2, 0];
     case 'hack': return ['hack', 2, 0];
     case 'arrest': return ['island', 2, 0];
+    case 'pull': return st.amt >= 600 ? ['bigRent', 1, 600] : null;
     case 'pay': return st.why === 'rent' && st.amt >= 600 ? ['bigRent', 1, 0] : null;
     case 'debt': return ['debt', 2, 0];
     case 'pot': return ['pot', 2, 0];
@@ -3522,7 +3546,7 @@ function initView(steps, base) {
       // bước 'bankrupt' có was là mảng; bước 'sell' tự động có was là ô cũ (object) → không duyệt được
       for (const [i] of Array.isArray(st.was) ? st.was : []) sqs.add(i);
       if (Number.isInteger(st.s)) seats.add(st.s);
-      if (st.k === 'arrest') seats.add(st.v);
+      if (st.k === 'arrest' || st.k === 'pull') seats.add(st.v);
     }
     for (const i of PROPS) if (base.props[i] && sqs.has(i)) viewProps[i] = { ...base.props[i] };
     base.pl.forEach((x, s) => { if (x && seats.has(s)) viewPl[s] = { ...x, hold: { ...x.hold } }; });
@@ -3550,7 +3574,7 @@ function moneyDelta(st) {
     case 'free': if (st.how === 'pay' && st.fee) out.push([s, -st.fee]); break;
     case 'sell': out.push([s, st.amt]); break;
     case 'bankrupt': if (st.cash !== undefined) out.push([s, -st.cash]); if (st.paid) out.push([st.to, st.paid]); break;
-    case 'rob': out.push([s, st.amt], [st.v, -st.amt]); break;
+    case 'rob': case 'pull': out.push([s, st.amt], [st.v, -st.amt]); break;
     case 'forceSell': out.push([st.o, st.amt]); break;
     case 'luck': case 'homePay': case 'interest': case 'pot': case 'bonus': case 'evGift': out.push([s, st.amt]); break;
     case 'gift': out.push([s, -st.amt], [st.to, st.amt]); break;
@@ -3575,6 +3599,7 @@ function revealStep(st) {
   if (st.k === 'cure' && viewProps[st.i]) { viewProps[st.i].plague = 0; viewProps[st.i].blackout = 0; }
   if (st.k === 'lift') viewLift = null;
   if (st.k === 'arrest' && viewPl[st.v]) { viewPl[st.v].jail = 1; viewPl[st.v].bus = false; }
+  if (st.k === 'pull' && viewPl[st.v]) viewPl[st.v].bus = false;
   const V = viewPl[st.s];
   if (!V) return;
   const dec = k => { V.hold[k] = Math.max(0, (V.hold[k] || 0) - 1); };
@@ -3986,7 +4011,7 @@ function stepMs(st) {
     case 'won': case 'timeup': return 900;
     case 'event': return EV_MS; case 'evEnd': return 700; case 'evGift': return 350;
     case 'chars': return 2600; case 'luck': return 1100; case 'pot': return 1300; case 'gift': return 1000;
-    case 'collect': return 900; case 'flyTicket': return 700; case 'flyGo': return 400; case 'arrest': return 1100; case 'scoop': return 1100;
+    case 'collect': return 900; case 'flyTicket': return 700; case 'flyGo': return 400; case 'arrest': return 1100; case 'pull': return 1500; case 'scoop': return 1100;
     case 'lawyer': return 1100; case 'insure': return 1400; case 'taxCut': return 800;
     default: return 0;
   }
@@ -4223,6 +4248,19 @@ async function animateStep(st, tok) {
       fx('circle', { cx: to[0], cy: to[1] + 8, r: 16, fill: 'rgba(120,110,95,.35)', class: 'fx puff' }, 550);
       await sleep(ms - 900); return;
     }
+    case 'pull': {
+      // Kiến Trúc Sư khai trương Biểu tượng: quân đối thủ bay về ô, trả phí cho chủ
+      const v = st.v, [cx, cy] = centerOf(st.i), from = tokenPt(v), to = tokenXY(st.i, v, false);
+      pow(cx, cy - 40, '🧲 KHAI TRƯƠNG!', '#ea580c'); flashSquare(st.i, colorOf(s)); playWhoosh(0.5);
+      await sleep(300); if (tok !== animTok) return;
+      await flyToken(v, from, to, { ms: 600, height: 90, spin: 360 });
+      if (tok !== animTok) return;
+      if (st.amt > 0) {
+        floatText(to[0], to[1] - 24, `-${fmt(st.amt)}`, '#e8323c', 1000, 20); cardMoney(v, -st.amt); playCoin(false);
+        setTimeout(() => { cardMoney(s, st.amt); playCoin(true); }, 260);
+      }
+      await sleep(ms - 900); return;
+    }
     case 'scoop': {
       const [x, y] = centerOf(st.i), [tx, ty] = tokenPt(s);
       playAlert(); pow(x, y - 30, '📰 TIN NÓNG!', '#65a30d'); flashSquare(st.i, '#6b7a90');
@@ -4388,6 +4426,7 @@ function stepText(st) {
     case 'flyTicket': return `✈️ Phi Công ${w} qua Bắt Đầu lần thứ hai — lượt sau được bay tới một điểm du lịch`;
     case 'flyGo': return `✈️ ${w} bay tới ${nm(st.i)}`;
     case 'arrest': return `🚨 Cảnh Sát ${w} bắt ${other(st.v)} ra Côn Đảo!`;
+    case 'pull': return `🧲 Kiến Trúc Sư ${w} khai trương ${nm(st.i)}: hút ${other(st.v)} về${st.amt ? `, thu ${fmt(st.amt)} phí tham quan` : ' (hết tiền nên không thu được)'}`;
     case 'scoop': return `📰 Nhà Báo ${w} đưa tin, lễ hội ở ${nm(st.i)} của ${other(st.o)} bị hủy — nhận nhuận bút ${fmt(st.amt)}`;
     case 'lawyer': return `⚖️ Luật Sư ${w} bác bỏ thẻ nhắm vào ${nm(st.i)}${st.amt ? ` — ${other(st.by)} bị phạt ${fmt(st.amt)}` : ''}`;
     case 'insure': return `☂️ Bảo hiểm cứu ${w} khỏi phá sản${st.cover ? ` — trả thay ${fmt(st.cover)}${st.to >= 0 ? ' cho ' + other(st.to) : ''}` : ''}${st.keep >= 0 ? `, giữ lại ${nm(st.keep)}` : ''}, tặng ${fmt(st.gift)} làm lại`;
