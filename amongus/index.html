@@ -2092,7 +2092,7 @@ function leaveOnline() {
   for (const id of ['netSheet', 'lobbySheet', 'resultSheet', 'meetSheet', 'taskSheet']) $(id).hidden = true;
   $('ejectScene').hidden = true; $('bAgain').disabled = false; $('bAgain').textContent = 'Chơi lại';
   $('bNew').textContent = '↻';
-  meeting = null; sabo = null; bodies = []; phase = 'setup';
+  meeting = null; sabo = null; bodies = []; phase = 'setup'; splats.length = 0; fx.length = 0; bodyBorn.clear();
   P = [newPlayer(0, 'Bạn', setup.ci, false)]; me = P[0]; place(me, BUTTON.x - 60, BUTTON.y + 90);
   syncHud(); syncVoiceUi(); openSetup();
 }
@@ -2102,7 +2102,7 @@ function lobbyBeans() {
   P = M.filter(m => !m.wait || phase === 'lobby').map((m, k) => Object.assign(newPlayer(k, m.name, m.ci, false), { cid: m.cid }));
   P.forEach((p, k) => { const a = (k / Math.max(1, P.length)) * Math.PI * 2 + 0.6; place(p, BUTTON.x + Math.cos(a) * 110, BUTTON.y + Math.sin(a) * 80); p.dir = Math.cos(a) < 0 ? 1 : -1; });
   me = P.find(p => p.cid === myCid) || P[0] || newPlayer(0, 'Bạn', setup.ci, false);
-  bodies = []; sabo = null; meeting = null;
+  bodies = []; sabo = null; meeting = null; splats.length = 0; fx.length = 0; bodyBorn.clear();
 }
 function enterLobby() {
   phase = 'lobby';
@@ -2578,7 +2578,7 @@ function applyFull(d) {
   sabo = d.sabo && SABO_KINDS.includes(d.sabo.kind) ? { kind: d.sabo.kind, t: d.sabo.t, left: Array.isArray(d.sabo.left) ? d.sabo.left : SABO_FIX[d.sabo.kind].slice() } : null; saboCd = +d.sc || 0; netProg = d.pr | 0;
   gameLeft = Number.isFinite(+d.gl) ? +d.gl : timeMin() * 60; timeWarn = gameLeft <= 60 ? 1 : 0;
   bodies = (d.b || []).map(([id, x, y]) => ({ id, x, y, ci: P[id] ? P[id].ci : 0, t: 0 }));
-  meeting = null; winner = null; mapOpen = false;
+  meeting = null; winner = null; mapOpen = false; splats.length = 0; fx.length = 0; bodyBorn.clear();
   for (const id of ['lobbySheet', 'resultSheet', 'meetSheet', 'taskSheet', 'setupSheet']) $(id).hidden = true;
   $('ejectScene').hidden = true; taskCur = null;
   cam.x = me.x; cam.y = me.y;
