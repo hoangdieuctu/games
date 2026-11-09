@@ -38,7 +38,7 @@ const ROLES = {
     team: 'village', wolf: false, max: 1, w: 3, step: 'guard',
     vi: 'Bảo Vệ', en: 'Bodyguard',
     short: { vi: 'Mỗi đêm bảo vệ một người khỏi bị Sói cắn.', en: 'Each night, protect one player from the Wolves.' },
-    rule: { vi: 'Mỗi đêm Bảo Vệ chọn một người để canh. Người đó không chết nếu bị Sói tấn công. Được tự bảo vệ mình hay bảo vệ một người hai đêm liền hay không là tuỳ luật phòng. Bảo Vệ không chặn được bình độc.', en: 'Each night the Bodyguard protects one player, who cannot be killed by a Wolf attack. Self-protection and protecting the same player twice in a row depend on room rules. Poison is not blocked.' },
+    rule: { vi: 'Mỗi đêm Bảo Vệ chọn một người để canh. Người đó không chết nếu bị Sói tấn công (kể cả khi người được canh là Sói bị Sói Trắng cắn). Được tự bảo vệ mình hay bảo vệ một người hai đêm liền hay không là tuỳ luật phòng. Bảo Vệ không chặn được bình độc.', en: 'Each night the Bodyguard protects one player, who cannot be killed by a Wolf attack (even a Wolf bitten by the White Werewolf). Self-protection and protecting the same player twice in a row depend on room rules. Poison is not blocked.' },
   },
   cupid: {
     team: 'village', wolf: false, max: 1, w: -3, step: 'cupid',

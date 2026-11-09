@@ -281,6 +281,22 @@ test('Sói Trắng: bầy thấy như Sói thường, thắng khi còn một mì
   G.players.forEach(p => { if (p.id !== 0) p.alive = false; });
   assert.equal(WW.checkWin(G).team, 'white');
 });
+test('Bảo Vệ canh Sói → Sói Trắng cắn không chết', () => {
+  const G = rigged(['werewolf', 'guard', 'villager', 'villager', 'whitewolf', 'villager', 'villager']);
+  let t = toStep(G, 'guard');
+  assert.ok(WW.act(G, 1, { t: 2 }, t));
+  t = run(G, t, 400, g => g.step === 'wolves'); WW.act(G, 0, { t: 3 }, t); WW.act(G, 4, { t: 3 }, t);
+  t = abstainDay(G, t); t = run(G, t, 2000, g => g.phase === 'night' && g.step === 'guard');
+  assert.ok(WW.options(G, 1).targets.includes(0), 'được chọn Sói');
+  assert.ok(WW.act(G, 1, { t: 0 }, t));
+  t = run(G, t, 400, g => g.step === 'wolves'); WW.act(G, 0, { t: 5 }, t); WW.act(G, 4, { t: 5 }, t);
+  t = run(G, t, 400, g => g.step === 'whitewolf');
+  assert.ok(WW.act(G, 4, { t: 0 }, t));
+  t = toPhase(G, 'morning', t);
+  assert.ok(G.players[0].alive, 'Sói được Bảo Vệ canh không chết');
+  assert.equal(WW.viewFor(G, 1).guardLast, 0);
+  assert.equal(WW.viewFor(G, 0).guardLast, undefined, 'người khác không biết Bảo Vệ canh ai');
+});
 test('Lượt của vai đã chết vẫn được gọi (giấu thông tin)', () => {
   const G = rigged(['werewolf', 'seer', 'villager', 'villager', 'villager']);
   G.players[1].alive = false;

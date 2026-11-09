@@ -377,7 +377,7 @@ const WW = (() => {
     for (const a of nt.attacks) {
       const t = P(G, a.t); if (!t || !t.alive || done.has(t.id)) continue;
       done.add(t.id);
-      if (a.by !== 'white' && nt.guard === t.id) continue;
+      if (nt.guard === t.id) continue; // Bảo Vệ chặn mọi cú cắn của Sói (kể cả Sói Trắng cắn Sói)
       if (nt.heal === t.id) continue;
       if (t.role === 'elder' && t.lives > 1 && a.by !== 'white') { t.lives--; continue; }
       kill(G, t.id, 'wolf', deaths);
@@ -610,7 +610,7 @@ const WW = (() => {
     // Sói máy đổi phiếu theo Sói người để cả bầy thống nhất
     if (G.phase === 'night' && G.step === 'wolves') {
       const humanVote = G.actors.map(i => P(G, i)).filter(p => isWolfSide(p) && !auto(p) && G.acts[p.id]).map(p => G.acts[p.id].t).pop();
-      if (humanVote) for (const id of G.actors) { const p = P(G, id); if (isWolfSide(p) && auto(p) && G.acts[id] && G.acts[id].t.join() !== humanVote.join()) { G.acts[id] = { t: humanVote.slice() }; G.nt.wolfVotes[id] = humanVote.slice(); ch = true; } }
+      if (humanVote) for (const id of G.actors) { const p = P(G, id); if (isWolfSide(p) && auto(p) && G.acts[id] && (!Array.isArray(G.acts[id].t) || G.acts[id].t.join() !== humanVote.join())) { G.acts[id] = { t: humanVote.slice() }; G.nt.wolfVotes[id] = humanVote.slice(); ch = true; } }
     }
     if (G.phase === 'day' && botTalk(G, now)) ch = true;
     if (!readyToEnd(G, now)) return ch;
@@ -698,6 +698,8 @@ const WW = (() => {
       v.mine = G.acts[id] || null;
       v.potions = me.role === 'witch' ? { heal: me.heal, poison: me.poison } : null;
       v.fox = me.role === 'fox' ? me.fox : null;
+      // Bảo Vệ: người đang canh (đêm nay, sau lượt Bảo Vệ) / người đã canh đêm trước (không được canh lại)
+      if (me.role === 'guard' && me.alive) v.guardLast = isInt(G.m.guardLast) ? G.m.guardLast : null;
       if (G.phase === 'night' && G.step === 'wolves' && isWolfSide(me)) v.wolfVotes = G.nt.wolfVotes;
       if (G.phase === 'hunter') v.hunter = G.actors[0];
     }

@@ -316,7 +316,7 @@ function renderGame() {
   Sound.setMood(night ? 'night' : 'day');
   $('hIco').textContent = phaseIcon(V); $('hDay').textContent = dayLabel(V); $('hTitle').textContent = phaseTitle(V);
   if (V.seq < Ctl.lastSeq) resetGameUi(); // khách: chủ phòng vừa mở ván mới
-  const key = [V.phase, V.step, V.day, V.night].join('|');
+  const key = [V.phase, V.step, V.day, V.night, V.hunter].join('|');
   if (key !== selKey) { selKey = key; sel = []; witchHeal = null; accSel = null; }
   processLog(V);
   renderSeats(V); renderAct(V); renderCenter(V); renderMyCard(V); syncOverlays(V); paintTimer();
@@ -338,18 +338,43 @@ function paintTimer() {
 }
 function canPick(V) {
   const o = V.opt; if (!o) return null;
-  if (o.kind === 'witch') return { targets: o.canPoison, need: 1 };
+  if (o.kind === 'witch') return V.mine ? null : { targets: o.canPoison, need: 1 };
   if (o.kind === 'talk') return { targets: o.targets, need: 1 };
   if (!o.targets || !o.need) return null;
   if (V.mine && !['bite', 'vote', 'shoot', 'bigbite', 'whitebite'].includes(o.kind)) return null;
   return { targets: o.targets, need: o.need };
 }
+// Bảo Vệ: 'on' = người mình đang canh đêm nay, 'no' = đã canh đêm trước nên không được canh lại
+function guardMark(V, i) {
+  if (V.role !== 'guard' || V.guardLast == null) return null;
+  const night = ['nightfall', 'night'].includes(V.phase);
+  if (V.phase === 'night' && V.step === 'guard') {
+    if (V.mine && V.mine.t === i) return 'on';
+    return !V.mine && V.guardLast === i && !V.opts.guardRepeat && V.opt ? 'no' : null;
+  }
+  return night && V.guardLast === i && NIGHT_AFTER_GUARD(V) ? 'on' : null;
+}
+const NIGHT_AFTER_GUARD = V => V.phase === 'night' && WW.NIGHT_ORDER.indexOf(V.step) > WW.NIGHT_ORDER.indexOf('guard');
 function seatLayout(n) {
-  const r = $('table').getBoundingClientRect(), w = r.width, h = r.height;
-  const rx = w / 2 - Math.min(48, w * 0.09), ry = h / 2 - Math.min(48, h * 0.11);
-  const circ = Math.PI * (rx + ry);
-  const sz = Math.max(34, Math.min(70, circ / n * 0.5, h * 0.2));
-  return { w, h, rx, ry, sz };
+  const tb = $('table');
+  tb.classList.toggle('crowd', n >= 13); // đông người: bàn cao hơn trên điện thoại để ghế không chồng nhau
+  const r = tb.getBoundingClientRect(), w = r.width, h = r.height;
+  const rx = w / 2 - Math.min(48, w * 0.09), ry = h / 2 - Math.max(32, Math.min(44, h * 0.085)); // chừa chỗ cho tên ở ghế dưới cùng
+  // ít người: ghế quanh hình elip; đông mà bàn nhỏ: ghế quanh hình "vuông bo tròn" (dùng cả bốn góc) — dài hơn ~30%
+  const p = Math.PI * (rx + ry) / n < 64 ? 3.6 : 2;
+  tb.style.setProperty('--tr', p > 2 ? '34%' : '50%');
+  // lấy mẫu đường viền rồi chia ghế cách đều theo chiều dài (bắt đầu ở giữa phía dưới = mình, đi theo chiều kim đồng hồ)
+  const K = 720, pts = [], len = [0];
+  for (let k = 0; k <= K; k++) {
+    const t = Math.PI / 2 + (k / K) * Math.PI * 2, c = Math.cos(t), si = Math.sin(t);
+    pts.push([w / 2 + rx * Math.sign(c) * Math.abs(c) ** (2 / p), h / 2 + ry * Math.sign(si) * Math.abs(si) ** (2 / p)]);
+    if (k) len.push(len[k - 1] + Math.hypot(pts[k][0] - pts[k - 1][0], pts[k][1] - pts[k - 1][1]));
+  }
+  const total = len[K], gap = total / n; // khoảng cách giữa hai ghế cạnh nhau
+  const at = d => { let k = 1; while (k < K && len[k] < d) k++; const f = (d - len[k - 1]) / (len[k] - len[k - 1] || 1); return [pts[k - 1][0] + (pts[k][0] - pts[k - 1][0]) * f, pts[k - 1][1] + (pts[k][1] - pts[k - 1][1]) * f]; };
+  const sz = Math.max(gap < 54 ? 31 : 34, Math.min(70, gap * 0.5, h * 0.2));
+  const nmw = Math.max(sz + 6, Math.min(sz + 40, gap - 6, 2 * (w / 2 - rx))); // tên không tràn sang ghế bên cạnh / ra ngoài mép bàn
+  return { w, h, sz, nmw, nmf: sz < 44 ? 10.5 : 12, pos: k => at(((k % n) + n) % n * gap) };
 }
 function renderSeats(V) {
   const box = $('seats'), n = V.players.length, L = seatLayout(n), pk = canPick(V);
@@ -358,11 +383,10 @@ function renderSeats(V) {
   const wolfCount = {}; if (V.wolfVotes) for (const ts of Object.values(V.wolfVotes)) for (const tg of ts) wolfCount[tg] = (wolfCount[tg] || 0) + 1;
   const asleep = ['nightfall', 'night'].includes(V.phase);
   V.players.forEach((p, i) => {
-    const a = Math.PI / 2 + ((i - V.me) / n) * Math.PI * 2;
-    const x = L.w / 2 + Math.cos(a) * L.rx, y = L.h / 2 + Math.sin(a) * L.ry;
+    const [x, y] = L.pos(i - V.me);
     const s = document.createElement('div');
     s.className = 'seat' + (i === V.me ? ' me' : '') + (p.alive ? '' : ' dead') + (p.wolf && i !== V.me && V.phase !== 'over' ? ' wolfmate' : '') + (asleep && p.alive && i !== V.me ? ' sleep' : '');
-    s.style.left = x + 'px'; s.style.top = y + 'px'; s.style.setProperty('--sz', L.sz + 'px'); s.style.setProperty('--c', COLORS[i % COLORS.length]);
+    s.style.left = x + 'px'; s.style.top = y + 'px'; s.style.setProperty('--sz', L.sz + 'px'); s.style.setProperty('--nmw', L.nmw + 'px'); s.style.setProperty('--nmf', L.nmf + 'px'); s.style.setProperty('--c', COLORS[i % COLORS.length]);
     s.dataset.id = i;
     const inner = p.role ? cardArt(p.role) : `<span class="ini">${esc((p.name || '?').trim().charAt(0).toUpperCase())}</span>`;
     const bd = [];
@@ -376,6 +400,8 @@ function renderSeats(V) {
     if (accCount[i]) mk.push(`<span class="acc">☝️${accCount[i]}</span>`);
     if (wolfCount[i]) mk.push(`<span class="wv">🐺${wolfCount[i]}</span>`);
     if (V.phase === 'vote' && (V.voted || []).includes(i)) mk.push('<span class="vt">✓</span>');
+    if (guardMark(V, i) === 'on') mk.push(`<span class="gd" title="${t('guardOn')}">🛡️</span>`);
+    if (guardMark(V, i) === 'no') mk.push(`<span class="gx" title="${t('guardNo')}">🛡️✕</span>`);
     s.innerHTML = `<span class="no">${i + 1}</span><div class="fr">${inner}</div><div class="bdg">${bd.join('')}</div><div class="marks">${mk.join('')}</div><div class="nm">${esc(p.name)}${p.bot ? ' 🤖' : ''}</div>`;
     if (pk && pk.targets.includes(i)) { s.classList.add('can'); s.onclick = () => pickSeat(i); }
     if (sel.includes(i)) s.classList.add('sel');
@@ -467,7 +493,9 @@ function renderAct(V) {
   const prompts = { cupid: t('a_cupid'), model: t('a_model'), guard: t('a_guard'), fox: t('a_fox'), bite: o.need > 1 ? t('a_bite2') : t('a_bite'), bigbite: t('a_bigbite'), whitebite: t('a_whitebite'), seer: t('a_seer'), charm: t('a_charm', { n: o.need }), shoot: t('a_shoot') };
   const again = ['bite', 'shoot', 'bigbite', 'whitebite'].includes(o.kind);
   if (V.mine && !again) return msg(t('done'));
-  msg(prompts[o.kind] || t('waiting'), (V.mine ? t('done') + ' · ' : '') + pickInfo(o.need));
+  let sub = (V.mine ? t('done') + ' · ' : '') + pickInfo(o.need);
+  if (o.kind === 'guard' && V.guardLast != null && !V.opts.guardRepeat && V.players[V.guardLast] && V.players[V.guardLast].alive) sub += (sub ? ' · ' : '') + t('guardNoName', { name: nm(V.guardLast) });
+  msg(prompts[o.kind] || t('waiting'), sub);
   const label = o.kind === 'shoot' ? t('shootBtn') : t('confirm');
   row(btn(`${label}${sel.length ? ' ' + names(sel) : ''}`, () => sendAct({ t: o.need > 1 || o.kind === 'bite' ? sel.slice() : sel[0] }), true, o.kind === 'bite' ? !sel.length : sel.length !== o.need),
     o.skip ? btn(o.kind === 'shoot' ? t('noShoot') : t('skipBtn'), () => sendAct({ skip: 1 })) : null);
