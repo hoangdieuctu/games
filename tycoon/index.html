@@ -992,7 +992,7 @@ const lenHint = k => { const L = LENS.find(x => x.key === k) || LENS[1]; return 
 
 // ── nhân vật: mỗi người một kỹ năng (nhóm giảm tiền / tăng tiền / di chuyển / phá đối thủ / phòng thủ / may mắn) ──
 // số liệu kỹ năng của Nhà Đầu Tư, Thu Ngân, Nhà Sưu Tầm, Luật Sư, Người Bảo Hiểm, Cảnh Sát, Nhà Báo
-const INVESTOR_RATE = 0.8, CASHIER_CUT = 0.2, COLLECTOR_OFF = 0.3, COLLECTOR_BONUS = 100, LAWYER_FINE = 100, INSURE_CASH = 500, POLICE_CHANCE = 0.25, SCOOP_PAY = 100;
+const INVESTOR_RATE = 0.9, CASHIER_CUT = 0.2, COLLECTOR_OFF = 0.3, COLLECTOR_BONUS = 100, LAWYER_FINE = 100, INSURE_CASH = 500, POLICE_CHANCE = 0.25, SCOOP_PAY = 100;
 const CHARS = [
   { id: 'mc', name: 'Siêu MC', skill: 'Lương qua Bắt Đầu gấp đôi', group: 'tăng tiền', skin: '#ffd9b3', hair: '#2b2118', style: 'quiff', acc: 'mic', outfit: '#1e6fd8', bg: '#dbeafe' },
   { id: 'boss', name: 'Ông Trùm', skill: 'Mua và xây nhà rẻ hơn 15%', group: 'giảm tiền', skin: '#f3c9a3', hair: '#6b4a2a', style: 'short', acc: 'glasses', outfit: '#23324a', bg: '#e5e7eb' },
@@ -1021,7 +1021,7 @@ const CHARS = [
   { id: 'collector', name: 'Nhà Sưu Tầm', skill: `Lên Biểu tượng rẻ hơn ${COLLECTOR_OFF * 100}%; qua Bắt Đầu nhận thêm $${COLLECTOR_BONUS} cho mỗi Biểu tượng đang có`, group: 'tăng tiền', skin: '#f3cfae', hair: '#9ca3af', style: 'collector', acc: 'vase', outfit: '#7c3aed', bg: '#f3e8ff' },
   { id: 'lawyer', name: 'Luật Sư', skill: `Thành phố không bị ép bán hay đổi; ai dùng thẻ nhắm vào thì bị phạt $${LAWYER_FINE} trả cho mình`, group: 'phòng thủ', skin: '#f1c7a0', hair: '#1f1a17', style: 'lawyer', acc: 'scale', outfit: '#111827', bg: '#f1f5f9' },
   { id: 'insurer', name: 'Người Bảo Hiểm', skill: `Phá sản lần đầu được bảo hiểm cứu: trả đủ nợ thay, giữ lại ô đất rẻ nhất và nhận $${INSURE_CASH} làm lại`, group: 'phòng thủ', skin: '#ffd9b3', hair: '#4b3621', style: 'insurer', acc: 'umbrella', outfit: '#0369a1', bg: '#e0f2fe' },
-  { id: 'pilot', name: 'Phi Công', skill: 'Qua Bắt Đầu: lượt sau được bay miễn phí tới một điểm du lịch bất kỳ', group: 'di chuyển', skin: '#f6d1b0', hair: '#3b2a1e', style: 'pilot', acc: 'plane', outfit: '#1e3a8a', bg: '#dbeafe' },
+  { id: 'pilot', name: 'Phi Công', skill: 'Cứ 2 lần qua Bắt Đầu: lượt sau được bay miễn phí tới một điểm du lịch bất kỳ', group: 'di chuyển', skin: '#f6d1b0', hair: '#3b2a1e', style: 'pilot', acc: 'plane', outfit: '#1e3a8a', bg: '#dbeafe' },
   { id: 'police', name: 'Cảnh Sát', skill: `Đi ngang qua hoặc dừng ở ô có đối thủ đứng: ${POLICE_CHANCE * 100}% bắt họ ra Côn Đảo (mỗi vòng tối đa 1 lần)`, group: 'phá đối thủ', skin: '#eec39a', hair: '#1f1a17', style: 'police', acc: 'whistle', outfit: '#1d4ed8', bg: '#dbeafe' },
   { id: 'journalist', name: 'Nhà Báo', skill: `Vào đất đối thủ đang mở lễ hội: hủy lễ hội đó trước khi trả phí và nhận $${SCOOP_PAY} nhuận bút`, group: 'phá đối thủ', skin: '#ffe3cc', hair: '#b45309', style: 'journalist', acc: 'camera', outfit: '#65a30d', bg: '#ecfccb' },
 ];
@@ -1473,8 +1473,8 @@ function moveBy(s, n, steps, how) {
   if (passGo && hasSkill(G, s, 'robin')) robin(s, steps);
   // Nhà Sưu Tầm: qua Bắt Đầu nhận thêm tiền cho mỗi Biểu tượng
   if (passGo && hasSkill(G, s, 'collector')) { const amt = COLLECTOR_BONUS * landmarks(G, s); if (amt > 0) { P.cash += amt; steps.push({ k: 'collect', s, amt, n: amt / COLLECTOR_BONUS }); } }
-  // Phi Công: qua Bắt Đầu thì lượt sau được bay tới một điểm du lịch
-  if (passGo && hasSkill(G, s, 'pilot') && !P.fly) { P.fly = true; steps.push({ k: 'flyTicket', s }); }
+  // Phi Công: cứ 2 lần qua Bắt Đầu (vòng chẵn) thì lượt sau được bay tới một điểm du lịch — mỗi vòng đều có vé thì quá mạnh
+  if (passGo && hasSkill(G, s, 'pilot') && !P.fly && P.laps % 2 === 0) { P.fly = true; steps.push({ k: 'flyTicket', s }); }
   if (hasSkill(G, s, 'police') && n !== 0) police(s, from, n, steps);
   if (hasSkill(G, s, 'robber')) rob(s, steps);
   land(s, steps);
@@ -4384,7 +4384,7 @@ function stepText(st) {
     case 'cure': return `${st.fx.includes('plague') ? '✨' : '💡'} ${w} ghé ${nm(st.i)} — ${st.fx.map(k => (k === 'plague' ? 'hết dịch bệnh' : 'có điện lại')).join(' và ')}, thu phí bình thường`;
     case 'shield': return `🛡️ Khiên của ${w} chặn được thẻ xấu nhắm vào ${nm(st.i)}`;
     case 'collect': return `🏺 Nhà Sưu Tầm ${w} có ${st.n} Biểu tượng — nhận thêm ${fmt(st.amt)}`;
-    case 'flyTicket': return `✈️ Phi Công ${w} qua Bắt Đầu — lượt sau được bay tới một điểm du lịch`;
+    case 'flyTicket': return `✈️ Phi Công ${w} qua Bắt Đầu lần thứ hai — lượt sau được bay tới một điểm du lịch`;
     case 'flyGo': return `✈️ ${w} bay tới ${nm(st.i)}`;
     case 'arrest': return `🚨 Cảnh Sát ${w} bắt ${other(st.v)} ra Côn Đảo!`;
     case 'scoop': return `📰 Nhà Báo ${w} đưa tin, lễ hội ở ${nm(st.i)} của ${other(st.o)} bị hủy — nhận nhuận bút ${fmt(st.amt)}`;
