@@ -149,6 +149,10 @@ button:disabled { opacity: .35; cursor: default; }
 .meet .skip button { flex: 1; border-radius: 12px; padding: 10px; font-weight: 800; font-size: 15px; background: rgba(255,255,255,.14); color: #fff; }
 .meet .skip button.on { background: #3ddc84; color: #05210f; }
 .meet .skip button:disabled { opacity: .4; }
+.meet .skip button.mapb { flex: 0 0 auto; padding: 10px 14px; }
+.mapview { width: min(96vw, 980px); display: flex; flex-direction: column; gap: 10px; align-items: stretch; }
+.mapview canvas { width: 100%; height: min(72vh, 600px); border-radius: 16px; background: #0b1020; border: 1.5px solid rgba(143,227,255,.35); }
+.mapview button { align-self: center; border-radius: 12px; padding: 10px 26px; font-weight: 800; font-size: 16px; background: rgba(255,255,255,.16); color: #fff; }
 /* ── đẩy ra ngoài ── */
 .eject { position: fixed; inset: 0; z-index: 25; background: radial-gradient(ellipse at 50% 60%, #121a35, #05070f 70%); display: flex; align-items: center; justify-content: center; overflow: hidden; animation: fade .3s; }
 .eject .stars { position: absolute; inset: 0; background-image: radial-gradient(#fff 1px, transparent 1.5px), radial-gradient(#9fb0c8 1px, transparent 1.5px); background-size: 120px 90px, 70px 60px; opacity: .5; }
@@ -219,6 +223,16 @@ button:disabled { opacity: .35; cursor: default; }
 .rb.vc.off { background: rgba(0,0,0,.45); opacity: .8; }
 .rb.vc.blocked { background: #e67e22; animation: blink 1s ease-in-out infinite; }
 .rb.vc.hush { box-shadow: 0 0 0 2px #ffd23f, 0 3px 10px rgba(0,0,0,.4); }
+.nstat { position: fixed; z-index: 30; top: calc(env(safe-area-inset-top, 0px) + 56px); left: 50%; transform: translateX(-50%); width: min(94vw, 620px); max-height: calc(100% - 80px); overflow-y: auto;
+  background: rgba(10,14,30,.94); border: 1.5px solid rgba(143,227,255,.35); border-radius: 16px; padding: 12px 14px; box-shadow: 0 14px 40px rgba(0,0,0,.5); font-size: 13.5px; }
+.nstat h3 { font-size: 15px; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; } .nstat h3 small { margin-left: auto; color: #9fb0c8; font-weight: 600; font-size: 12px; }
+.nstat table { width: 100%; border-collapse: collapse; } .nstat th { text-align: left; color: #9fb0c8; font-size: 11.5px; font-weight: 700; padding: 2px 6px; }
+.nstat td { padding: 4px 6px; border-top: 1px solid rgba(255,255,255,.08); vertical-align: top; white-space: nowrap; }
+.nstat td.nm { white-space: normal; font-weight: 800; } .nstat td.nm i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; background: var(--c); }
+.nstat .ok { color: #7be495; } .nstat .mid { color: #ffd23f; } .nstat .bad { color: #ff7b7b; font-weight: 800; } .nstat .dim { color: #8391a7; }
+.nstat .miss { display: block; font-size: 11.5px; color: #ff9b9b; white-space: normal; }
+.nstat .sum { margin-top: 8px; color: #cbd5e1; line-height: 1.45; } .nstat .sum b { color: #ffd23f; }
+.nstat .row { margin-top: 8px; } .nstat .row button { background: rgba(255,255,255,.14); color: #fff; font-size: 14px; padding: 8px; }
 .vchip { position: fixed; z-index: 5; top: calc(env(safe-area-inset-top, 0px) + 80px); right: calc(env(safe-area-inset-right, 0px) + 10px); background: rgba(0,0,0,.5); border: 1px solid rgba(255,255,255,.15); border-radius: 999px; padding: 3px 10px; font-size: 12px; font-weight: 700; color: #cbd5e1; max-width: 46vw; }
 .panel .or { text-align: center; color: var(--muted); font-weight: 700; font-size: 13px; margin: 14px 0 6px; }
 .panel .note { font-size: 12.5px; color: #c0392b; font-weight: 700; margin-top: 6px; }
@@ -324,6 +338,7 @@ button:disabled { opacity: .35; cursor: default; }
   <h1><span>Kẻ</span> Giả Mạo</h1>
   <span class="role-tag" id="roleTag" hidden></span>
   <button class="rb vc" id="bVoice" aria-label="Mic trò chuyện" hidden>🎤</button>
+  <button class="rb" id="bNet" aria-label="Mạng: ai đang lag" title="Mạng: xem ai đang lag (giữ phím Tab)" hidden>📶<kbd>Tab</kbd></button>
   <button class="rb" id="bMusic" aria-label="Bật/tắt nhạc nền">🎵</button>
   <button class="rb" id="bMute" aria-label="Bật/tắt âm thanh">🔊</button>
   <button class="rb" id="bRules" aria-label="Luật chơi">📖</button>
@@ -334,6 +349,7 @@ button:disabled { opacity: .35; cursor: default; }
 <canvas class="mmap" id="mmap" hidden title="Bản đồ (M)"></canvas>
 <div class="alert" id="alert" hidden></div>
 <div class="vchip" id="vchip" hidden></div>
+<div class="nstat" id="nstat" hidden></div>
 <div class="joy" id="joy" hidden><i></i></div>
 <div class="hint" id="hint" hidden>Di chuyển: WASD / mũi tên · E dùng · R báo · Q giết/bắn · V ống gió · F phá hoại · M bản đồ · T mic</div>
 <div class="sabo-pop" id="saboPop" hidden>
@@ -365,6 +381,8 @@ button:disabled { opacity: .35; cursor: default; }
     <div class="seg" id="suImps"></div>
     <div class="label">Thời gian ván</div>
     <div class="seg" id="suTime"></div>
+    <div class="label">Bản đồ</div>
+    <div class="seg" id="suMap"></div>
     <div class="label">Vai của bạn</div>
     <div class="seg" id="suRole"></div>
     <label class="check"><input type="checkbox" id="suConfirm"> Công bố vai người bị đẩy ra ngoài</label>
@@ -397,10 +415,15 @@ button:disabled { opacity: .35; cursor: default; }
     <h2 id="mtTitle">🚨 Họp khẩn cấp</h2>
     <div class="timer" id="mtTimer"></div>
     <div class="plist" id="mtList"></div>
-    <div class="skip"><button id="mtSkip">⏭️ Bỏ phiếu trắng</button></div>
+    <div class="skip"><button id="mtSkip">⏭️ Bỏ phiếu trắng</button><button class="mapb" id="mtMap">🗺️ Bản đồ</button></div>
     <div class="chat" id="mtChat"></div>
     <form class="say" id="mtSay" hidden><input id="mtSayIn" maxlength="80" placeholder="Nhắn cả phòng… (nhắc tên ai đó, họ sẽ trả lời)" autocomplete="off" enterkeyhint="send"><button>Gửi</button></form>
   </div>
+</div>
+
+<!-- bản đồ lúc họp -->
+<div class="overlay" id="mapSheet" hidden>
+  <div class="mapview"><canvas id="mvCv"></canvas><button id="mvClose">Đóng bản đồ</button></div>
 </div>
 
 <!-- bị giết -->
@@ -448,6 +471,8 @@ button:disabled { opacity: .35; cursor: default; }
       <div class="seg" id="lbImps"></div>
       <div class="label">Thời gian ván</div>
       <div class="seg" id="lbTime"></div>
+      <div class="label">Bản đồ</div>
+      <div class="seg" id="lbMap"></div>
       <div class="label">Voice chat khi đang chơi</div>
       <div class="seg" id="lbVoice"></div>
       <label class="check"><input type="checkbox" id="lbConfirm"> Công bố vai người bị đẩy ra ngoài</label>
@@ -493,51 +518,157 @@ const rnd = (a, b) => a + Math.random() * (b - a);
 const pick = arr => arr[Math.floor(Math.random() * arr.length)];
 const shuffle = arr => { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 
-// phòng: [x, y, rộng, cao] trên bản đồ 3000 × 1640
-const ROOMS = [
-  { id: 'cafe', name: 'Nhà Ăn', r: [1000, 80, 640, 460], col: '#56658a' },
-  { id: 'med', name: 'Y Tế', r: [560, 120, 300, 260], col: '#3f7f80' },
-  { id: 'upeng', name: 'Động Cơ Trên', r: [80, 100, 340, 300], col: '#6e5246' },
-  { id: 'weap', name: 'Vũ Khí', r: [1800, 100, 340, 300], col: '#6a5080' },
-  { id: 'obs', name: 'Đài Quan Sát', r: [2300, 80, 300, 260], col: '#3d5f86' },
-  { id: 'react', name: 'Lò Phản Ứng', r: [60, 560, 300, 400], col: '#7d4552' },
-  { id: 'sec', name: 'An Ninh', r: [520, 560, 260, 240], col: '#4c6c7c' },
-  { id: 'lab', name: 'Thí Nghiệm', r: [520, 880, 320, 260], col: '#4a7468' },
-  { id: 'admin', name: 'Hành Chính', r: [1180, 700, 320, 240], col: '#55708a' },
-  { id: 'o2', name: 'Oxy', r: [1800, 540, 260, 220], col: '#4f7d54' },
-  { id: 'green', name: 'Vườn Ươm', r: [2160, 500, 280, 280], col: '#4c7a3e' },
-  { id: 'nav', name: 'Điều Hướng', r: [2640, 560, 300, 360], col: '#4f5f92' },
-  { id: 'loeng', name: 'Động Cơ Dưới', r: [80, 1220, 340, 320], col: '#6e5246' },
-  { id: 'elec', name: 'Điện', r: [560, 1280, 320, 300], col: '#7d6d36' },
-  { id: 'stor', name: 'Kho', r: [1020, 1100, 420, 440], col: '#6f6853' },
-  { id: 'comms', name: 'Liên Lạc', r: [1560, 1280, 300, 260], col: '#5d6e7e' },
-  { id: 'shield', name: 'Khiên', r: [2000, 1100, 320, 300], col: '#7c6045' },
-  { id: 'hangar', name: 'Bãi Tàu Con', r: [2440, 1160, 420, 380], col: '#5b6170' },
+// ── bản đồ: mỗi bản đồ có phòng [x, y, rộng, cao], hành lang, vật cản, ống gió, bàn họp, chỗ sửa phá hoại, nhiệm vụ ──
+// vật cản: [x, y, rộng, cao, cao tới trần (che tầm nhìn), kiểu] · ống gió: [x, y, nhóm nối với nhau]
+// chỗ sửa: lights / reactor / o2a / o2b (cạn oxy phải sửa ở cả hai trạm) · mỗi bản đồ cần một vật 'core' (lõi lò) và 'btn' (dưới nút họp)
+const MAPS = [
+  { id: 'ship', name: 'Phi Thuyền', icon: '🚀', W: 3000, H: 1640,
+    rooms: [
+      { id: 'cafe', name: 'Nhà Ăn', r: [1000, 80, 640, 460], col: '#56658a' },
+      { id: 'med', name: 'Y Tế', r: [560, 120, 300, 260], col: '#3f7f80' },
+      { id: 'upeng', name: 'Động Cơ Trên', r: [80, 100, 340, 300], col: '#6e5246' },
+      { id: 'weap', name: 'Vũ Khí', r: [1800, 100, 340, 300], col: '#6a5080' },
+      { id: 'obs', name: 'Đài Quan Sát', r: [2300, 80, 300, 260], col: '#3d5f86' },
+      { id: 'react', name: 'Lò Phản Ứng', r: [60, 560, 300, 400], col: '#7d4552' },
+      { id: 'sec', name: 'An Ninh', r: [520, 560, 260, 240], col: '#4c6c7c' },
+      { id: 'lab', name: 'Thí Nghiệm', r: [520, 880, 320, 260], col: '#4a7468' },
+      { id: 'admin', name: 'Hành Chính', r: [1180, 700, 320, 240], col: '#55708a' },
+      { id: 'o2', name: 'Oxy', r: [1800, 540, 260, 220], col: '#4f7d54' },
+      { id: 'green', name: 'Vườn Ươm', r: [2160, 500, 280, 280], col: '#4c7a3e' },
+      { id: 'nav', name: 'Điều Hướng', r: [2640, 560, 300, 360], col: '#4f5f92' },
+      { id: 'loeng', name: 'Động Cơ Dưới', r: [80, 1220, 340, 320], col: '#6e5246' },
+      { id: 'elec', name: 'Điện', r: [560, 1280, 320, 300], col: '#7d6d36' },
+      { id: 'stor', name: 'Kho', r: [1020, 1100, 420, 440], col: '#6f6853' },
+      { id: 'comms', name: 'Liên Lạc', r: [1560, 1280, 300, 260], col: '#5d6e7e' },
+      { id: 'shield', name: 'Khiên', r: [2000, 1100, 320, 300], col: '#7c6045' },
+      { id: 'hangar', name: 'Bãi Tàu Con', r: [2440, 1160, 420, 380], col: '#5b6170' },
+    ],
+    halls: [[410, 220, 160, 90], [850, 200, 160, 90], [1630, 200, 180, 90], [2130, 180, 180, 90], [2480, 330, 90, 300], [2480, 600, 170, 90],
+      [2050, 600, 120, 90], [1880, 390, 90, 160], [1300, 530, 100, 180], [1250, 930, 90, 180], [2200, 770, 90, 340], [2700, 910, 90, 260],
+      [2310, 1220, 140, 90], [1850, 1300, 160, 90], [1430, 1380, 140, 90], [870, 1360, 160, 90], [410, 1360, 160, 90], [160, 950, 90, 280],
+      [160, 390, 90, 180], [350, 640, 180, 90], [600, 790, 90, 100], [640, 1130, 90, 160], [830, 870, 360, 70], [620, 370, 90, 200]],
+    obst: [
+      [1280, 285, 80, 50, 0, 'btn'], [1105, 170, 90, 60, 0, 'table'], [1445, 170, 90, 60, 0, 'table'], [1105, 400, 90, 60, 0, 'table'], [1445, 400, 90, 60, 0, 'table'],
+      [600, 250, 120, 50, 0, 'bed'], [160, 180, 160, 120, 1, 'engine'], [160, 1300, 160, 120, 1, 'engine'], [140, 700, 120, 120, 1, 'core'],
+      [1100, 1180, 100, 100, 1, 'crate'], [1300, 1300, 90, 140, 1, 'crate'], [1120, 1400, 80, 80, 1, 'crate'], [760, 1380, 20, 200, 1, 'wall'],
+      [1270, 790, 140, 70, 0, 'console'], [2860, 680, 50, 120, 0, 'console'], [2100, 1200, 120, 100, 0, 'console'], [2560, 1260, 200, 140, 1, 'ship'],
+      [2700, 1440, 80, 60, 1, 'crate'], [520, 990, 200, 24, 1, 'shelf'], [1600, 1460, 120, 50, 0, 'console'], [2420, 150, 60, 60, 1, 'scope'],
+      [1940, 200, 80, 80, 0, 'console'], [1830, 680, 200, 40, 0, 'plant'], [2200, 560, 60, 160, 0, 'plant'], [2340, 560, 60, 160, 0, 'plant'], [540, 600, 120, 40, 0, 'console'],
+    ],
+    vents: [[620, 1520, 0], [740, 760, 0], [800, 330, 0], [1010, 905, 0], [2080, 350, 1], [2550, 300, 1], [2700, 860, 1], [100, 600, 2], [380, 140, 2], [380, 1500, 2],
+      [1460, 900, 3], [1060, 500, 3], [1060, 1500, 3], [2280, 1360, 4], [2820, 1500, 4], [2400, 740, 4]],
+    button: { x: 1320, y: 310 },
+    fix: { lights: { x: 820, y: 1530 }, reactor: { x: 310, y: 900 }, o2a: { x: 2000, y: 590 }, o2b: { x: 1210, y: 880 } },
+    tasks: [
+      { x: 1040, y: 120, t: 'wires', n: 'Nối dây' }, { x: 1600, y: 510, t: 'hold', n: 'Đổ rác' }, { x: 600, y: 160, t: 'hold', n: 'Khám sức khoẻ' },
+      { x: 380, y: 360, t: 'hold', n: 'Đổ nhiên liệu' }, { x: 120, y: 130, t: 'swipe', n: 'Căn chỉnh động cơ' }, { x: 2100, y: 140, t: 'hex', n: 'Bắn thiên thạch' },
+      { x: 2340, y: 120, t: 'simon', n: 'Chỉnh kính viễn vọng' }, { x: 1830, y: 580, t: 'code', n: 'Nhập mã lọc khí' }, { x: 2410, y: 520, t: 'hold', n: 'Tưới cây' },
+      { x: 2900, y: 600, t: 'code', n: 'Nhập toạ độ' }, { x: 2900, y: 880, t: 'hold', n: 'Tải sơ đồ sao' }, { x: 1210, y: 730, t: 'swipe', n: 'Quẹt thẻ' },
+      { x: 1470, y: 730, t: 'hold', n: 'Tải dữ liệu' }, { x: 750, y: 590, t: 'wires', n: 'Nối dây' }, { x: 800, y: 1110, t: 'simon', n: 'Phân tích mẫu' },
+      { x: 560, y: 920, t: 'code', n: 'Nhập mã mẫu' }, { x: 90, y: 930, t: 'simon', n: 'Khởi động lò' }, { x: 390, y: 1250, t: 'hold', n: 'Đổ nhiên liệu' },
+      { x: 110, y: 1510, t: 'swipe', n: 'Căn chỉnh động cơ' }, { x: 590, y: 1310, t: 'wires', n: 'Nối dây' }, { x: 850, y: 1310, t: 'sw', n: 'Hiệu chỉnh cầu dao' },
+      { x: 1410, y: 1130, t: 'hold', n: 'Đổ nhiên liệu' }, { x: 1050, y: 1130, t: 'wires', n: 'Nối dây' }, { x: 1830, y: 1510, t: 'hold', n: 'Tải dữ liệu' },
+      { x: 2290, y: 1130, t: 'hex', n: 'Kích hoạt khiên' }, { x: 2470, y: 1510, t: 'code', n: 'Kiểm tra tàu con' }, { x: 2830, y: 1190, t: 'wires', n: 'Nối dây' },
+    ] },
+  // trạm nghiên cứu ở vùng cực: ba dãy phòng, sảnh họp ở giữa
+  { id: 'polar', name: 'Trạm Băng Hà', icon: '🧊', W: 2800, H: 1760,
+    rooms: [
+      { id: 'lab', name: 'Thí Nghiệm', r: [150, 120, 420, 300], col: '#4a7468' },
+      { id: 'comms', name: 'Liên Lạc', r: [800, 100, 360, 280], col: '#5d6e7e' },
+      { id: 'office', name: 'Văn Phòng', r: [1400, 100, 380, 300], col: '#55708a' },
+      { id: 'o2', name: 'Oxy', r: [2000, 120, 320, 280], col: '#4f7d54' },
+      { id: 'drill', name: 'Giàn Khoan', r: [2450, 120, 300, 360], col: '#6e5246' },
+      { id: 'react', name: 'Lò Sưởi', r: [100, 650, 380, 420], col: '#7d4552' },
+      { id: 'cold', name: 'Kho Lạnh', r: [650, 650, 330, 380], col: '#4d6f8f' },
+      { id: 'hall', name: 'Sảnh Chính', r: [1150, 650, 500, 420], col: '#56658a' },
+      { id: 'med', name: 'Y Tế', r: [1830, 650, 330, 320], col: '#3f7f80' },
+      { id: 'garage', name: 'Nhà Xe', r: [2300, 650, 420, 440], col: '#5b6170' },
+      { id: 'elec', name: 'Điện', r: [150, 1300, 360, 340], col: '#7d6d36' },
+      { id: 'dorm', name: 'Ký Túc Xá', r: [700, 1250, 420, 380], col: '#6a5080' },
+      { id: 'green', name: 'Nhà Kính', r: [1300, 1300, 400, 360], col: '#4c7a3e' },
+      { id: 'admin', name: 'Điều Hành', r: [1880, 1250, 340, 320], col: '#4f5f92' },
+      { id: 'dock', name: 'Bến Tàu', r: [2380, 1300, 360, 380], col: '#6f6853' },
+    ],
+    halls: [[560, 220, 250, 90], [1150, 200, 260, 90], [1770, 220, 240, 90], [2310, 220, 150, 90],
+      [250, 410, 90, 250], [850, 370, 90, 290], [1500, 390, 90, 270], [2050, 390, 90, 270], [2550, 470, 90, 190],
+      [470, 800, 190, 90], [970, 820, 190, 90], [1640, 780, 200, 90], [2150, 760, 160, 90],
+      [250, 1060, 90, 250], [800, 1020, 90, 240], [1420, 1060, 90, 250], [1950, 960, 90, 300], [2500, 1080, 90, 230],
+      [500, 1420, 210, 90], [1110, 1420, 200, 90], [1690, 1380, 200, 90], [2210, 1400, 180, 90]],
+    obst: [
+      [1360, 795, 80, 50, 0, 'btn'], [1200, 700, 90, 60, 0, 'table'], [1510, 700, 90, 60, 0, 'table'], [1200, 960, 90, 60, 0, 'table'], [1510, 960, 90, 60, 0, 'table'],
+      [230, 800, 120, 120, 1, 'core'], [200, 210, 160, 40, 0, 'console'], [400, 300, 120, 24, 1, 'shelf'],
+      [700, 720, 90, 90, 1, 'crate'], [860, 900, 80, 80, 1, 'crate'], [880, 160, 140, 60, 0, 'console'],
+      [1460, 170, 100, 60, 0, 'table'], [1640, 170, 100, 60, 0, 'table'], [2080, 200, 160, 40, 0, 'plant'],
+      [2520, 200, 160, 120, 1, 'engine'], [1880, 720, 120, 50, 0, 'bed'], [2420, 800, 200, 140, 1, 'ship'],
+      [260, 1380, 20, 180, 1, 'wall'], [760, 1320, 120, 50, 0, 'bed'], [960, 1320, 120, 50, 0, 'bed'],
+      [1340, 1360, 60, 160, 0, 'plant'], [1600, 1360, 60, 160, 0, 'plant'], [1960, 1320, 180, 60, 0, 'console'], [2560, 1460, 80, 60, 1, 'crate'],
+    ],
+    vents: [[190, 390, 0], [440, 1020, 0], [190, 1600, 0],
+      [1110, 340, 1], [1740, 360, 1], [2280, 360, 1], [2620, 440, 1],
+      [940, 1000, 2], [1080, 1590, 2], [1660, 1620, 2],
+      [2120, 920, 3], [2680, 1050, 3], [2700, 1640, 3], [2180, 1530, 3]],
+    button: { x: 1400, y: 820 },
+    fix: { lights: { x: 470, y: 1600 }, reactor: { x: 430, y: 700 }, o2a: { x: 2270, y: 170 }, o2b: { x: 1920, y: 1530 } },
+    tasks: [
+      { x: 190, y: 160, t: 'simon', n: 'Phân tích mẫu băng' }, { x: 530, y: 390, t: 'code', n: 'Nhập mã mẫu' },
+      { x: 840, y: 340, t: 'wires', n: 'Nối dây' }, { x: 1120, y: 140, t: 'hold', n: 'Tải dữ liệu' },
+      { x: 1440, y: 360, t: 'swipe', n: 'Quẹt thẻ' }, { x: 1740, y: 140, t: 'hold', n: 'Tải báo cáo' },
+      { x: 2040, y: 360, t: 'code', n: 'Nhập mã lọc khí' }, { x: 2490, y: 160, t: 'hold', n: 'Đổ nhiên liệu' }, { x: 2710, y: 440, t: 'hex', n: 'Phá băng mũi khoan' },
+      { x: 140, y: 690, t: 'simon', n: 'Khởi động lò' }, { x: 140, y: 1030, t: 'hold', n: 'Nạp nhiên liệu lò' },
+      { x: 940, y: 690, t: 'hold', n: 'Kiểm kê kho' }, { x: 690, y: 990, t: 'wires', n: 'Nối dây' },
+      { x: 1190, y: 1030, t: 'swipe', n: 'Quẹt thẻ' }, { x: 1610, y: 1030, t: 'hold', n: 'Đổ rác' },
+      { x: 2120, y: 690, t: 'hold', n: 'Khám sức khoẻ' }, { x: 1870, y: 930, t: 'simon', n: 'Phân tích máu' },
+      { x: 2680, y: 690, t: 'swipe', n: 'Căn chỉnh xe tuyết' }, { x: 2340, y: 1050, t: 'wires', n: 'Nối dây' },
+      { x: 190, y: 1340, t: 'sw', n: 'Hiệu chỉnh cầu dao' }, { x: 470, y: 1340, t: 'wires', n: 'Nối dây' },
+      { x: 740, y: 1590, t: 'hold', n: 'Dọn giường' }, { x: 1080, y: 1290, t: 'code', n: 'Đặt báo thức' },
+      { x: 1500, y: 1340, t: 'hold', n: 'Tưới cây' }, { x: 1460, y: 1620, t: 'hex', n: 'Diệt sâu bọ' },
+      { x: 2180, y: 1290, t: 'code', n: 'Nhập toạ độ' }, { x: 2700, y: 1340, t: 'hex', n: 'Kích hoạt khiên' }, { x: 2420, y: 1640, t: 'hold', n: 'Bốc hàng' },
+    ] },
+  // tàu ngầm: thân dài, buồng lái mũi bên trái, lò hạt nhân đuôi bên phải
+  { id: 'sub', name: 'Tàu Ngầm', icon: '🌊', W: 2400, H: 1400,
+    rooms: [
+      { id: 'bridge', name: 'Buồng Lái', r: [80, 520, 340, 360], col: '#4f5f92' },
+      { id: 'sonar', name: 'Sonar', r: [560, 120, 320, 280], col: '#3d5f86' },
+      { id: 'torp', name: 'Ngư Lôi', r: [560, 1000, 320, 280], col: '#7c6045' },
+      { id: 'store', name: 'Kho', r: [600, 560, 260, 280], col: '#6f6853' },
+      { id: 'mess', name: 'Nhà Ăn', r: [1000, 480, 440, 440], col: '#56658a' },
+      { id: 'quarters', name: 'Phòng Ngủ', r: [1040, 80, 360, 280], col: '#6a5080' },
+      { id: 'med', name: 'Y Tế', r: [1040, 1060, 360, 260], col: '#3f7f80' },
+      { id: 'o2', name: 'Oxy', r: [1560, 120, 300, 260], col: '#4f7d54' },
+      { id: 'elec', name: 'Điện', r: [1560, 1040, 300, 280], col: '#7d6d36' },
+      { id: 'react', name: 'Lò Hạt Nhân', r: [1980, 480, 340, 440], col: '#7d4552' },
+    ],
+    halls: [[410, 650, 200, 90], [850, 660, 160, 90], [250, 300, 90, 230], [250, 230, 320, 90], [250, 870, 90, 260], [250, 1080, 320, 90],
+      [870, 200, 180, 90], [870, 1140, 180, 90], [1180, 350, 90, 140], [1180, 910, 90, 160], [1390, 200, 180, 90], [1390, 1150, 180, 90],
+      [1720, 370, 90, 220], [1720, 520, 270, 90], [1720, 820, 90, 230], [1720, 800, 270, 90], [1430, 670, 560, 90]],
+    obst: [
+      [1180, 675, 80, 50, 0, 'btn'], [1060, 560, 90, 60, 0, 'table'], [1290, 560, 90, 60, 0, 'table'], [1060, 810, 90, 60, 0, 'table'], [1290, 810, 90, 60, 0, 'table'],
+      [2090, 650, 120, 120, 1, 'core'], [1100, 190, 100, 50, 0, 'bed'], [1260, 190, 100, 50, 0, 'bed'], [120, 620, 50, 120, 0, 'console'],
+      [700, 200, 60, 60, 1, 'scope'], [620, 1080, 60, 140, 1, 'crate'], [640, 600, 80, 80, 1, 'crate'], [1600, 1100, 120, 50, 0, 'console'],
+      [1080, 1130, 120, 50, 0, 'bed'], [1600, 180, 200, 40, 0, 'plant'], [260, 760, 120, 24, 1, 'shelf'],
+    ],
+    vents: [[130, 840, 0], [610, 360, 0], [600, 1250, 0],
+      [820, 800, 1], [1400, 880, 1], [1370, 1290, 1],
+      [1830, 350, 2], [2280, 520, 2], [1830, 1070, 2], [1370, 320, 2]],
+    button: { x: 1220, y: 700 },
+    fix: { lights: { x: 1820, y: 1280 }, reactor: { x: 2280, y: 880 }, o2a: { x: 1600, y: 340 }, o2b: { x: 380, y: 560 } },
+    tasks: [
+      { x: 120, y: 560, t: 'code', n: 'Nhập toạ độ' }, { x: 380, y: 840, t: 'hold', n: 'Tải hải đồ' },
+      { x: 840, y: 160, t: 'simon', n: 'Dò sóng âm' }, { x: 840, y: 360, t: 'wires', n: 'Nối dây' },
+      { x: 840, y: 1240, t: 'hold', n: 'Nạp ngư lôi' }, { x: 840, y: 1040, t: 'swipe', n: 'Căn chỉnh ống phóng' },
+      { x: 820, y: 600, t: 'wires', n: 'Nối dây' }, { x: 700, y: 800, t: 'hold', n: 'Kiểm kê kho' },
+      { x: 1400, y: 520, t: 'hold', n: 'Đổ rác' }, { x: 1040, y: 880, t: 'swipe', n: 'Quẹt thẻ' },
+      { x: 1080, y: 320, t: 'hold', n: 'Dọn giường' }, { x: 1380, y: 250, t: 'code', n: 'Đặt báo thức' },
+      { x: 1360, y: 1100, t: 'hold', n: 'Khám sức khoẻ' }, { x: 1080, y: 1290, t: 'simon', n: 'Phân tích mẫu' },
+      { x: 1600, y: 280, t: 'code', n: 'Nhập mã lọc khí' }, { x: 1830, y: 150, t: 'hold', n: 'Thay bình oxy' },
+      { x: 1600, y: 1290, t: 'sw', n: 'Hiệu chỉnh cầu dao' }, { x: 1830, y: 1180, t: 'wires', n: 'Nối dây' },
+      { x: 2020, y: 520, t: 'simon', n: 'Khởi động lò' }, { x: 2280, y: 700, t: 'hex', n: 'Làm mát lõi' }, { x: 2020, y: 880, t: 'hold', n: 'Đổ nhiên liệu' },
+    ] },
 ];
-const HALLS = [[410, 220, 160, 90], [850, 200, 160, 90], [1630, 200, 180, 90], [2130, 180, 180, 90], [2480, 330, 90, 300], [2480, 600, 170, 90],
-  [2050, 600, 120, 90], [1880, 390, 90, 160], [1300, 530, 100, 180], [1250, 930, 90, 180], [2200, 770, 90, 340], [2700, 910, 90, 260],
-  [2310, 1220, 140, 90], [1850, 1300, 160, 90], [1430, 1380, 140, 90], [870, 1360, 160, 90], [410, 1360, 160, 90], [160, 950, 90, 280],
-  [160, 390, 90, 180], [350, 640, 180, 90], [600, 790, 90, 100], [640, 1130, 90, 160], [830, 870, 360, 70], [620, 370, 90, 200]];
-const WALK = [...ROOMS.map(r => r.r), ...HALLS];
-const MAP_W = 3000, MAP_H = 1640;
-// vật cản: [x, y, rộng, cao, cao tới trần (che tầm nhìn), kiểu]
-const OBST = [
-  [1280, 285, 80, 50, 0, 'btn'], [1105, 170, 90, 60, 0, 'table'], [1445, 170, 90, 60, 0, 'table'], [1105, 400, 90, 60, 0, 'table'], [1445, 400, 90, 60, 0, 'table'],
-  [600, 250, 120, 50, 0, 'bed'], [160, 180, 160, 120, 1, 'engine'], [160, 1300, 160, 120, 1, 'engine'], [140, 700, 120, 120, 1, 'core'],
-  [1100, 1180, 100, 100, 1, 'crate'], [1300, 1300, 90, 140, 1, 'crate'], [1120, 1400, 80, 80, 1, 'crate'], [760, 1380, 20, 200, 1, 'wall'],
-  [1270, 790, 140, 70, 0, 'console'], [2860, 680, 50, 120, 0, 'console'], [2100, 1200, 120, 100, 0, 'console'], [2560, 1260, 200, 140, 1, 'ship'],
-  [2700, 1440, 80, 60, 1, 'crate'], [520, 990, 200, 24, 1, 'shelf'], [1600, 1460, 120, 50, 0, 'console'], [2420, 150, 60, 60, 1, 'scope'],
-  [1940, 200, 80, 80, 0, 'console'], [1830, 680, 200, 40, 0, 'plant'], [2200, 560, 60, 160, 0, 'plant'], [2340, 560, 60, 160, 0, 'plant'], [540, 600, 120, 40, 0, 'console'],
-];
+// bản đồ đang dùng (useMap đổi tất cả các biến này)
+let MAP_I = 0, mapVer = 0, ROOMS, HALLS, WALK, MAP_W, MAP_H, OBST, VENTS, BUTTON, FIX, TASKS, GW, GH, GRID;
 // lưới 10px: 0 ngoài tàu · 1 sàn · 2 vật thấp · 3 vật cao (che tầm nhìn)
-const GC = 10, GW = MAP_W / GC, GH = MAP_H / GC, GRID = new Uint8Array(GW * GH);
-for (const r of WALK) for (let j = r[1] / GC; j < (r[1] + r[3]) / GC; j++) for (let i = r[0] / GC; i < (r[0] + r[2]) / GC; i++) GRID[j * GW + i] = 1;
-// vật vẽ nhô mặt trên lên trên chân vật (vật cao 30px, vật thấp 12px) → chiếm cả phần đó: không đi lên mặt bàn được,
-// bóng tối đổ từ đúng mép vật nhìn thấy
-for (const o of OBST) for (let j = o[5] === 'btn' ? o[1] / GC : Math.floor((o[1] - (o[4] ? 30 : 12) + 5) / GC); j < (o[1] + o[3]) / GC; j++) for (let i = o[0] / GC; i < (o[0] + o[2]) / GC; i++) {
-  if (j < o[1] / GC && GRID[j * GW + i] !== 1) continue; // phần mặt trên nhô lên chỉ chiếm sàn, không đè tường
-  GRID[j * GW + i] = o[4] ? 3 : 2;
-}
+const GC = 10;
 const cellAt = (x, y) => (x < 0 || y < 0 || x >= MAP_W || y >= MAP_H ? 0 : GRID[((y / GC) | 0) * GW + ((x / GC) | 0)]);
 const inRect = (x, y, r) => x >= r[0] && x <= r[0] + r[2] && y >= r[1] && y <= r[1] + r[3];
 const walkable = (x, y) => cellAt(x, y) === 1;
@@ -553,32 +684,14 @@ function losClear(a, b) {
 }
 const roomAt = (x, y) => ROOMS.find(r => inRect(x, y, r.r));
 function roomName(x, y) { const r = roomAt(x, y); if (r) return r.name; let best = null, bd = 1e9; for (const q of ROOMS) { const d = Math.hypot(q.r[0] + q.r[2] / 2 - x, q.r[1] + q.r[3] / 2 - y); if (d < bd) { bd = d; best = q; } } return 'hành lang gần ' + best.name; }
-const VENTS = [[620, 1520, 0], [740, 760, 0], [800, 330, 0], [1010, 905, 0], [2080, 350, 1], [2550, 300, 1], [2700, 860, 1], [100, 600, 2], [380, 140, 2], [380, 1500, 2],
-  [1460, 900, 3], [1060, 500, 3], [1060, 1500, 3], [2280, 1360, 4], [2820, 1500, 4], [2400, 740, 4]]; // [x, y, nhóm nối với nhau]
-const BUTTON = { x: 1320, y: 310 }; // bàn họp khẩn cấp
-// chỗ sửa phá hoại (trạm); cạn oxy phải sửa ở cả hai trạm
-const FIX = { lights: { x: 820, y: 1530, room: 'Điện' }, reactor: { x: 310, y: 900, room: 'Lò Phản Ứng' }, o2a: { x: 2000, y: 590, room: 'Oxy' }, o2b: { x: 1210, y: 880, room: 'Hành Chính' } };
 const SABO_FIX = { lights: ['lights'], reactor: ['reactor'], o2: ['o2a', 'o2b'] };
 const SABO_KINDS = ['lights', 'reactor', 'o2'], O2_T = 40, SHOOT_CD = 15, SHOOT_RANGE = 170; // súng bắn xa hơn dao (KILL_RANGE) nhưng vẫn phải thấy rõ
 const FIX_ICON = { lights: '💡', reactor: '☢️', o2a: '🫁', o2b: '🫁' };
 const timedSabo = () => !!sabo && (sabo.kind === 'reactor' || sabo.kind === 'o2'); // phá hoại có đếm ngược, hết giờ thì thua
 const saboT0 = kind => (kind === 'o2' ? O2_T : REACTOR_T);
 const saboLeft = () => (sabo ? sabo.left || SABO_FIX[sabo.kind] : []); // trạm còn phải sửa
-const saboMsg = kind => (kind === 'lights' ? '💡 Mất điện! Phi hành đoàn chỉ thấy rất gần. Sửa ở phòng Điện.' : kind === 'o2' ? `🫁 Cạn oxy! Nhập mã ở cả phòng Oxy và Hành Chính trong ${O2_T} giây!` : '☢️ Lò phản ứng sắp nổ! Tới Lò Phản Ứng sửa trong 30 giây!');
+const saboMsg = kind => (kind === 'lights' ? `💡 Mất điện! Phi hành đoàn chỉ thấy rất gần. Sửa ở phòng ${FIX.lights.room}.` : kind === 'o2' ? `🫁 Cạn oxy! Nhập mã ở cả phòng ${FIX.o2a.room} và ${FIX.o2b.room} trong ${O2_T} giây!` : `☢️ Lò phản ứng sắp nổ! Tới ${FIX.reactor.room} sửa trong ${REACTOR_T} giây!`);
 const fixedMsg = kind => (kind === 'lights' ? '💡 Có điện lại rồi!' : kind === 'o2' ? '🫁 Oxy đã ổn định.' : '☢️ Lò phản ứng đã ổn định.');
-// nhiệm vụ: vị trí, loại mini-game, tên
-const TASKS = [
-  { x: 1040, y: 120, t: 'wires', n: 'Nối dây' }, { x: 1600, y: 510, t: 'hold', n: 'Đổ rác' }, { x: 600, y: 160, t: 'hold', n: 'Khám sức khoẻ' },
-  { x: 380, y: 360, t: 'hold', n: 'Đổ nhiên liệu' }, { x: 120, y: 130, t: 'swipe', n: 'Căn chỉnh động cơ' }, { x: 2100, y: 140, t: 'hex', n: 'Bắn thiên thạch' },
-  { x: 2340, y: 120, t: 'simon', n: 'Chỉnh kính viễn vọng' }, { x: 1830, y: 580, t: 'code', n: 'Nhập mã lọc khí' }, { x: 2410, y: 520, t: 'hold', n: 'Tưới cây' },
-  { x: 2900, y: 600, t: 'code', n: 'Nhập toạ độ' }, { x: 2900, y: 880, t: 'hold', n: 'Tải sơ đồ sao' }, { x: 1210, y: 730, t: 'swipe', n: 'Quẹt thẻ' },
-  { x: 1470, y: 730, t: 'hold', n: 'Tải dữ liệu' }, { x: 750, y: 590, t: 'wires', n: 'Nối dây' }, { x: 800, y: 1110, t: 'simon', n: 'Phân tích mẫu' },
-  { x: 560, y: 920, t: 'code', n: 'Nhập mã mẫu' }, { x: 90, y: 930, t: 'simon', n: 'Khởi động lò' }, { x: 390, y: 1250, t: 'hold', n: 'Đổ nhiên liệu' },
-  { x: 110, y: 1510, t: 'swipe', n: 'Căn chỉnh động cơ' }, { x: 590, y: 1310, t: 'wires', n: 'Nối dây' }, { x: 850, y: 1310, t: 'sw', n: 'Hiệu chỉnh cầu dao' },
-  { x: 1410, y: 1130, t: 'hold', n: 'Đổ nhiên liệu' }, { x: 1050, y: 1130, t: 'wires', n: 'Nối dây' }, { x: 1830, y: 1510, t: 'hold', n: 'Tải dữ liệu' },
-  { x: 2290, y: 1130, t: 'hex', n: 'Kích hoạt khiên' }, { x: 2470, y: 1510, t: 'code', n: 'Kiểm tra tàu con' }, { x: 2830, y: 1190, t: 'wires', n: 'Nối dây' },
-];
-TASKS.forEach((t, k) => { t.id = k; t.room = roomName(t.x, t.y); });
 const COLORS = [['Đỏ', '#c51111'], ['Xanh', '#132ed1'], ['Lục', '#117f2d'], ['Hồng', '#ed54ba'], ['Cam', '#ef7d0d'], ['Vàng', '#f5f557'], ['Đen', '#3f474e'], ['Trắng', '#d6e0f0'], ['Tím', '#6b2fbb'], ['Nâu', '#71491e'], ['Lam', '#38fedc'], ['Chanh', '#50ef39']];
 const BOT_NAMES = ['Tí', 'Sửu', 'Dần', 'Mão', 'Thìn', 'Tỵ', 'Ngọ', 'Mùi', 'Thân', 'Dậu', 'Tuất', 'Hợi'];
 
@@ -588,9 +701,7 @@ function segClear(a, b) {
   for (let k = 0; k <= n; k++) { const t = k / n; if (!canStand(a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t)) return false; }
   return true;
 }
-const PG = 20, PW = MAP_W / PG, PH = MAP_H / PG, PSTAND = new Uint8Array(PW * PH);
-for (let j = 0; j < PH; j++) for (let i = 0; i < PW; i++) PSTAND[j * PW + i] = canStand(i * PG + PG / 2, j * PG + PG / 2) ? 1 : 0;
-const pgG = new Float32Array(PW * PH), pgP = new Int32Array(PW * PH), pgS = new Uint32Array(PW * PH); let pgStamp = 0;
+const PG = 20; let PW, PH, PSTAND, pgG, pgP, pgS, pgStamp = 0;
 function nearCell(x, y) {
   const ci = clamp(Math.floor(x / PG), 0, PW - 1), cj = clamp(Math.floor(y / PG), 0, PH - 1);
   for (let r = 0; r < 8; r++) for (let dj = -r; dj <= r; dj++) for (let di = -r; di <= r; di++) {
@@ -632,6 +743,27 @@ function pathTo(a, b) {
   while (k < pts.length) { let far = k; for (let m = Math.min(pts.length - 1, k + 40); m > k; m--) if (segClear(cur, pts[m])) { far = m; break; } out.push(pts[far]); cur = pts[far]; k = far + 1; }
   return out;
 }
+// đổi bản đồ: dựng lại lưới đi lại / tầm nhìn, lưới tìm đường, toạ độ chỗ sửa và nhiệm vụ (ảnh nền vẽ lại lúc vẽ khung hình sau)
+function useMap(i) {
+  const m = MAPS[i] || MAPS[0]; MAP_I = MAPS.indexOf(m); mapVer++;
+  MAP_W = m.W; MAP_H = m.H; ROOMS = m.rooms; HALLS = m.halls; OBST = m.obst; VENTS = m.vents; BUTTON = m.button;
+  WALK = [...ROOMS.map(r => r.r), ...HALLS];
+  GW = MAP_W / GC; GH = MAP_H / GC; GRID = new Uint8Array(GW * GH);
+  for (const r of WALK) for (let j = r[1] / GC; j < (r[1] + r[3]) / GC; j++) for (let i = r[0] / GC; i < (r[0] + r[2]) / GC; i++) GRID[j * GW + i] = 1;
+  // vật vẽ nhô mặt trên lên trên chân vật (vật cao 30px, vật thấp 12px) → chiếm cả phần đó: không đi lên mặt bàn được,
+  // bóng tối đổ từ đúng mép vật nhìn thấy
+  for (const o of OBST) for (let j = o[5] === 'btn' ? o[1] / GC : Math.floor((o[1] - (o[4] ? 30 : 12) + 5) / GC); j < (o[1] + o[3]) / GC; j++) for (let i = o[0] / GC; i < (o[0] + o[2]) / GC; i++) {
+    if (j < o[1] / GC && GRID[j * GW + i] !== 1) continue; // phần mặt trên nhô lên chỉ chiếm sàn, không đè tường
+    GRID[j * GW + i] = o[4] ? 3 : 2;
+  }
+  FIX = {}; for (const [k, f] of Object.entries(m.fix)) FIX[k] = { x: f.x, y: f.y, room: roomName(f.x, f.y) };
+  TASKS = m.tasks.map((t, k) => Object.assign({}, t, { id: k, room: roomName(t.x, t.y) }));
+  PW = MAP_W / PG; PH = MAP_H / PG; PSTAND = new Uint8Array(PW * PH);
+  for (let j = 0; j < PH; j++) for (let i = 0; i < PW; i++) PSTAND[j * PW + i] = canStand(i * PG + PG / 2, j * PG + PG / 2) ? 1 : 0;
+  pgG = new Float32Array(PW * PH); pgP = new Int32Array(PW * PH); pgS = new Uint32Array(PW * PH); pgStamp = 0;
+}
+useMap(0);
+const pickMap = v => (Number.isInteger(v) && MAPS[v] ? v : Math.floor(Math.random() * MAPS.length)); // 'random' → bốc ngẫu nhiên
 
 // ═══════════════════════════ trạng thái ván ═══════════════════════════
 const SPEED = 175, BOT_SPEED = 140, VIS_CREW = 640, VIS_IMP = 720, VIS_DARK = 140, IDLE_T = 90, KILL_RANGE = 72, KILL_CD = 25, SABO_CD = 30, REACTOR_T = 30, TASK_N = 5, USE_RANGE = 60;
@@ -642,6 +774,9 @@ let setup = Object.assign({ name: '', ci: 0, bots: 7, imps: 2, role: 'random', c
 // online (xem phần "chơi online" cuối file): chủ phòng chạy luật + máy chơi, khách chỉ tự đi lại và gửi hành động lên
 const isHost = () => net.on && net.host, isGuest = () => net.on && !net.host;
 const TIME_OPTS = [[5, '5 phút'], [8, '8 phút'], [12, '12 phút']], TIME_DEF = 8;
+const MAP_OPTS = [...MAPS.map((m, k) => [k, m.icon + ' ' + m.name]), ['random', '🎲 Ngẫu nhiên']];
+const mapChoice = v => (Number.isInteger(v) && MAPS[v] ? v : 'random');
+const mapLabel = v => (Number.isInteger(v) && MAPS[v] ? MAPS[v].icon + ' ' + MAPS[v].name : '🎲 bản đồ ngẫu nhiên');
 const timeMin = () => { const v = net.on ? S.time : setup.time; return TIME_OPTS.some(o => o[0] === v) ? v : TIME_DEF; };
 let gameLeft = 0, timeWarn = 0; // giây chơi còn lại của ván (dừng khi họp)
 let impN = 0, netProg = 0; // số kẻ giả mạo (khách phi hành đoàn không biết là ai) · % nhiệm vụ chủ phòng gửi xuống
@@ -655,6 +790,7 @@ function newPlayer(id, name, ci, bot) {
     sus: {}, saw: [], killCd: 10, sheriff: false, jester: false, ammo: 0, shootCd: SHOOT_CD, vent: -1, ventT: 0, emergency: 1, lastRooms: [], fix: false, remote: false, cid: null, tx: BUTTON.x, ty: BUTTON.y };
 }
 function startGame() {
+  useMap(pickMap(setup.map));
   const n = setup.bots + 1, imps = Math.min(setup.imps, Math.floor((n - 1) / 2));
   const cols = shuffle(COLORS.map((c, k) => k).filter(k => k !== setup.ci)), names = shuffle(BOT_NAMES);
   P = [newPlayer(0, (setup.name || '').trim() || 'Bạn', setup.ci, false)];
@@ -679,11 +815,31 @@ function pickJester(who, avoid) {
   const c = P.filter(p => !p.imp && p !== avoid); if (c.length < 3) return;
   (who && !who.imp ? who : pick(c)).jester = true;
 }
+// chia nhiệm vụ đều: mỗi người 5 nhiệm vụ ở 5 phòng khác nhau, trải khắp tàu (xa nhau), và cả đội phủ đều các phòng —
+// phòng / nhiệm vụ đã có nhiều người nhận thì ít được chọn nữa, nên không dồn cả đám vào một góc
+function dealTasks() {
+  const useT = {}, useR = {}, room = t => roomAt(t.x, t.y) || { id: t.room };
+  for (const p of shuffle(P)) {
+    const got = [];
+    while (got.length < Math.min(TASK_N, TASKS.length)) {
+      const rooms = new Set(got.map(t => room(t).id));
+      let best = null, bs = Infinity;
+      for (const t of TASKS) {
+        if (got.includes(t)) continue;
+        const near = got.length ? Math.min(...got.map(g => dist(g, t))) : 900;
+        const sc = (useT[t.id] || 0) * 2 + (useR[room(t).id] || 0) + (rooms.has(room(t).id) ? 6 : 0) - Math.min(near, 900) / 450 + Math.random() * 1.2;
+        if (sc < bs) { bs = sc; best = t; }
+      }
+      got.push(best); useT[best.id] = (useT[best.id] || 0) + 1; useR[room(best).id] = (useR[room(best).id] || 0) + 1;
+    }
+    p.tasks = got.map(t => ({ id: t.id, done: false }));
+  }
+}
 // chung cho chơi với máy và chủ phòng online: chia nhiệm vụ, xếp chỗ, lộ vai
 function beginRound() {
   impN = P.filter(p => p.imp).length;
   // nhiệm vụ: mỗi người 5 nhiệm vụ khác nhau (kẻ giả mạo có danh sách giả để ngụy trang)
-  for (const p of P) p.tasks = shuffle(TASKS.map(t => t.id)).slice(0, TASK_N).map(id => ({ id, done: false }));
+  dealTasks();
   // xếp quanh bàn Nhà Ăn
   P.forEach((p, k) => { const a = (k / P.length) * Math.PI * 2; place(p, BUTTON.x + Math.cos(a) * 95, BUTTON.y + Math.sin(a) * 70); p.dir = Math.cos(a) < 0 ? 1 : -1; });
   bodies = []; sabo = null; saboCd = 10; meeting = null; winner = null; mapOpen = false; splats.length = 0; fx.length = 0; bodyBorn.clear();
@@ -779,6 +935,10 @@ let joy = null; // {id, x0, y0, dx, dy}
 addEventListener('keydown', e => { keys[e.key.toLowerCase()] = true; if (phase !== 'play' || !$('taskSheet').hidden || !$('meetSheet').hidden) return; const k = e.key.toLowerCase(); if (k === 'e') doUse(); if (k === 'r') doReport(); if (k === 'q') { if (me.sheriff) doShoot(); else doKill(); } if (k === 'v') doVent(); if (k === 'm') toggleMap();
   if (k === 'f') $('bSabo').click(); if (!$('saboPop').hidden && (k === '1' || k === '2' || k === '3')) $(k === '1' ? 'sbLights' : k === '2' ? 'sbReactor' : 'sbO2').click(); });
 // T: bật/tắt mic (mọi lúc khi đang online)
+addEventListener('keydown', e => { // bản đồ lúc họp: M bật/tắt, Esc đóng
+  const k = e.key.toLowerCase(); if (e.repeat || !meeting || $('meetSheet').hidden) return;
+  if (k === 'm') { if ($('mapSheet').hidden) openMeetMap(); else closeMeetMap(); } else if (k === 'escape') closeMeetMap();
+});
 addEventListener('keydown', e => { if (e.key.toLowerCase() === 't' && !e.repeat && net.on && !$('bVoice').hidden) voiceToggle(); });
 addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; });
 const cv = $('cv'), ctx = cv.getContext('2d');
@@ -1014,7 +1174,7 @@ function startMeeting(reporter, body) {
     for (const o of alive()) if (o !== reporter && o !== w && dist(o, body) < 220) { w.sus[o.id] = (w.sus[o.id] || 0) + 25; w.near = w.near || []; w.near.push(o.id); }
     if (reporter !== w) w.sus[reporter.id] = (w.sus[reporter.id] || 0) + 6;
   }
-  if (isHost()) netBroadcast({ t: 'meet', r: reporter.id, v: victim ? victim.id : -1, room, talkT: meeting.talkT, voteT: meeting.voteT, pr: progShown });
+  if (isHost()) netBroadcast({ t: 'meet', r: reporter.id, v: victim ? victim.id : -1, room, bx: body ? Math.round(body.x) : -1, by: body ? Math.round(body.y) : -1, talkT: meeting.talkT, voteT: meeting.voteT, pr: progShown });
   buildChat();
   meetingUi(); syncHud();
 }
@@ -1463,7 +1623,6 @@ function drawObst(x, o) {
   else if (kind === 'ship') { x.fillStyle = '#c8d3e6'; x.beginPath(); x.ellipse(cx, cy, w / 2 - 14, h / 2 - 18, 0, 0, Math.PI * 2); x.fill(); x.fillStyle = '#9fd3ff'; x.beginPath(); x.ellipse(cx + 30, cy - 6, 26, 14, 0, 0, Math.PI * 2); x.fill(); }
   else if (kind === 'scope') { x.fillStyle = '#2b3550'; x.beginPath(); x.arc(cx, cy, 22, 0, Math.PI * 2); x.fill(); x.fillStyle = '#9fd3ff'; x.beginPath(); x.arc(cx, cy, 10, 0, Math.PI * 2); x.fill(); }
 }
-buildMap();
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(buildMap);
 
 // ── hiệu ứng: hạt, vết máu, chớp màn hình ──
@@ -1539,9 +1698,14 @@ function showKillScene(kci, vci, opt = {}) {
 const fogCv = document.createElement('canvas'), fg = fogCv.getContext('2d'), FOG_K = .3, RAYS = 900, RCOS = [], RSIN = [];
 // mặt nạ khoảng trống đi lại được (1 điểm ảnh = 1 ô lưới): bóng tối chỉ phủ lên đó — tường, vũ trụ, đồ vật để nguyên
 const floorCv = document.createElement('canvas');
-{ floorCv.width = GW; floorCv.height = GH; const x = floorCv.getContext('2d'), im = x.createImageData(GW, GH);
+function buildFloor() {
+  floorCv.width = GW; floorCv.height = GH; const x = floorCv.getContext('2d'), im = x.createImageData(GW, GH);
   for (let k = 0; k < GW * GH; k++) if (GRID[k] === 1) { im.data[k * 4] = 3; im.data[k * 4 + 1] = 5; im.data[k * 4 + 2] = 12; im.data[k * 4 + 3] = 255; }
-  x.putImageData(im, 0, 0); }
+  x.putImageData(im, 0, 0);
+}
+// vẽ lại ảnh nền / mặt nạ sàn / minimap khi vừa đổi bản đồ
+let builtVer = -1;
+function ensureMap() { if (builtVer === mapVer) return; builtVer = mapVer; buildMap(); buildFloor(); miniBg = null; }
 const WALL_FACE = 34, WALL_EDGE = 7; // mặt tường phía trên sàn cao 34px; viền tường hai bên / phía dưới ~6–8px
 for (let k = 0; k < RAYS; k++) { RCOS.push(Math.cos(k / RAYS * Math.PI * 2)); RSIN.push(Math.sin(k / RAYS * Math.PI * 2)); }
 // dò tia theo từng ô lưới (DDA): điểm chạm tường chính xác nên mép bóng thẳng và đứng yên khi nhân vật di chuyển
@@ -1589,6 +1753,7 @@ function drawPlayerTop(p, bob, moving) {
 }
 function render() {
   const W = innerWidth, H = innerHeight, d = devicePixelRatio || 1, now = performance.now();
+  ensureMap();
   ctx.setTransform(d, 0, 0, d, 0, 0);
   // nền vũ trụ: tinh vân + sao trôi chậm theo camera (hai lớp)
   const bg = ctx.createRadialGradient(W * .3, H * .2, 0, W * .5, H * .5, Math.max(W, H));
@@ -1728,6 +1893,35 @@ function drawMinimap(W, H) {
   ctx.fillStyle = COLORS[me.ci][1]; ctx.beginPath(); ctx.arc(ox + me.x * k, oy + me.y * k, pr, 0, Math.PI * 2); ctx.fill(); ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke();
 }
 
+// bản đồ lúc họp: mặt bằng, tên phòng, chỗ phát hiện xác, nhiệm vụ của mình — không lộ vị trí người khác
+const mvCv = $('mvCv');
+function openMeetMap() { if (!meeting) return; $('mapSheet').hidden = false; playPop(); }
+function closeMeetMap() { $('mapSheet').hidden = true; }
+function drawMeetMap() {
+  if (!meeting || $('meetSheet').hidden) { closeMeetMap(); return; }
+  const d = devicePixelRatio || 1, W = mvCv.clientWidth, H = mvCv.clientHeight; if (!W || !H) return;
+  if (mvCv.width !== Math.round(W * d) || mvCv.height !== Math.round(H * d)) { mvCv.width = Math.round(W * d); mvCv.height = Math.round(H * d); }
+  const g = mvCv.getContext('2d'), now = performance.now(); g.setTransform(d, 0, 0, d, 0, 0); g.clearRect(0, 0, W, H);
+  const k = Math.min((W - 24) / MAP_W, (H - 24) / MAP_H), ox = (W - MAP_W * k) / 2, oy = (H - MAP_H * k) / 2;
+  paintPlan(g, k, ox, oy);
+  // phòng có xác: nhấp nháy đỏ
+  const rn = String(meeting.room || '').replace(/^hành lang gần /, ''), hot = ROOMS.find(r => r.name === rn);
+  if (hot) { g.fillStyle = `rgba(255,60,60,${.25 + .2 * Math.sin(now / 200)})`; g.fillRect(ox + hot.r[0] * k, oy + hot.r[1] * k, hot.r[2] * k, hot.r[3] * k); }
+  const dot = (x, y, r, col) => { g.fillStyle = col; g.beginPath(); g.arc(ox + x * k, oy + y * k, r, 0, Math.PI * 2); g.fill(); };
+  dot(BUTTON.x, BUTTON.y, 6, '#ff2b2b');
+  g.font = `800 ${clamp(34 * k, 10, 16)}px "Baloo 2", sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.lineWidth = 3; g.strokeStyle = 'rgba(0,0,0,.55)'; g.fillStyle = '#fff';
+  for (const r of ROOMS) { const x = ox + (r.r[0] + r.r[2] / 2) * k, y = oy + (r.r[1] + r.r[3] / 2) * k; g.strokeText(r.name, x, y); g.fillText(r.name, x, y); }
+  if (me.imp) for (const v of VENTS) dot(v[0], v[1], 3.5, '#94a3b8');
+  if (!me.imp) for (const t of me.tasks) if (!t.done) dot(TASKS[t.id].x, TASKS[t.id].y, 5, '#ffd23f');
+  const b = meeting.body;
+  if (b && Number.isFinite(b.x) && b.x >= 0) { g.font = `${clamp(70 * k, 16, 28)}px sans-serif`; g.fillText('💀', ox + b.x * k, oy + b.y * k); }
+  // chú thích
+  g.textAlign = 'left'; g.font = '700 13px "Baloo 2", sans-serif'; g.fillStyle = 'rgba(255,255,255,.75)';
+  g.fillText(meeting.room ? `💀 Xác ở ${meeting.room}` + (me.imp ? ' · chấm xám: ống gió' : ' · chấm vàng: nhiệm vụ của bạn') : (me.imp ? 'Họp khẩn cấp · chấm xám: ống gió' : 'Họp khẩn cấp · chấm vàng: nhiệm vụ của bạn'), 12, H - 12);
+}
+$('mtMap').onclick = openMeetMap;
+$('mvClose').onclick = closeMeetMap;
+$('mapSheet').onclick = e => { if (e.target === $('mapSheet')) closeMeetMap(); };
 // mặt bằng tàu (dùng cho bản đồ lớn và minimap)
 function paintPlan(g, k, ox, oy) {
   g.fillStyle = '#2a3552'; for (const r of WALK) g.fillRect(ox + (r[0] - 6) * k, oy + (r[1] - 6) * k, (r[2] + 12) * k, (r[3] + 12) * k);
@@ -1823,8 +2017,10 @@ function idleHud() {
 // ═══════════════════════════ vòng lặp ═══════════════════════════
 let last = performance.now(), ventKeyT = 0, stepT = 0, sirenT = 0;
 function loop(now) {
+  fpsTick(now);
   tick(now);
   render();
+  if (!$('mapSheet').hidden) drawMeetMap();
   requestAnimationFrame(loop);
 }
 // chủ phòng ẩn tab / bị trình duyệt hãm thì requestAnimationFrame thưa hoặc dừng → vẫn chạy luật bằng bộ đếm giờ,
@@ -1963,6 +2159,7 @@ function renderSetup() {
   seg($('suBots'), [[4, '4'], [5, '5'], [6, '6'], [7, '7'], [8, '8'], [9, '9']], setup.bots, v => { setup.bots = v; if (setup.imps > Math.floor(v / 2)) setup.imps = 1; });
   seg($('suImps'), [[1, '1 kẻ'], [2, '2 kẻ']].filter(([v]) => v <= Math.floor(setup.bots / 2)), setup.imps, v => { setup.imps = v; });
   seg($('suTime'), TIME_OPTS, timeMin(), v => { setup.time = v; });
+  seg($('suMap'), MAP_OPTS, mapChoice(setup.map), v => { setup.map = v; });
   seg($('suRole'), [['random', 'Ngẫu nhiên'], ['crew', 'Phi hành gia'], ['sheriff', 'Cảnh sát'], ['jester', 'Pha Trò'], ['imp', 'Kẻ giả mạo']], setup.role, v => { setup.role = v; });
   $('suSheriff').checked = setup.sheriff !== false; $('suJester').checked = setup.jester !== false;
   $('suConfirm').checked = !!setup.confirm;
@@ -1990,7 +2187,7 @@ $('taskSheet').onclick = e => { if (e.target === $('taskSheet')) closeTask(); };
 const PEERJS_URL = 'https://cdn.jsdelivr.net/npm/peerjs@1.5.5/dist/peerjs.min.js';
 const ROOM_PREFIX = 'kegiamao-vibe-';
 const MAX_P = 10; // tổng người + máy trong một ván
-const freshNet = () => ({ on: false, host: false, code: null, peer: null, conn: null, conns: new Map(), timer: 0, left: false, dup: false, seen: new Map(), heard: 0, hbAt: 0, hbOk: false, hbT: 0, snapAt: 0, posAt: 0, posKey: '', again: 0, kicked: false, banned: new Set() });
+const freshNet = () => ({ on: false, host: false, code: null, peer: null, conn: null, conns: new Map(), timer: 0, left: false, dup: false, seen: new Map(), heard: 0, hbAt: 0, hbOk: false, hbT: 0, snapAt: 0, posAt: 0, posKey: '', rn: 0, snapSq: 0, posSq: 0, rtt: 0, relay: null, rx: 0, rxLo: 0, rxHi: 0, loss: 0, ns: {}, moveAt: 0, again: 0, kicked: false, banned: new Set() });
 const PEER_OPTS = { debug: 0, config: { sdpSemantics: 'unified-plan', iceServers: [
   { urls: ['stun:stun.l.google.com:19302', 'stun:stun.cloudflare.com:3478'] },
   { urls: ['turn:eu-0.turn.peerjs.com:3478', 'turn:us-0.turn.peerjs.com:3478', 'turn:eu-0.turn.peerjs.com:3478?transport=tcp', 'turn:us-0.turn.peerjs.com:3478?transport=tcp'], username: 'peerjs', credential: 'peerjsp' },
@@ -2024,6 +2221,36 @@ function parseCode(s) {
   return /^[a-z0-9]{4,16}$/.test(s) ? s : null;
 }
 function netSend(msg) { if (net.conn && net.conn.open) try { net.conn.send(msg); } catch (e) {} }
+// kênh nhanh: vị trí / ảnh chụp đi trên một kênh dữ liệu riêng KHÔNG gửi lại, KHÔNG xếp hàng (gói mất thì bỏ, gói sau tới
+// ngay) — kênh chính của PeerJS gửi lại đủ và theo thứ tự nên một gói rớt làm cả hàng phía sau chờ → giật cục.
+// Cả hai bên tự tạo kênh cùng số id (negotiated) trên kết nối sẵn có nên không cần bắt tay thêm.
+function fastOpen(c, onMsg) {
+  const pc = c.peerConnection; if (!pc || c._fast) return;
+  try {
+    const ch = pc.createDataChannel('fast', { negotiated: true, id: 100, ordered: false, maxRetransmits: 0 });
+    ch.onmessage = e => { let d; try { d = JSON.parse(e.data); } catch (er) { return; } if (d && typeof d === 'object') onMsg(d); };
+    c._fast = ch;
+  } catch (e) {}
+}
+function fastSend(c, msg) {
+  const ch = c && c._fast;
+  if (ch && ch.readyState === 'open' && ch.bufferedAmount < 65536) { try { ch.send(JSON.stringify(msg)); return; } catch (e) {} }
+  if (c && c.open) try { c.send(msg); } catch (e) {}
+}
+// kết nối đi thẳng giữa hai máy hay phải vòng qua máy chủ trung gian (TURN, ở nước ngoài → trễ hơn nhiều)
+async function pathType(pc) {
+  if (!pc || !pc.getStats) return null;
+  try {
+    const st = await pc.getStats(), by = {}; let pair = null;
+    st.forEach(r => { by[r.id] = r; });
+    st.forEach(r => { if (r.type === 'transport' && r.selectedCandidatePairId) pair = by[r.selectedCandidatePairId]; });
+    if (!pair) st.forEach(r => { if (!pair && r.type === 'candidate-pair' && r.state === 'succeeded' && (r.nominated || r.selected)) pair = r; });
+    if (!pair) return null;
+    const l = by[pair.localCandidateId], rm = by[pair.remoteCandidateId];
+    return (l && l.candidateType === 'relay') || (rm && rm.candidateType === 'relay') ? 'relay' : 'direct';
+  } catch (e) { return null; }
+}
+const smooth = (old, v) => (old ? Math.round(old * 0.6 + v * 0.4) : v);
 function netBroadcast(msg) { for (const c of net.conns.keys()) if (c.open) try { c.send(msg); } catch (e) {} }
 function sendTo(cid, msg) { for (const [c, id] of net.conns) if (id === cid && c.open) try { c.send(msg); } catch (e) {} }
 
@@ -2099,6 +2326,7 @@ function leaveOnline() {
 
 // ── phòng chờ: mọi người đứng quanh bàn họp ──
 function lobbyBeans() {
+  if (Number.isInteger(S.map) && MAPS[S.map] && S.map !== MAP_I) useMap(S.map);
   P = M.filter(m => !m.wait || phase === 'lobby').map((m, k) => Object.assign(newPlayer(k, m.name, m.ci, false), { cid: m.cid }));
   P.forEach((p, k) => { const a = (k / Math.max(1, P.length)) * Math.PI * 2 + 0.6; place(p, BUTTON.x + Math.cos(a) * 110, BUTTON.y + Math.sin(a) * 80); p.dir = Math.cos(a) < 0 ? 1 : -1; });
   me = P.find(p => p.cid === myCid) || P[0] || newPlayer(0, 'Bạn', setup.ci, false);
@@ -2148,16 +2376,17 @@ function renderLobby() {
     seg($('lbBots'), [0, 1, 2, 3, 4, 5, 6, 7, 8].filter(v => v <= MAX_P - humans.length).map(v => [v, String(v)]), nb, v => { S.bots = v; });
     seg($('lbImps'), [[1, '1 kẻ'], [2, '2 kẻ'], [3, '3 kẻ']].filter(([v]) => v === 1 || v <= Math.floor((total - 1) / 2)), S.imps, v => { S.imps = v; });
     seg($('lbTime'), TIME_OPTS, timeMin(), v => { S.time = v; });
+    seg($('lbMap'), MAP_OPTS, mapChoice(S.map), v => { S.map = v; });
     seg($('lbVoice'), [['meet', '🔇 Chỉ khi họp'], ['near', '🔉 Nghe người ở gần']], S.voice, v => { S.voice = v; });
     $('lbConfirm').checked = !!S.confirm; $('lbSheriff').checked = !!S.sheriff; $('lbJester').checked = !!S.jester;
     const guests = humans.filter(m => !m.host), notReady = guests.filter(m => !m.ready).length;
     $('lbStart').disabled = total < 4 || notReady > 0;
-    $('lbHint').textContent = total < 4 ? 'Cần ít nhất 4 người chơi (thêm máy cho đủ cũng được).' : notReady ? `Chờ ${notReady} người bấm Sẵn sàng.` : `${total} người chơi · ${S.imps} Kẻ Giả Mạo${S.sheriff ? ' · có Cảnh sát trưởng' : ''}${S.jester && total >= 6 ? ' · có Kẻ Pha Trò' : ''} · ${timeMin()} phút · sẵn sàng!`;
+    $('lbHint').textContent = total < 4 ? 'Cần ít nhất 4 người chơi (thêm máy cho đủ cũng được).' : notReady ? `Chờ ${notReady} người bấm Sẵn sàng.` : `${total} người chơi · ${S.imps} Kẻ Giả Mạo${S.sheriff ? ' · có Cảnh sát trưởng' : ''}${S.jester && total >= 6 ? ' · có Kẻ Pha Trò' : ''} · ${timeMin()} phút · ${mapLabel(S.map)} · sẵn sàng!`;
   } else {
     const rd = !!(mine && mine.ready);
     $('lbReady').textContent = rd ? '↩️ Chưa xong' : '✅ Sẵn sàng'; $('lbReady').classList.toggle('go', !rd); $('lbReady').disabled = !mine;
     $('lbGuestHint').innerHTML = (rd ? `Đã sẵn sàng · chờ chủ phòng bắt đầu${DOTS}` : 'Chọn tên, màu áo rồi bấm <b>Sẵn sàng</b>.')
-      + `<br>Phòng: ${S.imps} Kẻ Giả Mạo${S.sheriff ? ' · có Cảnh sát trưởng' : ''}${S.jester ? ' · có Kẻ Pha Trò' : ''} · ván ${timeMin()} phút · ${S.voice === 'near' ? 'đang chơi nghe được người ở gần' : 'đang chơi im lặng, nói khi họp'}.`;
+      + `<br>Phòng: ${S.imps} Kẻ Giả Mạo${S.sheriff ? ' · có Cảnh sát trưởng' : ''}${S.jester ? ' · có Kẻ Pha Trò' : ''} · ván ${timeMin()} phút · ${mapLabel(S.map)} · ${S.voice === 'near' ? 'đang chơi nghe được người ở gần' : 'đang chơi im lặng, nói khi họp'}.`;
   }
   paintTalk();
 }
@@ -2205,7 +2434,7 @@ $('lbShare').onclick = () => navigator.share({ title: 'Kẻ Giả Mạo Online',
 async function hostOnline(tries = 0) {
   const code = randCode(), n = startNet(true, code);
   M = [{ cid: myCid, name: myName() || 'Chủ phòng', ci: setup.ci, host: true, ready: true, online: true }];
-  S = Object.assign({}, S, { imps: setup.imps, confirm: setup.confirm, sheriff: setup.sheriff !== false, jester: setup.jester !== false, bots: Math.min(setup.bots, 3), time: TIME_OPTS.some(o => o[0] === setup.time) ? setup.time : TIME_DEF });
+  S = Object.assign({}, S, { imps: setup.imps, confirm: setup.confirm, sheriff: setup.sheriff !== false, jester: setup.jester !== false, bots: Math.min(setup.bots, 3), time: TIME_OPTS.some(o => o[0] === setup.time) ? setup.time : TIME_DEF, map: mapChoice(setup.map) });
   netSheet('🌐', 'Tạo phòng', `Đang tạo phòng${DOTS}`, [[{ label: 'Huỷ', fn: () => leaveOnline() }]]);
   try { await loadPeerJs(); } catch (e) { if (net === n) netFail('Không tải được', 'Không tải được phần chơi online. Kiểm tra mạng rồi thử lại nhé.', () => hostOnline()); return; }
   if (net !== n) return;
@@ -2222,7 +2451,7 @@ async function hostOnline(tries = 0) {
       for (const [c, at] of n.seen) {
         if (slept) n.seen.set(c, now);
         else if (now - at > HB_DROP && (c.hb || !n.conns.has(c))) { n.seen.delete(c); try { c.close(); } catch (e) {} if (c.lost) c.lost(); continue; }
-        if (c.open) try { c.send({ t: 'hb' }); } catch (e) {}
+        if (c.open) try { c.send({ t: 'hb', ts: now }); } catch (e) {}
       }
     }, HB_MS);
     history.replaceState(null, '', location.pathname + location.search + '#room=' + code);
@@ -2233,13 +2462,19 @@ async function hostOnline(tries = 0) {
   peer.on('connection', c => {
     if (net !== n) return c.close();
     n.seen.set(c, Date.now());
+    // đếm số tin gửi theo kênh chính: ảnh chụp kênh nhanh mang số này để khách bỏ ảnh cũ hơn tin đã nhận
+    const send0 = c.send.bind(c); c.send = m => { c._n = (c._n || 0) + 1; return send0(m); };
     c.on('data', d => {
       if (net !== n) return;
       if (n.seen.has(c)) n.seen.set(c, Date.now());
-      if (d && d.t === 'hb') { c.hb = true; try { c.send({ t: 'hbr' }); } catch (e) {} return; }
-      if (d && d.t === 'hbr') return;
+      if (d && d.t === 'hb') { c.hb = true; try { c.send({ t: 'hbr', ts: d.ts }); } catch (e) {} return; }
+      if (d && d.t === 'hbr') { const r = Date.now() - d.ts; if (r >= 0 && r < 30000) c._rtt = smooth(c._rtt, r); return; }
       hostMsg(c, d);
     });
+    const fastIn = d => {
+      if (net !== n || d.t !== 'pos') return;
+      if (n.seen.has(c)) n.seen.set(c, Date.now()); hostMsg(c, d);
+    };
     const lost = c.lost = () => {
       n.seen.delete(c);
       if (net !== n || !n.conns.has(c)) return;
@@ -2248,7 +2483,7 @@ async function hostOnline(tries = 0) {
       memberLost(cid);
     };
     c.on('close', lost); c.on('error', lost);
-    c.on('open', () => watchIce(c, () => { try { c.close(); } catch (e) {} lost(); }));
+    c.on('open', () => { fastOpen(c, fastIn); watchIce(c, () => { try { c.close(); } catch (e) {} lost(); }); });
   });
   peer.on('disconnected', () => { setTimeout(() => { if (net === n && !peer.destroyed && peer.disconnected) peer.reconnect(); }, 1500); });
   peer.on('error', err => {
@@ -2330,14 +2565,17 @@ function hostMsg(c, d) {
     case 'color': if (phase === 'lobby' && okColor(d.c) && freeColor(d.c, cid) === d.c) { m.ci = d.c; } roomChanged(); return;
     case 'ready': if (phase === 'lobby') { m.ready = !!d.v; roomChanged(); } return;
     case 'vc': Object.assign(m, { vc: !!d.on, mic: !!d.mic, pid: c.peer }); roomChanged(); return;
+    case 'nr': m.nr = { rtt: d.rtt | 0, relay: d.relay === 'relay' || d.relay === 'direct' ? d.relay : null, vc: Array.isArray(d.vc) ? d.vc.slice(0, 2).map(v => v | 0) : null, fps: clamp(d.fps | 0, -1, 240), loss: d.loss | 0, hear: Array.isArray(d.hear) ? d.hear.filter(x => typeof x === 'string').slice(0, 12) : [] }; return;
     case 'bye': if (phase === 'lobby') { net.conns.delete(c); M = M.filter(x => x !== m); roomChanged(); } else { net.conns.delete(c); memberLost(cid); } return;
   }
   if (!p) return;
   const num = v => (typeof v === 'number' && isFinite(v) ? v : null);
   if (d.t === 'pos') {
+    if (d.sq) { if (!(d.sq > (c._psq || 0))) return; c._psq = d.sq; } // kênh nhanh không theo thứ tự: bỏ gói cũ
     if (phase !== 'play') return;
     const x = num(d.x), y = num(d.y); if (x === null || y === null) return;
     p.tx = clamp(x, 0, MAP_W); p.ty = clamp(y, 0, MAP_H); p.dir = d.d < 0 ? -1 : 1; p.vx = d.m ? SPEED : 0; p.vy = 0;
+    p.rvx = clamp(num(d.vx) || 0, -SPEED * 1.3, SPEED * 1.3); p.rvy = clamp(num(d.vy) || 0, -SPEED * 1.3, SPEED * 1.3); p.rAt = performance.now();
     const v = p.imp && !p.dead && Number.isInteger(d.v) && d.v >= 0 && d.v < VENTS.length ? d.v : -1;
     if ((v >= 0) !== (p.vent >= 0)) { p.vent = v; if (v >= 0) place(p, VENTS[v][0], VENTS[v][1]); witnessVent(p); } else p.vent = v;
     return;
@@ -2365,6 +2603,7 @@ function hostStartGame() {
   const humans = M.filter(m => m.online !== false);
   const total = humans.length + S.bots; if (total < 4 || humans.some(m => !m.host && !m.ready)) return;
   M = humans; M.forEach(m => { m.wait = false; });
+  useMap(pickMap(S.map));
   P = humans.map((m, k) => Object.assign(newPlayer(k, m.name, m.ci, false), { cid: m.cid, remote: k > 0 }));
   const cols = shuffle(COLORS.map((c, k) => k).filter(k => !humans.some(m => m.ci === k)));
   const names = shuffle(BOT_NAMES.filter(n => !humans.some(m => m.name.toLowerCase() === n.toLowerCase())));
@@ -2388,22 +2627,23 @@ function hostToLobby() {
 function fullFor(p) {
   const see = p.imp || p.dead || phase === 'over', m = meeting;
   return {
-    t: 'full', id: p.id, ph: phase, S, impN,
+    t: 'full', id: p.id, ph: phase, S, impN, mp: MAP_I,
     P: P.map(q => ({ id: q.id, name: q.name, ci: q.ci, cid: q.cid, imp: see && q.imp, dead: q.dead, ej: q.ejected, x: Math.round(q.x), y: Math.round(q.y), dir: q.dir })),
     tasks: p.tasks, em: p.emergency, kc: p.killCd, sh: p.sheriff ? 1 : 0, jt: p.jester ? 1 : 0, am: p.ammo, scd: p.shootCd, sabo: sabo ? { kind: sabo.kind, t: sabo.t, left: saboLeft() } : null, sc: saboCd,
     b: bodies.map(b => [b.id, Math.round(b.x), Math.round(b.y)]), pr: hostPct(), gl: gameLeft,
-    m: m ? { pr: progShown, r: m.reporter.id, v: m.victim ? m.victim.id : -1, room: m.room, t: m.t, phaseV: m.phaseV === 'done' ? 'vote' : m.phaseV, talkT: m.talkT, voteT: m.voteT, voted: Object.keys(m.votes).map(Number), my: m.votes[p.id] } : null,
+    m: m ? { pr: progShown, r: m.reporter.id, v: m.victim ? m.victim.id : -1, room: m.room, bx: m.body ? Math.round(m.body.x) : -1, by: m.body ? Math.round(m.body.y) : -1, t: m.t, phaseV: m.phaseV === 'done' ? 'vote' : m.phaseV, talkT: m.talkT, voteT: m.voteT, voted: Object.keys(m.votes).map(Number), my: m.votes[p.id] } : null,
   };
 }
 const realPct = () => (taskTotal() ? Math.round(taskDone() / taskTotal() * 100) : 0);
 const hostPct = () => (phase === 'over' ? realPct() : progShown);
 function hostSnap() {
   const imps = P.filter(q => q.imp).map(q => q.id);
-  const base = { t: 's', p: P.map(q => [Math.round(q.x), Math.round(q.y), q.dir, Math.hypot(q.vx, q.vy) > 5 ? 1 : 0, q.dead ? 1 : 0, q.vent >= 0 ? 1 : 0]),
+  net.snapSq++;
+  const base = { t: 's', sq: net.snapSq, p: P.map(q => { const [vx, vy] = netVel(q); return [Math.round(q.x), Math.round(q.y), q.dir, Math.hypot(q.vx, q.vy) > 5 ? 1 : 0, q.dead ? 1 : 0, q.vent >= 0 ? 1 : 0, Math.round(vx), Math.round(vy)]; }),
     b: bodies.map(b => [b.id, Math.round(b.x), Math.round(b.y)]), sb: sabo ? [sabo.kind, Math.round(sabo.t * 10) / 10, saboLeft()] : 0, pr: hostPct(), gl: Math.round(gameLeft * 10) / 10 };
   for (const [c, cid] of net.conns) {
     const p = P.find(q => q.cid === cid); if (!p || !c.open) continue;
-    try { c.send(Object.assign({}, base, { kc: Math.round(p.killCd * 10) / 10, em: p.emergency, sc: Math.round(saboCd), im: p.imp || p.dead ? imps : undefined })); } catch (e) {}
+    fastSend(c, Object.assign({}, base, { n: c._n || 0, kc: Math.round(p.killCd * 10) / 10, em: p.emergency, sc: Math.round(saboCd), im: p.imp || p.dead ? imps : undefined }));
   }
 }
 
@@ -2433,6 +2673,12 @@ async function joinOnline(code, again = 0) {
       clearTimeout(n.timer);
       n.conn = c;
       c.send({ t: 'hello', cid: myCid, name: myName(), ci: setup.ci });
+      fastOpen(c, d => {
+        if (net !== n || n.conn !== c || d.t !== 's' || !(d.sq > n.snapSq)) return;
+        n.rx++; if (!n.rxLo) n.rxLo = d.sq; n.rxHi = d.sq; n.snapSq = d.sq;
+        if ((d.n | 0) < n.rn) return; // chụp trước một tin kênh chính mình đã nhận → cũ, bỏ
+        n.heard = Date.now(); guestMsg(d);
+      });
       n.heard = n.hbAt = Date.now();
       n.hbT = setInterval(() => {
         if (net !== n || n.conn !== c) return clearInterval(n.hbT);
@@ -2440,15 +2686,16 @@ async function joinOnline(code, again = 0) {
         if (now - n.hbAt > HB_DEAD) n.heard = now;
         n.hbAt = now;
         if (n.hbOk && now - n.heard > HB_DEAD) { try { c.close(); } catch (e) {} lost(); return; }
-        netSend({ t: 'hb' });
+        netSend({ t: 'hb', ts: now });
       }, HB_MS);
       watchIce(c, () => { try { c.close(); } catch (e) {} lost(); });
     });
     c.on('data', d => {
       if (net !== n || n.conn !== c) return;
-      n.heard = Date.now();
-      if (d && d.t === 'hb') { netSend({ t: 'hbr' }); return; }
-      if (d && d.t === 'hbr') { n.hbOk = true; return; }
+      n.heard = Date.now(); n.rn++;
+      if (d && d.t === 'hb') { netSend({ t: 'hbr', ts: d.ts }); return; }
+      if (d && d.t === 'hbr') { n.hbOk = true; const r = Date.now() - d.ts; if (r >= 0 && r < 30000) n.rtt = smooth(n.rtt, r); return; }
+      if (d && d.t === 's') { if (d.sq < n.snapSq) return; n.snapSq = d.sq; } // ảnh chụp đi đường kênh chính (kênh nhanh chưa mở)
       guestMsg(d);
     });
     const lost = () => {
@@ -2477,7 +2724,7 @@ function netWake() {
   if (p && !p.destroyed && p.disconnected) try { p.reconnect(); } catch (e) {}
   if (net.host || !net.conn) return;
   const now = Date.now(); net.hbAt = now; net.heard = Math.max(net.heard, now - HB_DEAD + 4000);
-  netSend({ t: 'hb' });
+  netSend({ t: 'hb', ts: now });
 }
 document.addEventListener('visibilitychange', () => { if (!document.hidden) netWake(); });
 window.addEventListener('online', netWake);
@@ -2506,6 +2753,7 @@ function guestMsg(d) {
       return;
     }
     case 'bye': net.left = true; return;
+    case 'ns': if (d.L && typeof d.L === 'object') { net.ns = d.L; if (!$('nstat').hidden) renderNet(); } return;
     case 'room': {
       if (!Array.isArray(d.M)) return;
       M = d.M; if (d.S) S = d.S;
@@ -2571,6 +2819,7 @@ function guestMsg(d) {
 function applyFull(d) {
   if (!Array.isArray(d.P) || !d.P[d.id]) return;
   S = d.S || S; impN = d.impN || 0; myId = d.id;
+  if (Number.isInteger(d.mp) && MAPS[d.mp] && d.mp !== MAP_I) useMap(d.mp);
   P = d.P.map(q => { const p = Object.assign(newPlayer(q.id, q.name, q.ci, false), { cid: q.cid, imp: !!q.imp, dead: !!q.dead, ejected: !!q.ej, dir: q.dir || 1 }); place(p, q.x, q.y); return p; });
   me = P[d.id];
   me.tasks = Array.isArray(d.tasks) ? d.tasks : []; me.emergency = d.em | 0; me.killCd = +d.kc || 0;
@@ -2595,7 +2844,7 @@ function guestMeeting(d) {
   if (timedSabo()) sabo = null;
   const reporter = P[d.r] || me, victim = d.v >= 0 ? P[d.v] : null;
   if (Number.isInteger(d.pr)) netProg = d.pr;
-  meeting = { reporter, body: victim ? { id: victim.id } : null, victim, room: d.room, t: +d.t || 0, votes: {}, acc: {}, lines: [], phaseV: d.phaseV || 'talk', talkT: d.talkT || 25, voteT: d.voteT || 45 };
+  meeting = { reporter, body: victim ? { id: victim.id, x: +d.bx, y: +d.by } : null, victim, room: d.room, t: +d.t || 0, votes: {}, acc: {}, lines: [], phaseV: d.phaseV || 'talk', talkT: d.talkT || 25, voteT: d.voteT || 45 };
   for (const id of d.voted || []) meeting.votes[id] = '?';
   if (d.my !== undefined) meeting.votes[me.id] = d.my;
   meetingUi(); syncHud();
@@ -2607,6 +2856,7 @@ function applySnap(d) {
     q.dead = !!a[4];
     if (q === me) return;
     q.tx = a[0]; q.ty = a[1]; q.dir = a[2] < 0 ? -1 : 1; q.vx = a[3] ? SPEED : 0; q.vy = 0; q.vent = a[5] ? 0 : -1;
+    q.rvx = +a[6] || 0; q.rvy = +a[7] || 0; q.rAt = performance.now();
   });
   bodies = (d.b || []).map(([id, x, y]) => ({ id, x, y, ci: P[id] ? P[id].ci : 0, t: 0 }));
   if (d.sb && SABO_KINDS.includes(d.sb[0])) { if (!sabo || sabo.kind !== d.sb[0]) sabo = { kind: d.sb[0], t: d.sb[1] }; sabo.t = d.sb[1]; if (Array.isArray(d.sb[2])) sabo.left = d.sb[2]; } else sabo = null;
@@ -2618,18 +2868,31 @@ function applySnap(d) {
   if (key !== net.snapKey) { net.snapKey = key; syncHud(); }
 }
 // mỗi khung hình lúc đang chơi: kéo mượt nhân vật của người khác tới vị trí mới nhất, gửi vị trí / ảnh chụp
+// vận tốc gửi đi cho máy khác đoán trước: người online thì lấy vận tốc họ báo, máy chơi / chủ phòng thì vận tốc thật
+const netVel = q => (q.remote && !q.bot ? (performance.now() - (q.rAt || 0) < 300 ? [q.rvx || 0, q.rvy || 0] : [0, 0]) : q.vent >= 0 ? [0, 0] : [q.vx || 0, q.vy || 0]);
 function netTick(dt, now) {
   for (const q of P) {
     const netDriven = isGuest() ? q !== me : q.remote && !q.bot;
     if (!netDriven) continue;
-    const d = Math.hypot(q.tx - q.x, q.ty - q.y);
-    if (d > 160) { q.x = q.tx; q.y = q.ty; } else { const k = Math.min(1, dt * 12); q.x += (q.tx - q.x) * k; q.y += (q.ty - q.y) * k; }
+    // đoán trước theo vận tốc (tối đa 0.12s) để bù trễ mạng, rồi kéo mượt tới đó
+    const ex = q.vent >= 0 ? 0 : clamp((now - (q.rAt || 0)) / 1000, 0, 0.12);
+    let ax = q.tx + (q.rvx || 0) * ex, ay = q.ty + (q.rvy || 0) * ex;
+    if (!q.dead && !canStand(ax, ay)) { ax = q.tx; ay = q.ty; }
+    const d = Math.hypot(ax - q.x, ay - q.y);
+    if (d > 160) { q.x = ax; q.y = ay; } else { const k = Math.min(1, dt * 14); q.x += (ax - q.x) * k; q.y += (ay - q.y) * k; }
     if (Math.hypot(q.vx, q.vy) > 5) q.anim += dt * 10;
   }
-  if (isHost()) { if (now - net.snapAt > 90) { net.snapAt = now; hostSnap(); } }
-  else if (now - net.posAt > 66) {
+  if (isHost()) { if (now - net.snapAt > 66) { net.snapAt = now; hostSnap(); } }
+  else if (now - net.posAt > 50) {
     const key = `${Math.round(me.x)},${Math.round(me.y)},${me.dir},${me.vent}`, moving = Math.hypot(me.vx, me.vy) > 5;
-    if (key !== net.posKey || now - net.posAt > 600 || moving) { net.posAt = now; net.posKey = key; netSend({ t: 'pos', x: Math.round(me.x), y: Math.round(me.y), d: me.dir, m: moving ? 1 : 0, v: me.vent }); }
+    if (key !== net.posKey) net.moveAt = now;
+    // kênh nhanh có thể rớt gói → vừa đổi gì thì gửi lại thêm nửa giây cho chắc
+    if (moving || now - net.moveAt < 500 || now - net.posAt > 600) {
+      const el = Math.max(0.03, (now - net.posAt) / 1000), [lx, ly] = net.posXY || [me.x, me.y];
+      const vx = me.vent >= 0 ? 0 : clamp((me.x - lx) / el, -SPEED * 1.3, SPEED * 1.3), vy = me.vent >= 0 ? 0 : clamp((me.y - ly) / el, -SPEED * 1.3, SPEED * 1.3);
+      net.posAt = now; net.posKey = key; net.posXY = [me.x, me.y];
+      fastSend(net.conn, { t: 'pos', sq: ++net.posSq, x: Math.round(me.x), y: Math.round(me.y), d: me.dir, m: moving ? 1 : 0, v: me.vent, vx: Math.round(vx), vy: Math.round(vy) });
+    }
   }
 }
 function onlineOverUi() {
@@ -2650,7 +2913,7 @@ $('mtSayIn').onkeydown = e => e.stopPropagation();
 // bật mic sau thì replaceTrack). Bên có peer id nhỏ hơn là bên gọi. Ai nghe được ai do từng máy tự quyết (vcGain):
 // phòng chờ / kết thúc / họp: nghe hết người còn sống; hồn ma nghe tất cả nhưng người sống không nghe hồn ma;
 // đang chơi: im lặng, hoặc nghe người trong tầm nhìn (tuỳ chủ phòng chọn).
-const VC = { joined: false, mic: false, stream: null, micTrack: null, silent: null, calls: new Map(), audios: new Map(), meters: new Map(), blocked: false, talk: new Set(), t: 0, wantMic: false };
+const VC = { joined: false, mic: false, stream: null, micTrack: null, silent: null, calls: new Map(), audios: new Map(), meters: new Map(), blocked: false, talk: new Set(), t: 0, wantMic: false, retry: new Map() };
 const myPid = () => (net.peer && !net.peer.destroyed && net.peer.id) || null;
 const vcCtx = () => { try { actx = actx || new (window.AudioContext || window.webkitAudioContext)(); if (actx.state !== 'running') actx.resume(); return actx; } catch (e) { return null; } };
 function silentTrack() {
@@ -2707,7 +2970,7 @@ function syncVoice() {
     if (x.cid === myCid || !x.vc || !x.pid || x.pid === mine || x.online === false) continue;
     live.add(x.pid);
     if (!VC.joined) { voiceJoin(false); return; }
-    if (mine < x.pid && !VC.calls.has(x.pid)) voiceCall(x.pid);
+    if (mine < x.pid && !VC.calls.has(x.pid) && Date.now() - (VC.retry.get(x.pid) || 0) > 3000) { VC.retry.set(x.pid, Date.now()); voiceCall(x.pid); }
   }
   for (const [pid, c] of VC.calls) if (!live.has(pid) && Date.now() - (c._t || 0) > 10000) { try { c.close(); } catch (e) {} vcDrop(pid, c); }
 }
@@ -2809,6 +3072,7 @@ function voiceLeave() {
 function syncVoiceUi() {
   const b = $('bVoice');
   b.hidden = !(net.on && net.peer && !net.peer.destroyed);
+  $('bNet').hidden = b.hidden; if (b.hidden) { $('nstat').hidden = true; netPinned = false; }
   b.classList.toggle('live', VC.joined && VC.mic && !VC.blocked);
   b.classList.toggle('off', VC.joined && !VC.mic && !VC.blocked);
   b.classList.toggle('blocked', VC.blocked);
@@ -2817,6 +3081,97 @@ function syncVoiceUi() {
   syncVchip();
 }
 $('bVoice').onclick = voiceToggle;
+// cuộc gọi mic hỏng thì gọi lại: trước đây một cặp nối hụt (ICE thất bại, gọi lúc bên kia chưa sẵn sàng...) là im luôn
+// tới hết buổi — đông người (9–10 máy, 36–45 cặp) thì gần như lần nào cũng có vài cặp như vậy
+const iceOk = c => { const st = c && c.peerConnection && c.peerConnection.iceConnectionState; return st === 'connected' || st === 'completed'; };
+function voiceHealth() {
+  if (!net.on || !VC.joined) return;
+  const now = Date.now();
+  for (const [pid, c] of [...VC.calls]) {
+    const st = c.peerConnection ? c.peerConnection.iceConnectionState : 'new';
+    if (st === 'disconnected') c._bad = c._bad || now; else c._bad = 0;
+    const dead = st === 'failed' || st === 'closed' || (c._bad && now - c._bad > 6000) || (!VC.audios.has(pid) && now - (c._t || 0) > 15000) || (!iceOk(c) && now - (c._t || 0) > 20000);
+    if (dead) { try { c.close(); } catch (e) {} vcDrop(pid, c); }
+  }
+  syncVoice();
+}
+setInterval(voiceHealth, 2000);
+function voiceRedial() {
+  for (const [pid, c] of [...VC.calls]) { try { c.close(); } catch (e) {} vcDrop(pid, c); }
+  VC.retry.clear(); syncVoice(); toast('🔄 Đang nối lại mic với mọi người…', 2500);
+}
+// mic mình đang nghe được ai: [số người nghe được, số người cần nối] và danh sách cid
+function heardCids() {
+  const out = []; if (!VC.joined) return out;
+  for (const x of M) if (x.cid !== myCid && x.pid && VC.audios.has(x.pid) && iceOk(VC.calls.get(x.pid))) out.push(x.cid);
+  return out;
+}
+function voiceLinks() {
+  if (!VC.joined) return null;
+  const mine = myPid(), need = M.filter(x => x.cid !== myCid && x.vc && x.pid && x.pid !== mine && x.online !== false).length;
+  return [Math.min(need, heardCids().length), need];
+}
+
+// ── bảng mạng (giữ Tab / bấm 📶): ping tới chủ phòng, đi thẳng hay vòng máy chủ, mất gói, khung hình, mic nối được bao nhiêu người ──
+let fpsS = 60, fpsAt = 0;
+function fpsTick(now) { const d = now - (fpsAt || now); fpsAt = now; if (d > 0 && d < 1000) fpsS = fpsS * 0.95 + (1000 / d) * 0.05; }
+function netStatTick() {
+  if (!net.on || !net.peer) return;
+  const fps = document.hidden ? -1 : Math.round(fpsS); // -1: đang ẩn tab (trình duyệt hãm máy → giật)
+  if (net.host) {
+    for (const [c, cid] of net.conns) { const m = M.find(x => x.cid === cid); if (!m) continue; m.rtt = c._rtt || 0; pathType(c.peerConnection).then(t => { if (t) m.relay = t; }); }
+    const L = {};
+    for (const m of M) {
+      if (m.online === false) continue;
+      if (m.host) { L[m.cid] = { r: 0, p: null, v: voiceLinks(), f: fps, l: 0, h: heardCids() }; continue; }
+      const r = m.nr || {};
+      L[m.cid] = { r: m.rtt || r.rtt || 0, p: m.relay || r.relay || null, v: r.vc || null, f: r.fps, l: r.loss || 0, h: r.hear || [] };
+    }
+    net.ns = L;
+    if (net.conns.size) netBroadcast({ t: 'ns', L });
+  } else if (net.conn) {
+    const span = net.rxHi - net.rxLo + 1;
+    if (span >= 10) { net.loss = Math.round(clamp(1 - net.rx / span, 0, 1) * 100); net.rx = 0; net.rxLo = 0; net.rxHi = 0; }
+    pathType(net.conn.peerConnection).then(t => { if (t) net.relay = t; });
+    netSend({ t: 'nr', rtt: net.rtt, relay: net.relay, vc: voiceLinks(), fps, loss: net.loss, hear: heardCids() });
+  }
+  if (!$('nstat').hidden) renderNet();
+}
+setInterval(netStatTick, 2000);
+const esc = v => String(v).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+function renderNet() {
+  const box = $('nstat'); if (!net.on) { box.hidden = true; return; }
+  const live = M.filter(m => m.online !== false), warn = [];
+  let rows = '';
+  for (const m of live) {
+    const e = Object.assign({}, net.ns[m.cid] || {});
+    if (m.cid === myCid) { e.v = voiceLinks(); e.h = heardCids(); e.f = document.hidden ? -1 : Math.round(fpsS); if (!net.host) { e.r = net.rtt || e.r; e.p = net.relay || e.p; e.l = net.loss; } }
+    const ping = m.host ? '<span class="dim">chủ phòng</span>' : e.r ? `<span class="${e.r < 120 ? 'ok' : e.r < 250 ? 'mid' : 'bad'}">${e.r} ms</span>` : '<span class="dim">…</span>';
+    const path = m.host ? '<span class="dim">—</span>' : e.p === 'direct' ? '<span class="ok">Trực tiếp</span>' : e.p === 'relay' ? '<span class="mid">Qua máy chủ</span>' : '<span class="dim">…</span>';
+    const loss = m.host ? '<span class="dim">—</span>' : `<span class="${e.l < 3 ? 'ok' : e.l < 10 ? 'mid' : 'bad'}">${e.l | 0}%</span>`;
+    const fps = e.f === -1 ? '<span class="bad">ẩn tab</span>' : e.f ? `<span class="${e.f >= 45 ? 'ok' : e.f >= 25 ? 'mid' : 'bad'}">${e.f}</span>` : '<span class="dim">…</span>';
+    let mic = '<span class="dim">chưa bật</span>';
+    if (e.v) {
+      const miss = M.filter(x => x.cid !== m.cid && x.vc && x.pid && x.online !== false && !(e.h || []).includes(x.cid)).map(x => x.name);
+      mic = `<span class="${miss.length ? 'bad' : 'ok'}">🔊 ${e.v[0]}/${e.v[1]}</span>` + (miss.length ? `<span class="miss">không nghe: ${esc(miss.join(', '))}</span>` : '');
+    }
+    if (!m.host && (e.r >= 250 || e.l >= 10)) warn.push(`<b>${esc(m.name)}</b> mạng yếu (${e.r >= 250 ? 'ping ' + e.r + ' ms' : 'mất ' + e.l + '% gói'}) — người khác thấy ${esc(m.name)} giật, ${esc(m.name)} thấy mọi người giật`);
+    if (e.f === -1) warn.push(`<b>${esc(m.name)}</b> đang để game ở tab ẩn / khoá màn hình${m.host ? ' — chủ phòng ẩn tab thì cả phòng giật' : ''}`);
+    else if (e.f && e.f < 25) warn.push(`<b>${esc(m.name)}</b> máy chạy chậm (${e.f} khung hình/giây)${m.host ? ' — chủ phòng chậm thì cả phòng giật' : ''}`);
+    rows += `<tr><td class="nm"><i style="--c:${COLORS[m.ci] ? COLORS[m.ci][1] : '#888'}"></i>${esc(m.name)}${m.cid === myCid ? ' (bạn)' : ''}</td><td>${ping}</td><td>${path}</td><td>${loss}</td><td>${fps}</td><td>${mic}</td></tr>`;
+  }
+  box.innerHTML = `<h3>📶 Mạng <small>cập nhật mỗi 2 giây · giữ Tab hoặc bấm 📶</small></h3>`
+    + `<table><tr><th>Người chơi</th><th>Ping</th><th>Đường truyền</th><th>Mất gói</th><th>FPS</th><th>Mic</th></tr>${rows}</table>`
+    + `<div class="sum">${warn.length ? warn.join('<br>') : 'Mọi người đều ổn.'}<br><span class="dim">Ping: thời gian đi về tới chủ phòng (dưới 120 ms là tốt). "Qua máy chủ": hai máy không nối thẳng được nên đi vòng máy chủ ở nước ngoài — chậm hơn, thử đổi wifi / 4G.</span></div>`
+    + (VC.joined ? '<div class="row"><button id="nsRedial">🔄 Nối lại mic</button></div>' : '');
+  const rb = $('nsRedial'); if (rb) rb.onclick = e => { e.stopPropagation(); voiceRedial(); };
+}
+let netPinned = false;
+function showNet(on) { const b = $('nstat'); if (on && !net.on) on = false; b.hidden = !on; if (on) renderNet(); }
+$('bNet').onclick = () => { netPinned = $('nstat').hidden; showNet(netPinned); };
+addEventListener('keydown', e => { if (e.key !== 'Tab' || !net.on) return; e.preventDefault(); if (!e.repeat) showNet(true); });
+addEventListener('keyup', e => { if (e.key !== 'Tab' || !net.on) return; e.preventDefault(); if (!netPinned) showNet(false); });
+addEventListener('blur', () => { if (!netPinned && !$('nstat').hidden) showNet(false); });
 
 // bàn trống lúc chờ: vài nhân vật đứng quanh bàn cho sinh động
 P = [newPlayer(0, 'Bạn', setup.ci, false)]; me = P[0]; P.forEach((p, k) => { place(p, BUTTON.x - 60, BUTTON.y + 90); });
