@@ -48,6 +48,9 @@ button:disabled { opacity: .35; cursor: default; }
 .role-tag.jester { color: #d58cff; border-color: rgba(200,120,255,.55); }
 /* ── nhiệm vụ & tiến độ ── */
 .prog { position: fixed; z-index: 5; top: calc(env(safe-area-inset-top, 0px) + 54px); left: 50%; transform: translateX(-50%); width: min(60vw, 420px); height: 18px; border-radius: 999px; background: rgba(0,0,0,.5); border: 2px solid rgba(255,255,255,.35); overflow: hidden; }
+/* tên phòng đang đứng, ngay dưới thanh nhiệm vụ */
+.here { position: fixed; z-index: 5; top: calc(env(safe-area-inset-top, 0px) + 79px); left: 50%; transform: translateX(-50%); padding: 1px 12px; border-radius: 999px; background: rgba(8,12,26,.72); border: 1px solid rgba(143,227,255,.3); color: #e6f6ff; font-weight: 800; font-size: 13px; line-height: 20px; white-space: nowrap; pointer-events: none; text-shadow: 0 1px 2px #000; }
+.here.hall { color: rgba(230,246,255,.6); font-weight: 700; }
 .prog i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #3ddc84, #8fe3ff); transition: width .4s; }
 .prog b.late { color: #ff8a8a; animation: blink 1s ease-in-out infinite; }
 .prog b { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; text-shadow: 0 1px 2px #000; }
@@ -75,6 +78,10 @@ button:disabled { opacity: .35; cursor: default; }
 .acts button.kill { background: #c51111; border-color: #ffb3b3; }
 .acts button.vent { background: #475569; border-color: #cbd5e1; }
 .acts button.sabo { background: #6b21a8; border-color: #e9d5ff; }
+.acts button.door { background: #92400e; border-color: #fde68a; }
+.door-pop { border-color: #fbbf24; }
+.door-pop .sb-doors button.cur { background: rgba(251,191,36,.28); box-shadow: 0 0 0 2px #fbbf24 inset; color: #fff7d6; }
+.door-pop .sb-doors button.cur:not(:disabled):hover { background: rgba(251,191,36,.4); } .door-pop .sb-head { color: #fbbf24; margin-top: 0; }
 .acts button.map { background: rgba(0,0,0,.5); border-color: rgba(255,255,255,.4); }
 .acts button kbd, .rb kbd, .sabo-pop kbd { position: absolute; z-index: 2; top: -5px; right: -5px; min-width: 20px; height: 20px; padding: 0 4px; border-radius: 6px; background: #0b1020; border: 1.5px solid rgba(255,255,255,.7); color: #fff; font: 800 11px/17px system-ui, sans-serif; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,.5); pointer-events: none; }
 .rb { position: relative; } .rb kbd { top: -4px; right: -6px; min-width: 17px; height: 17px; font-size: 10px; line-height: 14px; }
@@ -85,6 +92,13 @@ button:disabled { opacity: .35; cursor: default; }
 .sabo-pop { position: fixed; z-index: 7; right: calc(env(safe-area-inset-right, 0px) + 100px); bottom: calc(env(safe-area-inset-bottom, 0px) + 100px); display: flex; flex-direction: column; gap: 8px; background: rgba(20,10,40,.95); border: 2px solid #c084fc; border-radius: 16px; padding: 10px; }
 .sabo-pop button { display: flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 10px; background: rgba(255,255,255,.1); font-weight: 800; font-size: 14px; white-space: nowrap; }
 .sabo-pop button:not(:disabled):hover { background: rgba(255,255,255,.2); }
+.sabo-pop { max-height: calc(100vh - 120px); overflow-y: auto; }
+.sabo-pop .sb-head { font-weight: 800; font-size: 12.5px; color: #c084fc; margin-top: 4px; }
+.sabo-pop .sb-doors { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.sabo-pop .sb-doors button { padding: 6px 10px; font-size: 13px; }
+.sabo-pop .sb-doors .nm { overflow: hidden; text-overflow: ellipsis; }
+.sabo-pop .sb-doors .dcd { margin-left: auto; font-size: 11.5px; color: #fca5a5; }
+.sabo-pop .sb-doors kbd { margin-left: 4px; }
 /* ── cần điều khiển ── */
 .joy { position: fixed; z-index: 6; width: 130px; height: 130px; border-radius: 50%; background: rgba(255,255,255,.1); border: 2px solid rgba(255,255,255,.3); pointer-events: none; transform: translate(-50%, -50%); }
 .joy i { position: absolute; left: 50%; top: 50%; width: 56px; height: 56px; border-radius: 50%; background: rgba(255,255,255,.55); transform: translate(-50%, -50%); box-shadow: 0 3px 8px rgba(0,0,0,.4); }
@@ -111,7 +125,12 @@ button:disabled { opacity: .35; cursor: default; }
 .seg { display: flex; background: #eef2f7; border-radius: 12px; padding: 3px; gap: 3px; }
 .seg button { flex: 1; border-radius: 9px; padding: 6px 2px; font-weight: 700; font-size: 14px; color: var(--muted); }
 .seg button.on { background: #fff; color: var(--ink); box-shadow: 0 2px 6px rgba(35,50,74,.15); }
-#suMap, #lbMap { flex-wrap: wrap; } #suMap button, #lbMap button { flex: 1 1 30%; font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } /* 10 bản đồ: xếp 3 cột */
+/* chọn bản đồ / vai: hộp chọn thả xuống */
+.selbox { position: relative; }
+.selbox::after { content: '▾'; position: absolute; right: 14px; top: 50%; transform: translateY(-50%); pointer-events: none; color: #93a4c3; font-size: 14px; }
+.selbox select { width: 100%; appearance: none; -webkit-appearance: none; font: inherit; font-weight: 700; font-size: 14px; color: #fff; background: #0a1122; border: 1px solid #22304d; border-radius: 12px; padding: 9px 36px 9px 12px; cursor: pointer; }
+.selbox select:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,.3); }
+.selbox select option { background: #0a1122; color: #fff; }
 .colors { display: flex; flex-wrap: wrap; gap: 8px; }
 .colors button { width: 30px; height: 30px; border-radius: 50%; background: var(--c); box-shadow: 0 0 0 2px #fff, 0 0 0 3px rgba(35,50,74,.15); transition: transform .12s; }
 .colors button.on { box-shadow: 0 0 0 3px #fff, 0 0 0 5px var(--c); transform: scale(1.12); }
@@ -346,23 +365,28 @@ button:disabled { opacity: .35; cursor: default; }
   <button class="rb" id="bNew" aria-label="Ván mới">↻</button>
 </header>
 <div class="prog" id="prog" hidden><i></i><b>Nhiệm vụ 0%</b></div>
+<div class="here" id="here" hidden></div>
 <div class="tasks" id="tasks" hidden></div>
 <canvas class="mmap" id="mmap" hidden title="Bản đồ (M)"></canvas>
 <div class="alert" id="alert" hidden></div>
 <div class="vchip" id="vchip" hidden></div>
 <div class="nstat" id="nstat" hidden></div>
 <div class="joy" id="joy" hidden><i></i></div>
-<div class="hint" id="hint" hidden>Di chuyển: WASD / mũi tên · E dùng · R báo · Q giết/bắn · V ống gió · F phá hoại · M bản đồ · T mic</div>
+<div class="hint" id="hint" hidden>Di chuyển: WASD / mũi tên · E dùng · R báo · Q giết/bắn · V ống gió · F phá hoại · G khoá cửa · M bản đồ · T mic</div>
 <div class="sabo-pop" id="saboPop" hidden>
   <button id="sbLights">💡 Tắt đèn <kbd>1</kbd></button>
   <button id="sbReactor">☢️ Lò phản ứng <kbd>2</kbd></button>
   <button id="sbO2">🫁 Cạn oxy <kbd>3</kbd></button>
-  <button id="sbDoors">🚪 Khoá cửa Điện <kbd>4</kbd></button>
+</div>
+<div class="sabo-pop door-pop" id="doorPop" hidden>
+  <div class="sb-head">🚪 Khoá cửa phòng · 10 giây</div>
+  <div class="sb-doors" id="sbDoorList"></div>
 </div>
 <div class="acts" id="acts" hidden>
   <button class="map" id="bMap"><span>🗺️</span>Bản đồ<kbd>M</kbd></button>
   <button class="use" id="bUse"><span>🔧</span>Dùng<kbd>E</kbd></button>
   <button class="sabo" id="bSabo" hidden><span>⚡</span>Phá hoại<div class="cd"></div><div class="cdn" hidden></div><kbd>F</kbd></button>
+  <button class="door" id="bDoor" hidden><span>🚪</span>Khoá cửa<div class="cd"></div><div class="cdn" hidden></div><kbd>G</kbd></button>
   <button class="vent" id="bVent" hidden><span>🕳️</span>Ống gió<kbd>V</kbd></button>
   <button class="kill" id="bKill" hidden><span>🔪</span>Giết<div class="cd"></div><div class="cdn" hidden></div><kbd>Q</kbd></button>
   <button class="shoot" id="bShoot" hidden><span>🔫</span>Bắn<div class="cd"></div><div class="cdn" hidden></div><kbd>Q</kbd></button>
@@ -384,9 +408,9 @@ button:disabled { opacity: .35; cursor: default; }
     <div class="label">Thời gian ván</div>
     <div class="seg" id="suTime"></div>
     <div class="label">Bản đồ</div>
-    <div class="seg" id="suMap"></div>
+    <div class="selbox" id="suMap"></div>
     <div class="label">Vai của bạn</div>
-    <div class="seg" id="suRole"></div>
+    <div class="selbox" id="suRole"></div>
     <label class="check"><input type="checkbox" id="suConfirm"> Công bố vai</label>
     <label class="check"><input type="checkbox" id="suSheriff"> Có Cảnh sát trưởng</label>
     <label class="check"><input type="checkbox" id="suJester"> Có Kẻ Pha Trò (từ 6 người)</label>
@@ -474,7 +498,7 @@ button:disabled { opacity: .35; cursor: default; }
       <div class="label">Thời gian ván</div>
       <div class="seg" id="lbTime"></div>
       <div class="label">Bản đồ</div>
-      <div class="seg" id="lbMap"></div>
+      <div class="selbox" id="lbMap"></div>
       <div class="label">Voice chat khi đang chơi</div>
       <div class="seg" id="lbVoice"></div>
       <label class="check"><input type="checkbox" id="lbConfirm"> Công bố vai</label>
@@ -504,7 +528,7 @@ button:disabled { opacity: .35; cursor: default; }
       <li><b>Tầm nhìn</b> 👁️: chỉ thấy những gì nhìn thẳng tới được — tường, thùng hàng, động cơ… che khuất người phía sau. Đèn tắt thì tầm nhìn còn rất ngắn. Phi thuyền rộng, mũi tên vàng ở mép màn hình chỉ tới nhiệm vụ của bạn.</li>
       <li>Chết rồi vẫn thành <b>ma</b> 👻: đi xuyên tường, làm nốt nhiệm vụ giúp đồng đội, nhưng không báo, không bỏ phiếu được.</li>
       <li><b>Online</b> 🌐: chủ phòng tạo phòng, gửi mã/link cho bạn bè; ghế trống có thể cho máy chơi. Bấm <b>🎤</b> để voice chat: phòng chờ và cuộc họp mọi người nghe nhau; lúc đang chơi tuỳ phòng — <i>im lặng</i> hoặc <i>nghe người ở gần</i>. Hồn ma vẫn nghe được mọi người, nhưng chỉ hồn ma nghe được hồn ma. Ai rớt mạng thì máy chơi thay tới khi họ vào lại.</li>
-      <li>Điều khiển: máy tính đi bằng <b>WASD</b> / mũi tên; điện thoại kéo nửa trái màn hình (cần ảo). Phím tắt hiện ở góc mỗi nút: <b>E</b> dùng/sửa/họp, <b>R</b> báo, <b>Q</b> giết, <b>V</b> ống gió (trong ống: ← → chuyển ống), <b>Q</b> bắn (Cảnh sát trưởng), <b>F</b> phá hoại (rồi <b>1</b> tắt đèn / <b>2</b> lò phản ứng / <b>3</b> cạn oxy / <b>4</b> khoá cửa phòng Điện 10 giây), <b>M</b> bản đồ, <b>T</b> bật/tắt mic.</li>
+      <li>Điều khiển: máy tính đi bằng <b>WASD</b> / mũi tên; điện thoại kéo nửa trái màn hình (cần ảo). Phím tắt hiện ở góc mỗi nút: <b>E</b> dùng/sửa/họp, <b>R</b> báo, <b>Q</b> giết, <b>V</b> ống gió (trong ống: ← → chuyển ống), <b>Q</b> bắn (Cảnh sát trưởng), <b>F</b> phá hoại (rồi <b>1</b> tắt đèn / <b>2</b> lò phản ứng / <b>3</b> cạn oxy ), <b>G</b> khoá cửa một phòng 10 giây (rồi chọn phòng bằng phím số hoặc chữ hiện cạnh tên phòng) — đếm ngược riêng 30 giây, không dính tới phá hoại, <b>M</b> bản đồ, <b>T</b> bật/tắt mic.</li>
     </ol>
     <button class="go" id="bRulesOk">Đã hiểu</button>
   </div>
@@ -944,7 +968,7 @@ const MAPS = [
     ] },
 ];
 // bản đồ đang dùng (useMap đổi tất cả các biến này)
-let MAP_I = 0, mapVer = 0, DOORS = [], doorT = 0, doorShut = false, ROOMS, HALLS, WALK, MAP_W, MAP_H, OBST, VENTS, BUTTON, FIX, TASKS, GW, GH, GRID;
+let MAP_I = 0, mapVer = 0, DOORS = [], ROOMS, HALLS, WALK, MAP_W, MAP_H, OBST, VENTS, BUTTON, FIX, TASKS, GW, GH, GRID;
 // lưới 10px: 0 ngoài tàu · 1 sàn · 2 vật thấp · 3 vật cao (che tầm nhìn)
 const GC = 10;
 const cellAt = (x, y) => (x < 0 || y < 0 || x >= MAP_W || y >= MAP_H ? 0 : GRID[((y / GC) | 0) * GW + ((x / GC) | 0)]);
@@ -974,6 +998,14 @@ const COLORS = [['Đỏ', '#c51111'], ['Xanh', '#132ed1'], ['Lục', '#117f2d'],
 const BOT_NAMES = ['Tí', 'Sửu', 'Dần', 'Mão', 'Thìn', 'Tỵ', 'Ngọ', 'Mùi', 'Thân', 'Dậu', 'Tuất', 'Hợi'];
 
 // ── đường đi cho máy: A* trên lưới 20px các chỗ đứng được, rồi kéo căng đường ──
+// hộp chọn thả xuống: opts = [[giá trị, nhãn]], giá trị giữ nguyên kiểu (số / chuỗi)
+function selBox(box, opts, cur, fn) {
+  box.innerHTML = '';
+  const sel = document.createElement('select');
+  opts.forEach(([v, l], k) => { const o = document.createElement('option'); o.value = k; o.textContent = l; if (v === cur) o.selected = true; sel.appendChild(o); });
+  sel.onchange = () => fn(opts[+sel.value][0]);
+  box.appendChild(sel);
+}
 function segClear(a, b) {
   const d = Math.hypot(b.x - a.x, b.y - a.y), n = Math.max(1, Math.ceil(d / 8));
   for (let k = 0; k <= n; k++) { const t = k / n; if (!canStand(a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t)) return false; }
@@ -1039,13 +1071,12 @@ function useMap(i) {
   PW = MAP_W / PG; PH = MAP_H / PG; PSTAND = new Uint8Array(PW * PH);
   for (let j = 0; j < PH; j++) for (let i = 0; i < PW; i++) PSTAND[j * PW + i] = canStand(i * PG + PG / 2, j * PG + PG / 2) ? 1 : 0;
   pgG = new Float32Array(PW * PH); pgP = new Int32Array(PW * PH); pgS = new Uint32Array(PW * PH); pgStamp = 0;
-  DOORS = doorRects(m); doorT = 0; doorShut = false;
+  DOORS = doorList(m);
 }
-// cửa phòng Điện: dải 20px chắn ngang mỗi hành lang nối vào phòng, ngay sát mép phòng (bản đồ có thể tự khai báo m.doors)
-function doorRects(m) {
-  if (m.doors) return m.doors;
-  const e = m.rooms.find(r => r.id === 'elec'); if (!e) return [];
-  const [rx, ry, rw, rh] = e.r, D = 20, out = [];
+// cửa phòng: dải 20px chắn ngang mỗi hành lang nối vào phòng, ngay sát mép phòng (bản đồ có thể tự khai báo m.doors cho phòng Điện)
+function roomDoorRects(m, room) {
+  if (room.id === 'elec' && m.doors) return m.doors;
+  const [rx, ry, rw, rh] = room.r, D = 20, out = [];
   for (const [hx, hy, hw, hh] of m.halls) {
     if (hy >= ry && hy + hh <= ry + rh) { // hành lang ngang chạm cạnh trái / phải
       if (hx < rx - D + 1 && hx + hw >= rx) out.push([rx - D, hy, D, hh]);
@@ -1057,27 +1088,95 @@ function doorRects(m) {
   }
   return out;
 }
-const DOOR_T = 10;
-const elecName = () => { const e = ROOMS.find(r => r.id === 'elec'); return e ? e.name : 'Điện'; };
-// đóng / mở cửa: cửa đóng là vật cao (chắn đường lẫn tầm nhìn); ai đang đứng giữa khung cửa bị đẩy ra chỗ trống gần nhất
-function shutDoors(on) {
-  if (doorShut === on) return; doorShut = on;
-  for (const d of DOORS) for (let j = d[1] / GC; j < (d[1] + d[3]) / GC; j++) for (let i = d[0] / GC; i < (d[0] + d[2]) / GC; i++) GRID[j * GW + i] = on ? 3 : 1;
-  for (const d of DOORS) {
+// mọi phòng (trừ phòng có nút họp) đều có cửa; bỏ khung cửa đè lên vật cản, ống gió, nhiệm vụ, chỗ sửa hay cửa phòng khác
+function doorList(m) {
+  const near = (d, x, y, r) => x > d[0] - r && x < d[0] + d[2] + r && y > d[1] - r && y < d[1] + d[3] + r;
+  // ống gió cần chừa chỗ rộng hơn (nắp ống to), nhiệm vụ / chỗ sửa chỉ cần không nằm ngay trên khung cửa
+  const pts = [...m.vents.map(v => [v[0], v[1], 34]), ...m.tasks.map(t => [t.x, t.y, 12]), ...Object.values(m.fix).map(f => [f.x, f.y, 12])];
+  const used = [], list = [];
+  for (const room of m.rooms) {
+    const [rx, ry, rw, rh] = room.r;
+    if (m.button.x >= rx && m.button.x < rx + rw && m.button.y >= ry && m.button.y < ry + rh) continue;
+    const rects = roomDoorRects(m, room).filter(d => {
+      for (let j = d[1] / GC; j < (d[1] + d[3]) / GC; j++) for (let i = d[0] / GC; i < (d[0] + d[2]) / GC; i++) if (GRID[j * GW + i] !== 1) return false;
+      if (pts.some(([x, y, r]) => near(d, x, y, r))) return false;
+      return !used.some(u => u[0] < d[0] + d[2] + 20 && d[0] < u[0] + u[2] + 20 && u[1] < d[1] + d[3] + 20 && d[1] < u[1] + u[3] + 20);
+    });
+    if (!rects.length || rects.length < roomDoorRects(m, room).length) continue; // còn lối không đặt được cửa → khoá không kín, bỏ
+    used.push(...rects);
+    list.push({ rid: room.id, name: room.name, rects, t: 0, cd: 0, shut: false });
+  }
+  return list;
+}
+const DOOR_T = 10, DOOR_CD = 30; // khoá 10 giây; khoá xong phải chờ 30 giây (tính từ lúc khoá) mới khoá được phòng khác — riêng với phá hoại
+let doorCd = 0;
+const doorOf = rid => DOORS.find(d => d.rid === rid);
+const anyDoorShut = () => DOORS.some(d => d.shut);
+// phòng (đang khoá cửa) mà người chơi p đang đứng bên trong, không có thì null
+const lockedRoomOf = p => { const r = roomAt(p.x, p.y); if (!r) return null; const d = doorOf(r.id); return d && d.shut ? r : null; };
+// đóng / mở cửa một phòng: cửa đóng là vật cao (chắn đường lẫn tầm nhìn); ai đang đứng giữa khung cửa bị đẩy ra chỗ trống gần nhất
+function shutDoor(dr, on) {
+  if (dr.shut === on) return; dr.shut = on;
+  for (const d of dr.rects) for (let j = d[1] / GC; j < (d[1] + d[3]) / GC; j++) for (let i = d[0] / GC; i < (d[0] + d[2]) / GC; i++) GRID[j * GW + i] = on ? 3 : 1;
+  for (const d of dr.rects) {
     const i0 = Math.max(0, Math.floor((d[0] - 40) / PG)), i1 = Math.min(PW - 1, Math.floor((d[0] + d[2] + 40) / PG));
     const j0 = Math.max(0, Math.floor((d[1] - 40) / PG)), j1 = Math.min(PH - 1, Math.floor((d[1] + d[3] + 40) / PG));
     for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) PSTAND[j * PW + i] = canStand(i * PG + PG / 2, j * PG + PG / 2) ? 1 : 0;
   }
   if (typeof buildFloor === 'function' && builtVer === mapVer) buildFloor();
   if (on) for (const p of P) if (!p.dead && p.vent < 0 && !canStand(p.x, p.y)) { const c = nearCell(p.x, p.y); if (c >= 0) place(p, (c % PW) * PG + PG / 2, ((c / PW) | 0) * PG + PG / 2); p.path = []; }
+  if (on) for (const p of P) if (p.bot) p.path = []; // máy tìm đường lại
 }
-function resetDoors() { doorT = 0; shutDoors(false); }
-function closeDoors(t) { doorT = t; shutDoors(true); playAlert(); toast(`🚪 Cửa phòng ${elecName()} bị khoá ${Math.ceil(t)} giây!`); syncHud(); }
-function doDoors(by) {
-  if (sabo || saboCd > 0 || doorT > 0 || phase !== 'play' || !DOORS.length) return;
-  if (isGuest()) return netSend({ t: 'sabo', kind: 'doors' });
-  if (isHost()) netBroadcast({ t: 'door', s: DOOR_T });
-  saboCd = SABO_CD; closeDoors(DOOR_T);
+function resetDoors() { for (const d of DOORS) { d.t = 0; shutDoor(d, false); } }
+function closeDoor(dr, t) {
+  dr.t = t; doorCd = Math.max(doorCd, DOOR_CD - (DOOR_T - t)); shutDoor(dr, true); playAlert();
+  toast(`🚪 Cửa phòng ${dr.name} bị khoá ${Math.ceil(t)} giây!`); syncHud();
+}
+// khoá cửa là nút riêng, không dính tới phá hoại: dùng được cả khi đang mất điện / lò phản ứng, có đếm ngược riêng
+function doDoors(by, rid) {
+  const dr = doorOf(rid);
+  if (!dr || dr.shut || doorCd > 0 || phase !== 'play') return;
+  if (isGuest()) return netSend({ t: 'sabo', kind: 'doors', r: rid });
+  if (isHost()) netBroadcast({ t: 'door', r: rid, s: DOOR_T });
+  closeDoor(dr, DOOR_T);
+}
+function doorTick(dt) {
+  doorCd = Math.max(0, doorCd - dt);
+  for (const d of DOORS) {
+    if (d.t > 0 && (d.t -= dt) <= 0) { d.t = 0; shutDoor(d, false); toast(`🚪 Cửa phòng ${d.name} đã mở.`); }
+  }
+}
+// trạng thái cửa gửi qua mạng: [[mã phòng, giây còn khoá], ...]
+const doorNet = () => DOORS.filter(d => d.t > 0).map(d => [d.rid, Math.round(d.t * 10) / 10]);
+function applyDoorNet(arr, full) {
+  const m = new Map(Array.isArray(arr) ? arr.filter(a => Array.isArray(a)).map(a => [a[0], Math.max(0, +a[1] || 0)]) : []);
+  for (const d of DOORS) {
+    const t = m.get(d.rid) || 0;
+    if (t > (full ? 0 : 0.3) && !d.shut) { d.t = t; shutDoor(d, true); }
+    else if (!t && d.shut) { d.t = 0; shutDoor(d, false); }
+    else if (t) d.t = t;
+  }
+}
+// bảng khoá cửa: danh sách phòng, phòng đang khoá có 🔒
+let doorPopKey = '';
+// phím tắt từng phòng: 1–9 rồi tới chữ cái không trùng phím điều khiển (WASD, E, R, Q, V, F, G, M, T)
+const DOOR_KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'z', 'x', 'c', 'b', 'n', 'h', 'j', 'k', 'l', 'y', 'u', 'i', 'o', 'p'];
+function renderDoorPop() {
+  const box = $('sbDoorList');
+  const cur = me && roomAt(me.x, me.y), curId = cur ? cur.id : '';
+  const key = curId + '|' + (doorCd > 0 ? 'cd' : DOORS.map(d => d.rid + (d.shut ? 'S' : '')).join(','));
+  if (key === doorPopKey && box.children.length === DOORS.length) return;
+  doorPopKey = key;
+  box.innerHTML = '';
+  DOORS.forEach((d, k) => {
+    const b = document.createElement('button');
+    b.disabled = d.shut || doorCd > 0;
+    if (d.rid === curId) { b.className = 'cur'; b.title = 'Phòng bạn đang đứng'; }
+    b.innerHTML = `<span class="nm"></span><span class="dcd">${d.shut ? '🔒' : ''}</span>${DOOR_KEYS[k] ? `<kbd>${DOOR_KEYS[k].toUpperCase()}</kbd>` : ''}`;
+    b.querySelector('.nm').textContent = d.name;
+    b.onclick = () => { $('doorPop').hidden = true; doDoors(me, d.rid); };
+    box.appendChild(b);
+  });
 }
 useMap(0);
 const pickMap = v => (Number.isInteger(v) && MAPS[v] ? v : Math.floor(Math.random() * MAPS.length)); // 'random' → bốc ngẫu nhiên
@@ -1091,9 +1190,9 @@ let setup = Object.assign({ name: '', ci: 0, bots: 7, imps: 2, role: 'random', c
 // online (xem phần "chơi online" cuối file): chủ phòng chạy luật + máy chơi, khách chỉ tự đi lại và gửi hành động lên
 const isHost = () => net.on && net.host, isGuest = () => net.on && !net.host;
 const TIME_OPTS = [[5, '5 phút'], [8, '8 phút'], [12, '12 phút']], TIME_DEF = 8;
-const MAP_OPTS = [...MAPS.map((m, k) => [k, m.icon + ' ' + m.name]), ['random', '🎲 Ngẫu nhiên']];
+const MAP_OPTS = [...MAPS.map((m, k) => [k, m.name]), ['random', 'Ngẫu nhiên']];
 const mapChoice = v => (Number.isInteger(v) && MAPS[v] ? v : 'random');
-const mapLabel = v => (Number.isInteger(v) && MAPS[v] ? MAPS[v].icon + ' ' + MAPS[v].name : '🎲 bản đồ ngẫu nhiên');
+const mapLabel = v => (Number.isInteger(v) && MAPS[v] ? MAPS[v].name : 'bản đồ ngẫu nhiên');
 const timeMin = () => { const v = net.on ? S.time : setup.time; return TIME_OPTS.some(o => o[0] === v) ? v : TIME_DEF; };
 let gameLeft = 0, timeWarn = 0; // giây chơi còn lại của ván (dừng khi họp)
 let impN = 0, netProg = 0; // số kẻ giả mạo (khách phi hành đoàn không biết là ai) · % nhiệm vụ chủ phòng gửi xuống
@@ -1159,7 +1258,7 @@ function beginRound() {
   dealTasks();
   // xếp quanh bàn Nhà Ăn
   P.forEach((p, k) => { const a = (k / P.length) * Math.PI * 2; place(p, BUTTON.x + Math.cos(a) * 95, BUTTON.y + Math.sin(a) * 70); p.dir = Math.cos(a) < 0 ? 1 : -1; });
-  bodies = []; sabo = null; saboCd = 10; resetDoors(); meeting = null; winner = null; mapOpen = false; splats.length = 0; fx.length = 0; bodyBorn.clear();
+  bodies = []; sabo = null; saboCd = 10; doorCd = 10; resetDoors(); meeting = null; winner = null; mapOpen = false; splats.length = 0; fx.length = 0; bodyBorn.clear();
   for (const p of P) { p.killCd = 10; p.shootCd = SHOOT_CD; p.idleT = 0; p.idleWarn = false; }
   progShown = 0; gameLeft = timeMin() * 60; timeWarn = 0;
   cam.x = me.x; cam.y = me.y;
@@ -1191,7 +1290,7 @@ function checkWin() {
 function endGame(side, why) {
   if (isHost()) { lastOver = { t: 'over', side, why, imps: P.filter(p => p.imp).map(p => p.id), sh: P.filter(p => p.sheriff).map(p => p.id), jt: P.filter(p => p.jester).map(p => p.id) }; netBroadcast(lastOver); }
   phase = 'over'; winner = side;
-  closeTask(); $('meetSheet').hidden = true; $('ejectScene').hidden = true; $('saboPop').hidden = true;
+  closeTask(); $('meetSheet').hidden = true; $('ejectScene').hidden = true; $('saboPop').hidden = true; $('doorPop').hidden = true;
   const meWon = side === 'jester' ? me.jester : side === 'imp' ? me.imp : !me.imp && !me.jester;
   const box = $('resBox'); box.className = 'panel dark res ' + side;
   $('rsTitle').textContent = side === 'jester' ? (meWon ? 'Bạn thắng — Kẻ Pha Trò!' : 'Kẻ Pha Trò thắng') : side === 'crew' ? (meWon ? '🎉 Phi hành đoàn thắng!' : '👩‍🚀 Phi hành đoàn thắng') : (meWon ? '🔪 Kẻ Giả Mạo thắng!' : '💀 Kẻ Giả Mạo thắng');
@@ -1250,7 +1349,7 @@ function showReveal() {
 const keys = {};
 let joy = null; // {id, x0, y0, dx, dy}
 addEventListener('keydown', e => { keys[e.key.toLowerCase()] = true; if (phase !== 'play' || !$('taskSheet').hidden || !$('meetSheet').hidden) return; const k = e.key.toLowerCase(); if (k === 'e') doUse(); if (k === 'r') doReport(); if (k === 'q') { if (me.sheriff) doShoot(); else doKill(); } if (k === 'v') doVent(); if (k === 'm') toggleMap();
-  if (k === 'f') $('bSabo').click(); if (!$('saboPop').hidden && (k === '1' || k === '2' || k === '3' || k === '4')) $(k === '1' ? 'sbLights' : k === '2' ? 'sbReactor' : k === '3' ? 'sbO2' : 'sbDoors').click(); });
+  if (k === 'f') $('bSabo').click(); if (k === 'g') $('bDoor').click(); if (!$('saboPop').hidden && (k === '1' || k === '2' || k === '3')) $(k === '1' ? 'sbLights' : k === '2' ? 'sbReactor' : 'sbO2').click(); else if (!$('doorPop').hidden && DOOR_KEYS.includes(k)) { const b = $('sbDoorList').children[DOOR_KEYS.indexOf(k)]; if (b) b.click(); } });
 // T: bật/tắt mic (mọi lúc khi đang online)
 addEventListener('keydown', e => { // bản đồ lúc họp: M bật/tắt, Esc đóng
   const k = e.key.toLowerCase(); if (e.repeat || !meeting || $('meetSheet').hidden) return;
@@ -1331,11 +1430,11 @@ function ventNext(dirn) { // trong ống: chuyển sang ống kế tiếp cùng 
 }
 function toggleMap() { mapOpen = !mapOpen; }
 $('bUse').onclick = doUse; $('bReport').onclick = doReport; $('bKill').onclick = doKill; $('bShoot').onclick = doShoot; $('bVent').onclick = doVent; $('bMap').onclick = toggleMap;
-$('bSabo').onclick = () => { if ($('bSabo').hidden || phase !== 'play' || !me.imp || saboCd > 0 || sabo || me.dead) return; $('sbDoors').hidden = !DOORS.length; $('sbDoors').disabled = doorT > 0; $('saboPop').hidden = !$('saboPop').hidden; };
+$('bSabo').onclick = () => { if ($('bSabo').hidden || phase !== 'play' || !me.imp || saboCd > 0 || sabo || me.dead) return; $('doorPop').hidden = true; $('saboPop').hidden = !$('saboPop').hidden; };
+$('bDoor').onclick = () => { if ($('bDoor').hidden || phase !== 'play' || !me.imp || doorCd > 0 || me.dead || !DOORS.length) return; $('saboPop').hidden = true; renderDoorPop(); $('doorPop').hidden = !$('doorPop').hidden; };
 $('sbLights').onclick = () => { $('saboPop').hidden = true; doSabotage('lights', me); };
 $('sbReactor').onclick = () => { $('saboPop').hidden = true; doSabotage('reactor', me); };
 $('sbO2').onclick = () => { $('saboPop').hidden = true; doSabotage('o2', me); };
-$('sbDoors').onclick = () => { $('saboPop').hidden = true; doDoors(me); };
 
 // ═══════════════════════════ luật: giết, phá hoại, báo ═══════════════════════════
 function kill(k, v) {
@@ -1467,7 +1566,15 @@ function impThink(b) {
       if (b.state !== 'hunt' || !b.path.length || Math.random() < 0.5) { goTo(b, v, 'hunt'); } return; }
   }
   // phá hoại thỉnh thoảng
-  if (!sabo && saboCd <= 0 && Math.random() < 0.08) { const r = Math.random(); if (r >= 0.85 && DOORS.length && doorT <= 0) doDoors(b); else doSabotage(r < 0.4 ? 'lights' : r < 0.65 ? 'reactor' : 'o2', b); return; }
+  if (!sabo && saboCd <= 0 && Math.random() < 0.08) { const r = Math.random(); doSabotage(r < 0.45 ? 'lights' : r < 0.75 ? 'reactor' : 'o2', b); return; }
+  // khoá cửa (thời gian chờ riêng từng phòng): ưu tiên nhốt phòng mình đang đứng cùng đúng một phi hành gia
+  if (DOORS.length && doorCd <= 0 && Math.random() < 0.02) {
+    const inRoom = (q, d) => { const r = ROOMS.find(x => x.id === d.rid).r; return q.x >= r[0] && q.x < r[0] + r[2] && q.y >= r[1] && q.y < r[1] + r[3]; };
+    const ready = doorCd > 0 ? [] : DOORS.filter(d => !d.shut), crew = d => P.filter(q => !q.dead && !q.imp && inRoom(q, d)).length;
+    const trap = ready.find(d => inRoom(b, d) && crew(d) === 1);
+    const pick = trap || (Math.random() < 0.25 ? ready.filter(d => crew(d) > 0)[0] : null);
+    if (pick) { doDoors(b, pick.rid); return; }
+  }
   // giả vờ làm nhiệm vụ như người thường
   if (b.state === 'doing') { b.timer += 0.3; if (b.timer > b.need) { b.state = 'idle'; } return; }
   if (!b.path.length) {
@@ -1480,7 +1587,7 @@ function impThink(b) {
 function startMeeting(reporter, body) {
   if (phase !== 'play') return;
   phase = 'meeting';
-  closeTask(); $('saboPop').hidden = true; joy = null; $('joy').hidden = true;
+  closeTask(); $('saboPop').hidden = true; $('doorPop').hidden = true; joy = null; $('joy').hidden = true;
   if (me.vent >= 0) { me.vent = -1; }
   for (const p of P) { if (p.vent >= 0) { p.vent = -1; } p.path = []; p.state = 'idle'; p.vx = p.vy = 0; }
   if (timedSabo()) { sabo = null; } // lò / oxy được tạm hoãn khi họp
@@ -1909,13 +2016,10 @@ function buildMap() {
     if (i > 0 && !GRID[j * GW + i - 1]) x.fillRect(i * GC - 6, j * GC, 6, GC);
     if (i + 1 < GW && !GRID[j * GW + i + 1]) x.fillRect((i + 1) * GC, j * GC, 6, GC);
   }
-  // tên phòng in trên sàn
-  x.textAlign = 'center'; x.textBaseline = 'middle';
-  for (const r of ROOMS) { x.font = '800 30px "Baloo 2", sans-serif'; x.fillStyle = 'rgba(255,255,255,.13)'; x.fillText(r.name.toUpperCase(), r.r[0] + r.r[2] / 2, r.r[1] + r.r[3] - 30); }
   // vật cản: mặt trên + mặt trước, vật cao có bóng đổ
   for (const o of OBST) drawObst(x, o);
-  // khung cửa phòng Điện: hai trụ ở hai đầu, rãnh cửa dưới sàn
-  for (const d of DOORS) {
+  // khung cửa các phòng: hai trụ ở hai đầu, rãnh cửa dưới sàn
+  for (const d of DOORS.flatMap(r => r.rects)) {
     const hor = d[2] > d[3]; x.fillStyle = 'rgba(0,0,0,.28)'; x.fillRect(d[0] + (hor ? 0 : 7), d[1] + (hor ? 7 : 0), hor ? d[2] : 6, hor ? 6 : d[3]);
     x.fillStyle = '#8a93ab';
     if (hor) { x.fillRect(d[0] - 10, d[1] - 30, 12, d[3] + 30); x.fillRect(d[0] + d[2] - 2, d[1] - 30, 12, d[3] + 30); }
@@ -1928,6 +2032,15 @@ function buildMap() {
     x.fillStyle = '#5d6884'; roundRect(x, v[0] - 25, v[1] - 15, 50, 30, 6); x.fill();
     x.fillStyle = '#151b2b'; roundRect(x, v[0] - 20, v[1] - 11, 40, 22, 4); x.fill();
     x.strokeStyle = '#7f8aa6'; x.lineWidth = 2.5; x.beginPath(); for (let k = -1; k <= 1; k++) { x.moveTo(v[0] - 17, v[1] + k * 6); x.lineTo(v[0] + 17, v[1] + k * 6); } x.stroke();
+  }
+  // tên phòng giữa phòng, vẽ sau cùng (đè lên đồ đạc) — chữ trắng viền tối cho dễ đọc trên mọi màu sàn; phòng hẹp thì thu nhỏ chữ cho vừa
+  x.textAlign = 'center'; x.textBaseline = 'middle'; x.lineJoin = 'round';
+  for (const r of ROOMS) {
+    const t = r.name.toUpperCase(), cx = r.r[0] + r.r[2] / 2, cy = r.r[1] + r.r[3] / 2;
+    let fs = 40; x.font = `800 ${fs}px "Baloo 2", sans-serif`;
+    const w = x.measureText(t).width, maxW = r.r[2] - 40; if (w > maxW) { fs = Math.max(18, Math.floor(fs * maxW / w)); x.font = `800 ${fs}px "Baloo 2", sans-serif`; }
+    x.lineWidth = Math.max(4, fs / 6); x.strokeStyle = 'rgba(8,12,26,.55)'; x.strokeText(t, cx, cy);
+    x.fillStyle = 'rgba(255,255,255,.62)'; x.fillText(t, cx, cy);
   }
   mapCv = c;
 }
@@ -2110,9 +2223,9 @@ function render() {
   const bp = .5 + .5 * Math.sin(now / 300);
   ctx.fillStyle = '#ff2b2b'; ctx.shadowColor = '#ff2b2b'; ctx.shadowBlur = 10 + bp * 14; ctx.beginPath(); ctx.ellipse(BUTTON.x, BUTTON.y - 8, 16, 12, 0, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0;
   ctx.fillStyle = 'rgba(255,255,255,.6)'; ctx.beginPath(); ctx.ellipse(BUTTON.x - 5, BUTTON.y - 12, 5, 3, 0, 0, Math.PI * 2); ctx.fill();
-  // cửa phòng Điện đang khoá: tấm thép sọc vàng đen cao như tường
-  if (doorShut) for (const d of DOORS) {
-    const hor = d[2] > d[3], top = d[1] - 30, h = d[3] + 30, a = Math.min(1, (DOOR_T - doorT) * 4);
+  // cửa phòng đang khoá: tấm thép sọc vàng đen cao như tường
+  for (const dr of DOORS) if (dr.shut) for (const d of dr.rects) {
+    const hor = d[2] > d[3], top = d[1] - 30, h = d[3] + 30, a = Math.min(1, (DOOR_T - dr.t) * 4);
     ctx.save(); ctx.beginPath(); ctx.rect(d[0], top, d[2], h); ctx.clip();
     const sh = hor ? 0 : (1 - a) * h;
     ctx.fillStyle = '#5b6377'; ctx.fillRect(d[0], top - sh, d[2], h);
@@ -2192,6 +2305,16 @@ function render() {
     g.addColorStop(0, 'rgba(0,0,0,1)'); g.addColorStop(1, 'rgba(0,0,0,0)');
     fg.fillStyle = g; fg.beginPath(); fg.moveTo(pts[0], pts[1]); for (let k = 2; k < pts.length; k += 2) fg.lineTo(pts[k], pts[k + 1]); fg.closePath(); fg.fill();
     ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'low'; ctx.drawImage(fogCv, 0, 0, W, H);
+    // đang ở trong phòng bị khoá cửa: ngoài phòng tối đen (chỉ còn thấy bên trong phòng, kể cả tường phòng)
+    const lockRoom = lockedRoomOf(me);
+    if (lockRoom) {
+      const [rx, ry, rw, rh] = lockRoom.r, a = Math.min(1, (DOOR_T - doorOf(lockRoom.id).t) * 3);
+      ctx.save(); ctx.translate(ox, oy); ctx.scale(zoom, zoom);
+      ctx.fillStyle = `rgba(2,4,12,${.96 * a})`; ctx.beginPath();
+      ctx.rect(-ox / zoom - 10, -oy / zoom - 10, W / zoom + 20, H / zoom + 20);
+      ctx.rect(rx - 8, ry - WALL_FACE - 14, rw + 16, rh + WALL_FACE + 22);
+      ctx.fill('evenodd'); ctx.restore();
+    }
     // người đang thấy (kể cả mình) vẽ lại đè lên bóng tối: chỉ thân người sáng, sàn quanh vẫn tối như cũ
     ctx.save(); ctx.translate(ox, oy); ctx.scale(zoom, zoom);
     for (const [p, bob, moving] of shown) drawPlayerTop(p, bob, moving);
@@ -2285,7 +2408,7 @@ function drawMini() {
   if (me.imp) for (const v of VENTS) dot(v[0], v[1], 1.6, '#94a3b8');
   if (!me.imp) for (const t of me.tasks) if (!t.done) dot(TASKS[t.id].x, TASKS[t.id].y, 2.6, '#ffd23f');
   for (const id of saboLeft()) dot(FIX[id].x, FIX[id].y, 4, Math.sin(now / 150) > 0 ? '#ff4d4d' : '#fff');
-  if (doorShut) { g.fillStyle = '#ff4d4d'; for (const dr of DOORS) g.fillRect(ox + dr[0] * k - 1, oy + dr[1] * k - 1, Math.max(2, dr[2] * k) + 2, Math.max(2, dr[3] * k) + 2); }
+  { g.fillStyle = '#ff4d4d'; for (const dr of DOORS.filter(d => d.shut).flatMap(d => d.rects)) g.fillRect(ox + dr[0] * k - 1, oy + dr[1] * k - 1, Math.max(2, dr[2] * k) + 2, Math.max(2, dr[3] * k) + 2); }
   g.strokeStyle = '#ff4d4d'; g.lineWidth = 1.6;
   for (const b of bodies) if (seesMe(b)) { const x = ox + b.x * k, y = oy + b.y * k; g.beginPath(); g.moveTo(x - 3, y - 3); g.lineTo(x + 3, y + 3); g.moveTo(x + 3, y - 3); g.lineTo(x - 3, y + 3); g.stroke(); }
   for (const p of P) if (p !== me && !p.dead && p.vent < 0 && seesMe(p)) dot(p.x, p.y, 2.6, COLORS[p.ci][1], 'rgba(0,0,0,.6)');
@@ -2309,7 +2432,7 @@ function syncHud() {
   if (me.imp && !me.dead) { const d = document.createElement('div'); d.className = 'hot'; d.textContent = `🔪 Giết: ${me.killCd > 0 ? Math.ceil(me.killCd) + 's' : 'sẵn sàng'}`; tk.appendChild(d); }
   if (me.sheriff && !me.dead) { const d = document.createElement('div'); d.className = 'hot gun'; d.textContent = gunLabel(); tk.appendChild(d); }
   if (idleOn(me) && phase !== 'over') { const d = document.createElement('div'); d.className = 'idle'; tk.appendChild(d); idleHud(); }
-  $('bKill').hidden = $('bSabo').hidden = $('bVent').hidden = !(me.imp && !me.dead);
+  $('bKill').hidden = $('bSabo').hidden = $('bVent').hidden = !(me.imp && !me.dead); $('bDoor').hidden = !(me.imp && !me.dead && DOORS.length);
   $('bShoot').hidden = !(me.sheriff && !me.dead && me.ammo > 0);
   $('bReport').hidden = me.dead;
   const al = $('alert'); if (sabo) { al.hidden = false; al.className = 'alert' + (sabo.kind === 'lights' ? ' dark' : ''); al.textContent = alertText(); } else al.hidden = true;
@@ -2322,6 +2445,14 @@ function alertText() {
 }
 // chỉ ghi lại nội dung nút khi đổi: thay phần tử con mỗi khung hình làm cú bấm chuột (nhấn ở phần tử cũ, nhả ở phần tử mới) bị mất
 const setHtml = (el, h) => { if (el._h !== h) { el._h = h; el.innerHTML = h; } };
+// tên phòng người chơi đang đứng (trong ống gió: tên phòng có ống đó); ngoài phòng là hành lang
+function hereTick() {
+  const el = $('here'), on = phase === 'play' && !meeting && !!me;
+  if (el.hidden === on) el.hidden = !on;
+  if (!on) return;
+  const r = roomAt(me.x, me.y), t = r ? '📍 ' + r.name : 'Hành lang';
+  if (el._t !== t) { el._t = t; el.textContent = t; el.classList.toggle('hall', !r); }
+}
 function progLabel(pct) {
   const b = $('prog').lastElementChild, s = Math.ceil(gameLeft), late = phase !== 'over' && s <= 60;
   b.textContent = `Nhiệm vụ ${pct}%` + (phase === 'over' ? '' : ` · ⏱ ${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`); b.classList.toggle('late', late);
@@ -2336,6 +2467,7 @@ function hudTick() {
   if (me.imp && !me.dead) {
     const bk = $('bKill'); bk.disabled = me.killCd > 0 || !o.victim; bk.querySelector('.cd').style.setProperty('--p', (me.killCd / KILL_CD * 100) + '%'); const cn = bk.querySelector('.cdn'); cn.hidden = me.killCd <= 0; cn.textContent = Math.ceil(me.killCd);
     const bs = $('bSabo'); bs.disabled = saboCd > 0 || !!sabo; bs.querySelector('.cd').style.setProperty('--p', (sabo ? 100 : saboCd / SABO_CD * 100) + '%'); const sn = bs.querySelector('.cdn'); sn.hidden = saboCd <= 0 || !!sabo; sn.textContent = Math.ceil(saboCd);
+    const bd = $('bDoor'); bd.disabled = doorCd > 0 || !DOORS.length; bd.querySelector('.cd').style.setProperty('--p', doorCd / DOOR_CD * 100 + '%'); const dn = bd.querySelector('.cdn'); dn.hidden = doorCd <= 0; dn.textContent = Math.ceil(doorCd);
     const bv = $('bVent'); bv.disabled = me.vent < 0 && o.vent < 0; setHtml(bv, (me.vent >= 0 ? '<span>⬆️</span>Chui ra' : '<span>🕳️</span>Ống gió') + '<kbd>V</kbd>');
   }
   if (me.sheriff && !me.dead && me.ammo > 0) {
@@ -2357,6 +2489,7 @@ function idleHud() {
 // ═══════════════════════════ vòng lặp ═══════════════════════════
 let last = performance.now(), ventKeyT = 0, stepT = 0, sirenT = 0;
 function loop(now) {
+  if (me) hereTick(); else $('here').hidden = true;
   fpsTick(now);
   tick(now);
   render();
@@ -2381,7 +2514,7 @@ function step(dt, now) {
     if (!isGuest()) for (const p of P) { if (p.bot && !(p.dead && p.imp)) botStep(p, dt); if (p.imp) p.killCd = Math.max(0, p.killCd - dt); if (p.sheriff) p.shootCd = Math.max(0, p.shootCd - dt); }
     else { if (me.imp) me.killCd = Math.max(0, me.killCd - dt); if (me.sheriff) me.shootCd = Math.max(0, me.shootCd - dt); }
     saboCd = Math.max(0, saboCd - dt);
-    if (doorT > 0 && (doorT -= dt) <= 0) { doorT = 0; shutDoors(false); toast(`🚪 Cửa phòng ${elecName()} đã mở.`); }
+    doorTick(dt); if (!$('doorPop').hidden) renderDoorPop();
     idleTick(dt);
     gameLeft = Math.max(0, gameLeft - dt);
     if (!timeWarn && gameLeft <= 60) { timeWarn = 1; toast(me.imp ? '⏱ Còn 1 phút! Cầm chân phi hành đoàn là thắng.' : '⏱ Còn 1 phút! Làm nhanh nhiệm vụ không là Kẻ Giả Mạo thắng!', 3500); playAlert(); }
@@ -2500,8 +2633,8 @@ function renderSetup() {
   seg($('suBots'), [[4, '4'], [5, '5'], [6, '6'], [7, '7'], [8, '8'], [9, '9']], setup.bots, v => { setup.bots = v; if (setup.imps > Math.floor(v / 2)) setup.imps = 1; });
   seg($('suImps'), [[1, '1 kẻ'], [2, '2 kẻ']].filter(([v]) => v <= Math.floor(setup.bots / 2)), setup.imps, v => { setup.imps = v; });
   seg($('suTime'), TIME_OPTS, timeMin(), v => { setup.time = v; });
-  seg($('suMap'), MAP_OPTS, mapChoice(setup.map), v => { setup.map = v; });
-  seg($('suRole'), [['random', 'Ngẫu nhiên'], ['crew', 'Phi hành gia'], ['sheriff', 'Cảnh sát'], ['jester', 'Pha Trò'], ['imp', 'Kẻ giả mạo']], setup.role, v => { setup.role = v; });
+  selBox($('suMap'), MAP_OPTS, mapChoice(setup.map), v => { setup.map = v; renderSetup(); });
+  selBox($('suRole'), [['random', 'Ngẫu nhiên'], ['crew', 'Phi hành gia'], ['sheriff', 'Cảnh sát'], ['jester', 'Pha Trò'], ['imp', 'Kẻ giả mạo']], setup.role, v => { setup.role = v; renderSetup(); });
   $('suSheriff').checked = setup.sheriff !== false; $('suJester').checked = setup.jester !== false;
   $('suConfirm').checked = !!setup.confirm;
 }
@@ -2717,7 +2850,7 @@ function renderLobby() {
     seg($('lbBots'), [0, 1, 2, 3, 4, 5, 6, 7, 8].filter(v => v <= MAX_P - humans.length).map(v => [v, String(v)]), nb, v => { S.bots = v; });
     seg($('lbImps'), [[1, '1 kẻ'], [2, '2 kẻ'], [3, '3 kẻ']].filter(([v]) => v === 1 || v <= Math.floor((total - 1) / 2)), S.imps, v => { S.imps = v; });
     seg($('lbTime'), TIME_OPTS, timeMin(), v => { S.time = v; });
-    seg($('lbMap'), MAP_OPTS, mapChoice(S.map), v => { S.map = v; });
+    selBox($('lbMap'), MAP_OPTS, mapChoice(S.map), v => { S.map = v; fixS(); roomChanged(); });
     seg($('lbVoice'), [['meet', '🔇 Chỉ khi họp'], ['near', '🔉 Nghe người ở gần']], S.voice, v => { S.voice = v; });
     $('lbConfirm').checked = !!S.confirm; $('lbSheriff').checked = !!S.sheriff; $('lbJester').checked = !!S.jester;
     const guests = humans.filter(m => !m.host), notReady = guests.filter(m => !m.ready).length;
@@ -2929,7 +3062,7 @@ function hostMsg(c, d) {
     case 'kill': { const v = P[d.v]; if (phase === 'play' && p.imp && !p.dead && p.killCd <= 0 && p.vent < 0 && v && !v.dead && !v.imp && dist(ps, v) < KILL_RANGE + 60) { kill(p, v); } return; }
     case 'report': { const b = bodies.find(x => x.id === d.b); if (phase === 'play' && !p.dead && b && dist(ps, b) < 170) startMeeting(p, b); return; }
     case 'emerg': if (phase === 'play' && !p.dead && !sabo && p.emergency > 0 && dist(ps, BUTTON) < 160) { p.emergency--; startMeeting(p, null); } return;
-    case 'sabo': if (phase === 'play' && p.imp && !p.dead && SABO_KINDS.includes(d.kind)) doSabotage(d.kind, p); else if (phase === 'play' && p.imp && !p.dead && d.kind === 'doors') doDoors(p); return;
+    case 'sabo': if (phase === 'play' && p.imp && !p.dead && SABO_KINDS.includes(d.kind)) doSabotage(d.kind, p); else if (phase === 'play' && p.imp && !p.dead && d.kind === 'doors') doDoors(p, d.r); return;
     case 'fix': { const id = saboLeft().includes(d.s) ? d.s : saboLeft().length === 1 ? saboLeft()[0] : null; if (phase === 'play' && id && !p.dead && dist(ps, FIX[id]) < USE_RANGE + 70) { idleReset(p); fixSabotage(id); } return; }
     case 'shoot': { const v = P[d.v]; if (phase === 'play' && p.sheriff && p.ammo > 0 && !p.dead && p.shootCd <= 1 && p.vent < 0 && v && v !== p && !v.dead && dist(ps, v) < SHOOT_RANGE + 60 && losClear(ps, v)) shoot(p, v); return; }
     case 'task': { const t = p.tasks.find(x => x.id === d.id); if (t && !p.imp && !p.jester && (phase === 'play' || phase === 'meeting')) { t.done = true; idleReset(p); syncHud(); checkWin(); } return; }
@@ -2970,7 +3103,7 @@ function fullFor(p) {
   return {
     t: 'full', id: p.id, ph: phase, S, impN, mp: MAP_I,
     P: P.map(q => ({ id: q.id, name: q.name, ci: q.ci, cid: q.cid, imp: see && q.imp, dead: q.dead, ej: q.ejected, x: Math.round(q.x), y: Math.round(q.y), dir: q.dir })),
-    tasks: p.tasks, em: p.emergency, kc: p.killCd, sh: p.sheriff ? 1 : 0, jt: p.jester ? 1 : 0, am: p.ammo, scd: p.shootCd, sabo: sabo ? { kind: sabo.kind, t: sabo.t, left: saboLeft() } : null, sc: saboCd, dr: doorT,
+    tasks: p.tasks, em: p.emergency, kc: p.killCd, sh: p.sheriff ? 1 : 0, jt: p.jester ? 1 : 0, am: p.ammo, scd: p.shootCd, sabo: sabo ? { kind: sabo.kind, t: sabo.t, left: saboLeft() } : null, sc: saboCd, dc: doorCd, dr: doorNet(),
     b: bodies.map(b => [b.id, Math.round(b.x), Math.round(b.y)]), pr: hostPct(), gl: gameLeft,
     m: m ? { pr: progShown, r: m.reporter.id, v: m.victim ? m.victim.id : -1, room: m.room, bx: m.body ? Math.round(m.body.x) : -1, by: m.body ? Math.round(m.body.y) : -1, t: m.t, phaseV: m.phaseV === 'done' ? 'vote' : m.phaseV, talkT: m.talkT, voteT: m.voteT, voted: Object.keys(m.votes).map(Number), my: m.votes[p.id] } : null,
   };
@@ -2981,10 +3114,10 @@ function hostSnap() {
   const imps = P.filter(q => q.imp).map(q => q.id);
   net.snapSq++;
   const base = { t: 's', sq: net.snapSq, p: P.map(q => { const [vx, vy] = netVel(q); return [Math.round(q.x), Math.round(q.y), q.dir, Math.hypot(q.vx, q.vy) > 5 ? 1 : 0, q.dead ? 1 : 0, q.vent >= 0 ? 1 : 0, Math.round(vx), Math.round(vy)]; }),
-    b: bodies.map(b => [b.id, Math.round(b.x), Math.round(b.y)]), sb: sabo ? [sabo.kind, Math.round(sabo.t * 10) / 10, saboLeft()] : 0, dr: doorT > 0 ? Math.round(doorT * 10) / 10 : 0, pr: hostPct(), gl: Math.round(gameLeft * 10) / 10 };
+    b: bodies.map(b => [b.id, Math.round(b.x), Math.round(b.y)]), sb: sabo ? [sabo.kind, Math.round(sabo.t * 10) / 10, saboLeft()] : 0, dr: doorNet(), pr: hostPct(), gl: Math.round(gameLeft * 10) / 10 };
   for (const [c, cid] of net.conns) {
     const p = P.find(q => q.cid === cid); if (!p || !c.open) continue;
-    fastSend(c, Object.assign({}, base, { n: c._n || 0, kc: Math.round(p.killCd * 10) / 10, em: p.emergency, sc: Math.round(saboCd), im: p.imp || p.dead ? imps : undefined }));
+    fastSend(c, Object.assign({}, base, { n: c._n || 0, kc: Math.round(p.killCd * 10) / 10, em: p.emergency, sc: Math.round(saboCd), dc: Math.round(doorCd), im: p.imp || p.dead ? imps : undefined }));
   }
 }
 
@@ -3121,7 +3254,7 @@ function guestMsg(d) {
       syncHud(); return;
     }
     case 'sabo': if (!SABO_KINDS.includes(d.kind)) return; sabo = { kind: d.kind, t: saboT0(d.kind), left: SABO_FIX[d.kind].slice() }; playAlert(); toast(saboMsg(d.kind)); if (me.imp) saboCd = SABO_CD; syncHud(); return;
-    case 'door': if (phase === 'play') { closeDoors(clamp(+d.s || DOOR_T, 0.5, DOOR_T)); if (me.imp) saboCd = SABO_CD; } return;
+    case 'door': if (phase === 'play') { const dr = doorOf(d.r); if (dr) closeDoor(dr, clamp(+d.s || DOOR_T, 0.5, DOOR_T)); } return;
     case 'fixpart': if (sabo && FIX[d.s]) { sabo.left = saboLeft().filter(x => x !== d.s); if (taskCur && taskCur.kind === 'fix' && taskCur.st === d.s) closeTask(); toast(`✅ Đã sửa ở ${FIX[d.s].room}${sabo.left.length ? ' — còn ' + FIX[sabo.left[0]].room + '!' : ''}`); playTaskDone(); syncHud(); } return;
     case 'shot': {
       const s = P_(d.s), v = P_(d.v); if (!s || !v) return;
@@ -3166,8 +3299,8 @@ function applyFull(d) {
   me = P[d.id];
   me.tasks = Array.isArray(d.tasks) ? d.tasks : []; me.emergency = d.em | 0; me.killCd = +d.kc || 0;
   me.sheriff = !!d.sh; me.jester = !!d.jt; me.ammo = d.am | 0; me.shootCd = +d.scd || 0;
-  sabo = d.sabo && SABO_KINDS.includes(d.sabo.kind) ? { kind: d.sabo.kind, t: d.sabo.t, left: Array.isArray(d.sabo.left) ? d.sabo.left : SABO_FIX[d.sabo.kind].slice() } : null; saboCd = +d.sc || 0; netProg = d.pr | 0;
-  doorT = Math.max(0, +d.dr || 0); shutDoors(doorT > 0);
+  sabo = d.sabo && SABO_KINDS.includes(d.sabo.kind) ? { kind: d.sabo.kind, t: d.sabo.t, left: Array.isArray(d.sabo.left) ? d.sabo.left : SABO_FIX[d.sabo.kind].slice() } : null; saboCd = +d.sc || 0; doorCd = +d.dc || 0; netProg = d.pr | 0;
+  resetDoors(); applyDoorNet(d.dr, true);
   gameLeft = Number.isFinite(+d.gl) ? +d.gl : timeMin() * 60; timeWarn = gameLeft <= 60 ? 1 : 0;
   bodies = (d.b || []).map(([id, x, y]) => ({ id, x, y, ci: P[id] ? P[id].ci : 0, t: 0 }));
   meeting = null; winner = null; mapOpen = false; splats.length = 0; fx.length = 0; bodyBorn.clear();
@@ -3183,7 +3316,7 @@ function guestMeeting(d) {
   if (phase !== 'play' && phase !== 'reveal') return;
   $('roleSheet').hidden = true;
   phase = 'meeting';
-  closeTask(); $('saboPop').hidden = true; joy = null; $('joy').hidden = true; me.vent = -1;
+  closeTask(); $('saboPop').hidden = true; $('doorPop').hidden = true; joy = null; $('joy').hidden = true; me.vent = -1;
   if (timedSabo()) sabo = null;
   resetDoors();
   const reporter = P[d.r] || me, victim = d.v >= 0 ? P[d.v] : null;
@@ -3204,8 +3337,8 @@ function applySnap(d) {
   });
   bodies = (d.b || []).map(([id, x, y]) => ({ id, x, y, ci: P[id] ? P[id].ci : 0, t: 0 }));
   if (d.sb && SABO_KINDS.includes(d.sb[0])) { if (!sabo || sabo.kind !== d.sb[0]) sabo = { kind: d.sb[0], t: d.sb[1] }; sabo.t = d.sb[1]; if (Array.isArray(d.sb[2])) sabo.left = d.sb[2]; } else sabo = null;
-  { const dr = Math.max(0, +d.dr || 0); if (dr > 0.3 && !doorShut) { doorT = dr; shutDoors(true); } else if (!dr && doorShut) resetDoors(); else if (dr) doorT = dr; }
-  if (me.imp) { me.killCd = +d.kc || 0; saboCd = +d.sc || 0; }
+  applyDoorNet(d.dr, false);
+  if (me.imp) { me.killCd = +d.kc || 0; saboCd = +d.sc || 0; if (d.dc !== undefined) doorCd = +d.dc || 0; }
   me.emergency = d.em | 0; netProg = d.pr | 0;
   if (Number.isFinite(+d.gl)) gameLeft = +d.gl;
   if (Array.isArray(d.im)) for (const id of d.im) if (P[id]) P[id].imp = true;
