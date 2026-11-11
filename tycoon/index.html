@@ -371,23 +371,32 @@ button:disabled { opacity: .4; cursor: default; }
   .dock { margin-top: auto; }
   .dice { padding-top: calc(var(--s) * .3); }
 }
-/* điện thoại dọc: chỉ hiện thẻ của mình, gọn một dòng (tiền mặt + tài sản); người khác xem bằng cách chạm quân / nhật ký */
+/* điện thoại dọc: thẻ 4 người ở 4 góc quanh bàn — 2 thẻ trên bàn, 2 thẻ dưới bàn (c0 = mình, góc dưới phải) */
 @media (orientation: portrait) and (max-width: 699px) {
-  .hud { display: flex; justify-content: center; gap: 6px; padding: 4px 8px 0; }
-  .hud .pl:not(.me) { display: none; }
-  .pl { flex-direction: row; align-items: center; gap: 8px; padding: 4px 10px 4px 8px; border-radius: 999px; border-width: 1.5px; max-width: 100%; }
+  .stage { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-rows: auto 1fr auto auto auto 1fr auto;
+    grid-template-areas: "top top" ". ." "c1 c2" "wrap wrap" "c3 c0" "act act" "dock dock"; column-gap: 8px; }
+  .top { grid-area: top; } .board-wrap { grid-area: wrap; } .actions { grid-area: act; } .dock { grid-area: dock; }
+  .hud { display: contents; }
+  .pl.c1 { grid-area: c1; margin: 6px 0 0 8px; } .pl.c2 { grid-area: c2; margin: 6px 8px 0 0; }
+  .pl.c3 { grid-area: c3; margin: 0 0 0 8px; } .pl.c0 { grid-area: c0; margin: 0 8px 0 0; }
+  /* thẻ 2 dòng: ảnh bên trái, tên + hạng dòng trên, tiền mặt (xanh) + tài sản (vàng) dòng dưới */
+  .pl { display: grid; grid-template-columns: 30px minmax(0, 1fr) auto; grid-template-areas: "ava nm rk" "ava mo mo" "go go go"; align-items: center; column-gap: 6px; row-gap: 1px; padding: 4px 8px 4px 5px; border-radius: 14px; border-width: 1.5px; min-width: 0; position: relative; }
   .pl::before { display: none; }
-  .pl-top { display: contents; } .pl .ava { width: 28px; height: 28px; order: -2; margin-right: 0; } .pl-id { order: -1; flex: 0 1 auto; }
+  .pl-top { display: contents; } .pl .ava { grid-area: ava; width: 30px; height: 30px; margin: 0; }
+  .pl-id { grid-area: nm; } .pl .nm { font-size: 12.5px; text-overflow: ellipsis; }
+  .pl .rank { grid-area: rk; width: 17px; height: 17px; font-size: 10.5px; }
+  .pl .par, .pl .vc { display: none; }
+  .pl .cd { position: absolute; top: -7px; right: -3px; font-size: 10.5px; line-height: 16px; padding: 0 5px; }
   .pl.turn .pl-top::before, .pl.turn .pl-top::after { display: none; }
-  .pl .nm { font-size: 12px; } .pl .rank { width: 18px; height: 18px; font-size: 11px; }
-  .pl-row { background: none; padding: 0; min-height: 0; gap: 4px; font-size: 12px; flex: 0 0 auto; } .pl-row .lbl b { display: none; }
+  .pl-row.money { grid-area: mo; background: none; padding: 0; min-height: 0; gap: 6px; justify-content: flex-start; font-size: 12px; }
+  .pl-row .ic { display: none; } .pl-row .mw { border-left: 1px solid rgba(255,255,255,.18); padding-left: 6px; }
   .pl .cash { font-size: 13px; } .pl .worth { font-size: 12px; } .pl .delta { font-size: 10px; padding: 0 5px; }
-  .pl-props, .pl-goals { display: none; }
+  .pl-props { display: none; }
+  /* 4 thanh tiến độ thắng: 2 hàng × 2 cột */
+  .pl-goals { grid-area: go; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2px; margin-top: 3px; }
+  .pl-goal { padding: 2px 4px; font-size: 9.5px; }
   .pl .cd { font-size: 10.5px; line-height: 16px; padding: 0 5px; }
   .pl .par { font-size: 10.5px; line-height: 16px; padding: 0 4px; }
-  /* nhiều người chơi chung máy: hai thẻ chia đôi bề ngang, chỉ giữ tiền mặt cho khỏi chồng chữ */
-  .hud:has(.pl.me ~ .pl.me) .pl-row .mw { display: none; }
-  .hud:has(.pl.me ~ .pl.me) .pl { gap: 5px; padding-right: 8px; }
   .stage { --s: 26px !important; }
   /* nút hành động treo trong sàn giữa bàn, ngay dưới nút ĐỔ (fit() chuyển #actions vào #mid), không làm bàn co lại */
   .mid .actions { position: absolute; top: 100%; left: 50%; transform: translateX(-50%); width: max-content; max-width: 70vw; min-height: 0; padding: 0; margin-top: 12px; gap: 4px; }
@@ -422,7 +431,9 @@ button:disabled { opacity: .4; cursor: default; }
   .board-wrap { top: 30px; bottom: 38px; }
   .pl { width: clamp(140px, 18vw, 180px); padding: 4px 7px 4px 9px; gap: 2px; } .pl .ava { width: 26px; height: 26px; } .pl .skill { display: none; } .pl .nm { font-size: 12.5px; } .pl-props { display: none; }
   .pl-row { font-size: 11px; min-height: 20px; padding: 1px 7px; } .pl .cash { font-size: 12.5px; } .pl .worth { font-size: 11.5px; } .pl-props { display: none; }
-  .pl-goal { font-size: 9.5px; padding: 2px 5px; }
+  /* màn thấp: 4 thanh tiến độ thắng gọn 2 hàng × 2 cột */
+  .pl-goals { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2px; }
+  .pl-goal { padding: 2px 4px; font-size: 9.5px; }
   .pl-row.money { padding: 1px 6px; } .pl-row .ic { display: none; } /* thẻ hẹp: bỏ biểu tượng, phân biệt bằng màu (xanh = tiền mặt, vàng = tài sản) */
   .status { font-size: 12px; padding: 2px 10px; top: calc(env(safe-area-inset-top, 0px) + 36px); }
   .actions button { min-height: 34px; padding: 4px 10px; font-size: 13px; } .actions button small { font-size: 10.5px; }
@@ -479,8 +490,13 @@ button:disabled { opacity: .4; cursor: default; }
 .rules li { margin: 4px 0; }
 .panel.wide { max-width: 760px; }
 .panel h3, .rules-h { font-size: 16px; font-weight: 800; margin: 16px 0 6px; }
-.rules-more { display: grid; grid-template-columns: 1fr; gap: 0 22px; }
-@media (min-width: 640px) { .rules-more { grid-template-columns: 1fr 1fr; } .rules-list.cols { columns: 2; column-gap: 22px; } }
+.rules-grid { display: grid; grid-template-columns: 1fr; gap: 0 22px; }
+.rules-grid h3 { margin: 10px 0 4px; }
+.rules-grid .rules { font-size: 13.5px; line-height: 1.4; }
+.rules-sub { margin-top: 8px; border: 1px solid #e6ecf3; border-radius: 12px; padding: 6px 12px; }
+.rules-sub summary { font-weight: 800; font-size: 15px; cursor: pointer; padding: 2px 0; }
+.rules-sub[open] summary { margin-bottom: 6px; }
+@media (min-width: 640px) { .rules-grid { grid-template-columns: 1fr 1fr; } .rules-list.cols { columns: 2; column-gap: 22px; } }
 .rules-tbl { width: 100%; border-collapse: collapse; font-size: 13.5px; }
 .rules-tbl th, .rules-tbl td { padding: 3px 6px; text-align: left; border-bottom: 1px solid #e6ecf3; }
 .rules-tbl th { color: var(--muted); font-weight: 700; font-size: 12.5px; }
@@ -641,33 +657,6 @@ button:disabled { opacity: .4; cursor: default; }
 </style>
 </head>
 <body>
-<!-- Chặn chơi trên điện thoại: bàn cờ cần màn hình lớn (máy tính / máy tính bảng) -->
-<style>
-#mobile-block{position:fixed;inset:0;z-index:2147483000;display:none;place-items:center;padding:24px;box-sizing:border-box;
-  background:linear-gradient(160deg,#2a1a5e,#5b2a86);color:#fff;font-family:'Baloo 2','Nunito',system-ui,sans-serif;text-align:center}
-#mobile-block .mb-box{max-width:340px;display:grid;gap:14px;justify-items:center}
-#mobile-block .mb-icon{width:96px;height:96px;border-radius:22px;box-shadow:0 8px 24px rgba(0,0,0,.35)}
-#mobile-block h1{margin:0;font-size:26px;line-height:1.15}
-#mobile-block p{margin:0;font-size:16px;line-height:1.45;color:#e6dcff}
-html.is-phone #mobile-block{display:grid}
-html.is-phone body{overflow:hidden}
-</style>
-<div id="mobile-block" role="alert">
-  <div class="mb-box">
-    <img class="mb-icon" src="icon.png" alt="">
-    <h1>Cờ Tỷ Phú chưa chơi được trên điện thoại</h1>
-    <p>Bàn cờ cần màn hình lớn hơn. Hãy mở trò chơi này trên máy tính hoặc máy tính bảng (iPad) nhé!</p>
-  </div>
-</div>
-<script>
-// Điện thoại = cạnh ngắn của màn hình dưới 600px (iPad và máy tính vẫn chơi bình thường)
-(function () {
-  var phone = Math.min(screen.width, screen.height) < 600;
-  if (phone) document.documentElement.classList.add('is-phone');
-})();
-</script>
-
-
 <div class="stage" id="stage">
 <header class="top">
   <h1><span>Cờ</span> <span>Tỷ</span> <span>Phú</span></h1>
@@ -844,29 +833,40 @@ html.is-phone body{overflow:hidden}
 <div class="overlay" id="rulesSheet" hidden>
   <div class="panel wide">
     <h2>Luật chơi</h2>
-    <ol class="rules">
-      <li>Mỗi người bắt đầu với <b>$2.000</b> — mỗi nhân vật có <b>80%</b> may mắn được <b>nhân đôi</b> thành $4.000 — và <b>3 thẻ Chẵn/Lẻ</b> 🎲 (giữ tối đa 3): trước khi tung, dùng một thẻ để chắc chắn tổng ra chẵn hoặc lẻ. Lần lượt tung <b>hai xúc xắc</b> đi vòng quanh <b>32 ô</b> (tối đa <b>4 người</b> chơi). Qua <b>Bắt Đầu</b> nhận <b>$300</b>; dừng đúng Bắt Đầu (từ vòng 2) còn được nâng cấp một thành phố.</li>
-      <li>Dừng ở <b>thành phố</b> chưa có chủ thì mua và xây ngay: Nhà → Biệt thự → Chung cư → Khách sạn → Biểu tượng. Vòng đầu chỉ xây tới Chung cư; qua Bắt Đầu rồi mới xây Khách sạn; có Khách sạn rồi mới lên Biểu tượng. Về thành phố của mình thì được nâng cấp.</li>
-      <li>Vào thành phố <b>của người khác</b> phải trả <b>phí tham quan</b> theo cấp nhà, rồi có thể <b>mua lại</b> với giá <b>bằng</b> số tiền chủ đã đầu tư (trừ Biểu tượng và điểm du lịch). <b>Biểu tượng</b> 🗼 cũng không bị ép bán, phá cấp hay đổi.</li>
-      <li>Phí tham quan <b>×2</b> khi chủ có đủ nhóm màu, <b>×2</b> cho <b>mỗi lần</b> thành phố hoặc điểm du lịch được mở <b>lễ hội</b> (cộng dồn: 2 lần là ×4; mỗi lúc chỉ một nơi có lễ hội — mở ở nơi khác thì nơi cũ bị lấy lại, phí về như cũ), <b>×2</b> ở 3 <b>ô đất vàng ⭐</b> chọn ngẫu nhiên mỗi ván.</li>
-      <li><b>5 điểm du lịch</b> 🏖️ càng xa ô Bắt Đầu càng đắt: giá từ $150 (Vũng Tàu) đến $300 (Đồ Sơn), phí tham quan từ $80 đến $320, nhân với số điểm chủ đang có, <b>mỗi lượt có người ghé</b> (kể cả chủ) phí tăng thêm <b>50%</b> phí gốc, không mua lại được. Ai gom đủ cả 5 <b>thắng ngay</b>.</li>
-      <li><b>Côn Đảo</b>: kẹt 3 lượt, ra sớm bằng tung đôi (vẫn được tung tiếp như tung đôi thường), nộp $100 hoặc thẻ ra tù. Tung đôi 3 lần liền cũng vào Côn Đảo. <b>Bến Xe</b>: lượt sau được đi tới ô bất kỳ (vé $40). <b>Đại Nhạc Hội</b>: trả $40 tổ chức lễ hội ở một thành phố hoặc điểm du lịch của mình. <b>Thuế</b>: nộp 10% tổng tài sản, tiền thuế dồn vào <b>Quỹ Thuế</b> — ai rút được thẻ Quỹ Thuế ở ô Cơ Hội sẽ nhận toàn bộ quỹ. <b>Nút ĐỔ</b>: chạm nhanh để tung ngẫu nhiên, hoặc <b>bấm giữ</b> cho thanh lực chạy rồi thả tay — lực càng cao càng dễ ra tổng điểm lớn. <b>Sòng bài</b>: đặt $100 đoán Chẵn/Lẻ (×2) hoặc Đôi (×6).</li>
-      <li><b>Cơ Hội</b>: thẻ có lợi (nhận Quỹ Thuế, miễn phí tham quan, giảm 50%, khiên, ra tù, lễ hội miễn phí, thêm thẻ Chẵn/Lẻ) hoặc hại (đổi thành phố, ép bán, phá cấp, dịch bệnh, mất điện, bị đưa đi nơi khác).</li>
-      <li>Tung đôi được đi tiếp, trừ khi vào Côn Đảo hay Bến Xe; không còn việc gì thì lượt tự chuyển. Thiếu tiền thì bán thành phố (được nửa vốn); bán hết cũng không đủ thì <b>phá sản</b> ngay: ngân hàng mua lại toàn bộ đất (nửa vốn), tiền thu được cùng tiền mặt trả cho chủ nợ. Đang thiếu tiền cũng có thể tự chọn <b>phá sản</b> thay vì bán nhà.</li>
-      <li><b>Thắng</b> khi: đối thủ phá sản hết · đủ <b>3 nhóm màu</b> · sở hữu <b>cả một hàng</b> · đủ <b>5 điểm du lịch</b> · xây đủ <b>5 Biểu tượng</b> · hoặc <b>giàu nhất</b> khi hết số vòng. Mỗi nhân vật có một kỹ năng riêng.</li>
-      <li><b>Vắng mặt</b>: ai tới lượt mà quá <b>30 giây</b> không thao tác thì <b>máy đánh thay</b> cho hết lượt đó — thẻ người chơi hiện <b>đếm ngược</b> ⏳, 10 giây cuối số to giữa bàn; quay lại thì bấm <b>✋ Tôi quay lại rồi</b> ở thanh dưới (hoặc chờ tới lượt sau) để tự chơi tiếp.</li>
-      <li><b>Online</b>: khách vào phòng bấm <b>✅ Sẵn sàng</b>, mọi người sẵn sàng rồi chủ phòng mới bắt đầu được. Người vào khi ván đang chơi sẽ <b>ngồi vào ghế máy</b> (nếu còn). Bấm 🎤 trên cùng để <b>trò chuyện bằng giọng nói</b> với cả phòng (bấm lần nữa để tắt mic). Lỡ tải lại trang thì mở lại link phòng là về đúng ghế cũ — chủ phòng tải lại trang cũng mở lại được phòng cùng mã, ván vẫn giữ nguyên.</li>
-      <li>Chạm vào thẻ người chơi khác để <b>tặng tiền</b> 🎁; bấm 😊 trên cùng để gửi <b>biểu tượng cảm xúc</b>; bấm 📍 rồi chạm một ô để <b>đánh dấu</b> ô đó nhấp nháy vài giây cho mọi người cùng chú ý.</li>
-    </ol>
-    <div class="rules-more">
-      <section><h3>🏠 Cấp nhà</h3><table class="rules-tbl" id="rulesLevels"></table><p class="rule">Tính theo giá gốc thành phố. Ví dụ Sài Gòn ($400): nhà $400, phí $140.</p></section>
-      <section><h3>🎭 Nhân vật</h3><ul class="rules-list" id="rulesChars"></ul></section>
+    <div class="rules-grid">
+      <section><h3>🎲 Cơ bản</h3><ul class="rules">
+        <li>2–4 người, bàn <b>32 ô</b>, tung <b>2 xúc xắc</b>. Vốn <b>$2.000</b> (80% được ×2 thành $4.000).</li>
+        <li>Qua <b>Bắt Đầu</b> +$300; dừng đúng ô (từ vòng 2) được nâng cấp 1 thành phố.</li>
+        <li>Tung <b>đôi</b> đi tiếp; 3 lần liền thì vào Côn Đảo.</li>
+        <li><b>Thẻ Chẵn/Lẻ</b> 🎲 (giữ ≤3): dùng trước khi tung để chắc ra chẵn/lẻ.</li>
+        <li><b>Nút ĐỔ</b>: chạm = ngẫu nhiên, giữ rồi thả = lực cao dễ ra số lớn.</li>
+      </ul></section>
+      <section><h3>🏙️ Đất &amp; phí</h3><ul class="rules">
+        <li>Mua thành phố rồi xây: Nhà → Biệt thự → Chung cư → Khách sạn (sau khi qua Bắt Đầu) → Biểu tượng 🗼.</li>
+        <li>Vào đất người khác: trả <b>phí tham quan</b>, rồi được <b>mua lại</b> bằng giá chủ đã đầu tư (trừ Biểu tượng, điểm du lịch).</li>
+        <li>Phí <b>×2</b>: đủ nhóm màu · mỗi lần mở <b>lễ hội</b> (cộng dồn, mỗi lúc 1 nơi) · 3 <b>ô đất vàng ⭐</b>.</li>
+        <li><b>5 điểm du lịch</b> 🏖️ ($150–$300): phí × số điểm chủ có, +50% mỗi lần có người ghé.</li>
+      </ul></section>
+      <section><h3>📍 Ô đặc biệt</h3><ul class="rules">
+        <li><b>Côn Đảo</b>: kẹt 3 lượt; ra bằng tung đôi, $100 hoặc thẻ ra tù.</li>
+        <li><b>Bến Xe</b>: lượt sau đi tới ô bất kỳ ($40). <b>Đại Nhạc Hội</b>: $40 mở lễ hội.</li>
+        <li><b>Thuế</b> 10% tài sản vào <b>Quỹ Thuế</b>; thẻ Quỹ Thuế lấy cả quỹ.</li>
+        <li><b>Sòng bài</b>: cược $100 Chẵn/Lẻ (×2) hoặc Đôi (×6). <b>Cơ Hội</b>: rút thẻ (xem dưới).</li>
+      </ul></section>
+      <section><h3>🏆 Thắng / thua</h3><ul class="rules">
+        <li>Thắng ngay: <b>3 nhóm màu</b> · <b>cả một hàng</b> · <b>5 điểm du lịch</b> · <b>5 Biểu tượng</b> · đối thủ phá sản hết. Hết vòng: <b>giàu nhất</b> thắng.</li>
+        <li>Thiếu tiền: bán đất (nửa vốn); vẫn không đủ thì <b>phá sản</b>.</li>
+      </ul></section>
     </div>
-    <h3 class="rules-h">❓ Thẻ Cơ Hội</h3>
-    <ul class="rules-list cols" id="rulesCards"></ul>
-    <h3 class="rules-h">📢 Sự kiện chung cả phòng</h3>
-    <p class="rules-list" id="rulesEvHint"></p>
-    <ul class="rules-list cols" id="rulesEvents"></ul>
+    <details class="rules-sub"><summary>🌐 Online &amp; tiện ích</summary><ul class="rules">
+      <li>Quá <b>30 giây</b> không thao tác thì máy đánh thay; bấm <b>✋ Tôi quay lại rồi</b> để chơi tiếp.</li>
+      <li>Khách bấm <b>✅ Sẵn sàng</b>; vào giữa ván thì ngồi ghế máy. Tải lại trang → mở lại link là về đúng ghế.</li>
+      <li>🎤 nói chuyện · 😊 cảm xúc · 📍 đánh dấu ô · chạm thẻ người khác để 🎁 tặng tiền.</li>
+    </ul></details>
+    <details class="rules-sub"><summary>🏠 Cấp nhà</summary><table class="rules-tbl" id="rulesLevels"></table><p class="rule">Tính theo giá gốc thành phố. Ví dụ Sài Gòn ($400): nhà $400, phí $140.</p></details>
+    <details class="rules-sub"><summary>🎭 Nhân vật</summary><ul class="rules-list cols" id="rulesChars"></ul></details>
+    <details class="rules-sub"><summary>❓ Thẻ Cơ Hội</summary><ul class="rules-list cols" id="rulesCards"></ul></details>
+    <details class="rules-sub"><summary>📢 Sự kiện chung</summary><p class="rules-list" id="rulesEvHint"></p><ul class="rules-list cols" id="rulesEvents"></ul></details>
     <button class="go" id="bRulesOk">Đã hiểu</button>
   </div>
 </div>
@@ -1491,7 +1491,7 @@ function moveBy(s, n, steps, how) {
   let salary = 0;
   const fire = passGo && phoenixOn(G, s); // xét trước khi cộng lương
   if (passGo) { P.laps++; salary = r10(SALARY * (hasSkill(G, s, 'mc') ? 2 : 1) * (evOn(G, 'tet') ? 2 : 1) * (fire ? 2 : 1)); P.cash += salary; }
-  steps.push({ k: 'move', s, from, to, n, passGo, salary, how, fly: how === 'fly' });
+  steps.push({ k: 'move', s, from, to, n, passGo, salary, how, fly: how === 'fly', plane: how === 'fly' && hasSkill(G, s, 'pilot') });
   if (fire) steps.push({ k: 'phoenix', s, why: 'salary' });
   if (passGo && hasSkill(G, s, 'wizard') && Math.random() < 0.5) hex(s, steps);
   if (passGo && hasSkill(G, s, 'robin')) robin(s, steps);
@@ -1507,7 +1507,7 @@ function moveBy(s, n, steps, how) {
 function flyTo(s, i, steps) {
   const P = G.pl[s], from = P.pos;
   P.pos = i;
-  steps.push({ k: 'move', s, from, to: i, n: 0, passGo: false, salary: 0, how: 'fly', fly: true });
+  steps.push({ k: 'move', s, from, to: i, n: 0, passGo: false, salary: 0, how: 'fly', fly: true, plane: true });
   land(s, steps);
 }
 // Cảnh Sát: đối thủ đứng ở các ô vừa đi qua (kể cả ô dừng) có POLICE_CHANCE bị bắt ra Côn Đảo; mỗi vòng tối đa 1 lần
@@ -2733,9 +2733,10 @@ function renderCenter() {
   rt.hidden = !on;
   if (on) rt.innerHTML = `Vòng <b>${Math.min(G.round, G.maxRound || G.round)}</b>${G.maxRound ? ' / ' + G.maxRound : ''}`;
   // sự kiện chung đang diễn ra
-  const et = $('evTag'), e = on && G.phase === 'play' && G.ev ? evOf(G.ev.id) : null;
+  const VE = busy() && viewEv ? { ...G, ...viewEv } : G;
+  const et = $('evTag'), e = on && G.phase === 'play' && VE.ev ? evOf(VE.ev.id) : null;
   et.hidden = !e;
-  if (e) { et.style.setProperty('--c', e.col); const left = evLeft(G); et.innerHTML = `${e.icon} <span>${e.name}</span><em class="ev-left">${left}</em>`; et.title = `${e.text} (${left > 1 ? `còn ${left} vòng` : 'vòng cuối'})`; }
+  if (e) { et.style.setProperty('--c', e.col); const left = evLeft(VE); et.innerHTML = `${e.icon} <span>${e.name}</span><em class="ev-left">${left}</em>`; et.title = `${e.text} (${left > 1 ? `còn ${left} vòng` : 'vòng cuối'})`; }
 }
 // dải chủ đất, viền màu chủ, sao đất vàng, lễ hội, dịch bệnh / mất điện
 // chỉ vẽ lại khi trạng thái đất thật sự đổi (paint() gọi rất thường xuyên)
@@ -2821,6 +2822,8 @@ function drawTourWarn(g, gb) {
   const G = viewG(); // đang hoạt hoạ: vẽ theo trạng thái đang hiển thị
   for (const s of SEATS) {
     if (!G.seats[s] || countOwned(G, s, TOURS) !== TOURS.length - 1) continue;
+    // điểm còn thiếu đã có người khác mua thì hết đường độc quyền (không mua lại được): khỏi cảnh báo
+    if (TOURS.some(i => G.props[i].owner >= 0 && G.props[i].owner !== s)) continue;
     for (const i of TOURS) {
       const r = rectOf(i), own = G.props[i].owner === s;
       el('rect', { x: r.x + TI + 2, y: r.y + TI + 2, width: r.w - 2 * TI - 4, height: r.h - 2 * TI - 4, rx: 4, fill: own ? 'none' : 'rgba(232,50,60,.15)', stroke: '#e8323c', 'stroke-width': 4, 'stroke-dasharray': own ? '8 5' : '' }, tileG(g, i));
@@ -3544,9 +3547,12 @@ let viewPot = null, viewOut = null, viewProps = {};
 // đất, thẻ đang giữ, Côn Đảo / vé xe, số lượt (hết hạn dịch bệnh / mất điện) của lần hiển thị trước:
 // lúc hoạt hoạ vẫn vẽ theo trạng thái cũ, tới bước nào (quân tới nơi, lật thẻ...) mới đổi phần đó
 let shownSnap = null, viewPl = {}, viewTurnNo = null;
+// sự kiện chung đang hiện trên thanh trên cùng: giữ cái cũ cho tới khi popup sự kiện mới hiện ra / kết thúc (undefined = theo G)
+let viewEv;
 const snapOf = g => (g && Array.isArray(g.props) && Array.isArray(g.pl) ? {
   props: g.props.map(p => p && { ...p }), turnNo: g.turnNo,
   pl: g.pl.map(P => P && { hold: { ...P.hold }, jail: P.jail, bus: P.bus, fly: P.fly, laps: P.laps }),
+  ev: g.ev ? { ...g.ev } : null, round: g.round,
 } : null);
 const shownOut = s => (busy() && viewOut ? viewOut[s] : G.pl[s].out);
 const shownProp = i => (busy() && viewProps[i]) || G.props[i];
@@ -3565,6 +3571,7 @@ function shownWorth(s) {
 }
 function initView(steps, base) {
   viewPot = G.pot || 0; viewOut = G.pl.map(p => p.out); viewProps = {}; viewPl = {}; viewTurnNo = null;
+  viewEv = base && steps.some(st => st.k === 'event' || st.k === 'evEnd') ? { ev: base.ev, round: base.round } : undefined;
   // ô được nhắc: tới bước 'lift' mới nhắc lên, trước đó vẫn hiện ô cũ
   viewLift = null; for (const st of steps) if (st.k === 'lift') viewLift = st.low >= 0 ? st.low : -1;
   // số dư đang hiện = số dư mới trừ mọi khoản sẽ cộng / trừ dần theo từng bước (kể cả lương qua Bắt Đầu)
@@ -4032,10 +4039,69 @@ async function rideBus(s, from, n, tok, onStart) {
   hopToken(s);
   fx('circle', { cx: end[0], cy: end[1] + 8, r: 16, fill: 'rgba(120,110,95,.35)', class: 'fx puff' }, 550);
 }
+// Phi Công: quân lên máy bay ✈️ cất cánh theo đường vòng cung cao, đầu máy bay quay theo hướng bay,
+// nhả vệt khói trắng phía sau, bóng máy bay chạy dưới đất nhỏ dần khi lên cao; hạ cánh xuống ô đích rồi quân bước xuống
+const PLANE_MS = 1500;
+async function ridePlane(s, from, to, tok, onMid) {
+  const g = tokenEls[s], [x0, y0] = tokenXY(from, s, false), [x1, y1] = tokenXY(to, s, false);
+  const H = 120 + Math.min(160, Math.hypot(x1 - x0, y1 - y0) * 0.35);
+  const cx = (x0 + x1) / 2, cy = Math.min(y0, y1) - H;
+  const at = t => { const u = 1 - t; return [u * u * x0 + 2 * u * t * cx + t * t * x1, u * u * y0 + 2 * u * t * cy + t * t * y1]; };
+  const vel = t => [2 * (1 - t) * (cx - x0) + 2 * t * (x1 - cx), 2 * (1 - t) * (cy - y0) + 2 * t * (y1 - cy)];
+  const shadow = el('ellipse', { cx: x0, cy: y0 + 10, rx: 20, ry: 6, fill: 'rgba(0,0,0,.28)', class: 'fx' }, $('gFx'));
+  const plane = el('g', { class: 'bus' }, $('gFx'));
+  const home = g.parentNode, next = g.nextSibling;
+  // quân ngồi trên lưng máy bay, thu nhỏ một chút; máy bay xoay theo hướng bay còn quân luôn đứng thẳng
+  const seat = el('g', { transform: 'translate(0 -10) scale(.7)' }, plane);
+  seat.appendChild(g); g.style.transition = 'none'; g.style.transform = 'none';
+  const body = el('g', {}, plane);
+  txt(0, 0, 'sq-icon', '✈️', body, { style: 'font-size:46px' });
+  const tname = g.querySelector('.tname');
+  const getOff = () => { home.insertBefore(g, next && next.parentNode === home ? next : null); g.style.transition = ''; if (tname) tname.style.transform = ''; };
+  playWhoosh(0.9); playEngine(PLANE_MS);
+  let lastPuff = 0, mid = !onMid;
+  const put = (now, t) => {
+    const e = easeInOut(t), [x, y] = at(e), [vx, vy] = vel(e), a = Math.atan2(vy, vx) * 180 / Math.PI;
+    // ✈️ vẽ hướng lên phải (-45°); bay sang trái thì lật ngang rồi xoay cho mũi trùng hướng bay
+    body.setAttribute('transform', vx >= 0 ? `rotate(${a + 45})` : `rotate(${a + 135}) scale(-1 1)`);
+    const lift = Math.sin(Math.PI * e);
+    plane.setAttribute('transform', `translate(${x} ${y}) scale(${1 + 0.35 * lift})`);
+    const gx = x0 + (x1 - x0) * e, gy = y0 + (y1 - y0) * e + 10;
+    shadow.setAttribute('cx', gx); shadow.setAttribute('cy', gy);
+    shadow.setAttribute('rx', 20 * (1 - 0.5 * lift)); shadow.setAttribute('opacity', 1 - 0.6 * lift);
+    if (now - lastPuff > 45 && t > 0.05 && t < 0.95) {
+      lastPuff = now;
+      const l = Math.hypot(vx, vy) || 1, px = x - vx / l * 22, py = y - vy / l * 22;
+      const c = el('circle', { cx: px, cy: py, r: 3, fill: '#fff', class: 'fx' });
+      $('gFx').insertBefore(c, plane);
+      c.animate([{ transform: 'scale(1)', opacity: .9 }, { transform: 'scale(2.4)', opacity: 0 }], { duration: 700, easing: 'ease-out', fill: 'forwards' });
+      setTimeout(() => c.remove(), 750);
+    }
+  };
+  await new Promise(res => {
+    const t0 = performance.now(), stop = setTimeout(res, PLANE_MS + 300);
+    const frame = now => {
+      if (tok !== animTok) { clearTimeout(stop); return res(); }
+      const t = Math.min(1, (now - t0) / PLANE_MS);
+      put(now, t);
+      if (!mid && t >= 0.5) { mid = true; onMid(); }
+      if (t < 1) requestAnimationFrame(frame); else { clearTimeout(stop); res(); }
+    };
+    requestAnimationFrame(frame);
+  });
+  if (!mid && tok === animTok) onMid();
+  getOff(); placeToken(s, to, false);
+  plane.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 250, fill: 'forwards' });
+  shadow.remove();
+  setTimeout(() => plane.remove(), 260);
+  if (tok !== animTok) return;
+  hopToken(s);
+  fx('circle', { cx: x1, cy: y1 + 8, r: 16, fill: 'rgba(120,110,95,.35)', class: 'fx puff' }, 550);
+}
 function stepMs(st) {
   switch (st.k) {
     case 'dice': return THROW_MS + 300; // chờ thêm chút để kịp thấy tổng số nút
-    case 'move': return st.how === 'bus' ? busMs(st.n) + 350 : st.fly ? FLY_MS + 150 : Math.abs(st.n) * STEP_MS + (st.passGo ? 300 : 100);
+    case 'move': return st.how === 'bus' ? busMs(st.n) + 350 : st.plane ? PLANE_MS + 250 : st.fly ? FLY_MS + 150 : Math.abs(st.n) * STEP_MS + (st.passGo ? 300 : 100);
     case 'boost': case 'reverse': case 'festJump': return 600; case 'island': return 800; case 'free': return 450; case 'stay': return 350; case 'triple': return 600; case 'released': return 400;
     case 'busStop': return 600; case 'busGo': return 300; case 'busNoCash': return 300;
     case 'home': return st.can ? 0 : 300; case 'homePay': return 1000; case 'interest': return 900; case 'bonus': return 700; case 'rentX2': return 900; case 'phoenix': return 900; case 'norent': return 350; case 'useFree': return 800; case 'charmFree': return 900; case 'useHalf': return 600;
@@ -4091,6 +4157,11 @@ async function animateStep(st, tok) {
       if (st.how === 'bus') {
         await rideBus(s, st.from, st.n, tok, st.passGo ? () => passGoFx(s, st.salary) : null);
         await sleep(350);
+        return;
+      }
+      if (st.plane) {
+        await ridePlane(s, st.from, st.to, tok, st.passGo ? () => passGoFx(s, st.salary) : null);
+        await sleep(250);
         return;
       }
       if (st.fly) {
@@ -4182,7 +4253,7 @@ async function animateStep(st, tok) {
       if (!e) { await sleep(ms); return; }
       playParty(); $('diceStage').classList.add('hide');
       const card = evCard(e);
-      renderCenter();
+      viewEv = undefined; renderCenter();
       await sleep(ms - 350);
       if (tok !== animTok) { $('diceStage').classList.remove('hide'); return; }
       card.classList.add('out');
@@ -4191,7 +4262,7 @@ async function animateStep(st, tok) {
       $('diceStage').classList.remove('hide');
       return;
     }
-    case 'evEnd': { renderCenter(); playWhoosh(0.3); await sleep(ms); return; }
+    case 'evEnd': { viewEv = { ev: null }; renderCenter(); playWhoosh(0.3); await sleep(ms); return; }
     case 'evGift': { const [x, y] = tokenPt(s); floatText(x, y - 24, `🧧 +${fmt(st.amt)}`, '#da251d', 1100, 20); cardMoney(s, st.amt); playCoin(true); await sleep(ms); return; }
     case 'hold': { const [x, y] = tokenPt(s); floatText(x, y - 20, HOLD_INFO[st.h][0] + (st.full ? ' đủ ' + PARITY_MAX : ''), st.full ? '#6b7a90' : '#23324a', 1000, st.full ? 18 : 24); playPop(); await sleep(ms); return; }
     case 'build': {
@@ -4576,7 +4647,7 @@ function fitNames(root) {
     el.style.fontSize = '';
     if (!el.clientWidth || el.scrollWidth <= el.clientWidth) continue;
     const base = parseFloat(getComputedStyle(el).fontSize);
-    el.style.fontSize = Math.max(9, Math.floor(base * el.clientWidth / el.scrollWidth * 10) / 10) + 'px';
+    el.style.fontSize = Math.max(el.classList.contains('t') ? 8 : 9, Math.floor(base * el.clientWidth / el.scrollWidth * 10) / 10) + 'px';
   }
 }
 function renderPlayers() {
