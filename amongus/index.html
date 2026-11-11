@@ -49,8 +49,6 @@ button:disabled { opacity: .35; cursor: default; }
 /* ── nhiệm vụ & tiến độ ── */
 .prog { position: fixed; z-index: 5; top: calc(env(safe-area-inset-top, 0px) + 54px); left: 50%; transform: translateX(-50%); width: min(60vw, 420px); height: 18px; border-radius: 999px; background: rgba(0,0,0,.5); border: 2px solid rgba(255,255,255,.35); overflow: hidden; }
 /* tên phòng đang đứng, ngay dưới thanh nhiệm vụ */
-.here { position: fixed; z-index: 5; top: calc(env(safe-area-inset-top, 0px) + 79px); left: 50%; transform: translateX(-50%); padding: 1px 12px; border-radius: 999px; background: rgba(8,12,26,.72); border: 1px solid rgba(143,227,255,.3); color: #e6f6ff; font-weight: 800; font-size: 13px; line-height: 20px; white-space: nowrap; pointer-events: none; text-shadow: 0 1px 2px #000; }
-.here.hall { color: rgba(230,246,255,.6); font-weight: 700; }
 .prog i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #3ddc84, #8fe3ff); transition: width .4s; }
 .prog b.late { color: #ff8a8a; animation: blink 1s ease-in-out infinite; }
 .prog b { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; text-shadow: 0 1px 2px #000; }
@@ -365,7 +363,6 @@ button:disabled { opacity: .35; cursor: default; }
   <button class="rb" id="bNew" aria-label="Ván mới">↻</button>
 </header>
 <div class="prog" id="prog" hidden><i></i><b>Nhiệm vụ 0%</b></div>
-<div class="here" id="here" hidden></div>
 <div class="tasks" id="tasks" hidden></div>
 <canvas class="mmap" id="mmap" hidden title="Bản đồ (M)"></canvas>
 <div class="alert" id="alert" hidden></div>
@@ -2033,14 +2030,26 @@ function buildMap() {
     x.fillStyle = '#151b2b'; roundRect(x, v[0] - 20, v[1] - 11, 40, 22, 4); x.fill();
     x.strokeStyle = '#7f8aa6'; x.lineWidth = 2.5; x.beginPath(); for (let k = -1; k <= 1; k++) { x.moveTo(v[0] - 17, v[1] + k * 6); x.lineTo(v[0] + 17, v[1] + k * 6); } x.stroke();
   }
-  // tên phòng giữa phòng, vẽ sau cùng (đè lên đồ đạc) — chữ trắng viền tối cho dễ đọc trên mọi màu sàn; phòng hẹp thì thu nhỏ chữ cho vừa
+  // tên phòng vẽ lên mặt tường phía trên phòng (không che đồ đạc / người trên sàn): chọn đoạn tường liền dài nhất ở mép trên phòng;
+  // phòng không có tường phía trên (sát sàn khác) thì vẽ nhỏ sát mép trên trong phòng
   x.textAlign = 'center'; x.textBaseline = 'middle'; x.lineJoin = 'round';
   for (const r of ROOMS) {
-    const t = r.name.toUpperCase(), cx = r.r[0] + r.r[2] / 2, cy = r.r[1] + r.r[3] / 2;
-    let fs = 40; x.font = `800 ${fs}px "Baloo 2", sans-serif`;
-    const w = x.measureText(t).width, maxW = r.r[2] - 40; if (w > maxW) { fs = Math.max(18, Math.floor(fs * maxW / w)); x.font = `800 ${fs}px "Baloo 2", sans-serif`; }
-    x.lineWidth = Math.max(4, fs / 6); x.strokeStyle = 'rgba(8,12,26,.55)'; x.strokeText(t, cx, cy);
-    x.fillStyle = 'rgba(255,255,255,.62)'; x.fillText(t, cx, cy);
+    const t = r.name.toUpperCase(), j0 = Math.round(r.r[1] / GC), i0 = Math.round(r.r[0] / GC), i1 = Math.round((r.r[0] + r.r[2]) / GC);
+    let best = null;
+    for (let i = i0; i < i1;) {
+      const wall = c => j0 >= 0 && j0 < GH && GRID[j0 * GW + c] && !(j0 > 0 && GRID[(j0 - 1) * GW + c]);
+      if (!wall(i)) { i++; continue; }
+      let e = i; while (e < i1 && wall(e)) e++;
+      if (!best || e - i > best[1] - best[0]) best = [i, e];
+      i = e;
+    }
+    const onWall = best && (best[1] - best[0]) * GC >= 80;
+    const cx = onWall ? (best[0] + best[1]) * GC / 2 : r.r[0] + r.r[2] / 2, cy = onWall ? r.r[1] - WALL_FACE / 2 + 1 : r.r[1] + 14;
+    let fs = onWall ? 24 : 16; x.font = `800 ${fs}px "Baloo 2", sans-serif`;
+    const w = x.measureText(t).width, maxW = (onWall ? (best[1] - best[0]) * GC : r.r[2]) - 16;
+    if (w > maxW) { fs = Math.max(11, Math.floor(fs * maxW / w)); x.font = `800 ${fs}px "Baloo 2", sans-serif`; }
+    x.lineWidth = Math.max(3, fs / 5); x.strokeStyle = 'rgba(8,12,26,.8)'; x.strokeText(t, cx, cy);
+    x.fillStyle = 'rgba(255,255,255,.9)'; x.fillText(t, cx, cy);
   }
   mapCv = c;
 }
@@ -2445,14 +2454,6 @@ function alertText() {
 }
 // chỉ ghi lại nội dung nút khi đổi: thay phần tử con mỗi khung hình làm cú bấm chuột (nhấn ở phần tử cũ, nhả ở phần tử mới) bị mất
 const setHtml = (el, h) => { if (el._h !== h) { el._h = h; el.innerHTML = h; } };
-// tên phòng người chơi đang đứng (trong ống gió: tên phòng có ống đó); ngoài phòng là hành lang
-function hereTick() {
-  const el = $('here'), on = phase === 'play' && !meeting && !!me;
-  if (el.hidden === on) el.hidden = !on;
-  if (!on) return;
-  const r = roomAt(me.x, me.y), t = r ? '📍 ' + r.name : 'Hành lang';
-  if (el._t !== t) { el._t = t; el.textContent = t; el.classList.toggle('hall', !r); }
-}
 function progLabel(pct) {
   const b = $('prog').lastElementChild, s = Math.ceil(gameLeft), late = phase !== 'over' && s <= 60;
   b.textContent = `Nhiệm vụ ${pct}%` + (phase === 'over' ? '' : ` · ⏱ ${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`); b.classList.toggle('late', late);
@@ -2489,7 +2490,6 @@ function idleHud() {
 // ═══════════════════════════ vòng lặp ═══════════════════════════
 let last = performance.now(), ventKeyT = 0, stepT = 0, sirenT = 0;
 function loop(now) {
-  if (me) hereTick(); else $('here').hidden = true;
   fpsTick(now);
   tick(now);
   render();
