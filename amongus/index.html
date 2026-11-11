@@ -111,6 +111,7 @@ button:disabled { opacity: .35; cursor: default; }
 .seg { display: flex; background: #eef2f7; border-radius: 12px; padding: 3px; gap: 3px; }
 .seg button { flex: 1; border-radius: 9px; padding: 6px 2px; font-weight: 700; font-size: 14px; color: var(--muted); }
 .seg button.on { background: #fff; color: var(--ink); box-shadow: 0 2px 6px rgba(35,50,74,.15); }
+#suMap, #lbMap { flex-wrap: wrap; } #suMap button, #lbMap button { flex: 1 1 30%; font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } /* 10 bản đồ: xếp 3 cột */
 .colors { display: flex; flex-wrap: wrap; gap: 8px; }
 .colors button { width: 30px; height: 30px; border-radius: 50%; background: var(--c); box-shadow: 0 0 0 2px #fff, 0 0 0 3px rgba(35,50,74,.15); transition: transform .12s; }
 .colors button.on { box-shadow: 0 0 0 3px #fff, 0 0 0 5px var(--c); transform: scale(1.12); }
@@ -356,6 +357,7 @@ button:disabled { opacity: .35; cursor: default; }
   <button id="sbLights">💡 Tắt đèn <kbd>1</kbd></button>
   <button id="sbReactor">☢️ Lò phản ứng <kbd>2</kbd></button>
   <button id="sbO2">🫁 Cạn oxy <kbd>3</kbd></button>
+  <button id="sbDoors">🚪 Khoá cửa Điện <kbd>4</kbd></button>
 </div>
 <div class="acts" id="acts" hidden>
   <button class="map" id="bMap"><span>🗺️</span>Bản đồ<kbd>M</kbd></button>
@@ -502,7 +504,7 @@ button:disabled { opacity: .35; cursor: default; }
       <li><b>Tầm nhìn</b> 👁️: chỉ thấy những gì nhìn thẳng tới được — tường, thùng hàng, động cơ… che khuất người phía sau. Đèn tắt thì tầm nhìn còn rất ngắn. Phi thuyền rộng, mũi tên vàng ở mép màn hình chỉ tới nhiệm vụ của bạn.</li>
       <li>Chết rồi vẫn thành <b>ma</b> 👻: đi xuyên tường, làm nốt nhiệm vụ giúp đồng đội, nhưng không báo, không bỏ phiếu được.</li>
       <li><b>Online</b> 🌐: chủ phòng tạo phòng, gửi mã/link cho bạn bè; ghế trống có thể cho máy chơi. Bấm <b>🎤</b> để voice chat: phòng chờ và cuộc họp mọi người nghe nhau; lúc đang chơi tuỳ phòng — <i>im lặng</i> hoặc <i>nghe người ở gần</i>. Hồn ma vẫn nghe được mọi người, nhưng chỉ hồn ma nghe được hồn ma. Ai rớt mạng thì máy chơi thay tới khi họ vào lại.</li>
-      <li>Điều khiển: máy tính đi bằng <b>WASD</b> / mũi tên; điện thoại kéo nửa trái màn hình (cần ảo). Phím tắt hiện ở góc mỗi nút: <b>E</b> dùng/sửa/họp, <b>R</b> báo, <b>Q</b> giết, <b>V</b> ống gió (trong ống: ← → chuyển ống), <b>Q</b> bắn (Cảnh sát trưởng), <b>F</b> phá hoại (rồi <b>1</b> tắt đèn / <b>2</b> lò phản ứng / <b>3</b> cạn oxy), <b>M</b> bản đồ, <b>T</b> bật/tắt mic.</li>
+      <li>Điều khiển: máy tính đi bằng <b>WASD</b> / mũi tên; điện thoại kéo nửa trái màn hình (cần ảo). Phím tắt hiện ở góc mỗi nút: <b>E</b> dùng/sửa/họp, <b>R</b> báo, <b>Q</b> giết, <b>V</b> ống gió (trong ống: ← → chuyển ống), <b>Q</b> bắn (Cảnh sát trưởng), <b>F</b> phá hoại (rồi <b>1</b> tắt đèn / <b>2</b> lò phản ứng / <b>3</b> cạn oxy / <b>4</b> khoá cửa phòng Điện 10 giây), <b>M</b> bản đồ, <b>T</b> bật/tắt mic.</li>
     </ol>
     <button class="go" id="bRulesOk">Đã hiểu</button>
   </div>
@@ -649,7 +651,7 @@ const MAPS = [
     ],
     vents: [[130, 840, 0], [610, 360, 0], [600, 1250, 0],
       [820, 800, 1], [1400, 880, 1], [1370, 1290, 1],
-      [1830, 350, 2], [2280, 520, 2], [1830, 1070, 2], [1370, 320, 2]],
+      [1830, 350, 2], [2280, 520, 2], [1840, 1110, 2], [1370, 320, 2]],
     button: { x: 1220, y: 700 },
     fix: { lights: { x: 1820, y: 1280 }, reactor: { x: 2280, y: 880 }, o2a: { x: 1600, y: 340 }, o2b: { x: 380, y: 560 } },
     tasks: [
@@ -664,9 +666,285 @@ const MAPS = [
       { x: 1600, y: 1290, t: 'sw', n: 'Hiệu chỉnh cầu dao' }, { x: 1830, y: 1180, t: 'wires', n: 'Nối dây' },
       { x: 2020, y: 520, t: 'simon', n: 'Khởi động lò' }, { x: 2280, y: 700, t: 'hex', n: 'Làm mát lõi' }, { x: 2020, y: 880, t: 'hold', n: 'Đổ nhiên liệu' },
     ] },
+  // căn cứ mặt trăng: mái vòm họp ở giữa, 4 nhánh toả ra, các phòng góc nối thành vòng ngoài
+  { id: 'moon', name: 'Căn Cứ Mặt Trăng', icon: '🌙', W: 2600, H: 2000,
+    rooms: [
+      { id: 'dome', name: 'Mái Vòm', r: [1150, 760, 500, 440], col: '#56658a' },
+      { id: 'obs', name: 'Đài Thiên Văn', r: [1220, 120, 360, 300], col: '#3d5f86' },
+      { id: 'react', name: 'Lò Năng Lượng', r: [1200, 1560, 400, 340], col: '#7d4552' },
+      { id: 'comms', name: 'Liên Lạc', r: [400, 820, 320, 320], col: '#5d6e7e' },
+      { id: 'lab', name: 'Thí Nghiệm', r: [2080, 800, 340, 360], col: '#4a7468' },
+      { id: 'o2', name: 'Máy Tạo Oxy', r: [300, 160, 340, 280], col: '#4f7d54' },
+      { id: 'med', name: 'Y Tế', r: [2140, 140, 340, 300], col: '#3f7f80' },
+      { id: 'elec', name: 'Điện', r: [300, 1500, 340, 320], col: '#7d6d36' },
+      { id: 'mine', name: 'Mỏ Đá', r: [2120, 1480, 380, 360], col: '#6e5246' },
+    ],
+    halls: [[1360, 410, 90, 360], [1360, 1190, 90, 380], [710, 940, 450, 90], [1640, 940, 450, 90], [630, 250, 600, 90], [480, 430, 90, 400],
+      [1570, 240, 580, 90], [2240, 430, 90, 380], [480, 1130, 90, 380], [630, 1650, 580, 90], [1590, 1660, 540, 90], [2230, 1150, 90, 340]],
+    obst: [
+      [1360, 965, 80, 50, 0, 'btn'], [1185, 850, 90, 60, 0, 'table'], [1525, 850, 90, 60, 0, 'table'], [1185, 1080, 90, 60, 0, 'table'], [1525, 1080, 90, 60, 0, 'table'],
+      [1240, 170, 60, 60, 1, 'scope'], [1340, 1700, 120, 120, 1, 'core'], [2100, 830, 120, 50, 0, 'console'], [320, 280, 60, 140, 0, 'plant'], [2340, 170, 120, 50, 0, 'bed'],
+      [320, 1750, 120, 50, 0, 'console'], [2400, 1530, 80, 80, 1, 'crate'], [2400, 1740, 80, 80, 1, 'crate'],
+    ],
+    vents: [[1400, 170, 1], [1250, 1860, 2], [450, 980, 0], [2380, 980, 2], [470, 300, 0], [2440, 290, 1],
+      [560, 1780, 0], [2310, 1800, 2]],
+    button: { x: 1400, y: 990 },
+    fix: { lights: { x: 350, y: 1550 }, reactor: { x: 1560, y: 1860 }, o2a: { x: 470, y: 210 }, o2b: { x: 2130, y: 1120 } },
+    tasks: [
+      { x: 1200, y: 810, t: 'swipe', n: 'Quẹt thẻ' }, { x: 1610, y: 810, t: 'hold', n: 'Đổ rác' },
+      { x: 1540, y: 170, t: 'simon', n: 'Chỉnh kính viễn vọng' }, { x: 1400, y: 270, t: 'hex', n: 'Bắn thiên thạch' },
+      { x: 1560, y: 1610, t: 'simon', n: 'Khởi động lò' }, { x: 1250, y: 1610, t: 'hold', n: 'Nạp nhiên liệu lò' },
+      { x: 680, y: 870, t: 'wires', n: 'Nối dây' }, { x: 680, y: 1100, t: 'hold', n: 'Tải dữ liệu' },
+      { x: 2380, y: 1120, t: 'code', n: 'Nhập mã mẫu' }, { x: 2250, y: 980, t: 'simon', n: 'Phân tích mẫu đá' },
+      { x: 560, y: 210, t: 'code', n: 'Nhập mã lọc khí' }, { x: 560, y: 370, t: 'hold', n: 'Thay bình oxy' },
+      { x: 2190, y: 190, t: 'hold', n: 'Khám sức khoẻ' }, { x: 2440, y: 400, t: 'simon', n: 'Phân tích máu' },
+      { x: 350, y: 1660, t: 'sw', n: 'Hiệu chỉnh cầu dao' }, { x: 470, y: 1660, t: 'wires', n: 'Nối dây' },
+      { x: 2170, y: 1530, t: 'hex', n: 'Khoan đá' }, { x: 2310, y: 1660, t: 'hold', n: 'Bốc quặng' },
+      { x: 2220, y: 1800, t: 'swipe', n: 'Căn chỉnh xe tự hành' },
+    ] },
+  // trạm ốc đảo: các phòng xếp thành vòng quanh sân, vườn chà là cắt ngang ở giữa
+  { id: 'oasis', name: 'Trạm Ốc Đảo', icon: '🏜️', W: 3000, H: 1800,
+    rooms: [
+      { id: 'well', name: 'Giếng Nước', r: [500, 140, 340, 320], col: '#4d6f8f' },
+      { id: 'hall', name: 'Sảnh Họp', r: [1200, 100, 560, 420], col: '#56658a' },
+      { id: 'market', name: 'Chợ', r: [2120, 140, 420, 320], col: '#7c6045' },
+      { id: 'solar', name: 'Pin Mặt Trời', r: [2400, 700, 360, 360], col: '#4f5f92' },
+      { id: 'tower', name: 'Tháp Canh', r: [2560, 1300, 320, 320], col: '#3d5f86' },
+      { id: 'med', name: 'Y Tế', r: [1880, 1320, 340, 300], col: '#3f7f80' },
+      { id: 'stor', name: 'Kho Hàng', r: [1200, 1280, 420, 380], col: '#6f6853' },
+      { id: 'elec', name: 'Điện', r: [520, 1300, 340, 320], col: '#7d6d36' },
+      { id: 'react', name: 'Lò Hơi', r: [240, 680, 440, 400], col: '#7d4552' },
+      { id: 'garden', name: 'Vườn Chà Là', r: [1100, 760, 700, 280], col: '#4c7a3e' },
+    ],
+    halls: [[830, 260, 380, 90], [1750, 260, 380, 90], [2430, 450, 90, 260], [2620, 1050, 90, 260], [2210, 1430, 360, 90], [1610, 1430, 280, 90],
+      [850, 1420, 360, 90], [560, 1070, 90, 240], [550, 450, 90, 240], [1370, 1030, 90, 260], [1790, 860, 620, 90], [670, 860, 440, 90]],
+    obst: [
+      [1440, 295, 80, 50, 0, 'btn'], [1265, 180, 90, 60, 0, 'table'], [1605, 180, 90, 60, 0, 'table'], [1265, 410, 90, 60, 0, 'table'], [1605, 410, 90, 60, 0, 'table'],
+      [520, 170, 60, 140, 0, 'plant'], [2440, 190, 80, 80, 1, 'crate'], [2140, 380, 90, 60, 0, 'table'], [2620, 730, 120, 50, 0, 'console'], [2800, 1350, 60, 60, 1, 'scope'],
+      [2080, 1350, 120, 50, 0, 'bed'], [1520, 1330, 80, 80, 1, 'crate'], [1220, 1620, 140, 24, 1, 'shelf'], [720, 1330, 120, 50, 0, 'console'], [400, 850, 120, 120, 1, 'core'],
+      [1420, 790, 60, 140, 0, 'plant'],
+    ],
+    vents: [[670, 190, 0], [2330, 420, 1], [2720, 880, 1], [2720, 1580, 1], [2050, 1580, 2], [1580, 1620, 2],
+      [570, 1460, 0], [290, 880, 0], [1280, 810, 2]],
+    button: { x: 1480, y: 320 },
+    fix: { lights: { x: 820, y: 1580 }, reactor: { x: 290, y: 730 }, o2a: { x: 800, y: 190 }, o2b: { x: 2170, y: 190 } },
+    tasks: [
+      { x: 800, y: 420, t: 'hold', n: 'Kéo nước' }, { x: 670, y: 300, t: 'code', n: 'Nhập mã lọc khí' },
+      { x: 1250, y: 150, t: 'swipe', n: 'Quẹt thẻ' }, { x: 1720, y: 150, t: 'hold', n: 'Tải dữ liệu' },
+      { x: 2330, y: 190, t: 'hold', n: 'Kiểm kê hàng' }, { x: 2330, y: 300, t: 'wires', n: 'Nối dây' },
+      { x: 2450, y: 1020, t: 'hex', n: 'Lau tấm pin' }, { x: 2580, y: 880, t: 'swipe', n: 'Xoay tấm pin' },
+      { x: 2840, y: 1580, t: 'simon', n: 'Quan sát bão cát' }, { x: 2610, y: 1580, t: 'code', n: 'Gửi tín hiệu' },
+      { x: 1930, y: 1370, t: 'hold', n: 'Khám sức khoẻ' }, { x: 2180, y: 1580, t: 'simon', n: 'Phân tích máu' },
+      { x: 1250, y: 1330, t: 'hold', n: 'Bốc hàng' }, { x: 1410, y: 1470, t: 'wires', n: 'Nối dây' },
+      { x: 570, y: 1580, t: 'sw', n: 'Hiệu chỉnh cầu dao' }, { x: 690, y: 1580, t: 'wires', n: 'Nối dây' },
+      { x: 290, y: 1040, t: 'simon', n: 'Khởi động lò' }, { x: 460, y: 730, t: 'hold', n: 'Châm nhiên liệu' },
+      { x: 1150, y: 810, t: 'hold', n: 'Tưới cây' }, { x: 1760, y: 810, t: 'hex', n: 'Diệt sâu bọ' },
+    ] },
+  // đoàn tàu: hai dãy toa dài (tầng trên, tầng dưới), nối nhau ở đầu, giữa và cuối tàu
+  { id: 'train', name: 'Đoàn Tàu Tốc Hành', icon: '🚆', W: 3400, H: 1240,
+    rooms: [
+      { id: 'engine', name: 'Đầu Máy', r: [100, 100, 420, 360], col: '#7d4552' },
+      { id: 'elec', name: 'Toa Điện', r: [660, 140, 320, 280], col: '#7d6d36' },
+      { id: 'dining', name: 'Toa Ăn', r: [1120, 80, 560, 420], col: '#56658a' },
+      { id: 'sleeper', name: 'Toa Giường Nằm', r: [1820, 140, 380, 280], col: '#6a5080' },
+      { id: 'lounge', name: 'Toa Ngắm Cảnh', r: [2340, 140, 380, 280], col: '#3d5f86' },
+      { id: 'cargo', name: 'Toa Hàng', r: [2860, 100, 420, 360], col: '#6f6853' },
+      { id: 'mail', name: 'Toa Thư', r: [300, 820, 360, 300], col: '#7c6045' },
+      { id: 'med', name: 'Toa Y Tế', r: [900, 820, 360, 300], col: '#3f7f80' },
+      { id: 'o2', name: 'Toa Điều Hoà', r: [1500, 820, 360, 300], col: '#4f7d54' },
+      { id: 'kitchen', name: 'Toa Bếp', r: [2100, 820, 360, 300], col: '#6e5246' },
+      { id: 'guard', name: 'Toa Bảo Vệ', r: [2700, 820, 420, 300], col: '#4c6c7c' },
+    ],
+    halls: [[510, 240, 160, 90], [970, 240, 160, 90], [1670, 240, 160, 90], [2190, 240, 160, 90], [2710, 240, 160, 90], [650, 930, 260, 90],
+      [1250, 930, 260, 90], [1850, 930, 260, 90], [2450, 930, 260, 90], [370, 450, 90, 380], [1550, 490, 90, 340], [2950, 450, 90, 380]],
+    obst: [
+      [1360, 275, 80, 50, 0, 'btn'], [1185, 160, 90, 60, 0, 'table'], [1525, 160, 90, 60, 0, 'table'], [1185, 390, 90, 60, 0, 'table'], [1525, 390, 90, 60, 0, 'table'],
+      [250, 250, 120, 120, 1, 'core'], [840, 170, 120, 50, 0, 'console'], [2060, 170, 120, 50, 0, 'bed'], [1840, 170, 120, 50, 0, 'bed'], [2500, 170, 60, 140, 0, 'plant'],
+      [3180, 150, 80, 80, 1, 'crate'], [3180, 360, 80, 80, 1, 'crate'], [500, 870, 140, 24, 1, 'shelf'], [1120, 850, 120, 50, 0, 'bed'], [1720, 850, 120, 50, 0, 'console'],
+      [2350, 850, 90, 60, 0, 'table'], [2120, 1080, 140, 24, 1, 'shelf'], [2720, 1050, 120, 50, 0, 'console'],
+    ],
+    vents: [[150, 280, 0], [2010, 380, 1], [2530, 380, 1], [3070, 150, 2], [350, 970, 0], [1080, 1080, 0],
+      [1680, 970, 2], [2280, 870, 1], [3080, 970, 2]],
+    button: { x: 1400, y: 300 },
+    fix: { lights: { x: 820, y: 380 }, reactor: { x: 150, y: 150 }, o2a: { x: 1680, y: 1080 }, o2b: { x: 2750, y: 870 } },
+    tasks: [
+      { x: 480, y: 150, t: 'simon', n: 'Khởi động đầu máy' }, { x: 150, y: 420, t: 'hold', n: 'Xúc than' },
+      { x: 710, y: 190, t: 'sw', n: 'Hiệu chỉnh cầu dao' }, { x: 820, y: 280, t: 'wires', n: 'Nối dây' },
+      { x: 1170, y: 130, t: 'hold', n: 'Dọn bàn' }, { x: 1640, y: 130, t: 'swipe', n: 'Soát vé' },
+      { x: 2010, y: 280, t: 'hold', n: 'Dọn giường' }, { x: 1920, y: 380, t: 'code', n: 'Đặt báo thức' },
+      { x: 2390, y: 190, t: 'simon', n: 'Chụp ảnh phong cảnh' }, { x: 2680, y: 190, t: 'hold', n: 'Lau kính' },
+      { x: 2910, y: 150, t: 'hold', n: 'Bốc hàng' }, { x: 3070, y: 280, t: 'code', n: 'Kiểm tra vận đơn' },
+      { x: 620, y: 1080, t: 'swipe', n: 'Phân loại thư' }, { x: 350, y: 1080, t: 'wires', n: 'Nối dây' },
+      { x: 950, y: 870, t: 'hold', n: 'Khám sức khoẻ' }, { x: 1220, y: 1080, t: 'simon', n: 'Phân tích máu' },
+      { x: 1820, y: 1080, t: 'code', n: 'Nhập mã lọc khí' }, { x: 1550, y: 1080, t: 'hex', n: 'Làm sạch quạt' },
+      { x: 2150, y: 870, t: 'hold', n: 'Nấu cơm' }, { x: 2420, y: 1080, t: 'hex', n: 'Đập muỗi' },
+      { x: 3080, y: 1080, t: 'swipe', n: 'Quẹt thẻ' }, { x: 2910, y: 1080, t: 'wires', n: 'Nối dây' },
+    ] },
+  // núi lửa: trục thang máy dọc ở giữa (miệng núi → sảnh → hầm), các phòng mọc hai bên như xương cá
+  { id: 'volcano', name: 'Phòng Thí Nghiệm Núi Lửa', icon: '🌋', W: 2400, H: 2400,
+    rooms: [
+      { id: 'crater', name: 'Miệng Núi Lửa', r: [960, 100, 480, 340], col: '#7d4552' },
+      { id: 'meet', name: 'Sảnh Chính', r: [930, 1000, 540, 420], col: '#56658a' },
+      { id: 'garage', name: 'Hầm Thoát Hiểm', r: [960, 1960, 480, 340], col: '#5b6170' },
+      { id: 'lab', name: 'Thí Nghiệm', r: [200, 520, 400, 320], col: '#4a7468' },
+      { id: 'o2', name: 'Lọc Khí', r: [220, 980, 360, 300], col: '#4f7d54' },
+      { id: 'elec', name: 'Điện', r: [240, 1420, 360, 320], col: '#7d6d36' },
+      { id: 'dorm', name: 'Phòng Ngủ', r: [200, 1900, 400, 320], col: '#6a5080' },
+      { id: 'sensor', name: 'Trạm Cảm Biến', r: [1800, 300, 360, 300], col: '#4f5f92' },
+      { id: 'cool', name: 'Làm Mát', r: [1800, 820, 380, 320], col: '#4d6f8f' },
+      { id: 'lava', name: 'Kênh Dung Nham', r: [1780, 1440, 420, 320], col: '#7c6045' },
+      { id: 'store', name: 'Kho Mẫu', r: [1820, 1940, 360, 320], col: '#6f6853' },
+    ],
+    halls: [[1430, 330, 380, 90], [570, 1100, 370, 90], [1460, 1030, 350, 90], [590, 2050, 380, 90], [1430, 2070, 400, 90], [360, 830, 90, 160],
+      [380, 1730, 90, 180], [1940, 590, 90, 240], [1960, 1750, 90, 200], [1150, 430, 90, 580], [1150, 1410, 90, 560], [590, 640, 570, 90],
+      [590, 1540, 570, 90], [1230, 1560, 560, 90]],
+    obst: [
+      [1160, 1195, 80, 50, 0, 'btn'], [985, 1080, 90, 60, 0, 'table'], [1325, 1080, 90, 60, 0, 'table'], [985, 1310, 90, 60, 0, 'table'], [1325, 1310, 90, 60, 0, 'table'],
+      [1140, 240, 120, 120, 1, 'core'], [980, 2200, 80, 80, 1, 'crate'], [1160, 2200, 80, 80, 1, 'crate'], [440, 570, 140, 24, 1, 'shelf'], [220, 760, 90, 60, 0, 'table'],
+      [240, 1120, 60, 140, 0, 'plant'], [460, 1450, 120, 50, 0, 'console'], [220, 2150, 120, 50, 0, 'bed'], [220, 1930, 120, 50, 0, 'bed'], [2020, 330, 120, 50, 0, 'console'],
+      [1820, 520, 60, 60, 1, 'scope'], [2000, 1000, 160, 120, 1, 'engine'], [2100, 1490, 80, 80, 1, 'crate'], [1840, 2220, 140, 24, 1, 'shelf'],
+    ],
+    vents: [[1010, 270, 0], [560, 800, 0], [400, 1240, 1], [290, 1580, 1], [560, 1950, 2], [2120, 450, 0],
+      [2140, 870, 1], [1990, 1490, 2], [2140, 2100, 2]],
+    button: { x: 1200, y: 1220 },
+    fix: { lights: { x: 290, y: 1470 }, reactor: { x: 1010, y: 150 }, o2a: { x: 270, y: 1030 }, o2b: { x: 1850, y: 870 } },
+    tasks: [
+      { x: 1400, y: 150, t: 'simon', n: 'Đo nhiệt dung nham' }, { x: 1010, y: 400, t: 'hold', n: 'Lấy mẫu khí' },
+      { x: 980, y: 1050, t: 'swipe', n: 'Quẹt thẻ' }, { x: 1070, y: 1050, t: 'hold', n: 'Tải dữ liệu' },
+      { x: 1400, y: 2010, t: 'swipe', n: 'Căn chỉnh xe' }, { x: 1400, y: 2260, t: 'hold', n: 'Đổ nhiên liệu' },
+      { x: 250, y: 570, t: 'simon', n: 'Phân tích mẫu đá' }, { x: 400, y: 680, t: 'code', n: 'Nhập mã mẫu' },
+      { x: 540, y: 1030, t: 'code', n: 'Nhập mã lọc khí' }, { x: 400, y: 1130, t: 'hold', n: 'Thay lõi lọc' },
+      { x: 560, y: 1700, t: 'sw', n: 'Hiệu chỉnh cầu dao' }, { x: 290, y: 1700, t: 'wires', n: 'Nối dây' },
+      { x: 400, y: 2180, t: 'hold', n: 'Dọn giường' }, { x: 250, y: 2060, t: 'code', n: 'Đặt báo thức' },
+      { x: 2120, y: 560, t: 'code', n: 'Hiệu chỉnh cảm biến' }, { x: 1980, y: 450, t: 'hex', n: 'Dọn tro bụi' },
+      { x: 1850, y: 980, t: 'hold', n: 'Bơm nước làm mát' }, { x: 1900, y: 1100, t: 'wires', n: 'Nối dây' },
+      { x: 1830, y: 1490, t: 'hex', n: 'Khơi dòng dung nham' }, { x: 2160, y: 1720, t: 'swipe', n: 'Đóng van xả' },
+      { x: 1870, y: 1990, t: 'hold', n: 'Kiểm kê mẫu' }, { x: 2140, y: 1990, t: 'wires', n: 'Nối dây' },
+    ] },
+  // lâu đài mây: đại sảnh ở giữa, hành lang vuông bao quanh, phòng và tháp góc ở vòng ngoài
+  { id: 'castle', name: 'Lâu Đài Mây', icon: '☁️', W: 2700, H: 2360,
+    rooms: [
+      { id: 'throne', name: 'Đại Sảnh', r: [1150, 1000, 500, 420], col: '#56658a' },
+      { id: 'library', name: 'Thư Viện', r: [800, 240, 400, 320], col: '#6a5080' },
+      { id: 'astro', name: 'Đài Sao', r: [1600, 240, 400, 320], col: '#3d5f86' },
+      { id: 'kitchen', name: 'Nhà Bếp', r: [800, 1960, 400, 300], col: '#6e5246' },
+      { id: 'elec', name: 'Điện', r: [1600, 1960, 360, 300], col: '#7d6d36' },
+      { id: 'react', name: 'Lò Mây', r: [160, 1000, 420, 420], col: '#7d4552' },
+      { id: 'o2', name: 'Máy Tạo Gió', r: [2240, 1000, 380, 400], col: '#4f7d54' },
+      { id: 'tower', name: 'Tháp Tây Bắc', r: [160, 240, 340, 320], col: '#4f5f92' },
+      { id: 'garden', name: 'Vườn Mây', r: [2260, 240, 360, 320], col: '#4c7a3e' },
+      { id: 'dungeon', name: 'Hầm Ngục', r: [180, 1960, 340, 300], col: '#4c6c7c' },
+      { id: 'stable', name: 'Chuồng Rồng', r: [2260, 1960, 360, 300], col: '#7c6045' },
+    ],
+    halls: [[490, 360, 320, 90], [290, 550, 90, 460], [1990, 360, 280, 90], [2400, 550, 90, 460], [510, 2070, 300, 90], [310, 1410, 90, 560],
+      [1950, 2070, 320, 90], [2400, 1390, 90, 580], [760, 760, 1290, 90], [760, 1570, 1290, 90], [760, 760, 90, 900], [1960, 760, 90, 900],
+      [1350, 840, 90, 170], [1350, 1410, 90, 170], [960, 550, 90, 220], [1760, 550, 90, 220], [960, 1650, 90, 320], [1740, 1650, 90, 320],
+      [570, 1160, 200, 90], [2040, 1160, 210, 90]],
+    obst: [
+      [1360, 1195, 80, 50, 0, 'btn'], [1185, 1080, 90, 60, 0, 'table'], [1525, 1080, 90, 60, 0, 'table'], [1185, 1310, 90, 60, 0, 'table'], [1525, 1310, 90, 60, 0, 'table'],
+      [1040, 290, 140, 24, 1, 'shelf'], [820, 290, 140, 24, 1, 'shelf'], [1620, 480, 60, 60, 1, 'scope'], [1090, 1990, 90, 60, 0, 'table'], [1100, 2160, 80, 80, 1, 'crate'],
+      [1620, 2190, 120, 50, 0, 'console'], [310, 1180, 120, 120, 1, 'core'], [180, 480, 60, 60, 1, 'scope'], [2540, 270, 60, 140, 0, 'plant'], [2410, 270, 60, 140, 0, 'plant'],
+      [200, 2160, 80, 80, 1, 'crate'], [2520, 2010, 80, 80, 1, 'crate'],
+    ],
+    vents: [[1160, 400, 0], [1800, 290, 1], [1000, 2220, 2], [1920, 2010, 3], [210, 1210, 0], [2580, 1200, 1],
+      [330, 290, 0], [2310, 520, 1], [350, 2220, 2], [2440, 2220, 3]],
+    button: { x: 1400, y: 1220 },
+    fix: { lights: { x: 1650, y: 2010 }, reactor: { x: 210, y: 1050 }, o2a: { x: 2290, y: 1050 }, o2b: { x: 210, y: 290 } },
+    tasks: [
+      { x: 1200, y: 1050, t: 'swipe', n: 'Quẹt thẻ' }, { x: 1610, y: 1050, t: 'hold', n: 'Tải dữ liệu' },
+      { x: 1160, y: 520, t: 'hold', n: 'Xếp sách' }, { x: 850, y: 520, t: 'code', n: 'Giải mật thư' },
+      { x: 1650, y: 290, t: 'simon', n: 'Chỉnh kính thiên văn' }, { x: 1960, y: 290, t: 'hex', n: 'Bắn sao băng' },
+      { x: 850, y: 2010, t: 'hold', n: 'Nấu súp' }, { x: 850, y: 2220, t: 'hex', n: 'Đập ruồi' },
+      { x: 1920, y: 2220, t: 'sw', n: 'Hiệu chỉnh cầu dao' }, { x: 1780, y: 2040, t: 'wires', n: 'Nối dây' },
+      { x: 540, y: 1050, t: 'simon', n: 'Khởi động lò' }, { x: 540, y: 1380, t: 'hold', n: 'Nạp mây' },
+      { x: 2580, y: 1050, t: 'code', n: 'Nhập mã lọc khí' }, { x: 2580, y: 1360, t: 'swipe', n: 'Chỉnh cánh quạt' },
+      { x: 460, y: 290, t: 'simon', n: 'Rung chuông' }, { x: 460, y: 520, t: 'code', n: 'Gửi tín hiệu' },
+      { x: 2310, y: 290, t: 'hold', n: 'Tưới cây' }, { x: 2580, y: 520, t: 'hex', n: 'Diệt sâu bọ' },
+      { x: 230, y: 2010, t: 'wires', n: 'Nối dây' }, { x: 480, y: 2010, t: 'hold', n: 'Lau sàn' },
+      { x: 2310, y: 2010, t: 'hold', n: 'Cho rồng ăn' }, { x: 2580, y: 2220, t: 'swipe', n: 'Chải vảy rồng' },
+    ] },
+  // tổ ong ngoài hành tinh: nhiều buồng nhỏ chật chội, đường nối chằng chịt quanh tổ mẹ
+  { id: 'hive', name: 'Tổ Ong Ngoài Hành Tinh', icon: '👾', W: 2200, H: 1480,
+    rooms: [
+      { id: 'pod', name: 'Buồng Trứng', r: [120, 120, 300, 260], col: '#6a5080' },
+      { id: 'lab', name: 'Phòng Mẫu', r: [680, 120, 300, 260], col: '#4a7468' },
+      { id: 'comms', name: 'Ăng-ten', r: [1240, 120, 300, 260], col: '#5d6e7e' },
+      { id: 'o2', name: 'Lá Phổi', r: [1800, 120, 300, 260], col: '#4f7d54' },
+      { id: 'react', name: 'Lõi Nhiệt', r: [100, 580, 340, 380], col: '#7d4552' },
+      { id: 'nest', name: 'Tổ Mẹ', r: [680, 580, 860, 380], col: '#4c7a3e' },
+      { id: 'med', name: 'Hồi Sức', r: [1780, 600, 340, 340], col: '#3f7f80' },
+      { id: 'elec', name: 'Điện', r: [120, 1160, 300, 260], col: '#7d6d36' },
+      { id: 'stor', name: 'Kho Mật', r: [680, 1160, 300, 260], col: '#7c6045' },
+      { id: 'pump', name: 'Bơm Dịch', r: [1240, 1160, 300, 260], col: '#4d6f8f' },
+      { id: 'dock', name: 'Cửa Hầm', r: [1800, 1160, 300, 260], col: '#5b6170' },
+    ],
+    halls: [[410, 210, 280, 90], [970, 210, 280, 90], [1530, 210, 280, 90], [230, 370, 90, 220], [790, 370, 90, 220], [1350, 370, 90, 220],
+      [1910, 370, 90, 240], [430, 730, 260, 90], [1530, 730, 260, 90], [230, 950, 90, 220], [410, 1250, 280, 90], [790, 950, 90, 220],
+      [1350, 950, 90, 220], [1530, 1250, 280, 90], [1910, 930, 90, 240]],
+    obst: [
+      [1070, 755, 80, 50, 0, 'btn'], [895, 640, 90, 60, 0, 'table'], [1235, 640, 90, 60, 0, 'table'], [895, 870, 90, 60, 0, 'table'], [1235, 870, 90, 60, 0, 'table'],
+      [820, 170, 140, 24, 1, 'shelf'], [1330, 150, 120, 50, 0, 'console'], [210, 740, 120, 120, 1, 'core'], [880, 1320, 80, 80, 1, 'crate'], [2000, 1320, 80, 80, 1, 'crate'],
+    ],
+    vents: [[170, 250, 0], [760, 170, 1], [1320, 320, 1], [2060, 250, 2], [2080, 770, 2], [170, 1290, 0],
+      [760, 1380, 0], [1290, 1290, 1], [1880, 1380, 2]],
+    button: { x: 1110, y: 780 },
+    fix: { lights: { x: 170, y: 1210 }, reactor: { x: 150, y: 630 }, o2a: { x: 2060, y: 170 }, o2b: { x: 1830, y: 650 } },
+    tasks: [
+      { x: 170, y: 170, t: 'hold', n: 'Ủ trứng' }, { x: 170, y: 340, t: 'simon', n: 'Đếm trứng' },
+      { x: 830, y: 250, t: 'code', n: 'Nhập mã mẫu' }, { x: 760, y: 320, t: 'simon', n: 'Phân tích mẫu' },
+      { x: 1470, y: 320, t: 'wires', n: 'Nối dây' }, { x: 1390, y: 320, t: 'hold', n: 'Tải dữ liệu' },
+      { x: 2060, y: 340, t: 'code', n: 'Nhập mã lọc khí' }, { x: 1950, y: 170, t: 'hold', n: 'Bơm khí' },
+      { x: 400, y: 630, t: 'simon', n: 'Khởi động lõi' }, { x: 400, y: 920, t: 'hold', n: 'Nạp nhiệt' },
+      { x: 730, y: 630, t: 'swipe', n: 'Quẹt thẻ' }, { x: 1500, y: 630, t: 'hex', n: 'Dọn tơ' },
+      { x: 1500, y: 920, t: 'hold', n: 'Đổ rác' }, { x: 2080, y: 650, t: 'hold', n: 'Khám sức khoẻ' },
+      { x: 2080, y: 900, t: 'simon', n: 'Phân tích máu' }, { x: 170, y: 1380, t: 'sw', n: 'Hiệu chỉnh cầu dao' },
+      { x: 270, y: 1380, t: 'wires', n: 'Nối dây' }, { x: 940, y: 1210, t: 'hold', n: 'Kiểm kê mật' },
+      { x: 760, y: 1230, t: 'hex', n: 'Đuổi ong' }, { x: 1290, y: 1210, t: 'swipe', n: 'Chỉnh van bơm' },
+      { x: 1290, y: 1380, t: 'wires', n: 'Nối dây' }, { x: 2060, y: 1210, t: 'code', n: 'Mở cửa hầm' },
+      { x: 1880, y: 1230, t: 'hold', n: 'Bốc hàng' },
+    ] },
+  // nhà máy kẹo: hai dãy xưởng hai bên, văn phòng và phòng nếm thử ở giữa, căng tin họp ở dưới
+  { id: 'candy', name: 'Nhà Máy Kẹo', icon: '🍬', W: 2480, H: 2120,
+    rooms: [
+      { id: 'sugar', name: 'Kho Đường', r: [180, 120, 380, 300], col: '#6f6853' },
+      { id: 'mix', name: 'Máy Trộn', r: [180, 620, 380, 320], col: '#6e5246' },
+      { id: 'elec', name: 'Điện', r: [200, 1120, 340, 300], col: '#7d6d36' },
+      { id: 'bake', name: 'Lò Nướng', r: [160, 1640, 440, 420], col: '#7d4552' },
+      { id: 'canteen', name: 'Căng Tin', r: [1000, 1620, 560, 440], col: '#56658a' },
+      { id: 'pack', name: 'Đóng Gói', r: [1960, 1640, 440, 420], col: '#7c6045' },
+      { id: 'qc', name: 'Kiểm Định', r: [2000, 120, 380, 300], col: '#4f5f92' },
+      { id: 'wrap', name: 'Gói Kẹo', r: [2000, 620, 380, 320], col: '#6a5080' },
+      { id: 'o2', name: 'Thông Gió', r: [2020, 1120, 340, 300], col: '#4f7d54' },
+      { id: 'office', name: 'Văn Phòng', r: [1000, 600, 520, 320], col: '#55708a' },
+      { id: 'taste', name: 'Phòng Nếm Thử', r: [1060, 1080, 420, 320], col: '#3f7f80' },
+    ],
+    halls: [[330, 410, 90, 220], [330, 930, 90, 200], [330, 1410, 90, 240], [590, 1810, 420, 90], [1550, 1810, 420, 90], [2150, 1410, 90, 240],
+      [2150, 930, 90, 200], [2150, 410, 90, 220], [550, 730, 460, 90], [1510, 730, 500, 90], [1230, 910, 90, 180], [1230, 1390, 90, 240]],
+    obst: [
+      [1240, 1825, 80, 50, 0, 'btn'], [1065, 1710, 90, 60, 0, 'table'], [1405, 1710, 90, 60, 0, 'table'], [1065, 1940, 90, 60, 0, 'table'], [1405, 1940, 90, 60, 0, 'table'],
+      [460, 170, 80, 80, 1, 'crate'], [200, 320, 80, 80, 1, 'crate'], [320, 1820, 120, 120, 1, 'core'], [2300, 1690, 80, 80, 1, 'crate'], [1980, 2020, 140, 24, 1, 'shelf'],
+      [2240, 150, 120, 50, 0, 'console'], [1410, 630, 90, 60, 0, 'table'], [1230, 630, 60, 140, 0, 'plant'], [1370, 1110, 90, 60, 0, 'table'],
+    ],
+    vents: [[370, 170, 0], [230, 780, 0], [250, 1270, 3], [210, 1850, 0], [2360, 1850, 1], [2050, 270, 1],
+      [2340, 780, 1], [2070, 1270, 2], [1130, 650, 2], [1110, 1240, 3]],
+    button: { x: 1280, y: 1850 },
+    fix: { lights: { x: 250, y: 1170 }, reactor: { x: 210, y: 1690 }, o2a: { x: 2070, y: 1170 }, o2b: { x: 1050, y: 650 } },
+    tasks: [
+      { x: 230, y: 170, t: 'hold', n: 'Đổ đường' }, { x: 520, y: 380, t: 'code', n: 'Kiểm kho' },
+      { x: 230, y: 670, t: 'swipe', n: 'Chỉnh tốc độ trộn' }, { x: 520, y: 670, t: 'hold', n: 'Đổ bột' },
+      { x: 500, y: 1170, t: 'sw', n: 'Hiệu chỉnh cầu dao' }, { x: 500, y: 1380, t: 'wires', n: 'Nối dây' },
+      { x: 560, y: 1690, t: 'simon', n: 'Hẹn giờ lò' }, { x: 560, y: 2020, t: 'hold', n: 'Nạp củi' },
+      { x: 1050, y: 1670, t: 'swipe', n: 'Quẹt thẻ' }, { x: 1520, y: 1670, t: 'hold', n: 'Đổ rác' },
+      { x: 2010, y: 1690, t: 'hold', n: 'Đóng thùng' }, { x: 2360, y: 2020, t: 'wires', n: 'Nối dây' },
+      { x: 2050, y: 170, t: 'simon', n: 'Soi màu kẹo' }, { x: 2340, y: 380, t: 'code', n: 'Nhập mã lô' },
+      { x: 2050, y: 670, t: 'hex', n: 'Gỡ kẹo kẹt máy' }, { x: 2340, y: 670, t: 'swipe', n: 'Căn giấy gói' },
+      { x: 2320, y: 1170, t: 'code', n: 'Nhập mã lọc khí' }, { x: 2320, y: 1380, t: 'hold', n: 'Thay lưới lọc' },
+      { x: 1480, y: 880, t: 'hold', n: 'Tải báo cáo' }, { x: 1050, y: 880, t: 'code', n: 'Duyệt đơn hàng' },
+      { x: 1110, y: 1130, t: 'simon', n: 'Chấm điểm kẹo' }, { x: 1440, y: 1360, t: 'hex', n: 'Đuổi kiến' },
+    ] },
 ];
 // bản đồ đang dùng (useMap đổi tất cả các biến này)
-let MAP_I = 0, mapVer = 0, ROOMS, HALLS, WALK, MAP_W, MAP_H, OBST, VENTS, BUTTON, FIX, TASKS, GW, GH, GRID;
+let MAP_I = 0, mapVer = 0, DOORS = [], doorT = 0, doorShut = false, ROOMS, HALLS, WALK, MAP_W, MAP_H, OBST, VENTS, BUTTON, FIX, TASKS, GW, GH, GRID;
 // lưới 10px: 0 ngoài tàu · 1 sàn · 2 vật thấp · 3 vật cao (che tầm nhìn)
 const GC = 10;
 const cellAt = (x, y) => (x < 0 || y < 0 || x >= MAP_W || y >= MAP_H ? 0 : GRID[((y / GC) | 0) * GW + ((x / GC) | 0)]);
@@ -761,6 +1039,45 @@ function useMap(i) {
   PW = MAP_W / PG; PH = MAP_H / PG; PSTAND = new Uint8Array(PW * PH);
   for (let j = 0; j < PH; j++) for (let i = 0; i < PW; i++) PSTAND[j * PW + i] = canStand(i * PG + PG / 2, j * PG + PG / 2) ? 1 : 0;
   pgG = new Float32Array(PW * PH); pgP = new Int32Array(PW * PH); pgS = new Uint32Array(PW * PH); pgStamp = 0;
+  DOORS = doorRects(m); doorT = 0; doorShut = false;
+}
+// cửa phòng Điện: dải 20px chắn ngang mỗi hành lang nối vào phòng, ngay sát mép phòng (bản đồ có thể tự khai báo m.doors)
+function doorRects(m) {
+  if (m.doors) return m.doors;
+  const e = m.rooms.find(r => r.id === 'elec'); if (!e) return [];
+  const [rx, ry, rw, rh] = e.r, D = 20, out = [];
+  for (const [hx, hy, hw, hh] of m.halls) {
+    if (hy >= ry && hy + hh <= ry + rh) { // hành lang ngang chạm cạnh trái / phải
+      if (hx < rx - D + 1 && hx + hw >= rx) out.push([rx - D, hy, D, hh]);
+      if (hx + hw > rx + rw + D - 1 && hx <= rx + rw) out.push([rx + rw, hy, D, hh]);
+    } else if (hx >= rx && hx + hw <= rx + rw) { // hành lang dọc chạm cạnh trên / dưới
+      if (hy < ry - D + 1 && hy + hh >= ry) out.push([hx, ry - D, hw, D]);
+      if (hy + hh > ry + rh + D - 1 && hy <= ry + rh) out.push([hx, ry + rh, hw, D]);
+    }
+  }
+  return out;
+}
+const DOOR_T = 10;
+const elecName = () => { const e = ROOMS.find(r => r.id === 'elec'); return e ? e.name : 'Điện'; };
+// đóng / mở cửa: cửa đóng là vật cao (chắn đường lẫn tầm nhìn); ai đang đứng giữa khung cửa bị đẩy ra chỗ trống gần nhất
+function shutDoors(on) {
+  if (doorShut === on) return; doorShut = on;
+  for (const d of DOORS) for (let j = d[1] / GC; j < (d[1] + d[3]) / GC; j++) for (let i = d[0] / GC; i < (d[0] + d[2]) / GC; i++) GRID[j * GW + i] = on ? 3 : 1;
+  for (const d of DOORS) {
+    const i0 = Math.max(0, Math.floor((d[0] - 40) / PG)), i1 = Math.min(PW - 1, Math.floor((d[0] + d[2] + 40) / PG));
+    const j0 = Math.max(0, Math.floor((d[1] - 40) / PG)), j1 = Math.min(PH - 1, Math.floor((d[1] + d[3] + 40) / PG));
+    for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) PSTAND[j * PW + i] = canStand(i * PG + PG / 2, j * PG + PG / 2) ? 1 : 0;
+  }
+  if (typeof buildFloor === 'function' && builtVer === mapVer) buildFloor();
+  if (on) for (const p of P) if (!p.dead && p.vent < 0 && !canStand(p.x, p.y)) { const c = nearCell(p.x, p.y); if (c >= 0) place(p, (c % PW) * PG + PG / 2, ((c / PW) | 0) * PG + PG / 2); p.path = []; }
+}
+function resetDoors() { doorT = 0; shutDoors(false); }
+function closeDoors(t) { doorT = t; shutDoors(true); playAlert(); toast(`🚪 Cửa phòng ${elecName()} bị khoá ${Math.ceil(t)} giây!`); syncHud(); }
+function doDoors(by) {
+  if (sabo || saboCd > 0 || doorT > 0 || phase !== 'play' || !DOORS.length) return;
+  if (isGuest()) return netSend({ t: 'sabo', kind: 'doors' });
+  if (isHost()) netBroadcast({ t: 'door', s: DOOR_T });
+  saboCd = SABO_CD; closeDoors(DOOR_T);
 }
 useMap(0);
 const pickMap = v => (Number.isInteger(v) && MAPS[v] ? v : Math.floor(Math.random() * MAPS.length)); // 'random' → bốc ngẫu nhiên
@@ -842,7 +1159,7 @@ function beginRound() {
   dealTasks();
   // xếp quanh bàn Nhà Ăn
   P.forEach((p, k) => { const a = (k / P.length) * Math.PI * 2; place(p, BUTTON.x + Math.cos(a) * 95, BUTTON.y + Math.sin(a) * 70); p.dir = Math.cos(a) < 0 ? 1 : -1; });
-  bodies = []; sabo = null; saboCd = 10; meeting = null; winner = null; mapOpen = false; splats.length = 0; fx.length = 0; bodyBorn.clear();
+  bodies = []; sabo = null; saboCd = 10; resetDoors(); meeting = null; winner = null; mapOpen = false; splats.length = 0; fx.length = 0; bodyBorn.clear();
   for (const p of P) { p.killCd = 10; p.shootCd = SHOOT_CD; p.idleT = 0; p.idleWarn = false; }
   progShown = 0; gameLeft = timeMin() * 60; timeWarn = 0;
   cam.x = me.x; cam.y = me.y;
@@ -933,7 +1250,7 @@ function showReveal() {
 const keys = {};
 let joy = null; // {id, x0, y0, dx, dy}
 addEventListener('keydown', e => { keys[e.key.toLowerCase()] = true; if (phase !== 'play' || !$('taskSheet').hidden || !$('meetSheet').hidden) return; const k = e.key.toLowerCase(); if (k === 'e') doUse(); if (k === 'r') doReport(); if (k === 'q') { if (me.sheriff) doShoot(); else doKill(); } if (k === 'v') doVent(); if (k === 'm') toggleMap();
-  if (k === 'f') $('bSabo').click(); if (!$('saboPop').hidden && (k === '1' || k === '2' || k === '3')) $(k === '1' ? 'sbLights' : k === '2' ? 'sbReactor' : 'sbO2').click(); });
+  if (k === 'f') $('bSabo').click(); if (!$('saboPop').hidden && (k === '1' || k === '2' || k === '3' || k === '4')) $(k === '1' ? 'sbLights' : k === '2' ? 'sbReactor' : k === '3' ? 'sbO2' : 'sbDoors').click(); });
 // T: bật/tắt mic (mọi lúc khi đang online)
 addEventListener('keydown', e => { // bản đồ lúc họp: M bật/tắt, Esc đóng
   const k = e.key.toLowerCase(); if (e.repeat || !meeting || $('meetSheet').hidden) return;
@@ -1014,10 +1331,11 @@ function ventNext(dirn) { // trong ống: chuyển sang ống kế tiếp cùng 
 }
 function toggleMap() { mapOpen = !mapOpen; }
 $('bUse').onclick = doUse; $('bReport').onclick = doReport; $('bKill').onclick = doKill; $('bShoot').onclick = doShoot; $('bVent').onclick = doVent; $('bMap').onclick = toggleMap;
-$('bSabo').onclick = () => { if ($('bSabo').hidden || phase !== 'play' || !me.imp || saboCd > 0 || sabo || me.dead) return; $('saboPop').hidden = !$('saboPop').hidden; };
+$('bSabo').onclick = () => { if ($('bSabo').hidden || phase !== 'play' || !me.imp || saboCd > 0 || sabo || me.dead) return; $('sbDoors').hidden = !DOORS.length; $('sbDoors').disabled = doorT > 0; $('saboPop').hidden = !$('saboPop').hidden; };
 $('sbLights').onclick = () => { $('saboPop').hidden = true; doSabotage('lights', me); };
 $('sbReactor').onclick = () => { $('saboPop').hidden = true; doSabotage('reactor', me); };
 $('sbO2').onclick = () => { $('saboPop').hidden = true; doSabotage('o2', me); };
+$('sbDoors').onclick = () => { $('saboPop').hidden = true; doDoors(me); };
 
 // ═══════════════════════════ luật: giết, phá hoại, báo ═══════════════════════════
 function kill(k, v) {
@@ -1149,7 +1467,7 @@ function impThink(b) {
       if (b.state !== 'hunt' || !b.path.length || Math.random() < 0.5) { goTo(b, v, 'hunt'); } return; }
   }
   // phá hoại thỉnh thoảng
-  if (!sabo && saboCd <= 0 && Math.random() < 0.08) { const r = Math.random(); doSabotage(r < 0.45 ? 'lights' : r < 0.75 ? 'reactor' : 'o2', b); return; }
+  if (!sabo && saboCd <= 0 && Math.random() < 0.08) { const r = Math.random(); if (r >= 0.85 && DOORS.length && doorT <= 0) doDoors(b); else doSabotage(r < 0.4 ? 'lights' : r < 0.65 ? 'reactor' : 'o2', b); return; }
   // giả vờ làm nhiệm vụ như người thường
   if (b.state === 'doing') { b.timer += 0.3; if (b.timer > b.need) { b.state = 'idle'; } return; }
   if (!b.path.length) {
@@ -1166,6 +1484,7 @@ function startMeeting(reporter, body) {
   if (me.vent >= 0) { me.vent = -1; }
   for (const p of P) { if (p.vent >= 0) { p.vent = -1; } p.path = []; p.state = 'idle'; p.vx = p.vy = 0; }
   if (timedSabo()) { sabo = null; } // lò / oxy được tạm hoãn khi họp
+  resetDoors(); // họp thì cửa mở
   const victim = body ? P[body.id] : null, room = body ? roomName(body.x, body.y) : null;
   progShown = realPct(); // họp mới cập nhật thanh tiến độ
   meeting = { reporter, body, victim, room, t: 0, votes: {}, picked: null, chat: [], acc: {}, lines: [], phaseV: 'talk', talkT: net.on ? 25 : 18, voteT: net.on ? 45 : 40, nextTalk: 3, botLines: 0, allAt: null };
@@ -1595,6 +1914,14 @@ function buildMap() {
   for (const r of ROOMS) { x.font = '800 30px "Baloo 2", sans-serif'; x.fillStyle = 'rgba(255,255,255,.13)'; x.fillText(r.name.toUpperCase(), r.r[0] + r.r[2] / 2, r.r[1] + r.r[3] - 30); }
   // vật cản: mặt trên + mặt trước, vật cao có bóng đổ
   for (const o of OBST) drawObst(x, o);
+  // khung cửa phòng Điện: hai trụ ở hai đầu, rãnh cửa dưới sàn
+  for (const d of DOORS) {
+    const hor = d[2] > d[3]; x.fillStyle = 'rgba(0,0,0,.28)'; x.fillRect(d[0] + (hor ? 0 : 7), d[1] + (hor ? 7 : 0), hor ? d[2] : 6, hor ? 6 : d[3]);
+    x.fillStyle = '#8a93ab';
+    if (hor) { x.fillRect(d[0] - 10, d[1] - 30, 12, d[3] + 30); x.fillRect(d[0] + d[2] - 2, d[1] - 30, 12, d[3] + 30); }
+    else { x.fillRect(d[0] - 2, d[1] - 42, d[2] + 4, 14); x.fillRect(d[0] - 2, d[1] + d[3] - 4, d[2] + 4, 10); }
+    x.fillStyle = '#f5c518'; if (hor) { x.fillRect(d[0] - 8, d[1] - 26, 8, 6); x.fillRect(d[0] + d[2], d[1] - 26, 8, 6); } else x.fillRect(d[0] + 2, d[1] - 38, d[2] - 4, 5);
+  }
   // ống thông gió
   for (const v of VENTS) {
     x.fillStyle = 'rgba(0,0,0,.35)'; x.beginPath(); x.ellipse(v[0], v[1] + 3, 27, 17, 0, 0, Math.PI * 2); x.fill();
@@ -1783,6 +2110,18 @@ function render() {
   const bp = .5 + .5 * Math.sin(now / 300);
   ctx.fillStyle = '#ff2b2b'; ctx.shadowColor = '#ff2b2b'; ctx.shadowBlur = 10 + bp * 14; ctx.beginPath(); ctx.ellipse(BUTTON.x, BUTTON.y - 8, 16, 12, 0, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0;
   ctx.fillStyle = 'rgba(255,255,255,.6)'; ctx.beginPath(); ctx.ellipse(BUTTON.x - 5, BUTTON.y - 12, 5, 3, 0, 0, Math.PI * 2); ctx.fill();
+  // cửa phòng Điện đang khoá: tấm thép sọc vàng đen cao như tường
+  if (doorShut) for (const d of DOORS) {
+    const hor = d[2] > d[3], top = d[1] - 30, h = d[3] + 30, a = Math.min(1, (DOOR_T - doorT) * 4);
+    ctx.save(); ctx.beginPath(); ctx.rect(d[0], top, d[2], h); ctx.clip();
+    const sh = hor ? 0 : (1 - a) * h;
+    ctx.fillStyle = '#5b6377'; ctx.fillRect(d[0], top - sh, d[2], h);
+    ctx.fillStyle = '#3b4255'; ctx.fillRect(d[0], top - sh + h - 14, d[2], 14);
+    ctx.fillStyle = '#f5c518'; for (let k = -h; k < d[2] + h; k += 22) { ctx.beginPath(); ctx.moveTo(d[0] + k, top - sh + h - 14); ctx.lineTo(d[0] + k + 11, top - sh + h - 14); ctx.lineTo(d[0] + k + 25, top - sh + h); ctx.lineTo(d[0] + k + 14, top - sh + h); ctx.fill(); }
+    ctx.strokeStyle = 'rgba(0,0,0,.45)'; ctx.lineWidth = 2; ctx.strokeRect(d[0] + 1, top - sh + 1, d[2] - 2, h - 2);
+    if (hor) { ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.fillRect(d[0] + d[2] / 2 - 1, top, 2, h); }
+    ctx.restore();
+  }
   // ống gió đang bật nắp
   for (let k = ventFx.length - 1; k >= 0; k--) { const f = ventFx[k], a = (now - f.t) / 450; if (a > 1) { ventFx.splice(k, 1); continue; } const v = VENTS[f.v]; ctx.save(); ctx.translate(v[0], v[1] - 11); ctx.scale(1, Math.abs(Math.cos(a * Math.PI * 2))); ctx.fillStyle = '#8c97b3'; roundRect(ctx, -20, -2, 40, 22, 4); ctx.fill(); ctx.restore(); }
   // chỗ sửa phá hoại
@@ -1946,6 +2285,7 @@ function drawMini() {
   if (me.imp) for (const v of VENTS) dot(v[0], v[1], 1.6, '#94a3b8');
   if (!me.imp) for (const t of me.tasks) if (!t.done) dot(TASKS[t.id].x, TASKS[t.id].y, 2.6, '#ffd23f');
   for (const id of saboLeft()) dot(FIX[id].x, FIX[id].y, 4, Math.sin(now / 150) > 0 ? '#ff4d4d' : '#fff');
+  if (doorShut) { g.fillStyle = '#ff4d4d'; for (const dr of DOORS) g.fillRect(ox + dr[0] * k - 1, oy + dr[1] * k - 1, Math.max(2, dr[2] * k) + 2, Math.max(2, dr[3] * k) + 2); }
   g.strokeStyle = '#ff4d4d'; g.lineWidth = 1.6;
   for (const b of bodies) if (seesMe(b)) { const x = ox + b.x * k, y = oy + b.y * k; g.beginPath(); g.moveTo(x - 3, y - 3); g.lineTo(x + 3, y + 3); g.moveTo(x + 3, y - 3); g.lineTo(x - 3, y + 3); g.stroke(); }
   for (const p of P) if (p !== me && !p.dead && p.vent < 0 && seesMe(p)) dot(p.x, p.y, 2.6, COLORS[p.ci][1], 'rgba(0,0,0,.6)');
@@ -2041,6 +2381,7 @@ function step(dt, now) {
     if (!isGuest()) for (const p of P) { if (p.bot && !(p.dead && p.imp)) botStep(p, dt); if (p.imp) p.killCd = Math.max(0, p.killCd - dt); if (p.sheriff) p.shootCd = Math.max(0, p.shootCd - dt); }
     else { if (me.imp) me.killCd = Math.max(0, me.killCd - dt); if (me.sheriff) me.shootCd = Math.max(0, me.shootCd - dt); }
     saboCd = Math.max(0, saboCd - dt);
+    if (doorT > 0 && (doorT -= dt) <= 0) { doorT = 0; shutDoors(false); toast(`🚪 Cửa phòng ${elecName()} đã mở.`); }
     idleTick(dt);
     gameLeft = Math.max(0, gameLeft - dt);
     if (!timeWarn && gameLeft <= 60) { timeWarn = 1; toast(me.imp ? '⏱ Còn 1 phút! Cầm chân phi hành đoàn là thắng.' : '⏱ Còn 1 phút! Làm nhanh nhiệm vụ không là Kẻ Giả Mạo thắng!', 3500); playAlert(); }
@@ -2319,7 +2660,7 @@ function leaveOnline() {
   for (const id of ['netSheet', 'lobbySheet', 'resultSheet', 'meetSheet', 'taskSheet']) $(id).hidden = true;
   $('ejectScene').hidden = true; $('bAgain').disabled = false; $('bAgain').textContent = 'Chơi lại';
   $('bNew').textContent = '↻';
-  meeting = null; sabo = null; bodies = []; phase = 'setup'; splats.length = 0; fx.length = 0; bodyBorn.clear();
+  meeting = null; sabo = null; resetDoors(); bodies = []; phase = 'setup'; splats.length = 0; fx.length = 0; bodyBorn.clear();
   P = [newPlayer(0, 'Bạn', setup.ci, false)]; me = P[0]; place(me, BUTTON.x - 60, BUTTON.y + 90);
   syncHud(); syncVoiceUi(); openSetup();
 }
@@ -2330,7 +2671,7 @@ function lobbyBeans() {
   P = M.filter(m => !m.wait || phase === 'lobby').map((m, k) => Object.assign(newPlayer(k, m.name, m.ci, false), { cid: m.cid }));
   P.forEach((p, k) => { const a = (k / Math.max(1, P.length)) * Math.PI * 2 + 0.6; place(p, BUTTON.x + Math.cos(a) * 110, BUTTON.y + Math.sin(a) * 80); p.dir = Math.cos(a) < 0 ? 1 : -1; });
   me = P.find(p => p.cid === myCid) || P[0] || newPlayer(0, 'Bạn', setup.ci, false);
-  bodies = []; sabo = null; meeting = null; splats.length = 0; fx.length = 0; bodyBorn.clear();
+  bodies = []; sabo = null; resetDoors(); meeting = null; splats.length = 0; fx.length = 0; bodyBorn.clear();
 }
 function enterLobby() {
   phase = 'lobby';
@@ -2588,7 +2929,7 @@ function hostMsg(c, d) {
     case 'kill': { const v = P[d.v]; if (phase === 'play' && p.imp && !p.dead && p.killCd <= 0 && p.vent < 0 && v && !v.dead && !v.imp && dist(ps, v) < KILL_RANGE + 60) { kill(p, v); } return; }
     case 'report': { const b = bodies.find(x => x.id === d.b); if (phase === 'play' && !p.dead && b && dist(ps, b) < 170) startMeeting(p, b); return; }
     case 'emerg': if (phase === 'play' && !p.dead && !sabo && p.emergency > 0 && dist(ps, BUTTON) < 160) { p.emergency--; startMeeting(p, null); } return;
-    case 'sabo': if (phase === 'play' && p.imp && !p.dead && SABO_KINDS.includes(d.kind)) doSabotage(d.kind, p); return;
+    case 'sabo': if (phase === 'play' && p.imp && !p.dead && SABO_KINDS.includes(d.kind)) doSabotage(d.kind, p); else if (phase === 'play' && p.imp && !p.dead && d.kind === 'doors') doDoors(p); return;
     case 'fix': { const id = saboLeft().includes(d.s) ? d.s : saboLeft().length === 1 ? saboLeft()[0] : null; if (phase === 'play' && id && !p.dead && dist(ps, FIX[id]) < USE_RANGE + 70) { idleReset(p); fixSabotage(id); } return; }
     case 'shoot': { const v = P[d.v]; if (phase === 'play' && p.sheriff && p.ammo > 0 && !p.dead && p.shootCd <= 1 && p.vent < 0 && v && v !== p && !v.dead && dist(ps, v) < SHOOT_RANGE + 60 && losClear(ps, v)) shoot(p, v); return; }
     case 'task': { const t = p.tasks.find(x => x.id === d.id); if (t && !p.imp && !p.jester && (phase === 'play' || phase === 'meeting')) { t.done = true; idleReset(p); syncHud(); checkWin(); } return; }
@@ -2629,7 +2970,7 @@ function fullFor(p) {
   return {
     t: 'full', id: p.id, ph: phase, S, impN, mp: MAP_I,
     P: P.map(q => ({ id: q.id, name: q.name, ci: q.ci, cid: q.cid, imp: see && q.imp, dead: q.dead, ej: q.ejected, x: Math.round(q.x), y: Math.round(q.y), dir: q.dir })),
-    tasks: p.tasks, em: p.emergency, kc: p.killCd, sh: p.sheriff ? 1 : 0, jt: p.jester ? 1 : 0, am: p.ammo, scd: p.shootCd, sabo: sabo ? { kind: sabo.kind, t: sabo.t, left: saboLeft() } : null, sc: saboCd,
+    tasks: p.tasks, em: p.emergency, kc: p.killCd, sh: p.sheriff ? 1 : 0, jt: p.jester ? 1 : 0, am: p.ammo, scd: p.shootCd, sabo: sabo ? { kind: sabo.kind, t: sabo.t, left: saboLeft() } : null, sc: saboCd, dr: doorT,
     b: bodies.map(b => [b.id, Math.round(b.x), Math.round(b.y)]), pr: hostPct(), gl: gameLeft,
     m: m ? { pr: progShown, r: m.reporter.id, v: m.victim ? m.victim.id : -1, room: m.room, bx: m.body ? Math.round(m.body.x) : -1, by: m.body ? Math.round(m.body.y) : -1, t: m.t, phaseV: m.phaseV === 'done' ? 'vote' : m.phaseV, talkT: m.talkT, voteT: m.voteT, voted: Object.keys(m.votes).map(Number), my: m.votes[p.id] } : null,
   };
@@ -2640,7 +2981,7 @@ function hostSnap() {
   const imps = P.filter(q => q.imp).map(q => q.id);
   net.snapSq++;
   const base = { t: 's', sq: net.snapSq, p: P.map(q => { const [vx, vy] = netVel(q); return [Math.round(q.x), Math.round(q.y), q.dir, Math.hypot(q.vx, q.vy) > 5 ? 1 : 0, q.dead ? 1 : 0, q.vent >= 0 ? 1 : 0, Math.round(vx), Math.round(vy)]; }),
-    b: bodies.map(b => [b.id, Math.round(b.x), Math.round(b.y)]), sb: sabo ? [sabo.kind, Math.round(sabo.t * 10) / 10, saboLeft()] : 0, pr: hostPct(), gl: Math.round(gameLeft * 10) / 10 };
+    b: bodies.map(b => [b.id, Math.round(b.x), Math.round(b.y)]), sb: sabo ? [sabo.kind, Math.round(sabo.t * 10) / 10, saboLeft()] : 0, dr: doorT > 0 ? Math.round(doorT * 10) / 10 : 0, pr: hostPct(), gl: Math.round(gameLeft * 10) / 10 };
   for (const [c, cid] of net.conns) {
     const p = P.find(q => q.cid === cid); if (!p || !c.open) continue;
     fastSend(c, Object.assign({}, base, { n: c._n || 0, kc: Math.round(p.killCd * 10) / 10, em: p.emergency, sc: Math.round(saboCd), im: p.imp || p.dead ? imps : undefined }));
@@ -2780,6 +3121,7 @@ function guestMsg(d) {
       syncHud(); return;
     }
     case 'sabo': if (!SABO_KINDS.includes(d.kind)) return; sabo = { kind: d.kind, t: saboT0(d.kind), left: SABO_FIX[d.kind].slice() }; playAlert(); toast(saboMsg(d.kind)); if (me.imp) saboCd = SABO_CD; syncHud(); return;
+    case 'door': if (phase === 'play') { closeDoors(clamp(+d.s || DOOR_T, 0.5, DOOR_T)); if (me.imp) saboCd = SABO_CD; } return;
     case 'fixpart': if (sabo && FIX[d.s]) { sabo.left = saboLeft().filter(x => x !== d.s); if (taskCur && taskCur.kind === 'fix' && taskCur.st === d.s) closeTask(); toast(`✅ Đã sửa ở ${FIX[d.s].room}${sabo.left.length ? ' — còn ' + FIX[sabo.left[0]].room + '!' : ''}`); playTaskDone(); syncHud(); } return;
     case 'shot': {
       const s = P_(d.s), v = P_(d.v); if (!s || !v) return;
@@ -2802,7 +3144,7 @@ function guestMsg(d) {
     }
     case 'meetEnd': {
       $('ejectScene').hidden = true; $('meetSheet').hidden = true;
-      meeting = null; bodies = []; sabo = null; me.vent = -1; splats.length = 0; bodyBorn.clear();
+      meeting = null; bodies = []; sabo = null; resetDoors(); me.vent = -1; splats.length = 0; bodyBorn.clear();
       if (!me.dead) { const a = (me.id / P.length) * Math.PI * 2; place(me, BUTTON.x + Math.cos(a) * 95, BUTTON.y + Math.sin(a) * 70); }
       for (const p of P) if (p !== me && !p.dead) { const a = (p.id / P.length) * Math.PI * 2; place(p, BUTTON.x + Math.cos(a) * 95, BUTTON.y + Math.sin(a) * 70); }
       me.shootCd = Math.max(me.shootCd, 10); phase = 'play'; toast('Tiếp tục!'); syncHud(); return;
@@ -2825,6 +3167,7 @@ function applyFull(d) {
   me.tasks = Array.isArray(d.tasks) ? d.tasks : []; me.emergency = d.em | 0; me.killCd = +d.kc || 0;
   me.sheriff = !!d.sh; me.jester = !!d.jt; me.ammo = d.am | 0; me.shootCd = +d.scd || 0;
   sabo = d.sabo && SABO_KINDS.includes(d.sabo.kind) ? { kind: d.sabo.kind, t: d.sabo.t, left: Array.isArray(d.sabo.left) ? d.sabo.left : SABO_FIX[d.sabo.kind].slice() } : null; saboCd = +d.sc || 0; netProg = d.pr | 0;
+  doorT = Math.max(0, +d.dr || 0); shutDoors(doorT > 0);
   gameLeft = Number.isFinite(+d.gl) ? +d.gl : timeMin() * 60; timeWarn = gameLeft <= 60 ? 1 : 0;
   bodies = (d.b || []).map(([id, x, y]) => ({ id, x, y, ci: P[id] ? P[id].ci : 0, t: 0 }));
   meeting = null; winner = null; mapOpen = false; splats.length = 0; fx.length = 0; bodyBorn.clear();
@@ -2842,6 +3185,7 @@ function guestMeeting(d) {
   phase = 'meeting';
   closeTask(); $('saboPop').hidden = true; joy = null; $('joy').hidden = true; me.vent = -1;
   if (timedSabo()) sabo = null;
+  resetDoors();
   const reporter = P[d.r] || me, victim = d.v >= 0 ? P[d.v] : null;
   if (Number.isInteger(d.pr)) netProg = d.pr;
   meeting = { reporter, body: victim ? { id: victim.id, x: +d.bx, y: +d.by } : null, victim, room: d.room, t: +d.t || 0, votes: {}, acc: {}, lines: [], phaseV: d.phaseV || 'talk', talkT: d.talkT || 25, voteT: d.voteT || 45 };
@@ -2860,6 +3204,7 @@ function applySnap(d) {
   });
   bodies = (d.b || []).map(([id, x, y]) => ({ id, x, y, ci: P[id] ? P[id].ci : 0, t: 0 }));
   if (d.sb && SABO_KINDS.includes(d.sb[0])) { if (!sabo || sabo.kind !== d.sb[0]) sabo = { kind: d.sb[0], t: d.sb[1] }; sabo.t = d.sb[1]; if (Array.isArray(d.sb[2])) sabo.left = d.sb[2]; } else sabo = null;
+  { const dr = Math.max(0, +d.dr || 0); if (dr > 0.3 && !doorShut) { doorT = dr; shutDoors(true); } else if (!dr && doorShut) resetDoors(); else if (dr) doorT = dr; }
   if (me.imp) { me.killCd = +d.kc || 0; saboCd = +d.sc || 0; }
   me.emergency = d.em | 0; netProg = d.pr | 0;
   if (Number.isFinite(+d.gl)) gameLeft = +d.gl;
