@@ -134,6 +134,7 @@ button:disabled { opacity: .35; cursor: default; }
 .colors button.on { box-shadow: 0 0 0 3px #fff, 0 0 0 5px var(--c); transform: scale(1.12); }
 .check { display: flex; align-items: center; gap: 8px; margin-top: 12px; font-weight: 700; font-size: 14.5px; cursor: pointer; }
 .check input { width: 20px; height: 20px; accent-color: var(--ink); }
+.checks { display: grid; grid-template-columns: 1fr 1fr; column-gap: 12px; } /* 2 cột: trái Công bố vai / Sự kiện lớn, phải Cảnh sát trưởng / Kẻ Pha Trò */
 .rules { font-size: 14.5px; line-height: 1.5; padding-left: 18px; } .rules li { margin: 5px 0; }
 /* ── lộ vai ── */
 .reveal { text-align: center; color: #fff; }
@@ -408,12 +409,14 @@ button:disabled { opacity: .35; cursor: default; }
     <div class="selbox" id="suMap"></div>
     <div class="label">Vai của bạn</div>
     <div class="selbox" id="suRole"></div>
-    <label class="check"><input type="checkbox" id="suConfirm"> Công bố vai</label>
-    <label class="check"><input type="checkbox" id="suSheriff"> Có Cảnh sát trưởng</label>
-    <label class="check"><input type="checkbox" id="suJester"> Có Kẻ Pha Trò (từ 6 người)</label>
-    <label class="check"><input type="checkbox" id="suEvt"> Có sự kiện lớn giữa ván</label>
+    <div class="checks">
+      <label class="check"><input type="checkbox" id="suConfirm"> Công bố vai</label>
+      <label class="check"><input type="checkbox" id="suSheriff"> Cảnh sát trưởng</label>
+      <label class="check" title="Thảm hoạ giữa ván, phải chui vào hầm trú ẩn"><input type="checkbox" id="suEvt"> Sự kiện lớn</label>
+      <label class="check" title="Cần từ 6 người chơi"><input type="checkbox" id="suJester"> Kẻ Pha Trò</label>
+    </div>
     <button class="go" id="bStart">Chơi với máy</button>
-    <button class="online-btn" id="bOnline">🌐 Chơi online với bạn bè</button>
+    <button class="online-btn" id="bOnline">Chơi online</button>
     <p class="rule">Phi hành đoàn làm xong hết nhiệm vụ hoặc đẩy hết Kẻ Giả Mạo ra ngoài thì thắng. Kẻ Giả Mạo thắng khi số người còn sống bằng số kẻ giả mạo, lò phản ứng nổ, cạn oxy, hoặc <b>hết giờ</b> mà nhiệm vụ chưa xong.</p>
   </div>
 </div>
@@ -499,10 +502,12 @@ button:disabled { opacity: .35; cursor: default; }
       <div class="selbox" id="lbMap"></div>
       <div class="label">Voice chat khi đang chơi</div>
       <div class="seg" id="lbVoice"></div>
-      <label class="check"><input type="checkbox" id="lbConfirm"> Công bố vai</label>
-      <label class="check"><input type="checkbox" id="lbSheriff"> Có Cảnh sát trưởng</label>
-      <label class="check"><input type="checkbox" id="lbJester"> Có Kẻ Pha Trò (từ 6 người)</label>
-      <label class="check"><input type="checkbox" id="lbEvt"> Có sự kiện lớn giữa ván</label>
+      <div class="checks">
+        <label class="check"><input type="checkbox" id="lbConfirm"> Công bố vai</label>
+        <label class="check"><input type="checkbox" id="lbSheriff"> Cảnh sát trưởng</label>
+        <label class="check" title="Thảm hoạ giữa ván, phải chui vào hầm trú ẩn"><input type="checkbox" id="lbEvt"> Sự kiện lớn</label>
+        <label class="check" title="Cần từ 6 người chơi"><input type="checkbox" id="lbJester"> Kẻ Pha Trò</label>
+      </div>
       <div class="row"><button id="lbCancel">Huỷ phòng</button><button class="go" id="lbStart">Bắt đầu</button></div>
       <p class="rule center" id="lbHint"></p>
     </div>
