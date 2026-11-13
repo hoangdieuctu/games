@@ -60,17 +60,26 @@ html, body {
 }
 .hbtn:active { transform: scale(.94); }
 .hbtn.off { opacity: .55; }
-@media (max-width: 560px) { #hud .fsbtn { display: none; } .hbtn { padding: 0 9px; font-size: 13px; } }
+.hbtn.ico { width: 40px; padding: 0; }
+#btnSound { margin-left: auto; } /* bỏ khung giữa: nút âm thanh / toàn màn hình vẫn dồn về góc phải */
+.hbtn.ico svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+@media (max-width: 560px) { #hud .fsbtn { display: none; } .hbtn { padding: 0 9px; font-size: 13px; } .hbtn.ico { padding: 0; } }
 .hmid {
   flex: 1 1 auto; min-width: 0; max-width: 460px; margin: 0 auto;
   background: var(--panel); border: 2px solid var(--line); border-radius: 16px;
-  padding: 4px 12px 7px; box-shadow: 0 4px 14px rgba(0,0,0,.35);
+  padding: 5px 12px; box-shadow: 0 4px 14px rgba(0,0,0,.35);
 }
 .hrow { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
 #lvName { font-size: 14px; font-weight: 700; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 #score { font-size: 19px; font-weight: 800; color: var(--gold); font-variant-numeric: tabular-nums; }
-.bar { height: 9px; border-radius: 6px; background: rgba(255,255,255,.12); overflow: hidden; margin-top: 2px; }
-#barFill { height: 100%; width: 0%; border-radius: 6px; background: linear-gradient(90deg, #2ec4a0, #ffd25a); transition: width .25s; }
+/* thanh tiến trình đứng ở mép phải màn hình, đầy dần từ dưới lên */
+.bar {
+  position: fixed; right: calc(env(safe-area-inset-right, 0px) + 14px); top: 50%; transform: translateY(-50%);
+  width: 12px; height: min(44vh, 320px); border-radius: 8px;
+  background: var(--panel); border: 2px solid var(--line); box-shadow: 0 4px 14px rgba(0,0,0,.35);
+  overflow: hidden; display: flex; align-items: flex-end;
+}
+#barFill { width: 100%; height: 0%; border-radius: 6px; background: linear-gradient(0deg, #2ec4a0, #ffd25a); transition: height .25s; }
 
 #swapBtn {
   position: fixed; z-index: 5;
@@ -221,13 +230,13 @@ h2 { font-size: 26px; color: var(--gold); margin-bottom: 6px; }
 <div id="toast"></div>
 
 <div id="hud" class="hidden">
-  <button class="hbtn" id="btnPause" aria-label="Tạm dừng">Dừng</button>
-  <div class="hmid">
+  <button class="hbtn ico" id="btnPause" aria-label="Tạm dừng" title="Tạm dừng (P)"><svg viewBox="0 0 24 24"><rect x="6" y="5" width="4" height="14" rx="1.2" fill="currentColor" stroke="none"/><rect x="14" y="5" width="4" height="14" rx="1.2" fill="currentColor" stroke="none"/></svg></button>
+  <div class="hmid hidden"><!-- khung tên màn + điểm phía trên: đã bỏ (vẫn giữ phần tử vì game.js cập nhật) -->
     <div class="hrow"><span id="lvName"></span><span id="score">0</span></div>
-    <div class="bar"><div id="barFill"></div></div>
   </div>
-  <button class="hbtn" id="btnSound" aria-label="Âm thanh">Âm thanh</button>
-  <button class="hbtn fsbtn" id="btnFull" aria-label="Toàn màn hình">Toàn màn hình</button>
+  <div class="bar" aria-label="Tiến độ màn chơi"><div id="barFill"></div></div>
+  <button class="hbtn ico" id="btnSound" aria-label="Âm thanh" title="Âm thanh"></button>
+  <button class="hbtn ico fsbtn" id="btnFull" aria-label="Toàn màn hình" title="Toàn màn hình (F)"></button>
 </div>
 <button id="swapBtn" class="hidden" aria-label="Đổi viên ngọc"><div class="dot" id="swapDot"></div><span class="lbl">Đổi ngọc</span></button>
 <div id="hint" class="hidden">Chuột trái: bắn · Chuột phải / Space: đổi ngọc · P: tạm dừng · F: toàn màn hình</div>

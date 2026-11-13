@@ -1156,7 +1156,7 @@ function updatePlay(dt) {
   $('danger').style.opacity = game.danger * (0.55 + 0.45 * Math.sin(game.time * 8));
   if (game.danger > 0.05) { game.beatT -= dt; if (game.beatT <= 0) { SFX.beat(); game.beatT = lerp(1.0, 0.45, game.danger); } }
   const left = game.tracks.reduce((a, T) => a + T.spawnLeft + T.balls.length, 0);
-  $('barFill').style.width = (clamp(1 - left / game.total, 0, 1) * 100).toFixed(1) + '%';
+  $('barFill').style.height = (clamp(1 - left / game.total, 0, 1) * 100).toFixed(1) + '%';
   // thua
   for (const T of game.tracks) {
     const B = T.balls;
@@ -1316,10 +1316,19 @@ const SCREENS = ['scrMenu', 'scrWorlds', 'scrLevels', 'ovPause', 'ovWin', 'ovLos
 function showOverlay(id) { for (const s of SCREENS) $(s).classList.toggle('hidden', s !== id); }
 function showHud() { $('hud').classList.remove('hidden'); $('swapBtn').classList.remove('hidden'); $('hint').classList.remove('hidden'); }
 function hideHud() { $('hud').classList.add('hidden'); $('swapBtn').classList.add('hidden'); $('hint').classList.add('hidden'); game.aimShow = false; }
+// biểu tượng cho các nút tròn trên thanh trên cùng (nút trong menu vẫn dùng chữ)
+const ICONS = {
+  sound: '<svg viewBox="0 0 24 24"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="currentColor"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/></svg>',
+  mute: '<svg viewBox="0 0 24 24"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="currentColor"/><path d="M16 9.5l5 5M21 9.5l-5 5"/></svg>',
+  full: '<svg viewBox="0 0 24 24"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg>',
+  exitFull: '<svg viewBox="0 0 24 24"><path d="M9 4v5H4M20 9h-5V4M15 20v-5h5M4 15h5v5"/></svg>',
+};
 function syncToggles() {
   for (const id of ['togSound1', 'togSound2']) $(id).classList.toggle('off', !save.sound);
   for (const id of ['togMusic1', 'togMusic2']) $(id).classList.toggle('off', !save.music);
-  $('btnSound').textContent = save.sound ? 'Âm thanh' : 'Tắt tiếng';
+  $('btnSound').innerHTML = save.sound ? ICONS.sound : ICONS.mute;
+  $('btnSound').setAttribute('aria-label', save.sound ? 'Âm thanh: đang bật' : 'Âm thanh: đang tắt');
+  $('btnSound').title = save.sound ? 'Tắt âm thanh' : 'Bật âm thanh';
   $('btnSound').classList.toggle('off', !save.sound);
 }
 let selWorld = 0;
@@ -1353,7 +1362,7 @@ function startLevel(L) {
   buildLevel(L);
   const def = game.def, W = WORLDS[def.w];
   $('lvName').textContent = `${W.emoji} ${def.w + 1}-${def.k + 1} · ${game.shapeName}`;
-  $('score').textContent = '0'; $('barFill').style.width = '0%';
+  $('score').textContent = '0'; $('barFill').style.height = '0%';
   showOverlay(null); showHud(); updateSwapDot();
   game.state = 'play'; game.aimShow = !isTouch;
   SFX.startMusic(W.theme); SFX.rush();
@@ -1410,7 +1419,8 @@ function syncFS() {
   const on = isFS();
   document.querySelectorAll('.fsbtn').forEach((b) => {
     b.classList.toggle('fson', on);
-    b.textContent = on ? 'Thoát toàn màn hình' : 'Toàn màn hình';
+    if (b.classList.contains('ico')) { b.innerHTML = on ? ICONS.exitFull : ICONS.full; b.title = on ? 'Thoát toàn màn hình (F)' : 'Toàn màn hình (F)'; }
+    else b.textContent = on ? 'Thoát toàn màn hình' : 'Toàn màn hình';
     b.setAttribute('aria-label', on ? 'Thoát toàn màn hình' : 'Toàn màn hình');
   });
   setTimeout(fitCamera, 120);
@@ -1418,6 +1428,7 @@ function syncFS() {
 if (IS_APP || (!USE_FS && !IS_IOS)) document.querySelectorAll('.fsbtn').forEach((b) => b.classList.add('hidden'));
 document.addEventListener('fullscreenchange', syncFS);
 document.addEventListener('webkitfullscreenchange', syncFS);
+$('btnFull').innerHTML = ICONS.full; // icon ban đầu (syncFS chỉ chạy khi đổi chế độ)
 $('btnFull').addEventListener('click', () => { SFX.init(); toggleFullscreen(); });
 addEventListener('keydown', (e) => { if (e.code === 'KeyF' && !e.repeat) toggleFullscreen(); });
 
