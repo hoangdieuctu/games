@@ -1381,7 +1381,7 @@ function freshGame(seats, maxRound, cash = 'luck') {
   const G = { phase: 'play', lift: -1, seats, pl: seats.map((x, s) => ({ pos: 0, cash: START_CASH, jail: 0, bus: false, laps: 0, rolls: 0, hold: freshHold(), out: false, char: chars[s] })),
     props: freshProps(), turn: 0, dice: 0, doubles: 0, again: false, step: 'roll', visit: null, pick: null, debt: null, spy: null,
     gold: shuffled(CITIES.length).slice(0, GOLD_N).map(k => CITIES[k]), deck: shuffled(CARDS.length), deckPos: 0, turnNo: 0, pot: 0,
-    round: 1, maxRound: maxRound || 0, winner: null, winHow: null, seq: 0, noEv: evMode === 'off' };
+    round: 1, maxRound: maxRound || 0, winner: null, winHow: null, seq: 0, noEv: evMode === 'off', ev: null, evLast: null };
   for (let s = 0; s < NS; s++) {
     if (!seats[s]) continue;
     const P = G.pl[s];
@@ -2743,7 +2743,7 @@ function renderCenter() {
 function drawOwnership() {
   const G = viewG(); // đang hoạt hoạ: vẽ theo trạng thái đang hiển thị
   const g = $('gOwn'), gb = $('gOwnB');
-  const key = G ? JSON.stringify([G.pl.map(p => p.char), SEATS.map(colIdx), G.gold, G.lift, PROPS.map(i => { const p = shownProp(i); return [p.owner, p.lv, p.fest, p.visits, effectOn(G, i, 'plague'), effectOn(G, i, 'blackout')]; })]) : '';
+  const key = G ? JSON.stringify([G.pl.map(p => p.char), SEATS.map(colIdx), G.gold, G.lift, G.ev && G.ev.id, PROPS.map(i => { const p = shownProp(i); return [p.owner, p.lv, p.fest, p.visits, effectOn(G, i, 'plague'), effectOn(G, i, 'blackout')]; })]) : '';
   if (key === ownKey) return;
   ownKey = key;
   g.innerHTML = ''; gb.innerHTML = '';
@@ -3558,8 +3558,10 @@ const shownOut = s => (busy() && viewOut ? viewOut[s] : G.pl[s].out);
 const shownProp = i => (busy() && viewProps[i]) || G.props[i];
 // bàn cờ như đang hiển thị (dùng để vẽ, không dùng để tính luật)
 function viewG() {
-  if (!busy() || viewTurnNo === null) return G;
-  return { ...G, lift: liftShown(), props: G.props.map((p, i) => viewProps[i] || p), pl: G.pl.map((P, s) => (viewPl[s] ? { ...P, ...viewPl[s] } : P)), turnNo: viewTurnNo };
+  if (!busy()) return G;
+  const E = viewEv ? { ev: viewEv.ev } : {}; // sự kiện chung như đang hiện (phí tham quan đổi khi thẻ sự kiện bật / kết thúc)
+  if (viewTurnNo === null) return viewEv ? { ...G, ...E } : G;
+  return { ...G, lift: liftShown(), props: G.props.map((p, i) => viewProps[i] || p), pl: G.pl.map((P, s) => (viewPl[s] ? { ...P, ...viewPl[s] } : P)), turnNo: viewTurnNo, ...E };
 }
 function shownWorth(s) {
   if (!busy() || !viewCash) return netWorth(G, s);
@@ -4253,7 +4255,7 @@ async function animateStep(st, tok) {
       if (!e) { await sleep(ms); return; }
       playParty(); $('diceStage').classList.add('hide');
       const card = evCard(e);
-      viewEv = undefined; renderCenter();
+      viewEv = undefined; renderCenter(); drawOwnership(); // phí tham quan trên bàn đổi theo sự kiện
       await sleep(ms - 350);
       if (tok !== animTok) { $('diceStage').classList.remove('hide'); return; }
       card.classList.add('out');
@@ -4262,7 +4264,7 @@ async function animateStep(st, tok) {
       $('diceStage').classList.remove('hide');
       return;
     }
-    case 'evEnd': { viewEv = { ev: null }; renderCenter(); playWhoosh(0.3); await sleep(ms); return; }
+    case 'evEnd': { viewEv = { ev: null }; renderCenter(); drawOwnership(); playWhoosh(0.3); await sleep(ms); return; }
     case 'evGift': { const [x, y] = tokenPt(s); floatText(x, y - 24, `🧧 +${fmt(st.amt)}`, '#da251d', 1100, 20); cardMoney(s, st.amt); playCoin(true); await sleep(ms); return; }
     case 'hold': { const [x, y] = tokenPt(s); floatText(x, y - 20, HOLD_INFO[st.h][0] + (st.full ? ' đủ ' + PARITY_MAX : ''), st.full ? '#6b7a90' : '#23324a', 1000, st.full ? 18 : 24); playPop(); await sleep(ms); return; }
     case 'build': {
