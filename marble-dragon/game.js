@@ -1,6 +1,7 @@
 // Rồng Con Bắn Ngọc — game bắn ngọc 3D (Three.js)
 import * as THREE from 'three';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { createWorldMap } from './worldmap.js';
 
 // ═════════════════════════ tiện ích ═════════════════════════
 const TAU = Math.PI * 2;
@@ -1332,19 +1333,26 @@ function syncToggles() {
   $('btnSound').classList.toggle('off', !save.sound);
 }
 let selWorld = 0;
-function renderWorlds() {
-  const list = $('worldList'); list.innerHTML = '';
-  let total = 0;
-  WORLDS.forEach((W, w) => {
-    let st = 0; for (let k = 0; k < 10; k++) st += save.stars[w * 10 + k] || 0; total += st;
-    const open = unlocked(w * 10);
-    const el = document.createElement('button'); el.className = 'wcard' + (open ? '' : ' locked');
-    el.innerHTML = `<div class="wnum">${w + 1}</div><div><div class="wn">${W.name}</div><div class="wd">${open ? W.desc : 'Hoàn thành thế giới trước để mở'}</div></div><div class="ws">★ ${st}/30</div>`;
-    if (open) el.onclick = () => { SFX.click(); selWorld = w; renderLevels(); showOverlay('scrLevels'); buildLevel(w * 10, true); };
-    list.appendChild(el);
-  });
-  $('totalStars').textContent = `Tổng: ★ ${total} / 150`;
+// bản đồ thế giới: mỗi khu là một hòn đảo, rồng con đi dọc con đường giữa các khu
+const worldStars = (w) => { let st = 0; for (let k = 0; k < 10; k++) st += save.stars[w * 10 + k] || 0; return st; };
+const worldMap = createWorldMap({
+  svg: $('worldMap'), card: $('mapCard'), worlds: WORLDS, save, persist, toast,
+  isOpen: (w) => unlocked(w * 10),
+  stars: worldStars,
+  cleared: (w) => { let n = 0; for (let k = 0; k < 10; k++) if (save.stars[w * 10 + k]) n++; return n; },
+  onEnter: (w) => { SFX.click(); selWorld = w; renderLevels(); showOverlay('scrLevels'); buildLevel(w * 10, true); },
+  sfx: (k) => { if (k === 'hop') SFX.click(); else if (k === 'arrive') SFX.star(0); else if (k === 'locked') SFX.sink(); else if (k === 'unlock') SFX.magic(); },
+});
+// gọi sau khi màn bản đồ đã hiện (cần kích thước thật để chọn bố cục ngang / dọc)
+function renderWorlds(w) {
+  let total = 0; WORLDS.forEach((W, k) => { total += worldStars(k); });
+  $('totalStars').textContent = `★ ${total} / ${WORLDS.length * 30}`;
+  worldMap.open(w);
 }
+addEventListener('keydown', (e) => {
+  if ($('scrWorlds').classList.contains('hidden') || !$('ovHelp').classList.contains('hidden')) return;
+  if (worldMap.key(e)) e.preventDefault();
+});
 function renderLevels() {
   const W = WORLDS[selWorld];
   $('lvTitle').textContent = W.name; $('lvDesc').textContent = W.desc;
@@ -1385,9 +1393,9 @@ document.addEventListener('click', (e) => {
   const act = b.dataset.act;
   if (act !== 'tsound') SFX.click();
   switch (act) {
-    case 'play': renderWorlds(); showOverlay('scrWorlds'); break;
+    case 'play': showOverlay('scrWorlds'); renderWorlds(); break;
     case 'menu': showOverlay('scrMenu'); break;
-    case 'worlds': game.state = 'menu'; hideHud(); SFX.stopMusic(); renderWorlds(); showOverlay('scrWorlds'); break;
+    case 'worlds': game.state = 'menu'; hideHud(); SFX.stopMusic(); showOverlay('scrWorlds'); renderWorlds(selWorld); break;
     case 'levels': game.state = 'menu'; hideHud(); SFX.stopMusic(); selWorld = Math.floor(game.L / 10); renderLevels(); showOverlay('scrLevels'); buildLevel(selWorld * 10, true); break;
     case 'help': openHelp(); break;
     case 'closehelp': closeHelp(); break;
@@ -1435,7 +1443,7 @@ addEventListener('keydown', (e) => { if (e.code === 'KeyF' && !e.repeat) toggleF
 $('btnPause').addEventListener('click', () => { SFX.click(); pauseGame(); });
 $('btnSound').addEventListener('click', () => { save.sound = !save.sound; save.music = save.sound; persist(); syncToggles(); if (save.music) SFX.startMusic(game.theme); else SFX.stopMusic(); });
 
-addEventListener('resize', () => { fitCamera(); });
+addEventListener('resize', () => { fitCamera(); if (!$('scrWorlds').classList.contains('hidden')) worldMap.resize(); });
 
 // ═════════════════════════ vòng lặp chính ═════════════════════════
 let last = performance.now();
