@@ -412,7 +412,7 @@ button:disabled { opacity: .35; cursor: default; }
     <div class="checks">
       <label class="check"><input type="checkbox" id="suConfirm"> Công bố vai</label>
       <label class="check"><input type="checkbox" id="suSheriff"> Cảnh sát trưởng</label>
-      <label class="check" title="Thảm hoạ giữa ván, phải chui vào hầm trú ẩn"><input type="checkbox" id="suEvt"> Sự kiện lớn</label>
+      <label class="check" title="2 lần thảm hoạ mỗi ván, phải chui vào hầm trú ẩn"><input type="checkbox" id="suEvt"> Sự kiện lớn</label>
       <label class="check" title="Cần từ 6 người chơi"><input type="checkbox" id="suJester"> Kẻ Pha Trò</label>
     </div>
     <button class="go" id="bStart">Chơi với máy</button>
@@ -505,7 +505,7 @@ button:disabled { opacity: .35; cursor: default; }
       <div class="checks">
         <label class="check"><input type="checkbox" id="lbConfirm"> Công bố vai</label>
         <label class="check"><input type="checkbox" id="lbSheriff"> Cảnh sát trưởng</label>
-        <label class="check" title="Thảm hoạ giữa ván, phải chui vào hầm trú ẩn"><input type="checkbox" id="lbEvt"> Sự kiện lớn</label>
+        <label class="check" title="2 lần thảm hoạ mỗi ván, phải chui vào hầm trú ẩn"><input type="checkbox" id="lbEvt"> Sự kiện lớn</label>
         <label class="check" title="Cần từ 6 người chơi"><input type="checkbox" id="lbJester"> Kẻ Pha Trò</label>
       </div>
       <div class="row"><button id="lbCancel">Huỷ phòng</button><button class="go" id="lbStart">Bắt đầu</button></div>
@@ -530,7 +530,7 @@ button:disabled { opacity: .35; cursor: default; }
       <li><b>Kẻ Pha Trò</b> (bật trong cài đặt, từ 6 người): phe riêng, chỉ có nhiệm vụ giả. Thắng một mình nếu bị mọi người <b>bỏ phiếu đẩy ra ngoài</b> — bị giết hay bị Cảnh sát trưởng bắn thì thua (Cảnh sát trưởng bắn trúng Kẻ Pha Trò thì không bị chết theo).</li>
       <li><b>Họp</b>: mọi người bàn luận rồi bỏ phiếu. Ai nhiều phiếu nhất bị <b>đẩy ra ngoài</b> (hoà phiếu hoặc phiếu trắng nhiều nhất thì không ai bị đẩy). Người chơi máy nhớ ai đứng cạnh xác, ai chui ống gió, ai giết trước mắt họ — và sẽ tố cáo trong cuộc họp. Bạn bấm <b>📢</b> cạnh tên ai để tố cáo người đó, bấm <b>✔</b> để bỏ phiếu.</li>
       <li><b>Tầm nhìn</b> 👁️: chỉ thấy những gì nhìn thẳng tới được — tường, thùng hàng, động cơ… che khuất người phía sau. Đèn tắt thì tầm nhìn còn rất ngắn. Phi thuyền rộng, mũi tên vàng ở mép màn hình chỉ tới nhiệm vụ của bạn.</li>
-      <li><b>Sự kiện lớn</b> 🌋 (bật trong cài đặt): giữa ván có một thảm hoạ theo bản đồ — bão mặt trời, tuyết lở, mưa thiên thạch, bão cát, núi lửa phun, bão sét… Báo trước 8 giây: chui vào một <b>hầm trú ẩn</b> (mỗi hầm chỉ 1 người; vào rồi nắp đóng lại, không ai thấy hay giết được bạn, phải ở trong tới khi thảm hoạ qua). Không trú kịp thì bị <b>choáng 4 giây</b> và <b>mất một nhiệm vụ đã làm</b>. Qua rồi thì vài phòng bị kẹt cửa một lúc. <b>Kẻ Giả Mạo không sợ thảm hoạ</b>: không bị choáng hay chậm, dao sẵn sàng ngay lúc báo động — người bị choáng ngoài hầm là mồi ngon (nhưng ai thấy kẻ đứng vững giữa thảm hoạ thì biết ngay là ai).</li>
+      <li><b>Sự kiện lớn</b> 🌋 (bật trong cài đặt): mỗi ván có <b>2 lần</b> thảm hoạ theo bản đồ (lúc còn 2/3 và 1/3 thời gian) — bão mặt trời, tuyết lở, mưa thiên thạch, bão cát, núi lửa phun, bão sét… Báo trước 8 giây: chui vào một <b>hầm trú ẩn</b> (mỗi hầm chỉ 1 người; vào rồi nắp đóng lại, không ai thấy hay giết được bạn, phải ở trong tới khi thảm hoạ qua). Không trú kịp thì bị <b>choáng 4 giây</b> và <b>mất một nhiệm vụ đã làm</b>. Qua rồi thì vài phòng bị kẹt cửa một lúc. <b>Kẻ Giả Mạo không sợ thảm hoạ</b>: không bị choáng hay chậm, dao sẵn sàng ngay lúc báo động — người bị choáng ngoài hầm là mồi ngon (nhưng ai thấy kẻ đứng vững giữa thảm hoạ thì biết ngay là ai).</li>
       <li>Chết rồi vẫn thành <b>ma</b> 👻: đi xuyên tường, làm nốt nhiệm vụ giúp đồng đội, nhưng không báo, không bỏ phiếu được.</li>
       <li><b>Online</b> 🌐: chủ phòng tạo phòng, gửi mã/link cho bạn bè; ghế trống có thể cho máy chơi. Bấm <b>🎤</b> để voice chat: phòng chờ và cuộc họp mọi người nghe nhau; lúc đang chơi tuỳ phòng — <i>im lặng</i> hoặc <i>nghe người ở gần</i>. Hồn ma vẫn nghe được mọi người, nhưng chỉ hồn ma nghe được hồn ma. Ai rớt mạng thì máy chơi thay tới khi họ vào lại.</li>
       <li>Điều khiển: máy tính đi bằng <b>WASD</b> / mũi tên; điện thoại kéo nửa trái màn hình (cần ảo). Phím tắt hiện ở góc mỗi nút: <b>E</b> dùng/sửa/họp, <b>R</b> báo, <b>Q</b> giết, <b>V</b> ống gió (trong ống: ← → chuyển ống), <b>Q</b> bắn (Cảnh sát trưởng), <b>F</b> phá hoại (rồi <b>1</b> tắt đèn / <b>2</b> lò phản ứng / <b>3</b> cạn oxy ), <b>G</b> khoá cửa một phòng 10 giây (rồi chọn phòng bằng phím số hoặc chữ hiện cạnh tên phòng) — đếm ngược riêng 30 giây, không dính tới phá hoại, <b>M</b> bản đồ, <b>T</b> bật/tắt mic.</li>
@@ -1265,7 +1265,7 @@ function beginRound() {
   P.forEach((p, k) => { const a = (k / P.length) * Math.PI * 2; place(p, BUTTON.x + Math.cos(a) * 95, BUTTON.y + Math.sin(a) * 70); p.dir = Math.cos(a) < 0 ? 1 : -1; });
   bodies = []; sabo = null; saboCd = 10; doorCd = 10; resetDoors(); meeting = null; winner = null; mapOpen = false; splats.length = 0; fx.length = 0; bodyBorn.clear();
   for (const p of P) { p.killCd = 10; p.shootCd = SHOOT_CD; p.idleT = 0; p.idleWarn = false; p.stun = 0; }
-  evt = null; evtUsed = false; evFx.length = 0;
+  evt = null; evtUsed = 0; evtLast = Infinity; evFx.length = 0;
   progShown = 0; gameLeft = timeMin() * 60; timeWarn = 0;
   cam.x = me.x; cam.y = me.y;
   phase = 'reveal';
@@ -1504,7 +1504,7 @@ function fixSabotage(id) {
 }
 let shake = 0;
 // ═══════════════════════════ sự kiện lớn giữa ván ═══════════════════════════
-// Giữa ván (còn nửa thời gian) có một thảm hoạ theo bản đồ. Báo trước EVT_WARN giây: mọi người chạy tới các
+// Mỗi ván có 2 thảm hoạ theo bản đồ (lúc còn 2/3 và 1/3 thời gian). Báo trước EVT_WARN giây: mọi người chạy tới các
 // chỗ trú ẩn (vòng xanh) — mỗi chỗ chỉ chứa 1 người, nên cả đám phải tách ra. Lúc thảm hoạ ập tới ai không đứng trong
 // chỗ trú thì bị choáng EVT_STUN giây và mất một nhiệm vụ đã làm. Xong thì vài cửa bị kẹt một lúc.
 // Kẻ Giả Mạo không sợ thảm hoạ: không bị choáng, không bị chậm, hồi chiêu giết về 0 lúc báo động — đây là lúc đi săn.
@@ -1522,7 +1522,8 @@ const EVTS = {
   candy: { n: 'Lũ sô-cô-la', i: '🍫', col: '140,80,40', fx: 'goo' },
 };
 const EVT_DEF = { n: 'Động đất', i: '🌍', col: '255,200,120', fx: 'dust' };
-let evt = null, evtUsed = false; // evt: { st: 'warn' | 'hit', t: giây còn lại của giai đoạn, sp: [{ x, y, by: id người đang trú | -1 }] }
+let evt = null, evtUsed = 0, evtLast = Infinity; // evtUsed: số thảm hoạ đã xảy ra trong ván (tối đa EVT_N)
+const EVT_N = 2; // evt: { st: 'warn' | 'hit', t: giây còn lại của giai đoạn, sp: [{ x, y, by: id người đang trú | -1 }] }
 const evtOn = () => (net.on ? S.evt !== false : setup.evt !== false);
 const evtInfo = () => EVTS[(MAPS[MAP_I] || {}).id] || EVT_DEF;
 const myShelter = () => (evt ? evt.sp.find(s => s.by === me.id) : null);
@@ -1565,7 +1566,7 @@ function enterBunkFx() { closeTask(); me.vx = me.vy = 0; tone('square', 140, 0, 
 function evtTick(dt) {
   for (const p of P) if (p.stun > 0) p.stun = Math.max(0, p.stun - dt);
   if (!evt) {
-    if (isGuest() || evtUsed || !evtOn() || sabo || gameLeft > timeMin() * 30) return;
+    if (isGuest() || evtUsed >= EVT_N || !evtOn() || sabo || gameLeft > timeMin() * 60 * (EVT_N - evtUsed) / (EVT_N + 1) || evtLast - gameLeft < 30) return; // cách lần trước ít nhất 30 giây
     return startEvt();
   }
   const t0 = evt.t; evt.t = Math.max(0, evt.t - dt);
@@ -1580,7 +1581,7 @@ function evtTick(dt) {
   }
 }
 function startEvt() {
-  evtUsed = true;
+  evtUsed++;
   evt = { st: 'warn', t: EVT_WARN, sp: makeShelters(alive().length + 2) };
   for (const p of P) if (p.imp) p.killCd = 0;
   if (isHost()) netBroadcast({ t: 'evt', st: 'warn', tt: evt.t, sp: evt.sp.map(s => [s.x, s.y]) });
@@ -1625,7 +1626,7 @@ function evtHitFx(hurt) {
   syncHud();
 }
 function evtEnd() {
-  evt = null;
+  evt = null; evtLast = gameLeft;
   for (const p of P) if (p.bot && p.state === 'shelter') { p.state = 'idle'; p.path = []; }
   // dư chấn: vài phòng bị kẹt cửa một lúc, cả đám khó gom lại ngay (không tính vào hồi chiêu khoá cửa của kẻ giả mạo)
   const jam = shuffle(DOORS.filter(d => !d.shut)).slice(0, Math.min(3, Math.ceil(DOORS.length / 3))), cd = doorCd;
