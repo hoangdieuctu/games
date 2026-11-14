@@ -1,0 +1,506 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#14110f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Truyện audio">
+<title>Truyện audio</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2314110f'/%3E%3Cpath d='M18 40V28a14 14 0 0 1 28 0v12' fill='none' stroke='%23e0a95b' stroke-width='5'/%3E%3Crect x='13' y='36' width='10' height='14' rx='4' fill='%23e0a95b'/%3E%3Crect x='41' y='36' width='10' height='14' rx='4' fill='%23e0a95b'/%3E%3C/svg%3E">
+<style>
+:root{
+  --bg:#14110f; --panel:#1f1a17; --panel2:#2a231f; --line:#3a312b;
+  --text:#f3ebe2; --muted:#a59789; --accent:#e0a95b; --accent2:#f4c987; --done:#7fb38a;
+  --safe-b:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--text);font:16px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;padding:0}
+[hidden]{display:none!important}
+header{position:sticky;top:0;z-index:5;background:linear-gradient(var(--bg) 85%,transparent);padding:calc(env(safe-area-inset-top,0px) + 14px) 16px 10px}
+.top{display:flex;align-items:center;gap:10px}
+.top a{color:var(--muted);text-decoration:none;font-size:26px;line-height:1;padding:2px 8px 4px 0}
+h1{font-size:20px;margin:0;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+main{padding:0 16px calc(var(--pad,24px) + var(--safe-b))}
+
+/* ---- library ---- */
+.sec{font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin:14px 0 8px}
+.card{display:flex;gap:14px;align-items:center;padding:12px;background:var(--panel);border-radius:16px;margin-bottom:10px;width:100%;text-align:left}
+.card:active{background:var(--panel2)}
+.cover{width:72px;height:72px;border-radius:12px;object-fit:cover;background:var(--panel2);flex:none}
+.card.big .cover{width:96px;height:96px}
+.card .mid{flex:1;min-width:0}
+.card .t{font-weight:600;font-size:16px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card .a{font-size:13px;color:var(--muted);margin-top:2px}
+.card .p{font-size:13px;color:var(--accent2);margin-top:6px}
+.bar{height:4px;background:var(--line);border-radius:4px;margin-top:6px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent);width:0}
+.empty{color:var(--muted);text-align:center;padding:40px 0}
+
+/* ---- story ---- */
+.info{display:flex;gap:14px;align-items:center;margin:4px 0 4px}
+.info .cover{width:84px;height:84px}
+.info .a{font-size:13px;color:var(--muted)}
+.info .d{font-size:13px;color:var(--muted);margin-top:4px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.info .d.open{-webkit-line-clamp:unset}
+.stat{font-size:13px;color:var(--muted);margin-top:8px;display:flex;justify-content:space-between}
+.tools{display:flex;gap:8px;margin-top:10px}
+.tools input{flex:1;min-width:0;background:var(--panel);border:1px solid var(--line);color:var(--text);border-radius:12px;padding:10px 12px;font-size:16px}
+.tools button{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:0 12px;font-size:14px;color:var(--accent2);white-space:nowrap}
+ul{list-style:none;margin:0;padding:0}
+li{display:flex;align-items:center;gap:12px;padding:12px 4px;border-bottom:1px solid var(--line);content-visibility:auto;contain-intrinsic-size:auto 60px}
+li .n{width:44px;font-variant-numeric:tabular-nums;font-weight:600;color:var(--muted);font-size:15px;flex:none}
+li .mid{flex:1;min-width:0}
+li .t{font-size:15px}
+li .sub{font-size:12px;color:var(--muted);margin-top:2px}
+li .pb{height:3px;background:var(--line);border-radius:3px;margin-top:6px;overflow:hidden}
+li .pb i{display:block;height:100%;background:var(--accent)}
+li.done .n,li.done .t{color:var(--done)}
+li.cur{background:var(--panel);border-radius:12px;border-color:transparent}
+li.cur .n,li.cur .t{color:var(--accent2)}
+li .chk{width:34px;height:34px;border-radius:50%;border:1.5px solid var(--line);display:grid;place-items:center;font-size:15px;color:transparent;flex:none}
+li.done .chk{border-color:var(--done);color:var(--done)}
+
+/* ---- player ---- */
+.player{position:fixed;left:0;right:0;bottom:0;z-index:10;background:var(--panel);border-top:1px solid var(--line);border-radius:18px 18px 0 0;padding:12px 16px calc(12px + var(--safe-b));box-shadow:0 -10px 30px rgba(0,0,0,.4)}
+.now{display:flex;justify-content:space-between;align-items:baseline;gap:8px;width:100%;text-align:left}
+.now b{font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.now span{font-size:12px;color:var(--muted);flex:none}
+.seek{display:flex;align-items:center;gap:10px;margin-top:6px;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+input[type=range]{flex:1;accent-color:var(--accent);height:28px}
+.ctl{display:flex;align-items:center;justify-content:space-between;margin-top:4px}
+.ctl button{width:48px;height:48px;border-radius:50%;display:grid;place-items:center}
+.ctl button:active{background:var(--panel2)}
+.ctl svg{width:26px;height:26px;fill:currentColor}
+.ctl .play{width:64px;height:64px;background:var(--accent);color:#1a120a}
+.ctl .play:active{background:var(--accent2)}
+.ctl .play svg{width:30px;height:30px}
+.ctl .txt{font-size:13px;font-weight:600;color:var(--accent2);width:52px}
+.ctl .txt.on{background:var(--panel2)}
+.msg{font-size:12px;color:var(--accent2);text-align:center;min-height:16px;margin-top:2px}
+.resume{margin:0 0 10px;width:100%;background:var(--accent);color:#1a120a;border-radius:14px;padding:12px 14px;font-weight:700;text-align:left}
+.resume small{display:block;font-weight:500;opacity:.8;margin-top:2px}
+.sheet{position:fixed;inset:0;z-index:20;background:rgba(0,0,0,.5);display:none;align-items:flex-end}
+.sheet.show{display:flex}
+.sheet>div{background:var(--panel);width:100%;border-radius:18px 18px 0 0;padding:16px 16px calc(16px + var(--safe-b))}
+.sheet h3{margin:0 0 10px;font-size:16px}
+.sheet button{display:block;width:100%;text-align:left;padding:14px 4px;border-bottom:1px solid var(--line)}
+.sheet button:last-child{border:0;color:var(--muted)}
+</style>
+</head>
+<body>
+
+<!-- Danh sách truyện -->
+<section id="libView">
+  <header><div class="top"><a href="../index.html" aria-label="Về trang chủ">‹</a><h1>Truyện audio</h1></div></header>
+  <main>
+    <div id="nowSec" hidden>
+      <div class="sec">Đang nghe</div>
+      <div id="nowCard"></div>
+    </div>
+    <div class="sec">Tất cả truyện</div>
+    <div id="lib"><div class="empty">Đang tải…</div></div>
+  </main>
+</section>
+
+<!-- Một truyện -->
+<section id="storyView" hidden>
+  <header>
+    <div class="top"><a href="#" aria-label="Về danh sách truyện">‹</a><h1 id="sTitle"></h1></div>
+    <div class="stat"><span id="statDone"></span><span id="statPct"></span></div>
+    <div class="bar"><i id="statBar"></i></div>
+    <div class="tools">
+      <input id="jump" type="number" inputmode="numeric" placeholder="Đi tới tập số…" min="1">
+      <button id="toCur">Tập đang nghe</button>
+    </div>
+  </header>
+  <main>
+    <div class="info" id="sInfo"></div>
+    <ul id="list"></ul>
+  </main>
+</section>
+
+<div class="player" id="player" hidden>
+  <button class="resume" id="resume" hidden></button>
+  <button class="now" id="nowBtn"><b id="nowT"></b><span id="nowS"></span></button>
+  <div class="seek"><span id="tCur">0:00</span><input id="seek" type="range" min="0" max="1000" value="0"><span id="tDur">0:00</span></div>
+  <div class="ctl">
+    <button class="txt" id="speed" aria-label="Tốc độ">1×</button>
+    <button id="prev" aria-label="Tập trước"><svg viewBox="0 0 24 24"><path d="M6 5h2v14H6zM20 5v14L9 12z"/></svg></button>
+    <button id="back" aria-label="Lùi 15 giây"><svg viewBox="0 0 24 24"><path d="M12 5V1L7 6l5 5V7a6 6 0 1 1-6 6H4a8 8 0 1 0 8-8z"/><text x="12" y="16.2" font-size="6.5" text-anchor="middle" font-family="sans-serif" font-weight="700">15</text></svg></button>
+    <button class="play" id="play" aria-label="Phát / tạm dừng"><svg viewBox="0 0 24 24" id="playIco"><path d="M8 5v14l11-7z"/></svg></button>
+    <button id="fwd" aria-label="Tới 30 giây"><svg viewBox="0 0 24 24"><path d="M12 5V1l5 5-5 5V7a6 6 0 1 0 6 6h2a8 8 0 1 1-8-8z"/><text x="12" y="16.2" font-size="6.5" text-anchor="middle" font-family="sans-serif" font-weight="700">30</text></svg></button>
+    <button id="next" aria-label="Tập sau"><svg viewBox="0 0 24 24"><path d="M16 5h2v14h-2zM4 5v14l11-7z"/></svg></button>
+    <button class="txt" id="sleep" aria-label="Hẹn giờ tắt">Hẹn giờ</button>
+  </div>
+  <div class="msg" id="msg"></div>
+</div>
+
+<div class="sheet" id="sleepSheet"><div>
+  <h3>Hẹn giờ tắt</h3>
+  <button data-m="15">Sau 15 phút</button>
+  <button data-m="30">Sau 30 phút</button>
+  <button data-m="45">Sau 45 phút</button>
+  <button data-m="60">Sau 60 phút</button>
+  <button data-m="end">Hết tập này</button>
+  <button data-m="off">Tắt hẹn giờ</button>
+</div></div>
+
+<audio id="au" preload="metadata"></audio>
+
+<script>
+const KEY = 'audio-story:v1';
+const SPEEDS = [1, 1.25, 1.5, 1.75, 2, 0.75];
+const $ = id => document.getElementById(id);
+const au = $('au');
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const fmt = s => {
+  s = Math.max(0, Math.floor(s || 0));
+  const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), x = String(s % 60).padStart(2, '0');
+  return h ? `${h}:${String(m).padStart(2, '0')}:${x}` : `${m}:${x}`;
+};
+const shortTitle = t => String(t).split(' - ')[0];
+
+// ================= state =================
+// S.st[storyId] = { cur, pos:{tập:giây}, dur:{tập:giây}, done:{tập:1} }
+let S = { last: null, speed: 1, st: {} };
+try { Object.assign(S, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) {}
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
+const st = id => S.st[id] || (S.st[id] = { cur: null, pos: {}, dur: {}, done: {} });
+const doneCount = id => Object.keys(st(id).done).length;
+const firstUnfinished = (id, n) => { for (let i = 1; i <= n; i++) if (!st(id).done[i]) return i; return 1; };
+
+let LIB = [];
+const DATA = {};
+async function getStory(id) {
+  if (!DATA[id]) {
+    const r = await fetch('stories/' + encodeURIComponent(id) + '.json');
+    if (!r.ok) throw new Error('not found');
+    DATA[id] = await r.json();
+  }
+  return DATA[id];
+}
+
+// P = truyện + tập đang chọn trên thanh nghe; loadedKey = cái đang nằm trong <audio>
+let P = { id: null, i: null };
+let loadedKey = null, pendingSeek = null;
+const pKey = () => P.id + '#' + P.i;
+let view = null; // id truyện đang xem, null = danh sách truyện
+
+// ================= library =================
+function cardHTML(e, big) {
+  const d = doneCount(e.id), s = st(e.id);
+  let p = '';
+  if (s.cur) p = `Đang nghe Tập ${s.cur}${s.pos[s.cur] > 5 && !s.done[s.cur] ? ' · ' + fmt(s.pos[s.cur]) : ''}`;
+  else p = `${e.count} tập`;
+  return `<button class="card${big ? ' big' : ''}" data-id="${esc(e.id)}">
+    <img class="cover" src="${esc(e.cover || '')}" alt="" loading="lazy">
+    <div class="mid"><div class="t">${esc(e.title)}</div><div class="a">${esc(e.author)}</div>
+    <div class="p">${p}</div><div class="bar"><i style="width:${d / e.count * 100}%"></i></div>
+    <div class="a">${d}/${e.count} tập đã nghe</div></div></button>`;
+}
+function renderLib() {
+  if (!LIB.length) { $('lib').innerHTML = '<div class="empty">Chưa có truyện nào.</div>'; return; }
+  const last = LIB.find(e => e.id === S.last);
+  $('nowSec').hidden = !last;
+  if (last) $('nowCard').innerHTML = cardHTML(last, true);
+  const order = [...LIB].sort((a, b) => (b.id === S.last) - (a.id === S.last));
+  $('lib').innerHTML = order.filter(e => e !== last).map(e => cardHTML(e)).join('') ||
+    '<div class="empty">Thêm truyện mới bằng add_story.py</div>';
+}
+$('libView').addEventListener('click', e => {
+  const c = e.target.closest('.card');
+  if (c) location.hash = encodeURIComponent(c.dataset.id);
+});
+
+// ================= story view =================
+let rows = [];
+async function showStory(id) {
+  let d;
+  try { d = await getStory(id); } catch (e) { location.hash = ''; return; }
+  view = id;
+  $('libView').hidden = true; $('storyView').hidden = false;
+  document.title = shortTitle(d.title);
+  $('sTitle').textContent = shortTitle(d.title);
+  $('sInfo').innerHTML = `<img class="cover" src="${esc(d.cover || '')}" alt="">
+    <div><div style="font-weight:600">${esc(d.title)}</div><div class="a">${esc(d.author)}${d.reader ? ' · Đọc: ' + esc(d.reader) : ''}</div>
+    <div class="d" id="desc">${esc(d.description)}</div></div>`;
+  $('desc').onclick = function () { this.classList.toggle('open'); };
+  const frag = document.createDocumentFragment();
+  rows = [];
+  d.tracks.forEach((t, k) => {
+    const i = k + 1, li = document.createElement('li');
+    li.dataset.i = i;
+    li.innerHTML = `<span class="n">${i}</span><div class="mid"><div class="t">${esc(t.t)}${i === d.tracks.length ? ' · Hết' : ''}</div><div class="sub"></div><div class="pb"><i></i></div></div><button class="chk" aria-label="Đánh dấu đã nghe">✓</button>`;
+    frag.appendChild(li); rows[i] = li;
+  });
+  $('list').replaceChildren(frag);
+  rows.forEach((_, i) => paintRow(i));
+  paintStats();
+  const s = st(id);
+  if (!P.id || (au.paused && P.id !== id)) select(id, s.cur || firstUnfinished(id, d.tracks.length));
+  requestAnimationFrame(() => scrollToRow(s.cur || 1));
+}
+function showLib() {
+  view = null;
+  $('storyView').hidden = true; $('libView').hidden = false;
+  document.title = 'Truyện audio';
+  renderLib();
+  scrollTo(0, 0);
+}
+function paintRow(i) {
+  const li = rows[i]; if (!li || !view) return;
+  const s = st(view), pos = s.pos[i] || 0, dur = s.dur[i] || 0, done = !!s.done[i];
+  li.classList.toggle('done', done);
+  li.classList.toggle('cur', s.cur === i);
+  let sub = '';
+  if (done) sub = 'Đã nghe xong';
+  else if (pos > 5) sub = `Đang nghe ${fmt(pos)}${dur ? ' / ' + fmt(dur) : ''}`;
+  else if (dur) sub = fmt(dur);
+  li.querySelector('.sub').textContent = sub;
+  li.querySelector('.pb').style.display = (!done && pos > 5 && dur) ? '' : 'none';
+  li.querySelector('.pb i').style.width = dur ? Math.min(100, pos / dur * 100) + '%' : '0';
+}
+function paintStats() {
+  if (!view) return;
+  const n = DATA[view].tracks.length, d = doneCount(view);
+  $('statDone').textContent = `Đã nghe ${d}/${n} tập`;
+  $('statPct').textContent = Math.round(d / n * 100) + '%';
+  $('statBar').style.width = (d / n * 100) + '%';
+}
+const repaint = (id, i) => { if (view === id) { paintRow(i); paintStats(); } };
+
+$('list').addEventListener('click', e => {
+  const li = e.target.closest('li'); if (!li) return;
+  const i = +li.dataset.i, s = st(view);
+  if (e.target.closest('.chk')) {
+    if (s.done[i]) delete s.done[i]; else { s.done[i] = 1; s.pos[i] = 0; }
+    save(); paintRow(i); paintStats(); return;
+  }
+  if (P.id === view && P.i === i && loadedKey === pKey()) { toggle(); return; }
+  load(view, i, true);
+});
+function scrollToRow(i, smooth) {
+  const li = rows[i]; if (!li) return;
+  li.scrollIntoView({ block: 'center', behavior: smooth ? 'smooth' : 'auto' });
+}
+$('toCur').onclick = () => scrollToRow(st(view).cur || 1, true);
+$('jump').addEventListener('keydown', e => {
+  if (e.key !== 'Enter') return;
+  const i = Math.min(rows.length - 1, Math.max(1, parseInt(e.target.value) || 1));
+  e.target.blur(); scrollToRow(i, true);
+  rows[i].animate([{ background: 'var(--panel2)' }, { background: 'transparent' }], 1200);
+});
+
+// ================= player =================
+// select: đặt truyện/tập lên thanh nghe nhưng chưa tải audio
+function select(id, i) {
+  P = { id, i };
+  $('player').hidden = false;
+  document.body.style.setProperty('--pad', $('player').offsetHeight + 24 + 'px');
+  const s = st(id), d = DATA[id];
+  const r = $('resume');
+  if (loadedKey === pKey()) r.hidden = true;
+  else {
+    r.hidden = false;
+    const p = s.done[i] ? 0 : (s.pos[i] || 0);
+    r.innerHTML = `▶ ${p > 5 ? 'Nghe tiếp' : 'Nghe'} Tập ${i}<small>${esc(shortTitle(d.title))}${p > 5 ? ' · từ ' + fmt(Math.max(0, p - 3)) : ''}</small>`;
+  }
+  showNow();
+  document.body.style.setProperty('--pad', $('player').offsetHeight + 24 + 'px');
+}
+function load(id, i, autoplay) {
+  const d = DATA[id]; if (!d || i < 1 || i > d.tracks.length) return;
+  flush();
+  const prev = { ...P };
+  const s = st(id);
+  s.cur = i; S.last = id; save();
+  P = { id, i };
+  if (prev.id === id && prev.i !== i) repaint(id, prev.i);
+  repaint(id, i);
+  loadedKey = pKey();
+  au.src = encodeURI(d.tracks[i - 1].u);
+  au.playbackRate = S.speed;
+  const p = s.done[i] ? 0 : (s.pos[i] || 0);
+  pendingSeek = p > 3 ? p - 3 : null; // lùi 3 giây cho dễ nhớ lại mạch truyện
+  select(id, i);
+  if (autoplay) play();
+  setMedia();
+}
+function play() {
+  const pr = au.play();
+  if (pr) pr.catch(err => { if (err.name !== 'AbortError') msg('Không phát được, thử bấm lại ▶'); });
+}
+function toggle() {
+  if (!P.id) return;
+  if (loadedKey !== pKey()) { load(P.id, P.i, true); return; }
+  au.paused ? play() : au.pause();
+}
+function showNow() {
+  if (!P.id) return;
+  const s = st(P.id), live = loadedKey === pKey();
+  $('nowT').textContent = `Tập ${P.i} · ${shortTitle(DATA[P.id].title)}`;
+  $('nowS').textContent = `${P.i}/${DATA[P.id].tracks.length}`;
+  const pos = pendingSeek ?? (live ? au.currentTime : (s.done[P.i] ? 0 : s.pos[P.i] || 0));
+  const dur = (live && isFinite(au.duration)) ? au.duration : (s.dur[P.i] || 0);
+  $('tCur').textContent = fmt(pos);
+  $('tDur').textContent = fmt(dur);
+  if (!dragging) $('seek').value = dur ? pos / dur * 1000 : 0;
+}
+au.addEventListener('loadedmetadata', () => {
+  const s = st(P.id);
+  if (isFinite(au.duration)) s.dur[P.i] = au.duration;
+  if (pendingSeek != null) { au.currentTime = Math.min(pendingSeek, au.duration - 1); pendingSeek = null; }
+  au.playbackRate = S.speed;
+  save(); repaint(P.id, P.i); showNow();
+});
+let lastSave = 0;
+au.addEventListener('timeupdate', () => {
+  if (pendingSeek != null || loadedKey !== pKey()) return;
+  showNow();
+  const now = Date.now();
+  if (now - lastSave > 4000) { lastSave = now; flush(); repaint(P.id, P.i); }
+});
+const setIco = () => $('playIco').innerHTML = au.paused ? '<path d="M8 5v14l11-7z"/>' : '<path d="M6 5h4v14H6zM14 5h4v14h-4z"/>';
+au.addEventListener('play', () => { setIco(); $('resume').hidden = true; msg(''); if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'playing'; });
+au.addEventListener('pause', () => {
+  setIco(); flush(); repaint(P.id, P.i);
+  if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';
+});
+au.addEventListener('waiting', () => msg('Đang tải…'));
+au.addEventListener('playing', () => msg(''));
+au.addEventListener('error', () => { if (au.src) msg('Lỗi tải tập này. Kiểm tra mạng rồi bấm ▶ lại.'); });
+au.addEventListener('ended', () => {
+  const { id, i } = P, s = st(id);
+  s.done[i] = 1; s.pos[i] = 0; save(); repaint(id, i);
+  if (sleepMode === 'end') { clearSleep(); msg('Đã tắt sau khi hết tập'); setIco(); return; }
+  if (i < DATA[id].tracks.length) { load(id, i + 1, true); if (view === id) scrollToRow(i + 1, true); }
+});
+function flush() {
+  if (P.id && loadedKey === pKey() && !au.ended && pendingSeek == null && au.currentTime > 0) {
+    st(P.id).pos[P.i] = au.currentTime; save();
+  }
+}
+document.addEventListener('visibilitychange', flush);
+window.addEventListener('pagehide', flush);
+
+const seekBy = dt => {
+  if (!P.id) return;
+  if (loadedKey !== pKey()) load(P.id, P.i, false);
+  if (pendingSeek != null) { pendingSeek = Math.max(0, pendingSeek + dt); showNow(); return; }
+  au.currentTime = Math.max(0, Math.min((au.duration || 1e9) - 0.5, au.currentTime + dt));
+};
+const step = dt => {
+  if (!P.id) return;
+  const i = P.i + dt;
+  if (i >= 1 && i <= DATA[P.id].tracks.length) {
+    load(P.id, i, !au.paused);
+    if (view === P.id) scrollToRow(i, true);
+  }
+};
+$('play').onclick = toggle;
+$('resume').onclick = toggle;
+$('back').onclick = () => seekBy(-15);
+$('fwd').onclick = () => seekBy(30);
+$('prev').onclick = () => step(-1);
+$('next').onclick = () => step(1);
+$('nowBtn').onclick = () => {
+  if (view !== P.id) location.hash = encodeURIComponent(P.id);
+  else scrollToRow(P.i, true);
+};
+
+let dragging = false;
+const seek = $('seek');
+seek.addEventListener('input', () => {
+  dragging = true;
+  const dur = (loadedKey === pKey() && au.duration) || st(P.id).dur[P.i] || 0;
+  $('tCur').textContent = fmt(seek.value / 1000 * dur);
+});
+seek.addEventListener('change', () => {
+  dragging = false;
+  if (!P.id) return;
+  if (loadedKey !== pKey()) load(P.id, P.i, false);
+  const dur = au.duration || st(P.id).dur[P.i] || 0;
+  const t = seek.value / 1000 * dur;
+  if (pendingSeek != null || !isFinite(au.duration)) pendingSeek = t; else au.currentTime = t;
+  showNow();
+});
+
+const setSpeedLabel = () => $('speed').textContent = S.speed + '×';
+$('speed').onclick = () => {
+  S.speed = SPEEDS[(SPEEDS.indexOf(S.speed) + 1) % SPEEDS.length];
+  au.playbackRate = S.speed; save(); setSpeedLabel();
+};
+setSpeedLabel();
+
+// ================= sleep timer =================
+let sleepEnd = 0, sleepMode = null, sleepTick = null;
+const sheet = $('sleepSheet');
+$('sleep').onclick = () => sheet.classList.add('show');
+sheet.onclick = e => {
+  const b = e.target.closest('button');
+  sheet.classList.remove('show');
+  if (!b) return;
+  const m = b.dataset.m;
+  clearSleep();
+  if (m === 'off') return;
+  sleepMode = m;
+  if (m !== 'end') sleepEnd = Date.now() + m * 60000;
+  $('sleep').classList.add('on');
+  sleepTick = setInterval(paintSleep, 1000); paintSleep();
+};
+function paintSleep() {
+  if (sleepMode === 'end') { $('sleep').textContent = 'Hết tập'; return; }
+  const left = Math.max(0, sleepEnd - Date.now());
+  $('sleep').textContent = fmt(left / 1000);
+  if (!left) { au.pause(); clearSleep(); msg('Đã tắt theo hẹn giờ'); }
+}
+function clearSleep() {
+  sleepEnd = 0; sleepMode = null; clearInterval(sleepTick);
+  $('sleep').textContent = 'Hẹn giờ'; $('sleep').classList.remove('on');
+}
+// Tab chạy nền có thể làm chậm setInterval — kiểm tra thêm khi audio chạy
+au.addEventListener('timeupdate', () => { if (sleepEnd && Date.now() >= sleepEnd) paintSleep(); });
+
+// ================= lock screen / headphones =================
+function setMedia() {
+  if (!('mediaSession' in navigator) || !P.id) return;
+  const d = DATA[P.id];
+  const art = d.cover ? [{ src: new URL(d.cover, location.href).href, sizes: '600x600', type: 'image/webp' }] : [];
+  navigator.mediaSession.metadata = new MediaMetadata({ title: `Tập ${P.i}`, artist: shortTitle(d.title), album: d.author || '', artwork: art });
+}
+if ('mediaSession' in navigator) {
+  const h = (a, f) => { try { navigator.mediaSession.setActionHandler(a, f); } catch (e) {} };
+  h('play', toggle); h('pause', () => au.pause());
+  h('seekbackward', () => seekBy(-15)); h('seekforward', () => seekBy(30));
+  h('previoustrack', () => P.id && load(P.id, P.i - 1, true));
+  h('nexttrack', () => P.id && load(P.id, P.i + 1, true));
+  h('seekto', d => { if (d.seekTime != null && loadedKey === pKey()) au.currentTime = d.seekTime; });
+}
+
+let msgT;
+function msg(t) { $('msg').textContent = t; clearTimeout(msgT); if (t && !t.endsWith('…')) msgT = setTimeout(() => $('msg').textContent = '', 4000); }
+
+// ================= start =================
+function route() {
+  const id = decodeURIComponent(location.hash.slice(1));
+  if (id && LIB.some(e => e.id === id)) showStory(id); else showLib();
+}
+window.addEventListener('hashchange', route);
+(async () => {
+  try { LIB = await fetch('stories.json').then(r => r.json()); }
+  catch (e) { $('lib').innerHTML = '<div class="empty">Không tải được danh sách truyện.</div>'; return; }
+  // Nạp sẵn truyện nghe gần nhất để nút "Nghe tiếp" bấm là phát ngay
+  if (S.last && LIB.some(e => e.id === S.last)) {
+    try {
+      const d = await getStory(S.last);
+      select(S.last, st(S.last).cur || firstUnfinished(S.last, d.tracks.length));
+    } catch (e) {}
+  }
+  route();
+})();
+</script>
+</body>
+</html>

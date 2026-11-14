@@ -230,6 +230,7 @@ html, body {
 }
 .card-mode.online { color: #9ff0c8; border-color: rgba(120,230,170,.45); }
 .card-mode.offline { color: #cfc4ff; border-color: rgba(190,170,255,.35); }
+.card-mode.other { color: #f4c987; border-color: rgba(224,169,91,.5); }
 .card-body { padding: 0 16px 16px; margin-top: -26px; position: relative; z-index: 2; gap: 10px; }
 .card-title { font-size: 18px; font-weight: 900; color: #fff3d6; text-shadow: 0 2px 8px rgba(0,0,0,.6); margin: 0; order: 1; text-align: center; }
 .card-tag { order: 2; margin: 0; gap: 5px; justify-content: center; text-align: center; }
@@ -891,6 +892,33 @@ footer {
   </a>
 
 
+  <!-- ── Truyện Audio ── -->
+  <a class="card" href="audio-story/index.html" data-cat="other" data-badge="🎧 Nghe">
+    <div class="card-thumb" style="background:linear-gradient(135deg,#3a2614,#120b06);">
+      <div class="card-thumb-bg" style="background:radial-gradient(ellipse at 50% 45%,#5a3a1c,#160d07 75%);"></div>
+      <svg class="card-thumb-ring" viewBox="0 0 110 110" aria-hidden="true">
+        <polygon points="55,4 102,29.5 102,80.5 55,106 8,80.5 8,29.5" style="stroke:rgba(224,169,91,.35);"/>
+      </svg>
+      <!-- Tai nghe ôm quyển sách mở, sóng âm hai bên -->
+      <svg viewBox="0 0 100 100" width="90" height="90" style="position:relative;z-index:1;" aria-hidden="true">
+        <path d="M22 58 V48 a28 28 0 0 1 56 0 V58" fill="none" stroke="#e0a95b" stroke-width="6" stroke-linecap="round"/>
+        <rect x="14" y="54" width="15" height="24" rx="6" fill="#e0a95b"/>
+        <rect x="71" y="54" width="15" height="24" rx="6" fill="#e0a95b"/>
+        <path d="M50 64 C42 59 36 59 32 61 V82 C36 80 42 80 50 85 C58 80 64 80 68 82 V61 C64 59 58 59 50 64 Z" fill="#f3ebe2"/>
+        <path d="M50 64 V85" stroke="#b07a3a" stroke-width="1.5"/>
+        <g stroke="#b07a3a" stroke-width="1.2" stroke-linecap="round"><path d="M36 67 h9 M36 72 h9 M36 77 h7 M55 67 h9 M55 72 h9 M55 77 h7"/></g>
+        <g fill="none" stroke="#f4c987" stroke-width="2" stroke-linecap="round" opacity=".8"><path d="M7 60 q-3 6 0 12"/><path d="M93 60 q3 6 0 12"/></g>
+      </svg>
+    </div>
+    <div class="card-body">
+      <div class="card-tag">Truyện Nói · Nghe Tiếp</div>
+      <h2 class="card-title">Truyện Audio</h2>
+      <div class="card-footer">
+        <span class="card-meta">Nghe truyện audio · Tự lưu chỗ đang nghe · Hẹn giờ tắt</span>
+      </div>
+    </div>
+  </a>
+
 </main>
 
 <footer>
@@ -943,7 +971,7 @@ if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) tick();
 
 // ── tag → chip, phân loại và lọc ──
 const CATS = [
-  ['all', 'Tất cả', '🎮'], ['offline', 'Offline', '📴'], ['online', 'Online', '🌐'],
+  ['all', 'Tất cả', '🎮'], ['offline', 'Offline', '📴'], ['online', 'Online', '🌐'], ['other', 'Others', '🧩'],
 ];
 const cards = [...document.querySelectorAll('#game-grid .card')];
 for (const t of document.querySelectorAll('.card-tag')) {
@@ -955,8 +983,10 @@ const catOf = c => (c.dataset.cat || '').split(/\s+/).filter(Boolean);
 // huy hiệu chế độ chơi góc trên ảnh
 for (const c of document.querySelectorAll('#game-grid .card')) {
   const th = c.querySelector('.card-thumb'); if (!th || th.querySelector('.card-mode')) continue;
-  const on = catOf(c).includes('online'), b = document.createElement('span');
-  b.className = 'card-mode ' + (on ? 'online' : 'offline'); b.textContent = on ? '🌐 Online' : '📴 Offline';
+  const cat = catOf(c), b = document.createElement('span');
+  const mode = cat.includes('online') ? 'online' : cat.includes('other') ? 'other' : 'offline';
+  b.className = 'card-mode ' + mode;
+  b.textContent = c.dataset.badge || { online: '🌐 Online', offline: '📴 Offline', other: '🧩 Khác' }[mode];
   th.appendChild(b);
 }
 const filters = document.getElementById('filters');
@@ -965,7 +995,7 @@ function applyFilter(key) {
   for (const b of filters.children) b.classList.toggle('on', b.dataset.key === key);
   let n = 0;
   for (const c of cards) { const show = key === 'all' || catOf(c).includes(key); c.classList.toggle('filtered-out', !show); if (show) n++; }
-  if (!empty) { empty = document.createElement('p'); empty.className = 'grid-empty'; empty.textContent = 'Chưa có trò chơi nào trong loại này.'; document.getElementById('game-grid').appendChild(empty); }
+  if (!empty) { empty = document.createElement('p'); empty.className = 'grid-empty'; empty.textContent = 'Chưa có mục nào trong loại này.'; document.getElementById('game-grid').appendChild(empty); }
   empty.hidden = n > 0;
   try { history.replaceState(null, '', key === 'all' ? location.pathname : '#loai=' + key); } catch (e) {}
 }
