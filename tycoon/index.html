@@ -397,13 +397,12 @@ button:disabled { opacity: .4; cursor: default; }
   .pl-goal { padding: 2px 4px; font-size: 9.5px; }
   .pl .cd { font-size: 10.5px; line-height: 16px; padding: 0 5px; }
   .pl .par { font-size: 10.5px; line-height: 16px; padding: 0 4px; }
-  .stage { --s: 26px !important; }
   /* nút hành động treo trong sàn giữa bàn, ngay dưới nút ĐỔ (fit() chuyển #actions vào #mid), không làm bàn co lại */
-  .mid .actions { position: absolute; top: 100%; left: 50%; transform: translateX(-50%); width: max-content; max-width: 70vw; min-height: 0; padding: 0; margin-top: 12px; gap: 4px; }
-  .mid .actions button { min-height: 30px; padding: 2px 9px; font-size: 12px; box-shadow: 0 3px 0 rgba(0,0,0,.28), 0 5px 10px rgba(0,0,0,.35); }
-  .mid .actions button small { font-size: 9.5px; }
-  .mid .actions button.lv { padding: 1px 8px; line-height: 1.1; }
-  .top { padding-top: 4px; } .top h1 { font-size: 20px; } .back, .mute { width: 34px; height: 34px; font-size: 21px; } .mute { font-size: 16px; }
+  .mid .actions { position: absolute; top: 100%; left: 50%; transform: translateX(-50%); width: max-content; max-width: 82vw; min-height: 0; padding: 0; margin-top: -24px; gap: 6px; }
+  .mid .actions button { min-height: 40px; padding: 4px 12px; font-size: 14px; box-shadow: 0 3px 0 rgba(0,0,0,.28), 0 5px 10px rgba(0,0,0,.35); }
+  .mid .actions button small { font-size: 11.5px; }
+  .mid .actions button.lv { padding: 4px 12px; line-height: 1.15; }
+  .top { padding-top: 4px; } .top h1, #bRules, .room-tag.host, .round-tag .rt-w { display: none; } .back, .mute { width: 34px; height: 34px; font-size: 21px; } .mute { font-size: 16px; }
   .status { font-size: 12.5px; }
   .dock button { min-height: 34px; padding: 4px 11px; font-size: 13px; }
 }
@@ -427,7 +426,7 @@ button:disabled { opacity: .4; cursor: default; }
 }
 /* màn ngang thấp (điện thoại): mọi thứ gọn lại */
 @media (orientation: landscape) and (max-height: 500px) {
-  .top h1 { font-size: 18px; } .back, .mute { width: 32px; height: 32px; font-size: 20px; } .mute { font-size: 15px; }
+  .top h1, #bRules, .room-tag.host, .round-tag .rt-w { display: none; } .back, .mute { width: 32px; height: 32px; font-size: 20px; } .mute { font-size: 15px; }
   .board-wrap { top: 30px; bottom: 38px; }
   .pl { width: clamp(140px, 18vw, 180px); padding: 4px 7px 4px 9px; gap: 2px; } .pl .ava { width: 26px; height: 26px; } .pl .skill { display: none; } .pl .nm { font-size: 12.5px; } .pl-props { display: none; }
   .pl-row { font-size: 11px; min-height: 20px; padding: 1px 7px; } .pl .cash { font-size: 12.5px; } .pl .worth { font-size: 11.5px; } .pl-props { display: none; }
@@ -436,7 +435,8 @@ button:disabled { opacity: .4; cursor: default; }
   .pl-goal { padding: 2px 4px; font-size: 9.5px; }
   .pl-row.money { padding: 1px 6px; } .pl-row .ic { display: none; } /* thẻ hẹp: bỏ biểu tượng, phân biệt bằng màu (xanh = tiền mặt, vàng = tài sản) */
   .status { font-size: 12px; padding: 2px 10px; top: calc(env(safe-area-inset-top, 0px) + 36px); }
-  .actions button { min-height: 34px; padding: 4px 10px; font-size: 13px; } .actions button small { font-size: 10.5px; }
+  .actions { top: calc(50% - 5px + var(--s) * 1.78 - 18px); max-width: min(54vw, 400px); gap: 6px; } /* nút to hơn: nhích lên để 2 hàng không đè thanh dưới, hẹp lại để không chạm thẻ người chơi */
+  .actions button { min-height: 40px; padding: 5px 13px; font-size: 14.5px; } .actions button small { font-size: 12px; } .actions button.lv { padding: 4px 13px; }
   .dock button { min-height: 30px; padding: 3px 10px; font-size: 12.5px; }
 }
 /* iPad ngang: chữ to hơn */
@@ -2731,7 +2731,7 @@ function renderCenter() {
   // số vòng hiện tại trên thanh trên cùng
   const rt = $('roundTag'), on = !!G && G.phase !== 'lobby';
   rt.hidden = !on;
-  if (on) rt.innerHTML = `Vòng <b>${Math.min(G.round, G.maxRound || G.round)}</b>${G.maxRound ? ' / ' + G.maxRound : ''}`;
+  if (on) rt.innerHTML = `<span class="rt-w">Vòng </span><b>${Math.min(G.round, G.maxRound || G.round)}</b>${G.maxRound ? '/' + G.maxRound : ''}`; // điện thoại chỉ hiện x/y
   // sự kiện chung đang diễn ra
   const VE = busy() && viewEv ? { ...G, ...viewEv } : G;
   const et = $('evTag'), e = on && G.phase === 'play' && VE.ev ? evOf(VE.ev.id) : null;
@@ -4877,6 +4877,7 @@ function renderButtons() {
   $('bBack').hidden = myAfkSeat() < 0;
   if ($('bEmo').hidden) $('emoPop').hidden = true;
   $('roomTag').textContent = net.on ? (host ? 'Chủ phòng' : net.seat < 0 ? 'Đang xem' : 'Online') : '';
+  $('roomTag').classList.toggle('host', !!host); // điện thoại: ẩn nhãn "Chủ phòng" cho gọn thanh trên
   syncVoiceUi(); syncVoice();
 }
 
@@ -5205,7 +5206,10 @@ function fit() {
   if (mode !== MODE || Math.abs(want - K) > 0.015) setView(mode, want);
   const bw = Math.max(280, Math.floor(Math.min(aw, ah * VW / VH)));
   $('boardBox').style.width = bw + 'px'; $('boardBox').style.height = Math.round(bw * VH / VW) + 'px';
-  stage.style.setProperty('--s', Math.round(Math.max(30, Math.min(54, bw * 0.046))) + 'px');
+  // điện thoại: cụm xúc xắc (vòng lực, Lẻ / ĐỔ / Chẵn) lấp kín sàn giữa bàn cho dễ canh lực
+  const lowLand = landscape && innerHeight <= 500;
+  const s = phone ? bw * 0.112 : lowLand ? Math.max(40, bw * 0.078) : Math.max(30, Math.min(54, bw * 0.046));
+  stage.style.setProperty('--s', Math.round(s) + 'px');
 }
 window.addEventListener('resize', fit);
 window.addEventListener('resize', () => fitNames());
