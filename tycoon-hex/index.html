@@ -163,6 +163,9 @@ button:disabled { opacity: .4; cursor: default; }
 .token .disc { stroke: #fff; stroke-width: 2; }
 /* quân tới lượt: quầng vàng thở nhẹ dưới chân, vòng màu nhấp nháy */
 .token .halo { opacity: 0; transform-box: fill-box; transform-origin: center; }
+.token .fire { opacity: 0; }
+.token.phoenix .fire { opacity: .9; animation: fireflick .9s ease-in-out infinite; }
+@keyframes fireflick { 50% { opacity: .55; } }
 .token.turn .halo { opacity: .85; animation: halobreathe 1.4s ease-in-out infinite; }
 @keyframes halobreathe { 50% { opacity: .5; transform: scale(1.15); } }
 .token.turn .ring { opacity: .9; animation: ring 1.2s ease-in-out infinite; }
@@ -847,7 +850,7 @@ html.is-phone body{overflow:hidden}
       <li>Mỗi người bắt đầu với <b>$3.000</b> — mỗi nhân vật có <b>80%</b> may mắn được <b>nhân đôi</b> thành $6.000 — và <b>3 thẻ Chẵn/Lẻ</b> 🎲 (giữ tối đa 3): trước khi tung, dùng một thẻ để chắc chắn tổng ra chẵn hoặc lẻ. Lần lượt tung <b>hai xúc xắc</b> đi vòng quanh <b>42 ô</b> trên <b>bàn lục giác 6 góc</b> (bản mở rộng, tối đa <b>6 người</b> chơi). Sáu góc: Bắt Đầu, Côn Đảo, Đại Nhạc Hội, Bến Xe, Thuế, Sòng Bài. Qua <b>Bắt Đầu</b> nhận <b>$300</b>; dừng đúng Bắt Đầu (từ vòng 2) còn được nâng cấp một thành phố.</li>
       <li>Dừng ở <b>thành phố</b> chưa có chủ thì mua và xây ngay: Nhà → Biệt thự → Chung cư → Khách sạn → Biểu tượng. Vòng đầu chỉ xây tới Chung cư; qua Bắt Đầu rồi mới xây Khách sạn; có Khách sạn rồi mới lên Biểu tượng. Về thành phố của mình thì được nâng cấp.</li>
       <li>Vào thành phố <b>của người khác</b> phải trả <b>phí tham quan</b> theo cấp nhà, rồi có thể <b>mua lại</b> với giá <b>bằng</b> số tiền chủ đã đầu tư (trừ Biểu tượng và điểm du lịch). <b>Biểu tượng</b> 🗼 cũng không bị ép bán, phá cấp hay đổi.</li>
-      <li>Phí tham quan <b>×2</b> khi chủ có đủ nhóm màu, <b>×2</b> cho <b>mỗi lần</b> thành phố hoặc điểm du lịch được mở <b>lễ hội</b> (cộng dồn: 2 lần là ×4; mỗi lúc chỉ một nơi có lễ hội — mở ở nơi khác thì nơi cũ bị lấy lại, phí về như cũ), <b>×2</b> ở 4 <b>ô đất vàng ⭐</b> chọn ngẫu nhiên mỗi ván.</li>
+      <li>Phí tham quan <b>×2</b> khi chủ có đủ nhóm màu, <b>×2</b> cho <b>mỗi lần</b> thành phố hoặc điểm du lịch được mở <b>lễ hội</b> (cộng dồn: 2 lần là ×4; mỗi lúc chỉ một nơi có lễ hội — mở ở nơi khác thì nơi cũ bị lấy lại, phí về như cũ; riêng lễ hội của Nàng Thơ được giữ), <b>×2</b> ở 4 <b>ô đất vàng ⭐</b> chọn ngẫu nhiên mỗi ván.</li>
       <li><b>6 điểm du lịch</b> 🏖️ càng xa ô Bắt Đầu càng đắt: giá từ $150 (Vũng Tàu) đến $300 (Đồ Sơn), phí tham quan từ $80 đến $320, nhân với số điểm chủ đang có, <b>mỗi lượt có người ghé</b> (kể cả chủ) phí tăng thêm <b>50%</b> phí gốc, không mua lại được. Ai gom đủ cả 6 <b>thắng ngay</b>.</li>
       <li><b>Côn Đảo</b>: kẹt 3 lượt, ra sớm bằng tung đôi (vẫn được tung tiếp như tung đôi thường), nộp $100 hoặc thẻ ra tù. Tung đôi 3 lần liền cũng vào Côn Đảo. <b>Bến Xe</b>: lượt sau được đi tới ô bất kỳ (vé $40). <b>Đại Nhạc Hội</b>: trả $40 tổ chức lễ hội ở một thành phố hoặc điểm du lịch của mình. <b>Thuế</b>: nộp 10% tổng tài sản, tiền thuế dồn vào <b>Quỹ Thuế</b> — ai rút được thẻ Quỹ Thuế ở ô Cơ Hội sẽ nhận toàn bộ quỹ. <b>Nút ĐỔ</b>: chạm nhanh để tung ngẫu nhiên, hoặc <b>bấm giữ</b> cho thanh lực chạy rồi thả tay — lực càng cao càng dễ ra tổng điểm lớn. <b>Sòng bài</b>: đặt $100 đoán Chẵn/Lẻ (×2) hoặc Đôi (×6).</li>
       <li><b>Cơ Hội</b>: thẻ có lợi (nhận Quỹ Thuế, miễn phí tham quan, giảm 50%, khiên, ra tù, lễ hội miễn phí, thêm thẻ Chẵn/Lẻ) hoặc hại (đổi thành phố, ép bán, phá cấp, dịch bệnh, mất điện, bị đưa đi nơi khác).</li>
@@ -998,33 +1001,57 @@ const fmt = n => '$' + Math.round(Math.abs(n)).toLocaleString('vi-VN');
 const LENS = [{ key: 'short', label: 'Ngắn', rounds: 12, time: '25–35 phút' }, { key: 'mid', label: 'Vừa', rounds: 20, time: '45–70 phút' }, { key: 'long', label: 'Dài', rounds: 30, time: 'hơn 1 giờ' }];
 const lenHint = k => { const L = LENS.find(x => x.key === k) || LENS[1]; return `Thắng ngay khi đối thủ phá sản hết, đủ ${GROUP_WIN} nhóm màu, cả một cạnh bàn, 6 điểm du lịch hoặc ${LANDMARK_WIN} Biểu tượng. Hết ${L.rounds} vòng thì ai giàu nhất thắng. Khoảng ${L.time}.`; };
 
-// ── nhân vật: mỗi người một kỹ năng (nhóm giảm tiền / tăng tiền / di chuyển / phá đối thủ / may mắn) ──
+// ── nhân vật: mỗi người một kỹ năng (nhóm giảm tiền / tăng tiền / di chuyển / phá đối thủ / phòng thủ / may mắn) ──
+// số liệu kỹ năng của Nhà Đầu Tư, Thu Ngân, Nhà Sưu Tầm, Luật Sư, Người Bảo Hiểm, Cảnh Sát, Nhà Báo, Kiến Trúc Sư
+const BANKER_RATE = 0.03, BANKER_CAP = 50;
+// tỉ lệ / số tiền của các kỹ năng cũ (bàn 6 người: chỉnh riêng cho cân bằng, khác bản 4 người)
+const ROB_RATE = 0.08, ROBIN_RATE = 0.05, CHARM_CHANCE = 0.15, GAMBLER_CHANCE = 0.15, AVENGER_CHANCE = 0.7, PARTIER_CHANCE = 0.8, WIZARD_CHANCE = 1;
+const INSURE_PREMIUM = 30, INVESTOR_TOP = 3, NEWS_PAY = 100, WIZARD_HITS = 2, FAIRY_OFF = 0.15, CHEF_BONUS = 0.3, RACER_ROLLS = 5, PHOENIX_RANK = 2;
+const INVESTOR_RATE = 0.8, CASHIER_CUT = 0.5, COLLECTOR_OFF = 0.3, COLLECTOR_BONUS = 100, LAWYER_FINE = 300, INSURE_CASH = 1000, POLICE_CHANCE = 0.8, SCOOP_PAY = 300, MAGNET_RANGE = 1;
 const CHARS = [
   { id: 'mc', name: 'Siêu MC', skill: 'Lương qua Bắt Đầu gấp đôi', group: 'tăng tiền', skin: '#ffd9b3', hair: '#2b2118', style: 'quiff', acc: 'mic', outfit: '#1e6fd8', bg: '#dbeafe' },
   { id: 'boss', name: 'Ông Trùm', skill: 'Mua và xây nhà rẻ hơn 15%', group: 'giảm tiền', skin: '#f3c9a3', hair: '#6b4a2a', style: 'short', acc: 'glasses', outfit: '#23324a', bg: '#e5e7eb' },
-  { id: 'fairy', name: 'Cô Tiên', skill: 'Phí tham quan phải trả giảm 20%', group: 'giảm tiền', skin: '#ffe3cc', hair: '#f4a6c8', style: 'long', acc: 'wand', outfit: '#e0509a', bg: '#fce7f3' },
-  { id: 'racer', name: 'Tay Đua', skill: '3 lần tung đầu tiên đi gấp đôi số nút', group: 'di chuyển', skin: '#f6d1b0', hair: '#e8323c', style: 'cap', acc: 'goggles', outfit: '#e8323c', bg: '#fee2e2' },
+  { id: 'fairy', name: 'Cô Tiên', skill: `Phí tham quan phải trả giảm ${FAIRY_OFF * 100}%`, group: 'giảm tiền', skin: '#ffe3cc', hair: '#f4a6c8', style: 'long', acc: 'wand', outfit: '#e0509a', bg: '#fce7f3' },
+  { id: 'racer', name: 'Tay Đua', skill: `${RACER_ROLLS} lần tung đầu tiên đi gấp đôi số nút`, group: 'di chuyển', skin: '#f6d1b0', hair: '#e8323c', style: 'cap', acc: 'goggles', outfit: '#e8323c', bg: '#fee2e2' },
   { id: 'dancer', name: 'Vũ Công', skill: 'Lần tung đầu tiên của ván: 80% đi lùi (lùi qua Bắt Đầu vẫn nhận lương)', group: 'di chuyển', skin: '#f6d1b0', hair: '#1f1a17', style: 'fringe', acc: 'glove', outfit: '#a21caf', bg: '#fae8ff' },
-  { id: 'partier', name: 'Dân Chơi', skill: 'Trả phí tham quan xong: 50% bay tới Đại Nhạc Hội', group: 'di chuyển', skin: '#f3cfae', hair: '#f97316', style: 'party', acc: 'horn', outfit: '#0ea5e9', bg: '#e0f2fe' },
+  { id: 'partier', name: 'Dân Chơi', skill: `Trả phí tham quan xong: ${PARTIER_CHANCE * 100}% bay tới Đại Nhạc Hội`, group: 'di chuyển', skin: '#f3cfae', hair: '#f97316', style: 'party', acc: 'horn', outfit: '#0ea5e9', bg: '#e0f2fe' },
   { id: 'monkey', name: 'Ngộ Không', skill: 'Dễ ra đôi hơn (thêm 15%), mỗi đôi nhận $50, ra 3 đôi không bị đi đảo', group: 'di chuyển', skin: '#f5c89e', hair: '#8b5a2b', style: 'spiky', acc: 'band', outfit: '#f5b700', bg: '#fef3c7' },
-  { id: 'diva', name: 'Nàng Thơ', skill: 'Lễ hội miễn phí và mỗi lần ×3 thay vì ×2', group: 'tăng tiền', skin: '#ffe0c7', hair: '#4a2c6b', style: 'bun', acc: 'flower', outfit: '#8e44ad', bg: '#ede9fe' },
+  { id: 'diva', name: 'Nàng Thơ', skill: 'Lễ hội miễn phí, mỗi lần ×3 thay vì ×2, và không bị mất khi người khác mở lễ hội nơi khác', group: 'tăng tiền', skin: '#ffe0c7', hair: '#4a2c6b', style: 'bun', acc: 'flower', outfit: '#8e44ad', bg: '#ede9fe' },
   { id: 'rich', name: 'Phú Bà', skill: 'Thu thêm 20% phí tham quan', group: 'tăng tiền', skin: '#f6d6bd', hair: '#d4a017', style: 'wave', acc: 'crown', outfit: '#27ae60', bg: '#d1fae5' },
   { id: 'tourist', name: 'Du Khách', skill: 'Bến Xe, ra tù miễn phí; điểm du lịch rẻ hơn 30%, phí tham quan ở đó giảm một nửa', group: 'giảm tiền', skin: '#e9b98a', hair: '#1f1a17', style: 'short', acc: 'hat', outfit: '#f39c12', bg: '#ffedd5' },
   { id: 'detective', name: 'Thám Tử', skill: 'Miễn thuế, có sẵn 2 khiên chống thẻ xấu', group: 'giảm tiền', skin: '#f3cfae', hair: '#3b3b3b', style: 'fedora', acc: 'monocle', outfit: '#6b4a2a', bg: '#f5efe0' },
-  { id: 'robber', name: 'Kẻ Cướp', skill: 'Dừng đúng ô có người đứng sẵn thì cướp 15% tiền của họ', group: 'tăng tiền', skin: '#f1c7a0', hair: '#1f1a17', style: 'beanie', acc: 'mask', outfit: '#2f2f2f', bg: '#e2e8f0' },
+  { id: 'robber', name: 'Kẻ Cướp', skill: `Dừng đúng ô có người đứng sẵn thì cướp ${ROB_RATE * 100}% tiền của họ`, group: 'tăng tiền', skin: '#f1c7a0', hair: '#1f1a17', style: 'beanie', acc: 'mask', outfit: '#2f2f2f', bg: '#e2e8f0' },
   { id: 'landlord', name: 'Chủ Đất', skill: 'Về ô đất của mình: 50% được ngân hàng trả bằng phí tham quan', group: 'tăng tiền', skin: '#eec39a', hair: '#d1d5db', style: 'bald', acc: 'key', outfit: '#8b5a2b', bg: '#f3e8d8' },
-  { id: 'gambler', name: 'Thần Bài', skill: 'Khách vào đất của mình: 25% phải trả phí ×2', group: 'tăng tiền', skin: '#f6d1b0', hair: '#111827', style: 'slick', acc: 'card', outfit: '#f8fafc', bg: '#e0e7ff' },
-  { id: 'charmer', name: 'Lãng Tử', skill: 'Vào đất người khác: 25% được miễn phí tham quan', group: 'giảm tiền', skin: '#f6d1b0', hair: '#3b2a1e', style: 'part', acc: 'rose', outfit: '#0f766e', bg: '#ccfbf1' },
-  { id: 'wizard', name: 'Pháp Sư', skill: 'Qua Bắt Đầu: 50% gây dịch bệnh ở một thành phố đối thủ ngẫu nhiên', group: 'phá đối thủ', skin: '#f3cfae', hair: '#e5e7eb', style: 'wizard', acc: 'staff', outfit: '#4338ca', bg: '#e0e7ff' },
+  { id: 'gambler', name: 'Thần Bài', skill: `Khách vào đất của mình: ${GAMBLER_CHANCE * 100}% phải trả phí ×2`, group: 'tăng tiền', skin: '#f6d1b0', hair: '#111827', style: 'slick', acc: 'card', outfit: '#f8fafc', bg: '#e0e7ff' },
+  { id: 'charmer', name: 'Lãng Tử', skill: `Vào đất người khác: ${CHARM_CHANCE * 100}% được miễn phí tham quan`, group: 'giảm tiền', skin: '#f6d1b0', hair: '#3b2a1e', style: 'part', acc: 'rose', outfit: '#0f766e', bg: '#ccfbf1' },
+  { id: 'wizard', name: 'Pháp Sư', skill: `Qua Bắt Đầu: ${WIZARD_CHANCE < 1 ? WIZARD_CHANCE * 100 + '% ' : ''}gây dịch bệnh ở ${WIZARD_HITS > 1 ? WIZARD_HITS + ' thành phố' : 'thành phố'} đối thủ đang thu phí cao nhất`, group: 'phá đối thủ', skin: '#f3cfae', hair: '#e5e7eb', style: 'wizard', acc: 'staff', outfit: '#4338ca', bg: '#e0e7ff' },
   { id: 'hacker', name: 'Hacker', skill: 'Vào thành phố đối thủ: 10% chiếm luôn, không mất đồng nào (trừ Biểu tượng)', group: 'phá đối thủ', skin: '#f1c7a0', hair: '#1f1a17', style: 'hood', acc: 'laptop', outfit: '#14532d', bg: '#dcfce7' },
-  { id: 'avenger', name: 'Kẻ Báo Thù', skill: 'Trả phí tham quan xong: 40% đập một cấp nhà và đòi lại nửa phí', group: 'phá đối thủ', skin: '#eec39a', hair: '#7f1d1d', style: 'bandana', acc: 'hammer', outfit: '#111827', bg: '#fee2e2' },
-  { id: 'robin', name: 'Hiệp Đạo', skill: 'Qua Bắt Đầu: lấy 8% tiền mặt của đối thủ giàu nhất (nếu họ giàu hơn mình)', group: 'phá đối thủ', skin: '#f6d1b0', hair: '#92400e', style: 'feather', acc: 'bow', outfit: '#15803d', bg: '#ecfccb' },
+  { id: 'avenger', name: 'Kẻ Báo Thù', skill: `Trả phí tham quan xong: ${AVENGER_CHANCE * 100}% đập một cấp nhà và đòi lại nửa phí`, group: 'phá đối thủ', skin: '#eec39a', hair: '#7f1d1d', style: 'bandana', acc: 'hammer', outfit: '#111827', bg: '#fee2e2' },
+  { id: 'robin', name: 'Hiệp Đạo', skill: `Qua Bắt Đầu: lấy ${ROBIN_RATE * 100}% tiền mặt của đối thủ giàu nhất (nếu họ giàu hơn mình)`, group: 'phá đối thủ', skin: '#f6d1b0', hair: '#92400e', style: 'feather', acc: 'bow', outfit: '#15803d', bg: '#ecfccb' },
   { id: 'spy', name: 'Gián Điệp', skill: 'Rút thẻ Cơ Hội được xem 2 thẻ và chọn 1', group: 'may mắn', skin: '#f1c7a0', hair: '#1f1a17', style: 'spy', acc: 'shades', outfit: '#1f2937', bg: '#e2e8f0' },
-  { id: 'banker', name: 'Chủ Ngân Hàng', skill: 'Đầu mỗi lượt nhận lãi 1% tiền mặt đang có', group: 'tăng tiền', skin: '#f6d6bd', hair: '#6b7280', style: 'banker', acc: 'coin', outfit: '#1e3a8a', bg: '#dbeafe' },
-  { id: 'chef', name: 'Vua Bếp', skill: 'Bắt đầu ván với thêm 40% tiền khởi đầu', group: 'tăng tiền', skin: '#ffd9b3', hair: '#4b3621', style: 'toque', acc: 'spoon', outfit: '#ffffff', bg: '#fff1f2' },
+  { id: 'banker', name: 'Chủ Ngân Hàng', skill: `Đầu mỗi lượt nhận lãi ${BANKER_RATE * 100}% tiền mặt đang có (tối đa $${BANKER_CAP}); sự kiện Ngân Hàng Chia Lãi nhận gấp đôi`, group: 'tăng tiền', skin: '#f6d6bd', hair: '#6b7280', style: 'banker', acc: 'coin', outfit: '#1e3a8a', bg: '#dbeafe' },
+  { id: 'chef', name: 'Vua Bếp', skill: `Bắt đầu ván với thêm ${CHEF_BONUS * 100}% tiền khởi đầu`, group: 'tăng tiền', skin: '#ffd9b3', hair: '#4b3621', style: 'toque', acc: 'spoon', outfit: '#ffffff', bg: '#fff1f2' },
+  { id: 'investor', name: 'Nhà Đầu Tư', skill: `Mua lại thành phố đối thủ chỉ trả ${INVESTOR_RATE * 100}% giá, mua xong được lên ngay 1 cấp miễn phí (tối đa ${LEVELS[INVESTOR_TOP].name})`, group: 'giảm tiền', skin: '#f6d1b0', hair: '#2b2118', style: 'investor', acc: 'chart', outfit: '#334155', bg: '#e0f2fe' },
+  { id: 'cashier', name: 'Thu Ngân', skill: `Đối thủ nộp thuế: nhận ngay ${CASHIER_CUT * 100}% số thuế đó (phần còn lại vào Quỹ Thuế)`, group: 'tăng tiền', skin: '#ffe0c7', hair: '#7c2d12', style: 'cashier', acc: 'register', outfit: '#dc2626', bg: '#fee2e2' },
+  { id: 'collector', name: 'Nhà Sưu Tầm', skill: `Lên Biểu tượng rẻ hơn ${COLLECTOR_OFF * 100}%; qua Bắt Đầu nhận thêm $${COLLECTOR_BONUS} cho mỗi Biểu tượng đang có`, group: 'tăng tiền', skin: '#f3cfae', hair: '#9ca3af', style: 'collector', acc: 'vase', outfit: '#7c3aed', bg: '#f3e8ff' },
+  { id: 'lawyer', name: 'Luật Sư', skill: `Thành phố miễn nhiễm thẻ xấu (ép bán, đổi, phá nhà, dịch bệnh, cắt điện); ai dùng thẻ nhắm vào thì bị phạt $${LAWYER_FINE} trả cho mình`, group: 'phòng thủ', skin: '#f1c7a0', hair: '#1f1a17', style: 'lawyer', acc: 'scale', outfit: '#111827', bg: '#f1f5f9' },
+  { id: 'insurer', name: 'Người Bảo Hiểm', skill: `Qua Bắt Đầu: mỗi đối thủ đóng $${INSURE_PREMIUM} phí bảo hiểm. Phá sản lần đầu được bảo hiểm cứu: trả đủ nợ thay, giữ lại ô đất rẻ nhất và nhận $${INSURE_CASH} làm lại`, group: 'phòng thủ', skin: '#ffd9b3', hair: '#4b3621', style: 'insurer', acc: 'umbrella', outfit: '#0369a1', bg: '#e0f2fe' },
+  { id: 'pilot', name: 'Phi Công', skill: 'Cứ 2 lần qua Bắt Đầu: lượt sau được bay miễn phí tới một điểm du lịch bất kỳ', group: 'di chuyển', skin: '#f6d1b0', hair: '#3b2a1e', style: 'pilot', acc: 'plane', outfit: '#1e3a8a', bg: '#dbeafe' },
+  { id: 'police', name: 'Cảnh Sát', skill: `Đi ngang qua hoặc dừng ở ô có đối thủ đứng: ${POLICE_CHANCE * 100}% bắt họ ra Côn Đảo (mỗi vòng tối đa 1 lần)`, group: 'phá đối thủ', skin: '#eec39a', hair: '#1f1a17', style: 'police', acc: 'whistle', outfit: '#1d4ed8', bg: '#dbeafe' },
+  { id: 'journalist', name: 'Nhà Báo', skill: `Đối thủ mở lễ hội: nhận $${NEWS_PAY} đưa tin. Vào đất đối thủ đang mở lễ hội: hủy lễ hội đó trước khi trả phí và nhận $${SCOOP_PAY} nhuận bút`, group: 'phá đối thủ', skin: '#ffe3cc', hair: '#b45309', style: 'journalist', acc: 'camera', outfit: '#65a30d', bg: '#ecfccb' },
+  { id: 'phoenix', name: 'Phượng Hoàng', skill: `Khi tổng tài sản ${PHOENIX_RANK > 1 ? `thuộc ${PHOENIX_RANK} người ` : ''}thấp nhất bàn: thu phí tham quan ×2 và qua Bắt Đầu nhận lương ×2`, group: 'tăng tiền', skin: '#ffe0c7', hair: '#ea580c', style: 'phoenix', acc: 'feather', outfit: '#dc2626', bg: '#ffedd5' },
+  { id: 'architect', name: 'Kiến Trúc Sư', skill: `Vừa lên Biểu tượng: khai trương hút mọi đối thủ đứng trong vòng ${MAGNET_RANGE} ô về Biểu tượng đó và thu phí tham quan (thiếu thì lấy hết tiền mặt)`, group: 'phá đối thủ', skin: '#f3cfae', hair: '#1f1a17', style: 'architect', acc: 'blueprint', outfit: '#ea580c', bg: '#ffedd5' },
 ];
 const charOf = id => CHARS.find(c => c.id === id) || CHARS[0];
 const hasSkill = (G, s, id) => !!G.seats[s] && G.pl[s].char === id;
+// Phượng Hoàng đang "cháy": tổng tài sản thuộc PHOENIX_RANK người thấp nhất bàn (số người có tài sản bằng hoặc thấp hơn mình
+// ít hơn PHOENIX_RANK; đầu ván bằng nhau thì chưa tính). Bàn 6 người khó là người nghèo nhất nên tính cả người nghèo nhì
+// worth: cách tính tài sản (giao diện đang hoạt hoạ thì truyền shownWorth)
+const phoenixOn = (G, s, worth = v => netWorth(G, v)) => {
+  if (s < 0 || !hasSkill(G, s, 'phoenix') || G.pl[s].out) return false;
+  const rest = active(G).filter(v => v !== s), w = worth(s);
+  return rest.length > 0 && rest.filter(v => worth(v) <= w).length < Math.min(PHOENIX_RANK, rest.length);
+};
 
 // ── thẻ Cơ Hội ──
 const CARDS = [
@@ -1156,12 +1183,14 @@ const active = G => SEATS.filter(s => G.seats[s] && !G.pl[s].out);
 function levelCost(i, lv, G, s) {
   let c = SQ[i].base * LEVELS[lv].cost;
   if (G && s !== undefined && s >= 0 && hasSkill(G, s, 'boss')) c *= 0.85;
+  if (G && s !== undefined && s >= 0 && lv === 5 && hasSkill(G, s, 'collector')) c *= 1 - COLLECTOR_OFF; // Nhà Sưu Tầm: Biểu tượng rẻ hơn
   if (evOn(G, 'stimulus')) c *= 0.7;
   return r10(c);
 }
 const cumCost = (i, from, to, G, s) => { let v = 0; for (let k = from + 1; k <= to; k++) v += levelCost(i, k, G, s); return v; };
 const invested = (G, i) => (SQ[i].t === 'tour' ? SQ[i].price : cumCost(i, 0, G.props[i].lv));
-const takeoverPrice = (G, i) => invested(G, i); // mua lại đúng bằng số vốn chủ đã bỏ ra
+// mua lại đúng bằng số vốn chủ đã bỏ ra; Nhà Đầu Tư (người mua s) chỉ trả INVESTOR_RATE
+const takeoverPrice = (G, i, s) => (s !== undefined && s >= 0 && hasSkill(G, s, 'investor') ? r10(invested(G, i) * INVESTOR_RATE) : invested(G, i));
 const sellValue = (G, i) => invested(G, i) / 2;
 // điểm du lịch càng xa ô Bắt Đầu càng đắt, phí tham quan càng cao
 const tourPrice = (G, s, i) => r10(SQ[i].price * (hasSkill(G, s, 'tourist') ? 0.7 : 1) * (evOn(G, 'stimulus') ? 0.7 : 1));
@@ -1193,7 +1222,7 @@ function rentBase(G, i) {
 const festMult = (G, i) => { const p = G.props[i]; return Math.pow(p.owner >= 0 && hasSkill(G, p.owner, 'diva') ? 3 : 2, p.fest || 0); };
 const festCity = G => { let best = -1; for (const i of PROPS) if (G.props[i].fest && (best < 0 || G.props[i].fest > G.props[best].fest)) best = i; return best; };
 // Cô Tiên giảm 20% mọi phí; Du Khách giảm một nửa phí ở điểm du lịch
-const rentFor = (G, i, payer) => r10(rentBase(G, i) * (hasSkill(G, payer, 'fairy') ? 0.8 : 1) * (SQ[i].t === 'tour' && hasSkill(G, payer, 'tourist') ? 0.5 : 1));
+const rentFor = (G, i, payer) => r10(rentBase(G, i) * (hasSkill(G, payer, 'fairy') ? 1 - FAIRY_OFF : 1) * (SQ[i].t === 'tour' && hasSkill(G, payer, 'tourist') ? 0.5 : 1));
 // cấp cao nhất có thể xây ở thành phố i trong lượt này
 function maxLevel(G, s, i) {
   const P = G.pl[s], lv = G.props[i].lv;
@@ -1238,7 +1267,7 @@ function botBuyLevel(G, s, i, from) {
   return best;
 }
 function botWantsTakeover(G, s, i) {
-  const price = takeoverPrice(G, i), P = G.pl[s], q = SQ[i];
+  const price = takeoverPrice(G, i, s), P = G.pl[s], q = SQ[i];
   if (P.cash - price < 300) return false;
   const completes = GROUP_IDX[q.g].every(j => j === i || G.props[j].owner === s);
   const breaks = ownsGroup(G, G.props[i].owner, q.g);
@@ -1254,7 +1283,10 @@ function botPickTarget(G, s, kind, opts) {
       case 'lift': return rentBase(G, i) + invested(G, i) * 0.1; // nhắc ô đang thu phí cao nhất
       case 'upgrade': { const lv = p.lv, c = levelCost(i, lv + 1, G, s); return c <= P.cash - reserve(G) ? (SQ[i].base * (LEVELS[lv + 1].rent - LEVELS[lv].rent)) / c : -1; }
       case 'swapMine': return -invested(G, i);
-      case 'swapTheirs': case 'forceSell': case 'destroy': case 'plague': case 'blackout': return rentBase(G, i) + invested(G, i) * 0.2 + netWorth(G, p.owner) * 0.05;
+      // thành phố của Luật Sư không ép bán / đổi được, còn bị phạt: chỉ chọn khi không còn chỗ nào khác
+      case 'swapTheirs': case 'forceSell': case 'destroy': case 'plague': case 'blackout': if (hasSkill(G, p.owner, 'lawyer')) return 0;
+        return rentBase(G, i) + invested(G, i) * 0.2 + netWorth(G, p.owner) * 0.05;
+      case 'fly': return p.owner < 0 ? (P.cash >= tourPrice(G, s, i) + 150 ? 50 + 40 * countOwned(G, s, TOURS) : -1) : p.owner === s ? 10 : -1;
       case 'bus': {
         if (i === P.pos || !isProp(i)) return -1;
         if (q.t === 'tour') return p.owner < 0 && P.cash >= tourPrice(G, s, i) + 200 ? 50 + 40 * countOwned(G, s, TOURS) : -1;
@@ -1287,7 +1319,7 @@ function botSellPick(G, s) {
 const SUM_WAYS = [0, 0, 1, 2, 3, 4, 5, 6, 5, 4, 3, 2, 1]; // số cách ra tổng 2..12 (trên 36)
 function botParity(G, s) {
   const P = G.pl[s];
-  if (!(P.hold.parity > 0) || (P.rolls < 3 && hasSkill(G, s, 'racer')) || (hasSkill(G, s, 'dancer') && !P.danced)) return null;
+  if (!(P.hold.parity > 0) || (P.rolls < RACER_ROLLS && hasSkill(G, s, 'racer')) || (hasSkill(G, s, 'dancer') && !P.danced)) return null;
   const val = sum => {
     const i = (P.pos + sum) % N, q = SQ[i], p = G.props[i];
     if (isProp(i)) {
@@ -1360,7 +1392,7 @@ function freshGame(seats, maxRound, cash = 'luck') {
     if (cash === 'double') P.cash = START_CASH * 2;
     // may mắn đầu ván: mỗi nhân vật có 80% được nhân đôi tiền khởi đầu
     else if (cash === 'luck' && Math.random() < LUCK_CHANCE) { P.luck = START_CASH; P.cash += START_CASH; }
-    if (chars[s] === 'chef') P.cash += (cash === 'double' ? START_CASH * 2 : START_CASH) * 0.4;
+    if (chars[s] === 'chef') P.cash += (cash === 'double' ? START_CASH * 2 : START_CASH) * CHEF_BONUS;
     if (chars[s] === 'detective') P.hold.shield = 2;
   }
   G.turn = firstTurn(seats);
@@ -1444,7 +1476,7 @@ function doRoll(s, par, power) {
     else {
       G.again = dbl;
       let n = d[0] + d[1];
-      if (P.rolls <= 3 && hasSkill(G, s, 'racer')) { n *= 2; steps.push({ k: 'boost', s, n }); }
+      if (P.rolls <= RACER_ROLLS && hasSkill(G, s, 'racer')) { n *= 2; steps.push({ k: 'boost', s, n }); }
       // Vũ Công: lần tung đầu tiên của ván 80% đi lùi
       if (hasSkill(G, s, 'dancer') && !P.danced) { P.danced = true; if (Math.random() < 0.8) { n = -n; steps.push({ k: 'reverse', s, n: -n }); } }
       moveBy(s, n, steps);
@@ -1460,18 +1492,82 @@ function moveBy(s, n, steps, how) {
   const passGo = n > 0 ? from + n >= N : n < 0 && from + n < 0;
   P.pos = to;
   let salary = 0;
-  if (passGo) { P.laps++; salary = r10(SALARY * (hasSkill(G, s, 'mc') ? 2 : 1) * (evOn(G, 'tet') ? 2 : 1)); P.cash += salary; }
-  steps.push({ k: 'move', s, from, to, n, passGo, salary, how, fly: how === 'fly' });
-  if (passGo && hasSkill(G, s, 'wizard') && Math.random() < 0.5) hex(s, steps);
+  const fire = passGo && phoenixOn(G, s); // xét trước khi cộng lương
+  if (passGo) { P.laps++; salary = r10(SALARY * (hasSkill(G, s, 'mc') ? 2 : 1) * (evOn(G, 'tet') ? 2 : 1) * (fire ? 2 : 1)); P.cash += salary; }
+  steps.push({ k: 'move', s, from, to, n, passGo, salary, how, fly: how === 'fly', plane: how === 'fly' && hasSkill(G, s, 'pilot') });
+  if (fire) steps.push({ k: 'phoenix', s, why: 'salary' });
+  if (passGo && hasSkill(G, s, 'wizard') && Math.random() < WIZARD_CHANCE) for (let k = 0; k < WIZARD_HITS; k++) hex(s, steps);
   if (passGo && hasSkill(G, s, 'robin')) robin(s, steps);
+  if (passGo && hasSkill(G, s, 'insurer')) premium(s, steps);
+  // Nhà Sưu Tầm: qua Bắt Đầu nhận thêm tiền cho mỗi Biểu tượng
+  if (passGo && hasSkill(G, s, 'collector')) { const amt = COLLECTOR_BONUS * landmarks(G, s); if (amt > 0) { P.cash += amt; steps.push({ k: 'collect', s, amt, n: amt / COLLECTOR_BONUS }); } }
+  // Phi Công: cứ 2 lần qua Bắt Đầu (vòng chẵn) thì lượt sau được bay tới một điểm du lịch — mỗi vòng đều có vé thì quá mạnh
+  if (passGo && hasSkill(G, s, 'pilot') && !P.fly && P.laps % 2 === 0) { P.fly = true; steps.push({ k: 'flyTicket', s }); }
+  if (hasSkill(G, s, 'police') && n !== 0) police(s, from, n, steps);
   if (hasSkill(G, s, 'robber')) rob(s, steps);
   land(s, steps);
 }
-// Pháp Sư: gây dịch bệnh ở một thành phố đối thủ ngẫu nhiên (ưu tiên ô chưa bị dịch), khiên vẫn chặn được
+// Phi Công bay thẳng tới ô i (không đi qua Bắt Đầu nên không nhận lương)
+function flyTo(s, i, steps) {
+  const P = G.pl[s], from = P.pos;
+  P.pos = i;
+  steps.push({ k: 'move', s, from, to: i, n: 0, passGo: false, salary: 0, how: 'fly', fly: true, plane: true });
+  land(s, steps);
+}
+// Cảnh Sát: đối thủ đứng ở các ô vừa đi qua (kể cả ô dừng) có POLICE_CHANCE bị bắt ra Côn Đảo; mỗi vòng tối đa 1 lần
+function police(s, from, n, steps) {
+  const P = G.pl[s];
+  if (P.copRound === G.round) return;
+  const dir = n < 0 ? -1 : 1, passed = new Set();
+  for (let k = 1; k <= Math.abs(n); k++) passed.add(((from + dir * k) % N + N) % N);
+  const vs = active(G).filter(v => v !== s && !G.pl[v].jail && passed.has(G.pl[v].pos));
+  for (const v of vs.sort(() => Math.random() - 0.5)) {
+    if (Math.random() >= POLICE_CHANCE) continue;
+    const V = G.pl[v];
+    V.pos = ISLAND_POS; V.jail = 1; V.bus = false; P.copRound = G.round;
+    steps.push({ k: 'arrest', s, v });
+    return;
+  }
+}
+// Kiến Trúc Sư vừa lên Biểu tượng ở ô i: đối thủ đứng trong vòng MAGNET_RANGE ô (hai phía, không tính người ở Côn Đảo)
+// bị hút về ô đó và trả phí tham quan; không đủ tiền thì trả hết tiền mặt, không bị phá sản (họ đang không tới lượt)
+function magnet(s, i, steps) {
+  const near = v => { const d = Math.abs(G.pl[v].pos - i); return Math.min(d, N - d) <= MAGNET_RANGE; };
+  const vs = active(G).filter(v => v !== s && !G.pl[v].jail && near(v)).sort((a, b) => Math.abs(G.pl[a].pos - i) - Math.abs(G.pl[b].pos - i));
+  for (const v of vs) {
+    const V = G.pl[v], from = V.pos, amt = Math.min(V.cash, rentFor(G, i, v));
+    V.pos = i; V.bus = false; V.cash -= amt; G.pl[s].cash += amt;
+    steps.push({ k: 'pull', s, v, i, from, amt });
+  }
+}
+// Nhà Báo vào đất đối thủ đang có lễ hội: hủy lễ hội trước khi tính phí, nhận nhuận bút từ ngân hàng
+function scoop(s, i, steps) {
+  const p = G.props[i];
+  if (!hasSkill(G, s, 'journalist') || !p.fest || p.owner < 0 || p.owner === s) return;
+  p.fest = 0; G.pl[s].cash += SCOOP_PAY;
+  steps.push({ k: 'scoop', s, i, o: p.owner, amt: SCOOP_PAY });
+}
+// Luật Sư: thẻ ép bán / đổi thành phố nhắm vào đất của o bị chặn, người dùng thẻ s bị phạt (tối đa số tiền đang có)
+function lawyerBlock(s, o, i, steps) {
+  if (!hasSkill(G, o, 'lawyer')) return false;
+  const amt = Math.max(0, Math.min(LAWYER_FINE, G.pl[s].cash));
+  G.pl[s].cash -= amt; G.pl[o].cash += amt;
+  steps.push({ k: 'lawyer', s: o, i, by: s, amt });
+  return true;
+}
+// thuế s vừa nộp amt: Thu Ngân (đối thủ) lấy CASHIER_CUT, phần còn lại vào Quỹ Thuế; trả về bước hoạt hoạ (nếu có)
+function taxIn(s, amt) {
+  const c = active(G).find(o => o !== s && hasSkill(G, o, 'cashier'));
+  const cut = c === undefined ? 0 : r10(amt * CASHIER_CUT);
+  if (cut > 0) G.pl[c].cash += cut;
+  G.pot = (G.pot || 0) + amt - cut;
+  return cut > 0 ? { k: 'taxCut', s: c, from: s, amt: cut } : null;
+}
+// Pháp Sư: gây dịch bệnh ở thành phố đối thủ đang thu phí cao nhất (ưu tiên ô chưa bị dịch), khiên vẫn chặn được
 function hex(s, steps) {
   const all = pickOpts(s, 'plague'), fresh = all.filter(i => !effectOn(G, i, 'plague')), opts = fresh.length ? fresh : all;
   if (!opts.length) return;
-  const i = opts[Math.floor(Math.random() * opts.length)], o = G.props[i].owner;
+  const i = opts.reduce((a, b) => (rentBase(G, b) > rentBase(G, a) ? b : a)), o = G.props[i].owner;
   if (shielded(o, i, steps)) return;
   G.props[i].plague = G.turnNo + 5 * active(G).length;
   steps.push({ k: 'plague', s, i, o, wiz: true });
@@ -1480,17 +1576,28 @@ function hex(s, steps) {
 function rob(s, steps) {
   for (const v of active(G)) {
     if (v === s || G.pl[v].pos !== G.pl[s].pos) continue;
-    const amt = r10(G.pl[v].cash * 0.15);
+    const amt = r10(G.pl[v].cash * ROB_RATE);
     if (amt <= 0) continue;
     G.pl[v].cash -= amt; G.pl[s].cash += amt;
     steps.push({ k: 'rob', s, v, amt });
   }
 }
+// Người Bảo Hiểm qua Bắt Đầu: mỗi đối thủ đóng INSURE_PREMIUM (thiếu thì đóng hết tiền mặt đang có)
+function premium(s, steps) {
+  const from = [];
+  for (const v of active(G)) {
+    if (v === s) continue;
+    const amt = Math.min(INSURE_PREMIUM, G.pl[v].cash);
+    if (amt <= 0) continue;
+    G.pl[v].cash -= amt; G.pl[s].cash += amt; from.push([v, amt]);
+  }
+  if (from.length) steps.push({ k: 'premium', s, from, amt: from.reduce((t, x) => t + x[1], 0) });
+}
 // Hiệp Đạo: lấy 8% tiền mặt của đối thủ giàu nhất (theo tổng tài sản), chỉ khi họ giàu hơn mình
 function robin(s, steps) {
   const v = active(G).filter(o => o !== s).sort((a, b) => netWorth(G, b) - netWorth(G, a))[0];
   if (v === undefined || netWorth(G, v) <= netWorth(G, s)) return;
-  const amt = r10(G.pl[v].cash * 0.08);
+  const amt = r10(G.pl[v].cash * ROBIN_RATE);
   if (amt <= 0) return;
   G.pl[v].cash -= amt; G.pl[s].cash += amt;
   steps.push({ k: 'rob', s, v, amt, robin: true });
@@ -1515,6 +1622,7 @@ function land(s, steps) {
         if (can && P.cash < need) { homePay(s, i, steps); if (P.cash < need) steps.push({ k: 'noCash', s, i, need, mode: 'upgrade' }); else { G.step = 'visit'; G.visit = { i, mode: 'upgrade' }; steps.push({ k: 'home', s, i, can }); } }
         else { homePay(s, i, steps); if (can) { G.step = 'visit'; G.visit = { i, mode: 'upgrade' }; } steps.push({ k: 'home', s, i, can }); }
       } else {
+        scoop(s, i, steps);
         // Hacker: 10% chiếm luôn thành phố, khỏi trả phí; khiên của chủ chặn được
         const o = p.owner;
         if (hasSkill(G, s, 'hacker') && canTakeover(G, s, i) && Math.random() < 0.1 && !shielded(o, i, steps)) {
@@ -1527,19 +1635,19 @@ function land(s, steps) {
         cure();
         if (P.out) break; // vừa phá sản vì không trả nổi
         // Kẻ Báo Thù: trả phí xong, 40% đập một cấp nhà và đòi lại nửa phí (Biểu tượng không bị đập, khiên chặn được)
-        if (G.step !== 'debt' && paid && hasSkill(G, s, 'avenger') && p.lv >= 2 && p.lv < 5 && Math.random() < 0.4 && !shielded(o, i, steps)) {
+        if (G.step !== 'debt' && paid && hasSkill(G, s, 'avenger') && p.lv >= 2 && p.lv < 5 && Math.random() < AVENGER_CHANCE && !shielded(o, i, steps)) {
           p.lv--; steps.push({ k: 'destroy', s, i, o, lv: p.lv, rev: true });
           const back = Math.min(G.pl[o].cash, r10(last.amt / 2));
           if (back > 0) { G.pl[o].cash -= back; P.cash += back; steps.push({ k: 'pay', s: o, to: s, amt: back, why: 'revenge', i }); }
         }
         // Dân Chơi: vừa trả phí tham quan xong, 50% bay thẳng tới Đại Nhạc Hội
-        if (G.step !== 'debt' && paid && hasSkill(G, s, 'partier') && Math.random() < 0.5) {
+        if (G.step !== 'debt' && paid && hasSkill(G, s, 'partier') && Math.random() < PARTIER_CHANCE) {
           steps.push({ k: 'festJump', s });
           moveTo(s, FEST_POS, steps, 'fly');
           break;
         }
         if (G.step !== 'debt' && canTakeover(G, s, i)) {
-          const need = takeoverPrice(G, i);
+          const need = takeoverPrice(G, i, s);
           if (P.cash >= need) { G.step = 'visit'; G.visit = { i, mode: 'takeover' }; steps.push({ k: 'takeoverOffer', s, i }); }
           else steps.push({ k: 'noCash', s, i, need, mode: 'takeover' });
         }
@@ -1553,7 +1661,7 @@ function land(s, steps) {
         else { G.step = 'visit'; G.visit = { i, mode: 'tour' }; steps.push({ k: 'offer', s, i }); }
       }
       else {
-        if (p.owner !== s) payRent(s, i, steps);
+        if (p.owner !== s) { scoop(s, i, steps); payRent(s, i, steps); }
         else { homePay(s, i, steps); steps.push({ k: 'home', s, i, can: false }); }
         // có người ghé (kể cả chủ) thì phí lần sau tăng; người trả phí phá sản thì đất vẫn của chủ nên vẫn tính
         if (p.owner >= 0) { p.visits = (p.visits || 0) + 1; steps.push({ k: 'tourUp', s, i, v: p.visits, amt: rentBase(G, i) }); }
@@ -1590,26 +1698,35 @@ function payRent(s, i, steps) {
   const o = G.props[i].owner, H = G.pl[s].hold;
   if (amt <= 0) { steps.push({ k: 'norent', s, i, o }); return; }
   // Lãng Tử: 25% được miễn phí tham quan
-  if (hasSkill(G, s, 'charmer') && Math.random() < 0.25) { steps.push({ k: 'charmFree', s, i, o, amt }); return; }
+  if (hasSkill(G, s, 'charmer') && Math.random() < CHARM_CHANCE) { steps.push({ k: 'charmFree', s, i, o, amt }); return; }
   if (H.free > 0 && (amt >= 100 || amt > G.pl[s].cash)) { H.free--; steps.push({ k: 'useFree', s, i, o, amt }); return; }
   // Thần Bài: 25% khách phải trả gấp đôi
-  if (hasSkill(G, o, 'gambler') && Math.random() < 0.25) { amt *= 2; steps.push({ k: 'rentX2', s: o, i, payer: s }); }
+  if (hasSkill(G, o, 'gambler') && Math.random() < GAMBLER_CHANCE) { amt *= 2; steps.push({ k: 'rentX2', s: o, i, payer: s }); }
+  // Phượng Hoàng đang ở nhóm nghèo nhất bàn: khách trả phí ×2
+  if (phoenixOn(G, o)) { amt *= 2; steps.push({ k: 'phoenix', s: o, i, payer: s, why: 'rent' }); }
   if (H.half > 0 && amt >= 100) { H.half--; amt = r10(amt / 2); steps.push({ k: 'useHalf', s, i }); }
   charge(s, o, amt, 'rent', steps, i);
 }
 // s trả amt cho to (-1 ngân hàng); thiếu thì vào bước nợ
 function charge(s, to, amt, why, steps, i) {
   const P = G.pl[s];
-  if (P.cash >= amt) { P.cash -= amt; if (to >= 0) G.pl[to].cash += amt; else if (why === 'tax') G.pot = (G.pot || 0) + amt; steps.push({ k: 'pay', s, to, amt, why, i }); return; }
+  if (P.cash >= amt) {
+    P.cash -= amt;
+    const cut = to < 0 && why === 'tax' ? taxIn(s, amt) : null;
+    if (to >= 0) G.pl[to].cash += amt;
+    steps.push({ k: 'pay', s, to, amt, why, i }); if (cut) steps.push(cut);
+    return;
+  }
   steps.push({ k: 'debt', s, to, amt, why, i });
   // bán hết đất cũng không đủ thì phá sản ngay, không bắt bán từng ô
-  if (liquid(G, s) < amt) { liquidate(s, to >= 0 ? to : -1, steps); return; }
+  if (liquid(G, s) < amt) { liquidate(s, to >= 0 ? to : -1, steps, amt, why, i); return; }
   G.step = 'debt'; G.debt = { to, amt, why, i };
 }
 // phá sản: bán từng ô đất cho ngân hàng (nửa vốn, mỗi ô một bước để hoạt hoạ lần lượt),
 // tiền thu được cùng tiền mặt trả cho chủ nợ (nợ ngân hàng thì mất), người chơi rời ván
-function liquidate(s, to, steps) {
+function liquidate(s, to, steps, amt, why, i) {
   const P = G.pl[s];
+  if (hasSkill(G, s, 'insurer') && !P.insured && amt > 0) { insure(s, to, steps, amt, why, i); return; }
   let sold = 0, n = 0;
   for (const i of PROPS) {
     if (G.props[i].owner !== s) continue;
@@ -1623,6 +1740,27 @@ function liquidate(s, to, steps) {
   steps.push({ k: 'bankrupt', s, to, was: [], n, cash, sold, paid });
   const act = active(G);
   if (act.length <= 1) { G.phase = 'over'; G.winner = act[0] ?? s; G.winHow = 'last'; G.turn = G.winner; G.step = 'end'; steps.push({ k: 'won', s: G.winner, how: 'last' }); }
+}
+// Người Bảo Hiểm phá sản lần đầu: ngân hàng mua lại mọi ô đất trừ ô rẻ nhất, tiền mặt trả nợ trước,
+// bảo hiểm trả nốt phần còn thiếu cho chủ nợ, rồi tặng INSURE_CASH để chơi tiếp
+function insure(s, to, steps, amt, why, at) {
+  const P = G.pl[s];
+  P.insured = true;
+  const mine = PROPS.filter(i => G.props[i].owner === s);
+  const keep = mine.length ? mine.reduce((a, b) => (invested(G, b) < invested(G, a) ? b : a)) : -1;
+  for (const i of mine) {
+    if (i === keep) continue;
+    const v = sellValue(G, i);
+    steps.push({ k: 'sell', s, i, amt: v, auto: true, was: { ...G.props[i] } });
+    P.cash += v; resetProp(i);
+  }
+  const own = Math.min(P.cash, amt), cover = amt - own;
+  P.cash -= own;
+  if (to >= 0) G.pl[to].cash += amt; else if (why === 'tax') G.pot = (G.pot || 0) + amt;
+  if (own > 0) steps.push({ k: 'pay', s, to, amt: own, why, i: at });
+  P.cash += INSURE_CASH;
+  G.debt = null; G.visit = null; G.pick = null; G.again = false; G.step = 'roll';
+  steps.push({ k: 'insure', s, to, cover, gift: INSURE_CASH, keep, tax: to < 0 && why === 'tax' });
 }
 function toIsland(s, steps) { const P = G.pl[s]; P.pos = ISLAND_POS; P.jail = 1; G.again = false; steps.push({ k: 'island', s }); }
 function pickOpts(s, kind) {
@@ -1638,6 +1776,7 @@ function pickOpts(s, kind) {
     case 'destroy': return CITIES.filter(i => others(i) && G.props[i].lv >= 2 && G.props[i].lv < 5);
     case 'lift': return PROPS.filter(i => G.props[i].owner === s && G.lift !== i);
     case 'bus': return ALL.filter(i => i !== P.pos);
+    case 'fly': return TOURS.filter(i => i !== P.pos);
   }
   return [];
 }
@@ -1717,14 +1856,23 @@ function doPick(s, i) {
       moveTo(s, i, steps, 'bus');
       break;
     }
+    case 'fly': {
+      P.fly = false; G.pick = null; G.step = 'roll'; G.again = false;
+      steps.push({ k: 'flyGo', s, i });
+      flyTo(s, i, steps);
+      break;
+    }
     case 'festival': case 'festivalFree': {
       const fee = pk.kind === 'festival' ? festFee(s) : 0;
       if (P.cash < fee) return;
       // lễ hội chuyển sang thành phố mới: nơi cũ bị lấy lại, phí trở về mức thường
-      const prev = PROPS.filter(j => j !== i && G.props[j].fest);
+      // lễ hội của Nàng Thơ (người khác) thì giữ nguyên
+      const prev = PROPS.filter(j => j !== i && G.props[j].fest && !(G.props[j].owner !== s && G.props[j].owner >= 0 && hasSkill(G, G.props[j].owner, 'diva')));
       for (const j of prev) G.props[j].fest = 0;
       P.cash -= fee; G.props[i].fest = (G.props[i].fest || 0) + 1; G.pick = null; G.step = 'roll';
       steps.push({ k: 'festival', s, i, fee, mult: festMult(G, i), prev });
+      // Nhà Báo (đối thủ) đưa tin lễ hội, ngân hàng trả nhuận bút
+      for (const j of active(G)) if (j !== s && hasSkill(G, j, 'journalist')) { G.pl[j].cash += NEWS_PAY; steps.push({ k: 'news', s: j, i, by: s, amt: NEWS_PAY }); }
       break;
     }
     case 'upgrade': G.pick = null; G.step = 'visit'; G.visit = { i, mode: 'upgrade' }; steps.push({ k: 'pickCity', s, i }); break;
@@ -1739,7 +1887,7 @@ function doPick(s, i) {
     case 'swapTheirs': {
       const mine = pk.data.mine, o = G.props[i].owner;
       G.pick = null; G.step = 'roll';
-      if (G.props[mine].owner !== s || shielded(o, i, steps)) break;
+      if (G.props[mine].owner !== s || lawyerBlock(s, o, i, steps) || shielded(o, i, steps)) break;
       G.props[mine].owner = o; G.props[i].owner = s;
       steps.push({ k: 'swap', s, mine, theirs: i, o });
       break;
@@ -1747,7 +1895,7 @@ function doPick(s, i) {
     case 'forceSell': {
       const o = G.props[i].owner;
       G.pick = null; G.step = 'roll';
-      if (shielded(o, i, steps)) break;
+      if (lawyerBlock(s, o, i, steps) || shielded(o, i, steps)) break;
       const amt = sellValue(G, i);
       G.pl[o].cash += amt; resetProp(i);
       steps.push({ k: 'forceSell', s, i, o, amt });
@@ -1756,7 +1904,7 @@ function doPick(s, i) {
     case 'destroy': {
       const o = G.props[i].owner;
       G.pick = null; G.step = 'roll';
-      if (shielded(o, i, steps)) break;
+      if (lawyerBlock(s, o, i, steps) || shielded(o, i, steps)) break;
       G.props[i].lv--;
       steps.push({ k: 'destroy', s, i, o, lv: G.props[i].lv });
       break;
@@ -1764,7 +1912,7 @@ function doPick(s, i) {
     case 'plague': case 'blackout': {
       const o = G.props[i].owner;
       G.pick = null; G.step = 'roll';
-      if (shielded(o, i, steps)) break;
+      if (lawyerBlock(s, o, i, steps) || shielded(o, i, steps)) break;
       G.props[i][pk.kind] = G.turnNo + 5 * active(G).length;
       steps.push({ k: pk.kind, s, i, o });
       break;
@@ -1785,7 +1933,7 @@ function doPickSkip(s) {
   if (!okTurn(s, ['pick']) || !G.pick || !G.pick.optional) return;
   const kind = G.pick.kind;
   G.pick = null; G.step = 'roll';
-  if (kind === 'bus') { G.pl[s].bus = false; commit({ type: 'turn', s, steps: [{ k: 'pickSkip', s, kind }] }); return; }
+  if (kind === 'bus' || kind === 'fly') { G.pl[s][kind] = false; commit({ type: 'turn', s, steps: [{ k: 'pickSkip', s, kind }] }); return; }
   finish(s, [{ k: 'pickSkip', s, kind }]);
 }
 // mua / nâng cấp thành phố lên cấp lv
@@ -1798,7 +1946,9 @@ function doBuy(s, lv) {
   if (P.cash < cost) return;
   P.cash -= cost; p.owner = s; p.lv = lv;
   G.visit = null; G.step = 'roll';
-  finish(s, [{ k: 'build', s, i, from, to: lv, cost }]);
+  const steps = [{ k: 'build', s, i, from, to: lv, cost }];
+  if (lv === 5 && hasSkill(G, s, 'architect')) magnet(s, i, steps);
+  finish(s, steps);
 }
 function doBuyTour(s) {
   if (!okTurn(s, ['visit']) || !G.visit || G.visit.mode !== 'tour') return;
@@ -1810,10 +1960,11 @@ function doBuyTour(s) {
 }
 function doTakeover(s) {
   if (!okTurn(s, ['visit']) || !G.visit || G.visit.mode !== 'takeover') return;
-  const i = G.visit.i, p = G.props[i], P = G.pl[s], o = p.owner, price = takeoverPrice(G, i);
+  const i = G.visit.i, p = G.props[i], P = G.pl[s], o = p.owner, price = takeoverPrice(G, i, s);
   if (!canTakeover(G, s, i) || P.cash < price) return;
   P.cash -= price; G.pl[o].cash += price; p.owner = s;
   const steps = [{ k: 'takeover', s, i, o, price }];
+  if (hasSkill(G, s, 'investor') && p.lv < Math.min(INVESTOR_TOP, maxLevel(G, s, i))) { p.lv++; steps.push({ k: 'build', s, i, from: p.lv - 1, to: p.lv, cost: 0, free: true }); }
   if (p.lv < maxLevel(G, s, i)) G.visit = { i, mode: 'upgrade' }; else { G.visit = null; G.step = 'roll'; }
   finish(s, steps);
 }
@@ -1845,9 +1996,13 @@ function doPayDebt(s) {
   if (!okTurn(s, ['debt'])) return;
   const D = G.debt, P = G.pl[s];
   if (P.cash < D.amt) return;
-  P.cash -= D.amt; if (D.to >= 0) G.pl[D.to].cash += D.amt; else if (D.why === 'tax') G.pot = (G.pot || 0) + D.amt;
+  P.cash -= D.amt;
+  const cut = D.to < 0 && D.why === 'tax' ? taxIn(s, D.amt) : null;
+  if (D.to >= 0) G.pl[D.to].cash += D.amt;
   G.debt = null; G.step = 'roll';
-  finish(s, [{ k: 'pay', s, to: D.to, amt: D.amt, why: D.why, i: D.i }]);
+  const steps = [{ k: 'pay', s, to: D.to, amt: D.amt, why: D.why, i: D.i }];
+  if (cut) steps.push(cut);
+  finish(s, steps);
 }
 function doSell(s, i) {
   if (!okTurn(s, ['debt']) || !PROPS.includes(i) || G.props[i].owner !== s) return;
@@ -1859,7 +2014,7 @@ function doBankrupt(s) {
   // đang nợ thì được chọn phá sản bất cứ lúc nào, kể cả khi bán đất vẫn đủ trả
   if (!okTurn(s, ['debt'])) return;
   const steps = [];
-  liquidate(s, G.debt.to >= 0 ? G.debt.to : -1, steps);
+  liquidate(s, G.debt.to >= 0 ? G.debt.to : -1, steps, G.debt.amt, G.debt.why, G.debt.i);
   finish(s, steps);
 }
 function doEnd(s) {
@@ -1886,15 +2041,16 @@ function nextTurn(steps) {
   }
   G.turn = t;
   const P = G.pl[t];
-  // Chủ Ngân Hàng: đầu lượt nhận lãi 1% tiền mặt
-  if (hasSkill(G, t, 'banker')) { const amt = r10(P.cash * 0.01); if (amt > 0) { P.cash += amt; steps.push({ k: 'interest', s: t, amt }); } }
-  // sự kiện Ngân Hàng Chia Lãi
-  if (evOn(G, 'bank')) { const amt = r10(P.cash * EV_INTEREST); if (amt > 0) { P.cash += amt; steps.push({ k: 'interest', s: t, amt, ev: true }); } }
+  // Chủ Ngân Hàng: đầu lượt nhận lãi BANKER_RATE tiền mặt, tối đa BANKER_CAP
+  if (hasSkill(G, t, 'banker')) { const amt = Math.min(BANKER_CAP, r10(P.cash * BANKER_RATE)); if (amt > 0) { P.cash += amt; steps.push({ k: 'interest', s: t, amt }); } }
+  // sự kiện Ngân Hàng Chia Lãi (Chủ Ngân Hàng nhận gấp đôi)
+  if (evOn(G, 'bank')) { const amt = r10(P.cash * EV_INTEREST * (hasSkill(G, t, 'banker') ? 2 : 1)); if (amt > 0) { P.cash += amt; steps.push({ k: 'interest', s: t, amt, ev: true }); } }
   if (P.jail) { if (P.jail > 3) { P.jail = 0; G.step = 'roll'; steps.push({ k: 'released', s: t }); } else G.step = 'jail'; }
   else if (P.bus) {
     if (P.cash < busFee(t)) { P.bus = false; G.step = 'roll'; steps.push({ k: 'busNoCash', s: t }); }
     else setPick(t, 'bus', pickOpts(t, 'bus'), true);
   }
+  else if (P.fly && !G.pl[t].jail) { const opts = pickOpts(t, 'fly'); if (opts.length) setPick(t, 'fly', opts, true); else { P.fly = false; G.step = 'roll'; } }
   else G.step = 'roll';
 }
 // đầu vòng mới: sự kiện đã đủ EV_ROUNDS vòng thì kết thúc (chưa đủ thì giữ nguyên); vòng 5, 10, 15... thì có thể xảy ra sự kiện mới cho cả phòng
@@ -2091,7 +2247,7 @@ const mix = (hex, to, t) => {
 
 // ── nhân vật chibi: đầu to, mỗi người một tạo hình riêng (mũ, tóc, trang phục, đạo cụ); khung -24..24 ──
 // chỗ tay phải cầm đồ vật của từng nhân vật (bản đủ tay chân); không có thì tay buông xuôi
-const CHIBI_HAND = { mc: [15.5, 10], fairy: [14.5, 3.5], detective: [22.5, 5.5], landlord: [17.5, 7], gambler: [16, 3.5], chef: [15.6, 11], charmer: [15.5, 9], wizard: [19.5, 5], spy: [15, 6], banker: [14.5, 6.5], robber: [16.5, 11] };
+const CHIBI_HAND = { mc: [15.5, 10], fairy: [14.5, 3.5], detective: [22.5, 5.5], landlord: [17.5, 7], gambler: [16, 3.5], chef: [15.6, 11], charmer: [15.5, 9], wizard: [19.5, 5], spy: [15, 6], banker: [14.5, 6.5], robber: [16.5, 11], investor: [15, 8], collector: [16, 9], lawyer: [17, 8], insurer: [17, 6], police: [15.5, 6], journalist: [15, 9], cashier: [15, 10], architect: [17, 9], phoenix: [16, 7] };
 function chibiInto(g, ch, full = false) {
   const P = (d, f, st, sw = 1) => el('path', { d, fill: f, stroke: st || (f === 'none' ? 'none' : mix(f === '#ffffff' ? '#cccccc' : f, '#000', .3)), 'stroke-width': sw, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' }, g);
   const R = (x, y, w, h, f, rx = 0, st = 'none', sw = 1) => el('rect', { x, y, width: w, height: h, rx, fill: f, stroke: st, 'stroke-width': sw }, g);
@@ -2287,6 +2443,82 @@ function chibiInto(g, ch, full = false) {
       head(); P('M-14 -8 Q-15 -16 -9 -18 L-9 -6 Z M14 -8 Q15 -16 9 -18 L9 -6 Z', ch.hair);
       P('M-16 -12 Q-4 -34 18 -16 Q4 -19 -16 -12 Z', '#166534', '#052e16'); P('M6 -21 Q16 -34 24 -30 Q16 -26 9 -19 Z', '#e8323c', '#991b1b');
       eyes(); brows(); cheeks(); mouth('grin');
+      break;
+    case 'investor': // tóc vuốt gọn, vest xám xanh, cà vạt xanh, bảng biểu đồ đi lên
+      body('#334155', true); P('M-2.5 7 L0 19 L2.5 7 Z', '#0ea5e9', '#0369a1');
+      head(); cap(); P('M-14 -9 Q-14 -25 2 -24 Q14 -22 14 -10 Q9 -17 1 -17 Q-8 -16 -14 -9 Z', ch.hair, '#000');
+      eyes(); brows(); cheeks(); mouth('grin');
+      R(13, -6, 13, 13, '#ffffff', 1.5, '#94a3b8'); P('M15 4 L18.5 0 L21 2 L24.5 -3.5', 'none', '#16a34a', 1.6); P('M22 -3.8 L24.8 -3.8 L24.8 -1', 'none', '#16a34a', 1.4);
+      break;
+    case 'cashier': // tóc buộc đuôi ngựa, nón lưỡi trai đỏ, tạp dề, cầm hoá đơn
+      P('M10 -14 Q22 -12 18 4 Q15 -4 9 -8 Z', ch.hair, hairD);
+      body('#dc2626'); R(-8, 9, 16, 11, '#ffffff', 2, '#e5e7eb'); R(-3, 12, 6, 3, '#fde68a', .8);
+      head(); cap(); P('M-14 -11 Q-13 -24 0 -24 Q13 -24 14 -11 Z', '#dc2626', '#991b1b'); P('M-14 -11 Q-22 -11 -21 -8 L-11 -9 Z', '#b91c1c', '#991b1b');
+      eyes('lash'); cheeks(); mouth();
+      R(13, -1, 9, 13, '#f8fafc', 1, '#94a3b8'); P('M15 2 L20 2 M15 5 L20 5 M15 8 L18.5 8', 'none', '#94a3b8', 1);
+      break;
+    case 'collector': // tóc bạc, kính một tròng, áo khoác nhung tím, ôm bình gốm
+      body('#7c3aed', true); P('M-2.5 7 L0 12 L2.5 7 Z', '#facc15');
+      head(); P('M-14 -6 Q-15 -16 -9 -19 Q0 -23 9 -19 Q15 -16 14 -6 Q10 -15 0 -15 Q-10 -15 -14 -6 Z', ch.hair, '#6b7280');
+      eyes(); Cc(5.5, -6, 4.2, 'none', '#d4a017', 1.4); P('M9.5 -4 Q11 2 9 8', 'none', '#d4a017', .8);
+      brows(); stache('#d1d5db'); mouth('small');
+      P('M14 -1 Q12 -5 15 -7 L21 -7 Q24 -5 22 -1 Q26 6 21 12 L15 12 Q10 6 14 -1 Z', '#38bdf8', '#0369a1'); P('M13.5 4 Q18 6.5 22.5 4', 'none', '#ffffff', 1.4); R(14.5, -9, 7, 2.5, '#0369a1', 1);
+      break;
+    case 'lawyer': // tóc rẽ ngôi gọn, vest đen sơ mi trắng cà vạt đỏ, cán cân công lý
+      body('#111827', true); P('M-2.5 7 L0 19 L2.5 7 Z', '#b91c1c', '#7f1d1d');
+      head(); cap(); P('M-14 -9 Q-15 -24 -3 -24 L-2 -17 Q-9 -16 -14 -9 Z M-2 -24 Q14 -24 14 -9 Q10 -17 -1 -17 Z', ch.hair, '#000');
+      eyes(); brows(true); mouth('small');
+      P('M19 -14 L19 8 M13 -11 L25 -11', 'none', '#d4a017', 1.6); P('M13 -11 L11 -4 M13 -11 L15 -4 M25 -11 L23 -4 M25 -11 L27 -4', 'none', '#d4a017', .7);
+      P('M10.5 -4 Q13 -1 15.5 -4 Z', '#facc15', '#b8860b', .6); P('M22.5 -4 Q25 -1 27.5 -4 Z', '#facc15', '#b8860b', .6); R(16, 7, 6, 2.5, '#d4a017', 1);
+      break;
+    case 'insurer': // tóc chải gọn, áo sơ mi xanh, cà vạt sọc, cầm ô xanh
+      body('#0369a1', true); P('M-2.5 7 L0 19 L2.5 7 Z', '#facc15', '#b8860b'); P('M-1.5 10 L1.5 11.5 M-1.5 14 L1.5 15.5', 'none', '#0369a1', .8);
+      head(); cap(); P('M-14 -9 Q-13 -24 1 -24 Q13 -23 14 -9 Q12 -16 4 -18 Q-2 -14 -14 -9 Z', ch.hair, '#000');
+      eyes('happy'); brows(); cheeks(); mouth('grin');
+      P('M17 12 L17 -12', 'none', '#374151', 1.6); P('M17 12 Q17 15 14.5 14', 'none', '#374151', 1.6);
+      P('M5 -12 Q17 -28 29 -12 Q26 -14.5 23 -12 Q20 -14.5 17 -12 Q14 -14.5 11 -12 Q8 -14.5 5 -12 Z', '#38bdf8', '#0369a1');
+      break;
+    case 'pilot': // mũ phi công có cánh vàng, kính phi công, áo khoác xanh lon vai vàng, khăn trắng
+      body('#1e3a8a'); P('M-16 10 L-9 8 L-9 11 L-16 13 Z M16 10 L9 8 L9 11 L16 13 Z', '#facc15', '#b8860b', .6); P('M-7 7 Q0 13 7 7 L5 11 Q0 15 -5 11 Z', '#ffffff', '#cbd5e1');
+      head(); cap();
+      P('M-14 -10 Q-14 -27 0 -27 Q14 -27 14 -10 Z', '#1e3a8a', '#172554'); R(-15, -13, 30, 4, '#111827', 2); P('M-6 -21 L0 -18 L6 -21 L3 -17 L-3 -17 Z', '#facc15', '#b8860b', .6);
+      R(-12, -10, 10.5, 7, '#92400e', 3.5, '#78350f'); R(1.5, -10, 10.5, 7, '#92400e', 3.5, '#78350f'); P('M-1.5 -7 L1.5 -7', 'none', '#78350f', 1.4); P('M-10 -8.5 L-6 -8.5 M3.5 -8.5 L7.5 -8.5', 'none', 'rgba(255,255,255,.55)', 1.1);
+      cheeks(); mouth('grin');
+      P('M15 -3 L27 -7 L27 -5 L22 -3 L24 2 L22 2 L19 -2 L15 -1 Z', '#e5e7eb', '#64748b', .8);
+      break;
+    case 'police': // mũ kê-pi xanh huy hiệu vàng, đồng phục xanh, còi bạc
+      body('#1d4ed8', true); Cc(-8, 13, 2.4, '#facc15', '#b8860b'); P('M-16 10 L-11 9 M16 10 L11 9', 'none', '#facc15', 1.6); for (const y of [11, 15]) Cc(0, y, 1, '#facc15');
+      head(); cap();
+      P('M-14 -12 Q-16 -26 0 -27 Q16 -26 14 -12 Z', '#1e3a8a', '#172554'); R(-14.5, -15, 29, 4, '#111827', 1.5); el('ellipse', { cx: 0, cy: -11.5, rx: 15, ry: 2.6, fill: '#111827' }, g);
+      P('M0 -24 L2.6 -21 L0 -18 L-2.6 -21 Z', '#facc15', '#b8860b', .6);
+      eyes(); brows(true); mouth('small');
+      R(13, 3, 7, 4.5, '#cbd5e1', 2, '#64748b'); Cc(19, 5.2, 3, '#e2e8f0', '#64748b'); P('M13 5 Q8 4 5 8', 'none', '#e8323c', .9);
+      break;
+    case 'journalist': // tóc xoăn nâu, mũ nồi, áo ghi-lê xanh lá, thẻ báo chí, máy ảnh
+      body('#65a30d'); P('M-6 7 L-3 20 M6 7 L3 20', 'none', '#f8fafc', 2.4); R(-11, 11, 7, 5, '#ffffff', 1, '#64748b'); txt(-7.5, 15, 'sq-price', 'PRESS', g, { fill: '#111827', style: 'font-size:2.6px;font-weight:900' });
+      head(); cap(); for (const [x, y] of [[-13, -9], [-10, -14], [13, -9], [10, -14]]) Cc(x, y, 3.5, ch.hair, hairD);
+      el('ellipse', { cx: -2, cy: -21, rx: 13, ry: 5.5, fill: '#334155', stroke: '#1e293b', 'stroke-width': 1 }, g); Cc(-2, -26.5, 1.6, '#334155');
+      eyes(); brows(); cheeks(); mouth('open');
+      R(12, -2, 13, 9, '#1f2937', 1.5, '#111'); Cc(18.5, 2.5, 3.2, '#60a5fa', '#111'); R(13.5, -4, 4, 2, '#1f2937', .5); Cc(23, 0, .9, '#facc15');
+      break;
+    case 'phoenix': // tóc đỏ cam dựng như ngọn lửa, cánh lông vũ đỏ vàng sau lưng, vương miện lông vàng, cầm lông vũ lửa
+      for (const k of [-1, 1]) { P(`M${k * 10} 10 Q${k * 30} 4 ${k * 27} -14 Q${k * 22} -6 ${k * 18} -8 Q${k * 20} 0 ${k * 12} 2 Z`, '#f97316', '#c2410c'); P(`M${k * 12} 8 Q${k * 24} 4 ${k * 24} -6 Q${k * 18} 0 ${k * 12} 2 Z`, '#facc15', '#ca8a04', .6); }
+      body('#dc2626'); P('M-7 7 L0 13 L7 7', 'none', '#facc15', 1.4); Cc(0, 15, 1.8, '#facc15', '#b8860b', .6);
+      head(); cap();
+      P('M-14 -8 Q-17 -20 -10 -22 Q-11 -27 -5 -26 Q-3 -33 1 -27 Q5 -32 7 -25 Q13 -26 11 -20 Q17 -19 14 -8 Q9 -15 0 -15 Q-9 -15 -14 -8 Z', ch.hair, '#9a3412');
+      P('M-5 -25 Q-3 -29 0 -25 Q3 -29 5 -25', 'none', '#fde047', 1.4);
+      P('M-7 -15 L-5 -20 L-2 -16 L0 -21 L2 -16 L5 -20 L7 -15 Z', '#facc15', '#b8860b', .6); Cc(0, -16.5, 1.3, '#dc2626');
+      eyes('lash'); brows(); cheeks(); mouth('grin');
+      P('M16 12 Q14 -2 22 -12 Q24 -4 20 2 Q24 -2 25 -6 Q26 4 16 12 Z', '#f97316', '#c2410c', .8); P('M17 9 Q17 0 21 -6 Q21 1 17 9 Z', '#facc15');
+      break;
+    case 'architect': // mũ bảo hộ vàng, áo phản quang cam sọc bạc, bút chì sau tai, cuộn bản vẽ xanh
+      body('#ea580c'); P('M-15.5 13 L15.5 13 L15.5 15.5 L-15.5 15.5 Z', '#e5e7eb', '#9ca3af', .5); P('M-6 7 L-6 20 M6 7 L6 20', 'none', '#e5e7eb', 2.2);
+      head(); cap();
+      P('M-15 -10 Q-15 -27 0 -27 Q15 -27 15 -10 Z', '#facc15', '#ca8a04'); R(-17, -12, 34, 3.5, '#eab308', 1.5, '#ca8a04'); P('M0 -27 L0 -12 M-7 -25 L-6 -12 M7 -25 L6 -12', 'none', '#ca8a04', 1);
+      P('M14 -10 L19 -16', 'none', '#f59e0b', 2); P('M19 -16 L20 -17.3', 'none', '#fca5a5', 2);
+      eyes(); brows(); cheeks(); mouth('grin');
+      P('M12 3 L25 -5 L27.5 -1 L14.5 7 Z', '#3b82f6', '#1d4ed8'); el('ellipse', { cx: 26.2, cy: -3, rx: 1.6, ry: 2.4, fill: '#bfdbfe', stroke: '#1d4ed8', 'stroke-width': .6, transform: 'rotate(-32 26.2 -3)' }, g);
+      P('M15 2.5 L23 -2.5 M16 5 L24 0', 'none', '#bfdbfe', .6);
       break;
     default: body(ch.outfit); head(); cap(); eyes(); mouth();
   }
@@ -2800,13 +3032,16 @@ $('board').insertBefore(defs, $('board').firstChild);
   // quầng sáng vàng dưới chân quân đang tới lượt
   const th = el('radialGradient', { id: 'turnHalo' }, defs);
   [[0, '#fff5c2', .95], [.35, '#ffd23f', .7], [1, '#ffd23f', 0]].forEach(([o, c, a]) => el('stop', { offset: o, 'stop-color': c, 'stop-opacity': a }, th));
+  const fh = el('radialGradient', { id: 'fireHalo' }, defs);
+  [[0, '#fff1c2', .9], [.4, '#fb923c', .75], [1, '#dc2626', 0]].forEach(([o, c, a]) => el('stop', { offset: o, 'stop-color': c, 'stop-opacity': a }, fh));
   const sh = el('linearGradient', { id: 'monoShine', x1: 0, y1: 0, x2: 1, y2: 1 }, defs);
   [[0, 0], [.45, 0], [.5, .75], [.55, 0], [1, 0]].forEach(([o, a]) => el('stop', { offset: o, 'stop-color': '#fff', 'stop-opacity': a }, sh));
 })();
 const tokenEls = SEATS.map(s => {
   const C = COLORS[s], g0 = el('g', { class: 'token' }, $('gTokens')), g = el('g', { transform: `scale(${TOKEN_SCALE})` }, g0);
   const z = el('g', { class: 'tzoom' }, g); // quân đang tới lượt phóng to quanh chân đế
-  el('ellipse', { cx: 0, cy: 1, rx: 34, ry: 16, class: 'halo', fill: 'url(#turnHalo)' }, z); // quầng vàng thở nhẹ khi tới lượt
+  el('ellipse', { cx: 0, cy: 1, rx: 34, ry: 16, class: 'halo', fill: 'url(#turnHalo)' }, z);
+  el('ellipse', { cx: 0, cy: 1, rx: 30, ry: 14, class: 'fire', fill: 'url(#fireHalo)' }, z); // Phượng Hoàng đang nghèo nhất: quầng lửa // quầng vàng thở nhẹ khi tới lượt
   el('ellipse', { cx: 0, cy: 2, rx: 16, ry: 6.5, fill: 'rgba(0,0,0,.35)' }, z);
   el('ellipse', { cx: 0, cy: 0, rx: 20, ry: 9.5, class: 'ring', stroke: C.main }, z);
   const b = el('g', { class: 'tbody' }, z);
@@ -3277,7 +3512,7 @@ let viewPot = null, viewOut = null, viewProps = {};
 let shownSnap = null, viewPl = {}, viewTurnNo = null;
 const snapOf = g => (g && Array.isArray(g.props) && Array.isArray(g.pl) ? {
   props: g.props.map(p => p && { ...p }), turnNo: g.turnNo,
-  pl: g.pl.map(P => P && { hold: { ...P.hold }, jail: P.jail, bus: P.bus, laps: P.laps }),
+  pl: g.pl.map(P => P && { hold: { ...P.hold }, jail: P.jail, bus: P.bus, fly: P.fly, laps: P.laps }),
 } : null);
 const shownOut = s => (busy() && viewOut ? viewOut[s] : G.pl[s].out);
 const shownProp = i => (busy() && viewProps[i]) || G.props[i];
@@ -3314,6 +3549,7 @@ function initView(steps, base) {
       // bước 'bankrupt' có was là mảng; bước 'sell' tự động có was là ô cũ (object) → không duyệt được
       for (const [i] of Array.isArray(st.was) ? st.was : []) sqs.add(i);
       if (Number.isInteger(st.s)) seats.add(st.s);
+      if (st.k === 'arrest' || st.k === 'pull') seats.add(st.v);
     }
     for (const i of PROPS) if (base.props[i] && sqs.has(i)) viewProps[i] = { ...base.props[i] };
     base.pl.forEach((x, s) => { if (x && seats.has(s)) viewPl[s] = { ...x, hold: { ...x.hold } }; });
@@ -3322,6 +3558,8 @@ function initView(steps, base) {
   for (const st of steps) {
     if (st.k === 'pay' && st.to < 0 && st.why === 'tax') viewPot -= st.amt;
     else if (st.k === 'pot') viewPot += st.amt;
+    else if (st.k === 'taxCut') viewPot += st.amt; // phần Thu Ngân lấy không vào quỹ
+    else if (st.k === 'insure' && st.tax) viewPot -= st.cover;
     else if (st.k === 'bankrupt') { viewOut[st.s] = false; for (const [i, p] of st.was || []) viewProps[i] = p; }
     else if (st.k === 'sell' && st.was) viewProps[st.i] = st.was;
   }
@@ -3339,10 +3577,14 @@ function moneyDelta(st) {
     case 'free': if (st.how === 'pay' && st.fee) out.push([s, -st.fee]); break;
     case 'sell': out.push([s, st.amt]); break;
     case 'bankrupt': if (st.cash !== undefined) out.push([s, -st.cash]); if (st.paid) out.push([st.to, st.paid]); break;
-    case 'rob': out.push([s, st.amt], [st.v, -st.amt]); break;
+    case 'rob': case 'pull': out.push([s, st.amt], [st.v, -st.amt]); break;
     case 'forceSell': out.push([st.o, st.amt]); break;
     case 'luck': case 'homePay': case 'interest': case 'pot': case 'bonus': case 'evGift': out.push([s, st.amt]); break;
     case 'gift': out.push([s, -st.amt], [st.to, st.amt]); break;
+    case 'collect': case 'scoop': case 'taxCut': case 'news': out.push([s, st.amt]); break;
+    case 'premium': out.push([s, st.amt]); for (const [v, a] of st.from) out.push([v, -a]); break;
+    case 'lawyer': if (st.amt) out.push([s, st.amt], [st.by, -st.amt]); break;
+    case 'insure': out.push([s, st.gift]); if (st.to >= 0 && st.cover) out.push([st.to, st.cover]); break;
   }
   return out;
 }
@@ -3350,16 +3592,18 @@ function applyMoney(st) {
   const d = moneyDelta(st);
   if (!d.length || !viewCash) return;
   for (const [s, v] of d) { viewCash[s] += v; cashFx[s] = { v, t: Date.now() }; }
-  if (viewPot !== null) { if (st.k === 'pay' && st.to < 0 && st.why === 'tax') viewPot += st.amt; else if (st.k === 'pot') viewPot -= st.amt; }
+  if (viewPot !== null) { if (st.k === 'pay' && st.to < 0 && st.why === 'tax') viewPot += st.amt; else if (st.k === 'pot' || st.k === 'taxCut') viewPot -= st.amt; else if (st.k === 'insure' && st.tax) viewPot += st.cover; }
   renderPlayers(); renderCenter();
 }
 // tới bước nào thì hiện thay đổi của bước đó: đất về trạng thái mới, thẻ / Côn Đảo / vé xe cộng trừ dần
 function revealStep(st) {
   const sq = { build: [st.i], buyTour: [st.i], takeover: [st.i], hack: [st.i], tourUp: [st.i], plague: [st.i], blackout: [st.i],
-    destroy: [st.i], forceSell: [st.i], sell: [st.i], festival: [st.i, ...(st.prev || [])], swap: [st.mine, st.theirs] }[st.k];
+    destroy: [st.i], forceSell: [st.i], sell: [st.i], festival: [st.i, ...(st.prev || [])], swap: [st.mine, st.theirs], scoop: [st.i] }[st.k];
   if (sq) for (const i of sq) delete viewProps[i];
   if (st.k === 'cure' && viewProps[st.i]) { viewProps[st.i].plague = 0; viewProps[st.i].blackout = 0; }
   if (st.k === 'lift') viewLift = null;
+  if (st.k === 'arrest' && viewPl[st.v]) { viewPl[st.v].jail = 1; viewPl[st.v].bus = false; }
+  if (st.k === 'pull' && viewPl[st.v]) viewPl[st.v].bus = false;
   const V = viewPl[st.s];
   if (!V) return;
   const dec = k => { V.hold[k] = Math.max(0, (V.hold[k] || 0) - 1); };
@@ -3375,7 +3619,9 @@ function revealStep(st) {
     case 'island': V.jail = 1; break;
     case 'busStop': V.bus = true; break;
     case 'busGo': case 'busNoCash': V.bus = false; break;
-    case 'pickSkip': if (st.kind === 'bus') V.bus = false; break;
+    case 'pickSkip': if (st.kind === 'bus') V.bus = false; if (st.kind === 'fly') V.fly = false; break;
+    case 'flyTicket': V.fly = true; break;
+    case 'flyGo': V.fly = false; break;
     case 'move': if (st.passGo) V.laps++; break;
     case 'bankrupt': V.hold = freshHold(); break;
   }
@@ -3753,13 +3999,72 @@ async function rideBus(s, from, n, tok, onStart) {
   hopToken(s);
   fx('circle', { cx: end[0], cy: end[1] + 8, r: 16, fill: 'rgba(120,110,95,.35)', class: 'fx puff' }, 550);
 }
+// Phi Công: quân lên máy bay ✈️ cất cánh theo đường vòng cung cao, đầu máy bay quay theo hướng bay,
+// nhả vệt khói trắng phía sau, bóng máy bay chạy dưới đất nhỏ dần khi lên cao; hạ cánh xuống ô đích rồi quân bước xuống
+const PLANE_MS = 1500;
+async function ridePlane(s, from, to, tok, onMid) {
+  const g = tokenEls[s], [x0, y0] = tokenXY(from, s, false), [x1, y1] = tokenXY(to, s, false);
+  const H = 120 + Math.min(160, Math.hypot(x1 - x0, y1 - y0) * 0.35);
+  const cx = (x0 + x1) / 2, cy = Math.min(y0, y1) - H;
+  const at = t => { const u = 1 - t; return [u * u * x0 + 2 * u * t * cx + t * t * x1, u * u * y0 + 2 * u * t * cy + t * t * y1]; };
+  const vel = t => [2 * (1 - t) * (cx - x0) + 2 * t * (x1 - cx), 2 * (1 - t) * (cy - y0) + 2 * t * (y1 - cy)];
+  const shadow = el('ellipse', { cx: x0, cy: y0 + 10, rx: 20, ry: 6, fill: 'rgba(0,0,0,.28)', class: 'fx' }, $('gFx'));
+  const plane = el('g', { class: 'bus' }, $('gFx'));
+  const home = g.parentNode, next = g.nextSibling;
+  // quân ngồi trên lưng máy bay, thu nhỏ một chút; máy bay xoay theo hướng bay còn quân luôn đứng thẳng
+  const seat = el('g', { transform: 'translate(0 -10) scale(.7)' }, plane);
+  seat.appendChild(g); g.style.transition = 'none'; g.style.transform = 'none';
+  const body = el('g', {}, plane);
+  txt(0, 0, 'sq-icon', '✈️', body, { style: 'font-size:46px' });
+  const tname = g.querySelector('.tname');
+  const getOff = () => { home.insertBefore(g, next && next.parentNode === home ? next : null); g.style.transition = ''; if (tname) tname.style.transform = ''; };
+  playWhoosh(0.9); playEngine(PLANE_MS);
+  let lastPuff = 0, mid = !onMid;
+  const put = (now, t) => {
+    const e = easeInOut(t), [x, y] = at(e), [vx, vy] = vel(e), a = Math.atan2(vy, vx) * 180 / Math.PI;
+    // ✈️ vẽ hướng lên phải (-45°); bay sang trái thì lật ngang rồi xoay cho mũi trùng hướng bay
+    body.setAttribute('transform', vx >= 0 ? `rotate(${a + 45})` : `rotate(${a + 135}) scale(-1 1)`);
+    const lift = Math.sin(Math.PI * e);
+    plane.setAttribute('transform', `translate(${x} ${y}) scale(${1 + 0.35 * lift})`);
+    const gx = x0 + (x1 - x0) * e, gy = y0 + (y1 - y0) * e + 10;
+    shadow.setAttribute('cx', gx); shadow.setAttribute('cy', gy);
+    shadow.setAttribute('rx', 20 * (1 - 0.5 * lift)); shadow.setAttribute('opacity', 1 - 0.6 * lift);
+    if (now - lastPuff > 45 && t > 0.05 && t < 0.95) {
+      lastPuff = now;
+      const l = Math.hypot(vx, vy) || 1, px = x - vx / l * 22, py = y - vy / l * 22;
+      const c = el('circle', { cx: px, cy: py, r: 3, fill: '#fff', class: 'fx' });
+      $('gFx').insertBefore(c, plane);
+      c.animate([{ transform: 'scale(1)', opacity: .9 }, { transform: 'scale(2.4)', opacity: 0 }], { duration: 700, easing: 'ease-out', fill: 'forwards' });
+      setTimeout(() => c.remove(), 750);
+    }
+  };
+  await new Promise(res => {
+    const t0 = performance.now(), stop = setTimeout(res, PLANE_MS + 300);
+    const frame = now => {
+      if (tok !== animTok) { clearTimeout(stop); return res(); }
+      const t = Math.min(1, (now - t0) / PLANE_MS);
+      put(now, t);
+      if (!mid && t >= 0.5) { mid = true; onMid(); }
+      if (t < 1) requestAnimationFrame(frame); else { clearTimeout(stop); res(); }
+    };
+    requestAnimationFrame(frame);
+  });
+  if (!mid && tok === animTok) onMid();
+  getOff(); placeToken(s, to, false);
+  plane.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 250, fill: 'forwards' });
+  shadow.remove();
+  setTimeout(() => plane.remove(), 260);
+  if (tok !== animTok) return;
+  hopToken(s);
+  fx('circle', { cx: x1, cy: y1 + 8, r: 16, fill: 'rgba(120,110,95,.35)', class: 'fx puff' }, 550);
+}
 function stepMs(st) {
   switch (st.k) {
     case 'dice': return THROW_MS + 300; // chờ thêm chút để kịp thấy tổng số nút
-    case 'move': return st.how === 'bus' ? busMs(st.n) + 350 : st.fly ? FLY_MS + 150 : Math.abs(st.n) * STEP_MS + (st.passGo ? 300 : 100);
+    case 'move': return st.how === 'bus' ? busMs(st.n) + 350 : st.plane ? PLANE_MS + 250 : st.fly ? FLY_MS + 150 : Math.abs(st.n) * STEP_MS + (st.passGo ? 300 : 100);
     case 'boost': case 'reverse': case 'festJump': return 600; case 'island': return 800; case 'free': return 450; case 'stay': return 350; case 'triple': return 600; case 'released': return 400;
     case 'busStop': return 600; case 'busGo': return 300; case 'busNoCash': return 300;
-    case 'home': return st.can ? 0 : 300; case 'homePay': return 1000; case 'interest': return 900; case 'bonus': return 700; case 'rentX2': return 900; case 'norent': return 350; case 'useFree': return 800; case 'charmFree': return 900; case 'useHalf': return 600;
+    case 'home': return st.can ? 0 : 300; case 'homePay': return 1000; case 'interest': return 900; case 'bonus': return 700; case 'rentX2': return 900; case 'phoenix': return 900; case 'norent': return 350; case 'useFree': return 800; case 'charmFree': return 900; case 'useHalf': return 600;
     case 'pay': return 800; case 'rob': return 1100; case 'debt': return 600; case 'card': return 2700; case 'spyDraw': return 700; case 'hold': return 600; case 'nothing': return 400;
     case 'build': return st.to === 5 ? LM_MS : 850; case 'buyTour': return 750; case 'takeover': case 'hack': return 1000; case 'skip': return 250;
     case 'liftOffer': return 500; case 'liftNone': return 300; case 'lift': return 1500; case 'noCash': return 1100; case 'festNone': return 300; case 'festival': return 1000;
@@ -3769,6 +4074,8 @@ function stepMs(st) {
     case 'won': case 'timeup': return 900;
     case 'event': return EV_MS; case 'evEnd': return 700; case 'evGift': return 350;
     case 'chars': return 2600; case 'luck': return 1100; case 'pot': return 1300; case 'gift': return 1000;
+    case 'collect': return 900; case 'flyTicket': return 700; case 'flyGo': return 400; case 'arrest': return 1100; case 'pull': return 1500; case 'scoop': return 1100;
+    case 'lawyer': return 1100; case 'insure': return 1400; case 'taxCut': return 800; case 'news': return 800; case 'premium': return 1000;
     default: return 0;
   }
 }
@@ -3809,6 +4116,11 @@ async function animateStep(st, tok) {
       if (st.how === 'bus') {
         await rideBus(s, st.from, st.n, tok, st.passGo ? () => passGoFx(s, st.salary) : null);
         await sleep(350);
+        return;
+      }
+      if (st.plane) {
+        await ridePlane(s, st.from, st.to, tok, st.passGo ? () => passGoFx(s, st.salary) : null);
+        await sleep(250);
         return;
       }
       if (st.fly) {
@@ -3871,6 +4183,10 @@ async function animateStep(st, tok) {
     case 'bonus': { const [x, y] = tokenPt(s); floatText(x, y - 24, `🐒 +${fmt(st.amt)}`, '#2e9d4f', 900, 20); cardMoney(s, st.amt); playCoin(true); await sleep(ms); return; }
     case 'interest': { const [x, y] = tokenPt(s); floatText(x, y - 24, `🏦 lãi${st.ev ? ' sự kiện' : ''} +${fmt(st.amt)}`, '#2e9d4f', 1000, 20); cardMoney(s, st.amt); playCoin(true); await sleep(ms); return; }
     case 'homePay': { const [x, y] = centerOf(st.i); floatText(x, y - 20, `🔑 +${fmt(st.amt)}`, '#2e9d4f', 1000, 20); flashSquare(st.i, '#2e9d4f'); cardMoney(s, st.amt); playCoin(true); await sleep(ms); return; }
+    case 'phoenix': {
+      const [x, y] = st.why === 'rent' ? centerOf(st.i) : tokenPt(s);
+      pow(x, y - 30, '🔥 ×2!', '#ea580c'); if (st.why === 'rent') flashSquare(st.i, '#ea580c'); playWhoosh(0.3); await sleep(ms); return;
+    }
     case 'rentX2': { const [x, y] = centerOf(st.i); pow(x, y - 30, '🃏 ×2!', '#e8323c'); flashSquare(st.i, '#e8323c'); playWhoosh(0.3); await sleep(ms); return; }
     case 'useHalf': { const [x, y] = tokenPt(s); floatText(x, y - 18, '🏷️ giảm 50%', '#1e6fd8', 1000, 18); playPop(); await sleep(ms); return; }
     case 'debt': { const [x, y] = tokenPt(s); pow(x, y - 34, 'THIẾU TIỀN!', '#e8323c'); playAlert(); await sleep(ms); return; }
@@ -3992,6 +4308,55 @@ async function animateStep(st, tok) {
       await sleep(400); drawOwnership(); await sleep(ms - 400); return;
     }
     case 'shield': { const [x, y] = centerOf(st.i); pow(x, y - 20, '🛡️', '#1e6fd8'); playPop(); await sleep(ms); return; }
+    case 'collect': { const [x, y] = tokenPt(s); floatText(x, y - 24, `🏺 +${fmt(st.amt)}`, '#7c3aed', 1000, 20); cardMoney(s, st.amt); playCoin(true); await sleep(ms); return; }
+    case 'flyTicket': { const [x, y] = tokenPt(s); floatText(x, y - 20, '✈️ vé bay', '#1e3a8a', 1000, 20); playPop(); await sleep(ms); return; }
+    case 'flyGo': { const [x, y] = tokenPt(s); floatText(x, y - 36, '✈️', '#1e3a8a', 1000, 24); playWhoosh(0.4); await sleep(ms); return; }
+    case 'arrest': {
+      const v = st.v, [px, py] = tokenPt(s), from = tokenPt(v), to = tokenXY(ISLAND_POS, v, true);
+      pow(px, py - 34, '🚨 BẮT!', '#1d4ed8'); playJail(); shakeBoard();
+      await sleep(350); if (tok !== animTok) return;
+      await flyToken(v, from, to, { ms: 550, height: 120, spin: 360 });
+      fx('circle', { cx: to[0], cy: to[1] + 8, r: 16, fill: 'rgba(120,110,95,.35)', class: 'fx puff' }, 550);
+      await sleep(ms - 900); return;
+    }
+    case 'pull': {
+      // Kiến Trúc Sư khai trương Biểu tượng: quân đối thủ bay về ô, trả phí cho chủ
+      const v = st.v, [cx, cy] = centerOf(st.i), from = tokenPt(v), to = tokenXY(st.i, v, false);
+      pow(cx, cy - 40, '🧲 KHAI TRƯƠNG!', '#ea580c'); flashSquare(st.i, colorOf(s)); playWhoosh(0.5);
+      await sleep(300); if (tok !== animTok) return;
+      await flyToken(v, from, to, { ms: 600, height: 90, spin: 360 });
+      if (tok !== animTok) return;
+      if (st.amt > 0) {
+        floatText(to[0], to[1] - 24, `-${fmt(st.amt)}`, '#e8323c', 1000, 20); cardMoney(v, -st.amt); playCoin(false);
+        setTimeout(() => { cardMoney(s, st.amt); playCoin(true); }, 260);
+      }
+      await sleep(ms - 900); return;
+    }
+    case 'scoop': {
+      const [x, y] = centerOf(st.i), [tx, ty] = tokenPt(s);
+      playAlert(); pow(x, y - 30, '📰 TIN NÓNG!', '#65a30d'); flashSquare(st.i, '#6b7a90');
+      await sleep(400); drawOwnership(); floatText(tx, ty - 24, `📰 +${fmt(st.amt)}`, '#2e9d4f', 1000, 20); cardMoney(s, st.amt); playCoin(true);
+      await sleep(ms - 400); return;
+    }
+    case 'lawyer': {
+      const [x, y] = centerOf(st.i);
+      pow(x, y - 24, '⚖️ BÁC BỎ!', '#111827'); playAlert();
+      if (st.amt) { cardMoney(st.by, -st.amt); setTimeout(() => { cardMoney(s, st.amt); playCoin(true); }, 260); }
+      await sleep(ms); return;
+    }
+    case 'insure': {
+      const [x, y] = tokenPt(s);
+      pow(x, y - 34, '☂️ BẢO HIỂM!', '#0369a1'); playParty(); burst(x, y, 10, ['#38bdf8', '#fff', '#0369a1'], 45);
+      cardMoney(s, st.gift); if (st.to >= 0 && st.cover) setTimeout(() => { cardMoney(st.to, st.cover); playCoin(true, true); }, 300);
+      await sleep(400); drawOwnership(); drawBuild(); await sleep(ms - 400); return;
+    }
+    case 'news': { const [x, y] = tokenPt(s); floatText(x, y - 24, `📰 +${fmt(st.amt)}`, '#65a30d', 1000, 20); cardMoney(s, st.amt); playCoin(true); await sleep(ms); return; }
+    case 'premium': {
+      const [x, y] = tokenPt(s); floatText(x, y - 24, `☂️ +${fmt(st.amt)}`, '#0369a1', 1000, 20);
+      for (const [v, a] of st.from) cardMoney(v, -a);
+      setTimeout(() => { cardMoney(s, st.amt); playCoin(true); }, 260); await sleep(ms); return;
+    }
+    case 'taxCut': { const [x, y] = tokenPt(s); floatText(x, y - 24, `🧾 +${fmt(st.amt)}`, '#dc2626', 1000, 20); cardMoney(s, st.amt); playCoin(true); await sleep(ms); return; }
     case 'taxFree': { const [x, y] = tokenPt(s); floatText(x, y - 20, '🕵️ miễn thuế', '#2e9d4f', 1000, 18); playPop(); await sleep(ms); return; }
     case 'afk': { const [x, y] = tokenPt(s); pow(x, y - 36, '⏳ MÁY ĐÁNH THAY', '#6b7a90'); renderPlayers(); await sleep(ms); return; }
     case 'join': { const [x, y] = tokenPt(s); pow(x, y - 36, '🙋 VÀO THAY MÁY', '#1e6fd8'); playParty(); renderPlayers(); if (s !== mySeat()) toast(`🙋 ${who(s)} vào chơi, thay cho ${st.bot}`); await sleep(ms); return; }
@@ -4086,7 +4451,7 @@ function stepText(st) {
     case 'busNoCash': return `${w} không đủ tiền mua vé xe`;
     case 'offer': return SQ[st.i].t === 'tour' ? `${tourIcon(st.i)} ${w} đến ${nm(st.i)} — điểm du lịch chưa có chủ` : `${w} đến ${nm(st.i)} — đất trống, có thể mua`;
     case 'home': return st.can ? `${w} về ${nm(st.i)} của mình — có thể nâng cấp` : `${w} về thăm ${nm(st.i)} của mình`;
-    case 'takeoverOffer': return `${w} có thể mua lại ${nm(st.i)} với giá ${fmt(takeoverPrice(G, st.i))}`;
+    case 'takeoverOffer': return `${w} có thể mua lại ${nm(st.i)} với giá ${fmt(takeoverPrice(G, st.i, s))}`;
     case 'norent': return `${w} vào ${nm(st.i)} nhưng không mất phí${G.props[st.i] && effectOn(G, st.i, 'plague') ? ' (dịch bệnh)' : SQ[st.i].t === 'tour' && evOn(G, 'storm') ? ' (bão, đóng cửa)' : ''}`;
     case 'charmFree': return `🌹 Lãng Tử ${w} được ${who(st.o)} mời vào chơi, khỏi trả ${fmt(st.amt)} ở ${nm(st.i)}`;
     case 'useFree': return `🎫 ${w} dùng vé miễn phí, khỏi trả ${fmt(st.amt)} ở ${nm(st.i)}`;
@@ -4095,6 +4460,7 @@ function stepText(st) {
     case 'bonus': return `🐒 Ngộ Không ${w} ra đôi, nhận thưởng ${fmt(st.amt)}`;
     case 'interest': return st.ev ? `🏦 Ngân Hàng Chia Lãi: ${w} nhận ${fmt(st.amt)}` : `🏦 Chủ Ngân Hàng ${w} nhận lãi ${fmt(st.amt)}`;
     case 'homePay': return `🔑 ${w} về ${nm(st.i)} của mình, ngân hàng trả ${fmt(st.amt)}`;
+    case 'phoenix': return st.why === 'rent' ? `🔥 Phượng Hoàng ${w} đang ở nhóm nghèo nhất bàn: ${who(st.payer)} phải trả phí gấp đôi ở ${nm(st.i)}` : `🔥 Phượng Hoàng ${w} đang ở nhóm nghèo nhất bàn: lương qua Bắt Đầu gấp đôi`;
     case 'rentX2': return `🃏 Thần Bài ${w} gặp may: ${who(st.payer)} phải trả phí gấp đôi ở ${nm(st.i)}`;
     case 'useHalf': return `🏷️ ${w} dùng phiếu giảm nửa phí ở ${nm(st.i)}`;
     case 'pay': {
@@ -4108,7 +4474,7 @@ function stepText(st) {
     case 'card': return `❓ Cơ Hội: ${CARDS[st.c].text}`;
     case 'hold': return st.full ? `${w} đã có đủ ${PARITY_MAX} ${HOLD_INFO[st.h][1].toLowerCase()} — không nhận thêm` : `${w} nhận ${HOLD_INFO[st.h][0]} ${HOLD_INFO[st.h][1].toLowerCase()}`;
     case 'nothing': return `Thẻ không có tác dụng lúc này`;
-    case 'build': return st.from === 0 ? `🏠 ${w} mua ${nm(st.i)} và xây ${lvName(st.i, st.to)} (${fmt(st.cost)})` : `🔨 ${w} nâng ${nm(st.i)} lên ${lvName(st.i, st.to)} (${fmt(st.cost)})`;
+    case 'build': if (st.free) return `📈 Nhà Đầu Tư ${w} nâng ${nm(st.i)} lên ${lvName(st.i, st.to)} miễn phí`; return st.from === 0 ? `🏠 ${w} mua ${nm(st.i)} và xây ${lvName(st.i, st.to)} (${fmt(st.cost)})` : `🔨 ${w} nâng ${nm(st.i)} lên ${lvName(st.i, st.to)} (${fmt(st.cost)})`;
     case 'buyTour': return `${tourIcon(st.i)} ${w} mua điểm du lịch ${nm(st.i)} (${fmt(st.cost)}) · đã có ${st.n}/5`;
     case 'takeover': return `💰 ${w} mua lại ${nm(st.i)} từ ${other(st.o)} với giá ${fmt(st.price)}!`;
     case 'noCash': return `💸 ${w} không đủ tiền ${st.mode === 'takeover' ? 'mua lại' : st.mode === 'upgrade' ? 'nâng cấp' : 'mua'} ${nm(st.i)} (cần ${fmt(st.need)}, có ${fmt(G.pl[s].cash)})`;
@@ -4125,7 +4491,7 @@ function stepText(st) {
     case 'festival': return `🎉 ${w} mở lễ hội ở ${nm(st.i)} — phí tham quan giờ ×${st.mult}${st.prev && st.prev.length ? ` · ${st.prev.map(nm).join(', ')} hết lễ hội, phí về như cũ` : ''}`;
     case 'startUp': return `🏁 ${w} dừng đúng Bắt Đầu — được nâng cấp một thành phố`;
     case 'pickCity': return `${w} chọn ${nm(st.i)}`;
-    case 'pickSkip': return st.kind === 'bus' ? `${w} bỏ vé xe, tung xúc xắc` : `${w} bỏ qua`;
+    case 'pickSkip': return st.kind === 'bus' ? `${w} bỏ vé xe, tung xúc xắc` : st.kind === 'fly' ? `${w} không bay, tung xúc xắc` : `${w} bỏ qua`;
     case 'swap': return `🔁 ${w} đổi ${nm(st.mine)} lấy ${nm(st.theirs)} của ${other(st.o)}`;
     case 'forceSell': return `📉 ${other(st.o)} bị ép bán ${nm(st.i)} (nhận ${fmt(st.amt)})`;
     case 'destroy': if (st.rev) return `🔨 Kẻ Báo Thù ${w} đập ${nm(st.i)} của ${other(st.o)} xuống ${LEVELS[st.lv].name}!`; return `🧨 ${w} phá ${nm(st.i)} của ${other(st.o)} xuống ${LEVELS[st.lv].name}`;
@@ -4134,6 +4500,17 @@ function stepText(st) {
       return `🔌 ${nm(st.i)} của ${other(st.o)} mất điện — phí còn một nửa 5 lượt`;
     case 'cure': return `${st.fx.includes('plague') ? '✨' : '💡'} ${w} ghé ${nm(st.i)} — ${st.fx.map(k => (k === 'plague' ? 'hết dịch bệnh' : 'có điện lại')).join(' và ')}, thu phí bình thường`;
     case 'shield': return `🛡️ Khiên của ${w} chặn được thẻ xấu nhắm vào ${nm(st.i)}`;
+    case 'collect': return `🏺 Nhà Sưu Tầm ${w} có ${st.n} Biểu tượng — nhận thêm ${fmt(st.amt)}`;
+    case 'flyTicket': return `✈️ Phi Công ${w} qua Bắt Đầu lần thứ hai — lượt sau được bay tới một điểm du lịch`;
+    case 'flyGo': return `✈️ ${w} bay tới ${nm(st.i)}`;
+    case 'arrest': return `🚨 Cảnh Sát ${w} bắt ${other(st.v)} ra Côn Đảo!`;
+    case 'pull': return `🧲 Kiến Trúc Sư ${w} khai trương ${nm(st.i)}: hút ${other(st.v)} về${st.amt ? `, thu ${fmt(st.amt)} phí tham quan` : ' (hết tiền nên không thu được)'}`;
+    case 'scoop': return `📰 Nhà Báo ${w} đưa tin, lễ hội ở ${nm(st.i)} của ${other(st.o)} bị hủy — nhận nhuận bút ${fmt(st.amt)}`;
+    case 'lawyer': return `⚖️ Luật Sư ${w} bác bỏ thẻ nhắm vào ${nm(st.i)}${st.amt ? ` — ${other(st.by)} bị phạt ${fmt(st.amt)}` : ''}`;
+    case 'insure': return `☂️ Bảo hiểm cứu ${w} khỏi phá sản${st.cover ? ` — trả thay ${fmt(st.cover)}${st.to >= 0 ? ' cho ' + other(st.to) : ''}` : ''}${st.keep >= 0 ? `, giữ lại ${nm(st.keep)}` : ''}, tặng ${fmt(st.gift)} làm lại`;
+    case 'news': return `📰 Nhà Báo ${w} đưa tin lễ hội ở ${nm(st.i)} — nhận ${fmt(st.amt)} nhuận bút`;
+    case 'premium': return `☂️ Người Bảo Hiểm ${w} qua Bắt Đầu, thu ${fmt(st.amt)} phí bảo hiểm từ ${st.from.length} đối thủ`;
+    case 'taxCut': return `🧾 Thu Ngân ${w} nhận ${fmt(st.amt)} từ tiền thuế của ${other(st.from)}`;
     case 'taxFree': return st.ev ? `🎁 Đang Miễn Thuế — ${w} không phải nộp thuế` : `🕵️ Thám Tử ${w} được miễn thuế`;
     case 'afk': return `⏳ ${w} vắng mặt quá ${AFK_MS / 1000} giây — máy đánh thay hết lượt này`;
     case 'back': return `✋ ${w} đã quay lại, tự chơi tiếp`;
@@ -4205,7 +4582,7 @@ function paintSteps() {
   let v = null;
   if (stepsKeep) v = stepsKeep;
   else if (pending && stepsShown) v = stepsShown; // khách online vừa bấm tung, đang chờ chủ phòng trả kết quả
-  else if (canRoll()) { const t = G.turn, P = G.pl[t]; v = { t, pos: P.pos, mult: !P.jail && P.rolls < 3 && hasSkill(G, t, 'racer') ? 2 : 1 }; }
+  else if (canRoll()) { const t = G.turn, P = G.pl[t]; v = { t, pos: P.pos, mult: !P.jail && P.rolls < RACER_ROLLS && hasSkill(G, t, 'racer') ? 2 : 1 }; }
   // cùng một dãy số như đang hiện (paint() gọi lại liên tục, lúc bấm tung...) thì giữ nguyên,
   // vẽ lại sẽ chạy lại hiệu ứng nảy làm dãy số chớp tắt
   const key = v ? [v.t, v.pos, v.mult, MODE, K].join() : '';
@@ -4260,6 +4637,10 @@ function renderPlayers() {
     id.innerHTML = '<span class="nm"></span>';
     id.querySelector('.nm').textContent = (x.type === 'bot' ? '🤖 ' : '') + who(s) + (x.remote && !x.online ? ' 📴' : '');
     d.appendChild(id);
+    // Phượng Hoàng đang ở nhóm nghèo nhất bàn: huy hiệu lửa trên thẻ và quầng lửa dưới quân
+    const fire = !out && G.phase === 'play' && phoenixOn(G, s, shownWorth);
+    tokenEls[s].classList.toggle('phoenix', fire);
+    if (fire) { const f = document.createElement('span'); f.className = 'vc'; f.textContent = '🔥'; f.title = 'Phượng Hoàng: đang ở nhóm nghèo nhất bàn, thu phí và nhận lương ×2'; top.appendChild(f); }
     // mic đang mở (trò chuyện bằng giọng nói)
     if (net.on && x.vc && x.mic) { const v = document.createElement('span'); v.className = 'vc'; v.textContent = '🎤'; v.title = 'Đang mở mic'; top.appendChild(v); }
     // số thẻ Chẵn/Lẻ đang có, luôn hiện cạnh tên
@@ -4291,6 +4672,8 @@ function renderPlayers() {
     const props = document.createElement('div'); props.className = 'pl-props';
     if (P.jail && !out) { const b = document.createElement('span'); b.className = 'badge'; b.textContent = `🏝️ Côn Đảo · còn ${Math.max(1, 4 - P.jail)} lượt`; props.appendChild(b); }
     if (P.bus && !out) { const b = document.createElement('span'); b.className = 'badge'; b.textContent = '🚌 lượt sau đi xe'; props.appendChild(b); }
+    if (P.fly && !P.bus && !out) { const b = document.createElement('span'); b.className = 'badge'; b.textContent = '✈️ lượt sau bay tới điểm du lịch'; props.appendChild(b); }
+    if (P.char === 'insurer' && !G.pl[s].insured && !out) { const b = document.createElement('span'); b.className = 'badge'; b.textContent = '☂️ còn bảo hiểm phá sản'; props.appendChild(b); }
     if (x.afk && !out) { const b = document.createElement('span'); b.className = 'badge'; b.textContent = '⏳ vắng mặt · máy đánh thay'; props.appendChild(b); }
     const hold = document.createElement('span'); hold.className = 'hold';
     for (const k of Object.keys(HOLD_INFO)) if (P.hold[k] && k !== 'parity') { const h = document.createElement('span'); h.textContent = HOLD_INFO[k][0] + (P.hold[k] > 1 ? P.hold[k] : ''); h.title = HOLD_INFO[k][1]; hold.appendChild(h); }
@@ -4358,7 +4741,7 @@ function renderDice() {
 const DOTS = '<span class="dots"><span>.</span><span>.</span><span>.</span></span>';
 const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
 const PICK_TEXT = {
-  bus: 'Chọn ô muốn bắt xe tới', festival: 'Chọn thành phố hoặc điểm du lịch của bạn để mở lễ hội', festivalFree: 'Chọn thành phố hoặc điểm du lịch của bạn để mở lễ hội miễn phí',
+  bus: 'Chọn ô muốn bắt xe tới', fly: 'Chọn điểm du lịch muốn bay tới ✈️ (miễn phí)', festival: 'Chọn thành phố hoặc điểm du lịch của bạn để mở lễ hội', festivalFree: 'Chọn thành phố hoặc điểm du lịch của bạn để mở lễ hội miễn phí',
   upgrade: 'Chọn thành phố muốn nâng cấp', swapMine: 'Chọn thành phố của bạn đem đổi', swapTheirs: 'Chọn thành phố của đối thủ muốn lấy',
   forceSell: 'Chọn thành phố đối thủ phải bán', destroy: 'Chọn thành phố đối thủ để phá một cấp', plague: 'Chọn thành phố đối thủ để gây dịch bệnh', blackout: 'Chọn thành phố đối thủ để cắt điện',
   lift: `Chọn ô đất của bạn để nhắc lên 🏗️ — phí ×${LIFT_MULT}, ô đang được nhắc sẽ hạ xuống`,
@@ -4377,7 +4760,7 @@ function renderStatus() {
     else if (G.step === 'jail') main = `${cap(nm)} đang ở Côn Đảo — ${jailFee(t) ? 'nộp ' + fmt(jailFee(t)) : 'ra miễn phí'}, dùng thẻ, hoặc tung đôi`;
     else if (G.step === 'visit') {
       const v = G.visit, q = SQ[v.i];
-      main = v.mode === 'buy' ? `Mua ${q.name}? Chọn cấp nhà — xây cao thì thu phí khách càng nhiều` : v.mode === 'upgrade' ? `Nâng cấp ${q.name}? Chọn cấp mới` : v.mode === 'tour' ? `Mua điểm du lịch ${q.name}?` : `Mua lại ${q.name} của ${who(G.props[v.i].owner)} với giá ${fmt(takeoverPrice(G, v.i))}?`;
+      main = v.mode === 'buy' ? `Mua ${q.name}? Chọn cấp nhà — xây cao thì thu phí khách càng nhiều` : v.mode === 'upgrade' ? `Nâng cấp ${q.name}? Chọn cấp mới` : v.mode === 'tour' ? `Mua điểm du lịch ${q.name}?` : `Mua lại ${q.name} của ${who(G.props[v.i].owner)} với giá ${fmt(takeoverPrice(G, v.i, t))}?`;
     }
     else if (G.step === 'pick') main = PICK_TEXT[G.pick.kind] + (G.pick.kind === 'bus' && busFee(t) ? ` (vé ${fmt(busFee(t))})` : G.pick.kind === 'festival' && festFee(t) ? ` (${fmt(festFee(t))})` : '');
     else if (G.step === 'casino') main = `Đặt ${fmt(CASINO_BET)}: Chẵn hay Lẻ (×${casinoX(2)}), hay Đôi (×${casinoX(6)})?`;
@@ -4413,7 +4796,7 @@ function renderActions() {
       box.appendChild(btn(`${tourIcon(G.visit.i)} Mua · ${fmt(tourPrice(G, t, G.visit.i))}`, 'primary', () => act('buyTour'), P.cash < tourPrice(G, t, G.visit.i)));
       box.appendChild(btn('Không mua', '', () => act('skip')));
     } else {
-      box.appendChild(btn(`💰 Mua lại · ${fmt(takeoverPrice(G, i))}`, 'primary', () => act('takeover'), P.cash < takeoverPrice(G, i)));
+      box.appendChild(btn(`💰 Mua lại · ${fmt(takeoverPrice(G, i, t))}`, 'primary', () => act('takeover'), P.cash < takeoverPrice(G, i, t)));
       box.appendChild(btn('Thôi', '', () => act('skip')));
     }
   } else if (G.step === 'roll' || G.step === 'jail') {
@@ -4429,7 +4812,7 @@ function renderActions() {
       if (P.hold.jail) box.appendChild(btn('🔓 Dùng thẻ ra tù', '', () => act('jailcard')));
     }
   } else if (G.step === 'pick') {
-    if (G.pick.optional) box.appendChild(btn(G.pick.kind === 'bus' ? '🎲 Không đi xe, tung xúc xắc' : 'Bỏ qua', '', () => act('pickSkip')));
+    if (G.pick.optional) box.appendChild(btn(G.pick.kind === 'bus' ? '🎲 Không đi xe, tung xúc xắc' : G.pick.kind === 'fly' ? '🎲 Không bay, tung xúc xắc' : 'Bỏ qua', '', () => act('pickSkip')));
   } else if (G.step === 'casino') {
     box.appendChild(btn(`Chẵn ×${casinoX(2)}`, '', () => act('casino', { choice: 'even' })));
     box.appendChild(btn(`Lẻ ×${casinoX(2)}`, '', () => act('casino', { choice: 'odd' })));

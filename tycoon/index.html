@@ -4230,10 +4230,6 @@ async function animateStep(st, tok) {
       const [x, y] = st.why === 'rent' ? centerOf(st.i) : tokenPt(s);
       pow(x, y - 30, '🔥 ×2!', '#ea580c'); if (st.why === 'rent') flashSquare(st.i, '#ea580c'); playWhoosh(0.3); await sleep(ms); return;
     }
-    case 'phoenix': {
-      const [x, y] = st.why === 'rent' ? centerOf(st.i) : tokenPt(s);
-      pow(x, y - 30, '🔥 ×2!', '#ea580c'); if (st.why === 'rent') flashSquare(st.i, '#ea580c'); playWhoosh(0.3); await sleep(ms); return;
-    }
     case 'rentX2': { const [x, y] = centerOf(st.i); pow(x, y - 30, '🃏 ×2!', '#e8323c'); flashSquare(st.i, '#e8323c'); playWhoosh(0.3); await sleep(ms); return; }
     case 'useHalf': { const [x, y] = tokenPt(s); floatText(x, y - 18, '🏷️ giảm 50%', '#1e6fd8', 1000, 18); playPop(); await sleep(ms); return; }
     case 'debt': { const [x, y] = tokenPt(s); pow(x, y - 34, 'THIẾU TIỀN!', '#e8323c'); playAlert(); await sleep(ms); return; }
