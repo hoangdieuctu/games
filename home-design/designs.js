@@ -7,17 +7,17 @@
   /* Kích thước mặc định [rộng, sâu] */
   HD.SIZES = {
     bed: [1.6, 2.05], crib: [1.2, 0.65], floorbed: [1.0, 1.9], daybed: [2.0, 0.9], wardrobe: [1.8, 0.6],
-    sofa: [2.0, 0.85], sofaL: [2.3, 1.5], bench: [1.9, 0.65], armchair: [0.75, 0.75], pouf: [0.45, 0.45],
+    sofa: [2.0, 0.85], sofaL: [2.3, 1.5], bench: [1.9, 0.65], armchair: [0.75, 0.75], pouf: [0.45, 0.45], beanbag: [0.85, 0.85],
     ctable: [0.56, 0.56], teatable: [0.9, 0.5], tvunit: [2.0, 0.35], table: [1.4, 0.8], chair: [0.42, 0.42],
     stool: [0.36, 0.36], highchair: [0.5, 0.5], banq: [1.8, 0.45], counter: [1.6, 0.6], fridge: [0.7, 0.7],
     cabinet: [1.2, 0.35], shelf: [0.9, 0.3], lowshelf: [1.0, 0.3], desk: [1.2, 0.55], ochair: [0.5, 0.5],
     plant: [0.35, 0.35], planter: [1.0, 0.3], tent: [1.0, 1.0], toybox: [0.6, 0.4], lamp: [0.3, 0.3],
     nightstand: [0.42, 0.4], changer: [0.9, 0.5], washer: [0.6, 0.6], toilet: [0.4, 0.65], vanity: [0.9, 0.45],
     glass: [0.72, 0.04], rug: [1.6, 2.2], playmat: [1.5, 1.5], shower: [0.93, 1.36], dryrack: [1.2, 0.5],
-    art: [0.9, 0.6], panel: [1, 0.02], mirror: [0.7, 0.02], wallaltar: [0.8, 0.45], pendant: [0.4, 0.4], mam: [0.8, 0.8]
+    art: [0.9, 0.6], walltv: [1.1, 0.05], aircon: [0.85, 0.2], dresser: [0.9, 0.4], panel: [1, 0.02], mirror: [0.7, 0.02], wallaltar: [0.8, 0.45], pendant: [0.4, 0.4], mam: [0.8, 0.8]
   };
   /* Đồ không cản đường đi */
-  HD.NOBLOCK = { rug: 1, playmat: 1, shower: 1, dryrack: 1, art: 1, panel: 1, mirror: 1, wallaltar: 1, pendant: 1, mam: 1 };
+  HD.NOBLOCK = { walltv: 1, aircon: 1, rug: 1, playmat: 1, shower: 1, dryrack: 1, art: 1, panel: 1, mirror: 1, wallaltar: 1, pendant: 1, mam: 1 };
   /* Đồ gắn trần (ẩn khi nhìn từ trên cao) */
   HD.CEIL = { dryrack: 1, pendant: 1 };
 
@@ -47,16 +47,19 @@
   };
 
   /* ───── Cụm đồ dùng chung ───── */
-  const baths = p => [
-    ['shower', 0.535, 3.95, 0, { c: p.bath1 }], ['glass', 1.0, 3.63, 1], ['toilet', 1.6, 3.6, 0],
+  /* slide: vách tắm có cánh kính lùa, kéo lại là kín hết chiều dài khu tắm */
+  const baths = (p, slide) => [
+    ['shower', 0.535, 3.95, 0, { c: p.bath1 }], slide ? ['glass', 1.0, 3.95, 1, { w: 1.36, slide: 1 }] : ['glass', 1.0, 3.63, 1], ['toilet', 1.6, 3.6, 0],
     ['vanity', 2.6, 3.5, 0, { w: 0.9 }], ['mirror', 2.6, 3.275, 0, { w: 0.7, h: 0.8, y: 1.5 }],
-    ['shower', 3.735, 3.95, 0, { c: p.bath2 }], ['glass', 4.2, 3.63, 1], ['toilet', 4.6, 3.6, 0],
+    ['shower', 3.735, 3.95, 0, { c: p.bath2 }], slide ? ['glass', 4.2, 3.95, 1, { w: 1.36, slide: 1 }] : ['glass', 4.2, 3.63, 1], ['toilet', 4.6, 3.6, 0],
     ['vanity', 5.55, 3.5, 0, { w: 0.85 }], ['mirror', 5.55, 3.275, 0, { w: 0.65, h: 0.8, y: 1.5 }]
   ];
   const logia = () => [
     ['washer', 5.6, 0.42, 0], ['cabinet', 5.08, 0.42, 0, { w: 0.4, d: 0.6, h: 0.85 }],
     ['dryrack', 5.45, 1.5, 1], ['plant', 5.08, 2.5, 0, { kind: 'bush', h: 0.7 }]
   ];
+  /* Máy lạnh treo tường: phòng khách (tường tây), phòng ngủ chính (tường tây, trên đầu giường), phòng ngủ 2 (tường tây) */
+  const aircons = () => [['aircon', 6.17, 6.55, 1], ['aircon', 0.07, 7.0, 1], ['aircon', 3.27, 7.4, 1]];
   const shoe = () => [['cabinet', 6.335, 0.95, 1, { w: 1.4, d: 0.33, h: 1.0, vase: 1 }]];
   const kPen = (stools) => [
     ['fridge', 8.58, 0.45, 3],
@@ -138,6 +141,34 @@
         ['art', 0.075, 7.0, 1, { w: 1.0, h: 0.5, y: 1.55, kind: 'hills' }],
         ['wardrobe', 4.08, 6.275, 0, { w: 1.6 }], ['bed', 3.78, 7.6, 2, { w: 1.0, d: 2.0, blanket: p.accent }],
         ['playmat', 5.15, 7.45, 0, { w: 1.5, d: 1.5 }], ['lowshelf', 5.15, 8.47, 2, { w: 1.4 }]
+      ])
+    },
+    {
+      name: 'Tối Giản Ấm – Ghế Lười', style: 'Tối giản',
+      desc: 'Biến thể của Tối Giản Ấm cho nhà có bé học tiểu học: phòng khách chỉ còn hai ghế lười trên thảm, không bàn ăn, không tranh, không chậu cây; cả ba phòng gắn quạt trần; phòng tắm ốp một màu, vách kính lùa kéo kín.',
+      points: ['Hai ghế lười nhẹ, kéo đi đâu cũng được, cả nhà ngồi bệt xem tivi hay đọc sách.',
+        'Bỏ bàn ăn và bàn trà nên từ bếp tới cửa kính là một khoảng sàn trống liền mạch.',
+        'Quạt trần ở phòng khách và hai phòng ngủ, mở cửa là mát, đỡ phải bật máy lạnh.',
+        'Trên nóc tủ lạnh có một hộc tủ lớn kịch trần làm kho chứa đồ ít dùng.',
+        'Phòng ngủ lớn có bàn trang điểm cạnh cửa kính và tivi gắn tường đối diện giường.',
+        'Phòng ngủ nhỏ: tủ quần áo liền tủ sách thành một khối, cạnh đó là bàn học cho bé tiểu học.',
+        'Khu tắm có cánh kính lùa kéo kín hết chiều dài nên nước không bắn ra ngoài; gạch ốp hai phòng tắm cùng một màu be.',
+        'Cửa kính hướng nam có rèm vải hai bên; cửa sổ nhỏ ở hai phòng tắm và lô gia có rèm cuốn thả lưng chừng, kín đáo mà vẫn lấy sáng.'],
+      bed2: 'Phòng của bé', pal: { bath1: '#d3ccbf', bath2: '#d3ccbf', winblind: true }, fans: ['living', 'master', 'bed2'],
+      noplants: true, slide: true,
+      items: p => [].concat([
+        ['cabinet', 6.335, 0.95, 1, { w: 1.4, d: 0.33, h: 1.0 }],
+        ['fridge', 8.58, 0.45, 3, { top: 1 }],
+        ['counter', 8.63, 1.625, 3, { w: 1.65, stove: 1, upper: 1 }],
+        ['counter', 8.065, 2.775, 2, { w: 1.73, d: 0.65, sink: 1, island: 1 }],
+        ['beanbag', 6.75, 6.62, 1], ['beanbag', 6.75, 7.78, 1, { c: p.accent }],
+        ['rug', 7.75, 7.2, 0, { w: 1.5, d: 2.3, pat: 'border' }],
+        ['tvunit', 8.755, 7.1, 3], ['lamp', 6.42, 8.44, 0]
+      ], masterA(), [
+        ['walltv', 3.13, 7.0, 3, { w: 1.1, y: 1.35 }],
+        ['dresser', 2.92, 8.15, 3], ['pouf', 2.42, 8.15, 0, { w: 0.38, c: p.fabric }],
+        ['wardrobe', 4.18, 6.275, 0, { w: 1.8, books: 0.7 }], ['bed', 3.78, 7.6, 2, { w: 1.0, d: 2.0, blanket: p.accent }],
+        ['desk', 5.74, 7.65, 3, { w: 1.1, d: 0.55, kid: 1 }], ['chair', 5.2, 7.65, 1, { w: 0.38, d: 0.38 }]
       ])
     },
     {
@@ -494,7 +525,8 @@
     return {
       id: i, name: d.name, style: d.style, desc: d.desc, points: d.points, bed2: d.bed2,
       remove: d.remove || [], fans: d.fans || [], pal,
-      items: d.bare ? d.items(pal) : d.items(pal).concat(baths(pal), logia())
+      items: (d.bare ? d.items(pal) : d.items(pal).concat(baths(pal, d.slide), logia(), aircons()))
+        .filter(it => !(d.noplants && (it[0] === 'plant' || it[0] === 'planter')))
     };
   });
 })(typeof window !== 'undefined' ? window : globalThis);

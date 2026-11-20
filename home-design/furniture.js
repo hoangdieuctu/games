@@ -296,6 +296,14 @@
     },
     wardrobe(o, p, w, d) {
       const g = G(), h = o.h || 2.45;
+      if (o.books) { /* một khối: bên trái là tủ quần áo, bên phải là các ngăn sách để hở */
+        const bw = o.books, cw = w - bw, c = G(); c.position.x = -bw / 2; g.add(c);
+        B(c, cw, 0.06, d - 0.04, M(DARK), 0, 0, -0.01);
+        B(c, cw, h - 0.06, d, M(o.c || p.wood), 0, 0.06, 0);
+        fronts(c, cw, 0.1, h - 0.14, d / 2 + 0.002, Math.max(2, Math.round(cw / 0.5)), p.wood2);
+        const sh = build.shelf({ h }, p, bw, d); sh.position.x = cw / 2; g.add(sh);
+        return g;
+      }
       B(g, w, 0.06, d - 0.04, M(DARK), 0, 0, -0.01);
       B(g, w, h - 0.06, d, M(o.c || p.wood), 0, 0.06, 0);
       fronts(g, w, 0.1, h - 0.14, d / 2 + 0.002, Math.max(2, Math.round(w / 0.5)), p.wood2);
@@ -365,6 +373,13 @@
     pouf(o, p, w) {
       const g = G();
       C(g, w / 2, 0.36, M(o.c || p.accent2, { roughness: 1 }), 0, 0, 0);
+      return g;
+    },
+    beanbag(o, p, w) {
+      const g = G(), c = o.c || p.accent2, f = M(c, { roughness: 1 }), f2 = M(shade(c, 0.93), { roughness: 1 });
+      S(g, w, 0.44, w, f, 0, 0.2, 0);
+      S(g, w * 0.86, 0.62, w * 0.52, f2, 0, 0.42, -w * 0.2);
+      S(g, w * 0.6, 0.16, w * 0.55, M(shade(c, 1.06), { roughness: 1 }), 0, 0.37, w * 0.08);
       return g;
     },
     ctable(o, p, w) {
@@ -488,6 +503,10 @@
       B(g, w, 1.85, d - 0.04, m, 0, 0, -0.02);
       B(g, w, 0.008, 0.01, M(DARK), 0, 0.72, d / 2 - 0.038);
       for (const y of [0.8, 0.5]) B(g, 0.02, y === 0.8 ? 0.6 : 0.16, 0.03, M(DARK), -w / 2 + 0.07, y, d / 2 - 0.025);
+      if (o.top) { /* hộc kho kịch trần trên nóc tủ lạnh */
+        B(g, w, H - 1.9, d, M(p.cab), 0, 1.9, 0);
+        fronts(g, w, 1.93, H - 1.96, d / 2 + 0.002, 2, p.wood2);
+      }
       return g;
     },
     cabinet(o, p, w, d) {
@@ -538,6 +557,31 @@
     },
     desk(o, p, w, d) {
       const g = G();
+      if (o.kid) { /* bàn học cho bé tiểu học: thấp hơn, có kệ sách và đèn bàn */
+        const m = M(p.wood, { roughness: 0.6 }), m2 = M(p.wood2), zb = -d / 2 + 0.1;
+        B(g, w, 0.03, d, m, 0, 0.62, 0);
+        legs(g, w, d, 0.62, m2, 0.04);
+        B(g, 0.36, 0.13, d - 0.08, m, w / 2 - 0.22, 0.49, 0);
+        for (const sx of [-1, 1]) B(g, 0.02, 0.56, 0.2, m, sx * (w / 2 - 0.01), 0.65, zb);
+        for (const y of [0.91, 1.19]) B(g, w, 0.02, 0.2, m, 0, y, zb);
+        B(g, w, 0.56, 0.012, M(shade(p.wood, 0.92)), 0, 0.65, -d / 2 + 0.006);
+        const cols = ['#e2725b', '#f0c35a', '#5b8fb9', '#7fb685', '#f0b49c', '#9c7fc1', '#e9e2d2'], r = rng(73);
+        let x = -w / 2 + 0.05;
+        while (x < w / 2 - 0.42) {
+          const bw = 0.025 + r() * 0.03, bh = 0.17 + r() * 0.07;
+          B(g, bw, bh, 0.15, M(cols[Math.floor(r() * cols.length)]), x + bw / 2, 0.93, zb);
+          x += bw + 0.004;
+        }
+        S(g, 0.17, 0.17, 0.17, M('#5b8fb9', { roughness: 0.5 }), w / 2 - 0.2, 1.045, zb); C(g, 0.05, 0.03, m2, w / 2 - 0.2, 0.93, zb);
+        B(g, 0.2, 0.14, 0.14, M(cols[1]), -w / 4, 0.65, zb); B(g, 0.16, 0.1, 0.14, M(cols[3]), -w / 4 + 0.22, 0.65, zb);
+        const dk = M(DARK, { metalness: 0.4, roughness: 0.5 });
+        C(g, 0.06, 0.015, dk, -w / 2 + 0.14, 0.65, 0.02); C(g, 0.008, 0.26, dk, -w / 2 + 0.14, 0.665, 0.02);
+        B(g, 0.2, 0.025, 0.07, dk, -w / 2 + 0.22, 0.915, 0.02); B(g, 0.16, 0.008, 0.05, glow('#fff0cc', 1.2), -w / 2 + 0.23, 0.907, 0.02).userData.ns = 1;
+        B(g, 0.3, 0.01, 0.21, M('#fbfaf5'), 0.02, 0.65, 0.1); B(g, 0.004, 0.011, 0.21, M('#c9c2b6'), 0.02, 0.65, 0.1);
+        C(g, 0.035, 0.09, M(p.accent2), w / 2 - 0.14, 0.65, 0.12);
+        for (let i = 0; i < 3; i++) C(g, 0.005, 0.14, M(cols[i * 2]), w / 2 - 0.15 + i * 0.012, 0.66, 0.115 + (i % 2) * 0.012);
+        return g;
+      }
       B(g, w, 0.035, d, M(p.wood, { roughness: 0.6 }), 0, 0.72, 0);
       legs(g, w, d, 0.72, M(p.wood2), 0.04);
       B(g, 0.4, 0.3, d - 0.08, M(p.wood), w / 2 - 0.24, 0.42, 0);
@@ -659,6 +703,16 @@
     },
     glass(o, p, w, d) {
       const g = G();
+      if (o.slide) { /* một tấm cố định + một cánh lùa đang kéo kín */
+        const st = M(STEEL, { metalness: 0.8, roughness: 0.2 }), hw = w / 2 + 0.03;
+        B(g, hw, 2.0, 0.01, GLASS, -w / 2 + hw / 2, 0, -0.012).userData.ns = 1;
+        B(g, hw, 2.0, 0.01, GLASS, w / 2 - hw / 2, 0, 0.012).userData.ns = 1;
+        B(g, w, 0.04, 0.05, st, 0, 2.0, 0); B(g, w, 0.012, 0.05, st, 0, 0, 0);
+        for (const sx of [-1, 1]) B(g, 0.015, 2.0, 0.015, st, sx * (w / 2 - 0.008), 0, sx * 0.012);
+        B(g, 0.015, 2.0, 0.015, st, w / 2 - hw + 0.008, 0, 0.012);
+        for (const sz of [-1, 1]) B(g, 0.02, 0.32, 0.025, st, w / 2 - hw + 0.07, 0.9, 0.012 + sz * 0.02);
+        return g;
+      }
       const e = B(g, w, 2.0, 0.012, GLASS, 0, 0, 0); e.userData.ns = 1;
       B(g, w, 0.025, 0.03, M(STEEL, { metalness: 0.8, roughness: 0.2 }), 0, 2.0, 0);
       return g;
@@ -680,6 +734,34 @@
       const g = G(), h = o.h || 0.8, y = (o.y || 1.5) - h / 2;
       B(g, w + 0.03, h + 0.03, 0.02, M(p.wood2), 0, y - 0.015, 0.01);
       B(g, w, h, 0.006, MIRROR, 0, y, 0.022);
+      return g;
+    },
+    aircon(o, p, w, d) {
+      const g = G(), y = o.y || 2.25, m = M('#f4f3ef', { roughness: 0.45 });
+      B(g, w, 0.28, d, m, 0, y, d / 2);
+      B(g, w - 0.02, 0.05, d - 0.03, M('#e4e2dc', { roughness: 0.5 }), 0, y - 0.012, d / 2 + 0.01);
+      B(g, w - 0.1, 0.012, 0.01, M(DARK), 0, y + 0.035, d + 0.001);
+      B(g, w - 0.06, 0.004, 0.006, M('#d9d6cf'), 0, y + 0.2, d + 0.001);
+      B(g, 0.02, 0.008, 0.004, glow('#7fe08a', 1.2), w / 2 - 0.08, y + 0.09, d + 0.001).userData.ns = 1;
+      return g;
+    },
+    walltv(o, p, w) {
+      const g = G(), h = w * 0.57, y = (o.y || 1.35) - h / 2;
+      B(g, 0.3, 0.2, 0.03, M(DARK), 0, y + h / 2 - 0.1, 0.015);
+      B(g, w, h, 0.035, M('#0b0c0f', { roughness: 0.25 }), 0, y, 0.048);
+      return g;
+    },
+    dresser(o, p, w, d) {
+      const g = G(), m = M(p.wood, { roughness: 0.6 }), steel = M(STEEL, { metalness: 0.8, roughness: 0.2 });
+      legs(g, w, d, 0.6, M(p.wood2), 0.035);
+      B(g, w, 0.15, d, m, 0, 0.6, 0);
+      fronts(g, w, 0.615, 0.12, d / 2 + 0.002, 2, p.wood2);
+      const mr = C(g, 0.3, 0.012, MIRROR, 0, 0, 0); mr.rotation.x = Math.PI / 2; mr.position.set(0, 1.22, -d / 2 + 0.02);
+      const fr = C(g, 0.32, 0.01, M(p.wood2), 0, 0, 0); fr.rotation.x = Math.PI / 2; fr.position.set(0, 1.22, -d / 2 + 0.01);
+      C(g, 0.03, 0.12, M(p.accent2, { roughness: 0.4 }), -w / 2 + 0.12, 0.75, -0.05);
+      C(g, 0.022, 0.08, M('#f1ede3', { roughness: 0.4 }), -w / 2 + 0.2, 0.75, 0.02);
+      C(g, 0.04, 0.05, M(p.accent, { roughness: 0.4 }), -w / 2 + 0.28, 0.75, -0.08);
+      B(g, 0.2, 0.05, 0.14, M('#f1ede3'), w / 2 - 0.18, 0.75, 0); C(g, 0.012, 0.02, steel, w / 2 - 0.18, 0.8, 0);
       return g;
     },
     art(o, p, w) {

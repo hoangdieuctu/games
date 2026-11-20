@@ -79,6 +79,8 @@
     wallCols.push(wl.axis === 'x' ? { x0: a, x1: b, z0: wl.at - th / 2, z1: wl.at + th / 2 } : { x0: wl.at - th / 2, x1: wl.at + th / 2, z0: a, z1: b });
   }
 
+  /* Phía trong nhà của các tường có cửa sổ nhỏ: +1 là phía z (hoặc x) lớn hơn */
+  const WIN_IN = { n2: 1, 'logia-w': 1 };
   function opening(wl, o, th, p) {
     const g = world, f = 0.05, t2 = th + 0.03, trim = M(p.trim), steel = M('#8d9197', { metalness: 0.7, roughness: 0.3 });
     if (o.type === 'door' || o.type === 'entry') {
@@ -102,6 +104,13 @@
     const n = full ? Math.max(2, Math.round((o.b - o.a) / 1.4)) : Math.max(1, Math.round((o.b - o.a) / 0.9));
     for (let i = 1; i < n; i++) { const x = o.a + (o.b - o.a) * i / n; wbox(g, wl, x - mw, x + mw, o.y0, o.y1, 0.05, trim); }
     wbox(g, wl, o.a, o.b, o.y0, o.y1, 0.012, HD.GLASS).userData.ns = 1;
+    if (o.type === 'window' && p.winblind && WIN_IN[wl.id]) {
+      /* Rèm cuốn cho cửa sổ nhỏ (phòng tắm, lô gia): hộp rèm trên đầu, vải thả lưng chừng */
+      const wo = WIN_IN[wl.id] * (th / 2 + 0.045), y = o.y0 + (o.y1 - o.y0) * 0.45;
+      wbox(g, wl, o.a - 0.05, o.b + 0.05, o.y1 + 0.02, o.y1 + 0.09, 0.07, M('#f1efea', { roughness: 0.6 }), wo);
+      wbox(g, wl, o.a - 0.03, o.b + 0.03, y, o.y1 + 0.03, 0.008, M(p.curtain, { roughness: 1 }), wo);
+      wbox(g, wl, o.a - 0.03, o.b + 0.03, y - 0.025, y, 0.02, M('#b9b3a6'), wo);
+    }
     if (wl.id !== 's' || p.nocurtain) return;
     /* Rèm hoặc mành tre cho cửa hướng nam; vách kính kín thì rèm nằm gọn trong lòng ô, không chờm lên tường và trần */
     const off = -(th / 2 + 0.07), ex = full ? 0 : 1, top = Math.min(o.y1 + 0.12, P.H - 0.035);
