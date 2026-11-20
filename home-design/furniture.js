@@ -206,10 +206,40 @@
     for (const sx of [-1, 1]) for (const sz of [-1, 1]) B(g, t, h, t, m, sx * (w / 2 - t / 2 - 0.02), 0, sz * (d / 2 - t / 2 - 0.02));
   }
   /* Các khe cửa tủ và tay nắm ở mặt trước */
-  function fronts(g, w, y0, h, z, n, handle) {
-    const gap = M(DARK), hm = M(handle || STEEL, { metalness: 0.6, roughness: 0.4 });
-    for (let i = 1; i < n; i++) B(g, 0.008, h, 0.006, gap, -w / 2 + (w / n) * i, y0, z);
-    for (let i = 0; i < n; i++) B(g, 0.014, Math.min(0.3, h * 0.3), 0.02, hm, -w / 2 + (w / n) * (i + (i % 2 ? 0.12 : 0.88)), y0 + h * 0.5, z + 0.008);
+  /* Mặt trước tủ: mỗi ô là một cánh mở được (hoặc ngăn kéo nếu ô thấp và bè), phía sau là lòng tủ vẽ giả.
+     body: vật liệu hoặc màu cánh; inner: màu lòng tủ. Cả cụm cánh là một thứ bấm G để mở/đóng. */
+  function fronts(g, w, y0, h, z, n, handle, body, inner) {
+    const hm = M(handle || STEEL, { metalness: 0.6, roughness: 0.4 }), bw = w / n;
+    const bm = body && body.isMaterial ? body : M(body || '#d9d2c4');
+    const r = rng(Math.round(w * 173 + h * 61 + y0 * 29 + n)), k = Math.max(1, Math.round(h / 0.4));
+    const cols = ['#e9e2d2', '#c9b08a', '#8fa58a', '#c98b62', '#7d8a94', '#d9cfbf', '#b5694a'];
+    B(g, w - 0.01, h, 0.003, M(inner || '#3a322b'), 0, y0, z + 0.0015);
+    for (let j = 0; j < k; j++) {
+      const sy = y0 + h * j / k;
+      if (j) B(g, w - 0.02, 0.016, 0.006, M(inner ? '#c9ced2' : '#8a7a66'), 0, sy, z + 0.004);
+      for (let i = 0; i < n; i++) {
+        const iw = bw * (0.35 + r() * 0.4), ih = Math.min(0.22, h / k * (0.3 + r() * 0.35));
+        if (ih > 0.03) B(g, iw, ih, 0.006, M(cols[Math.floor(r() * cols.length)], { roughness: 1 }), -w / 2 + bw * (i + 0.5) + (r() - 0.5) * bw * 0.15, sy + (j ? 0.016 : 0.004), z + 0.005);
+      }
+    }
+    const drawer = h < 0.45 && bw > h, leaves = [], pts = [], hh = Math.min(0.3, h * 0.3);
+    for (let i = 0; i < n; i++) {
+      const pv = G(), L = i % 2 === 0, sg = L ? 1 : -1;
+      if (drawer) {
+        pv.position.set(-w / 2 + bw * (i + 0.5), y0, z + 0.012);
+        B(pv, bw - 0.006, h, 0.018, bm, 0, 0, 0.009);
+        B(pv, bw - 0.05, Math.max(0.02, h - 0.04), 0.28, M('#a8977f'), 0, 0.012, -0.14);
+        B(pv, Math.min(0.16, bw * 0.3), 0.014, 0.02, hm, 0, h * 0.5, 0.026);
+        leaves.push({ pv, z: pv.position.z });
+      } else {
+        pv.position.set(-w / 2 + bw * (i + (L ? 0 : 1)) + sg * 0.003, y0, z + 0.012);
+        B(pv, bw - 0.006, h, 0.018, bm, sg * (bw - 0.006) / 2, 0, 0.009);
+        B(pv, 0.014, hh, 0.02, hm, sg * (bw * 0.88 - 0.003), h * 0.5, 0.026);
+        leaves.push({ pv, ang: -sg * 1.75 });
+      }
+      g.add(pv); pts.push([-w / 2 + bw * (i + 0.5), y0 + h / 2, z + 0.03]);
+    }
+    const mk = G(); mk.userData.act = { type: 'cab', leaves, pts }; g.add(mk);
   }
   function foliage(g, kind, h, y) {
     const a = M(GREEN, { roughness: 0.9 }), b = M(GREEN2, { roughness: 0.9 });
@@ -300,13 +330,13 @@
         const bw = o.books, cw = w - bw, c = G(); c.position.x = -bw / 2; g.add(c);
         B(c, cw, 0.06, d - 0.04, M(DARK), 0, 0, -0.01);
         B(c, cw, h - 0.06, d, M(o.c || p.wood), 0, 0.06, 0);
-        fronts(c, cw, 0.1, h - 0.14, d / 2 + 0.002, Math.max(2, Math.round(cw / 0.5)), p.wood2);
+        fronts(c, cw, 0.1, h - 0.14, d / 2 + 0.002, Math.max(2, Math.round(cw / 0.5)), p.wood2, o.c || p.wood);
         const sh = build.shelf({ h }, p, bw, d); sh.position.x = cw / 2; g.add(sh);
         return g;
       }
       B(g, w, 0.06, d - 0.04, M(DARK), 0, 0, -0.01);
       B(g, w, h - 0.06, d, M(o.c || p.wood), 0, 0.06, 0);
-      fronts(g, w, 0.1, h - 0.14, d / 2 + 0.002, Math.max(2, Math.round(w / 0.5)), p.wood2);
+      fronts(g, w, 0.1, h - 0.14, d / 2 + 0.002, Math.max(2, Math.round(w / 0.5)), p.wood2, o.c || p.wood);
       return g;
     },
     sofa(o, p, w, d) {
@@ -409,7 +439,7 @@
       }
       B(g, w, 0.34, d, m, 0, 0.16, 0);
       B(g, w - 0.2, 0.16, d - 0.1, M(DARK), 0, 0, 0);
-      fronts(g, w, 0.18, 0.3, d / 2 + 0.002, Math.max(2, Math.round(w / 0.6)), p.wood2);
+      fronts(g, w, 0.18, 0.3, d / 2 + 0.002, Math.max(2, Math.round(w / 0.6)), p.wood2, m);
       const tw = Math.min(w - 0.3, 1.35);
       B(g, tw, tw * 0.57, 0.04, M('#0b0c0f', { roughness: 0.25 }), 0, 0.95, -d / 2 + (o.slat ? 0.07 : 0.03));
       C(g, 0.06, 0.2, M(p.accent2), w / 2 - 0.2, 0.5, 0);
@@ -469,7 +499,7 @@
       B(g, w, 0.08, d - 0.1, M(DARK), 0, 0, -0.03);
       B(g, w, 0.8, d - 0.03, cab, 0, 0.08, -0.015);
       B(g, w + (o.island ? 0.04 : 0), 0.04, d + 0.02, top, 0, 0.88, 0);
-      fronts(g, w, 0.1, 0.76, d / 2 - 0.028, Math.max(2, Math.round(w / 0.45)), p.wood2);
+      fronts(g, w, 0.1, 0.76, d / 2 - 0.028, Math.max(2, Math.round(w / 0.45)), p.wood2, cab);
       const steel = M(p.steel, { metalness: 0.7, roughness: 0.3 });
       const both = o.sink && o.stove;
       if (o.stove) {
@@ -488,7 +518,7 @@
       }
       if (o.upper) {
         B(g, w, 0.72, 0.34, cab, 0, 1.49, -d / 2 + 0.17);
-        fronts(g, w, 1.51, 0.68, -d / 2 + 0.342, Math.max(2, Math.round(w / 0.45)), p.wood2);
+        fronts(g, w, 1.51, 0.68, -d / 2 + 0.342, Math.max(2, Math.round(w / 0.45)), p.wood2, cab);
         B(g, w, 0.57, 0.012, M(p.splash, { roughness: 0.3 }), 0, 0.92, -d / 2 + 0.006);
       }
       if (o.island) {
@@ -501,11 +531,11 @@
     fridge(o, p, w, d) {
       const g = G(), m = M(p.steel, { metalness: 0.5, roughness: 0.35 });
       B(g, w, 1.85, d - 0.04, m, 0, 0, -0.02);
-      B(g, w, 0.008, 0.01, M(DARK), 0, 0.72, d / 2 - 0.038);
-      for (const y of [0.8, 0.5]) B(g, 0.02, y === 0.8 ? 0.6 : 0.16, 0.03, M(DARK), -w / 2 + 0.07, y, d / 2 - 0.025);
+      fronts(g, w, 0.03, 0.68, d / 2 - 0.04, 1, DARK, m, '#eef1f3');
+      fronts(g, w, 0.73, 1.1, d / 2 - 0.04, 1, DARK, m, '#eef1f3');
       if (o.top) { /* hộc kho kịch trần trên nóc tủ lạnh */
         B(g, w, H - 1.9, d, M(p.cab), 0, 1.9, 0);
-        fronts(g, w, 1.93, H - 1.96, d / 2 + 0.002, 2, p.wood2);
+        fronts(g, w, 1.93, H - 1.96, d / 2 + 0.002, 2, p.wood2, p.cab);
       }
       return g;
     },
@@ -514,7 +544,7 @@
       B(g, w, 0.07, d - 0.04, M(DARK), 0, 0, -0.01);
       B(g, w, h - 0.07, d, M(p.wood), 0, 0.07, 0);
       B(g, w + 0.02, 0.025, d + 0.02, M(shade(p.wood, 0.85)), 0, h, 0);
-      fronts(g, w, 0.1, h - 0.14, d / 2 + 0.002, Math.max(1, Math.round(w / 0.45)), p.wood2);
+      fronts(g, w, 0.1, h - 0.14, d / 2 + 0.002, Math.max(1, Math.round(w / 0.45)), p.wood2, p.wood);
       if (o.vase) {
         C(g, 0.06, 0.2, M('#f1ede3', { roughness: 0.4 }), w * 0.28, h + 0.025, 0);
         const leaves = G(); foliage(leaves, 'monstera', 0.5, h + 0.2); leaves.position.x = w * 0.28; g.add(leaves);
@@ -637,7 +667,7 @@
       const g = G(), m = M(p.wood2, { metalness: 0.4, roughness: 0.5 });
       C(g, 0.13, 0.02, m, 0, 0, 0); C(g, 0.012, 1.4, m, 0, 0.02, 0);
       const s = new T.Mesh(UK, M('#ffe6b8', { emissive: '#ffe6b8', emissiveIntensity: 0.8, side: T.DoubleSide }));
-      s.scale.set(0.34, 0.26, 0.34); s.position.y = 1.5; s.userData.ns = 1; g.add(s);
+      s.scale.set(0.34, 0.26, 0.34); s.position.y = 1.5; s.userData.ns = 1; s.userData.act = { type: 'lamp' }; g.add(s);
       return g;
     },
     nightstand(o, p, w, d) {
@@ -646,7 +676,7 @@
       B(g, w, 0.34, d, M(p.wood), 0, 0.14, 0);
       B(g, w - 0.06, 0.008, 0.006, M(DARK), 0, 0.31, d / 2 + 0.002);
       C(g, 0.05, 0.14, M('#f1ede3'), 0, 0.48, 0);
-      const s = C(g, 0.09, 0.14, glow('#ffe6b8', 0.9), 0, 0.62, 0); s.userData.ns = 1;
+      const s = C(g, 0.09, 0.14, glow('#ffe6b8', 0.9), 0, 0.62, 0); s.userData.ns = 1; s.userData.act = { type: 'lamp' };
       return g;
     },
     changer(o, p, w, d) {
@@ -694,7 +724,7 @@
       const g = G(), steel = M(STEEL, { metalness: 0.8, roughness: 0.2 });
       B(g, w, 0.42, d, M(p.wood), 0, 0.36, 0);
       B(g, w + 0.02, 0.03, d + 0.02, M(p.top, { roughness: 0.35 }), 0, 0.78, 0);
-      fronts(g, w, 0.38, 0.38, d / 2 + 0.002, 2, p.wood2);
+      fronts(g, w, 0.38, 0.38, d / 2 + 0.002, 2, p.wood2, p.wood);
       B(g, 0.46, 0.11, 0.32, M('#fbfbf9', { roughness: 0.25 }), 0, 0.81, 0.02);
       B(g, 0.38, 0.012, 0.24, M('#dfe3e4', { roughness: 0.2 }), 0, 0.915, 0.02);
       C(g, 0.012, 0.2, steel, 0, 0.81, -d / 2 + 0.05); B(g, 0.02, 0.02, 0.12, steel, 0, 1.0, -d / 2 + 0.1);
@@ -703,14 +733,15 @@
     },
     glass(o, p, w, d) {
       const g = G();
-      if (o.slide) { /* một tấm cố định + một cánh lùa đang kéo kín */
-        const st = M(STEEL, { metalness: 0.8, roughness: 0.2 }), hw = w / 2 + 0.03;
-        B(g, hw, 2.0, 0.01, GLASS, -w / 2 + hw / 2, 0, -0.012).userData.ns = 1;
-        B(g, hw, 2.0, 0.01, GLASS, w / 2 - hw / 2, 0, 0.012).userData.ns = 1;
+      if (o.slide) { /* một tấm cố định (nửa +x) + một cánh lùa (nửa -x), bấm G để kéo mở/đóng */
+        const st = M(STEEL, { metalness: 0.8, roughness: 0.2 }), hw = w / 2 + 0.03, lf = G();
+        B(g, hw, 2.0, 0.01, GLASS, w / 2 - hw / 2, 0, -0.012).userData.ns = 1;
+        B(g, 0.015, 2.0, 0.015, st, w / 2 - 0.008, 0, -0.012); B(g, 0.015, 2.0, 0.015, st, w / 2 - hw + 0.008, 0, -0.012);
         B(g, w, 0.04, 0.05, st, 0, 2.0, 0); B(g, w, 0.012, 0.05, st, 0, 0, 0);
-        for (const sx of [-1, 1]) B(g, 0.015, 2.0, 0.015, st, sx * (w / 2 - 0.008), 0, sx * 0.012);
-        B(g, 0.015, 2.0, 0.015, st, w / 2 - hw + 0.008, 0, 0.012);
-        for (const sz of [-1, 1]) B(g, 0.02, 0.32, 0.025, st, w / 2 - hw + 0.07, 0.9, 0.012 + sz * 0.02);
+        B(lf, hw, 2.0, 0.01, GLASS, -w / 2 + hw / 2, 0, 0.012).userData.ns = 1;
+        B(lf, 0.015, 2.0, 0.015, st, -w / 2 + 0.008, 0, 0.012); B(lf, 0.015, 2.0, 0.015, st, -w / 2 + hw - 0.008, 0, 0.012);
+        for (const sz of [-1, 1]) B(lf, 0.02, 0.32, 0.025, st, -w / 2 + 0.08, 0.9, 0.012 + sz * 0.02);
+        lf.userData.act = { type: 'slide', dx: hw - 0.07, hw }; g.add(lf);
         return g;
       }
       const e = B(g, w, 2.0, 0.012, GLASS, 0, 0, 0); e.userData.ns = 1;
@@ -755,7 +786,7 @@
       const g = G(), m = M(p.wood, { roughness: 0.6 }), steel = M(STEEL, { metalness: 0.8, roughness: 0.2 });
       legs(g, w, d, 0.6, M(p.wood2), 0.035);
       B(g, w, 0.15, d, m, 0, 0.6, 0);
-      fronts(g, w, 0.615, 0.12, d / 2 + 0.002, 2, p.wood2);
+      fronts(g, w, 0.615, 0.12, d / 2 + 0.002, 2, p.wood2, m);
       const mr = C(g, 0.3, 0.012, MIRROR, 0, 0, 0); mr.rotation.x = Math.PI / 2; mr.position.set(0, 1.22, -d / 2 + 0.02);
       const fr = C(g, 0.32, 0.01, M(p.wood2), 0, 0, 0); fr.rotation.x = Math.PI / 2; fr.position.set(0, 1.22, -d / 2 + 0.01);
       C(g, 0.03, 0.12, M(p.accent2, { roughness: 0.4 }), -w / 2 + 0.12, 0.75, -0.05);
@@ -834,11 +865,12 @@
       let s;
       if (kind === 'lantern') {
         s = S(g, 0.42, 0.34, 0.42, M('#d9bd8f', { emissive: '#ffcf8a', emissiveIntensity: 0.55, map: rattanTex().map }), 0, y, 0);
+        s.userData.act = { type: 'lamp' };
       } else {
         const wide = kind === 'nonla';
         s = new T.Mesh(UK, M(wide ? '#ead9a8' : p.accent, { side: T.DoubleSide, emissive: wide ? '#ffcf8a' : '#000000', emissiveIntensity: 0.35 }));
         s.scale.set(wide ? 0.6 : 0.4, wide ? 0.22 : 0.24, wide ? 0.6 : 0.4); s.position.y = y + 0.02; g.add(s);
-        const b = S(g, 0.09, 0.09, 0.09, glow('#fff0cc', 1.3), 0, y - 0.04, 0); b.userData.ns = 1;
+        const b = S(g, 0.09, 0.09, 0.09, glow('#fff0cc', 1.3), 0, y - 0.04, 0); b.userData.ns = 1; b.userData.act = { type: 'lamp' };
       }
       s.userData.ns = 1;
       return g;

@@ -50,6 +50,19 @@
     ],
 
     lights: [[7.55, 1.6], [7.55, 4.5], [7.55, 7.2], [5.1, 5.3], [5.45, 1.4], [1.9, 4.05], [4.9, 4.05], [1.6, 7.2], [2.9, 5.3], [4.65, 7.4]],
+    /* Công tắc trên tường: (x, z) là điểm trên mặt tường, r là hướng mặt công tắc (như đồ đạc),
+       lights: thứ tự các đèn trần nó điều khiển, fan: quạt trần của phòng (nếu thiết kế có gắn) */
+    switches: [
+      { x: 7.75, z: 0.07, r: 0, lights: [0] },
+      { x: 6.17, z: 3.6, r: 1, lights: [1] },
+      { x: 6.17, z: 6.25, r: 1, lights: [2], fan: 'living' },
+      { x: 4.5, z: 5.83, r: 2, lights: [3] },
+      { x: 6.03, z: 2.85, r: 3, lights: [4] },
+      { x: 2.1, z: 4.63, r: 2, lights: [5] },
+      { x: 5.0, z: 4.63, r: 2, lights: [6] },
+      { x: 3.7, z: 4.77, r: 0, lights: [7, 8], fan: 'master' },
+      { x: 4.95, z: 5.83, r: 2, lights: [9], fan: 'bed2' }
+    ],
     fanAt: { living: [7.55, 7.2], master: [1.6, 7.2], bed2: [4.65, 7.4] }
   };
 

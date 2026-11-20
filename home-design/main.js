@@ -45,8 +45,11 @@
   Object.assign(sun.shadow.camera, { left: -8, right: 8, top: 8, bottom: -8, near: 1, far: 40 });
   sun.shadow.bias = -0.0005; sun.shadow.normalBias = 0.03;
   scene.add(sun, sun.target);
-  [[7.55, 1.8], [7.55, 6.8], [1.7, 6.8], [4.65, 7.2], [5, 5.3]].forEach(([x, z]) => {
-    const l = new T.PointLight('#ffe6c4', 0.55, 6.5, 1.6); l.position.set(x, 2.3, z); scene.add(l);
+  /* Mỗi đèn trần một bóng sáng thật để bật tắt được; đèn phòng chính sáng hơn đèn phòng phụ */
+  const BULB_I = [0.55, 0.3, 0.55, 0.5, 0.3, 0.3, 0.3, 0.55, 0.25, 0.55];
+  const bulbs = P.lights.map(([x, z], i) => {
+    const l = new T.PointLight('#ffe6c4', BULB_I[i], BULB_I[i] > 0.4 ? 6.5 : 4.5, 1.6); l.position.set(x, 2.3, z); scene.add(l);
+    return l;
   });
 
   /* Dãy nhà phía xa ngoài cửa sổ */
@@ -68,6 +71,52 @@
   const blobGeo = new T.PlaneGeometry(1, 1).rotateX(-Math.PI / 2);
 
   let world, ceil, caps, wallCols = [], itemCols = [], fans = [];
+  /* Những thứ bấm G để bật/tắt, mở/đóng. Mỗi thứ: pts (các điểm ngắm tới), on, t (0…1, vị trí hiện tại),
+     label [khi đang tắt/đóng, khi đang bật/mở], apply(s) cho chuyển động, set(on) cho thay đổi tức thì, can(next). */
+  let acts = [], dynCols = [], curAct = null;
+  const V = (x, y, z) => new T.Vector3(x, y, z);
+  const OFF_LAMP = new T.MeshStandardMaterial({ color: '#b9b2a4', roughness: 0.8, side: T.DoubleSide });
+  function addAct(a) { a.t = a.on ? 1 : 0; if (a.t0 !== undefined) a.t = a.t0; acts.push(a); return a; }
+  function toggleAct(a) {
+    if (!a || (a.can && !a.can(!a.on))) return;
+    a.on = !a.on; a.moving = true;
+    if (a.set) a.set(a.on);
+    renderer.shadowMap.needsUpdate = true;
+  }
+  const nearCol = c => st.x > c.x0 - R - 0.05 && st.x < c.x1 + R + 0.05 && st.z > c.z0 - R - 0.05 && st.z < c.z1 + R + 0.05;
+  /* Đoạn thẳng (trên mặt bằng) có cắt qua tường không — để không bấm được thứ ở phòng bên kia tường */
+  function blocked(x0, z0, x1, z1) {
+    const dx = x1 - x0, dz = z1 - z0, l = Math.hypot(dx, dz);
+    if (l < 0.2) return false;
+    const k = (l - 0.16) / l, ex = dx * k, ez = dz * k;
+    for (const c of wallCols) {
+      let t0 = 0, t1 = 1, ok = true;
+      for (const [o, e, lo, hi] of [[x0, ex, c.x0, c.x1], [z0, ez, c.z0, c.z1]]) {
+        if (Math.abs(e) < 1e-9) { if (o < lo || o > hi) { ok = false; break; } continue; }
+        let a = (lo - o) / e, b = (hi - o) / e; if (a > b) { const q = a; a = b; b = q; }
+        t0 = Math.max(t0, a); t1 = Math.min(t1, b);
+        if (t0 > t1) { ok = false; break; }
+      }
+      if (ok) return true;
+    }
+    return false;
+  }
+  const fwd = V(0, 0, 0), tmp = V(0, 0, 0);
+  function pickAct() {
+    camera.getWorldDirection(fwd);
+    const c = camera.position;
+    let best = null, bs = 9;
+    for (const a of acts) for (const pt of a.pts) {
+      tmp.subVectors(pt, c);
+      const dist = tmp.length();
+      if (dist > (a.range || 2.6)) continue;
+      const ang = Math.acos(Math.max(-1, Math.min(1, tmp.dot(fwd) / (dist || 1))));
+      if (ang > (dist < 0.9 ? 0.85 : 0.5)) continue;
+      const sc = ang + dist * 0.05;
+      if (sc < bs && !blocked(c.x, c.z, pt.x, pt.z)) { bs = sc; best = a; }
+    }
+    return best;
+  }
 
   function wbox(g, wl, a, b, y0, y1, th, mat, off) {
     if (b - a < 0.001 || y1 - y0 < 0.001) return null;
@@ -86,14 +135,29 @@
     if (o.type === 'door' || o.type === 'entry') {
       const doorM = M(p.door, { roughness: 0.6 }), L = o.b - o.a - 2 * f, hgt = o.y1 - f;
       wbox(g, wl, o.a, o.a + f, 0, o.y1, t2, trim); wbox(g, wl, o.b - f, o.b, 0, o.y1, t2, trim); wbox(g, wl, o.a, o.b, hgt, o.y1, t2, trim);
-      if (o.type === 'entry') {
-        wbox(g, wl, o.a + f, o.b - f, 0, hgt, 0.05, doorM);
-        wbox(g, wl, o.b - f - 0.14, o.b - f - 0.1, 0.95, 1.12, 0.13, steel);
-      } else {
-        const hx = o.hinge === 'a' ? o.a + f + 0.02 : o.b - f - 0.02, off = o.side * (L / 2 + th / 2), he = o.side * (L + th / 2 - 0.1);
-        if (wl.axis === 'x') { B(g, 0.04, hgt, L, doorM, hx, 0, wl.at + off); B(g, 0.1, 0.03, 0.12, steel, hx, 1.0, wl.at + he); }
-        else { B(g, L, hgt, 0.04, doorM, wl.at + off, 0, hx); B(g, 0.12, 0.03, 0.1, steel, wl.at + he, 1.0, hx); }
-      }
+      /* Cánh cửa quay quanh bản lề: đóng thì nằm trong ô cửa, mở thì vuông góc với tường về phía side.
+         Cửa chính mở vào trong nhà, lúc đầu đóng; cửa phòng lúc đầu mở. */
+      const entry = o.type === 'entry', X = wl.axis === 'x', dirC = entry || o.hinge === 'a' ? 1 : -1, side = entry ? 1 : o.side;
+      const along = dirC > 0 ? o.a + f : o.b - f, perp = wl.at + (entry ? 0 : side * (th / 2 + 0.02));
+      const ang = (dx, dz) => Math.atan2(-dz, dx);
+      const tc = X ? ang(dirC, 0) : ang(0, dirC);
+      let to = X ? ang(0, side) : ang(side, 0);
+      if (to - tc > Math.PI) to -= 2 * Math.PI; else if (tc - to > Math.PI) to += 2 * Math.PI;
+      const zs = Math.sign((X ? Math.sin(to) : Math.cos(to)) * dirC) * 0.02;
+      const pv = new T.Group(); pv.position.set(X ? along : perp, 0, X ? perp : along);
+      B(pv, L, hgt, 0.04, doorM, L / 2, 0, zs); B(pv, 0.1, 0.03, 0.13, steel, L - 0.08, 1.0, zs);
+      g.add(pv);
+      const mid = (o.a + o.b) / 2, lp = wl.at + side * (th / 2 + L / 2);
+      const col = entry ? null : Object.assign(X ? { x0: o.a, x1: o.b, z0: wl.at - th / 2, z1: wl.at + th / 2 } : { x0: wl.at - th / 2, x1: wl.at + th / 2, z0: o.a, z1: o.b }, { on: false });
+      if (col) dynCols.push(col);
+      const a = addAct({
+        pts: [X ? V(mid, 1.05, wl.at + (entry ? 0.14 : 0)) : V(wl.at, 1.05, mid), X ? V(along, 1.05, lp) : V(lp, 1.05, along)],
+        on: !entry, label: ['Mở cửa', 'Đóng cửa'],
+        apply(s) { pv.rotation.y = tc + (to - tc) * s; },
+        set(on) { if (col) col.on = !on; },
+        can: next => next || !col || !nearCol(col)
+      });
+      a.apply(a.t);
       return;
     }
     /* Vách kính kín sàn-trần: khung mảnh, tấm kính lớn; cửa sổ thường: khung dày, chia ô nhỏ */
@@ -104,28 +168,41 @@
     const n = full ? Math.max(2, Math.round((o.b - o.a) / 1.4)) : Math.max(1, Math.round((o.b - o.a) / 0.9));
     for (let i = 1; i < n; i++) { const x = o.a + (o.b - o.a) * i / n; wbox(g, wl, x - mw, x + mw, o.y0, o.y1, 0.05, trim); }
     wbox(g, wl, o.a, o.b, o.y0, o.y1, 0.012, HD.GLASS).userData.ns = 1;
+    const X = wl.axis === 'x', mid = (o.a + o.b) / 2;
+    const span = (m, a, b) => { if (X) { m.scale.x = b - a; m.position.x = (a + b) / 2; } else { m.scale.z = b - a; m.position.z = (a + b) / 2; } };
+    const at = (al, y, pe) => X ? V(al, y, pe) : V(pe, y, al);
     if (o.type === 'window' && p.winblind && WIN_IN[wl.id]) {
-      /* Rèm cuốn cho cửa sổ nhỏ (phòng tắm, lô gia): hộp rèm trên đầu, vải thả lưng chừng */
-      const wo = WIN_IN[wl.id] * (th / 2 + 0.045), y = o.y0 + (o.y1 - o.y0) * 0.45;
+      /* Rèm cuốn cho cửa sổ nhỏ (phòng tắm, lô gia): hộp rèm trên đầu, vải lúc đầu thả lưng chừng; G để kéo kín / cuốn lên */
+      const wo = WIN_IN[wl.id] * (th / 2 + 0.045), y1 = o.y1 + 0.03, fullH = o.y1 - o.y0 + 0.07;
       wbox(g, wl, o.a - 0.05, o.b + 0.05, o.y1 + 0.02, o.y1 + 0.09, 0.07, M('#f1efea', { roughness: 0.6 }), wo);
-      wbox(g, wl, o.a - 0.03, o.b + 0.03, y, o.y1 + 0.03, 0.008, M(p.curtain, { roughness: 1 }), wo);
-      wbox(g, wl, o.a - 0.03, o.b + 0.03, y - 0.025, y, 0.02, M('#b9b3a6'), wo);
+      const fab = wbox(g, wl, o.a - 0.03, o.b + 0.03, 0, 1, 0.008, M(p.curtain, { roughness: 1 }), wo);
+      const bar = wbox(g, wl, o.a - 0.03, o.b + 0.03, 0, 0.025, 0.02, M('#b9b3a6'), wo);
+      const a = addAct({
+        pts: [at(mid, (o.y0 + o.y1) / 2, wl.at + wo)], on: false, t0: 0.5, label: ['Kéo rèm xuống', 'Cuốn rèm lên'],
+        apply(s) { const h = fullH * (0.08 + 0.92 * s); fab.scale.y = h; fab.position.y = y1 - h / 2; bar.position.y = y1 - h; }
+      });
+      a.apply(a.t);
     }
     if (wl.id !== 's' || p.nocurtain) return;
-    /* Rèm hoặc mành tre cho cửa hướng nam; vách kính kín thì rèm nằm gọn trong lòng ô, không chờm lên tường và trần */
+    /* Rèm hoặc mành tre cho cửa hướng nam; vách kính kín thì rèm nằm gọn trong lòng ô, không chờm lên tường và trần.
+       Bấm G: rèm vải kéo kín hai nửa vào giữa, mành tre thả xuống tới sàn. */
     const off = -(th / 2 + 0.07), ex = full ? 0 : 1, top = Math.min(o.y1 + 0.12, P.H - 0.035);
+    const pts = [at(o.a + 0.25, 1.4, wl.at + off), at(mid, 1.4, wl.at + off), at(o.b - 0.25, 1.4, wl.at + off)];
     if (p.blind) {
-      wbox(g, wl, o.a - 0.05 * ex, o.b + 0.05 * ex, top - 0.62, top - 0.04, 0.025, M('#c9a66b', { roughness: 1 }), off);
-      for (let y = top - 0.58; y < top - 0.06; y += 0.07) wbox(g, wl, o.a - 0.05 * ex, o.b + 0.05 * ex, y, y + 0.008, 0.03, M('#a9865a'), off);
+      const bg = new T.Group(); bg.position.y = top; g.add(bg);
+      wbox(bg, wl, o.a - 0.05 * ex, o.b + 0.05 * ex, -0.62, -0.04, 0.025, M('#c9a66b', { roughness: 1 }), off);
+      for (let y = -0.58; y < -0.06; y += 0.07) wbox(bg, wl, o.a - 0.05 * ex, o.b + 0.05 * ex, y, y + 0.008, 0.03, M('#a9865a'), off);
+      pts.push(at(mid, top - 0.3, wl.at + off));
+      addAct({ pts, on: false, label: ['Thả mành xuống', 'Cuốn mành lên'], apply(s) { bg.scale.y = 1 + s * ((top - 0.06) / 0.62 - 1); } });
     } else {
-      const cm = M(p.curtain, { roughness: 1 });
-      wbox(g, wl, o.a - 0.14 * ex, o.a - 0.14 * ex + 0.34, 0.03, top, 0.07, cm, off);
-      wbox(g, wl, o.b + 0.14 * ex - 0.34, o.b + 0.14 * ex, 0.03, top, 0.07, cm, off);
+      const cm = M(p.curtain, { roughness: 1 }), a0 = o.a - 0.14 * ex, b0 = o.b + 0.14 * ex, half = (b0 - a0) / 2 + 0.01;
+      const l = wbox(g, wl, a0, a0 + 0.34, 0.03, top, 0.07, cm, off), r = wbox(g, wl, b0 - 0.34, b0, 0.03, top, 0.07, cm, off);
       wbox(g, wl, o.a - 0.2 * ex, o.b + 0.2 * ex, top, top + 0.025, 0.02, M('#3a3a3a'), off);
+      addAct({ pts, on: false, label: ['Kéo rèm lại', 'Mở rèm ra'], apply(s) { const w = 0.34 + (half - 0.34) * s; span(l, a0, a0 + w); span(r, b0 - w, b0); } });
     }
   }
 
-  function fan(x, z) {
+  function fan(x, z, swPt, rocker) {
     const g = new T.Group(), m = M('#5a4a3a'), rotor = new T.Group();
     C(g, 0.015, 0.32, m, 0, P.H - 0.32, 0); C(g, 0.09, 0.09, m, 0, P.H - 0.4, 0);
     C(g, 0.07, 0.03, HD.glow('#fff3d6', 0.9), 0, P.H - 0.43, 0);
@@ -136,16 +213,58 @@
     rotor.position.y = P.H - 0.36; g.add(rotor);
     g.position.set(x, 0, z);
     g.traverse(o => { o.userData.ns = 1; });
-    ceil.add(g); fans.push(rotor);
+    ceil.add(g);
+    const a = addAct({
+      pts: [V(x, P.H - 0.4, z)].concat(swPt ? [swPt] : []), on: true, range: 3.2, label: ['Bật quạt', 'Tắt quạt'],
+      set(on) { if (rocker) rocker.rotation.x = on ? -0.14 : 0.14; }
+    });
+    a.set(true); fans.push({ rotor, a });
+  }
+  /* Mặt công tắc trên tường; trả về phím bấm (để nghiêng khi bật/tắt) và điểm ngắm */
+  function plate(g, x) {
+    B(g, 0.086, 0.12, 0.012, M('#f6f4ef', { roughness: 0.5 }), x, 1.16, 0.006);
+    const rk = B(g, 0.04, 0.066, 0.01, M('#e2dfd7', { roughness: 0.4 }), x, 1.187, 0.014);
+    return { rk, pt: g.localToWorld(V(x, 1.22, 0.02)) };
+  }
+
+  /* Đăng ký các thứ bấm được nằm trong một món đồ (cánh tủ, ngăn kéo, đèn, cánh kính lùa) */
+  function regItem(g, w) {
+    g.updateMatrixWorld(true);
+    g.traverse(o => {
+      const a = o.userData.act;
+      if (!a) return;
+      if (a.type === 'cab') {
+        addAct({
+          pts: a.pts.map(q => o.localToWorld(V(q[0], q[1], q[2]))), on: false, label: ['Mở tủ', 'Đóng tủ'],
+          apply(s) { for (const l of a.leaves) { if (l.ang) l.pv.rotation.y = l.ang * s; else l.pv.position.z = l.z + 0.24 * s; } }
+        });
+      } else if (a.type === 'lamp') {
+        const onM = o.material;
+        addAct({ pts: [o.getWorldPosition(V(0, 0, 0))], on: true, range: 3, label: ['Bật đèn', 'Tắt đèn'], set(on) { o.material = on ? onM : OFF_LAMP; } });
+      } else if (a.type === 'slide') {
+        const rect = (x0, x1) => {
+          const p = g.localToWorld(V(x0, 0, 0)), q = g.localToWorld(V(x1, 0, 0));
+          return { x0: Math.min(p.x, q.x) - 0.02, x1: Math.max(p.x, q.x) + 0.02, z0: Math.min(p.z, q.z) - 0.02, z1: Math.max(p.z, q.z) + 0.02 };
+        };
+        itemCols.push(rect(w / 2 - a.hw, w / 2));
+        const col = Object.assign(rect(-w / 2, -w / 2 + a.hw), { on: true });
+        dynCols.push(col);
+        addAct({
+          pts: [g.localToWorld(V(-w / 2 + a.hw / 2, 1.05, 0))], on: false, label: ['Mở cửa kính', 'Đóng cửa kính'],
+          apply(s) { o.position.x = a.dx * s; }, set(on) { col.on = !on; }, can: next => next || !nearCol(col)
+        });
+      }
+    });
   }
 
   function build() {
+    for (let i = 0; i < bulbs.length; i++) bulbs[i].intensity = BULB_I[i];
     if (world) {
       scene.remove(world);
       world.traverse(o => { if (o.userData.own) o.geometry.dispose(); });
     }
     world = new T.Group(); ceil = new T.Group(); caps = new T.Group(); world.add(ceil, caps);
-    wallCols = []; itemCols = []; fans = [];
+    wallCols = []; itemCols = []; fans = []; acts = []; dynCols = []; curAct = null;
     const d = DS[st.d], p = d.pal, wallM = M(p.wall, { roughness: 0.95 }), capM = M('#4a3f36');
 
     for (const wl of P.walls) {
@@ -178,15 +297,31 @@
     const ceilM = M(p.ceil, { roughness: 1 });
     B(ceil, 4.34, 0.1, 3.3, ceilM, 6.9, P.H, 1.6);
     B(ceil, 9.14, 0.1, 5.64, ceilM, 4.5, P.H, 5.95);
-    for (const [x, z] of P.lights) C(ceil, 0.14, 0.02, HD.glow('#fff6e0', 1), x, P.H - 0.02, z).userData.ns = 1;
-    for (const id of d.fans) fan(P.fanAt[id][0], P.fanAt[id][1]);
+    const discOn = HD.glow('#fff6e0', 1), discOff = M('#dedbd3', { roughness: 0.6 });
+    const discs = P.lights.map(([x, z]) => { const m = C(ceil, 0.14, 0.02, discOn, x, P.H - 0.02, z); m.userData.ns = 1; return m; });
+    /* Công tắc: mỗi cái điều khiển đèn trần của một phòng; phòng có quạt trần thì thêm một công tắc quạt bên cạnh */
+    for (const sw of P.switches) {
+      const sg = new T.Group(); sg.position.set(sw.x, 0, sw.z); sg.rotation.y = sw.r * Math.PI / 2; world.add(sg); sg.updateMatrixWorld(true);
+      const pl = plate(sg, 0);
+      const a = addAct({
+        pts: [pl.pt].concat(sw.lights.map(i => V(P.lights[i][0], P.H - 0.03, P.lights[i][1]))), on: true, range: 3.2, label: ['Bật đèn', 'Tắt đèn'],
+        set(on) {
+          pl.rk.rotation.x = on ? -0.14 : 0.14;
+          for (const i of sw.lights) { discs[i].material = on ? discOn : discOff; bulbs[i].intensity = on ? BULB_I[i] : 0; }
+        }
+      });
+      a.set(true);
+      if (sw.fan && d.fans.includes(sw.fan)) { const fp = plate(sg, 0.105); fan(P.fanAt[sw.fan][0], P.fanAt[sw.fan][1], fp.pt, fp.rk); }
+    }
 
     for (const it of d.items) {
       const [w, dd] = HD.sizeOf(it);
       const g = HD.build[it[0]](it[4] || {}, p, w, dd);
       g.position.set(it[1], 0, it[2]); g.rotation.y = (it[3] || 0) * Math.PI / 2;
       (HD.CEIL[it[0]] ? ceil : world).add(g);
-      for (const f of HD.footprints(it)) {
+      const slide = it[0] === 'glass' && (it[4] || {}).slide;
+      regItem(g, w);
+      for (const f of slide ? [] : HD.footprints(it)) {
         itemCols.push(f);
         if (it[0] === 'glass') continue;
         const s = new T.Mesh(blobGeo, blobMat);
@@ -214,7 +349,8 @@
 
   /* ───── Va chạm ───── */
   function hit(x, z) {
-    for (const list of [wallCols, itemCols]) for (const c of list) {
+    for (const list of [wallCols, itemCols, dynCols]) for (const c of list) {
+      if (c.on === false) continue;
       const dx = x - Math.max(c.x0, Math.min(x, c.x1)), dz = z - Math.max(c.z0, Math.min(z, c.z1));
       if (dx * dx + dz * dz < R * R) return true;
     }
@@ -247,6 +383,7 @@
     else if (e.code === 'Digit3') setView('top');
     else if (e.code === 'KeyN') setDesign(st.d - 1);
     else if (e.code === 'KeyM') setDesign(st.d + 1);
+    else if (e.code === 'KeyG' && st.view !== 'top') toggleAct(curAct);
   });
   /* macOS không báo nhả phím khi đang giữ Cmd, nên nhả Cmd thì coi như nhả hết */
   addEventListener('keyup', e => { if (e.key === 'Meta') releaseKeys(); else keys[e.code] = false; });
@@ -346,6 +483,8 @@
     for (const c of itemCols) mg.fillRect(c.x0, c.z0, c.x1 - c.x0, c.z1 - c.z0);
     mg.fillStyle = '#4a3b2e';
     for (const c of wallCols) mg.fillRect(c.x0, c.z0, c.x1 - c.x0, c.z1 - c.z0);
+    mg.fillStyle = '#a07a52';
+    for (const c of dynCols) if (c.on) mg.fillRect(c.x0, c.z0, c.x1 - c.x0, c.z1 - c.z0);
     if (st.view === 'top') return;
     mg.save(); mg.translate(st.x, st.z); mg.rotate(-st.yaw);
     mg.fillStyle = 'rgba(214,73,51,.25)'; mg.beginPath(); mg.moveTo(0, 0); mg.arc(0, 0, 1.5, -Math.PI / 2 - 0.6, -Math.PI / 2 + 0.6); mg.fill();
@@ -422,7 +561,9 @@
   addEventListener('resize', resize);
 
   /* ───── Vòng lặp ───── */
-  let last = performance.now();
+  let last = performance.now(), actOn = null;
+  const actEl = $('act'), actTxt = $('actTxt');
+  actEl.onclick = () => toggleAct(curAct);
   function frame(now) {
     const dt = Math.min(0.05, (now - last) / 1000); last = now;
     if (st.view === 'top') {
@@ -435,7 +576,22 @@
       camera.position.set(st.x, eye, st.z);
       camera.rotation.set(st.pitch, st.yaw, 0);
     }
-    for (const f of fans) f.rotation.y += dt * 4;
+    /* Chuyển động mở/đóng: t trượt dần về 0 hoặc 1, có hãm ở hai đầu */
+    for (const a of acts) {
+      if (!a.moving) continue;
+      const to = a.on ? 1 : 0, step = dt / (a.apply ? 0.45 : 0.9);
+      a.t = Math.abs(to - a.t) <= step ? to : a.t + Math.sign(to - a.t) * step;
+      if (a.apply) a.apply(a.t * a.t * (3 - 2 * a.t));
+      if (a.t === to) a.moving = false;
+      renderer.shadowMap.needsUpdate = true;
+    }
+    for (const f of fans) f.rotor.rotation.y += dt * 4 * f.a.t;
+    const na = st.view === 'top' ? null : pickAct();
+    if (na !== curAct || (na && na.on !== actOn)) {
+      curAct = na; actOn = na && na.on;
+      actEl.hidden = !na;
+      if (na) actTxt.textContent = na.label[na.on ? 1 : 0];
+    }
     renderer.render(scene, camera);
     if (st.map) drawMap();
     requestAnimationFrame(frame);
