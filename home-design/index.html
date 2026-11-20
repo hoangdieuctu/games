@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-CBV0HJRM37"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-CBV0HJRM37');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Citigrand">
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="icon" type="image/png" href="icon.png">
+<meta name="theme-color" content="#f3eee4">
+<title>Citigrand</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=9">
+</head>
+<body>
+
+<canvas id="view"></canvas>
+
+<header id="bar">
+  <a id="back" class="btn" href="../index.html" aria-label="Về trang chủ">‹</a>
+  <button id="btnMap" class="btn" aria-label="Bật tắt bản đồ">▦</button>
+  <button id="btnFull" class="btn" aria-label="Toàn màn hình">⛶</button>
+</header>
+
+<canvas id="map" title="Bấm vào bản đồ để tới chỗ đó"></canvas>
+
+<div id="views" role="group" aria-label="Góc nhìn">
+  <button data-v="walk">Đi bộ</button>
+  <button data-v="baby">Mắt bé</button>
+  <button data-v="top">Trên cao</button>
+</div>
+
+<div id="joy"><i></i></div>
+<i id="dot"></i>
+<div id="tip">
+  <span><b>W A S D</b> đi lại</span>
+  <span><b>Chuột</b> nhìn quanh</span>
+  <span><b>Shift</b> đi nhanh</span>
+  <span><b>1 2 3</b> đổi góc nhìn</span>
+  <span><b>N M</b> đổi thiết kế</span>
+  <span><b>Esc</b> hiện con trỏ</span>
+</div>
+
+<nav id="switch">
+  <button id="prev" class="btn" aria-label="Thiết kế trước">‹</button>
+  <button id="cur"><small id="curTag"></small><b id="curName"></b></button>
+  <button id="next" class="btn" aria-label="Thiết kế sau">›</button>
+</nav>
+
+<section id="sheet" class="panel" hidden>
+  <header><h2>Các phương án thiết kế</h2><button class="close btn" aria-label="Đóng">×</button></header>
+  <div id="list"></div>
+</section>
+
+<div id="hint">
+  <div>
+    <h2>Dạo một vòng quanh nhà</h2>
+    <p class="pc"><b>W A S D</b> để đi · <b>rê chuột</b> để nhìn quanh · <b>Shift</b> đi nhanh · <b>Esc</b> để hiện lại con trỏ</p>
+    <p class="pc">Phím <b>1 2 3</b> đổi góc nhìn · phím <b>N M</b> đổi thiết kế</p>
+    <p class="mb"><b>Kéo nửa trái</b> màn hình để đi · <b>kéo nửa phải</b> để nhìn quanh</p>
+    <p>Bấm <b>‹ ›</b> ở dưới để đổi giữa các thiết kế. Bấm vào bản đồ để tới thẳng một phòng.</p>
+    <button class="go">Vào nhà</button>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.149.0/build/three.min.js"></script>
+<script src="plan.js?v=9"></script>
+<script src="designs.js?v=9"></script>
+<script src="furniture.js?v=9"></script>
+<script src="main.js?v=9"></script>
+</body>
+</html>
