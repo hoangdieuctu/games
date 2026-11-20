@@ -31,6 +31,7 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
   backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
 }
 .btn:active { transform: scale(.94); }
+.btn.off { color: rgba(51, 41, 31, .3); text-decoration: line-through; }
 
 #bar {
   position: fixed; left: 0; right: 0; top: 0; z-index: 5;

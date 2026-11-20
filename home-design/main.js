@@ -5,7 +5,7 @@
   const $ = id => document.getElementById(id);
 
   /* ───── Trạng thái (lưu ở trình duyệt) ───── */
-  const st = { d: 0, x: P.spawn.x, z: P.spawn.z, yaw: P.spawn.yaw, pitch: 0, view: 'walk', map: true, seen: false, az: 0, pol: 0.55, zoom: 1 };
+  const st = { d: 0, x: P.spawn.x, z: P.spawn.z, yaw: P.spawn.yaw, pitch: 0, view: 'walk', map: true, music: true, seen: false, az: 0, pol: 0.55, zoom: 1 };
   try { Object.assign(st, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) { /* bỏ qua dữ liệu hỏng */ }
   const q = new URLSearchParams(location.search);
   if (q.has('d')) st.d = Math.max(1, Math.min(DS.length, +q.get('d') || 1)) - 1;
@@ -362,6 +362,7 @@
     sheet.querySelectorAll('.opt').forEach((b, i) => b.classList.toggle('on', i === st.d));
     document.querySelectorAll('#views button').forEach(b => b.classList.toggle('on', b.dataset.v === st.view));
     map.hidden = !st.map;
+    $('btnSound').classList.toggle('off', !st.music);
     document.body.classList.toggle('top', st.view === 'top');
   }
   function setDesign(i) {
@@ -383,6 +384,16 @@
   $('prev').onclick = () => setDesign(st.d - 1);
   $('next').onclick = () => setDesign(st.d + 1);
   $('cur').onclick = () => { sheet.hidden = !sheet.hidden; };
+  /* Nhạc nền: bắt đầu ở thao tác đầu tiên, tạm dừng khi rời trang */
+  let started = false;
+  function startMusic() {
+    if (started) return;
+    started = true; HD.music.set(st.music);
+  }
+  addEventListener('pointerdown', startMusic);
+  addEventListener('keydown', startMusic);
+  document.addEventListener('visibilitychange', () => { if (started) HD.music.set(st.music && !document.hidden); });
+  $('btnSound').onclick = () => { st.music = !st.music; started = true; HD.music.set(st.music); refreshUI(); dirty = true; };
   $('btnMap').onclick = () => { st.map = !st.map; refreshUI(); dirty = true; };
   sheet.querySelector('.close').onclick = () => { sheet.hidden = true; };
   document.querySelectorAll('#views button').forEach(b => { b.onclick = () => setView(b.dataset.v); });
