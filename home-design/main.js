@@ -1,7 +1,11 @@
 /* Dựng căn hộ, điều khiển đi lại và giao diện. */
 (function () {
   const HD = window.HD, T = THREE, P = HD.PLAN, DS = HD.DESIGNS, B = HD.prim.B, C = HD.prim.C, M = HD.mat;
-  const KEY = 'home-design-v1', R = 0.2, EYES = { walk: 1.6, baby: 0.55 };
+  /* Trên màn hình phẳng, phòng dựng đúng số đo luôn cho cảm giác chật hơn ngoài đời (mất tầm nhìn hai bên, không có chiều sâu),
+     nên cả căn hộ được nới theo chiều ngang và chiều sâu thêm S lần; chiều cao giữ nguyên.
+     Mọi toạ độ trong mã (mặt bằng, đồ đạc, va chạm, bản đồ) vẫn là mét của mặt bằng gốc — chỉ lúc vẽ và lúc đặt máy quay mới nhân S. */
+  const S = 1.14;
+  const KEY = 'home-design-v1', R = 0.2 / S, EYES = { walk: 1.55, baby: 0.55 };
   const $ = id => document.getElementById(id);
 
   /* ───── Trạng thái (lưu ở trình duyệt) ───── */
@@ -39,16 +43,16 @@
   scene.add(new T.HemisphereLight('#fdfaf4', '#9a8c7c', 0.42));
   scene.add(new T.AmbientLight('#ffffff', 0.1));
   const sun = new T.DirectionalLight('#fff0d8', 2.2);
-  sun.position.set(8, 7.5, 18); sun.target.position.set(4, 0, 3.5);
+  sun.position.set(8 * S, 7.5, 18 * S); sun.target.position.set(4 * S, 0, 3.5 * S);
   sun.castShadow = true;
   sun.shadow.mapSize.set(2048, 2048);
-  Object.assign(sun.shadow.camera, { left: -8, right: 8, top: 8, bottom: -8, near: 1, far: 40 });
+  Object.assign(sun.shadow.camera, { left: -9.5, right: 9.5, top: 9.5, bottom: -9.5, near: 1, far: 44 });
   sun.shadow.bias = -0.0005; sun.shadow.normalBias = 0.03;
   scene.add(sun, sun.target);
   /* Mỗi đèn trần một bóng sáng thật để bật tắt được; đèn phòng chính sáng hơn đèn phòng phụ */
   const BULB_I = [0.55, 0.3, 0.55, 0.5, 0.3, 0.3, 0.3, 0.55, 0.25, 0.55];
   const bulbs = P.lights.map(([x, z], i) => {
-    const l = new T.PointLight('#ffe6c4', BULB_I[i], BULB_I[i] > 0.4 ? 6.5 : 4.5, 1.6); l.position.set(x, 2.3, z); scene.add(l);
+    const l = new T.PointLight('#ffe6c4', BULB_I[i], BULB_I[i] > 0.4 ? 6.5 : 4.5, 1.6); l.position.set(x * S, 2.3, z * S); scene.add(l);
     return l;
   });
 
@@ -60,6 +64,7 @@
     b.userData.ns = 1;
   }
   scene.add(city);
+  const rig = new T.Group(); rig.scale.set(S, 1, S); scene.add(rig);
 
   const blobTex = (() => {
     const c = document.createElement('canvas'); c.width = c.height = 128;
@@ -107,13 +112,13 @@
     const c = camera.position;
     let best = null, bs = 9;
     for (const a of acts) for (const pt of a.pts) {
-      tmp.subVectors(pt, c);
+      tmp.set(pt.x * S - c.x, pt.y - c.y, pt.z * S - c.z);
       const dist = tmp.length();
       if (dist > (a.range || 2.6)) continue;
       const ang = Math.acos(Math.max(-1, Math.min(1, tmp.dot(fwd) / (dist || 1))));
       if (ang > (dist < 0.9 ? 0.85 : 0.5)) continue;
       const sc = ang + dist * 0.05;
-      if (sc < bs && !blocked(c.x, c.z, pt.x, pt.z)) { bs = sc; best = a; }
+      if (sc < bs && !blocked(st.x, st.z, pt.x, pt.z)) { bs = sc; best = a; }
     }
     return best;
   }
@@ -260,7 +265,7 @@
   function build() {
     for (let i = 0; i < bulbs.length; i++) bulbs[i].intensity = BULB_I[i];
     if (world) {
-      scene.remove(world);
+      rig.remove(world);
       world.traverse(o => { if (o.userData.own) o.geometry.dispose(); });
     }
     world = new T.Group(); ceil = new T.Group(); caps = new T.Group(); world.add(ceil, caps);
@@ -335,8 +340,19 @@
       o.castShadow = !o.userData.ns && !o.material.transparent;
       o.receiveShadow = !o.userData.blob;
     });
-    scene.add(world);
+    rig.add(world);
     applyView();
+  }
+
+  /* Góc nhìn khi đi trong nhà: rộng hơn mắt máy ảnh thường để phòng không bị bó hẹp như nhìn qua ống;
+     màn hình dọc (điện thoại) thì mở thêm theo chiều đứng để bề ngang vẫn thấy được ít nhất khoảng 75°. */
+  function setFov() {
+    let f = 72;
+    if (st.view !== 'top') {
+      const need = 2 * Math.atan(Math.tan(37.5 * Math.PI / 180) / camera.aspect) * 180 / Math.PI;
+      f = Math.max(80, Math.min(100, need));
+    }
+    if (camera.fov !== f) { camera.fov = f; camera.updateProjectionMatrix(); }
   }
 
   /* Nhìn từ trên cao thì bỏ trần, tô đậm đỉnh tường và giảm nắng cho đỡ chói */
@@ -344,6 +360,7 @@
     const top = st.view === 'top';
     ceil.visible = !top; caps.visible = top;
     sun.intensity = top ? 1.0 : 2.2;
+    setFov();
     renderer.shadowMap.needsUpdate = true;
   }
 
@@ -462,7 +479,7 @@
     const len = Math.hypot(f, s);
     if (!len) return;
     if (len > 1) { f /= len; s /= len; }
-    const sp = (keys.ShiftLeft || keys.ShiftRight ? 3.2 : 1.9) * (st.view === 'baby' ? 0.6 : 1) * dt;
+    const sp = (keys.ShiftLeft || keys.ShiftRight ? 2.6 : 1.3) * (st.view === 'baby' ? 0.6 : 1) * dt / S;
     const sin = Math.sin(st.yaw), cos = Math.cos(st.yaw);
     const dx = (-sin * f + cos * s) * sp, dz = (-cos * f - sin * s) * sp;
     if (!hit(st.x + dx, st.z)) st.x += dx;
@@ -556,7 +573,7 @@
 
   function resize() {
     renderer.setSize(innerWidth, innerHeight, false);
-    camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix();
+    camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); setFov();
   }
   addEventListener('resize', resize);
 
@@ -567,13 +584,13 @@
   function frame(now) {
     const dt = Math.min(0.05, (now - last) / 1000); last = now;
     if (st.view === 'top') {
-      const dist = 12.5 * st.zoom / Math.min(1, camera.aspect * 0.95), sp = Math.sin(st.pol);
-      camera.position.set(4.5 + dist * sp * Math.sin(st.az), 0.5 + dist * Math.cos(st.pol), 4.5 + dist * sp * Math.cos(st.az));
-      camera.lookAt(4.5, 0.5, 4.5);
+      const dist = 12.5 * S * st.zoom / Math.min(1, camera.aspect * 0.95), sp = Math.sin(st.pol);
+      camera.position.set(4.5 * S + dist * sp * Math.sin(st.az), 0.5 + dist * Math.cos(st.pol), 4.5 * S + dist * sp * Math.cos(st.az));
+      camera.lookAt(4.5 * S, 0.5, 4.5 * S);
     } else {
       move(dt);
       eye += (EYES[st.view] - eye) * Math.min(1, dt * 8);
-      camera.position.set(st.x, eye, st.z);
+      camera.position.set(st.x * S, eye, st.z * S);
       camera.rotation.set(st.pitch, st.yaw, 0);
     }
     /* Chuyển động mở/đóng: t trượt dần về 0 hoặc 1, có hãm ở hai đầu */
