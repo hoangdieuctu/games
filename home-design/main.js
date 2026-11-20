@@ -9,12 +9,13 @@
   const $ = id => document.getElementById(id);
 
   /* ───── Trạng thái (lưu ở trình duyệt) ───── */
-  const st = { d: 0, x: P.spawn.x, z: P.spawn.z, yaw: P.spawn.yaw, pitch: 0, view: 'walk', map: true, music: true, seen: false, az: 0, pol: 0.55, zoom: 1 };
+  const st = { d: 0, x: P.spawn.x, z: P.spawn.z, yaw: P.spawn.yaw, pitch: 0, view: 'walk', map: true, music: true, time: 'day', seen: false, az: 0, pol: 0.55, zoom: 1 };
   try { Object.assign(st, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) { /* bỏ qua dữ liệu hỏng */ }
   const q = new URLSearchParams(location.search);
   if (q.has('d')) st.d = Math.max(1, Math.min(DS.length, +q.get('d') || 1)) - 1;
   if (!DS[st.d]) st.d = 0;
   if (!['walk', 'baby', 'top'].includes(st.view)) st.view = 'walk';
+  if (!['day', 'dusk', 'night'].includes(st.time)) st.time = 'day';
   let dirty = false;
   function save() {
     if (!dirty) return;
@@ -40,10 +41,9 @@
   const camera = new T.PerspectiveCamera(72, 1, 0.05, 150);
   camera.rotation.order = 'YXZ';
 
-  scene.add(new T.HemisphereLight('#fdfaf4', '#9a8c7c', 0.42));
-  scene.add(new T.AmbientLight('#ffffff', 0.1));
+  const hemi = new T.HemisphereLight('#fdfaf4', '#9a8c7c', 0.42), amb = new T.AmbientLight('#ffffff', 0.1);
+  scene.add(hemi, amb);
   const sun = new T.DirectionalLight('#fff0d8', 2.2);
-  sun.position.set(8 * S, 7.5, 18 * S); sun.target.position.set(4 * S, 0, 3.5 * S);
   sun.castShadow = true;
   sun.shadow.mapSize.set(2048, 2048);
   Object.assign(sun.shadow.camera, { left: -9.5, right: 9.5, top: 9.5, bottom: -9.5, near: 1, far: 44 });
@@ -56,14 +56,55 @@
     return l;
   });
 
-  /* Dãy nhà phía xa ngoài cửa sổ */
+  /* Dãy nhà phía xa ngoài cửa sổ: vật liệu riêng, không ăn đèn, để đổi màu theo giờ; ban đêm hiện các ô cửa sổ sáng đèn */
   const city = new T.Group();
+  const winTex = (() => {
+    const c = document.createElement('canvas'); c.width = 64; c.height = 128;
+    const g = c.getContext('2d');
+    g.fillStyle = '#1c2336'; g.fillRect(0, 0, 64, 128);
+    for (let y = 0; y < 16; y++) for (let x = 0; x < 6; x++) {
+      const k = (x * 7 + y * 13 + x * y * 3) % 10;
+      if (k < 4) { g.fillStyle = ['#ffd58a', '#ffe9b8', '#ffc56e', '#cfe4ff'][k]; g.fillRect(x * 10 + 4, y * 8 + 2, 6, 4); }
+    }
+    const t = new T.CanvasTexture(c); t.encoding = T.sRGBEncoding; return t;
+  })();
+  const CITY_DAY = ['#b9c6d2', '#c9cfd6', '#aebccb', '#d5d2cb'];
+  const cityMats = CITY_DAY.map(c => new T.MeshBasicMaterial({ color: c }));
   for (let i = 0; i < 26; i++) {
     const h = 14 + (i * 37 % 23), w = 5 + (i * 13 % 6);
-    const b = B(city, w, h, 6, M(['#b9c6d2', '#c9cfd6', '#aebccb', '#d5d2cb'][i % 4]), -60 + i * 5.2 + (i % 3), -26, 34 + (i * 29 % 30));
+    const b = B(city, w, h, 6, cityMats[i % 4], -60 + i * 5.2 + (i % 3), -26, 34 + (i * 29 % 30));
     b.userData.ns = 1;
   }
   scene.add(city);
+
+  /* ───── Giờ trong ngày ─────
+     sun: màu, độ mạnh, vị trí so với giữa nhà (cửa kính hướng nam = +z, tây = -x); bulb: hệ số sáng của đèn trần */
+  const TIMES = {
+    day: { icon: '☀', name: 'Buổi sáng', sky: '#cfe6f5', sun: ['#fff0d8', 2.2, 4, 7.5, 14.5], hemi: ['#fdfaf4', '#9a8c7c', 0.42], amb: 0.1, bulb: 1, exp: 1.0, city: null },
+    dusk: { icon: '◐', name: 'Hoàng hôn', sky: '#f3b27e', sun: ['#ff8f4a', 1.9, -9, 2.6, 15], hemi: ['#f7c9a2', '#6f5f5c', 0.26], amb: 0.06, bulb: 1.2, exp: 1.0, city: '#8a6a6e' },
+    night: { icon: '☾', name: 'Buổi tối', sky: '#0b1222', sun: ['#8fa8dc', 0.12, -5, 9, 12], hemi: ['#3a4666', '#17171c', 0.1], amb: 0.03, bulb: 1.6, exp: 0.92, city: null, lit: true }
+  };
+  let bulbK = 1;
+  const bulbOn = P.lights.map(() => true);
+  function litBulbs() { for (let i = 0; i < bulbs.length; i++) bulbs[i].intensity = bulbOn[i] ? BULB_I[i] * bulbK : 0; }
+  function applyTime() {
+    const t = TIMES[st.time], top = st.view === 'top';
+    scene.background.set(t.sky);
+    sun.color.set(t.sun[0]); sun.intensity = t.sun[1] * (top ? 0.45 : 1);
+    sun.target.position.set(4 * S, 0, 3.5 * S);
+    sun.position.set(4 * S + t.sun[2], t.sun[3], 3.5 * S + t.sun[4]);
+    hemi.color.set(t.hemi[0]); hemi.groundColor.set(t.hemi[1]); hemi.intensity = t.hemi[2];
+    amb.intensity = t.amb;
+    renderer.toneMappingExposure = t.exp;
+    cityMats.forEach((m, i) => {
+      const map = t.lit ? winTex : null;
+      if (m.map !== map) { m.map = map; m.needsUpdate = true; }
+      m.color.set(map ? (i % 2 ? '#ffffff' : '#c8c8c8') : t.city || CITY_DAY[i]);
+      if (!map && t.city && i % 2) m.color.offsetHSL(0, 0, 0.04);
+    });
+    bulbK = t.bulb; litBulbs();
+    renderer.shadowMap.needsUpdate = true;
+  }
   const rig = new T.Group(); rig.scale.set(S, 1, S); scene.add(rig);
 
   const blobTex = (() => {
@@ -263,7 +304,7 @@
   }
 
   function build() {
-    for (let i = 0; i < bulbs.length; i++) bulbs[i].intensity = BULB_I[i];
+    bulbOn.fill(true);
     if (world) {
       rig.remove(world);
       world.traverse(o => { if (o.userData.own) o.geometry.dispose(); });
@@ -312,7 +353,8 @@
         pts: [pl.pt].concat(sw.lights.map(i => V(P.lights[i][0], P.H - 0.03, P.lights[i][1]))), on: true, range: 3.2, label: ['Bật đèn', 'Tắt đèn'],
         set(on) {
           pl.rk.rotation.x = on ? -0.14 : 0.14;
-          for (const i of sw.lights) { discs[i].material = on ? discOn : discOff; bulbs[i].intensity = on ? BULB_I[i] : 0; }
+          for (const i of sw.lights) { discs[i].material = on ? discOn : discOff; bulbOn[i] = on; }
+          litBulbs();
         }
       });
       a.set(true);
@@ -359,9 +401,8 @@
   function applyView() {
     const top = st.view === 'top';
     ceil.visible = !top; caps.visible = top;
-    sun.intensity = top ? 1.0 : 2.2;
     setFov();
-    renderer.shadowMap.needsUpdate = true;
+    applyTime();
   }
 
   /* ───── Va chạm ───── */
@@ -401,6 +442,7 @@
     else if (e.code === 'KeyN') setDesign(st.d - 1);
     else if (e.code === 'KeyM') setDesign(st.d + 1);
     else if (e.code === 'KeyG' && st.view !== 'top') toggleAct(curAct);
+    else if (e.code === 'KeyT') nextTime();
   });
   /* macOS không báo nhả phím khi đang giữ Cmd, nên nhả Cmd thì coi như nhả hết */
   addEventListener('keyup', e => { if (e.key === 'Meta') releaseKeys(); else keys[e.code] = false; });
@@ -529,11 +571,18 @@
     document.querySelectorAll('#views button').forEach(b => b.classList.toggle('on', b.dataset.v === st.view));
     map.hidden = !st.map;
     $('btnSound').classList.toggle('off', !st.music);
+    const tm = TIMES[st.time];
+    $('btnTime').textContent = tm.icon; $('btnTime').title = tm.name + ' — bấm để đổi giờ (phím T)';
     document.body.classList.toggle('top', st.view === 'top');
   }
   function setDesign(i) {
     st.d = (i + DS.length) % DS.length;
     build(); unstick(); refreshUI(); dirty = true;
+  }
+  function nextTime() {
+    const k = Object.keys(TIMES);
+    st.time = k[(k.indexOf(st.time) + 1) % k.length];
+    applyTime(); refreshUI(); dirty = true;
   }
   function setView(v) {
     st.view = v;
@@ -560,6 +609,7 @@
   addEventListener('keydown', startMusic);
   document.addEventListener('visibilitychange', () => { if (started) HD.music.set(st.music && !document.hidden); });
   $('btnSound').onclick = () => { st.music = !st.music; started = true; HD.music.set(st.music); refreshUI(); dirty = true; };
+  $('btnTime').onclick = nextTime;
   $('btnMap').onclick = () => { st.map = !st.map; refreshUI(); dirty = true; };
   sheet.querySelector('.close').onclick = () => { sheet.hidden = true; };
   document.querySelectorAll('#views button').forEach(b => { b.onclick = () => setView(b.dataset.v); });
