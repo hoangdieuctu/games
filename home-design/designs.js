@@ -113,7 +113,7 @@
   const DEFS = [
     {
       name: 'Nhà Trống', style: 'Lúc nhận nhà',
-      desc: 'Căn hộ như lúc mới nhận: chưa có món nội thất nào, chưa treo rèm, chỉ có thiết bị vệ sinh. Đi một vòng để cảm nhận kích thước thật của từng phòng trước khi xem các phương án bên dưới.',
+      desc: 'Căn hộ như lúc mới nhận: chưa có món nội thất nào, chưa treo rèm, nhà vệ sinh cũng chưa lắp thiết bị. Đi một vòng để cảm nhận kích thước thật của từng phòng trước khi xem các phương án bên dưới.',
       points: ['Thấy rõ phòng nào rộng, phòng nào hẹp khi chưa có đồ che.',
         'Dễ hình dung nắng từ cửa hướng nam chiếu sâu tới đâu.',
         'Dùng làm mốc so sánh: chuyển sang thiết kế khác để xem cùng chỗ đứng đó thay đổi thế nào.'],
@@ -494,7 +494,7 @@
     return {
       id: i, name: d.name, style: d.style, desc: d.desc, points: d.points, bed2: d.bed2,
       remove: d.remove || [], fans: d.fans || [], pal,
-      items: d.items(pal).concat(baths(pal), d.bare ? [] : logia())
+      items: d.bare ? d.items(pal) : d.items(pal).concat(baths(pal), logia())
     };
   });
 })(typeof window !== 'undefined' ? window : globalThis);

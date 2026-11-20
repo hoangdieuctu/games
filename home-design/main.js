@@ -94,24 +94,25 @@
       }
       return;
     }
-    const fr = 0.045;
+    /* Vách kính kín sàn-trần: khung mảnh, tấm kính lớn; cửa sổ thường: khung dày, chia ô nhỏ */
+    const full = o.type === 'glass', fr = full ? 0.03 : 0.045, mw = full ? 0.015 : 0.02;
     wbox(g, wl, o.a, o.b, o.y1 - fr, o.y1, t2, trim);
     wbox(g, wl, o.a, o.b, o.y0, o.y0 + fr, o.y0 > 0 ? th + 0.1 : t2, trim);
     wbox(g, wl, o.a, o.a + fr, o.y0, o.y1, t2, trim); wbox(g, wl, o.b - fr, o.b, o.y0, o.y1, t2, trim);
-    const n = Math.max(1, Math.round((o.b - o.a) / 0.9));
-    for (let i = 1; i < n; i++) { const x = o.a + (o.b - o.a) * i / n; wbox(g, wl, x - 0.02, x + 0.02, o.y0, o.y1, 0.05, trim); }
+    const n = full ? Math.max(2, Math.round((o.b - o.a) / 1.4)) : Math.max(1, Math.round((o.b - o.a) / 0.9));
+    for (let i = 1; i < n; i++) { const x = o.a + (o.b - o.a) * i / n; wbox(g, wl, x - mw, x + mw, o.y0, o.y1, 0.05, trim); }
     wbox(g, wl, o.a, o.b, o.y0, o.y1, 0.012, HD.GLASS).userData.ns = 1;
     if (wl.id !== 's' || p.nocurtain) return;
-    /* Rèm hoặc mành tre cho cửa hướng nam */
-    const off = -(th / 2 + 0.07);
+    /* Rèm hoặc mành tre cho cửa hướng nam; vách kính kín thì rèm nằm gọn trong lòng ô, không chờm lên tường và trần */
+    const off = -(th / 2 + 0.07), ex = full ? 0 : 1, top = Math.min(o.y1 + 0.12, P.H - 0.035);
     if (p.blind) {
-      wbox(g, wl, o.a - 0.05, o.b + 0.05, o.y1 - 0.5, o.y1 + 0.08, 0.025, M('#c9a66b', { roughness: 1 }), off);
-      for (let y = o.y1 - 0.46; y < o.y1 + 0.06; y += 0.07) wbox(g, wl, o.a - 0.05, o.b + 0.05, y, y + 0.008, 0.03, M('#a9865a'), off);
+      wbox(g, wl, o.a - 0.05 * ex, o.b + 0.05 * ex, top - 0.62, top - 0.04, 0.025, M('#c9a66b', { roughness: 1 }), off);
+      for (let y = top - 0.58; y < top - 0.06; y += 0.07) wbox(g, wl, o.a - 0.05 * ex, o.b + 0.05 * ex, y, y + 0.008, 0.03, M('#a9865a'), off);
     } else {
       const cm = M(p.curtain, { roughness: 1 });
-      wbox(g, wl, o.a - 0.14, o.a + 0.2, 0.03, o.y1 + 0.12, 0.07, cm, off);
-      wbox(g, wl, o.b - 0.2, o.b + 0.14, 0.03, o.y1 + 0.12, 0.07, cm, off);
-      wbox(g, wl, o.a - 0.2, o.b + 0.2, o.y1 + 0.12, o.y1 + 0.145, 0.02, M('#3a3a3a'), off);
+      wbox(g, wl, o.a - 0.14 * ex, o.a - 0.14 * ex + 0.34, 0.03, top, 0.07, cm, off);
+      wbox(g, wl, o.b + 0.14 * ex - 0.34, o.b + 0.14 * ex, 0.03, top, 0.07, cm, off);
+      wbox(g, wl, o.a - 0.2 * ex, o.b + 0.2 * ex, top, top + 0.025, 0.02, M('#3a3a3a'), off);
     }
   }
 

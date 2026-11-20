@@ -7,7 +7,7 @@
     spawn: { x: 7.0, z: 0.9, yaw: Math.PI },
 
     /* axis 'x': tường chạy dọc trục x tại z = at; axis 'z': chạy dọc trục z tại x = at.
-       open: door (đi qua được, cánh mở), entry (cửa chính, đóng), window, glass (vách kính sát sàn). */
+       open: door (đi qua được, cánh mở), entry (cửa chính, đóng), window, glass (vách kính kín từ sàn tới trần). */
     walls: [
       { id: 'n', axis: 'x', at: 0, a: 4.8, b: 9, open: [{ a: 6.55, b: 7.5, y0: 0, y1: 2.15, type: 'entry' }] },
       { id: 'n2', axis: 'x', at: 3.2, a: 0, b: 4.8, open: [
@@ -20,9 +20,9 @@
       { id: 'bed2-n', axis: 'x', at: 5.9, a: 3.2, b: 6.1, open: [
         { a: 5.15, b: 5.95, y0: 0, y1: 2.1, type: 'door', hinge: 'b', side: 1 }] },
       { id: 's', axis: 'x', at: 8.7, a: 0, b: 9, open: [
-        { a: 1.1, b: 3.0, y0: 0.9, y1: 2.3, type: 'window' },
-        { a: 4.0, b: 5.9, y0: 0.9, y1: 2.3, type: 'window' },
-        { a: 6.5, b: 8.6, y0: 0, y1: 2.4, type: 'glass' }] },
+        { a: 0.95, b: 3.0, y0: 0, y1: 2.75, type: 'glass' },
+        { a: 3.9, b: 5.95, y0: 0, y1: 2.75, type: 'glass' },
+        { a: 6.17, b: 8.93, y0: 0, y1: 2.75, type: 'glass' }] },
       { id: 'w', axis: 'z', at: 0, a: 3.2, b: 8.7 },
       { id: 'logia-w', axis: 'z', at: 4.8, a: 0, b: 3.2, open: [{ a: 0.8, b: 2.2, y0: 1.0, y1: 2.2, type: 'window' }] },
       { id: 'logia-e', axis: 'z', at: 6.1, a: 0, b: 4.7, open: [
