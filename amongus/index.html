@@ -91,7 +91,6 @@ button:disabled { opacity: .35; cursor: default; }
 /* ── cần điều khiển ── */
 .joy { position: fixed; z-index: 6; width: 130px; height: 130px; border-radius: 50%; background: rgba(255,255,255,.1); border: 2px solid rgba(255,255,255,.3); pointer-events: none; transform: translate(-50%, -50%); }
 .joy i { position: absolute; left: 50%; top: 50%; width: 56px; height: 56px; border-radius: 50%; background: rgba(255,255,255,.55); transform: translate(-50%, -50%); box-shadow: 0 3px 8px rgba(0,0,0,.4); }
-.hint { position: fixed; z-index: 5; left: calc(env(safe-area-inset-left, 0px) + 16px); bottom: calc(env(safe-area-inset-bottom, 0px) + 16px); font-size: 12.5px; font-weight: 700; color: rgba(255,255,255,.55); max-width: 46vw; line-height: 1.3; pointer-events: none; }
 /* ── bảng ── */
 .overlay { position: fixed; inset: 0; z-index: 20; display: flex; align-items: center; justify-content: center; background: rgba(5,8,20,.6); padding: 14px; -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); animation: fade .2s ease-out; color: var(--ink); }
 @keyframes fade { from { opacity: 0; } }
@@ -363,7 +362,6 @@ button:disabled { opacity: .35; cursor: default; }
 <div class="vchip" id="vchip" hidden></div>
 <div class="nstat" id="nstat" hidden></div>
 <div class="joy" id="joy" hidden><i></i></div>
-<div class="hint" id="hint" hidden>Di chuyển: WASD / mũi tên · E dùng · R báo · Q giết/bắn · V ống gió · F phá hoại · M bản đồ · T mic</div>
 <div class="sabo-pop" id="saboPop" hidden>
   <button id="sbLights">💡 Tắt đèn <kbd>1</kbd></button>
   <button id="sbReactor">☢️ Lò phản ứng <kbd>2</kbd></button>
@@ -1366,7 +1364,7 @@ function nearby() {
   o.vent = me.imp && !me.dead ? VENTS.findIndex(v => Math.hypot(v[0] - me.x, v[1] - me.y) < 50) : -1;
   o.button = !me.dead && dist(me, BUTTON) < 110 && me.emergency > 0 && !sabo;
   o.fix = !me.dead ? saboLeft().find(id => dist(me, FIX[id]) < USE_RANGE + 20) || null : null;
-  o.target = me.sheriff && !me.dead && me.ammo > 0 && me.vent < 0 ? alive().filter(q => q !== me && q.vent < 0 && !inBunk(q) && dist(me, q) < SHOOT_RANGE && losClear(me, q)).sort((a, b) => dist(me, a) - dist(me, b))[0] : null;
+  o.target = shootTarget();
   return o;
 }
 function doUse() {
@@ -1383,6 +1381,19 @@ function doKill() {
   // khách: chủ phòng xét và giết; mình tự nhảy tới chỗ nạn nhân ngay cho khỏi trễ
   netSend({ t: 'kill', v: o.victim.id }); me.killCd = KILL_CD;
   if (canStand(o.victim.x + 8, o.victim.y)) { me.x = o.victim.x + 8; me.y = o.victim.y; }
+}
+// mục tiêu súng của Cảnh sát: góc nhìn thứ ba bắn người gần nhất; góc nhìn thứ nhất bắn người nằm dưới tâm ngắm (giữa màn hình)
+function shootTarget() {
+  if (!me.sheriff || me.dead || me.ammo <= 0 || me.vent >= 0) return null;
+  const ok = alive().filter(q => q !== me && q.vent < 0 && !inBunk(q) && dist(me, q) < SHOOT_RANGE && losClear(me, q));
+  if (!fpOn()) return ok.sort((a, b) => dist(me, a) - dist(me, b))[0] || null;
+  const ca = Math.cos(fpA), sa = Math.sin(fpA); let best = null, bo = Infinity;
+  for (const q of ok) {
+    const ax = q.x - me.x, ay = q.y - me.y, d = ax * ca + ay * sa; if (d < 8) continue; // sau lưng / ngay sát mặt: không ngắm được
+    const off = Math.abs(Math.atan2(-ax * sa + ay * ca, d)), tol = Math.atan(22 / d) + .03; // lệch tâm ngắm (rad) · nửa bề ngang thân + chút dễ dãi
+    if (off < tol && off / tol < bo) { bo = off / tol; best = q; }
+  }
+  return best;
 }
 function doShoot() {
   if (phase !== 'play' || !me.sheriff || me.dead || me.ammo <= 0 || me.shootCd > 0 || me.stun > 0 || inBunk(me)) return; const o = nearby(); if (!o.target) return;
@@ -2759,7 +2770,19 @@ function drawFP(W, H, now, shk) {
   // đang ở đâu
   if (phase === 'play' && $('alert').hidden) {
     ctx.font = '800 14px "Baloo 2", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(0,0,0,.65)'; ctx.fillStyle = 'rgba(255,255,255,.85)';
-    const t = '📍 ' + roomName(me.x, me.y); ctx.strokeText(t, W / 2, 91); ctx.fillText(t, W / 2, 91);
+    const t = roomName(me.x, me.y); ctx.strokeText(t, W / 2, 91); ctx.fillText(t, W / 2, 91);
+  }
+  if (phase === 'play' && me.sheriff && !me.dead && me.ammo > 0 && me.vent < 0) { // tâm ngắm của Cảnh sát: đỏ khi đang chĩa vào một người bắn được
+    const t = shootTarget(), cx = W / 2, cy = H / 2, col = t ? (me.shootCd > 0 ? '#fbbf24' : '#ff3b3b') : 'rgba(255,255,255,.75)';
+    ctx.save(); ctx.strokeStyle = 'rgba(0,0,0,.55)'; ctx.lineWidth = 4; ctx.lineCap = 'round';
+    const mark = () => { ctx.beginPath(); for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { ctx.moveTo(cx + dx * 6, cy + dy * 6); ctx.lineTo(cx + dx * 15, cy + dy * 15); } ctx.stroke(); ctx.beginPath(); ctx.arc(cx, cy, 1.6, 0, Math.PI * 2); ctx.stroke(); };
+    mark(); ctx.strokeStyle = col; ctx.lineWidth = 2; mark();
+    if (t) {
+      ctx.beginPath(); ctx.arc(cx, cy, 21, 0, Math.PI * 2); ctx.stroke();
+      ctx.font = '800 13px "Baloo 2", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'top'; ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(0,0,0,.7)'; ctx.fillStyle = col;
+      const s = '🔫 ' + t.name + (me.shootCd > 0 ? ' · ' + Math.ceil(me.shootCd) + 's' : ''); ctx.strokeText(s, cx, cy + 28); ctx.fillText(s, cx, cy + 28);
+    }
+    ctx.restore();
   }
   fpEdge[0] = fpEdge[1] = 0;
 }
@@ -3001,11 +3024,10 @@ miniCv.addEventListener('pointerdown', e => { e.stopPropagation(); toggleMap(); 
 
 // ═══════════════════════════ HUD ═══════════════════════════
 let toastT = 0;
-const HINT_TP = $('hint').textContent, HINT_FP = 'Góc nhìn thứ nhất — W/S tiến lùi · A/D bước ngang · ← → hoặc rê chuột để xoay, rê lên xuống để ngẩng / cúi · E dùng · R báo · Q giết/bắn · V ống gió · F phá hoại · M bản đồ · T mic';
 function toast(s, ms = 2600) { let t = document.querySelector('.toast'); if (!t) { t = document.createElement('div'); t.className = 'toast'; document.body.appendChild(t); } t.textContent = s; clearTimeout(toastT); toastT = setTimeout(() => t.remove(), ms); }
 function syncHud() {
   const inPlay = phase === 'play' || phase === 'meeting' || phase === 'over';
-  $('prog').hidden = !inPlay; $('tasks').hidden = !inPlay; $('acts').hidden = phase !== 'play'; $('hint').hidden = phase !== 'play' || innerWidth < 700; { const h = $('hint'), t = fpOn() ? HINT_FP : HINT_TP; if (h.textContent !== t) h.textContent = t; }
+  $('prog').hidden = !inPlay; $('tasks').hidden = !inPlay; $('acts').hidden = phase !== 'play';
   if (!inPlay) return;
   const pct = isGuest() ? netProg : hostPct();
   $('prog').firstElementChild.style.width = pct + '%'; progLabel(pct);
