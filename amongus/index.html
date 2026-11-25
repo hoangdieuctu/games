@@ -201,6 +201,7 @@ button:disabled { opacity: .35; cursor: default; }
 .hold .bar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #3ddc84, #8fe3ff); }
 .hold button { width: 130px; height: 130px; border-radius: 50%; background: radial-gradient(circle at 40% 30%, #ff8f8f, #c51111); border: 5px solid #fff; font-weight: 900; font-size: 20px; color: #fff; text-shadow: 0 2px 2px #000; box-shadow: 0 8px 20px rgba(0,0,0,.5); }
 .hold button.g { background: radial-gradient(circle at 40% 30%, #9ff5c2, #2e9d4f); }
+.gripst { display: flex; gap: 10px; font-weight: 800; font-size: 14px; } .gripst span { padding: 6px 12px; border-radius: 999px; background: rgba(255,255,255,.08); color: #93a4c3; } .gripst span.on { background: rgba(61,220,132,.22); color: #b9f5cf; }
 .hold button:active { transform: scale(.96); }
 /* mã */
 .code { display: flex; flex-direction: column; align-items: center; gap: 10px; }
@@ -515,7 +516,7 @@ button:disabled { opacity: .35; cursor: default; }
     <h2>Luật chơi</h2>
     <ol class="rules">
       <li><b>Phi hành đoàn</b> 👩‍🚀: đi khắp phi thuyền làm các <b>nhiệm vụ</b> (nối dây, quẹt thẻ, nhập mã, bật cầu dao, tải dữ liệu, lặp chuỗi đèn, bắn thiên thạch). Thanh tiến độ trên cùng đầy là <b>thắng</b>; <b>hết giờ</b> (⏱ trên thanh, đồng hồ dừng khi họp) mà chưa xong thì Kẻ Giả Mạo thắng. Thấy xác thì bấm <b>📢 Báo</b>; đứng cạnh bàn tròn ở Nhà Ăn có thể bấm <b>Dùng</b> để <b>họp khẩn cấp</b> (1 lần mỗi ván).</li>
-      <li><b>Kẻ Giả Mạo</b> 🔪: giả vờ làm nhiệm vụ, <b>giết</b> khi ở gần người khác và không ai nhìn thấy (hồi 25 giây), chui <b>ống thông gió</b> để đi nhanh, <b>phá hoại</b>: tắt đèn (mọi người chỉ thấy rất gần) lò phản ứng (phi hành đoàn phải tới Lò sửa trong 30 giây, không kịp là thua) hoặc <b>cạn oxy</b> (phải nhập mã ở <b>cả hai</b> nơi — phòng Oxy và Hành Chính — trong 40 giây).</li>
+      <li><b>Kẻ Giả Mạo</b> 🔪: giả vờ làm nhiệm vụ, <b>giết</b> khi ở gần người khác và không ai nhìn thấy (hồi 25 giây), chui <b>ống thông gió</b> để đi nhanh, <b>phá hoại</b>: tắt đèn (mọi người chỉ thấy rất gần) lò phản ứng (phi hành đoàn phải tới Lò sửa trong 30 giây, không kịp là thua) hoặc <b>cạn oxy</b> (cần <b>hai người cùng giữ van một lúc</b> ở hai trạm — phòng Oxy và Hành Chính — trong 3 giây, phải xong trước 40 giây).</li>
       <li><b>Cảnh sát trưởng</b> (bật trong cài đặt): một phi hành gia bí mật có <b>1 viên đạn</b>. Đứng gần ai đó thì bấm <b>Bắn</b>: trúng Kẻ Giả Mạo hoặc Kẻ Pha Trò thì người đó chết; bắn nhầm người tốt thì cả hai cùng chết. Cả tàu nghe tiếng súng.</li>
       <li><b>Kẻ Pha Trò</b> (bật trong cài đặt, từ 6 người): phe riêng, chỉ có nhiệm vụ giả. Thắng một mình nếu bị mọi người <b>bỏ phiếu đẩy ra ngoài</b> — bị giết hay bị Cảnh sát trưởng bắn thì thua (Cảnh sát trưởng bắn trúng Kẻ Pha Trò thì không bị chết theo).</li>
       <li><b>Họp</b>: mọi người bàn luận rồi bỏ phiếu. Ai nhiều phiếu nhất bị <b>đẩy ra ngoài</b> (hoà phiếu hoặc phiếu trắng nhiều nhất thì không ai bị đẩy). Người chơi máy nhớ ai đứng cạnh xác, ai chui ống gió, ai giết trước mắt họ — và sẽ tố cáo trong cuộc họp. Bạn bấm <b>📢</b> cạnh tên ai để tố cáo người đó, bấm <b>✔</b> để bỏ phiếu.</li>
@@ -542,7 +543,7 @@ const shuffle = arr => { const a = arr.slice(); for (let i = a.length - 1; i > 0
 
 // ── bản đồ: mỗi bản đồ có phòng [x, y, rộng, cao], hành lang, vật cản, ống gió, bàn họp, chỗ sửa phá hoại, nhiệm vụ ──
 // vật cản: [x, y, rộng, cao, cao tới trần (che tầm nhìn), kiểu] · ống gió: [x, y, nhóm nối với nhau]
-// chỗ sửa: lights / reactor / o2a / o2b (cạn oxy phải sửa ở cả hai trạm) · mỗi bản đồ cần một vật 'core' (lõi lò) và 'btn' (dưới nút họp)
+// chỗ sửa: lights / reactor / o2a / o2b (cạn oxy: hai người cùng giữ van ở hai trạm một lúc) · mỗi bản đồ cần một vật 'core' (lõi lò) và 'btn' (dưới nút họp)
 const MAPS = [
   { id: 'ship', name: 'Phi Thuyền', icon: '🚀', W: 3000, H: 1640,
     rooms: [
@@ -1038,7 +1039,7 @@ const FIX_ICON = { lights: '💡', reactor: '☢️', o2a: '🫁', o2b: '🫁' }
 const timedSabo = () => !!sabo && (sabo.kind === 'reactor' || sabo.kind === 'o2'); // phá hoại có đếm ngược, hết giờ thì thua
 const saboT0 = kind => (kind === 'o2' ? O2_T : REACTOR_T);
 const saboLeft = () => (sabo ? sabo.left || SABO_FIX[sabo.kind] : []); // trạm còn phải sửa
-const saboMsg = kind => (kind === 'lights' ? `💡 Mất điện! Phi hành đoàn chỉ thấy rất gần. Sửa ở phòng ${FIX.lights.room}.` : kind === 'o2' ? `🫁 Cạn oxy! Nhập mã ở cả phòng ${FIX.o2a.room} và ${FIX.o2b.room} trong ${O2_T} giây!` : `☢️ Lò phản ứng sắp nổ! Tới ${FIX.reactor.room} sửa trong ${REACTOR_T} giây!`);
+const saboMsg = kind => (kind === 'lights' ? `💡 Mất điện! Phi hành đoàn chỉ thấy rất gần. Sửa ở phòng ${FIX.lights.room}.` : kind === 'o2' ? `🫁 Cạn oxy! Cần HAI người cùng giữ van một lúc ở ${FIX.o2a.room} và ${FIX.o2b.room} — còn ${O2_T} giây!` : `☢️ Lò phản ứng sắp nổ! Tới ${FIX.reactor.room} sửa trong ${REACTOR_T} giây!`);
 const fixedMsg = kind => (kind === 'lights' ? '💡 Có điện lại rồi!' : kind === 'o2' ? '🫁 Oxy đã ổn định.' : '☢️ Lò phản ứng đã ổn định.');
 const COLORS = [['Đỏ', '#c51111'], ['Xanh', '#132ed1'], ['Lục', '#117f2d'], ['Hồng', '#ed54ba'], ['Cam', '#ef7d0d'], ['Vàng', '#f5f557'], ['Đen', '#3f474e'], ['Trắng', '#d6e0f0'], ['Tím', '#6b2fbb'], ['Nâu', '#71491e'], ['Lam', '#38fedc'], ['Chanh', '#50ef39']];
 const BOT_NAMES = ['Tí', 'Sửu', 'Dần', 'Mão', 'Thìn', 'Tỵ', 'Ngọ', 'Mùi', 'Thân', 'Dậu', 'Tuất', 'Hợi'];
@@ -1450,7 +1451,7 @@ function doSabotage(kind, by) {
   if (sabo || evt || saboCd > 0 || phase !== 'play') return;
   if (isGuest()) return netSend({ t: 'sabo', kind });
   if (isHost()) netBroadcast({ t: 'sabo', kind });
-  sabo = { kind, t: saboT0(kind), by: by.id, fixing: 0, left: SABO_FIX[kind].slice() };
+  sabo = { kind, t: saboT0(kind), by: by.id, fixing: 0, left: SABO_FIX[kind].slice(), both: 0 }; for (const p of P) p.grip = null;
   saboCd = SABO_CD;
   playAlert();
   toast(saboMsg(kind));
@@ -1473,8 +1474,26 @@ function fixSabotage(id) {
   }
   const kind = sabo.kind; sabo = null;
   if (isHost()) netBroadcast({ t: 'fixed', kind });
-  for (const p of P) { if (p.fix) { p.fix = false; p.state = 'idle'; p.path = []; } }
+  for (const p of P) { p.grip = null; if (p.fix) { p.fix = false; p.state = 'idle'; p.path = []; } }
   toast(fixedMsg(kind)); playChime(); syncHud();
+}
+// cạn oxy: mỗi trạm cần một người đang giữ van (p.grip = mã trạm); cả hai trạm cùng được giữ đủ O2_HOLD giây thì sửa xong.
+// Chủ phòng (hoặc chơi một mình) tính; khách nhận trạng thái giữ van qua ảnh chụp nhanh (sb[3] trạm đang giữ, sb[4] tiến độ).
+const O2_HOLD = 3;
+function o2Held(id) {
+  if (!sabo || sabo.kind !== 'o2') return false;
+  if (isGuest()) return !!((sabo.hm | 0) & (id === 'o2a' ? 1 : 2)) || (me.grip === id && !me.dead);
+  return P.some(p => !p.dead && p.grip === id && p.vent < 0 && dist(p, FIX[id]) < USE_RANGE + 70);
+}
+function o2Tick(dt) {
+  if (!sabo || sabo.kind !== 'o2') return;
+  const both = o2Held('o2a') && o2Held('o2b');
+  sabo.both = both ? (sabo.both || 0) + dt : Math.max(0, (sabo.both || 0) - dt * 2);
+  if (sabo.both >= O2_HOLD) { sabo.left = ['o2a']; fixSabotage('o2a'); }
+}
+function setGrip(id) { // mình bấm giữ / nhả van
+  if (me.grip === id) return; me.grip = id;
+  if (isGuest()) netSend({ t: 'grip', s: id });
 }
 let shake = 0;
 // ═══════════════════════════ sự kiện lớn giữa ván ═══════════════════════════
@@ -1796,7 +1815,8 @@ function botThink(b) {
   if (sabo && b.fix && !b.imp) {
     const left = saboLeft(); if (!left.includes(b.fixAt)) { b.fixAt = left.slice().sort((x, y) => dist(b, FIX[x]) - dist(b, FIX[y]))[0]; b.path = []; b.timer = 0; }
     const f = FIX[b.fixAt];
-    if (dist(b, f) < USE_RANGE + 10) { b.path = []; b.timer += 0.3; if (b.timer > 4) { b.timer = 0; fixSabotage(b.fixAt); } }
+    if (dist(b, f) < USE_RANGE + 10) { b.path = []; if (sabo.kind === 'o2') b.grip = b.fixAt; else { b.timer += 0.3; if (b.timer > 4) { b.timer = 0; fixSabotage(b.fixAt); } } } // oxy: đứng giữ van chờ người ở trạm kia
+    else if (b.grip) b.grip = null;
     else if (!b.path.length || b.state !== 'fix') goTo(b, f, 'fix');
     return;
   }
@@ -2113,11 +2133,12 @@ function openTask(t) {
 function openFix(id) {
   taskCur = { kind: 'fix', st: id };
   const o2 = id === 'o2a' || id === 'o2b';
-  $('tkTitle').textContent = id === 'lights' ? '💡 Bật lại cầu dao' : o2 ? `🫁 Nạp lại oxy · ${FIX[id].room}` : '☢️ Ổn định lò phản ứng';
-  $('tkSub').textContent = id === 'lights' ? 'Gạt tất cả cầu dao lên' : o2 ? (saboLeft().length > 1 ? 'Nhập đúng mã — nhớ sửa cả trạm còn lại!' : 'Nhập đúng mã — đây là trạm cuối!') : 'Giữ nút cho tới khi ổn định';
-  buildMini(id === 'lights' ? 'sw' : o2 ? 'code' : 'hold', id === 'lights' ? { allDown: true } : { secs: 3 }); $('taskSheet').hidden = false; playPop();
+  const other = o2 ? FIX[id === 'o2a' ? 'o2b' : 'o2a'] : null;
+  $('tkTitle').textContent = id === 'lights' ? '💡 Bật lại cầu dao' : o2 ? `🫁 Giữ van oxy · ${FIX[id].room}` : '☢️ Ổn định lò phản ứng';
+  $('tkSub').textContent = id === 'lights' ? 'Gạt tất cả cầu dao lên' : o2 ? `Giữ nút CÙNG LÚC với một người ở ${other.room} trong ${O2_HOLD} giây` : 'Giữ nút cho tới khi ổn định';
+  buildMini(id === 'lights' ? 'sw' : o2 ? 'grip' : 'hold', id === 'lights' ? { allDown: true } : o2 ? { st: id } : { secs: 3 }); $('taskSheet').hidden = false; playPop();
 }
-function closeTask() { $('taskSheet').hidden = true; $('tkBox').innerHTML = ''; taskCur = null; }
+function closeTask() { if (me && me.grip) setGrip(null); $('taskSheet').hidden = true; $('tkBox').innerHTML = ''; taskCur = null; }
 $('tkClose').onclick = closeTask;
 function miniDone() {
   if (!taskCur) return;
@@ -2156,6 +2177,20 @@ function buildMini(type, opt = {}) {
     b.addEventListener('pointerdown', e => { on = true; b.setPointerCapture(e.pointerId); if (!raf) { last = performance.now(); raf = requestAnimationFrame(tick); } });
     const off = () => { on = false; }; b.addEventListener('pointerup', off); b.addEventListener('pointercancel', off); b.addEventListener('pointerleave', off);
     $('tkClose').addEventListener('click', () => cancelAnimationFrame(raf), { once: true });
+  } else if (type === 'grip') { // cạn oxy: giữ van ở trạm này, chờ một người khác giữ van ở trạm kia cùng lúc
+    const st = opt.st, ot = st === 'o2a' ? 'o2b' : 'o2a', h = el('div', 'hold'), stat = el('div', 'gripst', h), bar = el('div', 'bar', h), fill = el('i', '', bar), b = el('button', 'g', h); b.textContent = 'GIỮ VAN';
+    let raf = 0;
+    const tick = () => {
+      if (!sabo || sabo.kind !== 'o2' || $('taskSheet').hidden || !taskCur || taskCur.st !== st) { setGrip(null); if (!sabo && taskCur && taskCur.st === st) closeTask(); return; }
+      const a = o2Held(st), c = o2Held(ot);
+      stat.innerHTML = `<span class="${a ? 'on' : ''}">${a ? '✋' : '⌛'} Trạm này</span><span class="${c ? 'on' : ''}">${c ? '✋' : '⌛'} ${FIX[ot].room}</span>`;
+      fill.style.width = Math.min(1, (sabo.both || 0) / O2_HOLD) * 100 + '%';
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    b.addEventListener('pointerdown', e => { setGrip(st); try { b.setPointerCapture(e.pointerId); } catch (er) {} });
+    const off = () => setGrip(null); b.addEventListener('pointerup', off); b.addEventListener('pointercancel', off); b.addEventListener('lostpointercapture', off);
+    $('tkClose').addEventListener('click', () => { cancelAnimationFrame(raf); setGrip(null); }, { once: true });
   } else if (type === 'code') {
     const c = el('div', 'code'), code = Array.from({ length: 5 }, () => Math.floor(Math.random() * 10)).join(''), show = el('div', 'show', c), inp = el('div', 'in', c), pad = el('div', 'pad', c);
     show.textContent = code; inp.textContent = ''; let cur = '';
@@ -2676,11 +2711,11 @@ function drawFP(W, H, now, shk) {
     c.fillStyle = 'rgba(255,255,255,.6)'; c.beginPath(); c.ellipse(-2.5, -TH - 5 - 2 * k, 2.6, 1.2, 0, 0, Math.PI * 2); c.fill();
   }, { bias: 20 });
   for (const [k, f] of Object.entries(FIX)) { // chỗ sửa phá hoại
-    const on = saboLeft().includes(k), p = on ? .5 + .5 * Math.sin(now / 120) : 0;
+    const on = saboLeft().includes(k), p = on ? .5 + .5 * Math.sin(now / 120) : 0, held = on && o2Held(k);
     add(f.x, f.y, 30, c => {
-      if (on) { c.fillStyle = `rgba(255,60,60,${.25 + p * .3})`; c.beginPath(); c.arc(0, -34, 30 + p * 8, 0, Math.PI * 2); c.fill(); }
+      if (on) { c.fillStyle = held ? `rgba(61,220,132,${.3 + p * .25})` : `rgba(255,60,60,${.25 + p * .3})`; c.beginPath(); c.arc(0, -34, 30 + p * 8, 0, Math.PI * 2); c.fill(); }
       c.fillStyle = '#39435c'; c.fillRect(-3, -18, 6, 18);
-      c.fillStyle = on ? '#ff4d4d' : '#334155'; roundRect(c, -18, -52, 36, 36, 7); c.fill(); c.strokeStyle = on ? '#fff' : '#64748b'; c.lineWidth = 2; c.stroke();
+      c.fillStyle = held ? '#2e9d4f' : on ? '#ff4d4d' : '#334155'; roundRect(c, -18, -52, 36, 36, 7); c.fill(); c.strokeStyle = on ? '#fff' : '#64748b'; c.lineWidth = 2; c.stroke();
       c.font = '19px sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillStyle = '#fff'; c.fillText(FIX_ICON[k], 0, -33);
     }, { bias: 40 });
   }
@@ -2858,9 +2893,9 @@ function render() {
   for (let k = ventFx.length - 1; k >= 0; k--) { const f = ventFx[k], a = (now - f.t) / 450; if (a > 1) { ventFx.splice(k, 1); continue; } const v = VENTS[f.v]; ctx.save(); ctx.translate(v[0], v[1] - 11); ctx.scale(1, Math.abs(Math.cos(a * Math.PI * 2))); ctx.fillStyle = '#8c97b3'; roundRect(ctx, -20, -2, 40, 22, 4); ctx.fill(); ctx.restore(); }
   // chỗ sửa phá hoại
   for (const [k, f] of Object.entries(FIX)) {
-    const on = saboLeft().includes(k), p = on ? .5 + .5 * Math.sin(now / 120) : 0;
-    if (on) { ctx.fillStyle = `rgba(255,60,60,${.25 + p * .3})`; ctx.beginPath(); ctx.arc(f.x, f.y, 40 + p * 10, 0, Math.PI * 2); ctx.fill(); }
-    ctx.fillStyle = on ? '#ff4d4d' : '#334155'; roundRect(ctx, f.x - 20, f.y - 22, 40, 40, 8); ctx.fill(); ctx.strokeStyle = on ? '#fff' : '#64748b'; ctx.lineWidth = 2.5; ctx.stroke();
+    const on = saboLeft().includes(k), p = on ? .5 + .5 * Math.sin(now / 120) : 0, held = on && o2Held(k); // trạm oxy có người đang giữ van: xanh
+    if (on) { ctx.fillStyle = held ? `rgba(61,220,132,${.3 + p * .25})` : `rgba(255,60,60,${.25 + p * .3})`; ctx.beginPath(); ctx.arc(f.x, f.y, 40 + p * 10, 0, Math.PI * 2); ctx.fill(); }
+    ctx.fillStyle = held ? '#2e9d4f' : on ? '#ff4d4d' : '#334155'; roundRect(ctx, f.x - 20, f.y - 22, 40, 40, 8); ctx.fill(); ctx.strokeStyle = on ? '#fff' : '#64748b'; ctx.lineWidth = 2.5; ctx.stroke();
     ctx.font = '20px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(FIX_ICON[k], f.x, f.y - 1);
   }
   // bảng nhiệm vụ: của mình thì phát sáng + mũi tên nhún
@@ -3055,7 +3090,7 @@ function syncHud() {
 const gunLabel = () => (me.ammo > 0 ? `🔫 Đạn: 1 viên · ${me.shootCd > 0 ? 'chờ ' + Math.ceil(me.shootCd) + 's' : 'sẵn sàng'}` : '🔫 Đã hết đạn');
 function alertText() {
   if (sabo.kind === 'lights') return `💡 Mất điện — sửa ở phòng ${FIX.lights.room}`;
-  if (sabo.kind === 'o2') return `🫁 Hết oxy sau ${Math.ceil(sabo.t)}s — sửa ở ${saboLeft().map(id => FIX[id].room).join(' và ')}`;
+  if (sabo.kind === 'o2') return `🫁 Hết oxy sau ${Math.ceil(sabo.t)}s — 2 người cùng giữ van ở ${FIX.o2a.room} ${o2Held('o2a') ? '✋' : '⌛'} và ${FIX.o2b.room} ${o2Held('o2b') ? '✋' : '⌛'}`;
   return `☢️ Lò phản ứng nổ sau ${Math.ceil(sabo.t)}s — sửa ở ${FIX.reactor.room}`;
 }
 // chỉ ghi lại nội dung nút khi đổi: thay phần tử con mỗi khung hình làm cú bấm chuột (nhấn ở phần tử cũ, nhả ở phần tử mới) bị mất
@@ -3144,6 +3179,7 @@ function step(dt, now) {
     if (!timeWarn && gameLeft <= 60) { timeWarn = 1; toast(me.imp ? '⏱ Còn 1 phút! Cầm chân phi hành đoàn là thắng.' : '⏱ Còn 1 phút! Làm nhanh nhiệm vụ không là Kẻ Giả Mạo thắng!', 3500); playAlert(); }
     if (gameLeft <= 0 && !isGuest()) { endGame('imp', 'Hết giờ mà phi hành đoàn chưa làm xong nhiệm vụ!'); return; }
     if (timedSabo() && (sirenT -= dt) <= 0) { sirenT = sabo.kind === 'o2' ? 1.6 : 1; playSiren(); }
+    if (!isGuest()) o2Tick(dt);
     if (timedSabo()) { sabo.t -= dt; if (sabo.t <= 0 && !isGuest()) { const k = sabo.kind; sabo = null; endGame('imp', k === 'o2' ? 'Phi thuyền đã cạn oxy!' : 'Lò phản ứng đã nổ!'); } }
     if (net.on) netTick(dt, now);
     hudTick();
@@ -3687,7 +3723,7 @@ function hostMsg(c, d) {
     return;
   }
   // chống bấm dồn: mỗi người một hành động / 300ms
-  if (Date.now() - (actLast[cid] || 0) < 300 && d.t !== 'vote' && d.t !== 'task') return;
+  if (Date.now() - (actLast[cid] || 0) < 300 && d.t !== 'vote' && d.t !== 'task' && d.t !== 'grip') return; // nhả van không được rớt
   actLast[cid] = Date.now();
   const ps = p.tx !== undefined ? { x: p.tx, y: p.ty } : p; // vị trí mới nhất khách báo
   switch (d.t) {
@@ -3695,7 +3731,8 @@ function hostMsg(c, d) {
     case 'report': { const b = bodies.find(x => x.id === d.b); if (phase === 'play' && !p.dead && b && dist(ps, b) < 170) startMeeting(p, b); return; }
     case 'emerg': if (phase === 'play' && !p.dead && !sabo && p.emergency > 0 && dist(ps, BUTTON) < 160) { p.emergency--; startMeeting(p, null); } return;
     case 'sabo': if (phase === 'play' && p.imp && !p.dead && SABO_KINDS.includes(d.kind)) doSabotage(d.kind, p); return;
-    case 'fix': { const id = saboLeft().includes(d.s) ? d.s : saboLeft().length === 1 ? saboLeft()[0] : null; if (phase === 'play' && id && !p.dead && dist(ps, FIX[id]) < USE_RANGE + 70) { idleReset(p); fixSabotage(id); } return; }
+    case 'grip': p.grip = d.s === 'o2a' || d.s === 'o2b' ? d.s : null; return;
+    case 'fix': { if (d.s === 'o2a' || d.s === 'o2b') return; const id = saboLeft().includes(d.s) ? d.s : saboLeft().length === 1 ? saboLeft()[0] : null; if (phase === 'play' && id && !p.dead && dist(ps, FIX[id]) < USE_RANGE + 70) { idleReset(p); fixSabotage(id); } return; }
     case 'shoot': { const v = P[d.v]; if (phase === 'play' && p.sheriff && p.ammo > 0 && !p.dead && p.shootCd <= 1 && p.vent < 0 && v && v !== p && !v.dead && !inBunk(v) && !inBunk(p) && dist(ps, v) < SHOOT_RANGE + 60 && losClear(ps, v)) shoot(p, v); return; }
     case 'task': { const t = p.tasks.find(x => x.id === d.id); if (t && !p.imp && !p.jester && (phase === 'play' || phase === 'meeting')) { t.done = true; idleReset(p); syncHud(); checkWin(); } return; }
     case 'vote': if (phase === 'meeting' && meeting && meeting.phaseV !== 'done') { if (d.p === -2) { cancelVote(p); return; } const t = d.p === -1 ? null : P[d.p]; if (d.p === -1 || (t && !t.dead)) castVote(p, t); } return;
@@ -3747,7 +3784,7 @@ function hostSnap() {
   const imps = P.filter(q => q.imp).map(q => q.id);
   net.snapSq++;
   const base = { t: 's', sq: net.snapSq, p: P.map(q => { const [vx, vy] = netVel(q); return [Math.round(q.x), Math.round(q.y), q.dir, Math.hypot(q.vx, q.vy) > 5 ? 1 : 0, q.dead ? 1 : 0, q.vent >= 0 ? 1 : 0, Math.round(vx), Math.round(vy), Math.round(q.z || 0), q.cr > .5 ? 1 : 0, q === me ? (fpOn() ? fpLookNet() : null) : q.la === undefined ? null : q.la]; }),
-    b: bodies.map(b => [b.id, Math.round(b.x), Math.round(b.y)]), sb: sabo ? [sabo.kind, Math.round(sabo.t * 10) / 10, saboLeft()] : 0, pr: hostPct(), gl: Math.round(gameLeft * 10) / 10, ev: evt ? [evt.st === 'hit' ? 1 : 0, Math.round(evt.t * 10) / 10, evt.sp.map(x => x.by)] : 0 };
+    b: bodies.map(b => [b.id, Math.round(b.x), Math.round(b.y)]), sb: sabo ? [sabo.kind, Math.round(sabo.t * 10) / 10, saboLeft(), sabo.kind === 'o2' ? (o2Held('o2a') ? 1 : 0) | (o2Held('o2b') ? 2 : 0) : 0, Math.round((sabo.both || 0) * 10) / 10] : 0, pr: hostPct(), gl: Math.round(gameLeft * 10) / 10, ev: evt ? [evt.st === 'hit' ? 1 : 0, Math.round(evt.t * 10) / 10, evt.sp.map(x => x.by)] : 0 };
   for (const [c, cid] of net.conns) {
     const p = P.find(q => q.cid === cid); if (!p || !c.open) continue;
     fastSend(c, Object.assign({}, base, { n: c._n || 0, kc: Math.round(p.killCd * 10) / 10, em: p.emergency, sc: Math.round(saboCd), im: p.imp || p.dead ? imps : undefined }));
@@ -3974,6 +4011,7 @@ function applySnap(d) {
   });
   bodies = (d.b || []).map(([id, x, y]) => ({ id, x, y, ci: P[id] ? P[id].ci : 0, t: 0 }));
   if (d.sb && SABO_KINDS.includes(d.sb[0])) { if (!sabo || sabo.kind !== d.sb[0]) sabo = { kind: d.sb[0], t: d.sb[1] }; sabo.t = d.sb[1]; if (Array.isArray(d.sb[2])) sabo.left = d.sb[2]; } else sabo = null;
+  if (sabo && Array.isArray(d.sb)) { sabo.hm = d.sb[3] | 0; sabo.both = +d.sb[4] || 0; }
   if (me.imp) { me.killCd = +d.kc || 0; saboCd = +d.sc || 0; }
   me.emergency = d.em | 0; netProg = d.pr | 0;
   if (Number.isFinite(+d.gl)) gameLeft = +d.gl;
