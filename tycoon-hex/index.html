@@ -733,6 +733,7 @@ html.is-phone body{overflow:hidden}
 
 <nav class="dock">
   <button id="bBack" class="primary" hidden>✋ Tôi quay lại rồi</button>
+  <button id="bAway" hidden title="Cho máy đánh thay mọi lượt của mình tới khi bấm ✋ Tôi quay lại rồi">💤 Máy đánh thay</button>
   <button id="bNew" class="primary">＋ Ván mới</button>
   <button id="bOnline">🌐 Chơi online</button>
   <button id="bInvite" hidden>🔗 Phòng chơi</button>
@@ -856,7 +857,7 @@ html.is-phone body{overflow:hidden}
       <li><b>Cơ Hội</b>: thẻ có lợi (nhận Quỹ Thuế, miễn phí tham quan, giảm 50%, khiên, ra tù, lễ hội miễn phí, thêm thẻ Chẵn/Lẻ) hoặc hại (đổi thành phố, ép bán, phá cấp, dịch bệnh, mất điện, bị đưa đi nơi khác).</li>
       <li>Tung đôi được đi tiếp, trừ khi vào Côn Đảo hay Bến Xe; không còn việc gì thì lượt tự chuyển. Thiếu tiền thì bán thành phố (được nửa vốn); bán hết cũng không đủ thì <b>phá sản</b> ngay: ngân hàng mua lại toàn bộ đất (nửa vốn), tiền thu được cùng tiền mặt trả cho chủ nợ. Đang thiếu tiền cũng có thể tự chọn <b>phá sản</b> thay vì bán nhà.</li>
       <li><b>Thắng</b> khi: đối thủ phá sản hết · đủ <b>2 nhóm màu</b> · sở hữu <b>cả một cạnh bàn</b> (4 thành phố + 1 điểm du lịch) · đủ <b>6 điểm du lịch</b> · xây đủ <b>6 Biểu tượng</b> · hoặc <b>giàu nhất</b> khi hết số vòng. Mỗi nhân vật có một kỹ năng riêng.</li>
-      <li><b>Vắng mặt</b>: ai tới lượt mà quá <b>30 giây</b> không thao tác thì <b>máy đánh thay</b> cho hết lượt đó — thẻ người chơi hiện <b>đếm ngược</b> ⏳, 10 giây cuối số to giữa bàn; quay lại thì bấm <b>✋ Tôi quay lại rồi</b> ở thanh dưới (hoặc chờ tới lượt sau) để tự chơi tiếp.</li>
+      <li><b>Vắng mặt</b>: ai tới lượt mà quá <b>30 giây</b> không thao tác thì <b>máy đánh thay</b> — thẻ người chơi hiện <b>đếm ngược</b> ⏳, 10 giây cuối số to giữa bàn; từ đó <b>mọi lượt sau máy đánh ngay</b>, không chờ 30 giây nữa, cho tới khi người đó bấm <b>✋ Tôi quay lại rồi</b> ở thanh dưới để tự chơi tiếp. Muốn đi đâu thì bấm <b>💤 Máy đánh thay</b> để máy chơi thay ngay, không cần chờ 30 giây.</li>
       <li><b>Online</b>: khách vào phòng bấm <b>✅ Sẵn sàng</b>, mọi người sẵn sàng rồi chủ phòng mới bắt đầu được. Người vào khi ván đang chơi sẽ <b>ngồi vào ghế máy</b> (nếu còn). Bấm 🎤 trên cùng để <b>trò chuyện bằng giọng nói</b> với cả phòng (bấm lần nữa để tắt mic). Lỡ tải lại trang thì mở lại link phòng là về đúng ghế cũ — chủ phòng tải lại trang cũng mở lại được phòng cùng mã, ván vẫn giữ nguyên.</li>
       <li>Chạm vào thẻ người chơi khác để <b>tặng tiền</b> 🎁; bấm 😊 trên cùng để gửi <b>biểu tượng cảm xúc</b>; bấm 📍 rồi chạm một ô để <b>đánh dấu</b> ô đó nhấp nháy vài giây cho mọi người cùng chú ý.</li>
     </ol>
@@ -1007,7 +1008,7 @@ const BANKER_RATE = 0.03, BANKER_CAP = 50;
 // tỉ lệ / số tiền của các kỹ năng cũ (bàn 6 người: chỉnh riêng cho cân bằng, khác bản 4 người)
 const ROB_RATE = 0.08, ROBIN_RATE = 0.05, CHARM_CHANCE = 0.15, GAMBLER_CHANCE = 0.15, AVENGER_CHANCE = 0.7, PARTIER_CHANCE = 0.8, WIZARD_CHANCE = 1;
 const INSURE_PREMIUM = 30, INVESTOR_TOP = 3, NEWS_PAY = 100, WIZARD_HITS = 2, FAIRY_OFF = 0.15, CHEF_BONUS = 0.3, RACER_ROLLS = 5, PHOENIX_RANK = 2;
-const INVESTOR_RATE = 0.8, CASHIER_CUT = 0.5, COLLECTOR_OFF = 0.3, COLLECTOR_BONUS = 100, LAWYER_FINE = 300, INSURE_CASH = 1000, POLICE_CHANCE = 0.8, SCOOP_PAY = 300, MAGNET_RANGE = 1;
+const INVESTOR_RATE = 0.8, CASHIER_CUT = 0.5, COLLECTOR_OFF = 0.3, COLLECTOR_BONUS = 100, LAWYER_FINE = 300, INSURE_CASH = 1000, POLICE_CHANCE = 0.2, SCOOP_PAY = 300, MAGNET_RANGE = 1;
 const CHARS = [
   { id: 'mc', name: 'Siêu MC', skill: 'Lương qua Bắt Đầu gấp đôi', group: 'tăng tiền', skin: '#ffd9b3', hair: '#2b2118', style: 'quiff', acc: 'mic', outfit: '#1e6fd8', bg: '#dbeafe' },
   { id: 'boss', name: 'Ông Trùm', skill: 'Mua và xây nhà rẻ hơn 15%', group: 'giảm tiền', skin: '#f3c9a3', hair: '#6b4a2a', style: 'short', acc: 'glasses', outfit: '#23324a', bg: '#e5e7eb' },
@@ -1098,7 +1099,7 @@ const evLeft = G => (G && G.ev ? Math.max(1, Math.min(EV_ROUNDS, (G.ev.round || 
 // hệ số phí tham quan của sự kiện đang diễn ra ở ô i
 const evRent = (G, i) => (evOn(G, 'national') ? 2 : evOn(G, 'crisis') ? 0.5 : 1) * (SQ[i].t === 'tour' ? (evOn(G, 'summer') ? 2 : evOn(G, 'storm') ? 0 : 1) : 1);
 const PARITY_MAX = 3, LUCK_CHANCE = 0.8, LANDMARK_WIN = 6, GROUP_WIN = 2, GOLD_N = 4, GIFTS = [50, 100, 200, 500];
-const AFK_MS = 30000; // người tới lượt mà quá 30 giây không thao tác thì máy đánh thay hết lượt đó
+const AFK_MS = 30000; // người tới lượt mà quá 30 giây không thao tác thì máy đánh thay — từ đó mọi lượt sau máy đánh luôn tới khi họ bấm quay lại
 // tiền khởi đầu: mặc định, gấp đôi cho mọi người, hoặc mỗi người 80% được nhân đôi
 const CASHES = [{ key: 'base', label: 'Mặc định', hint: `Mọi người bắt đầu với ${fmt(START_CASH)}.` }, { key: 'double', label: 'Gấp đôi', hint: `Mọi người bắt đầu với ${fmt(START_CASH * 2)}.` }, { key: 'luck', label: 'Ngẫu nhiên', hint: `Mọi người bắt đầu với ${fmt(START_CASH)}, mỗi người có ${LUCK_CHANCE * 100}% may mắn được nhân đôi.` }];
 const EMOJIS = ['😀', '😂', '😎', '😍', '😭', '😡', '😱', '🤑', '👍', '👏', '🙏', '🔥'];
@@ -2026,7 +2027,6 @@ function doEnd(s) {
 function nextTurn(steps) {
   G.doubles = 0; G.again = false; G.visit = null; G.pick = null; G.debt = null; G.turnNo++;
   const prev = G.turn;
-  if (G.seats[prev]) G.seats[prev].afk = false; // máy chỉ đánh thay người vắng mặt hết lượt đó
   let t = prev;
   do t = (t + 1) % NS; while (!G.seats[t] || G.pl[t].out);
   if (t <= prev) {
@@ -2119,6 +2119,24 @@ function doBack(s) {
   G.seats[s].afk = false;
   clearTimeout(driveT);
   commit({ type: 'turn', s, steps: [{ k: 'back', s }] });
+}
+// người chơi tự bấm 💤 cho máy đánh thay ngay (không chờ AFK_MS), tới khi bấm quay lại
+function doAway(s) {
+  if (!G || G.phase !== 'play' || !G.seats[s] || G.seats[s].type !== 'human' || G.seats[s].afk || G.pl[s].out) return;
+  G.seats[s].afk = true;
+  clearTimeout(afkT);
+  commit({ type: 'turn', s, steps: [{ k: 'afk', s, self: true }] });
+}
+// ghế của mình có thể bấm 💤 cho máy đánh thay
+function myAwaySeat() {
+  const s = localMe();
+  return s >= 0 && G.phase === 'play' && G.seats[s].type === 'human' && !G.seats[s].afk && !G.pl[s].out ? s : -1;
+}
+function goAway() {
+  const s = myAwaySeat();
+  if (s < 0) return;
+  if (net.on && !net.host) { netSend({ t: 'away' }); return; }
+  doAway(s);
 }
 // ghế của mình đang bị máy đánh thay vì vắng mặt (online: ghế mình ngồi; chung máy: người đang tới lượt)
 function myAfkSeat() {
@@ -4512,7 +4530,7 @@ function stepText(st) {
     case 'premium': return `☂️ Người Bảo Hiểm ${w} qua Bắt Đầu, thu ${fmt(st.amt)} phí bảo hiểm từ ${st.from.length} đối thủ`;
     case 'taxCut': return `🧾 Thu Ngân ${w} nhận ${fmt(st.amt)} từ tiền thuế của ${other(st.from)}`;
     case 'taxFree': return st.ev ? `🎁 Đang Miễn Thuế — ${w} không phải nộp thuế` : `🕵️ Thám Tử ${w} được miễn thuế`;
-    case 'afk': return `⏳ ${w} vắng mặt quá ${AFK_MS / 1000} giây — máy đánh thay hết lượt này`;
+    case 'afk': return st.self ? `💤 ${w} nhờ máy đánh thay tới khi quay lại` : `⏳ ${w} vắng mặt quá ${AFK_MS / 1000} giây — máy đánh thay tới khi quay lại`;
     case 'back': return `✋ ${w} đã quay lại, tự chơi tiếp`;
     case 'tourUp': return `📈 Phí tham quan ${nm(st.i)} tăng lên ${fmt(st.amt)} (+${Math.round(TOUR_UP * 100 * st.v)}%)`;
     case 'sell': return st.auto ? `🏦 Ngân hàng mua lại ${nm(st.i)} của ${w} giá ${fmt(st.amt)}` : `${w} bán ${nm(st.i)} được ${fmt(st.amt)}`;
@@ -4836,6 +4854,7 @@ function renderButtons() {
   $('roomTag').hidden = !net.on;
   $('bEmo').hidden = !(G.phase === 'play' && localMe() >= 0);
   $('bBack').hidden = myAfkSeat() < 0;
+  $('bAway').hidden = myAwaySeat() < 0;
   if ($('bEmo').hidden) $('emoPop').hidden = true;
   $('roomTag').textContent = net.on ? (host ? 'Chủ phòng' : net.seat < 0 ? 'Đang xem' : 'Online') : '';
   syncVoiceUi(); syncVoice();
@@ -5464,6 +5483,7 @@ function hostMsg(c, d) {
     else Object.assign(G.seats[s], { online: false, lostAt: Date.now(), vc: false, mic: false });
   }
   else if (d.t === 'back') doBack(s);
+  else if (d.t === 'away') doAway(s);
   else if (d.t === 'gift') { if (Number.isInteger(d.to) && Number.isInteger(d.amt)) doGift(s, d.to, d.amt); }
   else if (d.t === 'ping') {
     if (!Number.isInteger(d.i) || d.i < 0 || d.i >= N || Date.now() - (pingHostLast[s] || 0) < 800) return;
@@ -6086,6 +6106,7 @@ $('bLeave').onclick = () => leaveOnline();
 $('bRules').onclick = () => { $('rulesSheet').hidden = false; };
 $('evTag').onclick = peekEvent;
 $('bBack').onclick = () => { comeBack(); playTap(); };
+$('bAway').onclick = () => { goAway(); playTap(); };
 // ⛶ toàn màn hình (trình duyệt không hỗ trợ, như Safari trên iPhone, thì ẩn nút)
 (function fullscreen() {
   const d = document, root = d.documentElement, b = $('bFull');
