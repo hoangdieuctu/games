@@ -177,6 +177,19 @@ button:disabled { opacity: .35; cursor: default; }
 .res .beans div { display: flex; flex-direction: column; align-items: center; font-size: 11px; font-weight: 700; color: #cbd5e1; width: 58px; }
 .res .beans canvas { width: 44px; height: 52px; }
 .res .beans .i { color: #ff6b6b; }
+.board { margin-top: 12px; }
+.board h3 { margin: 0 0 6px; font-size: 16px; text-align: center; color: #ffd23f; }
+.board .br { display: flex; align-items: center; gap: 8px; padding: 5px 8px; border-radius: 12px; background: rgba(255,255,255,.06); color: #e2e8f0; margin-top: 5px; }
+.board .br.me { box-shadow: inset 0 0 0 2px #3b82f6; }
+.board .rk { width: 26px; text-align: center; font-weight: 900; font-size: 15px; flex: 0 0 auto; }
+.board canvas { width: 22px; height: 27px; flex: 0 0 auto; }
+.board .nm { flex: 1; min-width: 0; font-weight: 800; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.board .nm small { display: block; font-weight: 700; font-size: 11px; color: #94a3b8; }
+.board .add { font-weight: 900; font-size: 13px; color: #4ade80; }
+.board .add.z { color: #64748b; }
+.board .pt { font-weight: 900; font-size: 16px; min-width: 44px; text-align: right; }
+.board .pt small { font-size: 10px; font-weight: 700; color: #94a3b8; }
+.board .how { margin: 6px 0 0; font-size: 11px; text-align: center; color: #94a3b8; }
 /* ── nhiệm vụ mini ── */
 .task { background: #e9eef5; color: var(--ink); max-width: 440px; }
 .task h2 { font-size: 20px; margin-bottom: 4px; }
@@ -454,6 +467,7 @@ button:disabled { opacity: .35; cursor: default; }
     <h2 id="rsTitle"></h2>
     <p class="why" id="rsWhy"></p>
     <div class="beans" id="rsBeans"></div>
+    <div class="board" id="rsBoard" hidden></div>
     <button class="go" id="bAgain">Chơi lại</button>
   </div>
 </div>
@@ -476,6 +490,7 @@ button:disabled { opacity: .35; cursor: default; }
     </div>
     <div class="label" id="lbCount">Người chơi</div>
     <div id="lbMembers"></div>
+    <div class="board" id="lbBoard" hidden></div>
     <div class="label">Tên của bạn</div>
     <input class="name" id="lbName" maxlength="12" autocomplete="off" spellcheck="false">
     <div class="label">Màu áo</div>
@@ -523,7 +538,7 @@ button:disabled { opacity: .35; cursor: default; }
       <li><b>Tầm nhìn</b> 👁️: chỉ thấy những gì nhìn thẳng tới được — tường, thùng hàng, động cơ… che khuất người phía sau. Đèn tắt thì tầm nhìn còn rất ngắn. Phi thuyền rộng, mũi tên vàng ở mép màn hình chỉ tới nhiệm vụ của bạn.</li>
       <li><b>Sự kiện lớn</b> 🌋 (bật trong cài đặt): mỗi ván có <b>2 lần</b> thảm hoạ theo bản đồ (lúc còn 2/3 và 1/3 thời gian) — bão mặt trời, tuyết lở, mưa thiên thạch, bão cát, núi lửa phun, bão sét… Báo trước 8 giây: chui vào một <b>hầm trú ẩn</b> (mỗi hầm chỉ 1 người; vào rồi nắp đóng lại, không ai thấy hay giết được bạn, phải ở trong tới khi thảm hoạ qua). Không trú kịp thì bị <b>choáng 4 giây</b> và <b>mất một nhiệm vụ đã làm</b>. <b>Kẻ Giả Mạo không sợ thảm hoạ</b>: không bị choáng hay chậm, dao sẵn sàng ngay lúc báo động — người bị choáng ngoài hầm là mồi ngon (nhưng ai thấy kẻ đứng vững giữa thảm hoạ thì biết ngay là ai).</li>
       <li>Chết rồi vẫn thành <b>ma</b> 👻: đi xuyên tường, bay lên cao xem cả trạm, <b>không cần làm nhiệm vụ</b> (nhiệm vụ còn dở của người chết được bỏ khỏi thanh tiến độ), nhưng không báo, không bỏ phiếu được.</li>
-      <li><b>Online</b> 🌐: chủ phòng tạo phòng, gửi mã/link cho bạn bè; ghế trống có thể cho máy chơi. Bấm <b>🎤</b> để voice chat: phòng chờ và cuộc họp mọi người nghe nhau; lúc đang chơi tuỳ phòng — <i>im lặng</i> hoặc <i>nghe người ở gần</i>. Hồn ma vẫn nghe được mọi người, nhưng chỉ hồn ma nghe được hồn ma. Ai rớt mạng thì máy chơi thay tới khi họ vào lại.</li>
+      <li><b>Online</b> 🌐: chủ phòng tạo phòng, gửi mã/link cho bạn bè; ghế trống có thể cho máy chơi. Bấm <b>🎤</b> để voice chat: phòng chờ và cuộc họp mọi người nghe nhau; lúc đang chơi tuỳ phòng — <i>im lặng</i> hoặc <i>nghe người ở gần</i>. Hồn ma vẫn nghe được mọi người, nhưng chỉ hồn ma nghe được hồn ma. Ai rớt mạng thì máy chơi thay tới khi họ vào lại. <b>Bảng xếp hạng</b> 🏆 của phòng cộng dồn qua các ván: thắng +3 (Kẻ Pha Trò thắng +4), mỗi lần giết / bắn trúng +1, bỏ phiếu đúng Kẻ Giả Mạo bị đẩy ra +1, phi hành gia làm xong hết nhiệm vụ +1.</li>
       <li>Điều khiển: máy tính đi bằng <b>WASD</b> / mũi tên; điện thoại kéo nửa trái màn hình (cần ảo). Phím tắt hiện ở góc mỗi nút: <b>E</b> dùng/sửa/họp, <b>R</b> báo, <b>Q</b> giết, <b>V</b> ống gió (trong ống: ← → chuyển ống), <b>Q</b> bắn (Cảnh sát trưởng), <b>F</b> phá hoại (rồi <b>1</b> tắt đèn / <b>2</b> lò phản ứng / <b>3</b> cạn oxy ), <b>M</b> bản đồ, <b>T</b> bật/tắt mic.</li>
       <li><b>Góc nhìn</b> 👁️: chọn lúc bắt đầu ván (online thì mỗi người tự chọn trong phòng chờ). <b>Thứ ba</b> là nhìn từ trên xuống như cũ. <b>Thứ nhất</b> là nhìn bằng mắt nhân vật: <b>W / S</b> (hoặc ↑ ↓) tiến lùi, <b>A / D</b> bước ngang, <b>← →</b> xoay người — hoặc bấm chuột vào màn hình rồi rê chuột để xoay (Esc để thả chuột); điện thoại kéo nửa trái để đi, kéo nửa phải để xoay. Mũi tên vàng kèm số mét chỉ hướng tới nhiệm vụ, bản đồ nhỏ có hình quạt cho biết bạn đang nhìn về đâu.</li>
     </ol>
@@ -1241,8 +1256,9 @@ function checkWin() {
   if (imps >= crew) return endGame('imp', 'Kẻ Giả Mạo đã áp đảo phi hành đoàn.');
   return false;
 }
-function endGame(side, why) {
-  if (isHost()) { lastOver = { t: 'over', side, why, imps: P.filter(p => p.imp).map(p => p.id), sh: P.filter(p => p.sheriff).map(p => p.id), jt: P.filter(p => p.jester).map(p => p.id) }; netBroadcast(lastOver); }
+function endGame(side, why, add) {
+  if (isHost()) add = scoreGame(side);
+  if (isHost()) { lastOver = { t: 'over', side, why, B: board, add, imps: P.filter(p => p.imp).map(p => p.id), sh: P.filter(p => p.sheriff).map(p => p.id), jt: P.filter(p => p.jester).map(p => p.id) }; netBroadcast(lastOver); }
   phase = 'over'; winner = side; evt = null;
   closeTask(); $('meetSheet').hidden = true; $('ejectScene').hidden = true; $('saboPop').hidden = true;
   const meWon = side === 'jester' ? me.jester : side === 'imp' ? me.imp : !me.imp && !me.jester;
@@ -1251,6 +1267,7 @@ function endGame(side, why) {
   $('rsWhy').textContent = why + (meWon ? ' Bạn thắng!' : ' Bạn thua rồi.');
   const b = $('rsBeans'); b.innerHTML = '';
   for (const p of P) { const d = document.createElement('div'); d.appendChild(beanCanvas(p.ci, 44, 52, p.dead)); const s = document.createElement('span'); s.textContent = p.name; if (p.imp) { s.className = 'i'; s.textContent += ' 🔪'; } else if (p.sheriff) s.textContent += ' 🔫'; else if (p.jester) s.textContent += ' 🃏'; d.appendChild(s); b.appendChild(d); }
+  renderBoard($('rsBoard'), net.on ? add || {} : null);
   meWon ? playFanfare() : playSad();
   setTimeout(() => { $('resultSheet').hidden = false; }, 400);
   if (net.on) onlineOverUi();
@@ -1430,6 +1447,7 @@ function kill(k, v) {
   if (inBunk(v) || inBunk(k)) return; // trong hầm: nắp đóng, không ai đụng được
   v.dead = true; v.vx = v.vy = 0; v.path = []; v.state = 'idle';
   bodies.push({ x: v.x, y: v.y, ci: v.ci, id: v.id, t: performance.now(), killer: k.id });
+  k.kills = (k.kills | 0) + 1; // bảng xếp hạng
   if (!(k.remote && !k.bot) && canStand(v.x + 8, v.y)) place(k, v.x + 8, v.y); k.killCd = KILL_CD; // khách tự nhảy tới
   if (isHost()) netBroadcast({ t: 'kill', v: v.id, k: k.id });
   const room = roomName(v.x, v.y);
@@ -1443,7 +1461,7 @@ function kill(k, v) {
 function shoot(s, v) {
   s.ammo = 0; s.path = []; s.state = 'idle';
   const ok = !!v.imp || !!v.jester, die = q => { q.dead = true; q.vx = q.vy = 0; q.path = []; q.state = 'idle'; q.vent = -1; bodies.push({ x: q.x, y: q.y, ci: q.ci, id: q.id, t: performance.now(), killer: s.id, shot: true }); };
-  die(v); if (!ok) die(s);
+  die(v); if (!ok) die(s); else s.kills = (s.kills | 0) + 1;
   if (isHost()) netBroadcast({ t: 'shot', s: s.id, v: v.id, ok });
   shotFx(s, v, ok);
   syncHud(); checkWin();
@@ -2060,6 +2078,7 @@ function finishVotes() {
   let top = -1, tv = -1, tie = false;
   for (const [k, n] of Object.entries(tally)) { if (n > tv) { tv = n; top = +k; tie = false; } else if (n === tv) tie = true; }
   const ej = top >= 0 && !tie ? P[top] : null, n = impsAlive().length - (ej && ej.imp ? 1 : 0);
+  if (ej && ej.imp && !isGuest()) for (const [vid, t] of Object.entries(m.votes)) if (+t === ej.id && P[vid]) P[vid].votesOk = (P[vid].votesOk | 0) + 1; // bảng xếp hạng
   if (isHost()) netBroadcast({ t: 'reveal', votes: m.votes, ej: ej ? ej.id : -1, tie, imp: !!(ej && ej.imp && confirmOn()), jt: !!(ej && ej.jester && confirmOn()), n });
   renderMeeting(true);
   setTimeout(() => {
@@ -3354,6 +3373,7 @@ const PEER_OPTS = { debug: 0, config: { sdpSemantics: 'unified-plan', iceServers
 const HB_MS = 2000, HB_DEAD = 8000, HB_DROP = 20000, LOBBY_GRACE = 15000, REJOIN_MAX = 20, REJOIN_MS = 3000;
 const DOTS = '<span class="dots"><span>.</span><span>.</span><span>.</span></span>';
 let net = freshNet();
+let board = {}; // bảng xếp hạng online: cid → { name, ci, g: số ván, w: thắng, k: giết / bắn trúng, pts: điểm }
 let M = [], S = { bots: 3, imps: 1, confirm: true, voice: 'meet', sheriff: true, jester: true, evt: true }, lastOver = null, myId = -1;
 function randCode() { return Array.from(crypto.getRandomValues(new Uint8Array(6)), b => 'abcdefghijkmnpqrstuvwxyz23456789'[b % 32]).join(''); }
 const myCid = (() => {
@@ -3472,7 +3492,7 @@ function startNet(host, code) {
 }
 function leaveOnline() {
   closeNet();
-  net = freshNet(); M = []; lastOver = null; myId = -1;
+  net = freshNet(); M = []; lastOver = null; myId = -1; board = {};
   if (location.hash) history.replaceState(null, '', location.pathname + location.search);
   for (const id of ['netSheet', 'lobbySheet', 'resultSheet', 'meetSheet', 'taskSheet']) $(id).hidden = true;
   $('ejectScene').hidden = true; $('bAgain').disabled = false; $('bAgain').textContent = 'Chơi lại';
@@ -3518,6 +3538,7 @@ function renderLobby() {
     if (host && !m.host && m.cid !== myCid) row.appendChild(kickBtn(m.cid));
     box.appendChild(row);
   }
+  renderBoard($('lbBoard'), null);
   for (let k = 0; k < nb; k++) { const row = document.createElement('div'); row.className = 'mem empty'; row.innerHTML = '<span class="nm">🤖 Máy chơi</span>'; box.appendChild(row); }
   const mine = myMem();
   if (document.activeElement !== $('lbName')) $('lbName').value = mine ? mine.name : myName();
@@ -3567,7 +3588,7 @@ function kickBtn(cid) {
   return b;
 }
 function fixS() { const humans = M.filter(m => m.online !== false).length; S.bots = Math.max(0, Math.min(S.bots, MAX_P - humans)); const total = humans + S.bots; if (S.imps > 1 && S.imps > Math.floor((total - 1) / 2)) S.imps = Math.max(1, Math.floor((total - 1) / 2)); }
-const roomMsg = () => ({ t: 'room', M: M.map(m => ({ cid: m.cid, name: m.name, ci: m.ci, host: !!m.host, ready: !!m.ready, online: m.online !== false, wait: !!m.wait, vc: !!m.vc, mic: !!m.mic, pid: m.pid || null })), S, ph: phase === 'lobby' ? 'lobby' : 'game' });
+const roomMsg = () => ({ t: 'room', M: M.map(m => ({ cid: m.cid, name: m.name, ci: m.ci, host: !!m.host, ready: !!m.ready, online: m.online !== false, wait: !!m.wait, vc: !!m.vc, mic: !!m.mic, pid: m.pid || null })), S, B: board, ph: phase === 'lobby' ? 'lobby' : 'game' });
 function roomChanged() {
   if (!net.host) return;
   netBroadcast(roomMsg());
@@ -3596,7 +3617,7 @@ $('lbShare').onclick = () => navigator.share({ title: 'Kẻ Giả Mạo Online',
 // ── chủ phòng ──
 async function hostOnline(tries = 0) {
   const code = randCode(), n = startNet(true, code);
-  M = [{ cid: myCid, name: myName() || 'Chủ phòng', ci: setup.ci, host: true, ready: true, online: true }];
+  M = [{ cid: myCid, name: myName() || 'Chủ phòng', ci: setup.ci, host: true, ready: true, online: true }]; board = {};
   S = Object.assign({}, S, { imps: setup.imps, confirm: setup.confirm, sheriff: setup.sheriff !== false, jester: setup.jester !== false, bots: Math.min(setup.bots, 3), time: TIME_OPTS.some(o => o[0] === setup.time) ? setup.time : TIME_DEF, map: mapChoice(setup.map), view: setup.view === '1' ? '1' : '3' });
   netSheet('🌐', 'Tạo phòng', `Đang tạo phòng${DOTS}`, [[{ label: 'Huỷ', fn: () => leaveOnline() }]]);
   try { await loadPeerJs(); } catch (e) { if (net === n) netFail('Không tải được', 'Không tải được phần chơi online. Kiểm tra mạng rồi thử lại nhé.', () => hostOnline()); return; }
@@ -3675,7 +3696,7 @@ function memberLost(cid) {
 function hostKick(cid) {
   if (!isHost() || !cid || cid === myCid) return;
   const m = M.find(x => x.cid === cid); if (!m || m.host) return;
-  net.banned.add(cid);
+  net.banned.add(cid); delete board[cid];
   for (const [c, id] of net.conns) if (id === cid) {
     net.conns.delete(c); net.seen.delete(c);
     try { c.send({ t: 'kicked' }); } catch (e) {}
@@ -3782,6 +3803,41 @@ function hostStartGame() {
   beginRound();
   netBroadcast(roomMsg());
   for (const p of P) if (p.remote) sendTo(p.cid, fullFor(p));
+}
+// ── bảng xếp hạng online: chủ phòng cộng điểm cho người thật (theo cid) sau mỗi ván, gửi kèm gói room / over ──
+const PTS = { win: 3, jester: 4, kill: 1, vote: 1, tasks: 1 };
+function scoreGame(side) {
+  const add = {};
+  for (const p of P) {
+    if (!p.cid) continue; // máy chơi không lên bảng
+    const won = side === 'jester' ? !!p.jester : side === 'imp' ? !!p.imp : !p.imp && !p.jester;
+    let pts = won ? (p.jester ? PTS.jester : PTS.win) : 0;
+    pts += (p.kills | 0) * PTS.kill + (p.votesOk | 0) * PTS.vote;
+    if (!p.imp && !p.jester && p.tasks.length && p.tasks.every(t => t.done)) pts += PTS.tasks;
+    const m = memOf(p), b = board[p.cid] || (board[p.cid] = { g: 0, w: 0, k: 0, pts: 0 });
+    b.name = m ? m.name : p.name; b.ci = m ? m.ci : p.ci;
+    b.g++; if (won) b.w++; b.k += p.kills | 0; b.pts += pts; add[p.cid] = pts;
+  }
+  return add;
+}
+function renderBoard(el, add) {
+  const rows = Object.entries(board).filter(([, b]) => b && typeof b === 'object').map(([cid, b]) => ({ cid, name: String(b.name || '?').slice(0, 14), ci: COLORS[b.ci] ? b.ci : 0, g: b.g | 0, w: b.w | 0, k: b.k | 0, pts: b.pts | 0 }))
+    .sort((a, b) => b.pts - a.pts || b.w - a.w || a.g - b.g || a.name.localeCompare(b.name));
+  el.innerHTML = ''; el.hidden = !rows.length || !net.on; if (el.hidden) return;
+  const h = document.createElement('h3'); h.textContent = '🏆 Bảng xếp hạng phòng'; el.appendChild(h);
+  let rank = 0, last = null;
+  rows.forEach((r, i) => {
+    if (r.pts !== last) { rank = i + 1; last = r.pts; }
+    const row = document.createElement('div'); row.className = 'br' + (r.cid === myCid ? ' me' : '');
+    const rk = document.createElement('span'); rk.className = 'rk'; rk.textContent = ['🥇', '🥈', '🥉'][rank - 1] || rank; row.appendChild(rk);
+    row.appendChild(beanCanvas(r.ci, 22, 27));
+    const nm = document.createElement('span'); nm.className = 'nm'; nm.textContent = r.name + (r.cid === myCid ? ' (bạn)' : '');
+    const sm = document.createElement('small'); sm.textContent = `${r.w}/${r.g} ván thắng${r.k ? ` · 🔪 ${r.k}` : ''}`; nm.appendChild(sm); row.appendChild(nm);
+    if (add && add[r.cid] !== undefined) { const a = document.createElement('span'); const v = add[r.cid] | 0; a.className = 'add' + (v ? '' : ' z'); a.textContent = '+' + v; row.appendChild(a); }
+    const pt = document.createElement('span'); pt.className = 'pt'; pt.innerHTML = `${r.pts}<small> đ</small>`; row.appendChild(pt);
+    el.appendChild(row);
+  });
+  const how = document.createElement('p'); how.className = 'how'; how.textContent = 'Thắng +3 (Kẻ Pha Trò +4) · giết / bắn trúng +1 · bỏ phiếu đúng Kẻ Giả Mạo +1 · xong hết nhiệm vụ +1'; el.appendChild(how);
 }
 function hostToLobby() {
   M = M.filter(m => m.online !== false);
@@ -3922,7 +3978,7 @@ function guestMsg(d) {
     case 'ns': if (d.L && typeof d.L === 'object') { net.ns = d.L; if (!$('nstat').hidden) renderNet(); } return;
     case 'room': {
       if (!Array.isArray(d.M)) return;
-      M = d.M; if (d.S) S = d.S;
+      M = d.M; if (d.S) S = d.S; if (d.B && typeof d.B === 'object') board = d.B;
       const mine = myMem();
       if (d.ph === 'lobby') { if (phase !== 'lobby') enterLobby(); else { hideNetSheet(); lobbyBeans(); renderLobby(); } }
       else if (mine && mine.wait) {
@@ -3984,7 +4040,8 @@ function guestMsg(d) {
       for (const id of d.sh || []) if (P[id]) P[id].sheriff = true;
       for (const id of d.jt || []) if (P[id]) P[id].jester = true;
       $('ejectScene').hidden = true; $('meetSheet').hidden = true;
-      endGame(d.side, String(d.why || '')); return;
+      if (d.B && typeof d.B === 'object') board = d.B;
+      endGame(d.side, String(d.why || ''), d.add && typeof d.add === 'object' ? d.add : {}); return;
     }
   }
 }
